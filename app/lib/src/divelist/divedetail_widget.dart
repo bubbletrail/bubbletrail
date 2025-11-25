@@ -11,18 +11,12 @@ class DiveDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('Dive #${dive.number}'),
-      ),
+      appBar: AppBar(backgroundColor: Theme.of(context).colorScheme.inversePrimary, title: Text('Dive #${dive.number}')),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isWideScreen = constraints.maxWidth > 800;
           return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: isWideScreen ? _buildWideLayout(context) : _buildNarrowLayout(context),
-            ),
+            child: Padding(padding: const EdgeInsets.all(16.0), child: isWideScreen ? _buildWideLayout(context) : _buildNarrowLayout(context)),
           );
         },
       ),
@@ -30,10 +24,7 @@ class DiveDetailScreen extends StatelessWidget {
   }
 
   Widget _buildNarrowLayout(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: _buildAllSections(context),
-    );
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: _buildAllSections(context));
   }
 
   Widget _buildWideLayout(BuildContext context) {
@@ -81,17 +72,11 @@ class DiveDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: leftColumn,
-              ),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: leftColumn),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: rightColumn,
-              ),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: rightColumn),
             ),
           ],
         ),
@@ -137,12 +122,28 @@ class DiveDetailScreen extends StatelessWidget {
         const SizedBox(height: 16),
       ],
       if (dive.cylinders.isNotEmpty) ...[
-        _buildInfoCard(context, 'Cylinders',
+        _buildInfoCard(
+          context,
+          'Cylinders',
           dive.cylinders.asMap().entries.map((entry) {
             final idx = entry.key;
             final cyl = entry.value;
             final desc = cyl.description ?? 'Cylinder ${idx + 1}';
             final details = <String>[];
+
+            // Gas mixture
+            if (cyl.o2 != null || cyl.he != null) {
+              final o2 = cyl.o2 ?? 21.0;
+              final he = cyl.he ?? 0.0;
+              if (he > 0) {
+                details.add('Tx${o2.toStringAsFixed(0)}/${he.toStringAsFixed(0)}');
+              } else if (o2 != 21.0) {
+                details.add('EAN${o2.toStringAsFixed(0)}');
+              } else {
+                details.add('Air');
+              }
+            }
+
             if (cyl.size != null) details.add('${cyl.size!.toStringAsFixed(1)} l');
             if (cyl.workpressure != null) details.add('${cyl.workpressure!.toStringAsFixed(0)} bar');
             if (cyl.start != null) details.add('Start: ${cyl.start!.toStringAsFixed(0)} bar');
@@ -153,7 +154,9 @@ class DiveDetailScreen extends StatelessWidget {
         const SizedBox(height: 16),
       ],
       if (dive.weightsystems.isNotEmpty) ...[
-        _buildInfoCard(context, 'Weight Systems',
+        _buildInfoCard(
+          context,
+          'Weight Systems',
           dive.weightsystems.asMap().entries.map((entry) {
             final idx = entry.key;
             final ws = entry.value;
@@ -181,10 +184,7 @@ class DiveDetailScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Depth Profile',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
+                Text('Depth Profile', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                 const Divider(),
                 DepthProfileWidget(diveComputer: dive.divecomputers[0]),
               ],
@@ -203,10 +203,7 @@ class DiveDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
+            Text(title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
             const Divider(),
             ...children,
           ],
@@ -223,14 +220,9 @@ class DiveDetailScreen extends StatelessWidget {
         children: [
           SizedBox(
             width: 150,
-            child: Text(
-              '$label:',
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
+            child: Text('$label:', style: const TextStyle(fontWeight: FontWeight.w600)),
           ),
-          Expanded(
-            child: Text(value),
-          ),
+          Expanded(child: Text(value)),
         ],
       ),
     );

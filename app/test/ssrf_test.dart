@@ -459,4 +459,52 @@ void main() {
     );
     expect(reparsed, formatted.start);
   });
+
+  test('Cylinder O2 and He parsing and serialization', () {
+    // Test serialization of O2 (nitrox)
+    final cyl1 = Cylinder(
+      size: 12.0,
+      workpressure: 200.0,
+      description: '12x200',
+      o2: 32.0,
+      start: 200.0,
+      end: 50.0,
+    );
+    final xml1 = cyl1.toXml();
+    expect(xml1.getAttribute('o2'), '32.0%');
+    expect(xml1.getAttribute('he'), isNull);
+
+    // Test serialization of O2 and He (trimix)
+    final cyl2 = Cylinder(
+      size: 24.0,
+      workpressure: 232.0,
+      description: 'D12x232',
+      o2: 21.0,
+      he: 35.0,
+      start: 210.0,
+      end: 100.0,
+    );
+    final xml2 = cyl2.toXml();
+    expect(xml2.getAttribute('o2'), '21.0%');
+    expect(xml2.getAttribute('he'), '35.0%');
+
+    // Test round-trip for nitrox
+    final reparsed1 = Cylinder.fromXml(xml1);
+    expect(reparsed1.o2, closeTo(32.0, 0.1));
+    expect(reparsed1.he, isNull);
+
+    // Test round-trip for trimix
+    final reparsed2 = Cylinder.fromXml(xml2);
+    expect(reparsed2.o2, closeTo(21.0, 0.1));
+    expect(reparsed2.he, closeTo(35.0, 0.1));
+
+    // Test parsing from XML string
+    final xmlString = "<cylinder size='10.0 l' workpressure='300.0 bar' description='10x300' o2='30.0%' end='115.2 bar' />";
+    final parsedFromString = Cylinder.fromXml(XmlDocument.parse(xmlString).rootElement);
+    expect(parsedFromString.o2, closeTo(30.0, 0.1));
+    expect(parsedFromString.he, isNull);
+
+    print('Cylinder with O2: ${xml1.toXmlString()}');
+    print('Cylinder with O2/He: ${xml2.toXmlString()}');
+  });
 }

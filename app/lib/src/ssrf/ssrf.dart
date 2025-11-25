@@ -457,8 +457,10 @@ class Cylinder {
   final String? description;
   final double? start; // bar
   final double? end; // bar
+  final double? o2; // percentage (0-100)
+  final double? he; // percentage (0-100)
 
-  const Cylinder({this.size, this.workpressure, this.description, this.start, this.end});
+  const Cylinder({this.size, this.workpressure, this.description, this.start, this.end, this.o2, this.he});
 
   factory Cylinder.fromXml(XmlElement elem) {
     return Cylinder(
@@ -467,6 +469,8 @@ class Cylinder {
       description: elem.getAttribute('description'),
       start: tryParseUnitString(elem.getAttribute('start')),
       end: tryParseUnitString(elem.getAttribute('end')),
+      o2: tryParseUnitString(elem.getAttribute('o2')),
+      he: tryParseUnitString(elem.getAttribute('he')),
     );
   }
 
@@ -481,6 +485,12 @@ class Cylinder {
       }
       if (description != null) {
         builder.attribute('description', description!);
+      }
+      if (o2 != null) {
+        builder.attribute('o2', '${o2!.toStringAsFixed(1)}%');
+      }
+      if (he != null) {
+        builder.attribute('he', '${he!.toStringAsFixed(1)}%');
       }
       if (start != null) {
         builder.attribute('start', '${start!.toStringAsFixed(1)} bar');
@@ -565,6 +575,11 @@ double? tryParseUnitString(String? s) {
 
   final asIs = double.tryParse(s);
   if (asIs != null) return asIs;
+
+  // Handle percentage (e.g., "32.0%")
+  if (s.endsWith('%')) {
+    return double.tryParse(s.substring(0, s.length - 1));
+  }
 
   final parts = s.split(' ');
   if (parts.length < 2) return null;
