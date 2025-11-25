@@ -17,11 +17,81 @@ void main() {
     final xmlData = await File('./test/testdata/jakob@nym.se.ssrf').readAsString();
     final doc = XmlDocument.parse(xmlData);
     final ssrf = Ssrf.fromXml(doc.rootElement);
+
+    // Test basic counts
     expect(ssrf.dives.length, 317);
-    expect(ssrf.dives[316].number, 307);
-    expect(ssrf.dives[316].duration, 75 * 60 + 24);
-    expect(ssrf.dives[316].maxDepth, 34.8);
-    expect(ssrf.dives[316].meanDepth, 19.385);
+    expect(ssrf.diveSites.length, 92);
+
+    // Test settings
+    expect(ssrf.settings, isNotNull);
+    expect(ssrf.settings!.fingerprints.length, 3);
+    expect(ssrf.settings!.fingerprints[0].model, '40d5bff1');
+
+    // Test divesites
+    final firstSite = ssrf.diveSites[0];
+    expect(firstSite.uuid.trim(), '9a6a0ea');
+    expect(firstSite.name, 'Sweden / Blekinge / Järnavik');
+    expect(firstSite.position, isNotNull);
+    expect(firstSite.position!.lat, closeTo(56.179390, 0.000001));
+    expect(firstSite.position!.lon, closeTo(15.070710, 0.000001));
+
+    // Test first dive with all attributes
+    final firstDive = ssrf.dives[0];
+    expect(firstDive.number, 1);
+    expect(firstDive.rating, 2);
+    expect(firstDive.sac, closeTo(26.454, 0.001));
+    expect(firstDive.tags, containsAll(['Dry', 'OW', 'Shore']));
+    expect(firstDive.divesiteid, 'f97fc13d');
+    expect(firstDive.duration, 43 * 60 + 30);
+
+    // Test dive child elements
+    expect(firstDive.divemaster, 'Nina');
+    expect(firstDive.buddies, containsAll(['Anna']));
+    expect(firstDive.notes, contains('First qualification dive'));
+
+    // Test cylinder
+    expect(firstDive.cylinders.length, 1);
+    expect(firstDive.cylinders[0].size, 10.0);
+    expect(firstDive.cylinders[0].workpressure, 300.0);
+    expect(firstDive.cylinders[0].description, '10x300');
+    expect(firstDive.cylinders[0].start, 232.0);
+    expect(firstDive.cylinders[0].end, 45.0);
+
+    // Test weightsystem
+    expect(firstDive.weightsystems.length, 1);
+    expect(firstDive.weightsystems[0].weight, 8.0);
+
+    // Test divecomputer
+    expect(firstDive.divecomputers.length, 1);
+    final firstDc = firstDive.divecomputers[0];
+    expect(firstDc.maxDepth, closeTo(8.88, 0.01));
+    expect(firstDc.meanDepth, closeTo(4.952, 0.001));
+
+    // Test environment
+    expect(firstDc.environment, isNotNull);
+    expect(firstDc.environment!.airTemperature, 2.0);
+    expect(firstDc.environment!.waterTemperature, 10.0);
+
+    // Test extradata
+    expect(firstDc.extradata['current'], 'None');
+    expect(firstDc.extradata['entryType'], 'Shore');
+
+    // Test events
+    expect(firstDc.events.length, greaterThan(0));
+    expect(firstDc.events[0].name, 'gaschange');
+
+    // Test samples
+    expect(firstDc.samples.length, greaterThan(0));
+    expect(firstDc.samples[0].depth, 0.0);
+    expect(firstDc.samples[0].temp, closeTo(10.56, 0.01));
+
+    // Test last dive
+    final lastDive = ssrf.dives[316];
+    expect(lastDive.number, 307);
+    expect(lastDive.duration, 75 * 60 + 24);
+    expect(lastDive.divecomputers.length, greaterThan(0));
+    expect(lastDive.divecomputers[0].maxDepth, 34.8);
+    expect(lastDive.divecomputers[0].meanDepth, 19.385);
   });
 
   test('Serialize and deserialize SSRF data', () {
@@ -31,18 +101,20 @@ void main() {
         number: 1,
         start: DateTime(2019, 10, 30, 10, 49, 15),
         duration: 43 * 60 + 30,
-        maxDepth: 8.88,
-        meanDepth: 4.952,
         rating: 2,
-      ),
+      )..divecomputers.add(DiveComputer(
+          maxDepth: 8.88,
+          meanDepth: 4.952,
+        )),
       Dive(
         number: 2,
         start: DateTime(2019, 10, 31, 10, 25, 0),
         duration: 41 * 60 + 30,
-        maxDepth: 10.5,
-        meanDepth: 5.2,
         rating: 3,
-      ),
+      )..divecomputers.add(DiveComputer(
+          maxDepth: 10.5,
+          meanDepth: 5.2,
+        )),
     ]);
 
     // Add a divesite
@@ -69,14 +141,16 @@ void main() {
     expect(deserializedSsrf.dives.length, 2);
     expect(deserializedSsrf.dives[0].number, 1);
     expect(deserializedSsrf.dives[0].duration, 43 * 60 + 30);
-    expect(deserializedSsrf.dives[0].maxDepth, 8.88);
-    expect(deserializedSsrf.dives[0].meanDepth, 4.952);
+    expect(deserializedSsrf.dives[0].divecomputers.length, 1);
+    expect(deserializedSsrf.dives[0].divecomputers[0].maxDepth, 8.88);
+    expect(deserializedSsrf.dives[0].divecomputers[0].meanDepth, 4.952);
     expect(deserializedSsrf.dives[0].rating, 2);
 
     expect(deserializedSsrf.dives[1].number, 2);
     expect(deserializedSsrf.dives[1].duration, 41 * 60 + 30);
-    expect(deserializedSsrf.dives[1].maxDepth, 10.5);
-    expect(deserializedSsrf.dives[1].meanDepth, 5.2);
+    expect(deserializedSsrf.dives[1].divecomputers.length, 1);
+    expect(deserializedSsrf.dives[1].divecomputers[0].maxDepth, 10.5);
+    expect(deserializedSsrf.dives[1].divecomputers[0].meanDepth, 5.2);
     expect(deserializedSsrf.dives[1].rating, 3);
   });
 
@@ -85,15 +159,17 @@ void main() {
       number: 42,
       start: DateTime(2023, 6, 15, 14, 30, 0),
       duration: 3600,
+      rating: 5,
+    );
+    dive.tags.addAll(['Boat', 'Wet', 'Deep']);
+    dive.divecomputers.add(DiveComputer(
       maxDepth: 25.5,
       meanDepth: 15.2,
-      rating: 5,
       environment: Environment(
         airTemperature: 22.5,
         waterTemperature: 18.3,
       ),
-    );
-    dive.tags.addAll(['Boat', 'Wet', 'Deep']);
+    ));
 
     final xmlElement = dive.toXml();
     final xmlString = xmlElement.toXmlString(pretty: true);
@@ -150,5 +226,189 @@ void main() {
     expect(xmlElement.getAttribute('uuid'), 'abc123');
     expect(xmlElement.getAttribute('name'), 'Beautiful Reef');
     expect(xmlElement.getAttribute('gps'), '56.179390 15.070710');
+  });
+
+  test('Complete serialization with all features', () {
+    // Create a comprehensive test with all features
+    final dive1 = Dive(
+      number: 1,
+      start: DateTime(2023, 6, 15, 14, 30, 0),
+      duration: 3600,
+      rating: 5,
+      sac: 18.5,
+      otu: 15,
+      cns: 5,
+      divesiteid: 'site-123',
+      divemaster: 'John Doe',
+      notes: 'Amazing dive with great visibility.',
+    )
+      ..tags.addAll(['Boat', 'Deep', 'Wreck'])
+      ..buddies.addAll(['Jane Smith', 'Bob Jones'])
+      ..cylinders.add(const Cylinder(
+        size: 12.0,
+        workpressure: 200.0,
+        description: '12x200',
+        start: 200.0,
+        end: 50.0,
+      ))
+      ..weightsystems.add(const Weightsystem(weight: 6.0, description: 'integrated'));
+
+    final dc1 = DiveComputer(
+      maxDepth: 25.5,
+      meanDepth: 15.2,
+      environment: Environment(
+        airTemperature: 28.0,
+        waterTemperature: 22.0,
+      ),
+    )
+      ..samples.addAll([
+        const Sample(time: 0, depth: 0.0),
+        const Sample(time: 60, depth: 5.0, temp: 22.0),
+        const Sample(time: 120, depth: 10.0, temp: 21.5, pressure: 180.0),
+      ])
+      ..events.add(const Event(time: 0, type: 11, value: 21, name: 'gaschange', cylinder: 0))
+      ..extradata['visibility'] = 'Excellent'
+      ..extradata['current'] = 'Moderate';
+
+    dive1.divecomputers.add(dc1);
+
+    final ssrf = Ssrf(
+      dives: [dive1],
+      settings: Settings(
+        fingerprints: [
+          const Fingerprint(
+            model: 'test-model',
+            serial: 'test-serial',
+            deviceid: 'device-123',
+            diveid: 'dive-456',
+            data: 'abc123',
+          ),
+        ],
+      ),
+    )..diveSites.add(const Divesite(
+        uuid: 'site-123',
+        name: 'Test Wreck Site',
+        position: GPSPosition(35.123456, -120.654321),
+      ));
+
+    // Serialize
+    final xmlDoc = ssrf.toXmlDocument();
+    final xmlString = xmlDoc.toXmlString(pretty: true);
+
+    print('Complete SSRF XML:\n$xmlString');
+
+    // Deserialize
+    final parsedDoc = XmlDocument.parse(xmlString);
+    final deserializedSsrf = Ssrf.fromXml(parsedDoc.rootElement);
+
+    // Verify settings
+    expect(deserializedSsrf.settings, isNotNull);
+    expect(deserializedSsrf.settings!.fingerprints.length, 1);
+    expect(deserializedSsrf.settings!.fingerprints[0].model, 'test-model');
+
+    // Verify divesites
+    expect(deserializedSsrf.diveSites.length, 1);
+    expect(deserializedSsrf.diveSites[0].uuid, 'site-123');
+    expect(deserializedSsrf.diveSites[0].position!.lat, closeTo(35.123456, 0.000001));
+
+    // Verify dive
+    final dive = deserializedSsrf.dives[0];
+    expect(dive.number, 1);
+    expect(dive.rating, 5);
+    expect(dive.sac, closeTo(18.5, 0.001));
+    expect(dive.otu, 15);
+    expect(dive.cns, 5);
+    expect(dive.divesiteid, 'site-123');
+    expect(dive.divemaster, 'John Doe');
+    expect(dive.buddies, containsAll(['Jane Smith', 'Bob Jones']));
+    expect(dive.buddies.length, 2);
+    expect(dive.notes, 'Amazing dive with great visibility.');
+    expect(dive.tags, containsAll(['Boat', 'Deep', 'Wreck']));
+
+    // Verify cylinder
+    expect(dive.cylinders.length, 1);
+    expect(dive.cylinders[0].size, 12.0);
+    expect(dive.cylinders[0].start, 200.0);
+
+    // Verify weightsystem
+    expect(dive.weightsystems.length, 1);
+    expect(dive.weightsystems[0].weight, 6.0);
+
+    // Verify divecomputer
+    expect(dive.divecomputers.length, 1);
+    final dc = dive.divecomputers[0];
+
+    // Verify samples
+    expect(dc.samples.length, 3);
+    expect(dc.samples[2].pressure, closeTo(180.0, 0.1));
+
+    // Verify events
+    expect(dc.events.length, 1);
+    expect(dc.events[0].name, 'gaschange');
+
+    // Verify extradata
+    expect(dc.extradata['visibility'], 'Excellent');
+    expect(dc.extradata['current'], 'Moderate');
+
+    // Verify environment
+    expect(dc.environment!.airTemperature, 28.0);
+    expect(dc.environment!.waterTemperature, 22.0);
+  });
+
+  test('Multiple divecomputers', () {
+    // Create a dive with multiple divecomputers
+    final dive = Dive(
+      number: 100,
+      start: DateTime(2024, 1, 15, 10, 0, 0),
+      duration: 3000,
+      rating: 4,
+    );
+
+    // Add first divecomputer
+    dive.divecomputers.add(DiveComputer(
+      maxDepth: 30.0,
+      meanDepth: 18.5,
+      environment: Environment(
+        airTemperature: 25.0,
+        waterTemperature: 20.0,
+      ),
+    )..samples.addAll([
+        const Sample(time: 0, depth: 0.0),
+        const Sample(time: 60, depth: 10.0),
+      ]));
+
+    // Add second divecomputer
+    dive.divecomputers.add(DiveComputer(
+      maxDepth: 30.2,
+      meanDepth: 18.7,
+    )..samples.addAll([
+        const Sample(time: 0, depth: 0.0),
+        const Sample(time: 65, depth: 10.5),
+      ]));
+
+    // Serialize
+    final xmlElement = dive.toXml();
+    final xmlString = xmlElement.toXmlString(pretty: true);
+
+    print('Multiple divecomputers XML:\n$xmlString');
+
+    // Deserialize
+    final parsedElement = XmlDocument.parse(xmlString).rootElement;
+    final deserializedDive = Dive.fromXml(parsedElement);
+
+    // Verify both divecomputers
+    expect(deserializedDive.divecomputers.length, 2);
+
+    final dc1 = deserializedDive.divecomputers[0];
+    expect(dc1.maxDepth, 30.0);
+    expect(dc1.meanDepth, 18.5);
+    expect(dc1.environment, isNotNull);
+    expect(dc1.samples.length, 2);
+
+    final dc2 = deserializedDive.divecomputers[1];
+    expect(dc2.maxDepth, 30.2);
+    expect(dc2.meanDepth, 18.7);
+    expect(dc2.environment, isNull);
+    expect(dc2.samples.length, 2);
   });
 }
