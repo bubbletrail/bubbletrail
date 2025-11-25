@@ -4,12 +4,14 @@ import 'package:intl/intl.dart';
 import '../ssrf/ssrf.dart';
 import 'common_widgets.dart';
 import 'depth_profile_widget.dart';
+import 'divesite_card_widget.dart';
 
 class DiveDetailScreen extends StatelessWidget {
   final Dive dive;
+  final List<Dive> dives;
   final List<Divesite> diveSites;
 
-  const DiveDetailScreen({super.key, required this.dive, required this.diveSites});
+  const DiveDetailScreen({super.key, required this.dive, required this.dives, required this.diveSites});
 
   @override
   Widget build(BuildContext context) {
@@ -101,13 +103,11 @@ class DiveDetailScreen extends StatelessWidget {
       ]),
       const SizedBox(height: 16),
       if (diveSite != null) ...[
-        buildInfoCard(context, 'Dive Site', [
-          buildInfoRow('Name', diveSite.name),
-          if (diveSite.position != null) ...[
-            buildInfoRow('Latitude', diveSite.position!.lat.toStringAsFixed(6)),
-            buildInfoRow('Longitude', diveSite.position!.lon.toStringAsFixed(6)),
-          ],
-        ]),
+        DiveSiteCardWidget(
+          divesite: diveSite,
+          allDives: dives,
+          diveSites: diveSites,
+        ),
         const SizedBox(height: 16),
       ],
       if (dive.divecomputers.isNotEmpty) ...[
