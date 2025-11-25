@@ -34,32 +34,7 @@ class DiveSiteCardWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Map preview (only if position exists)
-            if (divesite.position != null)
-              SizedBox(
-                height: 150,
-                child: FlutterMap(
-                  options: MapOptions(
-                    initialCenter: LatLng(divesite.position!.lat, divesite.position!.lon),
-                    initialZoom: 13.0,
-                    interactionOptions: const InteractionOptions(
-                      flags: InteractiveFlag.none, // Disable interactions
-                    ),
-                  ),
-                  children: [
-                    TileLayer(urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', userAgentPackageName: 'net.kastelo.osdl', maxZoom: 19),
-                    MarkerLayer(
-                      markers: [
-                        Marker(
-                          point: LatLng(divesite.position!.lat, divesite.position!.lon),
-                          width: 30,
-                          height: 30,
-                          child: Icon(Icons.location_pin, size: 30, color: Theme.of(context).colorScheme.error),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+            if (divesite.position != null) SizedBox(height: 150, child: DiveSiteMap(position: divesite.position!)),
             // Site information
             Padding(
               padding: const EdgeInsets.all(16.0),

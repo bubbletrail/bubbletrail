@@ -1,4 +1,4 @@
-package net.kastelo.osdl
+package org.divepath.divepath
 
 import io.flutter.embedding.android.FlutterActivity
 

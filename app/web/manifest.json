@@ -1,11 +1,11 @@
 {
-    "name": "osdl",
-    "short_name": "osdl",
+    "name": "divepath",
+    "short_name": "divepath",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Yet another dive log",
+    "description": "Divepath",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

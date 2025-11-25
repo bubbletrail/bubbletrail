@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "net.kastelo" "\0"
-            VALUE "FileDescription", "osdl" "\0"
+            VALUE "CompanyName", "org.divepath" "\0"
+            VALUE "FileDescription", "divepath" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "osdl" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 net.kastelo. All rights reserved." "\0"
-            VALUE "OriginalFilename", "osdl.exe" "\0"
-            VALUE "ProductName", "osdl" "\0"
+            VALUE "InternalName", "divepath" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 org.divepath. All rights reserved." "\0"
+            VALUE "OriginalFilename", "divepath.exe" "\0"
+            VALUE "ProductName", "divepath" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

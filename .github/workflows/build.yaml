@@ -30,12 +30,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: app/build/macos/Build/Products/Release
-          name: osdl-macos
+          name: divepath-macos
       - name: Save artifacts (iOS)
         uses: actions/upload-artifact@v4
         with:
           path: app/build/ios/Build/Products/Release
-          name: osdl-macos
+          name: divepath-ios
 
   build-windows:
     name: Build Windows
@@ -59,4 +59,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: app/build/windows/x64/runner/Release
-          name: osdl-windows
+          name: divepath-windows

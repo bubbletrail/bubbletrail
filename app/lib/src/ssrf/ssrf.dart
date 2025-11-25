@@ -5,15 +5,18 @@ class Ssrf {
   List<Divesite> diveSites;
   Settings? settings;
 
-  Ssrf({required this.dives, this.diveSites = const [], this.settings});
+  Ssrf({required this.dives, required this.diveSites, this.settings});
 
   factory Ssrf.fromXml(XmlElement elem) {
     final settingsElem = elem.getElement('settings');
     final divesitesElem = elem.getElement('divesites');
     final divesElem = elem.getElement('dives');
 
-    return Ssrf(settings: settingsElem != null ? Settings.fromXml(settingsElem) : null, dives: divesElem?.findElements('dive').map(Dive.fromXml).toList() ?? [])
-      ..diveSites = divesitesElem?.findElements('site').map(Divesite.fromXml).toList() ?? [];
+    return Ssrf(
+      settings: settingsElem != null ? Settings.fromXml(settingsElem) : null,
+      dives: divesElem?.findElements('dive').map(Dive.fromXml).toList() ?? [],
+      diveSites: divesitesElem?.findElements('site').map(Divesite.fromXml).toList() ?? [],
+    );
   }
 
   XmlDocument toXmlDocument() {

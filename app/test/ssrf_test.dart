@@ -1,16 +1,9 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xml/xml.dart';
 
-import 'package:osdl/src/ssrf/ssrf.dart';
+import 'package:divepath/src/ssrf/ssrf.dart';
 
 void main() {
   test('Load sample SSRF file', () async {
@@ -111,17 +104,12 @@ void main() {
         Dive(number: 2, start: DateTime(2019, 10, 31, 10, 25, 0), duration: 41 * 60 + 30, rating: 3)
           ..divecomputers.add(DiveComputer(maxDepth: 10.5, meanDepth: 5.2)),
       ],
+      diveSites: [const Divesite(uuid: 'test-uuid-123', name: 'Test Site', position: GPSPosition(56.179390, 15.070710))],
     );
-
-    // Add a divesite
-    originalSsrf.diveSites.add(const Divesite(uuid: 'test-uuid-123', name: 'Test Site', position: GPSPosition(56.179390, 15.070710)));
 
     // Serialize to XML
     final xmlDoc = originalSsrf.toXmlDocument();
     final xmlString = xmlDoc.toXmlString(pretty: true);
-
-    // Print for debugging
-    print('Generated XML:\n$xmlString');
 
     // Deserialize back
     final parsedDoc = XmlDocument.parse(xmlString);
@@ -150,9 +138,6 @@ void main() {
     dive.divecomputers.add(DiveComputer(maxDepth: 25.5, meanDepth: 15.2, environment: Environment(airTemperature: 22.5, waterTemperature: 18.3)));
 
     final xmlElement = dive.toXml();
-    final xmlString = xmlElement.toXmlString(pretty: true);
-
-    print('Dive XML:\n$xmlString');
 
     // Verify attributes
     expect(xmlElement.getAttribute('number'), '42');
@@ -174,9 +159,6 @@ void main() {
     const sample = Sample(time: 125.5, depth: 8.88, temp: 10.5, pressure: 200.0);
 
     final xmlElement = sample.toXml();
-    final xmlString = xmlElement.toXmlString();
-
-    print('Sample XML: $xmlString');
 
     expect(xmlElement.getAttribute('time'), '2:06 min');
     expect(xmlElement.getAttribute('depth'), '8.88 m');
@@ -188,9 +170,6 @@ void main() {
     const site = Divesite(uuid: 'abc123', name: 'Beautiful Reef', position: GPSPosition(56.179390, 15.070710));
 
     final xmlElement = site.toXml();
-    final xmlString = xmlElement.toXmlString();
-
-    print('Divesite XML: $xmlString');
 
     expect(xmlElement.getAttribute('uuid'), 'abc123');
     expect(xmlElement.getAttribute('name'), 'Beautiful Reef');
@@ -231,16 +210,15 @@ void main() {
 
     final ssrf = Ssrf(
       dives: [dive1],
+      diveSites: [const Divesite(uuid: 'site-123', name: 'Test Wreck Site', position: GPSPosition(35.123456, -120.654321))],
       settings: Settings(
         fingerprints: [const Fingerprint(model: 'test-model', serial: 'test-serial', deviceid: 'device-123', diveid: 'dive-456', data: 'abc123')],
       ),
-    )..diveSites.add(const Divesite(uuid: 'site-123', name: 'Test Wreck Site', position: GPSPosition(35.123456, -120.654321)));
+    );
 
     // Serialize
     final xmlDoc = ssrf.toXmlDocument();
     final xmlString = xmlDoc.toXmlString(pretty: true);
-
-    print('Complete SSRF XML:\n$xmlString');
 
     // Deserialize
     final parsedDoc = XmlDocument.parse(xmlString);
@@ -318,8 +296,6 @@ void main() {
     // Serialize
     final xmlElement = dive.toXml();
     final xmlString = xmlElement.toXmlString(pretty: true);
-
-    print('Multiple divecomputers XML:\n$xmlString');
 
     // Deserialize
     final parsedElement = XmlDocument.parse(xmlString).rootElement;
@@ -402,8 +378,5 @@ void main() {
     final parsedFromString = Cylinder.fromXml(XmlDocument.parse(xmlString).rootElement);
     expect(parsedFromString.o2, closeTo(30.0, 0.1));
     expect(parsedFromString.he, isNull);
-
-    print('Cylinder with O2: ${xml1.toXmlString()}');
-    print('Cylinder with O2/He: ${xml2.toXmlString()}');
   });
 }
