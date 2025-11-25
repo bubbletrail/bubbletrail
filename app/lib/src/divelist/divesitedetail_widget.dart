@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../ssrf/ssrf.dart';
 import 'common_widgets.dart';
 import 'dive_table_widget.dart';
+import 'divesite_map_widget.dart';
 
 class DiveSiteDetailScreen extends StatelessWidget {
   final Divesite divesite;
@@ -29,6 +30,8 @@ class DiveSiteDetailScreen extends StatelessWidget {
                 ],
                 buildInfoRow('UUID', divesite.uuid),
               ]),
+              const SizedBox(height: 16),
+              DiveSiteMapWidget(divesite: divesite),
               const SizedBox(height: 16),
               if (dives.isNotEmpty) ...[
                 Card(
