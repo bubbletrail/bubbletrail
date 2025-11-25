@@ -59,10 +59,8 @@ class DepthProfileWidget extends StatelessWidget {
             lineBarsData: [
               LineChartBarData(
                 spots: spots,
-                isCurved: true,
                 color: Colors.blue,
                 barWidth: 2,
-                isStrokeCapRound: true,
                 dotData: const FlDotData(show: false),
                 aboveBarData: BarAreaData(show: true, color: Colors.blue.withValues(alpha: 0.3)),
               ),

@@ -60,19 +60,18 @@ class DiveListScreen extends StatelessWidget {
                     DataColumn(label: Text('Time')),
                     DataColumn(label: Text('Max Depth (m)')),
                     DataColumn(label: Text('Duration')),
+                    DataColumn(label: Text('Site')),
                   ],
+                  dividerThickness: 0,
+                  dataRowMinHeight: 24,
+                  dataRowMaxHeight: 32,
                   rows: dives.map((dive) {
                     final maxDepth = dive.divecomputers.isNotEmpty ? dive.divecomputers[0].maxDepth : 0.0;
 
                     return DataRow(
                       onSelectChanged: (selected) {
                         if (selected == true) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DiveDetailScreen(dive: dive),
-                            ),
-                          );
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => DiveDetailScreen(dive: dive)));
                         }
                       },
                       cells: [
@@ -81,6 +80,7 @@ class DiveListScreen extends StatelessWidget {
                         DataCell(Text(DateFormat('HH:mm').format(dive.start))),
                         DataCell(Text(maxDepth.toStringAsFixed(1))),
                         DataCell(Text(_formatDuration(dive.duration))),
+                        DataCell(Text(dive.divesiteid ?? '')),
                       ],
                     );
                   }).toList(),
