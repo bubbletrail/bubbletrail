@@ -14,7 +14,20 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Yet Another Dive Log',
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue), useMaterial3: true),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
+      ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.dark,
+          primary: Colors.lightBlue,
+          secondary: Colors.lightBlueAccent,
+        ),
+        useMaterial3: true,
+      ),
+      themeMode: ThemeMode.system,
       home: BlocProvider(create: (context) => DiveListBloc(), child: const DiveListScreen()),
     );
   }

@@ -20,6 +20,10 @@ class DepthProfileWidget extends StatelessWidget {
     final maxTime = diveComputer.samples.map((s) => s.time).reduce((a, b) => a > b ? a : b) / 60;
     final spots = diveComputer.samples.map((sample) => FlSpot(sample.time / 60, -sample.depth)).toList();
 
+    final colorScheme = Theme.of(context).colorScheme;
+    final primaryColor = colorScheme.primary;
+    final borderColor = colorScheme.outline;
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: AspectRatio(
@@ -51,7 +55,7 @@ class DepthProfileWidget extends StatelessWidget {
                 ),
               ),
             ),
-            borderData: FlBorderData(show: true, border: Border.all(color: Colors.black12)),
+            borderData: FlBorderData(show: true, border: Border.all(color: borderColor)),
             minX: 0,
             maxX: maxTime * 1.05,
             minY: maxDepth * 1.1,
@@ -59,10 +63,10 @@ class DepthProfileWidget extends StatelessWidget {
             lineBarsData: [
               LineChartBarData(
                 spots: spots,
-                color: Colors.blue,
+                color: primaryColor,
                 barWidth: 2,
                 dotData: const FlDotData(show: false),
-                aboveBarData: BarAreaData(show: true, color: Colors.blue.withValues(alpha: 0.3)),
+                aboveBarData: BarAreaData(show: true, color: primaryColor.withValues(alpha: 0.3)),
               ),
             ],
             lineTouchData: LineTouchData(
@@ -71,7 +75,11 @@ class DepthProfileWidget extends StatelessWidget {
                   return touchedSpots.map((spot) {
                     return LineTooltipItem(
                       '${spot.x.toStringAsFixed(1)} min\n${spot.y.toStringAsFixed(1)} m',
-                      const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                      TextStyle(
+                        color: colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     );
                   }).toList();
                 },
