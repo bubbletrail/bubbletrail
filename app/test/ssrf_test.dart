@@ -44,6 +44,14 @@ void main() {
     expect(firstDive.divesiteid, 'f97fc13d');
     expect(firstDive.duration, 43 * 60 + 30);
 
+    // Test date and time were parsed correctly
+    expect(firstDive.start.year, 2019);
+    expect(firstDive.start.month, 10);
+    expect(firstDive.start.day, 30);
+    expect(firstDive.start.hour, 10);
+    expect(firstDive.start.minute, 49);
+    expect(firstDive.start.second, 15);
+
     // Test dive child elements
     expect(firstDive.divemaster, 'Nina');
     expect(firstDive.buddies, containsAll(['Anna']));
@@ -410,5 +418,45 @@ void main() {
     expect(dc2.meanDepth, 18.7);
     expect(dc2.environment, isNull);
     expect(dc2.samples.length, 2);
+  });
+
+  test('Date and time parsing', () {
+    // Test date-only parsing
+    final date1 = tryParseDateTime('2024-03-15', null);
+    expect(date1, isNotNull);
+    expect(date1!.year, 2024);
+    expect(date1.month, 3);
+    expect(date1.day, 15);
+    expect(date1.hour, 0);
+    expect(date1.minute, 0);
+    expect(date1.second, 0);
+
+    // Test date and time parsing
+    final date2 = tryParseDateTime('2024-03-15', '14:30:45');
+    expect(date2, isNotNull);
+    expect(date2!.year, 2024);
+    expect(date2.month, 3);
+    expect(date2.day, 15);
+    expect(date2.hour, 14);
+    expect(date2.minute, 30);
+    expect(date2.second, 45);
+
+    // Test round-trip formatting
+    final formatted = Dive(
+      number: 1,
+      start: DateTime(2024, 3, 15, 14, 30, 45),
+      duration: 60,
+    );
+
+    final xmlElement = formatted.toXml();
+    expect(xmlElement.getAttribute('date'), '2024-03-15');
+    expect(xmlElement.getAttribute('time'), '14:30:45');
+
+    // Parse back
+    final reparsed = tryParseDateTime(
+      xmlElement.getAttribute('date'),
+      xmlElement.getAttribute('time'),
+    );
+    expect(reparsed, formatted.start);
   });
 }

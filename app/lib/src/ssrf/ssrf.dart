@@ -583,7 +583,39 @@ double? tryParseUnitString(String? s) {
 }
 
 DateTime? tryParseDateTime(String? date, String? time) {
-  return null;
+  if (date == null) return null;
+
+  try {
+    // Parse date in format 'YYYY-MM-DD'
+    final dateParts = date.split('-');
+    if (dateParts.length != 3) return null;
+
+    final year = int.tryParse(dateParts[0]);
+    final month = int.tryParse(dateParts[1]);
+    final day = int.tryParse(dateParts[2]);
+
+    if (year == null || month == null || day == null) return null;
+
+    // Parse time in format 'HH:MM:SS' if provided
+    int hour = 0;
+    int minute = 0;
+    int second = 0;
+
+    if (time != null) {
+      final timeParts = time.split(':');
+      if (timeParts.length >= 2) {
+        hour = int.tryParse(timeParts[0]) ?? 0;
+        minute = int.tryParse(timeParts[1]) ?? 0;
+        if (timeParts.length >= 3) {
+          second = int.tryParse(timeParts[2]) ?? 0;
+        }
+      }
+    }
+
+    return DateTime(year, month, day, hour, minute, second);
+  } catch (e) {
+    return null;
+  }
 }
 
 // Serialization helpers
