@@ -52,9 +52,14 @@ class LoadDives extends DiveListEvent {
   const LoadDives();
 }
 
+class SaveDives extends DiveListEvent {
+  const SaveDives();
+}
+
 class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   DiveListBloc() : super(const DiveListInitial()) {
     on<LoadDives>(_onLoadDives);
+    on<SaveDives>(_onSaveDives);
 
     // Automatically load dives when the bloc is created
     add(const LoadDives());
@@ -70,8 +75,21 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       final ssrf = Ssrf.fromXml(doc.rootElement);
 
       emit(DiveListLoaded(ssrf.dives, ssrf.diveSites));
+      add(const SaveDives());
     } catch (e) {
       emit(DiveListError('Failed to load dives: $e'));
+    }
+  }
+
+  Future<void> _onSaveDives(SaveDives event, Emitter<DiveListState> emit) async {
+    try {
+      final docsDir = await getApplicationDocumentsDirectory();
+      final ds = (state as DiveListLoaded);
+      final doc = Ssrf(dives: ds.dives, diveSites: ds.diveSites);
+      final docXml = doc.toXmlDocument().toXmlString(pretty: true);
+      await File('${docsDir.path}/dives.ssrf.new').writeAsString(docXml);
+    } catch (e) {
+      emit(DiveListError('Failed to save dives: $e'));
     }
   }
 }

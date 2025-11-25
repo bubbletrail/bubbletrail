@@ -1,11 +1,11 @@
 import 'package:xml/xml.dart';
 
 class Ssrf {
-  Settings? settings;
-  List<Divesite> diveSites = [];
   List<Dive> dives;
+  List<Divesite> diveSites;
+  Settings? settings;
 
-  Ssrf({required this.dives, this.settings});
+  Ssrf({required this.dives, this.diveSites = const [], this.settings});
 
   factory Ssrf.fromXml(XmlElement elem) {
     final settingsElem = elem.getElement('settings');
