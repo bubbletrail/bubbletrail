@@ -1,0 +1,62 @@
+on:
+    - push
+
+name: Build
+
+jobs:
+  build-macos-ios:
+    name: Build macOS & iOS
+    runs-on: macos-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Build
+        run: |
+            cd app
+            flutter pub get
+            flutter build macos \
+                --release --no-pub \
+                --build-number=${{github.run_number}} \
+                --build-name=1.0.0
+            flutter build ios \
+                --release --no-pub --no-codesign \
+                --build-number=${{github.run_number}} \
+                --build-name=1.0.0
+      - name: Save artifacts (macOS)
+        uses: actions/upload-artifact@v4
+        with:
+          path: app/build/macos/Build/Products/Release
+          name: osdl-macos
+      - name: Save artifacts (iOS)
+        uses: actions/upload-artifact@v4
+        with:
+          path: app/build/ios/Build/Products/Release
+          name: osdl-macos
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Build
+        run: |
+            cd app
+            flutter pub get
+            flutter build windows `
+                --release --no-pub `
+                --build-number=${{github.run_number}} `
+                --build-name=1.0.0
+      - name: Save artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          path: app/build/windows/x64/runner/Release
+          name: osdl-windows
