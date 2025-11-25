@@ -27,7 +27,7 @@ class DepthProfileWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: AspectRatio(
-        aspectRatio: 1.5,
+        aspectRatio: 2,
         child: LineChart(
           LineChartData(
             gridData: FlGridData(show: true, drawVerticalLine: true, drawHorizontalLine: true),
@@ -75,11 +75,7 @@ class DepthProfileWidget extends StatelessWidget {
                   return touchedSpots.map((spot) {
                     return LineTooltipItem(
                       '${spot.x.toStringAsFixed(1)} min\n${spot.y.toStringAsFixed(1)} m',
-                      TextStyle(
-                        color: colorScheme.onPrimary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
+                      TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 12),
                     );
                   }).toList();
                 },
