@@ -15,8 +15,47 @@ class DiveDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentIndex = dives.indexWhere((d) => d == dive);
+    final hasPrevious = currentIndex > 0;
+    final hasNext = currentIndex < dives.length - 1;
+
     return Scaffold(
-      appBar: AppBar(backgroundColor: Theme.of(context).colorScheme.inversePrimary, title: Text('Dive #${dive.number}')),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text('Dive #${dive.number}'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios),
+            onPressed: hasPrevious
+                ? () {
+                    Navigator.pushReplacement(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            DiveDetailScreen(dive: dives[currentIndex - 1], dives: dives, diveSites: diveSites),
+                      ),
+                    );
+                  }
+                : null,
+            tooltip: hasPrevious ? 'Previous dive' : null,
+          ),
+          IconButton(
+            icon: const Icon(Icons.arrow_forward_ios),
+            onPressed: hasNext
+                ? () {
+                    Navigator.pushReplacement(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            DiveDetailScreen(dive: dives[currentIndex + 1], dives: dives, diveSites: diveSites),
+                      ),
+                    );
+                  }
+                : null,
+            tooltip: hasNext ? 'Next dive' : null,
+          ),
+        ],
+      ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isWideScreen = constraints.maxWidth > 800;
@@ -102,14 +141,7 @@ class DiveDetailScreen extends StatelessWidget {
         if (dive.tags.isNotEmpty) buildInfoRow('Tags', dive.tags.join(', ')),
       ]),
       const SizedBox(height: 16),
-      if (diveSite != null) ...[
-        DiveSiteCardWidget(
-          divesite: diveSite,
-          allDives: dives,
-          diveSites: diveSites,
-        ),
-        const SizedBox(height: 16),
-      ],
+      if (diveSite != null) ...[DiveSiteCardWidget(divesite: diveSite, allDives: dives, diveSites: diveSites), const SizedBox(height: 16)],
       if (dive.divecomputers.isNotEmpty) ...[
         buildInfoCard(context, 'Dive Computer Data', [
           buildInfoRow('Max Depth', '${dive.divecomputers[0].maxDepth.toStringAsFixed(1)} m'),
