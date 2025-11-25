@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../divelist/divelist_widget.dart';
 import '../divelist/divesitelist_widget.dart';
 
@@ -12,10 +13,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _screens = [
-    DiveListScreen(),
-    DiveSiteListScreen(),
-  ];
+  static const List<Widget> _screens = [DiveListScreen(), DiveSiteListScreen()];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -31,14 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedIndex: _selectedIndex,
         onDestinationSelected: _onItemTapped,
         destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.waves),
-            label: 'Dives',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.place),
-            label: 'Sites',
-          ),
+          NavigationDestination(icon: Icon(Icons.waves), label: 'Dives'),
+          NavigationDestination(icon: Icon(Icons.place), label: 'Sites'),
         ],
       ),
     );

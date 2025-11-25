@@ -12,40 +12,47 @@ class Ssrf {
     final divesitesElem = elem.getElement('divesites');
     final divesElem = elem.getElement('dives');
 
-    return Ssrf(
-      settings: settingsElem != null ? Settings.fromXml(settingsElem) : null,
-      dives: divesElem?.findElements('dive').map(Dive.fromXml).toList() ?? [],
-    )..diveSites = divesitesElem?.findElements('site').map(Divesite.fromXml).toList() ?? [];
+    return Ssrf(settings: settingsElem != null ? Settings.fromXml(settingsElem) : null, dives: divesElem?.findElements('dive').map(Dive.fromXml).toList() ?? [])
+      ..diveSites = divesitesElem?.findElements('site').map(Divesite.fromXml).toList() ?? [];
   }
 
   XmlDocument toXmlDocument() {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
-    builder.element('divelog', nest: () {
-      builder.attribute('program', 'subsurface');
-      builder.attribute('version', '3');
+    builder.element(
+      'divelog',
+      nest: () {
+        builder.attribute('program', 'subsurface');
+        builder.attribute('version', '3');
 
-      // Add settings section
-      if (settings != null) {
-        builder.xml(settings!.toXml().toXmlString());
-      }
-
-      // Add divesites section
-      if (diveSites.isNotEmpty) {
-        builder.element('divesites', nest: () {
-          for (final site in diveSites) {
-            builder.xml(site.toXml().toXmlString());
-          }
-        });
-      }
-
-      // Add dives section
-      builder.element('dives', nest: () {
-        for (final dive in dives) {
-          builder.xml(dive.toXml().toXmlString());
+        // Add settings section
+        if (settings != null) {
+          builder.xml(settings!.toXml().toXmlString());
         }
-      });
-    });
+
+        // Add divesites section
+        if (diveSites.isNotEmpty) {
+          builder.element(
+            'divesites',
+            nest: () {
+              for (final site in diveSites) {
+                builder.xml(site.toXml().toXmlString());
+              }
+            },
+          );
+        }
+
+        // Add dives section
+        builder.element(
+          'dives',
+          nest: () {
+            for (final dive in dives) {
+              builder.xml(dive.toXml().toXmlString());
+            }
+          },
+        );
+      },
+    );
 
     return builder.buildDocument();
   }
@@ -132,71 +139,83 @@ class Dive {
 
   XmlElement toXml() {
     final builder = XmlBuilder();
-    builder.element('dive', nest: () {
-      builder.attribute('number', number.toString());
+    builder.element(
+      'dive',
+      nest: () {
+        builder.attribute('number', number.toString());
 
-      if (rating != null) {
-        builder.attribute('rating', rating.toString());
-      }
+        if (rating != null) {
+          builder.attribute('rating', rating.toString());
+        }
 
-      if (sac != null) {
-        builder.attribute('sac', '${sac!.toStringAsFixed(3)} l/min');
-      }
+        if (sac != null) {
+          builder.attribute('sac', '${sac!.toStringAsFixed(3)} l/min');
+        }
 
-      if (otu != null) {
-        builder.attribute('otu', otu.toString());
-      }
+        if (otu != null) {
+          builder.attribute('otu', otu.toString());
+        }
 
-      if (cns != null) {
-        builder.attribute('cns', '$cns%');
-      }
+        if (cns != null) {
+          builder.attribute('cns', '$cns%');
+        }
 
-      if (tags.isNotEmpty) {
-        builder.attribute('tags', tags.join(', '));
-      }
+        if (tags.isNotEmpty) {
+          builder.attribute('tags', tags.join(', '));
+        }
 
-      if (divesiteid != null) {
-        builder.attribute('divesiteid', divesiteid!);
-      }
+        if (divesiteid != null) {
+          builder.attribute('divesiteid', divesiteid!);
+        }
 
-      builder.attribute('date', formatDate(start));
-      builder.attribute('time', formatTime(start));
-      builder.attribute('duration', formatDuration(duration));
+        builder.attribute('date', formatDate(start));
+        builder.attribute('time', formatTime(start));
+        builder.attribute('duration', formatDuration(duration));
 
-      // Add child elements
-      if (divemaster != null) {
-        builder.element('divemaster', nest: () {
-          builder.text(divemaster!);
-        });
-      }
+        // Add child elements
+        if (divemaster != null) {
+          builder.element(
+            'divemaster',
+            nest: () {
+              builder.text(divemaster!);
+            },
+          );
+        }
 
-      if (buddies.isNotEmpty) {
-        builder.element('buddy', nest: () {
-          builder.text(buddies.join(', '));
-        });
-      }
+        if (buddies.isNotEmpty) {
+          builder.element(
+            'buddy',
+            nest: () {
+              builder.text(buddies.join(', '));
+            },
+          );
+        }
 
-      if (notes != null) {
-        builder.element('notes', nest: () {
-          builder.text(notes!);
-        });
-      }
+        if (notes != null) {
+          builder.element(
+            'notes',
+            nest: () {
+              builder.text(notes!);
+            },
+          );
+        }
 
-      // Add cylinders
-      for (final cylinder in cylinders) {
-        builder.xml(cylinder.toXml().toXmlString());
-      }
+        // Add cylinders
+        for (final cylinder in cylinders) {
+          builder.xml(cylinder.toXml().toXmlString());
+        }
 
-      // Add weightsystems
-      for (final weightsystem in weightsystems) {
-        builder.xml(weightsystem.toXml().toXmlString());
-      }
+        // Add weightsystems
+        for (final weightsystem in weightsystems) {
+          builder.xml(weightsystem.toXml().toXmlString());
+        }
 
-      // Add divecomputers
-      for (final divecomputer in divecomputers) {
-        builder.xml(divecomputer.toXml().toXmlString());
-      }
-    });
+        // Add divecomputers
+        for (final divecomputer in divecomputers) {
+          builder.xml(divecomputer.toXml().toXmlString());
+        }
+      },
+    );
 
     return builder.buildFragment().firstElementChild!;
   }
@@ -210,11 +229,7 @@ class DiveComputer {
   List<Event> events = [];
   Map<String, String> extradata = {};
 
-  DiveComputer({
-    required this.maxDepth,
-    required this.meanDepth,
-    this.environment,
-  });
+  DiveComputer({required this.maxDepth, required this.meanDepth, this.environment});
 
   factory DiveComputer.fromXml(XmlElement elem) {
     final depth = elem.getElement('depth');
@@ -256,42 +271,54 @@ class DiveComputer {
 
   XmlElement toXml() {
     final builder = XmlBuilder();
-    builder.element('divecomputer', nest: () {
-      builder.element('depth', nest: () {
-        builder.attribute('max', formatDepth(maxDepth));
-        builder.attribute('mean', formatDepth(meanDepth));
-      });
+    builder.element(
+      'divecomputer',
+      nest: () {
+        builder.element(
+          'depth',
+          nest: () {
+            builder.attribute('max', formatDepth(maxDepth));
+            builder.attribute('mean', formatDepth(meanDepth));
+          },
+        );
 
-      // Add temperature if environment is present
-      if (environment != null) {
-        builder.element('temperature', nest: () {
-          if (environment!.airTemperature != null) {
-            builder.attribute('air', formatTemp(environment!.airTemperature!));
-          }
-          if (environment!.waterTemperature != null) {
-            builder.attribute('water', formatTemp(environment!.waterTemperature!));
-          }
-        });
-      }
+        // Add temperature if environment is present
+        if (environment != null) {
+          builder.element(
+            'temperature',
+            nest: () {
+              if (environment!.airTemperature != null) {
+                builder.attribute('air', formatTemp(environment!.airTemperature!));
+              }
+              if (environment!.waterTemperature != null) {
+                builder.attribute('water', formatTemp(environment!.waterTemperature!));
+              }
+            },
+          );
+        }
 
-      // Add extradata
-      for (final entry in extradata.entries) {
-        builder.element('extradata', nest: () {
-          builder.attribute('key', entry.key);
-          builder.attribute('value', entry.value);
-        });
-      }
+        // Add extradata
+        for (final entry in extradata.entries) {
+          builder.element(
+            'extradata',
+            nest: () {
+              builder.attribute('key', entry.key);
+              builder.attribute('value', entry.value);
+            },
+          );
+        }
 
-      // Add events
-      for (final event in events) {
-        builder.xml(event.toXml().toXmlString());
-      }
+        // Add events
+        for (final event in events) {
+          builder.xml(event.toXml().toXmlString());
+        }
 
-      // Add samples
-      for (final sample in samples) {
-        builder.xml(sample.toXml().toXmlString());
-      }
-    });
+        // Add samples
+        for (final sample in samples) {
+          builder.xml(sample.toXml().toXmlString());
+        }
+      },
+    );
 
     return builder.buildFragment().firstElementChild!;
   }
@@ -323,18 +350,21 @@ class Sample {
 
   XmlElement toXml() {
     final builder = XmlBuilder();
-    builder.element('sample', nest: () {
-      builder.attribute('time', formatDuration(time));
-      builder.attribute('depth', formatDepth(depth));
+    builder.element(
+      'sample',
+      nest: () {
+        builder.attribute('time', formatDuration(time));
+        builder.attribute('depth', formatDepth(depth));
 
-      if (temp != null) {
-        builder.attribute('temp', formatTemp(temp!));
-      }
+        if (temp != null) {
+          builder.attribute('temp', formatTemp(temp!));
+        }
 
-      if (pressure != null) {
-        builder.attribute('pressure', '${pressure!.toStringAsFixed(1)} bar');
-      }
-    });
+        if (pressure != null) {
+          builder.attribute('pressure', '${pressure!.toStringAsFixed(1)} bar');
+        }
+      },
+    );
 
     return builder.buildFragment().firstElementChild!;
   }
@@ -362,23 +392,22 @@ class Divesite {
       }
     }
 
-    return Divesite(
-      uuid: elem.getAttribute('uuid') ?? '',
-      name: elem.getAttribute('name') ?? '',
-      position: position,
-    );
+    return Divesite(uuid: elem.getAttribute('uuid') ?? '', name: elem.getAttribute('name') ?? '', position: position);
   }
 
   XmlElement toXml() {
     final builder = XmlBuilder();
-    builder.element('site', nest: () {
-      builder.attribute('uuid', uuid);
-      builder.attribute('name', name);
+    builder.element(
+      'site',
+      nest: () {
+        builder.attribute('uuid', uuid);
+        builder.attribute('name', name);
 
-      if (position != null) {
-        builder.attribute('gps', '${position!.lat.toStringAsFixed(6)} ${position!.lon.toStringAsFixed(6)}');
-      }
-    });
+        if (position != null) {
+          builder.attribute('gps', '${position!.lat.toStringAsFixed(6)} ${position!.lon.toStringAsFixed(6)}');
+        }
+      },
+    );
 
     return builder.buildFragment().firstElementChild!;
   }
@@ -397,18 +426,19 @@ class Settings {
   Settings({required this.fingerprints});
 
   factory Settings.fromXml(XmlElement elem) {
-    return Settings(
-      fingerprints: elem.findElements('fingerprint').map(Fingerprint.fromXml).toList(),
-    );
+    return Settings(fingerprints: elem.findElements('fingerprint').map(Fingerprint.fromXml).toList());
   }
 
   XmlElement toXml() {
     final builder = XmlBuilder();
-    builder.element('settings', nest: () {
-      for (final fingerprint in fingerprints) {
-        builder.xml(fingerprint.toXml().toXmlString());
-      }
-    });
+    builder.element(
+      'settings',
+      nest: () {
+        for (final fingerprint in fingerprints) {
+          builder.xml(fingerprint.toXml().toXmlString());
+        }
+      },
+    );
     return builder.buildFragment().firstElementChild!;
   }
 }
@@ -420,13 +450,7 @@ class Fingerprint {
   final String diveid;
   final String data;
 
-  const Fingerprint({
-    required this.model,
-    required this.serial,
-    required this.deviceid,
-    required this.diveid,
-    required this.data,
-  });
+  const Fingerprint({required this.model, required this.serial, required this.deviceid, required this.diveid, required this.data});
 
   factory Fingerprint.fromXml(XmlElement elem) {
     return Fingerprint(
@@ -440,13 +464,16 @@ class Fingerprint {
 
   XmlElement toXml() {
     final builder = XmlBuilder();
-    builder.element('fingerprint', nest: () {
-      builder.attribute('model', model);
-      builder.attribute('serial', serial);
-      builder.attribute('deviceid', deviceid);
-      builder.attribute('diveid', diveid);
-      builder.attribute('data', data);
-    });
+    builder.element(
+      'fingerprint',
+      nest: () {
+        builder.attribute('model', model);
+        builder.attribute('serial', serial);
+        builder.attribute('deviceid', deviceid);
+        builder.attribute('diveid', diveid);
+        builder.attribute('data', data);
+      },
+    );
     return builder.buildFragment().firstElementChild!;
   }
 }
@@ -476,29 +503,32 @@ class Cylinder {
 
   XmlElement toXml() {
     final builder = XmlBuilder();
-    builder.element('cylinder', nest: () {
-      if (size != null) {
-        builder.attribute('size', '${size!.toStringAsFixed(1)} l');
-      }
-      if (workpressure != null) {
-        builder.attribute('workpressure', '${workpressure!.toStringAsFixed(1)} bar');
-      }
-      if (description != null) {
-        builder.attribute('description', description!);
-      }
-      if (o2 != null) {
-        builder.attribute('o2', '${o2!.toStringAsFixed(1)}%');
-      }
-      if (he != null) {
-        builder.attribute('he', '${he!.toStringAsFixed(1)}%');
-      }
-      if (start != null) {
-        builder.attribute('start', '${start!.toStringAsFixed(1)} bar');
-      }
-      if (end != null) {
-        builder.attribute('end', '${end!.toStringAsFixed(1)} bar');
-      }
-    });
+    builder.element(
+      'cylinder',
+      nest: () {
+        if (size != null) {
+          builder.attribute('size', '${size!.toStringAsFixed(1)} l');
+        }
+        if (workpressure != null) {
+          builder.attribute('workpressure', '${workpressure!.toStringAsFixed(1)} bar');
+        }
+        if (description != null) {
+          builder.attribute('description', description!);
+        }
+        if (o2 != null) {
+          builder.attribute('o2', '${o2!.toStringAsFixed(1)}%');
+        }
+        if (he != null) {
+          builder.attribute('he', '${he!.toStringAsFixed(1)}%');
+        }
+        if (start != null) {
+          builder.attribute('start', '${start!.toStringAsFixed(1)} bar');
+        }
+        if (end != null) {
+          builder.attribute('end', '${end!.toStringAsFixed(1)} bar');
+        }
+      },
+    );
     return builder.buildFragment().firstElementChild!;
   }
 }
@@ -510,22 +540,22 @@ class Weightsystem {
   const Weightsystem({this.weight, this.description});
 
   factory Weightsystem.fromXml(XmlElement elem) {
-    return Weightsystem(
-      weight: tryParseUnitString(elem.getAttribute('weight')),
-      description: elem.getAttribute('description'),
-    );
+    return Weightsystem(weight: tryParseUnitString(elem.getAttribute('weight')), description: elem.getAttribute('description'));
   }
 
   XmlElement toXml() {
     final builder = XmlBuilder();
-    builder.element('weightsystem', nest: () {
-      if (weight != null) {
-        builder.attribute('weight', '${weight!.toStringAsFixed(1)} kg');
-      }
-      if (description != null) {
-        builder.attribute('description', description!);
-      }
-    });
+    builder.element(
+      'weightsystem',
+      nest: () {
+        if (weight != null) {
+          builder.attribute('weight', '${weight!.toStringAsFixed(1)} kg');
+        }
+        if (description != null) {
+          builder.attribute('description', description!);
+        }
+      },
+    );
     return builder.buildFragment().firstElementChild!;
   }
 }
@@ -551,21 +581,24 @@ class Event {
 
   XmlElement toXml() {
     final builder = XmlBuilder();
-    builder.element('event', nest: () {
-      builder.attribute('time', formatDuration(time));
-      if (type != null) {
-        builder.attribute('type', type.toString());
-      }
-      if (value != null) {
-        builder.attribute('value', value.toString());
-      }
-      if (name != null) {
-        builder.attribute('name', name!);
-      }
-      if (cylinder != null) {
-        builder.attribute('cylinder', cylinder.toString());
-      }
-    });
+    builder.element(
+      'event',
+      nest: () {
+        builder.attribute('time', formatDuration(time));
+        if (type != null) {
+          builder.attribute('type', type.toString());
+        }
+        if (value != null) {
+          builder.attribute('value', value.toString());
+        }
+        if (name != null) {
+          builder.attribute('name', name!);
+        }
+        if (cylinder != null) {
+          builder.attribute('cylinder', cylinder.toString());
+        }
+      },
+    );
     return builder.buildFragment().firstElementChild!;
   }
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
+
+import 'dive_table_widget.dart';
 import 'divelist_bloc.dart';
-import 'divedetail_widget.dart';
 
 class DiveListScreen extends StatelessWidget {
   const DiveListScreen({super.key});
@@ -52,50 +52,7 @@ class DiveListScreen extends StatelessWidget {
             }
 
             return SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SingleChildScrollView(
-                child: DataTable(
-                  columns: const [
-                    DataColumn(label: Text('Dive #')),
-                    DataColumn(label: Text('Date')),
-                    DataColumn(label: Text('Time')),
-                    DataColumn(label: Text('Max Depth (m)')),
-                    DataColumn(label: Text('Duration')),
-                    DataColumn(label: Text('Site')),
-                  ],
-                  dividerThickness: 0,
-                  dataRowMinHeight: 24,
-                  dataRowMaxHeight: 32,
-                  rows: dives.map((dive) {
-                    final maxDepth = dive.divecomputers.isNotEmpty ? dive.divecomputers[0].maxDepth : 0.0;
-                    final diveSite = dive.divesiteid != null
-                        ? diveSites.where((s) => s.uuid.trim() == dive.divesiteid).firstOrNull
-                        : null;
-                    final siteName = diveSite?.name ?? '';
-
-                    return DataRow(
-                      onSelectChanged: (selected) {
-                        if (selected == true) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DiveDetailScreen(dive: dive, diveSites: diveSites),
-                            ),
-                          );
-                        }
-                      },
-                      cells: [
-                        DataCell(Text(dive.number.toString())),
-                        DataCell(Text(DateFormat('yyyy-MM-dd').format(dive.start))),
-                        DataCell(Text(DateFormat('HH:mm').format(dive.start))),
-                        DataCell(Text(maxDepth.toStringAsFixed(1))),
-                        DataCell(Text(_formatDuration(dive.duration))),
-                        DataCell(Text(siteName)),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              ),
+              child: DiveTableWidget(dives: dives, diveSites: diveSites, showSiteColumn: true),
             );
           }
 
@@ -103,10 +60,5 @@ class DiveListScreen extends StatelessWidget {
         },
       ),
     );
-  }
-
-  String _formatDuration(double seconds) {
-    final minutes = (seconds / 60).floor();
-    return '$minutes min';
   }
 }
