@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "net.kastelo" "\0"
-            VALUE "FileDescription", "yadl" "\0"
+            VALUE "FileDescription", "osdl" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "yadl" "\0"
+            VALUE "InternalName", "osdl" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 net.kastelo. All rights reserved." "\0"
-            VALUE "OriginalFilename", "yadl.exe" "\0"
-            VALUE "ProductName", "yadl" "\0"
+            VALUE "OriginalFilename", "osdl.exe" "\0"
+            VALUE "ProductName", "osdl" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

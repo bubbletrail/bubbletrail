@@ -10,7 +10,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xml/xml.dart';
 
-import 'package:yadl/src/ssrf/ssrf.dart';
+import 'package:osdl/src/ssrf/ssrf.dart';
 
 void main() {
   test('Load sample SSRF file', () async {
@@ -104,35 +104,17 @@ void main() {
 
   test('Serialize and deserialize SSRF data', () {
     // Create test data
-    final originalSsrf = Ssrf(dives: [
-      Dive(
-        number: 1,
-        start: DateTime(2019, 10, 30, 10, 49, 15),
-        duration: 43 * 60 + 30,
-        rating: 2,
-      )..divecomputers.add(DiveComputer(
-          maxDepth: 8.88,
-          meanDepth: 4.952,
-        )),
-      Dive(
-        number: 2,
-        start: DateTime(2019, 10, 31, 10, 25, 0),
-        duration: 41 * 60 + 30,
-        rating: 3,
-      )..divecomputers.add(DiveComputer(
-          maxDepth: 10.5,
-          meanDepth: 5.2,
-        )),
-    ]);
+    final originalSsrf = Ssrf(
+      dives: [
+        Dive(number: 1, start: DateTime(2019, 10, 30, 10, 49, 15), duration: 43 * 60 + 30, rating: 2)
+          ..divecomputers.add(DiveComputer(maxDepth: 8.88, meanDepth: 4.952)),
+        Dive(number: 2, start: DateTime(2019, 10, 31, 10, 25, 0), duration: 41 * 60 + 30, rating: 3)
+          ..divecomputers.add(DiveComputer(maxDepth: 10.5, meanDepth: 5.2)),
+      ],
+    );
 
     // Add a divesite
-    originalSsrf.diveSites.add(
-      const Divesite(
-        uuid: 'test-uuid-123',
-        name: 'Test Site',
-        position: GPSPosition(56.179390, 15.070710),
-      ),
-    );
+    originalSsrf.diveSites.add(const Divesite(uuid: 'test-uuid-123', name: 'Test Site', position: GPSPosition(56.179390, 15.070710)));
 
     // Serialize to XML
     final xmlDoc = originalSsrf.toXmlDocument();
@@ -163,21 +145,9 @@ void main() {
   });
 
   test('Serialize dive with tags and environment', () {
-    final dive = Dive(
-      number: 42,
-      start: DateTime(2023, 6, 15, 14, 30, 0),
-      duration: 3600,
-      rating: 5,
-    );
+    final dive = Dive(number: 42, start: DateTime(2023, 6, 15, 14, 30, 0), duration: 3600, rating: 5);
     dive.tags.addAll(['Boat', 'Wet', 'Deep']);
-    dive.divecomputers.add(DiveComputer(
-      maxDepth: 25.5,
-      meanDepth: 15.2,
-      environment: Environment(
-        airTemperature: 22.5,
-        waterTemperature: 18.3,
-      ),
-    ));
+    dive.divecomputers.add(DiveComputer(maxDepth: 25.5, meanDepth: 15.2, environment: Environment(airTemperature: 22.5, waterTemperature: 18.3)));
 
     final xmlElement = dive.toXml();
     final xmlString = xmlElement.toXmlString(pretty: true);
@@ -201,12 +171,7 @@ void main() {
   });
 
   test('Serialize sample data', () {
-    const sample = Sample(
-      time: 125.5,
-      depth: 8.88,
-      temp: 10.5,
-      pressure: 200.0,
-    );
+    const sample = Sample(time: 125.5, depth: 8.88, temp: 10.5, pressure: 200.0);
 
     final xmlElement = sample.toXml();
     final xmlString = xmlElement.toXmlString();
@@ -220,11 +185,7 @@ void main() {
   });
 
   test('Serialize divesite with GPS', () {
-    const site = Divesite(
-      uuid: 'abc123',
-      name: 'Beautiful Reef',
-      position: GPSPosition(56.179390, 15.070710),
-    );
+    const site = Divesite(uuid: 'abc123', name: 'Beautiful Reef', position: GPSPosition(56.179390, 15.070710));
 
     final xmlElement = site.toXml();
     final xmlString = xmlElement.toXmlString();
@@ -238,37 +199,25 @@ void main() {
 
   test('Complete serialization with all features', () {
     // Create a comprehensive test with all features
-    final dive1 = Dive(
-      number: 1,
-      start: DateTime(2023, 6, 15, 14, 30, 0),
-      duration: 3600,
-      rating: 5,
-      sac: 18.5,
-      otu: 15,
-      cns: 5,
-      divesiteid: 'site-123',
-      divemaster: 'John Doe',
-      notes: 'Amazing dive with great visibility.',
-    )
-      ..tags.addAll(['Boat', 'Deep', 'Wreck'])
-      ..buddies.addAll(['Jane Smith', 'Bob Jones'])
-      ..cylinders.add(const Cylinder(
-        size: 12.0,
-        workpressure: 200.0,
-        description: '12x200',
-        start: 200.0,
-        end: 50.0,
-      ))
-      ..weightsystems.add(const Weightsystem(weight: 6.0, description: 'integrated'));
+    final dive1 =
+        Dive(
+            number: 1,
+            start: DateTime(2023, 6, 15, 14, 30, 0),
+            duration: 3600,
+            rating: 5,
+            sac: 18.5,
+            otu: 15,
+            cns: 5,
+            divesiteid: 'site-123',
+            divemaster: 'John Doe',
+            notes: 'Amazing dive with great visibility.',
+          )
+          ..tags.addAll(['Boat', 'Deep', 'Wreck'])
+          ..buddies.addAll(['Jane Smith', 'Bob Jones'])
+          ..cylinders.add(const Cylinder(size: 12.0, workpressure: 200.0, description: '12x200', start: 200.0, end: 50.0))
+          ..weightsystems.add(const Weightsystem(weight: 6.0, description: 'integrated'));
 
-    final dc1 = DiveComputer(
-      maxDepth: 25.5,
-      meanDepth: 15.2,
-      environment: Environment(
-        airTemperature: 28.0,
-        waterTemperature: 22.0,
-      ),
-    )
+    final dc1 = DiveComputer(maxDepth: 25.5, meanDepth: 15.2, environment: Environment(airTemperature: 28.0, waterTemperature: 22.0))
       ..samples.addAll([
         const Sample(time: 0, depth: 0.0),
         const Sample(time: 60, depth: 5.0, temp: 22.0),
@@ -283,21 +232,9 @@ void main() {
     final ssrf = Ssrf(
       dives: [dive1],
       settings: Settings(
-        fingerprints: [
-          const Fingerprint(
-            model: 'test-model',
-            serial: 'test-serial',
-            deviceid: 'device-123',
-            diveid: 'dive-456',
-            data: 'abc123',
-          ),
-        ],
+        fingerprints: [const Fingerprint(model: 'test-model', serial: 'test-serial', deviceid: 'device-123', diveid: 'dive-456', data: 'abc123')],
       ),
-    )..diveSites.add(const Divesite(
-        uuid: 'site-123',
-        name: 'Test Wreck Site',
-        position: GPSPosition(35.123456, -120.654321),
-      ));
+    )..diveSites.add(const Divesite(uuid: 'site-123', name: 'Test Wreck Site', position: GPSPosition(35.123456, -120.654321)));
 
     // Serialize
     final xmlDoc = ssrf.toXmlDocument();
@@ -365,34 +302,18 @@ void main() {
 
   test('Multiple divecomputers', () {
     // Create a dive with multiple divecomputers
-    final dive = Dive(
-      number: 100,
-      start: DateTime(2024, 1, 15, 10, 0, 0),
-      duration: 3000,
-      rating: 4,
-    );
+    final dive = Dive(number: 100, start: DateTime(2024, 1, 15, 10, 0, 0), duration: 3000, rating: 4);
 
     // Add first divecomputer
-    dive.divecomputers.add(DiveComputer(
-      maxDepth: 30.0,
-      meanDepth: 18.5,
-      environment: Environment(
-        airTemperature: 25.0,
-        waterTemperature: 20.0,
-      ),
-    )..samples.addAll([
-        const Sample(time: 0, depth: 0.0),
-        const Sample(time: 60, depth: 10.0),
-      ]));
+    dive.divecomputers.add(
+      DiveComputer(maxDepth: 30.0, meanDepth: 18.5, environment: Environment(airTemperature: 25.0, waterTemperature: 20.0))
+        ..samples.addAll([const Sample(time: 0, depth: 0.0), const Sample(time: 60, depth: 10.0)]),
+    );
 
     // Add second divecomputer
-    dive.divecomputers.add(DiveComputer(
-      maxDepth: 30.2,
-      meanDepth: 18.7,
-    )..samples.addAll([
-        const Sample(time: 0, depth: 0.0),
-        const Sample(time: 65, depth: 10.5),
-      ]));
+    dive.divecomputers.add(
+      DiveComputer(maxDepth: 30.2, meanDepth: 18.7)..samples.addAll([const Sample(time: 0, depth: 0.0), const Sample(time: 65, depth: 10.5)]),
+    );
 
     // Serialize
     final xmlElement = dive.toXml();
@@ -442,48 +363,26 @@ void main() {
     expect(date2.second, 45);
 
     // Test round-trip formatting
-    final formatted = Dive(
-      number: 1,
-      start: DateTime(2024, 3, 15, 14, 30, 45),
-      duration: 60,
-    );
+    final formatted = Dive(number: 1, start: DateTime(2024, 3, 15, 14, 30, 45), duration: 60);
 
     final xmlElement = formatted.toXml();
     expect(xmlElement.getAttribute('date'), '2024-03-15');
     expect(xmlElement.getAttribute('time'), '14:30:45');
 
     // Parse back
-    final reparsed = tryParseDateTime(
-      xmlElement.getAttribute('date'),
-      xmlElement.getAttribute('time'),
-    );
+    final reparsed = tryParseDateTime(xmlElement.getAttribute('date'), xmlElement.getAttribute('time'));
     expect(reparsed, formatted.start);
   });
 
   test('Cylinder O2 and He parsing and serialization', () {
     // Test serialization of O2 (nitrox)
-    final cyl1 = Cylinder(
-      size: 12.0,
-      workpressure: 200.0,
-      description: '12x200',
-      o2: 32.0,
-      start: 200.0,
-      end: 50.0,
-    );
+    final cyl1 = Cylinder(size: 12.0, workpressure: 200.0, description: '12x200', o2: 32.0, start: 200.0, end: 50.0);
     final xml1 = cyl1.toXml();
     expect(xml1.getAttribute('o2'), '32.0%');
     expect(xml1.getAttribute('he'), isNull);
 
     // Test serialization of O2 and He (trimix)
-    final cyl2 = Cylinder(
-      size: 24.0,
-      workpressure: 232.0,
-      description: 'D12x232',
-      o2: 21.0,
-      he: 35.0,
-      start: 210.0,
-      end: 100.0,
-    );
+    final cyl2 = Cylinder(size: 24.0, workpressure: 232.0, description: 'D12x232', o2: 21.0, he: 35.0, start: 210.0, end: 100.0);
     final xml2 = cyl2.toXml();
     expect(xml2.getAttribute('o2'), '21.0%');
     expect(xml2.getAttribute('he'), '35.0%');

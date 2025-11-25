@@ -29,7 +29,7 @@ class DiveSiteMapWidget extends StatelessWidget {
         child: FlutterMap(
           options: MapOptions(initialCenter: position, initialZoom: 15.0, minZoom: 3.0, maxZoom: 18.0),
           children: [
-            TileLayer(urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', userAgentPackageName: 'net.kastelo.yadl', maxZoom: 19),
+            TileLayer(urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', userAgentPackageName: 'net.kastelo.osdl', maxZoom: 19),
             MarkerLayer(
               markers: [
                 Marker(

@@ -1,4 +1,4 @@
-package net.kastelo.yadl
+package net.kastelo.osdl
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,6 +1,6 @@
 {
-    "name": "yadl",
-    "short_name": "yadl",
+    "name": "osdl",
+    "short_name": "osdl",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

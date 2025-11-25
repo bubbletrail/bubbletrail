@@ -11,12 +11,7 @@ class DiveSiteCardWidget extends StatelessWidget {
   final List<Dive> allDives;
   final List<Divesite> diveSites;
 
-  const DiveSiteCardWidget({
-    super.key,
-    required this.divesite,
-    required this.allDives,
-    required this.diveSites,
-  });
+  const DiveSiteCardWidget({super.key, required this.divesite, required this.allDives, required this.diveSites});
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +26,7 @@ class DiveSiteCardWidget extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => DiveSiteDetailScreen(
-                divesite: divesite,
-                dives: siteDives,
-                diveSites: diveSites,
-              ),
+              builder: (context) => DiveSiteDetailScreen(divesite: divesite, dives: siteDives, diveSites: diveSites),
             ),
           );
         },
@@ -55,22 +46,14 @@ class DiveSiteCardWidget extends StatelessWidget {
                     ),
                   ),
                   children: [
-                    TileLayer(
-                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'net.kastelo.yadl',
-                      maxZoom: 19,
-                    ),
+                    TileLayer(urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', userAgentPackageName: 'net.kastelo.osdl', maxZoom: 19),
                     MarkerLayer(
                       markers: [
                         Marker(
                           point: LatLng(divesite.position!.lat, divesite.position!.lon),
                           width: 30,
                           height: 30,
-                          child: Icon(
-                            Icons.location_pin,
-                            size: 30,
-                            color: Theme.of(context).colorScheme.error,
-                          ),
+                          child: Icon(Icons.location_pin, size: 30, color: Theme.of(context).colorScheme.error),
                         ),
                       ],
                     ),
@@ -86,10 +69,7 @@ class DiveSiteCardWidget extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          'Dive Site',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                        ),
+                        child: Text('Dive Site', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                       ),
                       Icon(Icons.arrow_forward_ios, size: 16, color: Theme.of(context).colorScheme.primary),
                     ],
