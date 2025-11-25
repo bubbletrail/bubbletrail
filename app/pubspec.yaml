@@ -39,6 +39,7 @@ dependencies:
   flutter_bloc: ^8.1.6
   equatable: ^2.0.5
   path_provider: ^2.1.5
+  fl_chart: ^0.69.0
 
 dev_dependencies:
   flutter_test:

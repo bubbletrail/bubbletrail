@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../ssrf/ssrf.dart';
+import 'depth_profile_widget.dart';
 
 class DiveDetailScreen extends StatelessWidget {
   final Dive dive;
@@ -38,6 +39,26 @@ class DiveDetailScreen extends StatelessWidget {
                     _buildInfoRow('Water Temperature', '${dive.divecomputers[0].environment!.waterTemperature!.toStringAsFixed(1)} °C'),
                 ]),
                 const SizedBox(height: 16),
+                if (dive.divecomputers[0].samples.isNotEmpty) ...[
+                  Card(
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Depth Profile',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const Divider(),
+                          DepthProfileWidget(diveComputer: dive.divecomputers[0]),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
               ],
               if (dive.sac != null || dive.otu != null || dive.cns != null) ...[
                 _buildInfoCard(context, 'Physiological Data', [
