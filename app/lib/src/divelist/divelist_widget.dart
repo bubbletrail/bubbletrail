@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'divelist_bloc.dart';
+import 'divedetail_widget.dart';
 
 class DiveListScreen extends StatelessWidget {
   const DiveListScreen({super.key});
@@ -64,6 +65,16 @@ class DiveListScreen extends StatelessWidget {
                     final maxDepth = dive.divecomputers.isNotEmpty ? dive.divecomputers[0].maxDepth : 0.0;
 
                     return DataRow(
+                      onSelectChanged: (selected) {
+                        if (selected == true) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DiveDetailScreen(dive: dive),
+                            ),
+                          );
+                        }
+                      },
                       cells: [
                         DataCell(Text(dive.number.toString())),
                         DataCell(Text(DateFormat('yyyy-MM-dd').format(dive.start))),
