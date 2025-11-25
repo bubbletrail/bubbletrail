@@ -65,6 +65,7 @@ class DiveSiteListScreen extends StatelessWidget {
                               builder: (context) => DiveSiteDetailScreen(
                                 divesite: site,
                                 dives: state.dives.where((d) => d.divesiteid == site.uuid.trim()).toList(),
+                                diveSites: state.diveSites,
                               ),
                             ),
                           );

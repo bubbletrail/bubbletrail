@@ -5,8 +5,9 @@ import 'depth_profile_widget.dart';
 
 class DiveDetailScreen extends StatelessWidget {
   final Dive dive;
+  final List<Divesite> diveSites;
 
-  const DiveDetailScreen({super.key, required this.dive});
+  const DiveDetailScreen({super.key, required this.dive, required this.diveSites});
 
   @override
   Widget build(BuildContext context) {
@@ -86,6 +87,10 @@ class DiveDetailScreen extends StatelessWidget {
   }
 
   List<Widget> _buildAllSections(BuildContext context) {
+    final diveSite = dive.divesiteid != null
+        ? diveSites.where((s) => s.uuid.trim() == dive.divesiteid).firstOrNull
+        : null;
+
     return [
       _buildInfoCard(context, 'General Information', [
         _buildInfoRow('Date', DateFormat('yyyy-MM-dd').format(dive.start)),
@@ -95,6 +100,16 @@ class DiveDetailScreen extends StatelessWidget {
         if (dive.tags.isNotEmpty) _buildInfoRow('Tags', dive.tags.join(', ')),
       ]),
       const SizedBox(height: 16),
+      if (diveSite != null) ...[
+        _buildInfoCard(context, 'Dive Site', [
+          _buildInfoRow('Name', diveSite.name),
+          if (diveSite.position != null) ...[
+            _buildInfoRow('Latitude', diveSite.position!.lat.toStringAsFixed(6)),
+            _buildInfoRow('Longitude', diveSite.position!.lon.toStringAsFixed(6)),
+          ],
+        ]),
+        const SizedBox(height: 16),
+      ],
       if (dive.divecomputers.isNotEmpty) ...[
         _buildInfoCard(context, 'Dive Computer Data', [
           _buildInfoRow('Max Depth', '${dive.divecomputers[0].maxDepth.toStringAsFixed(1)} m'),

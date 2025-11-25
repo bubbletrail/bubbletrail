@@ -45,6 +45,7 @@ class DiveListScreen extends StatelessWidget {
 
           if (state is DiveListLoaded) {
             final dives = state.dives;
+            final diveSites = state.diveSites;
 
             if (dives.isEmpty) {
               return const Center(child: Text('No dives yet. Add your first dive!'));
@@ -67,11 +68,20 @@ class DiveListScreen extends StatelessWidget {
                   dataRowMaxHeight: 32,
                   rows: dives.map((dive) {
                     final maxDepth = dive.divecomputers.isNotEmpty ? dive.divecomputers[0].maxDepth : 0.0;
+                    final diveSite = dive.divesiteid != null
+                        ? diveSites.where((s) => s.uuid.trim() == dive.divesiteid).firstOrNull
+                        : null;
+                    final siteName = diveSite?.name ?? '';
 
                     return DataRow(
                       onSelectChanged: (selected) {
                         if (selected == true) {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => DiveDetailScreen(dive: dive)));
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DiveDetailScreen(dive: dive, diveSites: diveSites),
+                            ),
+                          );
                         }
                       },
                       cells: [
@@ -80,7 +90,7 @@ class DiveListScreen extends StatelessWidget {
                         DataCell(Text(DateFormat('HH:mm').format(dive.start))),
                         DataCell(Text(maxDepth.toStringAsFixed(1))),
                         DataCell(Text(_formatDuration(dive.duration))),
-                        DataCell(Text(dive.divesiteid ?? '')),
+                        DataCell(Text(siteName)),
                       ],
                     );
                   }).toList(),

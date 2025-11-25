@@ -6,8 +6,9 @@ import 'divedetail_widget.dart';
 class DiveSiteDetailScreen extends StatelessWidget {
   final Divesite divesite;
   final List<Dive> dives;
+  final List<Divesite> diveSites;
 
-  const DiveSiteDetailScreen({super.key, required this.divesite, required this.dives});
+  const DiveSiteDetailScreen({super.key, required this.divesite, required this.dives, required this.diveSites});
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +67,7 @@ class DiveSiteDetailScreen extends StatelessWidget {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => DiveDetailScreen(dive: dive),
+                                        builder: (context) => DiveDetailScreen(dive: dive, diveSites: diveSites),
                                       ),
                                     );
                                   }
