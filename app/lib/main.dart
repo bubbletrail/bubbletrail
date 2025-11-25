@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:yadl/src/divelist/divelist_widget.dart';
 import 'package:yadl/src/divelist/divelist_bloc.dart';
+import 'package:yadl/src/home/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       themeMode: ThemeMode.system,
-      home: BlocProvider(create: (context) => DiveListBloc(), child: const DiveListScreen()),
+      home: BlocProvider(create: (context) => DiveListBloc(), child: const HomeScreen()),
     );
   }
 }

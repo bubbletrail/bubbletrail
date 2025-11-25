@@ -23,8 +23,9 @@ class DiveListLoading extends DiveListState {
 
 class DiveListLoaded extends DiveListState {
   final List<Dive> dives;
+  final List<Divesite> diveSites;
 
-  const DiveListLoaded(this.dives);
+  const DiveListLoaded(this.dives, this.diveSites);
 
   @override
   List<Object?> get props => [dives];
@@ -67,7 +68,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       final doc = XmlDocument.parse(xmlData);
       final ssrf = Ssrf.fromXml(doc.rootElement);
 
-      emit(DiveListLoaded(ssrf.dives));
+      emit(DiveListLoaded(ssrf.dives, ssrf.diveSites));
     } catch (e) {
       emit(DiveListError('Failed to load dives: $e'));
     }

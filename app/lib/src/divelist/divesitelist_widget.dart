@@ -1,0 +1,91 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'divelist_bloc.dart';
+import 'divesitedetail_widget.dart';
+
+class DiveSiteListScreen extends StatelessWidget {
+  const DiveSiteListScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Dive Sites'),
+      ),
+      body: BlocBuilder<DiveListBloc, DiveListState>(
+        builder: (context, state) {
+          if (state is DiveListInitial || state is DiveListLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state is DiveListError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+                  const SizedBox(height: 16),
+                  Text('Error loading dive sites', style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 8),
+                  Text(state.message, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
+                ],
+              ),
+            );
+          }
+
+          if (state is DiveListLoaded) {
+            final diveSites = state.diveSites;
+
+            if (diveSites.isEmpty) {
+              return const Center(child: Text('No dive sites yet.'));
+            }
+
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SingleChildScrollView(
+                child: DataTable(
+                  columns: const [
+                    DataColumn(label: Text('Name')),
+                    DataColumn(label: Text('Latitude')),
+                    DataColumn(label: Text('Longitude')),
+                    DataColumn(label: Text('# Dives')),
+                  ],
+                  dividerThickness: 0,
+                  dataRowMinHeight: 24,
+                  dataRowMaxHeight: 32,
+                  rows: diveSites.map((site) {
+                    final divesAtSite = state.dives.where((d) => d.divesiteid == site.uuid.trim()).length;
+                    return DataRow(
+                      onSelectChanged: (selected) {
+                        if (selected == true) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DiveSiteDetailScreen(
+                                divesite: site,
+                                dives: state.dives.where((d) => d.divesiteid == site.uuid.trim()).toList(),
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      cells: [
+                        DataCell(Text(site.name)),
+                        DataCell(Text(site.position?.lat.toStringAsFixed(6) ?? '-')),
+                        DataCell(Text(site.position?.lon.toStringAsFixed(6) ?? '-')),
+                        DataCell(Text(divesAtSite.toString())),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            );
+          }
+
+          return const Center(child: Text('Unknown state'));
+        },
+      ),
+    );
+  }
+}
