@@ -52,13 +52,11 @@ class DiveTableWidget extends StatelessWidget {
           return DataRow(
             onSelectChanged: (selected) {
               if (selected == true) {
+                context.read<DiveListBloc>().add(SelectDive(dive.id));
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => BlocProvider.value(
-                      value: context.read<DiveListBloc>(),
-                      child: DiveDetailScreen(dive: dive, dives: dives, diveSites: diveSites),
-                    ),
+                    builder: (_) => BlocProvider.value(value: context.read<DiveListBloc>(), child: DiveDetailScreen()),
                   ),
                 );
               }

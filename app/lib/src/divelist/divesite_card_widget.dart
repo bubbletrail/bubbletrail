@@ -6,28 +6,27 @@ import 'divesitedetail_widget.dart';
 
 class DiveSiteCardWidget extends StatelessWidget {
   final Divesite divesite;
-  final List<Dive> allDives;
-  final List<Divesite> diveSites;
+  final List<Dive>? allDives;
 
-  const DiveSiteCardWidget({super.key, required this.divesite, required this.allDives, required this.diveSites});
+  const DiveSiteCardWidget({super.key, required this.divesite, this.allDives});
 
   @override
   Widget build(BuildContext context) {
     // Filter dives for this site
-    final siteDives = allDives.where((d) => d.divesiteid?.trim() == divesite.uuid.trim()).toList();
+    // final siteDives = allDives.where((d) => d.divesiteid?.trim() == divesite.uuid.trim()).toList();
 
     return Card(
       elevation: 2,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DiveSiteDetailScreen(divesite: divesite, dives: siteDives, diveSites: diveSites),
-            ),
-          );
-        },
+        // onTap: () {
+        //   Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //       builder: (context) => DiveSiteDetailScreen(divesite: divesite, dives: siteDives, diveSites: diveSites),
+        //     ),
+        //   );
+        // },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

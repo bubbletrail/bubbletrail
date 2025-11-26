@@ -10,18 +10,39 @@ import 'diveedit_widget.dart';
 import 'divesite_card_widget.dart';
 
 class DiveDetailScreen extends StatelessWidget {
-  final Dive dive;
-  final List<Dive> dives;
-  final List<Divesite> diveSites;
-
-  const DiveDetailScreen({super.key, required this.dive, required this.dives, required this.diveSites});
+  const DiveDetailScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final currentIndex = dives.indexWhere((d) => d == dive);
-    final hasPrevious = currentIndex > 0;
-    final hasNext = currentIndex < dives.length - 1;
+    return BlocBuilder<DiveListBloc, DiveListState>(
+      builder: (context, state) {
+        if (state is! DiveListLoaded) {
+          return Placeholder();
+        }
+        if (state.selectedDiveID == null) {
+          return Placeholder();
+        }
+        final diveIdx = state.dives.indexWhere((d) => d.id == state.selectedDiveID);
+        final dive = state.dives[diveIdx];
+        final diveSite = state.diveSites.where((s) => s.uuid == dive.divesiteid).first;
+        final nextDiveID = diveIdx < state.dives.length ? state.dives[diveIdx + 1].id : null;
+        final prevDiveID = diveIdx > 0 ? state.dives[diveIdx - 1].id : null;
+        return DiveDetails(dive: dive, diveSite: diveSite, nextID: nextDiveID, prevID: prevDiveID);
+      },
+    );
+  }
+}
 
+class DiveDetails extends StatelessWidget {
+  final Dive dive;
+  final Divesite diveSite;
+  final String? nextID;
+  final String? prevID;
+
+  const DiveDetails({super.key, required this.dive, required this.diveSite, required this.nextID, required this.prevID});
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -44,33 +65,21 @@ class DiveDetailScreen extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.arrow_back_ios),
-            onPressed: hasPrevious
+            onPressed: prevID != null
                 ? () {
-                    Navigator.pushReplacement(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            DiveDetailScreen(dive: dives[currentIndex - 1], dives: dives, diveSites: diveSites),
-                      ),
-                    );
+                    context.read<DiveListBloc>().add(SelectDive(prevID!));
                   }
                 : null,
-            tooltip: hasPrevious ? 'Previous dive' : null,
+            tooltip: 'Previous dive',
           ),
           IconButton(
             icon: const Icon(Icons.arrow_forward_ios),
-            onPressed: hasNext
+            onPressed: nextID != null
                 ? () {
-                    Navigator.pushReplacement(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            DiveDetailScreen(dive: dives[currentIndex + 1], dives: dives, diveSites: diveSites),
-                      ),
-                    );
+                    context.read<DiveListBloc>().add(SelectDive(nextID!));
                   }
                 : null,
-            tooltip: hasNext ? 'Next dive' : null,
+            tooltip: 'Next dive',
           ),
         ],
       ),
@@ -148,8 +157,6 @@ class DiveDetailScreen extends StatelessWidget {
   }
 
   List<Widget> _buildAllSections(BuildContext context) {
-    final diveSite = dive.divesiteid != null ? diveSites.where((s) => s.uuid.trim() == dive.divesiteid).firstOrNull : null;
-
     return [
       buildInfoCard(context, 'General Information', [
         buildInfoRow('Date', DateFormat('yyyy-MM-dd').format(dive.start)),
@@ -159,7 +166,7 @@ class DiveDetailScreen extends StatelessWidget {
         if (dive.tags.isNotEmpty) buildInfoRow('Tags', dive.tags.join(', ')),
       ]),
       const SizedBox(height: 16),
-      if (diveSite != null) ...[DiveSiteCardWidget(divesite: diveSite, allDives: dives, diveSites: diveSites), const SizedBox(height: 16)],
+      ...[DiveSiteCardWidget(divesite: diveSite), const SizedBox(height: 16)],
       if (dive.divecomputers.isNotEmpty) ...[
         buildInfoCard(context, 'Dive Computer Data', [
           buildInfoRow('Max Depth', '${dive.divecomputers[0].maxDepth.toStringAsFixed(1)} m'),

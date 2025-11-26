@@ -25,11 +25,12 @@ class DiveListLoading extends DiveListState {
 class DiveListLoaded extends DiveListState {
   final List<Dive> dives;
   final List<Divesite> diveSites;
+  final String? selectedDiveID;
 
-  const DiveListLoaded(this.dives, this.diveSites);
+  const DiveListLoaded(this.dives, this.diveSites, {this.selectedDiveID});
 
   @override
-  List<Object?> get props => [dives];
+  List<Object?> get props => [dives, diveSites, selectedDiveID];
 }
 
 class DiveListError extends DiveListState {
@@ -65,11 +66,21 @@ class UpdateDive extends DiveListEvent {
   List<Object?> get props => [dive];
 }
 
+class SelectDive extends DiveListEvent {
+  final String id;
+
+  const SelectDive(this.id);
+
+  @override
+  List<Object?> get props => [id];
+}
+
 class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   DiveListBloc() : super(const DiveListInitial()) {
     on<LoadDives>(_onLoadDives);
     on<SaveDives>(_onSaveDives);
     on<UpdateDive>(_onUpdateDive);
+    on<SelectDive>(_onSelectDive);
 
     // Automatically load dives when the bloc is created
     add(const LoadDives());
@@ -122,5 +133,11 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       // Trigger save
       add(const SaveDives());
     }
+  }
+
+  Future<void> _onSelectDive(SelectDive event, Emitter<DiveListState> emit) async {
+    if (state is! DiveListLoaded) return;
+    final currentState = state as DiveListLoaded;
+    emit(DiveListLoaded(currentState.dives, currentState.diveSites, selectedDiveID: event.id));
   }
 }
