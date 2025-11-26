@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import 'divelist_bloc.dart';
-import 'divesitedetail_widget.dart';
 
 class DiveSiteListScreen extends StatelessWidget {
   const DiveSiteListScreen({super.key});
@@ -57,16 +57,7 @@ class DiveSiteListScreen extends StatelessWidget {
                     return DataRow(
                       onSelectChanged: (selected) {
                         if (selected == true) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DiveSiteDetailScreen(
-                                divesite: site,
-                                dives: state.dives.where((d) => d.divesiteid == site.uuid.trim()).toList(),
-                                diveSites: state.diveSites,
-                              ),
-                            ),
-                          );
+                          context.go('/sites/${site.uuid}');
                         }
                       },
                       cells: [

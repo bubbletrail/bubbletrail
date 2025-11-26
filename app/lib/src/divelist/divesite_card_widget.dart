@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../ssrf/ssrf.dart';
 import 'common_widgets.dart';
-import 'divesitedetail_widget.dart';
 
 class DiveSiteCardWidget extends StatelessWidget {
   final Divesite divesite;
@@ -19,14 +19,9 @@ class DiveSiteCardWidget extends StatelessWidget {
       elevation: 2,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        // onTap: () {
-        //   Navigator.push(
-        //     context,
-        //     MaterialPageRoute(
-        //       builder: (context) => DiveSiteDetailScreen(divesite: divesite, dives: siteDives, diveSites: diveSites),
-        //     ),
-        //   );
-        // },
+        onTap: () {
+          context.go('/sites/${divesite.uuid}');
+        },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

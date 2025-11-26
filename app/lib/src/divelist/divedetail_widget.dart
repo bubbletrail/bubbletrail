@@ -1,16 +1,18 @@
 import 'package:divepath/src/divelist/divelist_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../ssrf/ssrf.dart';
 import 'common_widgets.dart';
 import 'depth_profile_widget.dart';
-import 'diveedit_widget.dart';
 import 'divesite_card_widget.dart';
 
 class DiveDetailScreen extends StatelessWidget {
-  const DiveDetailScreen({super.key});
+  final String diveID;
+
+  const DiveDetailScreen({super.key, required this.diveID});
 
   @override
   Widget build(BuildContext context) {
@@ -19,13 +21,10 @@ class DiveDetailScreen extends StatelessWidget {
         if (state is! DiveListLoaded) {
           return Placeholder();
         }
-        if (state.selectedDiveID == null) {
-          return Placeholder();
-        }
-        final diveIdx = state.dives.indexWhere((d) => d.id == state.selectedDiveID);
+        final diveIdx = state.dives.indexWhere((d) => d.id == diveID);
         final dive = state.dives[diveIdx];
-        final diveSite = state.diveSites.where((s) => s.uuid == dive.divesiteid).first;
-        final nextDiveID = diveIdx < state.dives.length ? state.dives[diveIdx + 1].id : null;
+        final diveSite = state.diveSites.firstWhere((s) => s.uuid == dive.divesiteid);
+        final nextDiveID = diveIdx < state.dives.length - 1 ? state.dives[diveIdx + 1].id : null;
         final prevDiveID = diveIdx > 0 ? state.dives[diveIdx - 1].id : null;
         return DiveDetails(dive: dive, diveSite: diveSite, nextID: nextDiveID, prevID: prevDiveID);
       },
@@ -51,15 +50,7 @@ class DiveDetails extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => BlocProvider.value(
-                    value: context.read<DiveListBloc>(),
-                    child: DiveEditScreen(dive: dive),
-                  ),
-                ),
-              );
+              context.go('/dives/${dive.id}/edit');
             },
             tooltip: 'Edit dive',
           ),
@@ -67,7 +58,7 @@ class DiveDetails extends StatelessWidget {
             icon: const Icon(Icons.arrow_back_ios),
             onPressed: prevID != null
                 ? () {
-                    context.read<DiveListBloc>().add(SelectDive(prevID!));
+                    context.go('/dives/${prevID!}');
                   }
                 : null,
             tooltip: 'Previous dive',
@@ -76,7 +67,7 @@ class DiveDetails extends StatelessWidget {
             icon: const Icon(Icons.arrow_forward_ios),
             onPressed: nextID != null
                 ? () {
-                    context.read<DiveListBloc>().add(SelectDive(nextID!));
+                    context.go('/dives/${nextID!}');
                   }
                 : null,
             tooltip: 'Next dive',

@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../ssrf/ssrf.dart';
 import 'divelist_bloc.dart';
 
 class DiveEditScreen extends StatefulWidget {
-  final Dive dive;
+  final String diveID;
 
-  const DiveEditScreen({super.key, required this.dive});
+  const DiveEditScreen({super.key, required this.diveID});
 
   @override
   State<DiveEditScreen> createState() => _DiveEditScreenState();
 }
 
 class _DiveEditScreenState extends State<DiveEditScreen> {
+  late final Dive dive;
   late final TextEditingController _numberController;
   late final TextEditingController _dateController;
   late final TextEditingController _timeController;
@@ -28,15 +30,16 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   @override
   void initState() {
     super.initState();
-    _numberController = TextEditingController(text: widget.dive.number.toString());
-    _dateController = TextEditingController(text: DateFormat('yyyy-MM-dd').format(widget.dive.start));
-    _timeController = TextEditingController(text: DateFormat('HH:mm:ss').format(widget.dive.start));
-    _durationController = TextEditingController(text: (widget.dive.duration / 60).toStringAsFixed(1));
-    _divemasterController = TextEditingController(text: widget.dive.divemaster ?? '');
-    _buddiesController = TextEditingController(text: widget.dive.buddies.join(', '));
-    _notesController = TextEditingController(text: widget.dive.notes ?? '');
-    _tagsController = TextEditingController(text: widget.dive.tags.join(', '));
-    _rating = widget.dive.rating;
+    dive = (context.read<DiveListBloc>().state as DiveListLoaded).dives.firstWhere((d) => d.id == widget.diveID);
+    _numberController = TextEditingController(text: dive.number.toString());
+    _dateController = TextEditingController(text: DateFormat('yyyy-MM-dd').format(dive.start));
+    _timeController = TextEditingController(text: DateFormat('HH:mm:ss').format(dive.start));
+    _durationController = TextEditingController(text: (dive.duration / 60).toStringAsFixed(1));
+    _divemasterController = TextEditingController(text: dive.divemaster ?? '');
+    _buddiesController = TextEditingController(text: dive.buddies.join(', '));
+    _notesController = TextEditingController(text: dive.notes ?? '');
+    _tagsController = TextEditingController(text: dive.tags.join(', '));
+    _rating = dive.rating;
   }
 
   @override
@@ -59,9 +62,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       final timeParts = _timeController.text.split(':');
 
       if (dateParts.length != 3 || timeParts.length != 3) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid date or time format')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid date or time format')));
         return;
       }
 
@@ -76,34 +77,30 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       final durationMinutes = double.parse(_durationController.text);
 
       // Update dive properties
-      widget.dive.number = int.parse(_numberController.text);
-      widget.dive.start = start;
-      widget.dive.duration = durationMinutes * 60;
-      widget.dive.rating = _rating;
-      widget.dive.divemaster = _divemasterController.text.trim().isEmpty ? null : _divemasterController.text.trim();
-      widget.dive.notes = _notesController.text.trim().isEmpty ? null : _notesController.text.trim();
+      dive.number = int.parse(_numberController.text);
+      dive.start = start;
+      dive.duration = durationMinutes * 60;
+      dive.rating = _rating;
+      dive.divemaster = _divemasterController.text.trim().isEmpty ? null : _divemasterController.text.trim();
+      dive.notes = _notesController.text.trim().isEmpty ? null : _notesController.text.trim();
 
       // Update buddies
       final buddiesText = _buddiesController.text.trim();
-      widget.dive.buddies = buddiesText.isEmpty ? {} : buddiesText.split(',').map((b) => b.trim()).where((b) => b.isNotEmpty).toSet();
+      dive.buddies = buddiesText.isEmpty ? {} : buddiesText.split(',').map((b) => b.trim()).where((b) => b.isNotEmpty).toSet();
 
       // Update tags
       final tagsText = _tagsController.text.trim();
-      widget.dive.tags = tagsText.isEmpty ? {} : tagsText.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toSet();
+      dive.tags = tagsText.isEmpty ? {} : tagsText.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toSet();
 
       // Send update event to bloc
-      context.read<DiveListBloc>().add(UpdateDive(widget.dive));
+      context.read<DiveListBloc>().add(UpdateDive(dive));
 
       // Navigate back
-      Navigator.of(context).pop();
+      context.pop();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Dive updated successfully')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Dive updated successfully')));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saving dive: $e')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error saving dive: $e')));
     }
   }
 
@@ -112,14 +109,8 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('Edit Dive #${widget.dive.number}'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _saveDive,
-            tooltip: 'Save',
-          ),
-        ],
+        title: Text('Edit Dive #${dive.number}'),
+        actions: [IconButton(icon: const Icon(Icons.save), onPressed: _saveDive, tooltip: 'Save')],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -128,39 +119,25 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
           children: [
             TextField(
               controller: _numberController,
-              decoration: const InputDecoration(
-                labelText: 'Dive Number',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'Dive Number', border: OutlineInputBorder()),
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _dateController,
-              decoration: const InputDecoration(
-                labelText: 'Date (yyyy-MM-dd)',
-                border: OutlineInputBorder(),
-                helperText: 'Format: yyyy-MM-dd',
-              ),
+              decoration: const InputDecoration(labelText: 'Date (yyyy-MM-dd)', border: OutlineInputBorder(), helperText: 'Format: yyyy-MM-dd'),
               keyboardType: TextInputType.datetime,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _timeController,
-              decoration: const InputDecoration(
-                labelText: 'Time (HH:mm:ss)',
-                border: OutlineInputBorder(),
-                helperText: 'Format: HH:mm:ss',
-              ),
+              decoration: const InputDecoration(labelText: 'Time (HH:mm:ss)', border: OutlineInputBorder(), helperText: 'Format: HH:mm:ss'),
               keyboardType: TextInputType.datetime,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _durationController,
-              decoration: const InputDecoration(
-                labelText: 'Duration (minutes)',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'Duration (minutes)', border: OutlineInputBorder()),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
             const SizedBox(height: 16),
@@ -170,11 +147,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
               children: List.generate(5, (index) {
                 final starValue = index + 1;
                 return IconButton(
-                  icon: Icon(
-                    _rating != null && starValue <= _rating! ? Icons.star : Icons.star_border,
-                    color: Colors.amber,
-                    size: 32,
-                  ),
+                  icon: Icon(_rating != null && starValue <= _rating! ? Icons.star : Icons.star_border, color: Colors.amber, size: 32),
                   onPressed: () {
                     setState(() {
                       _rating = starValue == _rating ? null : starValue;
@@ -195,38 +168,24 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
             const SizedBox(height: 16),
             TextField(
               controller: _tagsController,
-              decoration: const InputDecoration(
-                labelText: 'Tags',
-                border: OutlineInputBorder(),
-                helperText: 'Comma-separated',
-              ),
+              decoration: const InputDecoration(labelText: 'Tags', border: OutlineInputBorder(), helperText: 'Comma-separated'),
               maxLines: 2,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _divemasterController,
-              decoration: const InputDecoration(
-                labelText: 'Divemaster',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'Divemaster', border: OutlineInputBorder()),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _buddiesController,
-              decoration: const InputDecoration(
-                labelText: 'Buddies',
-                border: OutlineInputBorder(),
-                helperText: 'Comma-separated',
-              ),
+              decoration: const InputDecoration(labelText: 'Buddies', border: OutlineInputBorder(), helperText: 'Comma-separated'),
               maxLines: 2,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _notesController,
-              decoration: const InputDecoration(
-                labelText: 'Notes',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'Notes', border: OutlineInputBorder()),
               maxLines: 6,
             ),
             const SizedBox(height: 24),
@@ -234,9 +193,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _saveDive,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
+                style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
                 child: const Text('Save Changes', style: TextStyle(fontSize: 16)),
               ),
             ),

@@ -1,10 +1,8 @@
-import 'package:divepath/src/divelist/divelist_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../ssrf/ssrf.dart';
-import 'divedetail_widget.dart';
 
 class DiveTableWidget extends StatelessWidget {
   final List<Dive> dives;
@@ -52,13 +50,7 @@ class DiveTableWidget extends StatelessWidget {
           return DataRow(
             onSelectChanged: (selected) {
               if (selected == true) {
-                context.read<DiveListBloc>().add(SelectDive(dive.id));
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BlocProvider.value(value: context.read<DiveListBloc>(), child: DiveDetailScreen()),
-                  ),
-                );
+                context.go('/dives/${dive.id}');
               }
             },
             cells: cells,
