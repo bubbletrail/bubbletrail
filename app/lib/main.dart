@@ -1,14 +1,14 @@
-import 'package:divepath/src/divelist/divedetail_widget.dart';
-import 'package:divepath/src/divelist/diveedit_widget.dart';
-import 'package:divepath/src/divelist/divelist_widget.dart';
-import 'package:divepath/src/divelist/divesitedetail_widget.dart';
-import 'package:divepath/src/divelist/divesitelist_widget.dart';
-import 'package:divepath/src/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import 'src/divelist/divelist_bloc.dart';
+import 'src/bloc/divelist_bloc.dart';
+import 'src/dives/divedetails_screen.dart';
+import 'src/dives/diveedit_screen.dart';
+import 'src/dives/divelist_screen.dart';
+import 'src/sites/divesitedetail_widget.dart';
+import 'src/sites/divesitelist_screen.dart';
+import 'src/theme/theme.dart';
 
 void main() {
   runApp(const MyApp());
@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
                   routes: [
                     GoRoute(
                       path: ':diveID',
-                      builder: (context, state) => DiveDetailScreen(diveID: state.pathParameters['diveID']!),
+                      builder: (context, state) => DiveDetailsScreen(diveID: state.pathParameters['diveID']!),
                       routes: [
                         GoRoute(
                           path: 'edit',

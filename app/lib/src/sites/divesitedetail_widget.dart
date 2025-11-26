@@ -1,10 +1,10 @@
-import 'package:divepath/src/divelist/divelist_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'common_widgets.dart';
-import 'dive_table_widget.dart';
-import 'divesite_map_widget.dart';
+import '../bloc/divelist_bloc.dart';
+import '../common/common_widgets.dart';
+import '../common/divetable_widget.dart';
+import 'divesitemap_widget.dart';
 
 class DiveSiteDetailScreen extends StatelessWidget {
   final String siteID;
@@ -29,11 +29,11 @@ class DiveSiteDetailScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              buildInfoCard(context, 'Location Information', [
-                buildInfoRow('Name', site.name),
+              infoCard(context, 'Location Information', [
+                infoRow('Name', site.name),
                 if (site.position != null) ...[
-                  buildInfoRow('Latitude', site.position!.lat.toStringAsFixed(6)),
-                  buildInfoRow('Longitude', site.position!.lon.toStringAsFixed(6)),
+                  infoRow('Latitude', site.position!.lat.toStringAsFixed(6)),
+                  infoRow('Longitude', site.position!.lon.toStringAsFixed(6)),
                 ],
               ]),
               const SizedBox(height: 16),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'dive_table_widget.dart';
-import 'divelist_bloc.dart';
+import '../common/divetable_widget.dart';
+import '../bloc/divelist_bloc.dart';
 
 class DiveListScreen extends StatelessWidget {
   const DiveListScreen({super.key});
@@ -43,9 +43,7 @@ class DiveListScreen extends StatelessWidget {
               return const Center(child: Text('No dives yet. Add your first dive!'));
             }
 
-            return SingleChildScrollView(
-              child: DiveTableWidget(dives: dives, diveSites: diveSites, showSiteColumn: true),
-            );
+            return DiveTableWidget(dives: dives, diveSites: diveSites, showSiteColumn: true);
           }
 
           return const Center(child: Text('Unknown state'));
