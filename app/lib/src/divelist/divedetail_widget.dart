@@ -44,8 +44,7 @@ class DiveDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('Dive #${dive.number}'),
+        title: Text('Dive #${dive.number}: ${diveSite.name}'),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),

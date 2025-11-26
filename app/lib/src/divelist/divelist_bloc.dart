@@ -98,6 +98,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       final doc = Ssrf(dives: ds.dives, diveSites: ds.diveSites);
       final docXml = doc.toXmlDocument().toXmlString(pretty: true);
       await File('${docsDir.path}/dives.ssrf.new').writeAsString(docXml);
+      await File('${docsDir.path}/dives.ssrf.new').rename('${docsDir.path}/dives.ssrf');
     } catch (e) {
       emit(DiveListError('Failed to save dives: $e'));
     }

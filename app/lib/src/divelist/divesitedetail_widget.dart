@@ -22,7 +22,7 @@ class DiveSiteDetailScreen extends StatelessWidget {
     final dives = state.dives.where((s) => s.divesiteid == siteID).toList();
 
     return Scaffold(
-      appBar: AppBar(backgroundColor: Theme.of(context).colorScheme.inversePrimary, title: Text(site.name)),
+      appBar: AppBar(title: Text(site.name)),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),

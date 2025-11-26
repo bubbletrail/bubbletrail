@@ -108,7 +108,6 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text('Edit Dive #${dive.number}'),
         actions: [IconButton(icon: const Icon(Icons.save), onPressed: _saveDive, tooltip: 'Save')],
       ),

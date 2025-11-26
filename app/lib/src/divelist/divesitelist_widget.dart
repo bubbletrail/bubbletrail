@@ -10,7 +10,7 @@ class DiveSiteListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: Theme.of(context).colorScheme.inversePrimary, title: const Text('Dive Sites')),
+      appBar: AppBar(title: const Text('Dive Sites')),
       body: BlocBuilder<DiveListBloc, DiveListState>(
         builder: (context, state) {
           if (state is DiveListInitial || state is DiveListLoading) {
@@ -52,6 +52,7 @@ class DiveSiteListScreen extends StatelessWidget {
                   dividerThickness: 0,
                   dataRowMinHeight: 24,
                   dataRowMaxHeight: 32,
+                  showCheckboxColumn: false,
                   rows: diveSites.map((site) {
                     final divesAtSite = state.dives.where((d) => d.divesiteid == site.uuid.trim()).length;
                     return DataRow(

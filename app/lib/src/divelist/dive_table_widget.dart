@@ -33,6 +33,7 @@ class DiveTableWidget extends StatelessWidget {
         dividerThickness: 0,
         dataRowMinHeight: 24,
         dataRowMaxHeight: 32,
+        showCheckboxColumn: false,
         rows: dives.map((dive) {
           final maxDepth = dive.divecomputers.isNotEmpty ? dive.divecomputers[0].maxDepth : 0.0;
           final diveSite = dive.divesiteid != null ? diveSites.where((s) => s.uuid.trim() == dive.divesiteid).firstOrNull : null;

@@ -11,16 +11,8 @@ class DiveListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Dive Log'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              // TODO: Add new dive
-            },
-          ),
-        ],
+        title: const Text('Dives'),
+        actions: [IconButton(icon: const Icon(Icons.add), onPressed: null)],
       ),
       body: BlocBuilder<DiveListBloc, DiveListState>(
         builder: (context, state) {
