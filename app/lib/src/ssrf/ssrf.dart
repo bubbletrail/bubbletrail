@@ -1,3 +1,4 @@
+import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
 class Ssrf {
@@ -62,6 +63,7 @@ class Ssrf {
 }
 
 class Dive {
+  String id;
   int number;
   int? rating;
   Set<String> tags = {};
@@ -83,6 +85,7 @@ class Dive {
   List<DiveComputer> divecomputers = [];
 
   Dive({
+    String? id,
     required this.number,
     required this.start,
     required this.duration,
@@ -93,9 +96,12 @@ class Dive {
     this.divesiteid,
     this.divemaster,
     this.notes,
-  });
+  }) : id = id ?? Uuid().v4().split('-').first;
 
   factory Dive.fromXml(XmlElement elem) {
+    // Dive ID or null
+    final diveID = elem.getAttribute('uuid');
+
     // Parse tags
     final tagsStr = elem.getAttribute('tags');
     final tags = tagsStr != null ? tagsStr.split(',').map((t) => t.trim()).toSet() : <String>{};
@@ -113,6 +119,7 @@ class Dive {
     }
 
     final dive = Dive(
+      id: diveID,
       number: int.tryParse(elem.getAttribute('number') ?? '0') ?? 0,
       start: tryParseDateTime(elem.getAttribute('date'), elem.getAttribute('time')) ?? DateTime.fromMillisecondsSinceEpoch(0),
       duration: tryParseUnitString(elem.getAttribute('duration')) ?? 0,
@@ -145,6 +152,7 @@ class Dive {
     builder.element(
       'dive',
       nest: () {
+        builder.attribute('uuid', id);
         builder.attribute('number', number.toString());
 
         if (rating != null) {

@@ -30,6 +30,7 @@ void main() {
 
     // Test first dive with all attributes
     final firstDive = ssrf.dives[0];
+    expect(firstDive.id, isNotEmpty);
     expect(firstDive.number, 257);
     expect(firstDive.rating, 5);
     expect(firstDive.sac, closeTo(13.507, 0.001));

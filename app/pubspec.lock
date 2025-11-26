@@ -49,6 +49,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.19.1"
+  crypto:
+    dependency: transitive
+    description:
+      name: crypto
+      sha256: c8ea0233063ba03258fbcf2ca4d6dadfefe14f02fab57702265467a19f27fadf
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.7"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -89,6 +97,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
+  fixnum:
+    dependency: transitive
+    description:
+      name: fixnum
+      sha256: b6dc7065e46c974bc7c5f143080a6764ec7a4be6da1285ececdc37be96de53be
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
   fl_chart:
     dependency: "direct main"
     description:
@@ -424,6 +440,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.1"
+  uuid:
+    dependency: "direct main"
+    description:
+      name: uuid
+      sha256: a11b666489b1954e01d992f3d601b1804a33937b5a8fe677bd26b8a9f96f96e8
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.5.2"
   vector_math:
     dependency: transitive
     description:
