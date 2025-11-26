@@ -7,13 +7,13 @@ import 'package:divepath/src/ssrf/ssrf.dart';
 
 void main() {
   test('Load sample SSRF file', () async {
-    final xmlData = await File('./test/testdata/jakob@nym.se.ssrf').readAsString();
+    final xmlData = await File('./test/testdata/subsurface-sample.xml').readAsString();
     final doc = XmlDocument.parse(xmlData);
     final ssrf = Ssrf.fromXml(doc.rootElement);
 
     // Test basic counts
-    expect(ssrf.dives.length, 317);
-    expect(ssrf.diveSites.length, 92);
+    expect(ssrf.dives.length, 54);
+    expect(ssrf.diveSites.length, 32);
 
     // Test settings
     expect(ssrf.settings, isNotNull);
@@ -22,60 +22,56 @@ void main() {
 
     // Test divesites
     final firstSite = ssrf.diveSites[0];
-    expect(firstSite.uuid.trim(), '9a6a0ea');
-    expect(firstSite.name, 'Sweden / Blekinge / Järnavik');
+    expect(firstSite.uuid.trim(), 'e05b954');
+    expect(firstSite.name, 'Xxxxxxxx / Xxx Xxx / Xxxxx Xxxx');
     expect(firstSite.position, isNotNull);
-    expect(firstSite.position!.lat, closeTo(56.179390, 0.000001));
-    expect(firstSite.position!.lon, closeTo(15.070710, 0.000001));
+    expect(firstSite.position!.lat, closeTo(10.110830, 0.000001));
+    expect(firstSite.position!.lon, closeTo(99.813260, 0.000001));
 
     // Test first dive with all attributes
     final firstDive = ssrf.dives[0];
-    expect(firstDive.number, 1);
-    expect(firstDive.rating, 2);
-    expect(firstDive.sac, closeTo(26.454, 0.001));
-    expect(firstDive.tags, containsAll(['Dry', 'OW', 'Shore']));
-    expect(firstDive.divesiteid, 'f97fc13d');
-    expect(firstDive.duration, 43 * 60 + 30);
+    expect(firstDive.number, 257);
+    expect(firstDive.rating, 5);
+    expect(firstDive.sac, closeTo(13.507, 0.001));
+    expect(firstDive.tags, containsAll(['Boat', 'Wet']));
+    expect(firstDive.divesiteid, '4500464d');
+    expect(firstDive.duration, 44 * 60 + 48);
 
     // Test date and time were parsed correctly
-    expect(firstDive.start.year, 2019);
-    expect(firstDive.start.month, 10);
-    expect(firstDive.start.day, 30);
-    expect(firstDive.start.hour, 10);
-    expect(firstDive.start.minute, 49);
-    expect(firstDive.start.second, 15);
+    expect(firstDive.start.year, 2025);
+    expect(firstDive.start.month, 4);
+    expect(firstDive.start.day, 16);
+    expect(firstDive.start.hour, 8);
+    expect(firstDive.start.minute, 37);
+    expect(firstDive.start.second, 58);
 
     // Test dive child elements
-    expect(firstDive.divemaster, 'Nina');
-    expect(firstDive.buddies, containsAll(['Anna']));
-    expect(firstDive.notes, contains('First qualification dive'));
+    expect(firstDive.divemaster, 'Xxxx');
+    expect(firstDive.buddies, containsAll(['Xxxxxx']));
+    expect(firstDive.notes, isNotEmpty);
 
     // Test cylinder
     expect(firstDive.cylinders.length, 1);
-    expect(firstDive.cylinders[0].size, 10.0);
-    expect(firstDive.cylinders[0].workpressure, 300.0);
-    expect(firstDive.cylinders[0].description, '10x300');
-    expect(firstDive.cylinders[0].start, 232.0);
-    expect(firstDive.cylinders[0].end, 45.0);
+    expect(firstDive.cylinders[0].size, 11.0);
+    expect(firstDive.cylinders[0].workpressure, 230.0);
+    expect(firstDive.cylinders[0].description, 'AL80');
+    expect(firstDive.cylinders[0].start, isNull);
+    expect(firstDive.cylinders[0].end, isNull);
 
     // Test weightsystem
     expect(firstDive.weightsystems.length, 1);
-    expect(firstDive.weightsystems[0].weight, 8.0);
+    expect(firstDive.weightsystems[0].weight, 2.4);
 
     // Test divecomputer
     expect(firstDive.divecomputers.length, 1);
     final firstDc = firstDive.divecomputers[0];
-    expect(firstDc.maxDepth, closeTo(8.88, 0.01));
-    expect(firstDc.meanDepth, closeTo(4.952, 0.001));
+    expect(firstDc.maxDepth, closeTo(23.5, 0.01));
+    expect(firstDc.meanDepth, closeTo(15.881, 0.001));
 
     // Test environment
     expect(firstDc.environment, isNotNull);
-    expect(firstDc.environment!.airTemperature, 2.0);
-    expect(firstDc.environment!.waterTemperature, 10.0);
-
-    // Test extradata
-    expect(firstDc.extradata['current'], 'None');
-    expect(firstDc.extradata['entryType'], 'Shore');
+    expect(firstDc.environment!.airTemperature, 0.0);
+    expect(firstDc.environment!.waterTemperature, 29.0);
 
     // Test events
     expect(firstDc.events.length, greaterThan(0));
@@ -83,16 +79,16 @@ void main() {
 
     // Test samples
     expect(firstDc.samples.length, greaterThan(0));
-    expect(firstDc.samples[0].depth, 0.0);
-    expect(firstDc.samples[0].temp, closeTo(10.56, 0.01));
+    expect(firstDc.samples[0].depth, closeTo(1.1, 0.01));
+    expect(firstDc.samples[0].temp, closeTo(30.0, 0.01));
 
     // Test last dive
-    final lastDive = ssrf.dives[316];
-    expect(lastDive.number, 307);
-    expect(lastDive.duration, 75 * 60 + 24);
+    final lastDive = ssrf.dives[53];
+    expect(lastDive.number, 310);
+    expect(lastDive.duration, 87 * 60 + 54);
     expect(lastDive.divecomputers.length, greaterThan(0));
-    expect(lastDive.divecomputers[0].maxDepth, 34.8);
-    expect(lastDive.divecomputers[0].meanDepth, 19.385);
+    expect(lastDive.divecomputers[0].maxDepth, 22.6);
+    expect(lastDive.divecomputers[0].meanDepth, closeTo(12.489, 0.001));
   });
 
   test('Serialize and deserialize SSRF data', () {
