@@ -1,9 +1,12 @@
+import 'package:divepath/src/divelist/divelist_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../ssrf/ssrf.dart';
 import 'common_widgets.dart';
 import 'depth_profile_widget.dart';
+import 'diveedit_widget.dart';
 import 'divesite_card_widget.dart';
 
 class DiveDetailScreen extends StatelessWidget {
@@ -24,6 +27,21 @@ class DiveDetailScreen extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text('Dive #${dive.number}'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider.value(
+                    value: context.read<DiveListBloc>(),
+                    child: DiveEditScreen(dive: dive),
+                  ),
+                ),
+              );
+            },
+            tooltip: 'Edit dive',
+          ),
           IconButton(
             icon: const Icon(Icons.arrow_back_ios),
             onPressed: hasPrevious

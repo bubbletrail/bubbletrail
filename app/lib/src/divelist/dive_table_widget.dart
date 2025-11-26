@@ -1,4 +1,6 @@
+import 'package:divepath/src/divelist/divelist_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../ssrf/ssrf.dart';
@@ -53,7 +55,10 @@ class DiveTableWidget extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => DiveDetailScreen(dive: dive, dives: dives, diveSites: diveSites),
+                    builder: (_) => BlocProvider.value(
+                      value: context.read<DiveListBloc>(),
+                      child: DiveDetailScreen(dive: dive, dives: dives, diveSites: diveSites),
+                    ),
                   ),
                 );
               }

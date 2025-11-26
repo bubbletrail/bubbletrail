@@ -56,10 +56,20 @@ class SaveDives extends DiveListEvent {
   const SaveDives();
 }
 
+class UpdateDive extends DiveListEvent {
+  final Dive dive;
+
+  const UpdateDive(this.dive);
+
+  @override
+  List<Object?> get props => [dive];
+}
+
 class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   DiveListBloc() : super(const DiveListInitial()) {
     on<LoadDives>(_onLoadDives);
     on<SaveDives>(_onSaveDives);
+    on<UpdateDive>(_onUpdateDive);
 
     // Automatically load dives when the bloc is created
     add(const LoadDives());
@@ -90,6 +100,27 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       await File('${docsDir.path}/dives.ssrf.new').writeAsString(docXml);
     } catch (e) {
       emit(DiveListError('Failed to save dives: $e'));
+    }
+  }
+
+  Future<void> _onUpdateDive(UpdateDive event, Emitter<DiveListState> emit) async {
+    if (state is! DiveListLoaded) return;
+
+    final currentState = state as DiveListLoaded;
+
+    // Find the dive in the list and update it
+    final diveIndex = currentState.dives.indexWhere((d) => d == event.dive);
+
+    if (diveIndex != -1) {
+      // Create a new list with the updated dive
+      final updatedDives = List<Dive>.from(currentState.dives);
+      updatedDives[diveIndex] = event.dive;
+
+      // Emit the new state with updated dives
+      emit(DiveListLoaded(updatedDives, currentState.diveSites));
+
+      // Trigger save
+      add(const SaveDives());
     }
   }
 }
