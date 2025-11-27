@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -109,18 +110,20 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
 
     final currentState = state as DiveListLoaded;
 
+    // Is it a new dive? If so, set the dive number and add it to the list.
+    if (event.dive.number <= 0) {
+      event.dive.number = currentState.dives.map((d) => d.number).reduce(max) + 1;
+      emit(DiveListLoaded(currentState.dives + [event.dive], currentState.diveSites));
+      add(const SaveDives());
+      return;
+    }
+
     // Find the dive in the list and update it
     final diveIndex = currentState.dives.indexWhere((d) => d == event.dive);
-
     if (diveIndex != -1) {
-      // Create a new list with the updated dive
       final updatedDives = List<Dive>.from(currentState.dives);
       updatedDives[diveIndex] = event.dive;
-
-      // Emit the new state with updated dives
       emit(DiveListLoaded(updatedDives, currentState.diveSites));
-
-      // Trigger save
       add(const SaveDives());
     }
   }

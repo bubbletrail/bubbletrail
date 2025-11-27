@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../common/divetable_widget.dart';
 import '../bloc/divelist_bloc.dart';
@@ -12,7 +13,14 @@ class DiveListScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dives'),
-        actions: [IconButton(icon: const Icon(Icons.add), onPressed: null)],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              context.go('/dives/new');
+            },
+          ),
+        ],
       ),
       body: BlocBuilder<DiveListBloc, DiveListState>(
         builder: (context, state) {

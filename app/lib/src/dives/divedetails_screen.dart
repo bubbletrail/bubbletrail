@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -23,7 +24,7 @@ class DiveDetailsScreen extends StatelessWidget {
         }
         final diveIdx = state.dives.indexWhere((d) => d.id == diveID);
         final dive = state.dives[diveIdx];
-        final diveSite = state.diveSites.firstWhere((s) => s.uuid == dive.divesiteid);
+        final diveSite = state.diveSites.firstWhereOrNull((s) => s.uuid == dive.divesiteid);
         final nextDiveID = diveIdx < state.dives.length - 1 ? state.dives[diveIdx + 1].id : null;
         final prevDiveID = diveIdx > 0 ? state.dives[diveIdx - 1].id : null;
         return _DiveDetails(dive: dive, diveSite: diveSite, nextID: nextDiveID, prevID: prevDiveID);
@@ -34,7 +35,7 @@ class DiveDetailsScreen extends StatelessWidget {
 
 class _DiveDetails extends StatelessWidget {
   final Dive dive;
-  final Divesite diveSite;
+  final Divesite? diveSite;
   final String? nextID;
   final String? prevID;
 
@@ -44,7 +45,7 @@ class _DiveDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dive #${dive.number}: ${diveSite.name}'),
+        title: Text('Dive #${dive.number}: ${diveSite?.name ?? 'Unknown site'}'),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
@@ -156,7 +157,7 @@ class _DiveDetails extends StatelessWidget {
         if (dive.tags.isNotEmpty) infoRow('Tags', dive.tags.join(', ')),
       ]),
       const SizedBox(height: 16),
-      ...[_DivesiteCard(divesite: diveSite), const SizedBox(height: 16)],
+      if (diveSite != null) ...[_DivesiteCard(divesite: diveSite!), const SizedBox(height: 16)],
       if (dive.divecomputers.isNotEmpty) ...[
         infoCard(context, 'Dive Computer Data', [
           infoRow('Max Depth', '${dive.divecomputers[0].maxDepth.toStringAsFixed(1)} m'),

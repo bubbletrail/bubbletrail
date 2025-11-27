@@ -7,7 +7,7 @@ import '../ssrf/ssrf.dart';
 import '../bloc/divelist_bloc.dart';
 
 class DiveEditScreen extends StatefulWidget {
-  final String diveID;
+  final String? diveID;
 
   const DiveEditScreen({super.key, required this.diveID});
 
@@ -30,7 +30,11 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   @override
   void initState() {
     super.initState();
-    dive = (context.read<DiveListBloc>().state as DiveListLoaded).dives.firstWhere((d) => d.id == widget.diveID);
+    if (widget.diveID == null) {
+      dive = Dive(number: 0, start: DateTime.now(), duration: 0);
+    } else {
+      dive = (context.read<DiveListBloc>().state as DiveListLoaded).dives.firstWhere((d) => d.id == widget.diveID);
+    }
     _numberController = TextEditingController(text: dive.number.toString());
     _dateController = TextEditingController(text: DateFormat('yyyy-MM-dd').format(dive.start));
     _timeController = TextEditingController(text: DateFormat('HH:mm:ss').format(dive.start));

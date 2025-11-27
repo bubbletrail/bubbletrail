@@ -23,16 +23,18 @@ class MyApp extends StatelessWidget {
       initialLocation: '/dives',
       routes: [
         StatefulShellRoute.indexedStack(
-          builder: (BuildContext context, GoRouterState state, StatefulNavigationShell shell) => Scaffold(
-            body: SafeArea(
-              child: Row(
+          builder: (BuildContext context, GoRouterState state, StatefulNavigationShell shell) {
+            final appBarTheme = Theme.of(context).appBarTheme;
+
+            return Scaffold(
+              body: Row(
                 children: [
                   NavigationRail(
-                    backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+                    backgroundColor: appBarTheme.backgroundColor,
                     labelType: NavigationRailLabelType.all,
                     selectedIndex: shell.currentIndex,
                     onDestinationSelected: (n) => shell.goBranch(n),
-                    leading: SizedBox(height: 42),
+                    leading: SizedBox(height: (appBarTheme.toolbarHeight ?? 48) - 8),
                     destinations: const [
                       NavigationRailDestination(icon: Icon(Icons.waves), label: Text('Dives')),
                       NavigationRailDestination(icon: Icon(Icons.place), label: Text('Sites')),
@@ -41,8 +43,8 @@ class MyApp extends StatelessWidget {
                   Expanded(child: shell),
                 ],
               ),
-            ),
-          ),
+            );
+          },
           branches: [
             StatefulShellBranch(
               routes: <RouteBase>[
@@ -50,6 +52,7 @@ class MyApp extends StatelessWidget {
                   path: '/dives',
                   builder: (BuildContext context, GoRouterState state) => const DiveListScreen(),
                   routes: [
+                    GoRoute(path: 'new', builder: (context, state) => DiveEditScreen(diveID: null)),
                     GoRoute(
                       path: ':diveID',
                       builder: (context, state) => DiveDetailsScreen(diveID: state.pathParameters['diveID']!),

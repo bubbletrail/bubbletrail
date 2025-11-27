@@ -18,7 +18,7 @@ class AppTheme {
       secondary: AppTheme._secondaryColor,
       secondaryContainer: _darkSecondaryBackground,
     ),
-    appBarTheme: AppBarTheme(backgroundColor: _darkSecondaryBackground, elevation: 0, scrolledUnderElevation: 0, centerTitle: false),
+    appBarTheme: AppBarTheme(backgroundColor: _darkSecondaryBackground, elevation: 0, scrolledUnderElevation: 0, centerTitle: false, toolbarHeight: 48),
   );
 
   static final ThemeData lightTheme = ThemeData(
@@ -30,6 +30,6 @@ class AppTheme {
       primary: AppTheme._primaryColor,
       secondary: AppTheme._secondaryColor,
     ),
-    appBarTheme: AppBarTheme(backgroundColor: _lightSecondaryBackground, elevation: 0, scrolledUnderElevation: 0, centerTitle: false),
+    appBarTheme: AppBarTheme(backgroundColor: _lightSecondaryBackground, elevation: 0, scrolledUnderElevation: 0, centerTitle: false, toolbarHeight: 48),
   );
 }
