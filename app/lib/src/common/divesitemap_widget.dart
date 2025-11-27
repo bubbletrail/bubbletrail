@@ -22,7 +22,7 @@ class DiveSiteMap extends StatelessWidget {
               point: latlng,
               width: 40,
               height: 40,
-              child: Icon(Icons.location_pin, size: 40, color: Theme.of(context).colorScheme.error),
+              child: Icon(Icons.location_pin, size: 40, color: Colors.redAccent),
             ),
           ],
         ),
