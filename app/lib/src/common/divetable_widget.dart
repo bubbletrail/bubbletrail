@@ -74,7 +74,7 @@ class _DiveTableWidgetState extends State<DiveTableWidget> {
 
     final columns = [
       DataColumn(label: const Text('Dive #'), onSort: _onSort),
-      DataColumn(label: const Text('Date'), onSort: _onSort),
+      DataColumn(label: const Text('Start'), onSort: _onSort),
       DataColumn(label: const Text('Max Depth (m)'), onSort: _onSort),
       DataColumn(label: const Text('Duration'), onSort: _onSort),
       if (widget.showSiteColumn) DataColumn(label: const Text('Site'), onSort: _onSort),
@@ -100,7 +100,7 @@ class _DiveTableWidgetState extends State<DiveTableWidget> {
 
             final cells = [
               DataCell(Text(dive.number.toString())),
-              DataCell(Text(DateFormat('yyyy-MM-dd HH:mm').format(dive.start))),
+              DataCell(Text(DateFormat.yMd().add_jm().format(dive.start))),
               DataCell(Text(maxDepth.toStringAsFixed(1))),
               DataCell(Text(formatDuration(dive.duration))),
               if (widget.showSiteColumn) DataCell(Text(siteName)),

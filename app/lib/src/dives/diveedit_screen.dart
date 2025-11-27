@@ -122,7 +122,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                     onTap: _selectDate,
                     child: InputDecorator(
                       decoration: const InputDecoration(labelText: 'Date', border: OutlineInputBorder(), suffixIcon: Icon(Icons.calendar_today)),
-                      child: Text(DateFormat('yyyy-MM-dd').format(_selectedDateTime)),
+                      child: Text(DateFormat.yMd().format(_selectedDateTime)),
                     ),
                   ),
                 ),
@@ -131,7 +131,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                     onTap: _selectTime,
                     child: InputDecorator(
                       decoration: const InputDecoration(labelText: 'Time', border: OutlineInputBorder(), suffixIcon: Icon(Icons.access_time)),
-                      child: Text(DateFormat('HH:mm:ss').format(_selectedDateTime)),
+                      child: Text(DateFormat.Hms().format(_selectedDateTime)),
                     ),
                   ),
                 ),

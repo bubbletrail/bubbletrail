@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/find_locale.dart';
+import 'package:intl/intl.dart';
 
 import 'src/bloc/divelist_bloc.dart';
 import 'src/dives/divedetails_screen.dart';
@@ -11,6 +14,7 @@ import 'src/sites/divesitelist_screen.dart';
 import 'src/theme/theme.dart';
 
 void main() {
+  Intl.defaultLocale = 'sv_SE'; // XXX
   runApp(const MyApp());
 }
 
@@ -94,6 +98,7 @@ class MyApp extends StatelessWidget {
         themeMode: ThemeMode.system,
         debugShowCheckedModeBanner: false,
         routerConfig: router,
+        localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
       ),
     );
   }

@@ -150,8 +150,7 @@ class _DiveDetails extends StatelessWidget {
   List<Widget> _buildAllSections(BuildContext context) {
     return [
       infoCard(context, 'General Information', [
-        infoRow('Date', DateFormat('yyyy-MM-dd').format(dive.start)),
-        infoRow('Time', DateFormat('HH:mm:ss').format(dive.start)),
+        infoRow('Start', DateFormat.yMd().add_jm().format(dive.start)),
         infoRow('Duration', formatDuration(dive.duration)),
         if (dive.rating != null) infoRow('Rating', '★' * dive.rating!),
         if (dive.tags.isNotEmpty) infoRow('Tags', dive.tags.join(', ')),
