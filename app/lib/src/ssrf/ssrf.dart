@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
@@ -13,9 +14,12 @@ class Ssrf {
     final divesitesElem = elem.getElement('divesites');
     final divesElem = elem.getElement('dives');
 
+    var dives = divesElem?.findElements('dive').map(Dive.fromXml).toList() ?? [];
+    dives.addAll(divesElem?.findAllElements('trip').map((e) => e.findElements('dive').map(Dive.fromXml).toList()).flattened ?? []);
+
     return Ssrf(
       settings: settingsElem != null ? Settings.fromXml(settingsElem) : null,
-      dives: divesElem?.findElements('dive').map(Dive.fromXml).toList() ?? [],
+      dives: dives,
       diveSites: divesitesElem?.findElements('site').map(Divesite.fromXml).toList() ?? [],
     );
   }

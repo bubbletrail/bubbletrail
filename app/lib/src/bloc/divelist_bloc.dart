@@ -66,11 +66,21 @@ class UpdateDive extends DiveListEvent {
   List<Object?> get props => [dive];
 }
 
+class ImportDives extends DiveListEvent {
+  final String filePath;
+
+  const ImportDives(this.filePath);
+
+  @override
+  List<Object?> get props => [filePath];
+}
+
 class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   DiveListBloc() : super(const DiveListInitial()) {
     on<LoadDives>(_onLoadDives);
     on<SaveDives>(_onSaveDives);
     on<UpdateDive>(_onUpdateDive);
+    on<ImportDives>(_onImportDives);
 
     // Automatically load dives when the bloc is created
     add(const LoadDives());
@@ -125,6 +135,35 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       updatedDives[diveIndex] = event.dive;
       emit(DiveListLoaded(updatedDives, currentState.diveSites));
       add(const SaveDives());
+    }
+  }
+
+  Future<void> _onImportDives(ImportDives event, Emitter<DiveListState> emit) async {
+    if (state is! DiveListLoaded) return;
+
+    try {
+      final currentState = state as DiveListLoaded;
+
+      // Read the SSRF file
+      final xmlData = await File(event.filePath).readAsString();
+      final doc = XmlDocument.parse(xmlData);
+      final importedSsrf = Ssrf.fromXml(doc.rootElement);
+      print("loading ${importedSsrf.dives.length} dives");
+
+      // Merge dives: add imported dives to existing ones
+      final allDives = List<Dive>.from(currentState.dives);
+      allDives.addAll(importedSsrf.dives);
+
+      // Merge dive sites: only add new ones (check by uuid)
+      final existingSiteUuids = currentState.diveSites.map((s) => s.uuid).toSet();
+      final newSites = importedSsrf.diveSites.where((s) => !existingSiteUuids.contains(s.uuid)).toList();
+      final allDiveSites = List<Divesite>.from(currentState.diveSites);
+      allDiveSites.addAll(newSites);
+
+      emit(DiveListLoaded(allDives, allDiveSites));
+      add(const SaveDives());
+    } catch (e) {
+      emit(DiveListError('Failed to import dives: $e'));
     }
   }
 }

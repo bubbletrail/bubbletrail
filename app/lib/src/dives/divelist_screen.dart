@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -15,7 +16,20 @@ class DiveListScreen extends StatelessWidget {
         title: const Text('Dives'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.file_upload),
+            tooltip: 'Import SSRF file',
+            onPressed: () async {
+              final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['ssrf', 'xml']);
+              if (result != null && result.files.single.path != null) {
+                if (context.mounted) {
+                  context.read<DiveListBloc>().add(ImportDives(result.files.single.path!));
+                }
+              }
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.add),
+            tooltip: 'Add new dive',
             onPressed: () {
               context.go('/dives/new');
             },
