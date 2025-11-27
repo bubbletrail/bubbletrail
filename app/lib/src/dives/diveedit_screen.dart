@@ -17,14 +17,12 @@ class DiveEditScreen extends StatefulWidget {
 
 class _DiveEditScreenState extends State<DiveEditScreen> {
   late final Dive dive;
-  late final TextEditingController _numberController;
-  late final TextEditingController _dateController;
-  late final TextEditingController _timeController;
   late final TextEditingController _durationController;
   late final TextEditingController _divemasterController;
   late final TextEditingController _buddiesController;
   late final TextEditingController _notesController;
   late final TextEditingController _tagsController;
+  late DateTime _selectedDateTime;
   late int? _rating;
 
   @override
@@ -35,9 +33,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     } else {
       dive = (context.read<DiveListBloc>().state as DiveListLoaded).dives.firstWhere((d) => d.id == widget.diveID);
     }
-    _numberController = TextEditingController(text: dive.number.toString());
-    _dateController = TextEditingController(text: DateFormat('yyyy-MM-dd').format(dive.start));
-    _timeController = TextEditingController(text: DateFormat('HH:mm:ss').format(dive.start));
+    _selectedDateTime = dive.start;
     _durationController = TextEditingController(text: (dive.duration / 60).toStringAsFixed(1));
     _divemasterController = TextEditingController(text: dive.divemaster ?? '');
     _buddiesController = TextEditingController(text: dive.buddies.join(', '));
@@ -48,9 +44,6 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
 
   @override
   void dispose() {
-    _numberController.dispose();
-    _dateController.dispose();
-    _timeController.dispose();
     _durationController.dispose();
     _divemasterController.dispose();
     _buddiesController.dispose();
@@ -59,30 +52,30 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     super.dispose();
   }
 
+  Future<void> _selectDate() async {
+    final DateTime? picked = await showDatePicker(context: context, initialDate: _selectedDateTime, firstDate: DateTime(1900), lastDate: DateTime(2100));
+    if (picked != null) {
+      setState(() {
+        _selectedDateTime = DateTime(picked.year, picked.month, picked.day, _selectedDateTime.hour, _selectedDateTime.minute, _selectedDateTime.second);
+      });
+    }
+  }
+
+  Future<void> _selectTime() async {
+    final TimeOfDay? picked = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(_selectedDateTime));
+    if (picked != null) {
+      setState(() {
+        _selectedDateTime = DateTime(_selectedDateTime.year, _selectedDateTime.month, _selectedDateTime.day, picked.hour, picked.minute, 0);
+      });
+    }
+  }
+
   void _saveDive() {
     try {
-      // Parse date and time
-      final dateParts = _dateController.text.split('-');
-      final timeParts = _timeController.text.split(':');
-
-      if (dateParts.length != 3 || timeParts.length != 3) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid date or time format')));
-        return;
-      }
-
-      final year = int.parse(dateParts[0]);
-      final month = int.parse(dateParts[1]);
-      final day = int.parse(dateParts[2]);
-      final hour = int.parse(timeParts[0]);
-      final minute = int.parse(timeParts[1]);
-      final second = int.parse(timeParts[2]);
-
-      final start = DateTime(year, month, day, hour, minute, second);
       final durationMinutes = double.parse(_durationController.text);
 
       // Update dive properties
-      dive.number = int.parse(_numberController.text);
-      dive.start = start;
+      dive.start = _selectedDateTime;
       dive.duration = durationMinutes * 60;
       dive.rating = _rating;
       dive.divemaster = _divemasterController.text.trim().isEmpty ? null : _divemasterController.text.trim();
@@ -119,79 +112,75 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 16,
           children: [
-            TextField(
-              controller: _numberController,
-              decoration: const InputDecoration(labelText: 'Dive Number', border: OutlineInputBorder()),
-              keyboardType: TextInputType.number,
+            Row(
+              spacing: 16,
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: _selectDate,
+                    child: InputDecorator(
+                      decoration: const InputDecoration(labelText: 'Date', border: OutlineInputBorder(), suffixIcon: Icon(Icons.calendar_today)),
+                      child: Text(DateFormat('yyyy-MM-dd').format(_selectedDateTime)),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: InkWell(
+                    onTap: _selectTime,
+                    child: InputDecorator(
+                      decoration: const InputDecoration(labelText: 'Time', border: OutlineInputBorder(), suffixIcon: Icon(Icons.access_time)),
+                      child: Text(DateFormat('HH:mm:ss').format(_selectedDateTime)),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _dateController,
-              decoration: const InputDecoration(labelText: 'Date (yyyy-MM-dd)', border: OutlineInputBorder(), helperText: 'Format: yyyy-MM-dd'),
-              keyboardType: TextInputType.datetime,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _timeController,
-              decoration: const InputDecoration(labelText: 'Time (HH:mm:ss)', border: OutlineInputBorder(), helperText: 'Format: HH:mm:ss'),
-              keyboardType: TextInputType.datetime,
-            ),
-            const SizedBox(height: 16),
             TextField(
               controller: _durationController,
               decoration: const InputDecoration(labelText: 'Duration (minutes)', border: OutlineInputBorder()),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
-            const SizedBox(height: 16),
-            Text('Rating', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Row(
-              children: List.generate(5, (index) {
-                final starValue = index + 1;
-                return IconButton(
-                  icon: Icon(_rating != null && starValue <= _rating! ? Icons.star : Icons.star_border, color: Colors.amber, size: 32),
-                  onPressed: () {
-                    setState(() {
-                      _rating = starValue == _rating ? null : starValue;
-                    });
-                  },
-                );
-              }),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Rating', style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                Row(
+                  children: List.generate(5, (index) {
+                    final starValue = index + 1;
+                    return IconButton(
+                      icon: Icon(_rating != null && starValue <= _rating! ? Icons.star : Icons.star_border, color: Colors.amber, size: 32),
+                      onPressed: () {
+                        setState(() {
+                          _rating = starValue == _rating ? null : starValue;
+                        });
+                      },
+                    );
+                  }),
+                ),
+              ],
             ),
-            if (_rating != null)
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _rating = null;
-                  });
-                },
-                child: const Text('Clear rating'),
-              ),
-            const SizedBox(height: 16),
             TextField(
               controller: _tagsController,
               decoration: const InputDecoration(labelText: 'Tags', border: OutlineInputBorder(), helperText: 'Comma-separated'),
               maxLines: 2,
             ),
-            const SizedBox(height: 16),
             TextField(
               controller: _divemasterController,
               decoration: const InputDecoration(labelText: 'Divemaster', border: OutlineInputBorder()),
             ),
-            const SizedBox(height: 16),
             TextField(
               controller: _buddiesController,
               decoration: const InputDecoration(labelText: 'Buddies', border: OutlineInputBorder(), helperText: 'Comma-separated'),
               maxLines: 2,
             ),
-            const SizedBox(height: 16),
             TextField(
               controller: _notesController,
               decoration: const InputDecoration(labelText: 'Notes', border: OutlineInputBorder()),
               maxLines: 6,
             ),
-            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
