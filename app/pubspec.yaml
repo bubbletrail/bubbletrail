@@ -48,6 +48,11 @@ dependencies:
   go_router: ^17.0.0
   collection: ^1.19.1
   file_picker: ^8.1.4
+  flutter_blue_plus: ^1.35.2
+  dive_computer:
+    git:
+      url: https://github.com/divepath/libdivecomputer_flutter.git
+      ref: rel
 
 dev_dependencies:
   flutter_test:

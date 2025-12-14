@@ -5,7 +5,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import 'src/bloc/ble_bloc.dart';
 import 'src/bloc/divelist_bloc.dart';
+import 'src/dives/ble_scan_screen.dart';
 import 'src/dives/divedetails_screen.dart';
 import 'src/dives/diveedit_screen.dart';
 import 'src/dives/divelist_screen.dart';
@@ -71,6 +73,7 @@ class _MyAppState extends State<MyApp> {
                     destinations: const [
                       NavigationRailDestination(icon: Icon(Icons.waves), label: Text('Dives')),
                       NavigationRailDestination(icon: Icon(Icons.place), label: Text('Sites')),
+                      NavigationRailDestination(icon: Icon(Icons.bluetooth), label: Text('Connect')),
                     ],
                   ),
                   Expanded(child: shell),
@@ -114,12 +117,23 @@ class _MyAppState extends State<MyApp> {
                 ),
               ],
             ),
+            StatefulShellBranch(
+              routes: <RouteBase>[
+                GoRoute(
+                  path: '/connect',
+                  builder: (context, state) => const BleScanScreen(),
+                ),
+              ],
+            ),
           ],
         ),
       ],
     );
-    return BlocProvider(
-      create: (context) => DiveListBloc(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => DiveListBloc()),
+        BlocProvider(create: (context) => BleBloc()..add(const BleStarted())),
+      ],
       child: MaterialApp.router(
         title: 'Divepath',
         theme: AppTheme.lightTheme,
