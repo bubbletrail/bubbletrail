@@ -47,11 +47,16 @@ class _MyAppState extends State<MyApp> {
       }
     });
 
-    _channel.invokeMethod<String>('getInitialFile').then((filePath) {
-      if (filePath != null) {
-        _diveListBloc.add(ImportDives(filePath));
-      }
-    });
+    _channel
+        .invokeMethod<String>('getInitialFile')
+        .then((filePath) {
+          if (filePath != null) {
+            _diveListBloc.add(ImportDives(filePath));
+          }
+        })
+        .onError((_, _) {
+          // Ignore unimplemented error on macOS etc
+        });
   }
 
   @override

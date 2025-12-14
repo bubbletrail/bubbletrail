@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class AppTheme {
@@ -8,9 +10,11 @@ class AppTheme {
   static const Color _darkSecondaryBackground = _primaryColor; // Color(0xFF3366BB);
   static const Color _lightSecondaryBackground = Color(0xFF80C0FF);
 
+  static final density = Platform.isAndroid || Platform.isIOS ? VisualDensity.standard : VisualDensity.compact;
+
   static final ThemeData darkTheme = ThemeData(
     useMaterial3: true,
-    visualDensity: VisualDensity.compact,
+    visualDensity: density,
     colorScheme: ColorScheme.fromSeed(
       brightness: Brightness.dark,
       seedColor: AppTheme._primaryColor,
@@ -23,7 +27,7 @@ class AppTheme {
 
   static final ThemeData lightTheme = ThemeData(
     useMaterial3: true,
-    visualDensity: VisualDensity.compact,
+    visualDensity: density,
     colorScheme: ColorScheme.fromSeed(
       brightness: Brightness.light,
       seedColor: AppTheme._primaryColor,

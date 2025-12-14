@@ -79,7 +79,6 @@ class ImportDives extends DiveListEvent {
 class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   DiveListBloc() : super(const DiveListInitial()) {
     on<DiveListEvent>((event, emit) async {
-      print("got event $event");
       if (event is LoadDives) {
         await _onLoadDives(event, emit);
       } else if (event is SaveDives) {
@@ -153,7 +152,6 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       final xmlData = await File(event.filePath).readAsString();
       final doc = XmlDocument.parse(xmlData);
       final importedSsrf = Ssrf.fromXml(doc.rootElement);
-      print("loading ${importedSsrf.dives.length} dives");
       if (state is DiveListLoaded) {
         final currentState = state as DiveListLoaded;
 

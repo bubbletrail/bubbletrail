@@ -39,6 +39,8 @@ class DiveSiteListScreen extends StatelessWidget {
               return const Center(child: Text('No dive sites yet.'));
             }
 
+            final t = Theme.of(context);
+
             return SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: SingleChildScrollView(
@@ -50,8 +52,8 @@ class DiveSiteListScreen extends StatelessWidget {
                     DataColumn(label: Text('# Dives')),
                   ],
                   dividerThickness: 0,
-                  dataRowMinHeight: 24,
-                  dataRowMaxHeight: 32,
+                  dataRowMinHeight: t.visualDensity == VisualDensity.compact ? 24 : 32,
+                  dataRowMaxHeight: t.visualDensity == VisualDensity.compact ? 32 : 48,
                   showCheckboxColumn: false,
                   rows: diveSites.map((site) {
                     final divesAtSite = state.dives.where((d) => d.divesiteid == site.uuid.trim()).length;

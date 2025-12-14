@@ -80,6 +80,8 @@ class _DiveTableWidgetState extends State<DiveTableWidget> {
       if (widget.showSiteColumn) DataColumn(label: const Text('Site'), onSort: _onSort),
     ];
 
+    final t = Theme.of(context);
+
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: SingleChildScrollView(
@@ -89,8 +91,8 @@ class _DiveTableWidgetState extends State<DiveTableWidget> {
           sortColumnIndex: _sortColumnIndex,
           sortAscending: _sortAscending,
           dividerThickness: 0,
-          dataRowMinHeight: 24,
-          dataRowMaxHeight: 32,
+          dataRowMinHeight: t.visualDensity == VisualDensity.compact ? 24 : 32,
+          dataRowMaxHeight: t.visualDensity == VisualDensity.compact ? 32 : 48,
           columnSpacing: 8,
           showCheckboxColumn: false,
           rows: _getSortedDives().map((dive) {
