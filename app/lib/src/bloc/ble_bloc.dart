@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dive_computer/dive_computer.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -81,6 +82,15 @@ class _BleServicesDiscovered extends BleEvent {
   List<Object?> get props => [services];
 }
 
+class _BleSupportedComputersLoaded extends BleEvent {
+  final List<Computer> computers;
+
+  const _BleSupportedComputersLoaded(this.computers);
+
+  @override
+  List<Object?> get props => [computers];
+}
+
 // State
 class BleState extends Equatable {
   final BluetoothAdapterState adapterState;
@@ -90,6 +100,7 @@ class BleState extends Equatable {
   final BluetoothConnectionState connectionState;
   final List<BluetoothService> discoveredServices;
   final bool isDiscoveringServices;
+  final List<Computer> supportedBleComputers;
   final String? error;
 
   const BleState({
@@ -100,6 +111,7 @@ class BleState extends Equatable {
     this.connectionState = BluetoothConnectionState.disconnected,
     this.discoveredServices = const [],
     this.isDiscoveringServices = false,
+    this.supportedBleComputers = const [],
     this.error,
   });
 
@@ -112,6 +124,7 @@ class BleState extends Equatable {
     BluetoothConnectionState? connectionState,
     List<BluetoothService>? discoveredServices,
     bool? isDiscoveringServices,
+    List<Computer>? supportedBleComputers,
     String? error,
     bool clearError = false,
   }) {
@@ -123,21 +136,23 @@ class BleState extends Equatable {
       connectionState: connectionState ?? this.connectionState,
       discoveredServices: discoveredServices ?? this.discoveredServices,
       isDiscoveringServices: isDiscoveringServices ?? this.isDiscoveringServices,
+      supportedBleComputers: supportedBleComputers ?? this.supportedBleComputers,
       error: clearError ? null : (error ?? this.error),
     );
   }
 
   @override
   List<Object?> get props => [
-        adapterState,
-        scanResults,
-        isScanning,
-        connectedDevice,
-        connectionState,
-        discoveredServices,
-        isDiscoveringServices,
-        error,
-      ];
+    adapterState,
+    scanResults,
+    isScanning,
+    connectedDevice,
+    connectionState,
+    discoveredServices,
+    isDiscoveringServices,
+    supportedBleComputers,
+    error,
+  ];
 }
 
 // Bloc
@@ -158,13 +173,26 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     on<_BleScanCompleted>(_onScanCompleted);
     on<_BleConnectionStateChanged>(_onConnectionStateChanged);
     on<_BleServicesDiscovered>(_onServicesDiscovered);
+    on<_BleSupportedComputersLoaded>(_onSupportedComputersLoaded);
   }
 
-  void _onStarted(BleStarted event, Emitter<BleState> emit) {
+  Future<void> _onStarted(BleStarted event, Emitter<BleState> emit) async {
     _adapterStateSubscription?.cancel();
     _adapterStateSubscription = FlutterBluePlus.adapterState.listen((state) {
       add(_BleAdapterStateChanged(state));
     });
+
+    _loadSupportedBleComputers();
+  }
+
+  Future<void> _loadSupportedBleComputers() async {
+    try {
+      final allComputers = await DiveComputer.instance.supportedComputers;
+      final bleComputers = allComputers.where((c) => c.transports.contains(ComputerTransport.ble)).toList();
+      add(_BleSupportedComputersLoaded(bleComputers));
+    } catch (e) {
+      // Silently fail - computers list will remain empty
+    }
   }
 
   void _onAdapterStateChanged(_BleAdapterStateChanged event, Emitter<BleState> emit) {
@@ -230,32 +258,24 @@ class BleBloc extends Bloc<BleEvent, BleState> {
 
   void _onConnectionStateChanged(_BleConnectionStateChanged event, Emitter<BleState> emit) {
     if (event.connectionState == BluetoothConnectionState.disconnected) {
-      emit(state.copyWith(
-        connectionState: event.connectionState,
-        clearConnectedDevice: true,
-        discoveredServices: [],
-        isDiscoveringServices: false,
-      ));
+      emit(state.copyWith(connectionState: event.connectionState, clearConnectedDevice: true, discoveredServices: [], isDiscoveringServices: false));
     } else {
       emit(state.copyWith(connectionState: event.connectionState));
     }
   }
 
   void _onServicesDiscovered(_BleServicesDiscovered event, Emitter<BleState> emit) {
-    emit(state.copyWith(
-      discoveredServices: event.services,
-      isDiscoveringServices: false,
-    ));
+    emit(state.copyWith(discoveredServices: event.services, isDiscoveringServices: false));
+  }
+
+  void _onSupportedComputersLoaded(_BleSupportedComputersLoaded event, Emitter<BleState> emit) {
+    emit(state.copyWith(supportedBleComputers: event.computers));
   }
 
   Future<void> _onDisconnect(BleDisconnect event, Emitter<BleState> emit) async {
     if (state.connectedDevice != null) {
       await state.connectedDevice!.disconnect();
-      emit(state.copyWith(
-        clearConnectedDevice: true,
-        connectionState: BluetoothConnectionState.disconnected,
-        discoveredServices: [],
-      ));
+      emit(state.copyWith(clearConnectedDevice: true, connectionState: BluetoothConnectionState.disconnected, discoveredServices: []));
     }
   }
 
