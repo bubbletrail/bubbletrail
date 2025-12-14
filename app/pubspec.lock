@@ -116,11 +116,9 @@ packages:
   dive_computer:
     dependency: "direct main"
     description:
-      path: "."
-      ref: rel
-      resolved-ref: bfbedb8dbfe0099f6227350c4dc6b4e08923e536
-      url: "https://github.com/divepath/libdivecomputer_flutter.git"
-    source: git
+      path: "../pkg/divecomputer"
+      relative: true
+    source: path
     version: "0.1.0-dev.2"
   equatable:
     dependency: "direct main"

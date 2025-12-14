@@ -50,9 +50,7 @@ dependencies:
   file_picker: ^8.1.4
   flutter_blue_plus: ^1.35.2
   dive_computer:
-    git:
-      url: https://github.com/divepath/libdivecomputer_flutter.git
-      ref: rel
+    path: ../pkg/divecomputer
   bloc_concurrency: ^0.2.5
 
 dev_dependencies:
