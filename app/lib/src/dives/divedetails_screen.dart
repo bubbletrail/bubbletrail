@@ -286,13 +286,12 @@ class _DivesiteCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text('Dive Site', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                        child: Text(divesite.name, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                       ),
                       Icon(Icons.arrow_forward_ios, size: 16, color: Theme.of(context).colorScheme.primary),
                     ],
                   ),
                   const Divider(),
-                  infoRow('Name', divesite.name),
                   if (divesite.position != null) ...[
                     infoRow('Latitude', divesite.position!.lat.toStringAsFixed(6)),
                     infoRow('Longitude', divesite.position!.lon.toStringAsFixed(6)),
