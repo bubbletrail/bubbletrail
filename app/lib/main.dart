@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -60,6 +62,18 @@ class _MyAppState extends State<MyApp> {
         StatefulShellRoute.indexedStack(
           builder: (BuildContext context, GoRouterState state, StatefulNavigationShell shell) {
             final appBarTheme = Theme.of(context).appBarTheme;
+            const destinations = [(icon: Icons.waves, label: 'Dives'), (icon: Icons.place, label: 'Sites'), (icon: Icons.bluetooth, label: 'Connect')];
+
+            if (Platform.isIOS) {
+              return Scaffold(
+                body: shell,
+                bottomNavigationBar: NavigationBar(
+                  selectedIndex: shell.currentIndex,
+                  onDestinationSelected: (n) => shell.goBranch(n),
+                  destinations: [for (final d in destinations) NavigationDestination(icon: Icon(d.icon), label: d.label)],
+                ),
+              );
+            }
 
             return Scaffold(
               body: Row(
@@ -70,11 +84,7 @@ class _MyAppState extends State<MyApp> {
                     selectedIndex: shell.currentIndex,
                     onDestinationSelected: (n) => shell.goBranch(n),
                     leading: SizedBox(height: (appBarTheme.toolbarHeight ?? 48) - 8),
-                    destinations: const [
-                      NavigationRailDestination(icon: Icon(Icons.waves), label: Text('Dives')),
-                      NavigationRailDestination(icon: Icon(Icons.place), label: Text('Sites')),
-                      NavigationRailDestination(icon: Icon(Icons.bluetooth), label: Text('Connect')),
-                    ],
+                    destinations: [for (final d in destinations) NavigationRailDestination(icon: Icon(d.icon), label: Text(d.label))],
                   ),
                   Expanded(child: shell),
                 ],
@@ -118,12 +128,7 @@ class _MyAppState extends State<MyApp> {
               ],
             ),
             StatefulShellBranch(
-              routes: <RouteBase>[
-                GoRoute(
-                  path: '/connect',
-                  builder: (context, state) => const BleScanScreen(),
-                ),
-              ],
+              routes: <RouteBase>[GoRoute(path: '/connect', builder: (context, state) => const BleScanScreen())],
             ),
           ],
         ),
@@ -131,7 +136,7 @@ class _MyAppState extends State<MyApp> {
     );
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => DiveListBloc()),
+        BlocProvider.value(value: _diveListBloc),
         BlocProvider(create: (context) => BleBloc()..add(const BleStarted())),
       ],
       child: MaterialApp.router(

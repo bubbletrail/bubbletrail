@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:xml/xml.dart';
 
@@ -77,10 +78,18 @@ class ImportDives extends DiveListEvent {
 
 class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   DiveListBloc() : super(const DiveListInitial()) {
-    on<LoadDives>(_onLoadDives);
-    on<SaveDives>(_onSaveDives);
-    on<UpdateDive>(_onUpdateDive);
-    on<ImportDives>(_onImportDives);
+    on<DiveListEvent>((event, emit) async {
+      print("got event $event");
+      if (event is LoadDives) {
+        await _onLoadDives(event, emit);
+      } else if (event is SaveDives) {
+        await _onSaveDives(event, emit);
+      } else if (event is UpdateDive) {
+        await _onUpdateDive(event, emit);
+      } else if (event is ImportDives) {
+        await _onImportDives(event, emit);
+      }
+    }, transformer: sequential());
 
     // Automatically load dives when the bloc is created
     add(const LoadDives());

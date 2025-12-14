@@ -53,6 +53,7 @@ dependencies:
     git:
       url: https://github.com/divepath/libdivecomputer_flutter.git
       ref: rel
+  bloc_concurrency: ^0.2.5
 
 dev_dependencies:
   flutter_test:
