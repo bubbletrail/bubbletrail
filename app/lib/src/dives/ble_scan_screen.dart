@@ -74,10 +74,37 @@ class BleScanScreen extends StatelessWidget {
       return SingleChildScrollView(child: _buildConnectedDeviceCard(context, state));
     }
 
+    final filteredResults = state.filteredScanResults;
+    final hasHiddenDevices = state.scanResults.length > filteredResults.length;
+
     return Column(
       children: [
         if (state.isScanning) const LinearProgressIndicator() else const SizedBox(height: 4),
-        Expanded(child: state.scanResults.isEmpty ? _buildEmptyState(context, state) : _buildDeviceList(context, state)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  hasHiddenDevices && !state.showAllDevices
+                      ? '${filteredResults.length} dive computer(s) found'
+                      : '${state.scanResults.length} device(s) found',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+              const Text('Show all'),
+              Switch(
+                value: state.showAllDevices,
+                onChanged: (_) => context.read<BleBloc>().add(const BleToggleShowAllDevices()),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: filteredResults.isEmpty
+              ? _buildEmptyState(context, state)
+              : _buildDeviceList(context, state),
+        ),
       ],
     );
   }
@@ -109,109 +136,208 @@ class BleScanScreen extends StatelessWidget {
                 ],
               ),
             )
+          else if (state.isDownloading)
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                  SizedBox(width: 12),
+                  Text('Downloading dives...'),
+                ],
+              ),
+            )
+          else if (state.downloadedDives.isNotEmpty)
+            _buildDownloadedDives(context, state)
           else if (state.discoveredServices.isNotEmpty)
-            _buildServicesList(context, state),
+            _buildDownloadSection(context, state),
         ],
       ),
     );
   }
 
-  Widget _buildServicesList(BuildContext context, BleState state) {
+  Widget _buildDownloadSection(BuildContext context, BleState state) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Services (${state.discoveredServices.length})', style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 8),
-          ...state.discoveredServices.map((service) => _buildServiceTile(context, service)),
+          FilledButton.icon(
+            onPressed: state.supportedBleComputers.isEmpty
+                ? null
+                : () => _showComputerSelectionDialog(context, state),
+            icon: const Icon(Icons.download),
+            label: const Text('Download Dives'),
+          ),
+          if (state.supportedBleComputers.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                'Loading supported computers...',
+                style: Theme.of(context).textTheme.bodySmall,
+                textAlign: TextAlign.center,
+              ),
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildServiceTile(BuildContext context, BluetoothService service) {
-    final serviceName = _getServiceName(service.uuid);
-    final isKnown = serviceName != 'Unknown Service';
-
-    return ExpansionTile(
-      tilePadding: EdgeInsets.zero,
-      leading: Icon(
-        isKnown ? Icons.check_circle_outline : Icons.help_outline,
-        size: 20,
-        color: isKnown ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary,
-      ),
-      title: Text(serviceName, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: isKnown ? FontWeight.w500 : null)),
-      subtitle: Text(service.uuid.toString().toUpperCase(), style: Theme.of(context).textTheme.bodySmall?.copyWith(fontFamily: 'monospace', fontSize: 10)),
-      children: service.characteristics.map((c) => _buildCharacteristicTile(context, c)).toList(),
+  void _showComputerSelectionDialog(BuildContext context, BleState state) {
+    final deviceName = state.connectedDevice?.platformName ?? '';
+    final filteredComputers = filterComputersByDeviceName(
+      state.supportedBleComputers,
+      deviceName,
     );
-  }
+    final hasMatches = filteredComputers.length < state.supportedBleComputers.length;
 
-  Widget _buildCharacteristicTile(BuildContext context, BluetoothCharacteristic characteristic) {
-    final charName = _getCharacteristicName(characteristic.uuid);
-    final properties = _getCharacteristicProperties(characteristic);
-
-    return Padding(
-      padding: const EdgeInsets.only(left: 32, bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.subdirectory_arrow_right, size: 16, color: Theme.of(context).colorScheme.secondary),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(charName, style: Theme.of(context).textTheme.bodySmall),
-                Text(
-                  characteristic.uuid.toString().toUpperCase(),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontFamily: 'monospace', fontSize: 9, color: Theme.of(context).colorScheme.secondary),
-                ),
-                if (properties.isNotEmpty)
-                  Wrap(
-                    spacing: 4,
-                    children: properties
-                        .split(', ')
-                        .map(
-                          (p) => Chip(
-                            label: Text(p),
-                            labelStyle: const TextStyle(fontSize: 9),
-                            padding: EdgeInsets.zero,
-                            visualDensity: VisualDensity.compact,
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                        )
-                        .toList(),
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Select Dive Computer'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (hasMatches)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    'Suggested for "$deviceName":',
+                    style: Theme.of(dialogContext).textTheme.bodySmall,
                   ),
+                ),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: filteredComputers.length,
+                  itemBuilder: (context, index) {
+                    final computer = filteredComputers[index];
+                    return ListTile(
+                      title: Text('${computer.vendor} ${computer.product}'),
+                      onTap: () {
+                        Navigator.of(dialogContext).pop();
+                        context.read<BleBloc>().add(BleStartDownload(computer));
+                      },
+                    );
+                  },
+                ),
+              ),
+              if (hasMatches) ...[
+                const Divider(),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                    _showAllComputersDialog(context, state);
+                  },
+                  child: const Text('Show all computers...'),
+                ),
               ],
-            ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
           ),
         ],
       ),
     );
   }
 
+  void _showAllComputersDialog(BuildContext context, BleState state) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('All BLE Dive Computers'),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 400,
+          child: ListView.builder(
+            itemCount: state.supportedBleComputers.length,
+            itemBuilder: (context, index) {
+              final computer = state.supportedBleComputers[index];
+              return ListTile(
+                title: Text('${computer.vendor} ${computer.product}'),
+                onTap: () {
+                  Navigator.of(dialogContext).pop();
+                  context.read<BleBloc>().add(BleStartDownload(computer));
+                },
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDownloadedDives(BuildContext context, BleState state) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Downloaded ${state.downloadedDives.length} dive(s)',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          ...state.downloadedDives.map((dive) => ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.scuba_diving),
+                title: Text(dive.dateTime?.toString() ?? 'Unknown date'),
+                subtitle: Text('Max depth: ${dive.maxDepth?.toStringAsFixed(1) ?? '?'}m'),
+              )),
+        ],
+      ),
+    );
+  }
+
   Widget _buildEmptyState(BuildContext context, BleState state) {
+    final hasUnfilteredResults = state.scanResults.isNotEmpty && state.filteredScanResults.isEmpty;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.bluetooth_searching, size: 64, color: Theme.of(context).colorScheme.secondary),
           const SizedBox(height: 16),
-          Text(state.isScanning ? 'Scanning...' : 'No devices found', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            state.isScanning
+                ? 'Scanning...'
+                : hasUnfilteredResults
+                    ? 'No dive computers found'
+                    : 'No devices found',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 8),
-          const Text('Make sure your dive computer is in\nBluetooth pairing mode', textAlign: TextAlign.center),
+          Text(
+            hasUnfilteredResults
+                ? 'Found ${state.scanResults.length} other device(s).\nEnable "Show all" to see them.'
+                : 'Make sure your dive computer is in\nBluetooth pairing mode',
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
   }
 
   Widget _buildDeviceList(BuildContext context, BleState state) {
+    final results = state.filteredScanResults;
     return ListView.builder(
       padding: const EdgeInsets.all(8),
-      itemCount: state.scanResults.length,
+      itemCount: results.length,
       itemBuilder: (context, index) {
-        final result = state.scanResults[index];
+        final result = results[index];
         final device = result.device;
 
         return Card(
@@ -233,56 +359,6 @@ class BleScanScreen extends StatelessWidget {
         );
       },
     );
-  }
-
-  String _getServiceName(Guid uuid) {
-    const knownServices = {
-      '1800': 'Generic Access',
-      '1801': 'Generic Attribute',
-      '180a': 'Device Information',
-      '180f': 'Battery Service',
-      '181c': 'User Data',
-      '181d': 'Weight Scale',
-      '1810': 'Blood Pressure',
-      '1816': 'Cycling Speed and Cadence',
-      '1818': 'Cycling Power',
-      '1819': 'Location and Navigation',
-      '6e400001-b5a3-f393-e0a9-e50e24dcca9e': 'Nordic UART Service',
-      'fe59': 'Nordic Secure DFU',
-    };
-    final uuidStr = uuid.toString().toLowerCase();
-    final shortUuid = uuidStr.length >= 8 ? uuidStr.substring(4, 8) : uuidStr;
-    return knownServices[shortUuid] ?? knownServices[uuidStr] ?? 'Unknown Service';
-  }
-
-  String _getCharacteristicName(Guid uuid) {
-    const knownCharacteristics = {
-      '2a00': 'Device Name',
-      '2a01': 'Appearance',
-      '2a04': 'Peripheral Preferred Connection Parameters',
-      '2a19': 'Battery Level',
-      '2a24': 'Model Number',
-      '2a25': 'Serial Number',
-      '2a26': 'Firmware Revision',
-      '2a27': 'Hardware Revision',
-      '2a28': 'Software Revision',
-      '2a29': 'Manufacturer Name',
-      '6e400002-b5a3-f393-e0a9-e50e24dcca9e': 'UART RX',
-      '6e400003-b5a3-f393-e0a9-e50e24dcca9e': 'UART TX',
-    };
-    final uuidStr = uuid.toString().toLowerCase();
-    final shortUuid = uuidStr.length >= 8 ? uuidStr.substring(4, 8) : uuidStr;
-    return knownCharacteristics[shortUuid] ?? knownCharacteristics[uuidStr] ?? 'Unknown';
-  }
-
-  String _getCharacteristicProperties(BluetoothCharacteristic characteristic) {
-    final props = <String>[];
-    if (characteristic.properties.read) props.add('Read');
-    if (characteristic.properties.write) props.add('Write');
-    if (characteristic.properties.writeWithoutResponse) props.add('WriteNoResp');
-    if (characteristic.properties.notify) props.add('Notify');
-    if (characteristic.properties.indicate) props.add('Indicate');
-    return props.join(', ');
   }
 
   String _getSignalStrengthLabel(int rssi) {
