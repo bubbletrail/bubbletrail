@@ -139,28 +139,29 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   }
 
   Future<void> _onImportDives(ImportDives event, Emitter<DiveListState> emit) async {
-    if (state is! DiveListLoaded) return;
-
     try {
-      final currentState = state as DiveListLoaded;
-
       // Read the SSRF file
       final xmlData = await File(event.filePath).readAsString();
       final doc = XmlDocument.parse(xmlData);
       final importedSsrf = Ssrf.fromXml(doc.rootElement);
       print("loading ${importedSsrf.dives.length} dives");
+      if (state is DiveListLoaded) {
+        final currentState = state as DiveListLoaded;
 
-      // Merge dives: add imported dives to existing ones
-      final allDives = List<Dive>.from(currentState.dives);
-      allDives.addAll(importedSsrf.dives);
+        // Merge dives: add imported dives to existing ones
+        final allDives = List<Dive>.from(currentState.dives);
+        allDives.addAll(importedSsrf.dives);
 
-      // Merge dive sites: only add new ones (check by uuid)
-      final existingSiteUuids = currentState.diveSites.map((s) => s.uuid).toSet();
-      final newSites = importedSsrf.diveSites.where((s) => !existingSiteUuids.contains(s.uuid)).toList();
-      final allDiveSites = List<Divesite>.from(currentState.diveSites);
-      allDiveSites.addAll(newSites);
+        // Merge dive sites: only add new ones (check by uuid)
+        final existingSiteUuids = currentState.diveSites.map((s) => s.uuid).toSet();
+        final newSites = importedSsrf.diveSites.where((s) => !existingSiteUuids.contains(s.uuid)).toList();
+        final allDiveSites = List<Divesite>.from(currentState.diveSites);
+        allDiveSites.addAll(newSites);
 
-      emit(DiveListLoaded(allDives, allDiveSites));
+        emit(DiveListLoaded(allDives, allDiveSites));
+      } else {
+        emit(DiveListLoaded(importedSsrf.dives, importedSsrf.diveSites));
+      }
       add(const SaveDives());
     } catch (e) {
       emit(DiveListError('Failed to import dives: $e'));

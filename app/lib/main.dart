@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -17,8 +18,37 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  static const _channel = MethodChannel('org.divepath.app/file_handler');
+  final _diveListBloc = DiveListBloc();
+
+  @override
+  void initState() {
+    super.initState();
+    _setupFileHandler();
+  }
+
+  void _setupFileHandler() {
+    _channel.setMethodCallHandler((call) async {
+      if (call.method == 'fileReceived') {
+        final filePath = call.arguments as String;
+        _diveListBloc.add(ImportDives(filePath));
+      }
+    });
+
+    _channel.invokeMethod<String>('getInitialFile').then((filePath) {
+      if (filePath != null) {
+        _diveListBloc.add(ImportDives(filePath));
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
