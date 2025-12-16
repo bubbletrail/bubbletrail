@@ -60,9 +60,18 @@ class ScreenScaffold extends StatelessWidget {
             ),
             color: t.canvasColor,
           ),
-          child: body,
-
-          /// TODO: clipping
+          child: Padding(
+            padding: const EdgeInsets.all(1.0), // the border
+            child: ClipRRect(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(8),
+                topRight: Radius.circular(8),
+                bottomLeft: Radius.circular(8),
+                bottomRight: Radius.circular(14),
+              ),
+              child: body,
+            ),
+          ),
         ),
       ),
       floatingActionButton: floatingActionButton,
