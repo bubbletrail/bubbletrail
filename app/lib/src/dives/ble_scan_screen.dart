@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../bloc/ble_bloc.dart';
+import '../common/common_widgets.dart';
 
 class BleScanScreen extends StatelessWidget {
   const BleScanScreen({super.key});
@@ -12,24 +13,20 @@ class BleScanScreen extends StatelessWidget {
     return BlocConsumer<BleBloc, BleState>(
       listener: (context, state) {
         if (state.error != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.error!), backgroundColor: Colors.red),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error!), backgroundColor: Colors.red));
         }
       },
       builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Connect Dive Computer'),
-            actions: [
-              if (state.connectedDevice != null)
-                IconButton(
-                  icon: const Icon(Icons.bluetooth_disabled),
-                  tooltip: 'Disconnect',
-                  onPressed: () => context.read<BleBloc>().add(const BleDisconnect()),
-                ),
-            ],
-          ),
+        return ScreenScaffold(
+          title: const Text('Connect Dive Computer'),
+          actions: [
+            if (state.connectedDevice != null)
+              IconButton(
+                icon: const Icon(Icons.bluetooth_disabled),
+                tooltip: 'Disconnect',
+                onPressed: () => context.read<BleBloc>().add(const BleDisconnect()),
+              ),
+          ],
           body: _buildBody(context, state),
           floatingActionButton: state.adapterState == BluetoothAdapterState.on && state.connectedDevice == null
               ? FloatingActionButton.extended(
@@ -61,10 +58,7 @@ class BleScanScreen extends StatelessWidget {
             const SizedBox(height: 8),
             const Text('Please enable Bluetooth to scan for dive computers'),
             const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () => context.read<BleBloc>().add(const BleTurnOn()),
-              child: const Text('Turn On Bluetooth'),
-            ),
+            ElevatedButton(onPressed: () => context.read<BleBloc>().add(const BleTurnOn()), child: const Text('Turn On Bluetooth')),
           ],
         ),
       );
@@ -93,18 +87,11 @@ class BleScanScreen extends StatelessWidget {
                 ),
               ),
               const Text('Show all'),
-              Switch(
-                value: state.showAllDevices,
-                onChanged: (_) => context.read<BleBloc>().add(const BleToggleShowAllDevices()),
-              ),
+              Switch(value: state.showAllDevices, onChanged: (_) => context.read<BleBloc>().add(const BleToggleShowAllDevices())),
             ],
           ),
         ),
-        Expanded(
-          child: filteredResults.isEmpty
-              ? _buildEmptyState(context, state)
-              : _buildDeviceList(context, state),
-        ),
+        Expanded(child: filteredResults.isEmpty ? _buildEmptyState(context, state) : _buildDeviceList(context, state)),
       ],
     );
   }
@@ -120,10 +107,7 @@ class BleScanScreen extends StatelessWidget {
             leading: const Icon(Icons.bluetooth_connected),
             title: Text(state.connectedDevice!.platformName),
             subtitle: Text('Status: ${state.connectionState.name}'),
-            trailing: TextButton(
-              onPressed: () => context.read<BleBloc>().add(const BleDisconnect()),
-              child: const Text('Disconnect'),
-            ),
+            trailing: TextButton(onPressed: () => context.read<BleBloc>().add(const BleDisconnect()), child: const Text('Disconnect')),
           ),
           if (state.isDiscoveringServices)
             const Padding(
@@ -163,20 +147,14 @@ class BleScanScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FilledButton.icon(
-            onPressed: state.supportedBleComputers.isEmpty
-                ? null
-                : () => _showComputerSelectionDialog(context, state),
+            onPressed: state.supportedBleComputers.isEmpty ? null : () => _showComputerSelectionDialog(context, state),
             icon: const Icon(Icons.download),
             label: const Text('Download Dives'),
           ),
           if (state.supportedBleComputers.isEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
-              child: Text(
-                'Loading supported computers...',
-                style: Theme.of(context).textTheme.bodySmall,
-                textAlign: TextAlign.center,
-              ),
+              child: Text('Loading supported computers...', style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
             ),
         ],
       ),
@@ -185,10 +163,7 @@ class BleScanScreen extends StatelessWidget {
 
   void _showComputerSelectionDialog(BuildContext context, BleState state) {
     final deviceName = state.connectedDevice?.platformName ?? '';
-    final filteredComputers = filterComputersByDeviceName(
-      state.supportedBleComputers,
-      deviceName,
-    );
+    final filteredComputers = filterComputersByDeviceName(state.supportedBleComputers, deviceName);
     final hasMatches = filteredComputers.length < state.supportedBleComputers.length;
 
     showDialog(
@@ -204,10 +179,7 @@ class BleScanScreen extends StatelessWidget {
               if (hasMatches)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Text(
-                    'Suggested for "$deviceName":',
-                    style: Theme.of(dialogContext).textTheme.bodySmall,
-                  ),
+                  child: Text('Suggested for "$deviceName":', style: Theme.of(dialogContext).textTheme.bodySmall),
                 ),
               Flexible(
                 child: ListView.builder(
@@ -238,12 +210,7 @@ class BleScanScreen extends StatelessWidget {
             ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
-          ),
-        ],
+        actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Cancel'))],
       ),
     );
   }
@@ -270,12 +237,7 @@ class BleScanScreen extends StatelessWidget {
             },
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
-          ),
-        ],
+        actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Cancel'))],
       ),
     );
   }
@@ -286,17 +248,16 @@ class BleScanScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Downloaded ${state.downloadedDives.length} dive(s)',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          Text('Downloaded ${state.downloadedDives.length} dive(s)', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
-          ...state.downloadedDives.map((dive) => ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.scuba_diving),
-                title: Text(dive.dateTime?.toString() ?? 'Unknown date'),
-                subtitle: Text('Max depth: ${dive.maxDepth?.toStringAsFixed(1) ?? '?'}m'),
-              )),
+          ...state.downloadedDives.map(
+            (dive) => ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.scuba_diving),
+              title: Text(dive.dateTime?.toString() ?? 'Unknown date'),
+              subtitle: Text('Max depth: ${dive.maxDepth?.toStringAsFixed(1) ?? '?'}m'),
+            ),
+          ),
         ],
       ),
     );
@@ -315,8 +276,8 @@ class BleScanScreen extends StatelessWidget {
             state.isScanning
                 ? 'Scanning...'
                 : hasUnfilteredResults
-                    ? 'No dive computers found'
-                    : 'No devices found',
+                ? 'No dive computers found'
+                : 'No devices found',
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
@@ -351,10 +312,7 @@ class BleScanScreen extends StatelessWidget {
                 Text('${_getSignalStrengthLabel(result.rssi)} (${result.rssi} dBm)', style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
-            trailing: ElevatedButton(
-              onPressed: () => context.read<BleBloc>().add(BleConnectToDevice(device)),
-              child: const Text('Connect'),
-            ),
+            trailing: ElevatedButton(onPressed: () => context.read<BleBloc>().add(BleConnectToDevice(device)), child: const Text('Connect')),
           ),
         );
       },

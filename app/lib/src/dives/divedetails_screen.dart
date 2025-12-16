@@ -43,37 +43,35 @@ class _DiveDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Dive #${dive.number}: ${diveSite?.name ?? 'Unknown site'}'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              context.go('/dives/${dive.id}/edit');
-            },
-            tooltip: 'Edit dive',
-          ),
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
-            onPressed: prevID != null
-                ? () {
-                    context.go('/dives/${prevID!}');
-                  }
-                : null,
-            tooltip: 'Previous dive',
-          ),
-          IconButton(
-            icon: const Icon(Icons.arrow_forward_ios),
-            onPressed: nextID != null
-                ? () {
-                    context.go('/dives/${nextID!}');
-                  }
-                : null,
-            tooltip: 'Next dive',
-          ),
-        ],
-      ),
+    return ScreenScaffold(
+      title: Text('Dive #${dive.number}: ${diveSite?.name ?? 'Unknown site'}'),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.edit),
+          onPressed: () {
+            context.go('/dives/${dive.id}/edit');
+          },
+          tooltip: 'Edit dive',
+        ),
+        IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: prevID != null
+              ? () {
+                  context.go('/dives/${prevID!}');
+                }
+              : null,
+          tooltip: 'Previous dive',
+        ),
+        IconButton(
+          icon: const Icon(Icons.arrow_forward_ios),
+          onPressed: nextID != null
+              ? () {
+                  context.go('/dives/${nextID!}');
+                }
+              : null,
+          tooltip: 'Next dive',
+        ),
+      ],
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isWideScreen = constraints.maxWidth > 800;

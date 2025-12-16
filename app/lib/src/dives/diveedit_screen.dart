@@ -1,3 +1,4 @@
+import 'package:divepath/src/common/common_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -103,11 +104,9 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Edit Dive #${dive.number}'),
-        actions: [IconButton(icon: const Icon(Icons.save), onPressed: _saveDive, tooltip: 'Save')],
-      ),
+    return ScreenScaffold(
+      title: Text('Edit Dive #${dive.number}'),
+      actions: [IconButton(icon: const Icon(Icons.save), onPressed: _saveDive, tooltip: 'Save')],
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(

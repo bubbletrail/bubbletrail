@@ -1,3 +1,4 @@
+import 'package:divepath/src/common/common_widgets.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,66 +12,68 @@ class DiveListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dives'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.file_upload),
-            tooltip: 'Import SSRF file',
-            onPressed: () async {
-              final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['ssrf', 'xml']);
-              if (result != null && result.files.single.path != null) {
-                if (context.mounted) {
-                  context.read<DiveListBloc>().add(ImportDives(result.files.single.path!));
-                }
-              }
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: 'Add new dive',
-            onPressed: () {
-              context.go('/dives/new');
-            },
-          ),
-        ],
-      ),
-      body: BlocBuilder<DiveListBloc, DiveListState>(
-        builder: (context, state) {
-          if (state is DiveListInitial || state is DiveListLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    return ScreenScaffold(title: const Text('Dives'), actions: _actions(context), body: _body());
+  }
 
-          if (state is DiveListError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
-                  const SizedBox(height: 16),
-                  Text('Error loading dives', style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 8),
-                  Text(state.message, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
-                ],
-              ),
-            );
-          }
-
-          if (state is DiveListLoaded) {
-            final dives = state.dives;
-            final diveSites = state.diveSites;
-
-            if (dives.isEmpty) {
-              return const Center(child: Text('No dives yet. Add your first dive!'));
+  List<Widget> _actions(BuildContext context) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.file_upload),
+        tooltip: 'Import SSRF file',
+        onPressed: () async {
+          final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['ssrf', 'xml']);
+          if (result != null && result.files.single.path != null) {
+            if (context.mounted) {
+              context.read<DiveListBloc>().add(ImportDives(result.files.single.path!));
             }
-
-            return DiveTableWidget(dives: dives, diveSites: diveSites, showSiteColumn: true);
           }
-
-          return const Center(child: Text('Unknown state'));
         },
       ),
+      IconButton(
+        icon: const Icon(Icons.add),
+        tooltip: 'Add new dive',
+        onPressed: () {
+          context.go('/dives/new');
+        },
+      ),
+    ];
+  }
+
+  BlocBuilder<DiveListBloc, DiveListState> _body() {
+    return BlocBuilder<DiveListBloc, DiveListState>(
+      builder: (context, state) {
+        if (state is DiveListInitial || state is DiveListLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (state is DiveListError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+                const SizedBox(height: 16),
+                Text('Error loading dives', style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 8),
+                Text(state.message, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
+              ],
+            ),
+          );
+        }
+
+        if (state is DiveListLoaded) {
+          final dives = state.dives;
+          final diveSites = state.diveSites;
+
+          if (dives.isEmpty) {
+            return const Center(child: Text('No dives yet. Add your first dive!'));
+          }
+
+          return DiveTableWidget(dives: dives, diveSites: diveSites, showSiteColumn: true);
+        }
+
+        return const Center(child: Text('Unknown state'));
+      },
     );
   }
 }

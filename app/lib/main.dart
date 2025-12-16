@@ -13,7 +13,7 @@ import 'src/dives/ble_scan_screen.dart';
 import 'src/dives/divedetails_screen.dart';
 import 'src/dives/diveedit_screen.dart';
 import 'src/dives/divelist_screen.dart';
-import 'src/sites/divesitedetail_widget.dart';
+import 'src/sites/divesitedetail_screen.dart';
 import 'src/sites/divesitelist_screen.dart';
 import 'src/theme/theme.dart';
 
@@ -69,22 +69,32 @@ class _MyAppState extends State<MyApp> {
             final appBarTheme = Theme.of(context).appBarTheme;
             const destinations = [(icon: Icons.waves, label: 'Dives'), (icon: Icons.place, label: 'Sites'), (icon: Icons.bluetooth, label: 'Connect')];
 
+            final cs = Theme.of(context).colorScheme;
+            final decoration = BoxDecoration(
+              gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [cs.tertiaryContainer, cs.onTertiaryFixedVariant]),
+            );
+
             if (Platform.isIOS) {
-              return Scaffold(
-                body: shell,
-                bottomNavigationBar: NavigationBar(
-                  selectedIndex: shell.currentIndex,
-                  onDestinationSelected: (n) => shell.goBranch(n),
-                  destinations: [for (final d in destinations) NavigationDestination(icon: Icon(d.icon), label: d.label)],
+              return Container(
+                decoration: decoration,
+                child: Scaffold(
+                  body: shell,
+                  bottomNavigationBar: NavigationBar(
+                    selectedIndex: shell.currentIndex,
+                    onDestinationSelected: (n) => shell.goBranch(n),
+                    destinations: [for (final d in destinations) NavigationDestination(icon: Icon(d.icon), label: d.label)],
+                  ),
                 ),
               );
             }
 
-            return Scaffold(
-              body: Row(
+            return Container(
+              decoration: decoration,
+
+              child: Row(
                 children: [
                   NavigationRail(
-                    backgroundColor: appBarTheme.backgroundColor,
+                    backgroundColor: Colors.transparent,
                     labelType: NavigationRailLabelType.all,
                     selectedIndex: shell.currentIndex,
                     onDestinationSelected: (n) => shell.goBranch(n),

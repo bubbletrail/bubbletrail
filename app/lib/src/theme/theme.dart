@@ -10,7 +10,25 @@ class AppTheme {
   static const Color _darkSecondaryBackground = _primaryColor; // Color(0xFF3366BB);
   static const Color _lightSecondaryBackground = Color(0xFF80C0FF);
 
+  static const Color _darkBackgroundGradientTop = Color(0xFF001020);
+  static const Color _darkBackgroundGradientBottom = Color(0xFF204060);
+  static const Color _darkBackgroundGradientDivider = Color(0xFF305070);
+
+  static const Color _lightBackgroundGradientTop = Color(0xFFA0F0FF);
+  static const Color _lightBackgroundGradientBottom = Color(0xFF80B0F0);
+  static const Color _lightBackgroundGradientDivider = Color(0xFF4080C0);
+
   static final density = Platform.isAndroid || Platform.isIOS ? VisualDensity.standard : VisualDensity.compact;
+
+  static const transitions = PageTransitionsTheme(
+    builders: <TargetPlatform, PageTransitionsBuilder>{
+      TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+      TargetPlatform.iOS: FadeForwardsPageTransitionsBuilder(),
+      TargetPlatform.linux: FadeForwardsPageTransitionsBuilder(),
+      TargetPlatform.macOS: FadeForwardsPageTransitionsBuilder(),
+      TargetPlatform.windows: FadeForwardsPageTransitionsBuilder(),
+    },
+  );
 
   static final ThemeData darkTheme = ThemeData(
     useMaterial3: true,
@@ -21,8 +39,13 @@ class AppTheme {
       primary: AppTheme._primaryColor,
       secondary: AppTheme._secondaryColor,
       secondaryContainer: _darkSecondaryBackground,
+      tertiaryContainer: _darkBackgroundGradientTop,
+      onTertiaryContainer: _darkBackgroundGradientDivider,
+      onTertiaryFixedVariant: _darkBackgroundGradientBottom,
     ),
-    appBarTheme: AppBarTheme(backgroundColor: _darkSecondaryBackground, elevation: 0, scrolledUnderElevation: 0, centerTitle: false, toolbarHeight: 48),
+    appBarTheme: AppBarTheme(backgroundColor: Colors.transparent, elevation: 0, scrolledUnderElevation: 0, centerTitle: false, toolbarHeight: 48),
+    navigationRailTheme: NavigationRailThemeData(backgroundColor: Colors.transparent),
+    pageTransitionsTheme: transitions,
   );
 
   static final ThemeData lightTheme = ThemeData(
@@ -33,7 +56,12 @@ class AppTheme {
       seedColor: AppTheme._primaryColor,
       primary: AppTheme._primaryColor,
       secondary: AppTheme._secondaryColor,
+      tertiaryContainer: _lightBackgroundGradientTop,
+      onTertiaryContainer: _lightBackgroundGradientDivider,
+      onTertiaryFixedVariant: _lightBackgroundGradientBottom,
     ),
-    appBarTheme: AppBarTheme(backgroundColor: _lightSecondaryBackground, elevation: 0, scrolledUnderElevation: 0, centerTitle: false, toolbarHeight: 48),
+    appBarTheme: AppBarTheme(backgroundColor: Colors.transparent, elevation: 0, scrolledUnderElevation: 0, centerTitle: false, toolbarHeight: 48),
+    navigationRailTheme: NavigationRailThemeData(backgroundColor: Colors.transparent),
+    pageTransitionsTheme: transitions,
   );
 }

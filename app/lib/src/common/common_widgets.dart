@@ -32,3 +32,40 @@ Widget infoRow(String label, String value) {
     ),
   );
 }
+
+class ScreenScaffold extends StatelessWidget {
+  final Widget title;
+  final Widget body;
+  final List<Widget>? actions;
+  final Widget? floatingActionButton;
+
+  const ScreenScaffold({super.key, required this.title, required this.body, this.actions, this.floatingActionButton});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context);
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(title: title, backgroundColor: Colors.transparent, actions: actions),
+      body: Padding(
+        padding: const EdgeInsets.only(right: 4.0, bottom: 4.0),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: BoxBorder.all(color: t.colorScheme.onTertiaryContainer),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(8),
+              topRight: Radius.circular(8),
+              bottomLeft: Radius.circular(8),
+              bottomRight: Radius.circular(14),
+            ),
+            color: t.canvasColor,
+          ),
+          child: body,
+
+          /// TODO: clipping
+        ),
+      ),
+      floatingActionButton: floatingActionButton,
+    );
+  }
+}

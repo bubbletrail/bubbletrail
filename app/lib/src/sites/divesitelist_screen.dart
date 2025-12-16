@@ -3,14 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../bloc/divelist_bloc.dart';
+import '../common/common_widgets.dart';
 
 class DiveSiteListScreen extends StatelessWidget {
   const DiveSiteListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Dive Sites')),
+    return ScreenScaffold(
+      title: const Text('Dive Sites'),
       body: BlocBuilder<DiveListBloc, DiveListState>(
         builder: (context, state) {
           if (state is DiveListInitial || state is DiveListLoading) {
