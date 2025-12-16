@@ -1,15 +1,14 @@
 import 'dart:io';
 
+import 'package:divepath/src/ssrf/ssrf.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xml/xml.dart';
-
-import 'package:divepath/src/ssrf/ssrf.dart';
 
 void main() {
   test('Load sample SSRF file', () async {
     final xmlData = await File('./test/testdata/subsurface-sample.xml').readAsString();
     final doc = XmlDocument.parse(xmlData);
-    final ssrf = Ssrf.fromXml(doc.rootElement);
+    final ssrf = SsrfXml.fromXml(doc.rootElement);
 
     // Test basic counts
     expect(ssrf.dives.length, 54);
@@ -110,7 +109,7 @@ void main() {
 
     // Deserialize back
     final parsedDoc = XmlDocument.parse(xmlString);
-    final deserializedSsrf = Ssrf.fromXml(parsedDoc.rootElement);
+    final deserializedSsrf = SsrfXml.fromXml(parsedDoc.rootElement);
 
     // Verify the data matches
     expect(deserializedSsrf.dives.length, 2);
@@ -219,7 +218,7 @@ void main() {
 
     // Deserialize
     final parsedDoc = XmlDocument.parse(xmlString);
-    final deserializedSsrf = Ssrf.fromXml(parsedDoc.rootElement);
+    final deserializedSsrf = SsrfXml.fromXml(parsedDoc.rootElement);
 
     // Verify settings
     expect(deserializedSsrf.settings, isNotNull);
@@ -296,7 +295,7 @@ void main() {
 
     // Deserialize
     final parsedElement = XmlDocument.parse(xmlString).rootElement;
-    final deserializedDive = Dive.fromXml(parsedElement);
+    final deserializedDive = DiveXml.fromXml(parsedElement);
 
     // Verify both divecomputers
     expect(deserializedDive.divecomputers.length, 2);
@@ -361,18 +360,18 @@ void main() {
     expect(xml2.getAttribute('he'), '35.0%');
 
     // Test round-trip for nitrox
-    final reparsed1 = Cylinder.fromXml(xml1);
+    final reparsed1 = CylinderXml.fromXml(xml1);
     expect(reparsed1.o2, closeTo(32.0, 0.1));
     expect(reparsed1.he, isNull);
 
     // Test round-trip for trimix
-    final reparsed2 = Cylinder.fromXml(xml2);
+    final reparsed2 = CylinderXml.fromXml(xml2);
     expect(reparsed2.o2, closeTo(21.0, 0.1));
     expect(reparsed2.he, closeTo(35.0, 0.1));
 
     // Test parsing from XML string
     final xmlString = "<cylinder size='10.0 l' workpressure='300.0 bar' description='10x300' o2='30.0%' end='115.2 bar' />";
-    final parsedFromString = Cylinder.fromXml(XmlDocument.parse(xmlString).rootElement);
+    final parsedFromString = CylinderXml.fromXml(XmlDocument.parse(xmlString).rootElement);
     expect(parsedFromString.o2, closeTo(30.0, 0.1));
     expect(parsedFromString.he, isNull);
   });

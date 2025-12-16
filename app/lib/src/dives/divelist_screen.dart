@@ -1,11 +1,11 @@
-import 'package:divepath/src/common/common_widgets.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../common/divetable_widget.dart';
 import '../bloc/divelist_bloc.dart';
+import '../common/common_widgets.dart';
+import '../common/divetable_widget.dart';
 
 class DiveListScreen extends StatelessWidget {
   const DiveListScreen({super.key});

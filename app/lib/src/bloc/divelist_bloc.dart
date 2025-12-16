@@ -104,7 +104,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       final doc = await compute((filename) async {
         final xmlData = await File(filename).readAsString();
         final doc = XmlDocument.parse(xmlData);
-        return ssrf.Ssrf.fromXml(doc.rootElement);
+        return ssrf.SsrfXml.fromXml(doc.rootElement);
       }, filename);
       emit(DiveListLoaded(doc.dives, doc.diveSites));
       add(const SaveDives());
@@ -159,7 +159,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       // Read the SSRF file
       final xmlData = await File(event.filePath).readAsString();
       final doc = XmlDocument.parse(xmlData);
-      final importedSsrf = ssrf.Ssrf.fromXml(doc.rootElement);
+      final importedSsrf = ssrf.SsrfXml.fromXml(doc.rootElement);
       if (state is DiveListLoaded) {
         final currentState = state as DiveListLoaded;
 
