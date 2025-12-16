@@ -37,9 +37,13 @@ class DepthProfileWidget extends StatelessWidget {
                 axisNameWidget: const Text('Depth (m)'),
                 sideTitles: SideTitles(
                   showTitles: true,
-                  reservedSize: 45,
+                  minIncluded: false,
+                  reservedSize: 30,
                   getTitlesWidget: (value, meta) {
-                    return Text(value.toStringAsFixed(0), style: const TextStyle(fontSize: 10));
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: Text(value.toStringAsFixed(0).replaceFirst('-', ''), style: const TextStyle(fontSize: 10), textAlign: TextAlign.right),
+                    );
                   },
                 ),
               ),
@@ -49,6 +53,7 @@ class DepthProfileWidget extends StatelessWidget {
                 axisNameWidget: const Text('Time (min)'),
                 sideTitles: SideTitles(
                   showTitles: true,
+                  maxIncluded: false,
                   reservedSize: 30,
                   getTitlesWidget: (value, meta) {
                     return Text(value.toStringAsFixed(0), style: const TextStyle(fontSize: 10));
@@ -75,12 +80,14 @@ class DepthProfileWidget extends StatelessWidget {
                 getTooltipItems: (touchedSpots) {
                   return touchedSpots.map((spot) {
                     return LineTooltipItem(
-                      '${spot.x.toStringAsFixed(1)} min\n${spot.y.toStringAsFixed(1)} m',
+                      '${formatDuration(spot.x * 60)}\n${spot.y.toStringAsFixed(1).replaceFirst('-', '')} m',
                       TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 12),
                     );
                   }).toList();
                 },
               ),
+              getTouchLineStart: (barData, spotIndex) => 0,
+              getTouchLineEnd: (barData, spotIndex) => 0,
             ),
           ),
         ),

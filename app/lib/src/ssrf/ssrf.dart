@@ -685,7 +685,7 @@ DateTime? tryParseDateTime(String? date, String? time) {
 String formatDuration(double seconds) {
   final minutes = seconds ~/ 60;
   final secs = (seconds % 60).round();
-  return '$minutes:${secs.toString().padLeft(2, '0')} min';
+  return '$minutes:${secs.toString().padLeft(2, '0')}';
 }
 
 String formatDepth(double meters) {
