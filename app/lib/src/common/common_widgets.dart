@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 Widget infoCard(BuildContext context, String title, List<Widget> children) {
@@ -48,7 +50,7 @@ class ScreenScaffold extends StatelessWidget {
       backgroundColor: Colors.transparent,
       appBar: AppBar(title: title, backgroundColor: Colors.transparent, actions: actions),
       body: Padding(
-        padding: const EdgeInsets.only(right: 4.0, bottom: 4.0),
+        padding: Platform.isIOS ? const EdgeInsets.all(0) : const EdgeInsets.only(right: 4.0, bottom: 4.0),
         child: Row(
           children: [
             Expanded(

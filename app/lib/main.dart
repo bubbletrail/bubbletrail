@@ -77,12 +77,16 @@ class _MyAppState extends State<MyApp> {
             if (Platform.isIOS) {
               return Container(
                 decoration: decoration,
-                child: Scaffold(
-                  body: shell,
-                  bottomNavigationBar: NavigationBar(
-                    selectedIndex: shell.currentIndex,
-                    onDestinationSelected: (n) => shell.goBranch(n),
-                    destinations: [for (final d in destinations) NavigationDestination(icon: Icon(d.icon), label: d.label)],
+                child: SafeArea(
+                  child: Scaffold(
+                    backgroundColor: Colors.transparent,
+                    body: shell,
+                    bottomNavigationBar: NavigationBar(
+                      backgroundColor: Colors.transparent,
+                      selectedIndex: shell.currentIndex,
+                      onDestinationSelected: (n) => shell.goBranch(n),
+                      destinations: [for (final d in destinations) NavigationDestination(icon: Icon(d.icon), label: d.label)],
+                    ),
                   ),
                 ),
               );
@@ -90,7 +94,6 @@ class _MyAppState extends State<MyApp> {
 
             return Container(
               decoration: decoration,
-
               child: Row(
                 children: [
                   NavigationRail(
