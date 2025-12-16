@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../common/divesitemap_widget.dart';
-import '../ssrf/ssrf.dart';
+import '../ssrf/ssrf.dart' as ssrf;
 
 class DiveSiteMapWidget extends StatelessWidget {
-  final Divesite divesite;
+  final ssrf.Divesite divesite;
   final double height;
 
   const DiveSiteMapWidget({super.key, required this.divesite, this.height = 300});

@@ -1,10 +1,10 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-import '../ssrf/ssrf.dart';
+import '../ssrf/ssrf.dart' as ssrf;
 
 class DepthProfileWidget extends StatelessWidget {
-  final DiveComputer diveComputer;
+  final ssrf.DiveComputer diveComputer;
 
   const DepthProfileWidget({super.key, required this.diveComputer});
 
@@ -80,7 +80,7 @@ class DepthProfileWidget extends StatelessWidget {
                 getTooltipItems: (touchedSpots) {
                   return touchedSpots.map((spot) {
                     return LineTooltipItem(
-                      '${formatDuration(spot.x * 60)}\n${spot.y.toStringAsFixed(1).replaceFirst('-', '')} m',
+                      '${ssrf.formatDuration(spot.x * 60)}\n${spot.y.toStringAsFixed(1).replaceFirst('-', '')} m',
                       TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 12),
                     );
                   }).toList();

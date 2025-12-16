@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
-import '../ssrf/ssrf.dart';
+import '../ssrf/ssrf.dart' as ssrf;
 
 class DiveSiteMap extends StatefulWidget {
   const DiveSiteMap({super.key, required this.position});
 
-  final GPSPosition position;
+  final ssrf.GPSPosition position;
 
   @override
   State<DiveSiteMap> createState() => _DiveSiteMapState();

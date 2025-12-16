@@ -1,11 +1,11 @@
-import 'package:divepath/src/common/common_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../ssrf/ssrf.dart';
 import '../bloc/divelist_bloc.dart';
+import '../common/common_widgets.dart';
+import '../ssrf/ssrf.dart' as ssrf;
 
 class DiveEditScreen extends StatefulWidget {
   final String? diveID;
@@ -17,7 +17,7 @@ class DiveEditScreen extends StatefulWidget {
 }
 
 class _DiveEditScreenState extends State<DiveEditScreen> {
-  late final Dive dive;
+  late final ssrf.Dive dive;
   late final TextEditingController _durationController;
   late final TextEditingController _divemasterController;
   late final TextEditingController _buddiesController;
@@ -30,7 +30,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   void initState() {
     super.initState();
     if (widget.diveID == null) {
-      dive = Dive(number: 0, start: DateTime.now(), duration: 0);
+      dive = ssrf.Dive(number: 0, start: DateTime.now(), duration: 0);
     } else {
       dive = (context.read<DiveListBloc>().state as DiveListLoaded).dives.firstWhere((d) => d.id == widget.diveID);
     }

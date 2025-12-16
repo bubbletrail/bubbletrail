@@ -1,15 +1,14 @@
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:math';
 
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:xml/xml.dart';
 
-import '../ssrf/ssrf.dart';
+import '../ssrf/ssrf.dart' as ssrf;
 
 abstract class DiveListState extends Equatable {
   const DiveListState();
@@ -27,8 +26,8 @@ class DiveListLoading extends DiveListState {
 }
 
 class DiveListLoaded extends DiveListState {
-  final List<Dive> dives;
-  final List<Divesite> diveSites;
+  final List<ssrf.Dive> dives;
+  final List<ssrf.Divesite> diveSites;
 
   const DiveListLoaded(this.dives, this.diveSites);
 
@@ -61,7 +60,7 @@ class SaveDives extends DiveListEvent {
 }
 
 class UpdateDive extends DiveListEvent {
-  final Dive dive;
+  final ssrf.Dive dive;
 
   const UpdateDive(this.dive);
 
@@ -102,12 +101,12 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     try {
       final docsDir = await getApplicationDocumentsDirectory();
       final filename = '${docsDir.path}/dives.ssrf';
-      final ssrf = await compute((filename) async {
+      final doc = await compute((filename) async {
         final xmlData = await File(filename).readAsString();
         final doc = XmlDocument.parse(xmlData);
-        return Ssrf.fromXml(doc.rootElement);
+        return ssrf.Ssrf.fromXml(doc.rootElement);
       }, filename);
-      emit(DiveListLoaded(ssrf.dives, ssrf.diveSites));
+      emit(DiveListLoaded(doc.dives, doc.diveSites));
       add(const SaveDives());
     } catch (e) {
       emit(DiveListError('Failed to load dives: $e'));
@@ -119,14 +118,14 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       final docsDir = await getApplicationDocumentsDirectory();
       final filename = '${docsDir.path}/dives.ssrf';
       final ds = (state as DiveListLoaded);
-      final doc = Ssrf(dives: ds.dives, diveSites: ds.diveSites);
+      final doc = ssrf.Ssrf(dives: ds.dives, diveSites: ds.diveSites);
       await compute((msg) async {
-        final doc = msg[0] as Ssrf;
-        final filename = msg[1] as String;
+        final doc = msg.$1;
+        final filename = msg.$2;
         final docXml = doc.toXmlDocument().toXmlString(pretty: true);
         await File('$filename.new').writeAsString(docXml);
         await File('$filename.new').rename(filename);
-      }, [doc, filename]);
+      }, (doc, filename));
     } catch (e) {
       emit(DiveListError('Failed to save dives: $e'));
     }
@@ -148,7 +147,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     // Find the dive in the list and update it
     final diveIndex = currentState.dives.indexWhere((d) => d == event.dive);
     if (diveIndex != -1) {
-      final updatedDives = List<Dive>.from(currentState.dives);
+      final updatedDives = List<ssrf.Dive>.from(currentState.dives);
       updatedDives[diveIndex] = event.dive;
       emit(DiveListLoaded(updatedDives, currentState.diveSites));
       add(const SaveDives());
@@ -160,18 +159,18 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       // Read the SSRF file
       final xmlData = await File(event.filePath).readAsString();
       final doc = XmlDocument.parse(xmlData);
-      final importedSsrf = Ssrf.fromXml(doc.rootElement);
+      final importedSsrf = ssrf.Ssrf.fromXml(doc.rootElement);
       if (state is DiveListLoaded) {
         final currentState = state as DiveListLoaded;
 
         // Merge dives: add imported dives to existing ones
-        final allDives = List<Dive>.from(currentState.dives);
+        final allDives = List<ssrf.Dive>.from(currentState.dives);
         allDives.addAll(importedSsrf.dives);
 
         // Merge dive sites: only add new ones (check by uuid)
         final existingSiteUuids = currentState.diveSites.map((s) => s.uuid).toSet();
         final newSites = importedSsrf.diveSites.where((s) => !existingSiteUuids.contains(s.uuid)).toList();
-        final allDiveSites = List<Divesite>.from(currentState.diveSites);
+        final allDiveSites = List<ssrf.Divesite>.from(currentState.diveSites);
         allDiveSites.addAll(newSites);
 
         emit(DiveListLoaded(allDives, allDiveSites));

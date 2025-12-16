@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import '../bloc/divelist_bloc.dart';
 import '../common/common_widgets.dart';
 import '../common/divesitemap_widget.dart';
-import '../ssrf/ssrf.dart';
+import '../ssrf/ssrf.dart' as ssrf;
 import 'depthprofile_widget.dart';
 
 class DiveDetailsScreen extends StatelessWidget {
@@ -34,8 +34,8 @@ class DiveDetailsScreen extends StatelessWidget {
 }
 
 class _DiveDetails extends StatelessWidget {
-  final Dive dive;
-  final Divesite? diveSite;
+  final ssrf.Dive dive;
+  final ssrf.Divesite? diveSite;
   final String? nextID;
   final String? prevID;
 
@@ -149,7 +149,7 @@ class _DiveDetails extends StatelessWidget {
     return [
       infoCard(context, 'General Information', [
         infoRow('Start', DateFormat.yMd().add_jm().format(dive.start)),
-        infoRow('Duration', formatDuration(dive.duration)),
+        infoRow('Duration', ssrf.formatDuration(dive.duration)),
         if (dive.rating != null) infoRow('Rating', '★' * dive.rating!),
         if (dive.tags.isNotEmpty) infoRow('Tags', dive.tags.join(', ')),
       ]),
@@ -257,7 +257,7 @@ class _DiveDetails extends StatelessWidget {
 }
 
 class _DivesiteCard extends StatelessWidget {
-  final Divesite divesite;
+  final ssrf.Divesite divesite;
 
   const _DivesiteCard({required this.divesite});
 

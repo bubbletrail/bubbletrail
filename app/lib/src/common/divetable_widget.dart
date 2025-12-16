@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../ssrf/ssrf.dart';
+import '../ssrf/ssrf.dart' as ssrf;
 
 class DiveTableWidget extends StatefulWidget {
-  final List<Dive> dives;
-  final List<Divesite> diveSites;
+  final List<ssrf.Dive> dives;
+  final List<ssrf.Divesite> diveSites;
   final bool showSiteColumn;
 
   const DiveTableWidget({super.key, required this.dives, required this.diveSites, this.showSiteColumn = true});
@@ -19,8 +19,8 @@ class _DiveTableWidgetState extends State<DiveTableWidget> {
   int _sortColumnIndex = 1;
   bool _sortAscending = false;
 
-  List<Dive> _getSortedDives() {
-    var comparison = (Dive a, Dive b) => a.number.compareTo(b.number);
+  List<ssrf.Dive> _getSortedDives() {
+    var comparison = (ssrf.Dive a, ssrf.Dive b) => a.number.compareTo(b.number);
 
     switch (_sortColumnIndex) {
       case 0: // Dive #
@@ -50,7 +50,7 @@ class _DiveTableWidgetState extends State<DiveTableWidget> {
         break;
     }
 
-    final sortedDives = List<Dive>.from(widget.dives);
+    final sortedDives = List<ssrf.Dive>.from(widget.dives);
     if (_sortAscending) {
       sortedDives.sort(comparison);
     } else {
@@ -104,7 +104,7 @@ class _DiveTableWidgetState extends State<DiveTableWidget> {
               DataCell(Text(dive.number.toString())),
               DataCell(Text(DateFormat.yMd().add_jm().format(dive.start))),
               DataCell(Text(maxDepth.toStringAsFixed(1))),
-              DataCell(Text(formatDuration(dive.duration))),
+              DataCell(Text(ssrf.formatDuration(dive.duration))),
               if (widget.showSiteColumn) DataCell(Text(siteName)),
             ];
 
