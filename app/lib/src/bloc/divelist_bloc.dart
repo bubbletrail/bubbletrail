@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:math';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:path_provider/path_provider.dart';
@@ -99,10 +101,12 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
 
     try {
       final docsDir = await getApplicationDocumentsDirectory();
-      final xmlData = await File('${docsDir.path}/dives.ssrf').readAsString();
-      final doc = XmlDocument.parse(xmlData);
-      final ssrf = Ssrf.fromXml(doc.rootElement);
-
+      final filename = '${docsDir.path}/dives.ssrf';
+      final ssrf = await compute((filename) async {
+        final xmlData = await File(filename).readAsString();
+        final doc = XmlDocument.parse(xmlData);
+        return Ssrf.fromXml(doc.rootElement);
+      }, filename);
       emit(DiveListLoaded(ssrf.dives, ssrf.diveSites));
       add(const SaveDives());
     } catch (e) {
@@ -113,11 +117,16 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   Future<void> _onSaveDives(SaveDives event, Emitter<DiveListState> emit) async {
     try {
       final docsDir = await getApplicationDocumentsDirectory();
+      final filename = '${docsDir.path}/dives.ssrf';
       final ds = (state as DiveListLoaded);
       final doc = Ssrf(dives: ds.dives, diveSites: ds.diveSites);
-      final docXml = doc.toXmlDocument().toXmlString(pretty: true);
-      await File('${docsDir.path}/dives.ssrf.new').writeAsString(docXml);
-      await File('${docsDir.path}/dives.ssrf.new').rename('${docsDir.path}/dives.ssrf');
+      await compute((msg) async {
+        final doc = msg[0] as Ssrf;
+        final filename = msg[1] as String;
+        final docXml = doc.toXmlDocument().toXmlString(pretty: true);
+        await File('$filename.new').writeAsString(docXml);
+        await File('$filename.new').rename(filename);
+      }, [doc, filename]);
     } catch (e) {
       emit(DiveListError('Failed to save dives: $e'));
     }
