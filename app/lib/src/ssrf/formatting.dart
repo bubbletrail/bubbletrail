@@ -62,7 +62,7 @@ DateTime? tryParseDateTime(String? date, String? time) {
 }
 
 // Serialization helpers
-String formatDuration(double seconds) {
+String formatDuration(int seconds) {
   final minutes = seconds ~/ 60;
   final secs = (seconds % 60).round();
   return '$minutes:${secs.toString().padLeft(2, '0')} min';

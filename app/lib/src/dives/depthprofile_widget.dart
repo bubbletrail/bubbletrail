@@ -4,22 +4,22 @@ import 'package:flutter/material.dart';
 import '../ssrf/ssrf.dart' as ssrf;
 
 class DepthProfileWidget extends StatelessWidget {
-  final ssrf.DiveComputer diveComputer;
+  final ssrf.DiveComputerLog diveComputerLog;
 
-  const DepthProfileWidget({super.key, required this.diveComputer});
+  const DepthProfileWidget({super.key, required this.diveComputerLog});
 
   @override
   Widget build(BuildContext context) {
-    if (diveComputer.samples.isEmpty) {
+    if (diveComputerLog.samples.isEmpty) {
       return const Center(
         child: Padding(padding: EdgeInsets.all(16.0), child: Text('No depth profile data available')),
       );
     }
 
     // Inverting depth, so that depths are negative for graph purposes
-    final maxDepth = -diveComputer.samples.map((s) => s.depth).reduce((a, b) => a > b ? a : b);
-    final maxTime = diveComputer.samples.map((s) => s.time).reduce((a, b) => a > b ? a : b) / 60;
-    final spots = diveComputer.samples.map((sample) => FlSpot(sample.time / 60, -sample.depth)).toList();
+    final maxDepth = -diveComputerLog.samples.map((s) => s.depth).reduce((a, b) => a > b ? a : b);
+    final maxTime = diveComputerLog.samples.map((s) => s.time).reduce((a, b) => a > b ? a : b) / 60;
+    final spots = diveComputerLog.samples.map((sample) => FlSpot(sample.time / 60, -sample.depth)).toList();
 
     final colorScheme = Theme.of(context).colorScheme;
     final primaryColor = colorScheme.primary;
@@ -80,7 +80,7 @@ class DepthProfileWidget extends StatelessWidget {
                 getTooltipItems: (touchedSpots) {
                   return touchedSpots.map((spot) {
                     return LineTooltipItem(
-                      '${ssrf.formatDuration(spot.x * 60)}\n${spot.y.toStringAsFixed(1).replaceFirst('-', '')} m',
+                      '${ssrf.formatDuration((spot.x * 60).toInt())}\n${spot.y.toStringAsFixed(1).replaceFirst('-', '')} m',
                       TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 12),
                     );
                   }).toList();

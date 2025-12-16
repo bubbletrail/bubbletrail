@@ -14,14 +14,13 @@ void main() {
     expect(ssrf.dives.length, 54);
     expect(ssrf.diveSites.length, 32);
 
-    // Test settings
-    expect(ssrf.settings, isNotNull);
-    expect(ssrf.settings!.fingerprints.length, 3);
-    expect(ssrf.settings!.fingerprints[0].model, '40d5bff1');
+    // Test diveComputers (parsed from fingerprints in settings)
+    expect(ssrf.diveComputers.length, 3);
+    expect(ssrf.diveComputers[0].model, '40d5bff1');
 
     // Test divesites
     final firstSite = ssrf.diveSites[0];
-    expect(firstSite.uuid.trim(), 'e05b954');
+    expect(firstSite.uuid, '0e05b954');
     expect(firstSite.name, 'Xxxxxxxx / Xxx Xxx / Xxxxx Xxxx');
     expect(firstSite.position, isNotNull);
     expect(firstSite.position!.lat, closeTo(10.110830, 0.000001));
@@ -52,9 +51,9 @@ void main() {
 
     // Test cylinder
     expect(firstDive.cylinders.length, 1);
-    expect(firstDive.cylinders[0].size, 11.0);
-    expect(firstDive.cylinders[0].workpressure, 230.0);
-    expect(firstDive.cylinders[0].description, 'AL80');
+    expect(firstDive.cylinders[0].cylinder?.size, 11.0);
+    expect(firstDive.cylinders[0].cylinder?.workpressure, 230.0);
+    expect(firstDive.cylinders[0].cylinder?.description, 'AL80');
     expect(firstDive.cylinders[0].start, isNull);
     expect(firstDive.cylinders[0].end, isNull);
 
@@ -96,9 +95,9 @@ void main() {
     final originalSsrf = Ssrf(
       dives: [
         Dive(number: 1, start: DateTime(2019, 10, 30, 10, 49, 15), duration: 43 * 60 + 30, rating: 2)
-          ..divecomputers.add(DiveComputer(maxDepth: 8.88, meanDepth: 4.952)),
+          ..divecomputers.add(DiveComputerLog(diveComputerId: 0, maxDepth: 8.88, meanDepth: 4.952)),
         Dive(number: 2, start: DateTime(2019, 10, 31, 10, 25, 0), duration: 41 * 60 + 30, rating: 3)
-          ..divecomputers.add(DiveComputer(maxDepth: 10.5, meanDepth: 5.2)),
+          ..divecomputers.add(DiveComputerLog(diveComputerId: 0, maxDepth: 10.5, meanDepth: 5.2)),
       ],
       diveSites: [const Divesite(uuid: 'test-uuid-123', name: 'Test Site', position: GPSPosition(56.179390, 15.070710))],
     );
@@ -131,7 +130,9 @@ void main() {
   test('Serialize dive with tags and environment', () {
     final dive = Dive(number: 42, start: DateTime(2023, 6, 15, 14, 30, 0), duration: 3600, rating: 5);
     dive.tags.addAll(['Boat', 'Wet', 'Deep']);
-    dive.divecomputers.add(DiveComputer(maxDepth: 25.5, meanDepth: 15.2, environment: Environment(airTemperature: 22.5, waterTemperature: 18.3)));
+    dive.divecomputers.add(
+      DiveComputerLog(diveComputerId: 0, maxDepth: 25.5, meanDepth: 15.2, environment: Environment(airTemperature: 22.5, waterTemperature: 18.3)),
+    );
 
     final xmlElement = dive.toXml();
 
@@ -152,11 +153,11 @@ void main() {
   });
 
   test('Serialize sample data', () {
-    const sample = Sample(time: 125.5, depth: 8.88, temp: 10.5, pressure: 200.0);
+    const sample = Sample(time: 125, depth: 8.88, temp: 10.5, pressure: 200.0);
 
     final xmlElement = sample.toXml();
 
-    expect(xmlElement.getAttribute('time'), '2:06 min');
+    expect(xmlElement.getAttribute('time'), '2:05 min');
     expect(xmlElement.getAttribute('depth'), '8.88 m');
     expect(xmlElement.getAttribute('temp'), '10.5 C');
     expect(xmlElement.getAttribute('pressure'), '200.0 bar');
@@ -189,10 +190,12 @@ void main() {
           )
           ..tags.addAll(['Boat', 'Deep', 'Wreck'])
           ..buddies.addAll(['Jane Smith', 'Bob Jones'])
-          ..cylinders.add(const Cylinder(size: 12.0, workpressure: 200.0, description: '12x200', start: 200.0, end: 50.0))
+          ..cylinders.add(
+            const DiveCylinder(cylinderId: 0, cylinder: Cylinder(id: 0, size: 12.0, workpressure: 200.0, description: '12x200'), start: 200.0, end: 50.0),
+          )
           ..weightsystems.add(const Weightsystem(weight: 6.0, description: 'integrated'));
 
-    final dc1 = DiveComputer(maxDepth: 25.5, meanDepth: 15.2, environment: Environment(airTemperature: 28.0, waterTemperature: 22.0))
+    final dc1 = DiveComputerLog(diveComputerId: 0, maxDepth: 25.5, meanDepth: 15.2, environment: Environment(airTemperature: 28.0, waterTemperature: 22.0))
       ..samples.addAll([
         const Sample(time: 0, depth: 0.0),
         const Sample(time: 60, depth: 5.0, temp: 22.0),
@@ -207,9 +210,9 @@ void main() {
     final ssrf = Ssrf(
       dives: [dive1],
       diveSites: [const Divesite(uuid: 'site-123', name: 'Test Wreck Site', position: GPSPosition(35.123456, -120.654321))],
-      settings: Settings(
-        fingerprints: [const Fingerprint(model: 'test-model', serial: 'test-serial', deviceid: 'device-123', diveid: 'dive-456', data: 'abc123')],
-      ),
+      diveComputers: [
+        const DiveComputer(id: 0, model: 'test-model', serial: 'test-serial', deviceid: 'device-123', diveid: 'dive-456', fingerprintData: 'abc123'),
+      ],
     );
 
     // Serialize
@@ -220,10 +223,9 @@ void main() {
     final parsedDoc = XmlDocument.parse(xmlString);
     final deserializedSsrf = SsrfXml.fromXml(parsedDoc.rootElement);
 
-    // Verify settings
-    expect(deserializedSsrf.settings, isNotNull);
-    expect(deserializedSsrf.settings!.fingerprints.length, 1);
-    expect(deserializedSsrf.settings!.fingerprints[0].model, 'test-model');
+    // Verify diveComputers (serialized as fingerprints in settings)
+    expect(deserializedSsrf.diveComputers.length, 1);
+    expect(deserializedSsrf.diveComputers[0].model, 'test-model');
 
     // Verify divesites
     expect(deserializedSsrf.diveSites.length, 1);
@@ -246,7 +248,7 @@ void main() {
 
     // Verify cylinder
     expect(dive.cylinders.length, 1);
-    expect(dive.cylinders[0].size, 12.0);
+    expect(dive.cylinders[0].cylinder?.size, 12.0);
     expect(dive.cylinders[0].start, 200.0);
 
     // Verify weightsystem
@@ -280,13 +282,14 @@ void main() {
 
     // Add first divecomputer
     dive.divecomputers.add(
-      DiveComputer(maxDepth: 30.0, meanDepth: 18.5, environment: Environment(airTemperature: 25.0, waterTemperature: 20.0))
+      DiveComputerLog(diveComputerId: 0, maxDepth: 30.0, meanDepth: 18.5, environment: Environment(airTemperature: 25.0, waterTemperature: 20.0))
         ..samples.addAll([const Sample(time: 0, depth: 0.0), const Sample(time: 60, depth: 10.0)]),
     );
 
     // Add second divecomputer
     dive.divecomputers.add(
-      DiveComputer(maxDepth: 30.2, meanDepth: 18.7)..samples.addAll([const Sample(time: 0, depth: 0.0), const Sample(time: 65, depth: 10.5)]),
+      DiveComputerLog(diveComputerId: 0, maxDepth: 30.2, meanDepth: 18.7)
+        ..samples.addAll([const Sample(time: 0, depth: 0.0), const Sample(time: 65, depth: 10.5)]),
     );
 
     // Serialize
@@ -348,30 +351,43 @@ void main() {
 
   test('Cylinder O2 and He parsing and serialization', () {
     // Test serialization of O2 (nitrox)
-    final cyl1 = Cylinder(size: 12.0, workpressure: 200.0, description: '12x200', o2: 32.0, start: 200.0, end: 50.0);
+    const cyl1 = DiveCylinder(
+      cylinderId: 0,
+      cylinder: Cylinder(id: 0, size: 12.0, workpressure: 200.0, description: '12x200'),
+      o2: 32.0,
+      start: 200.0,
+      end: 50.0,
+    );
     final xml1 = cyl1.toXml();
     expect(xml1.getAttribute('o2'), '32.0%');
     expect(xml1.getAttribute('he'), isNull);
 
     // Test serialization of O2 and He (trimix)
-    final cyl2 = Cylinder(size: 24.0, workpressure: 232.0, description: 'D12x232', o2: 21.0, he: 35.0, start: 210.0, end: 100.0);
+    const cyl2 = DiveCylinder(
+      cylinderId: 0,
+      cylinder: Cylinder(id: 0, size: 24.0, workpressure: 232.0, description: 'D12x232'),
+      o2: 21.0,
+      he: 35.0,
+      start: 210.0,
+      end: 100.0,
+    );
     final xml2 = cyl2.toXml();
     expect(xml2.getAttribute('o2'), '21.0%');
     expect(xml2.getAttribute('he'), '35.0%');
 
     // Test round-trip for nitrox
-    final reparsed1 = CylinderXml.fromXml(xml1);
+    final reparsed1 = DiveCylinderXml.fromXml(xml1);
     expect(reparsed1.o2, closeTo(32.0, 0.1));
     expect(reparsed1.he, isNull);
 
     // Test round-trip for trimix
-    final reparsed2 = CylinderXml.fromXml(xml2);
+    final reparsed2 = DiveCylinderXml.fromXml(xml2);
     expect(reparsed2.o2, closeTo(21.0, 0.1));
     expect(reparsed2.he, closeTo(35.0, 0.1));
 
     // Test parsing from XML string
     final xmlString = "<cylinder size='10.0 l' workpressure='300.0 bar' description='10x300' o2='30.0%' end='115.2 bar' />";
-    final parsedFromString = CylinderXml.fromXml(XmlDocument.parse(xmlString).rootElement);
+    final parsedFromString = DiveCylinderXml.fromXml(XmlDocument.parse(xmlString).rootElement);
     expect(parsedFromString.o2, closeTo(30.0, 0.1));
     expect(parsedFromString.he, isNull);
   });

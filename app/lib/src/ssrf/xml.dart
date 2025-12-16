@@ -13,11 +13,24 @@ extension SsrfXml on Ssrf {
     var dives = divesElem?.findElements('dive').map(DiveXml.fromXml).toList() ?? [];
     dives.addAll(divesElem?.findAllElements('trip').map((e) => e.findElements('dive').map(DiveXml.fromXml).toList()).flattened ?? []);
 
-    return Ssrf(
-      settings: settingsElem != null ? SettingsXml.fromXml(settingsElem) : null,
-      dives: dives,
-      diveSites: divesitesElem?.findElements('site').map(DivesiteXml.fromXml).toList() ?? [],
-    );
+    // Parse fingerprints from settings into DiveComputers
+    final diveComputers = <DiveComputer>[];
+    if (settingsElem != null) {
+      for (final fpElem in settingsElem.findElements('fingerprint')) {
+        diveComputers.add(
+          DiveComputer(
+            id: 0,
+            model: fpElem.getAttribute('model') ?? '',
+            serial: fpElem.getAttribute('serial'),
+            deviceid: fpElem.getAttribute('deviceid'),
+            diveid: fpElem.getAttribute('diveid'),
+            fingerprintData: fpElem.getAttribute('data'),
+          ),
+        );
+      }
+    }
+
+    return Ssrf(dives: dives, diveSites: divesitesElem?.findElements('site').map(DivesiteXml.fromXml).toList() ?? [], diveComputers: diveComputers);
   }
 
   XmlDocument toXmlDocument() {
@@ -29,9 +42,26 @@ extension SsrfXml on Ssrf {
         builder.attribute('program', 'subsurface');
         builder.attribute('version', '3');
 
-        // Add settings section
-        if (settings != null) {
-          builder.xml(settings!.toXml().toXmlString());
+        // Add settings section with fingerprints from diveComputers
+        final dcsWithFingerprint = diveComputers.where((dc) => dc.fingerprintData != null).toList();
+        if (dcsWithFingerprint.isNotEmpty) {
+          builder.element(
+            'settings',
+            nest: () {
+              for (final dc in dcsWithFingerprint) {
+                builder.element(
+                  'fingerprint',
+                  nest: () {
+                    builder.attribute('model', dc.model);
+                    if (dc.serial != null) builder.attribute('serial', dc.serial!);
+                    if (dc.deviceid != null) builder.attribute('deviceid', dc.deviceid!);
+                    if (dc.diveid != null) builder.attribute('diveid', dc.diveid!);
+                    if (dc.fingerprintData != null) builder.attribute('data', dc.fingerprintData!);
+                  },
+                );
+              }
+            },
+          );
         }
 
         // Add divesites section
@@ -65,7 +95,7 @@ extension SsrfXml on Ssrf {
 extension DiveXml on Dive {
   static Dive fromXml(XmlElement elem) {
     // Dive ID or null
-    final diveID = elem.getAttribute('uuid');
+    final diveID = ensureUUID(elem.getAttribute('uuid'));
 
     // Parse tags
     final tagsStr = elem.getAttribute('tags');
@@ -87,7 +117,7 @@ extension DiveXml on Dive {
       id: diveID,
       number: int.tryParse(elem.getAttribute('number') ?? '0') ?? 0,
       start: tryParseDateTime(elem.getAttribute('date'), elem.getAttribute('time')) ?? DateTime.fromMillisecondsSinceEpoch(0),
-      duration: tryParseUnitString(elem.getAttribute('duration')) ?? 0,
+      duration: (tryParseUnitString(elem.getAttribute('duration')) ?? 0).toInt(),
       rating: int.tryParse(elem.getAttribute('rating') ?? ''),
       sac: tryParseUnitString(elem.getAttribute('sac')),
       otu: int.tryParse(elem.getAttribute('otu') ?? ''),
@@ -101,13 +131,19 @@ extension DiveXml on Dive {
     dive.buddies = buddies;
 
     // Parse cylinders
-    dive.cylinders = elem.findElements('cylinder').map(CylinderXml.fromXml).toList();
+    dive.cylinders = elem.findElements('cylinder').map(DiveCylinderXml.fromXml).toList();
 
     // Parse weightsystems
     dive.weightsystems = elem.findElements('weightsystem').map(WeightsystemXml.fromXml).toList();
 
     // Parse divecomputers
-    dive.divecomputers = elem.findElements('divecomputer').map(DiveComputerXml.fromXml).toList();
+    dive.divecomputers = elem.findElements('divecomputer').map(DiveComputerLogXml.fromXml).toList();
+
+    // Populate depth summary from first dive computer
+    if (dive.divecomputers.isNotEmpty) {
+      dive.maxDepth = dive.divecomputers[0].maxDepth;
+      dive.meanDepth = dive.divecomputers[0].meanDepth;
+    }
 
     return dive;
   }
@@ -197,10 +233,28 @@ extension DiveXml on Dive {
   }
 }
 
-extension DiveComputerXml on DiveComputer {
-  static DiveComputer fromXml(XmlElement elem) {
+extension DiveComputerLogXml on DiveComputerLog {
+  static DiveComputerLog fromXml(XmlElement elem) {
     final depth = elem.getElement('depth');
     final temperature = elem.getElement('temperature');
+
+    // Parse model from divecomputer element
+    final model = elem.getAttribute('model') ?? 'Unknown';
+    var serial = elem.getAttribute('serial');
+
+    // Parse extradata first to potentially extract serial
+    final extradata = <String, String>{};
+    for (final extradataElem in elem.findElements('extradata')) {
+      final key = extradataElem.getAttribute('key');
+      final value = extradataElem.getAttribute('value');
+      if (key != null && value != null) {
+        extradata[key] = value;
+        // Use Serial from extradata if not already set from attribute
+        if (key == 'Serial' && serial == null) {
+          serial = value;
+        }
+      }
+    }
 
     // Parse environment from temperature
     Environment? environment;
@@ -212,24 +266,18 @@ extension DiveComputerXml on DiveComputer {
       }
     }
 
-    final divecomputer = DiveComputer(
+    final diveComputerLog = DiveComputerLog(
+      diveComputerId: 0, // Will be resolved when saving to database
+      diveComputer: DiveComputer(id: 0, model: model, serial: serial),
       maxDepth: tryParseUnitString(depth?.getAttribute('max')) ?? 0,
       meanDepth: tryParseUnitString(depth?.getAttribute('mean')) ?? 0,
       environment: environment,
       samples: elem.findElements('sample').map(SampleXml.fromXml).toList(),
       events: elem.findElements('event').map(EventXml.fromXml).toList(),
+      extradata: extradata,
     );
 
-    // Parse extradata
-    for (final extradataElem in elem.findElements('extradata')) {
-      final key = extradataElem.getAttribute('key');
-      final value = extradataElem.getAttribute('value');
-      if (key != null && value != null) {
-        divecomputer.extradata[key] = value;
-      }
-    }
-
-    return divecomputer;
+    return diveComputerLog;
   }
 
   XmlElement toXml() {
@@ -237,6 +285,13 @@ extension DiveComputerXml on DiveComputer {
     builder.element(
       'divecomputer',
       nest: () {
+        if (diveComputer != null) {
+          builder.attribute('model', diveComputer!.model);
+          if (diveComputer!.serial != null) {
+            builder.attribute('serial', diveComputer!.serial!);
+          }
+        }
+
         builder.element(
           'depth',
           nest: () {
@@ -290,7 +345,7 @@ extension DiveComputerXml on DiveComputer {
 extension SampleXml on Sample {
   static Sample fromXml(XmlElement elem) {
     return Sample(
-      time: tryParseUnitString(elem.getAttribute('time')) ?? 0,
+      time: (tryParseUnitString(elem.getAttribute('time')) ?? 0).toInt(),
       depth: tryParseUnitString(elem.getAttribute('depth')) ?? 0,
       temp: tryParseUnitString(elem.getAttribute('temp')),
       pressure: tryParseUnitString(elem.getAttribute('pressure')),
@@ -335,7 +390,7 @@ extension DivesiteXml on Divesite {
       }
     }
 
-    return Divesite(uuid: elem.getAttribute('uuid') ?? '', name: elem.getAttribute('name') ?? '', position: position);
+    return Divesite(uuid: ensureUUID(elem.getAttribute('uuid')) ?? '', name: elem.getAttribute('name') ?? '', position: position);
   }
 
   XmlElement toXml() {
@@ -356,58 +411,16 @@ extension DivesiteXml on Divesite {
   }
 }
 
-extension SettingsXml on Settings {
-  static Settings fromXml(XmlElement elem) {
-    return Settings(fingerprints: elem.findElements('fingerprint').map(FingerprintXml.fromXml).toList());
-  }
-
-  XmlElement toXml() {
-    final builder = XmlBuilder();
-    builder.element(
-      'settings',
-      nest: () {
-        for (final fingerprint in fingerprints) {
-          builder.xml(fingerprint.toXml().toXmlString());
-        }
-      },
-    );
-    return builder.buildFragment().firstElementChild!;
-  }
-}
-
-extension FingerprintXml on Fingerprint {
-  static Fingerprint fromXml(XmlElement elem) {
-    return Fingerprint(
-      model: elem.getAttribute('model') ?? '',
-      serial: elem.getAttribute('serial') ?? '',
-      deviceid: elem.getAttribute('deviceid') ?? '',
-      diveid: elem.getAttribute('diveid') ?? '',
-      data: elem.getAttribute('data') ?? '',
-    );
-  }
-
-  XmlElement toXml() {
-    final builder = XmlBuilder();
-    builder.element(
-      'fingerprint',
-      nest: () {
-        builder.attribute('model', model);
-        builder.attribute('serial', serial);
-        builder.attribute('deviceid', deviceid);
-        builder.attribute('diveid', diveid);
-        builder.attribute('data', data);
-      },
-    );
-    return builder.buildFragment().firstElementChild!;
-  }
-}
-
-extension CylinderXml on Cylinder {
-  static Cylinder fromXml(XmlElement elem) {
-    return Cylinder(
-      size: tryParseUnitString(elem.getAttribute('size')),
-      workpressure: tryParseUnitString(elem.getAttribute('workpressure')),
-      description: elem.getAttribute('description'),
+extension DiveCylinderXml on DiveCylinder {
+  static DiveCylinder fromXml(XmlElement elem) {
+    return DiveCylinder(
+      cylinderId: 0, // Will be resolved when saving to database
+      cylinder: Cylinder(
+        id: 0,
+        size: tryParseUnitString(elem.getAttribute('size')),
+        workpressure: tryParseUnitString(elem.getAttribute('workpressure')),
+        description: elem.getAttribute('description'),
+      ),
       start: tryParseUnitString(elem.getAttribute('start')),
       end: tryParseUnitString(elem.getAttribute('end')),
       o2: tryParseUnitString(elem.getAttribute('o2')),
@@ -420,14 +433,14 @@ extension CylinderXml on Cylinder {
     builder.element(
       'cylinder',
       nest: () {
-        if (size != null) {
-          builder.attribute('size', '${size!.toStringAsFixed(1)} l');
+        if (cylinder?.size != null) {
+          builder.attribute('size', '${cylinder!.size!.toStringAsFixed(1)} l');
         }
-        if (workpressure != null) {
-          builder.attribute('workpressure', '${workpressure!.toStringAsFixed(1)} bar');
+        if (cylinder?.workpressure != null) {
+          builder.attribute('workpressure', '${cylinder!.workpressure!.toStringAsFixed(1)} bar');
         }
-        if (description != null) {
-          builder.attribute('description', description!);
+        if (cylinder?.description != null) {
+          builder.attribute('description', cylinder!.description!);
         }
         if (o2 != null) {
           builder.attribute('o2', '${o2!.toStringAsFixed(1)}%');
@@ -472,7 +485,7 @@ extension WeightsystemXml on Weightsystem {
 extension EventXml on Event {
   static Event fromXml(XmlElement elem) {
     return Event(
-      time: tryParseUnitString(elem.getAttribute('time')) ?? 0,
+      time: (tryParseUnitString(elem.getAttribute('time')) ?? 0).toInt(),
       type: int.tryParse(elem.getAttribute('type') ?? ''),
       value: int.tryParse(elem.getAttribute('value') ?? ''),
       name: elem.getAttribute('name'),
@@ -503,3 +516,5 @@ extension EventXml on Event {
     return builder.buildFragment().firstElementChild!;
   }
 }
+
+String? ensureUUID(String? u) => u?.replaceAll(' ', '0');

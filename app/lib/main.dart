@@ -8,7 +8,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import 'src/bloc/ble_bloc.dart';
+import 'src/bloc/divedetails_bloc.dart';
 import 'src/bloc/divelist_bloc.dart';
+import 'src/common/common.dart';
 import 'src/dives/ble_scan_screen.dart';
 import 'src/dives/divedetails_screen.dart';
 import 'src/dives/diveedit_screen.dart';
@@ -116,14 +118,32 @@ class _MyAppState extends State<MyApp> {
                   path: '/dives',
                   builder: (BuildContext context, GoRouterState state) => const DiveListScreen(),
                   routes: [
-                    GoRoute(path: 'new', builder: (context, state) => DiveEditScreen(diveID: null)),
+                    GoRoute(
+                      path: 'new',
+                      builder: (context, state) => BlocProvider.value(
+                        value: DiveDetailsBloc(onDiveUpdated: () => context.read<DiveListBloc>().add(LoadDives()))..add(NewDiveEvent()),
+                        child: DiveDetailsAvailable(child: DiveEditScreen()),
+                      ),
+                    ),
                     GoRoute(
                       path: ':diveID',
-                      builder: (context, state) => DiveDetailsScreen(diveID: state.pathParameters['diveID']!),
+                      builder: (context, state) => BlocProvider(
+                        create: (context) => DiveDetailsBloc(),
+                        child: Builder(
+                          builder: (context) {
+                            context.read<DiveDetailsBloc>().add(LoadDiveDetails(state.pathParameters['diveID']!));
+                            return DiveDetailsAvailable(child: DiveDetailsScreen());
+                          },
+                        ),
+                      ),
                       routes: [
                         GoRoute(
                           path: 'edit',
-                          builder: (context, state) => DiveEditScreen(diveID: state.pathParameters['diveID']!),
+                          builder: (context, state) => BlocProvider.value(
+                            value: DiveDetailsBloc(onDiveUpdated: () => context.read<DiveListBloc>().add(LoadDives()))
+                              ..add(LoadDiveDetails(state.pathParameters['diveID']!)),
+                            child: DiveDetailsAvailable(child: DiveEditScreen()),
+                          ),
                         ),
                       ],
                     ),

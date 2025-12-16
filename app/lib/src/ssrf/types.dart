@@ -3,9 +3,9 @@ import 'package:uuid/uuid.dart';
 class Ssrf {
   final List<Dive> dives;
   final List<Divesite> diveSites;
-  final Settings? settings;
+  final List<DiveComputer> diveComputers;
 
-  const Ssrf({required this.dives, required this.diveSites, this.settings});
+  const Ssrf({required this.dives, required this.diveSites, this.diveComputers = const []});
 }
 
 class Dive {
@@ -14,7 +14,11 @@ class Dive {
   int? rating;
   Set<String> tags = {};
   DateTime start;
-  double duration; // seconds
+  int duration; // seconds
+
+  // Depth summary (populated from dive computer data)
+  double? maxDepth; // meters
+  double? meanDepth; // meters
 
   // Additional attributes
   double? sac; // l/min
@@ -26,9 +30,9 @@ class Dive {
   String? divemaster;
   Set<String> buddies = {};
   String? notes;
-  List<Cylinder> cylinders = [];
+  List<DiveCylinder> cylinders = [];
   List<Weightsystem> weightsystems = [];
-  List<DiveComputer> divecomputers = [];
+  List<DiveComputerLog> divecomputers = [];
 
   Dive({
     String? id,
@@ -36,6 +40,8 @@ class Dive {
     required this.start,
     required this.duration,
     this.rating,
+    this.maxDepth,
+    this.meanDepth,
     this.sac,
     this.otu,
     this.cns,
@@ -46,6 +52,19 @@ class Dive {
 }
 
 class DiveComputer {
+  final int id;
+  final String model;
+  final String? serial;
+  final String? deviceid;
+  final String? diveid;
+  final String? fingerprintData;
+
+  const DiveComputer({required this.id, required this.model, this.serial, this.deviceid, this.diveid, this.fingerprintData});
+}
+
+class DiveComputerLog {
+  final int diveComputerId;
+  final DiveComputer? diveComputer; // populated when loaded from storage
   final double maxDepth; // meters
   final double meanDepth; // meters
   final Environment? environment;
@@ -53,7 +72,16 @@ class DiveComputer {
   late final List<Event> events;
   late final Map<String, String> extradata;
 
-  DiveComputer({required this.maxDepth, required this.meanDepth, this.environment, samples, events, extradata}) {
+  DiveComputerLog({
+    required this.diveComputerId,
+    this.diveComputer,
+    required this.maxDepth,
+    required this.meanDepth,
+    this.environment,
+    samples,
+    events,
+    extradata,
+  }) {
     this.samples = samples ?? [];
     this.events = events ?? [];
     this.extradata = extradata ?? {};
@@ -68,7 +96,7 @@ class Environment {
 }
 
 class Sample {
-  final double time; // seconds
+  final int time; // seconds
   final double depth; // meters
   final double? temp; // degrees celsius
   final double? pressure; // bars
@@ -91,32 +119,24 @@ class GPSPosition {
   const GPSPosition(this.lat, this.lon);
 }
 
-class Settings {
-  final List<Fingerprint> fingerprints;
-
-  const Settings({required this.fingerprints});
-}
-
-class Fingerprint {
-  final String model;
-  final String serial;
-  final String deviceid;
-  final String diveid;
-  final String data;
-
-  const Fingerprint({required this.model, required this.serial, required this.deviceid, required this.diveid, required this.data});
-}
-
 class Cylinder {
+  final int id;
   final double? size; // liters
   final double? workpressure; // bar
   final String? description;
+
+  const Cylinder({required this.id, this.size, this.workpressure, this.description});
+}
+
+class DiveCylinder {
+  final int cylinderId;
+  final Cylinder? cylinder; // populated when loaded from storage
   final double? start; // bar
   final double? end; // bar
   final double? o2; // percentage (0-100)
   final double? he; // percentage (0-100)
 
-  const Cylinder({this.size, this.workpressure, this.description, this.start, this.end, this.o2, this.he});
+  const DiveCylinder({required this.cylinderId, this.cylinder, this.start, this.end, this.o2, this.he});
 }
 
 class Weightsystem {
@@ -127,7 +147,7 @@ class Weightsystem {
 }
 
 class Event {
-  final double time; // seconds
+  final int time; // seconds
   final int? type;
   final int? value;
   final String? name;

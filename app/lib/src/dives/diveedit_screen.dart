@@ -3,14 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../bloc/divelist_bloc.dart';
+import '../bloc/divedetails_bloc.dart';
 import '../common/common_widgets.dart';
 import '../ssrf/ssrf.dart' as ssrf;
 
 class DiveEditScreen extends StatefulWidget {
-  final String? diveID;
-
-  const DiveEditScreen({super.key, required this.diveID});
+  const DiveEditScreen({super.key});
 
   @override
   State<DiveEditScreen> createState() => _DiveEditScreenState();
@@ -29,11 +27,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.diveID == null) {
-      dive = ssrf.Dive(number: 0, start: DateTime.now(), duration: 0);
-    } else {
-      dive = (context.read<DiveListBloc>().state as DiveListLoaded).dives.firstWhere((d) => d.id == widget.diveID);
-    }
+    dive = (context.read<DiveDetailsBloc>().state as DiveDetailsLoaded).dive;
     _selectedDateTime = dive.start;
     _durationController = TextEditingController(text: (dive.duration / 60).toStringAsFixed(1));
     _divemasterController = TextEditingController(text: dive.divemaster ?? '');
@@ -77,7 +71,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
 
       // Update dive properties
       dive.start = _selectedDateTime;
-      dive.duration = durationMinutes * 60;
+      dive.duration = (durationMinutes * 60).toInt();
       dive.rating = _rating;
       dive.divemaster = _divemasterController.text.trim().isEmpty ? null : _divemasterController.text.trim();
       dive.notes = _notesController.text.trim().isEmpty ? null : _notesController.text.trim();
@@ -91,7 +85,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       dive.tags = tagsText.isEmpty ? {} : tagsText.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toSet();
 
       // Send update event to bloc
-      context.read<DiveListBloc>().add(UpdateDive(dive));
+      context.read<DiveDetailsBloc>().add(UpdateDiveDetails(dive));
 
       // Navigate back
       context.pop();

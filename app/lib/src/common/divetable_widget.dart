@@ -31,8 +31,8 @@ class _DiveTableWidgetState extends State<DiveTableWidget> {
         break;
       case 2: // Max Depth
         comparison = (a, b) {
-          final aDepth = a.divecomputers.isNotEmpty ? a.divecomputers[0].maxDepth : 0.0;
-          final bDepth = b.divecomputers.isNotEmpty ? b.divecomputers[0].maxDepth : 0.0;
+          final aDepth = a.maxDepth ?? 0.0;
+          final bDepth = b.maxDepth ?? 0.0;
           return aDepth.compareTo(bDepth);
         };
         break;
@@ -96,7 +96,7 @@ class _DiveTableWidgetState extends State<DiveTableWidget> {
           columnSpacing: 8,
           showCheckboxColumn: false,
           rows: _getSortedDives().map((dive) {
-            final maxDepth = dive.divecomputers.isNotEmpty ? dive.divecomputers[0].maxDepth : 0.0;
+            final maxDepth = dive.maxDepth ?? 0.0;
             final diveSite = dive.divesiteid != null ? widget.diveSites.where((s) => s.uuid.trim() == dive.divesiteid).firstOrNull : null;
             final siteName = diveSite?.name ?? '';
 

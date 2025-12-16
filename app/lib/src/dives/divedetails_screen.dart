@@ -1,9 +1,9 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../bloc/divedetails_bloc.dart';
 import '../bloc/divelist_bloc.dart';
 import '../common/common_widgets.dart';
 import '../common/divesitemap_widget.dart';
@@ -11,23 +11,28 @@ import '../ssrf/ssrf.dart' as ssrf;
 import 'depthprofile_widget.dart';
 
 class DiveDetailsScreen extends StatelessWidget {
-  final String diveID;
-
-  const DiveDetailsScreen({super.key, required this.diveID});
+  const DiveDetailsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<DiveListBloc, DiveListState>(
+    // Get prev/next dive IDs from the overview list
+    final listState = context.watch<DiveListBloc>().state;
+    return BlocBuilder<DiveDetailsBloc, DiveDetailsState>(
       builder: (context, state) {
-        if (state is! DiveListLoaded) {
-          return Placeholder();
+        state as DiveDetailsLoaded;
+
+        String? nextDiveID;
+        String? prevDiveID;
+
+        if (listState is DiveListLoaded) {
+          final diveIdx = listState.dives.indexWhere((d) => d.id == state.dive.id);
+          if (diveIdx != -1) {
+            nextDiveID = diveIdx < listState.dives.length - 1 ? listState.dives[diveIdx + 1].id : null;
+            prevDiveID = diveIdx > 0 ? listState.dives[diveIdx - 1].id : null;
+          }
         }
-        final diveIdx = state.dives.indexWhere((d) => d.id == diveID);
-        final dive = state.dives[diveIdx];
-        final diveSite = state.diveSites.firstWhereOrNull((s) => s.uuid == dive.divesiteid);
-        final nextDiveID = diveIdx < state.dives.length - 1 ? state.dives[diveIdx + 1].id : null;
-        final prevDiveID = diveIdx > 0 ? state.dives[diveIdx - 1].id : null;
-        return _DiveDetails(dive: dive, diveSite: diveSite, nextID: nextDiveID, prevID: prevDiveID);
+
+        return _DiveDetails(dive: state.dive, diveSite: state.diveSite, nextID: nextDiveID, prevID: prevDiveID);
       },
     );
   }
@@ -57,7 +62,7 @@ class _DiveDetails extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: prevID != null
               ? () {
-                  context.go('/dives/${prevID!}');
+                  context.go('/dives/$prevID');
                 }
               : null,
           tooltip: 'Previous dive',
@@ -66,7 +71,7 @@ class _DiveDetails extends StatelessWidget {
           icon: const Icon(Icons.arrow_forward_ios),
           onPressed: nextID != null
               ? () {
-                  context.go('/dives/${nextID!}');
+                  context.go('/dives/$nextID');
                 }
               : null,
           tooltip: 'Next dive',
@@ -188,7 +193,7 @@ class _DiveDetails extends StatelessWidget {
           dive.cylinders.asMap().entries.map((entry) {
             final idx = entry.key;
             final cyl = entry.value;
-            final desc = cyl.description ?? 'Cylinder ${idx + 1}';
+            final desc = cyl.cylinder?.description ?? 'Cylinder ${idx + 1}';
             final details = <String>[];
 
             // Gas mixture
@@ -204,8 +209,8 @@ class _DiveDetails extends StatelessWidget {
               }
             }
 
-            if (cyl.size != null) details.add('${cyl.size!.toStringAsFixed(1)} l');
-            if (cyl.workpressure != null) details.add('${cyl.workpressure!.toStringAsFixed(0)} bar');
+            if (cyl.cylinder?.size != null) details.add('${cyl.cylinder!.size!.toStringAsFixed(1)} l');
+            if (cyl.cylinder?.workpressure != null) details.add('${cyl.cylinder!.workpressure!.toStringAsFixed(0)} bar');
             if (cyl.start != null) details.add('Start: ${cyl.start!.toStringAsFixed(0)} bar');
             if (cyl.end != null) details.add('End: ${cyl.end!.toStringAsFixed(0)} bar');
             return infoRow(desc, details.join(', '));
@@ -246,7 +251,7 @@ class _DiveDetails extends StatelessWidget {
               children: [
                 Text('Depth Profile', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                 const Divider(),
-                DepthProfileWidget(diveComputer: dive.divecomputers[0]),
+                DepthProfileWidget(diveComputerLog: dive.divecomputers[0]),
               ],
             ),
           ),
