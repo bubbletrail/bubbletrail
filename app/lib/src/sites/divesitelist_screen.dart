@@ -43,8 +43,9 @@ class DiveSiteListScreen extends StatelessWidget {
             final t = Theme.of(context);
 
             return SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+              scrollDirection: Axis.vertical,
               child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
                 child: DataTable(
                   columns: const [
                     DataColumn(label: Text('Name')),

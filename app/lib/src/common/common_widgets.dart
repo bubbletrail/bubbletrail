@@ -49,29 +49,35 @@ class ScreenScaffold extends StatelessWidget {
       appBar: AppBar(title: title, backgroundColor: Colors.transparent, actions: actions),
       body: Padding(
         padding: const EdgeInsets.only(right: 4.0, bottom: 4.0),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            border: BoxBorder.all(color: t.colorScheme.onTertiaryContainer),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(8),
-              topRight: Radius.circular(8),
-              bottomLeft: Radius.circular(8),
-              bottomRight: Radius.circular(14),
-            ),
-            color: t.canvasColor,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(1.0), // the border
-            child: ClipRRect(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(8),
-                topRight: Radius.circular(8),
-                bottomLeft: Radius.circular(8),
-                bottomRight: Radius.circular(14),
+        child: Row(
+          children: [
+            Expanded(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  border: BoxBorder.all(color: t.colorScheme.onTertiaryContainer),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    topRight: Radius.circular(8),
+                    bottomLeft: Radius.circular(8),
+                    bottomRight: Radius.circular(14),
+                  ),
+                  color: t.canvasColor,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(1.0), // the border
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(8),
+                      topRight: Radius.circular(8),
+                      bottomLeft: Radius.circular(8),
+                      bottomRight: Radius.circular(14),
+                    ),
+                    child: body,
+                  ),
+                ),
               ),
-              child: body,
             ),
-          ),
+          ],
         ),
       ),
       floatingActionButton: floatingActionButton,
