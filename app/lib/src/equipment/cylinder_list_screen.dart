@@ -27,25 +27,14 @@ class CylinderListScreen extends StatelessWidget {
           }
 
           if (state is CylinderListError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
-                  const SizedBox(height: 16),
-                  Text('Error loading cylinders', style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 8),
-                  Text(state.message, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
-                ],
-              ),
-            );
+            return ErrorStateWidget(title: 'Error loading cylinders', message: state.message);
           }
 
           if (state is CylinderListLoaded) {
             final cylinders = state.cylinders;
 
             if (cylinders.isEmpty) {
-              return const Center(child: Text('No cylinders yet. Tap + to add one.'));
+              return const EmptyStateWidget(message: 'No cylinders yet. Tap + to add one.', icon: Icons.propane_tank);
             }
 
             return ListView.builder(

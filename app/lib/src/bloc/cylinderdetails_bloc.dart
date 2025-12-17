@@ -3,23 +3,24 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../ssrf/ssrf.dart' as ssrf;
 import '../ssrf/storage/storage.dart';
+import 'details_state.dart';
 
-abstract class CylinderDetailsState extends Equatable {
+abstract class CylinderDetailsState extends Equatable with DetailsStateMixin {
   const CylinderDetailsState();
 
   @override
   List<Object?> get props => [];
 }
 
-class CylinderDetailsInitial extends CylinderDetailsState {
+class CylinderDetailsInitial extends CylinderDetailsState with DetailsInitialMixin {
   const CylinderDetailsInitial();
 }
 
-class CylinderDetailsLoading extends CylinderDetailsState {
+class CylinderDetailsLoading extends CylinderDetailsState with DetailsLoadingMixin {
   const CylinderDetailsLoading();
 }
 
-class CylinderDetailsLoaded extends CylinderDetailsState {
+class CylinderDetailsLoaded extends CylinderDetailsState with DetailsLoadedMixin {
   final ssrf.Cylinder cylinder;
   final bool isNew;
 
@@ -29,13 +30,14 @@ class CylinderDetailsLoaded extends CylinderDetailsState {
   List<Object?> get props => [cylinder, isNew];
 }
 
-class CylinderDetailsError extends CylinderDetailsState {
-  final String message;
+class CylinderDetailsError extends CylinderDetailsState with DetailsErrorMixin {
+  @override
+  final String errorMessage;
 
-  const CylinderDetailsError(this.message);
+  const CylinderDetailsError(this.errorMessage);
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [errorMessage];
 }
 
 abstract class CylinderDetailsEvent extends Equatable {

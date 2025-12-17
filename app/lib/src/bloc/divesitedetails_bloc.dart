@@ -4,23 +4,24 @@ import 'package:uuid/uuid.dart';
 
 import '../ssrf/ssrf.dart' as ssrf;
 import '../ssrf/storage/storage.dart';
+import 'details_state.dart';
 
-abstract class DivesiteDetailsState extends Equatable {
+abstract class DivesiteDetailsState extends Equatable with DetailsStateMixin {
   const DivesiteDetailsState();
 
   @override
   List<Object?> get props => [];
 }
 
-class DivesiteDetailsInitial extends DivesiteDetailsState {
+class DivesiteDetailsInitial extends DivesiteDetailsState with DetailsInitialMixin {
   const DivesiteDetailsInitial();
 }
 
-class DivesiteDetailsLoading extends DivesiteDetailsState {
+class DivesiteDetailsLoading extends DivesiteDetailsState with DetailsLoadingMixin {
   const DivesiteDetailsLoading();
 }
 
-class DivesiteDetailsLoaded extends DivesiteDetailsState {
+class DivesiteDetailsLoaded extends DivesiteDetailsState with DetailsLoadedMixin {
   final ssrf.Divesite divesite;
   final bool isNew;
 
@@ -30,13 +31,14 @@ class DivesiteDetailsLoaded extends DivesiteDetailsState {
   List<Object?> get props => [divesite, isNew];
 }
 
-class DivesiteDetailsError extends DivesiteDetailsState {
-  final String message;
+class DivesiteDetailsError extends DivesiteDetailsState with DetailsErrorMixin {
+  @override
+  final String errorMessage;
 
-  const DivesiteDetailsError(this.message);
+  const DivesiteDetailsError(this.errorMessage);
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [errorMessage];
 }
 
 abstract class DivesiteDetailsEvent extends Equatable {

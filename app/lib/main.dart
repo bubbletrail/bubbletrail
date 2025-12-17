@@ -146,7 +146,7 @@ class _MyAppState extends State<MyApp> {
                       name: AppRouteName.divesNew,
                       builder: (context, state) => BlocProvider.value(
                         value: DiveDetailsBloc()..add(NewDiveEvent()),
-                        child: DiveDetailsAvailable(child: DiveEditScreen()),
+                        child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: DiveEditScreen()),
                       ),
                     ),
                     GoRoute(
@@ -157,7 +157,7 @@ class _MyAppState extends State<MyApp> {
                         child: Builder(
                           builder: (context) {
                             context.read<DiveDetailsBloc>().add(LoadDiveDetails(state.pathParameters['diveID']!));
-                            return DiveDetailsAvailable(child: DiveDetailsScreen());
+                            return DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: DiveDetailsScreen());
                           },
                         ),
                       ),
@@ -167,7 +167,7 @@ class _MyAppState extends State<MyApp> {
                           name: AppRouteName.divesDetailsEdit,
                           builder: (context, state) => BlocProvider.value(
                             value: DiveDetailsBloc()..add(LoadDiveDetails(state.pathParameters['diveID']!)),
-                            child: DiveDetailsAvailable(child: DiveEditScreen()),
+                            child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: DiveEditScreen()),
                           ),
                         ),
                       ],
@@ -188,7 +188,7 @@ class _MyAppState extends State<MyApp> {
                       name: AppRouteName.sitesNew,
                       builder: (context, state) => BlocProvider(
                         create: (context) => DivesiteDetailsBloc()..add(const NewDivesiteEvent()),
-                        child: DivesiteDetailsAvailable(child: DivesiteEditScreen()),
+                        child: DetailsAvailable<DivesiteDetailsBloc, DivesiteDetailsState>(child: DivesiteEditScreen()),
                       ),
                     ),
                     GoRoute(
@@ -201,7 +201,7 @@ class _MyAppState extends State<MyApp> {
                           name: AppRouteName.sitesDetailsEdit,
                           builder: (context, state) => BlocProvider(
                             create: (context) => DivesiteDetailsBloc()..add(LoadDivesiteDetails(state.pathParameters['siteID']!)),
-                            child: DivesiteDetailsAvailable(child: DivesiteEditScreen()),
+                            child: DetailsAvailable<DivesiteDetailsBloc, DivesiteDetailsState>(child: DivesiteEditScreen()),
                           ),
                         ),
                       ],
@@ -227,7 +227,7 @@ class _MyAppState extends State<MyApp> {
                           name: AppRouteName.cylindersNew,
                           builder: (context, state) => BlocProvider(
                             create: (context) => CylinderDetailsBloc()..add(const NewCylinderEvent()),
-                            child: CylinderDetailsAvailable(child: CylinderEditScreen()),
+                            child: DetailsAvailable<CylinderDetailsBloc, CylinderDetailsState>(child: CylinderEditScreen()),
                           ),
                         ),
                         GoRoute(
@@ -235,7 +235,7 @@ class _MyAppState extends State<MyApp> {
                           name: AppRouteName.cylindersDetails,
                           builder: (context, state) => BlocProvider(
                             create: (context) => CylinderDetailsBloc()..add(LoadCylinderDetails(int.parse(state.pathParameters['cylinderID']!))),
-                            child: CylinderDetailsAvailable(child: CylinderEditScreen()),
+                            child: DetailsAvailable<CylinderDetailsBloc, CylinderDetailsState>(child: CylinderEditScreen()),
                           ),
                         ),
                       ],

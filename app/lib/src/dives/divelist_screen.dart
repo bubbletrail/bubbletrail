@@ -47,18 +47,7 @@ class DiveListScreen extends StatelessWidget {
         }
 
         if (state is DiveListError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
-                const SizedBox(height: 16),
-                Text('Error loading dives', style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 8),
-                Text(state.message, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
-              ],
-            ),
-          );
+          return ErrorStateWidget(title: 'Error loading dives', message: state.message);
         }
 
         if (state is DiveListLoaded) {
@@ -66,7 +55,7 @@ class DiveListScreen extends StatelessWidget {
           final diveSites = state.diveSites;
 
           if (dives.isEmpty) {
-            return const Center(child: Text('No dives yet. Add your first dive!'));
+            return const EmptyStateWidget(message: 'No dives yet. Add your first dive!', icon: Icons.scuba_diving);
           }
 
           return DiveTableWidget(dives: dives, diveSites: diveSites, showSiteColumn: true);

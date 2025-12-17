@@ -4,23 +4,24 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../ssrf/ssrf.dart' as ssrf;
 import '../ssrf/storage/storage.dart';
 import '../ssrf/types.dart';
+import 'details_state.dart';
 
-abstract class DiveDetailsState extends Equatable {
+abstract class DiveDetailsState extends Equatable with DetailsStateMixin {
   const DiveDetailsState();
 
   @override
   List<Object?> get props => [];
 }
 
-class DiveDetailsInitial extends DiveDetailsState {
+class DiveDetailsInitial extends DiveDetailsState with DetailsInitialMixin {
   const DiveDetailsInitial();
 }
 
-class DiveDetailsLoading extends DiveDetailsState {
+class DiveDetailsLoading extends DiveDetailsState with DetailsLoadingMixin {
   const DiveDetailsLoading();
 }
 
-class DiveDetailsLoaded extends DiveDetailsState {
+class DiveDetailsLoaded extends DiveDetailsState with DetailsLoadedMixin {
   final ssrf.Dive dive;
   final ssrf.Divesite? diveSite;
   final bool newDive;
@@ -31,13 +32,14 @@ class DiveDetailsLoaded extends DiveDetailsState {
   List<Object?> get props => [dive, diveSite, newDive];
 }
 
-class DiveDetailsError extends DiveDetailsState {
-  final String message;
+class DiveDetailsError extends DiveDetailsState with DetailsErrorMixin {
+  @override
+  final String errorMessage;
 
-  const DiveDetailsError(this.message);
+  const DiveDetailsError(this.errorMessage);
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [errorMessage];
 }
 
 abstract class DiveDetailsEvent extends Equatable {

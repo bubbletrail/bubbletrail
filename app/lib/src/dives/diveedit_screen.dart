@@ -162,41 +162,23 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       return;
     }
 
-    final selected = await showDialog<String?>(
+    final currentSite = _selectedDivesiteId != null ? diveSites.where((s) => s.uuid == _selectedDivesiteId).firstOrNull : null;
+
+    final result = await showSelectionDialog<ssrf.Divesite>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Select Dive Site'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: diveSites.length + 1,
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return ListTile(
-                  leading: const Icon(Icons.clear),
-                  title: const Text('No site'),
-                  selected: _selectedDivesiteId == null,
-                  onTap: () => Navigator.of(dialogContext).pop(''),
-                );
-              }
-              final site = diveSites[index - 1];
-              return ListTile(
-                leading: const Icon(Icons.location_on),
-                title: Text(site.name),
-                selected: site.uuid == _selectedDivesiteId,
-                onTap: () => Navigator.of(dialogContext).pop(site.uuid),
-              );
-            },
-          ),
-        ),
-        actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(null), child: const Text('Cancel'))],
+      title: 'Select Dive Site',
+      items: diveSites,
+      selectedItem: currentSite,
+      noneOption: 'No site',
+      itemBuilder: (site) => ListTile(
+        leading: const Icon(Icons.location_on),
+        title: Text(site.name),
       ),
     );
 
-    if (selected != null) {
+    if (!result.cancelled) {
       setState(() {
-        _selectedDivesiteId = selected.isEmpty ? null : selected;
+        _selectedDivesiteId = result.value?.uuid;
       });
     }
   }
@@ -214,58 +196,40 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       return;
     }
 
-    final selected = await showDialog<ssrf.Cylinder?>(
+    final result = await showSelectionDialog<ssrf.Cylinder>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Select Cylinder'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: cylinders.length,
-            itemBuilder: (context, index) {
-              final cyl = cylinders[index];
-              final subtitle = [if (cyl.size != null) '${cyl.size}L', if (cyl.workpressure != null) '${cyl.workpressure} bar'].join(' @ ');
-              return ListTile(
-                leading: const Icon(Icons.scuba_diving),
-                title: Text(cyl.description ?? 'Cylinder ${cyl.id}'),
-                subtitle: subtitle.isNotEmpty ? Text(subtitle) : null,
-                onTap: () => Navigator.of(dialogContext).pop(cyl),
-              );
-            },
-          ),
-        ),
-        actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(null), child: const Text('Cancel'))],
-      ),
+      title: 'Select Cylinder',
+      items: cylinders,
+      itemBuilder: (cyl) {
+        final subtitle = [if (cyl.size != null) '${cyl.size}L', if (cyl.workpressure != null) '${cyl.workpressure} bar'].join(' @ ');
+        return ListTile(
+          leading: const Icon(Icons.scuba_diving),
+          title: Text(cyl.description ?? 'Cylinder ${cyl.id}'),
+          subtitle: subtitle.isNotEmpty ? Text(subtitle) : null,
+        );
+      },
     );
 
-    if (selected != null) {
+    if (!result.cancelled && result.value != null) {
       setState(() {
-        _cylinders.add(_EditableDiveCylinder(cylinderId: selected.id, cylinder: selected, o2: 21, he: 0));
+        _cylinders.add(_EditableDiveCylinder(cylinderId: result.value!.id, cylinder: result.value, o2: 21, he: 0));
       });
     }
   }
 
-  void _removeCylinder(int index) {
+  Future<void> _removeCylinder(int index) async {
     final hasGasChanges = _gasChanges.any((gc) => gc.cylinderIndex == index);
     if (hasGasChanges) {
-      showDialog(
+      final confirmed = await showConfirmationDialog(
         context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text('Remove Cylinder'),
-          content: const Text('This cylinder has gas change events. Removing it will also remove those events.'),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Cancel')),
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-                _doRemoveCylinder(index);
-              },
-              child: const Text('Remove'),
-            ),
-          ],
-        ),
+        title: 'Remove Cylinder',
+        message: 'This cylinder has gas change events. Removing it will also remove those events.',
+        confirmText: 'Remove',
+        isDestructive: true,
       );
+      if (confirmed) {
+        _doRemoveCylinder(index);
+      }
     } else {
       _doRemoveCylinder(index);
     }

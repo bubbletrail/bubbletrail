@@ -27,25 +27,14 @@ class DiveSiteListScreen extends StatelessWidget {
           }
 
           if (state is DiveListError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
-                  const SizedBox(height: 16),
-                  Text('Error loading dive sites', style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 8),
-                  Text(state.message, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
-                ],
-              ),
-            );
+            return ErrorStateWidget(title: 'Error loading dive sites', message: state.message);
           }
 
           if (state is DiveListLoaded) {
             final diveSites = state.diveSites;
 
             if (diveSites.isEmpty) {
-              return const Center(child: Text('No dive sites yet.'));
+              return const EmptyStateWidget(message: 'No dive sites yet.', icon: Icons.location_on);
             }
 
             final t = Theme.of(context);
