@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../app_routes.dart';
 import '../ssrf/ssrf.dart' as ssrf;
 
 class DiveTableWidget extends StatefulWidget {
@@ -111,7 +112,7 @@ class _DiveTableWidgetState extends State<DiveTableWidget> {
             return DataRow(
               onSelectChanged: (selected) {
                 if (selected == true) {
-                  context.go('/dives/${dive.id}');
+                  context.goNamed(AppRouteName.divesDetails, pathParameters: {'diveID': dive.id});
                 }
               },
               cells: cells,

@@ -63,6 +63,13 @@ class DiveStorage {
     return Future.wait(maps.map((m) => _mapToDive(db, m)));
   }
 
+  Future<int> get nextDiveNo async {
+    final db = await SsrfDatabase.database;
+    final maps = await db.rawQuery('SELECT 1+max(number) AS next FROM dives');
+    if (maps.isEmpty || maps[0]['next'] == null) return 1;
+    return maps[0]['next'] as int;
+  }
+
   /// Returns all dives with only the overview data (from dives table only).
   /// Does not load children like cylinders, weightsystems, divecomputers, etc.
   Future<List<Dive>> getAllOverview() async {

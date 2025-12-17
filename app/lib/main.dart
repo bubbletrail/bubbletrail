@@ -7,6 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import 'src/app_routes.dart';
 import 'src/bloc/ble_bloc.dart';
 import 'src/bloc/divedetails_bloc.dart';
 import 'src/bloc/divelist_bloc.dart';
@@ -115,18 +116,24 @@ class _MyAppState extends State<MyApp> {
             StatefulShellBranch(
               routes: <RouteBase>[
                 GoRoute(
-                  path: '/dives',
-                  builder: (BuildContext context, GoRouterState state) => const DiveListScreen(),
+                  path: AppRoutePath.dives,
+                  name: AppRouteName.dives,
+                  builder: (BuildContext context, GoRouterState state) {
+                    context.read<DiveListBloc>().add(LoadDives());
+                    return const DiveListScreen();
+                  },
                   routes: [
                     GoRoute(
-                      path: 'new',
+                      path: AppRoutePath.divesNew,
+                      name: AppRouteName.divesNew,
                       builder: (context, state) => BlocProvider.value(
-                        value: DiveDetailsBloc(onDiveUpdated: () => context.read<DiveListBloc>().add(LoadDives()))..add(NewDiveEvent()),
+                        value: DiveDetailsBloc()..add(NewDiveEvent()),
                         child: DiveDetailsAvailable(child: DiveEditScreen()),
                       ),
                     ),
                     GoRoute(
-                      path: ':diveID',
+                      path: AppRoutePath.divesDetails,
+                      name: AppRouteName.divesDetails,
                       builder: (context, state) => BlocProvider(
                         create: (context) => DiveDetailsBloc(),
                         child: Builder(
@@ -138,10 +145,10 @@ class _MyAppState extends State<MyApp> {
                       ),
                       routes: [
                         GoRoute(
-                          path: 'edit',
+                          path: AppRoutePath.divesDetailsEdit,
+                          name: AppRouteName.divesDetailsEdit,
                           builder: (context, state) => BlocProvider.value(
-                            value: DiveDetailsBloc(onDiveUpdated: () => context.read<DiveListBloc>().add(LoadDives()))
-                              ..add(LoadDiveDetails(state.pathParameters['diveID']!)),
+                            value: DiveDetailsBloc()..add(LoadDiveDetails(state.pathParameters['diveID']!)),
                             child: DiveDetailsAvailable(child: DiveEditScreen()),
                           ),
                         ),
@@ -154,11 +161,13 @@ class _MyAppState extends State<MyApp> {
             StatefulShellBranch(
               routes: <RouteBase>[
                 GoRoute(
-                  path: '/sites',
+                  path: AppRoutePath.sites,
+                  name: AppRouteName.sites,
                   builder: (context, state) => const DiveSiteListScreen(),
                   routes: <RouteBase>[
                     GoRoute(
-                      path: ':siteID',
+                      path: AppRoutePath.sitesDetails,
+                      name: AppRouteName.sitesDetails,
                       builder: (context, state) => DiveSiteDetailScreen(siteID: state.pathParameters['siteID']!),
                     ),
                   ],
@@ -166,7 +175,7 @@ class _MyAppState extends State<MyApp> {
               ],
             ),
             StatefulShellBranch(
-              routes: <RouteBase>[GoRoute(path: '/connect', builder: (context, state) => const BleScanScreen())],
+              routes: <RouteBase>[GoRoute(path: AppRoutePath.connect, name: AppRouteName.connect, builder: (context, state) => const BleScanScreen())],
             ),
           ],
         ),

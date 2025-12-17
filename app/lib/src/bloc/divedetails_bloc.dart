@@ -23,11 +23,12 @@ class DiveDetailsLoading extends DiveDetailsState {
 class DiveDetailsLoaded extends DiveDetailsState {
   final ssrf.Dive dive;
   final ssrf.Divesite? diveSite;
+  final bool newDive;
 
-  const DiveDetailsLoaded(this.dive, this.diveSite);
+  const DiveDetailsLoaded(this.dive, this.diveSite, this.newDive);
 
   @override
-  List<Object?> get props => [dive, diveSite];
+  List<Object?> get props => [dive, diveSite, newDive];
 }
 
 class DiveDetailsError extends DiveDetailsState {
@@ -73,9 +74,8 @@ class UpdateDiveDetails extends DiveDetailsEvent {
 
 class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
   final SsrfStorage _storage;
-  final void Function()? onDiveUpdated;
 
-  DiveDetailsBloc({SsrfStorage? storage, this.onDiveUpdated}) : _storage = storage ?? SsrfStorage(), super(const DiveDetailsInitial()) {
+  DiveDetailsBloc({SsrfStorage? storage}) : _storage = storage ?? SsrfStorage(), super(const DiveDetailsInitial()) {
     on<LoadDiveDetails>(_onLoadDiveDetails);
     on<UpdateDiveDetails>(_onUpdateDiveDetails);
     on<NewDiveEvent>(_onNewDive);
@@ -96,7 +96,7 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
         diveSite = await _storage.divesites.getById(dive.divesiteid!);
       }
 
-      emit(DiveDetailsLoaded(dive, diveSite));
+      emit(DiveDetailsLoaded(dive, diveSite, false));
     } catch (e) {
       emit(DiveDetailsError('Failed to load dive details: $e'));
     }
@@ -104,16 +104,21 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
 
   Future<void> _onUpdateDiveDetails(UpdateDiveDetails event, Emitter<DiveDetailsState> emit) async {
     try {
-      await _storage.dives.update(event.dive);
+      final s = state as DiveDetailsLoaded;
+      if (s.newDive) {
+        await _storage.dives.insert(event.dive);
+      } else {
+        await _storage.dives.update(event.dive);
+      }
       add(LoadDiveDetails(event.dive.id));
-      onDiveUpdated?.call();
     } catch (e) {
       emit(DiveDetailsError('Failed to update dive: $e'));
     }
   }
 
   Future<void> _onNewDive(NewDiveEvent event, Emitter<DiveDetailsState> emit) async {
-    final dive = Dive(number: 0, start: DateTime.now(), duration: 0);
-    emit(DiveDetailsLoaded(dive, null));
+    final diveNo = await _storage.dives.nextDiveNo;
+    final dive = Dive(number: diveNo, start: DateTime.now(), duration: 0);
+    emit(DiveDetailsLoaded(dive, null, true));
   }
 }

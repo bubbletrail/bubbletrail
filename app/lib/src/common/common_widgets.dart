@@ -52,6 +52,7 @@ class ScreenScaffold extends StatelessWidget {
       body: Padding(
         padding: Platform.isIOS ? const EdgeInsets.all(0) : const EdgeInsets.only(right: 4.0, bottom: 4.0),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
               child: DecoratedBox(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../app_routes.dart';
 import '../bloc/divelist_bloc.dart';
 import '../common/common_widgets.dart';
 
@@ -62,7 +63,7 @@ class DiveSiteListScreen extends StatelessWidget {
                     return DataRow(
                       onSelectChanged: (selected) {
                         if (selected == true) {
-                          context.go('/sites/${site.uuid}');
+                          context.goNamed(AppRouteName.sitesDetails, pathParameters: {'siteID': site.uuid});
                         }
                       },
                       cells: [

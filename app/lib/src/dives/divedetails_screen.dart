@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../app_routes.dart';
 import '../bloc/divedetails_bloc.dart';
 import '../bloc/divelist_bloc.dart';
 import '../common/common_widgets.dart';
@@ -54,7 +55,7 @@ class _DiveDetails extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.edit),
           onPressed: () {
-            context.go('/dives/${dive.id}/edit');
+            context.goNamed(AppRouteName.divesDetailsEdit, pathParameters: {'diveID': dive.id});
           },
           tooltip: 'Edit dive',
         ),
@@ -62,7 +63,7 @@ class _DiveDetails extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: prevID != null
               ? () {
-                  context.go('/dives/$prevID');
+                  context.goNamed(AppRouteName.divesDetails, pathParameters: {'diveID': prevID!});
                 }
               : null,
           tooltip: 'Previous dive',
@@ -71,7 +72,7 @@ class _DiveDetails extends StatelessWidget {
           icon: const Icon(Icons.arrow_forward_ios),
           onPressed: nextID != null
               ? () {
-                  context.go('/dives/$nextID');
+                  context.goNamed(AppRouteName.divesDetails, pathParameters: {'diveID': nextID!});
                 }
               : null,
           tooltip: 'Next dive',
@@ -273,7 +274,7 @@ class _DivesiteCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          context.go('/sites/${divesite.uuid}');
+          context.goNamed(AppRouteName.sitesDetails, pathParameters: {'siteID': divesite.uuid});
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
