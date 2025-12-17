@@ -87,7 +87,13 @@ class _MyAppState extends State<MyApp> {
 
             final cs = Theme.of(context).colorScheme;
             final decoration = BoxDecoration(
-              gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [cs.tertiaryContainer, cs.onTertiaryFixedVariant]),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [cs.tertiaryContainer, cs.onTertiaryFixedVariant, cs.tertiaryContainer, cs.onTertiaryFixedVariant],
+                stops: [0.1, 0.25, 0.4, 0.8],
+                tileMode: TileMode.mirror,
+              ),
             );
 
             if (Platform.isIOS) {

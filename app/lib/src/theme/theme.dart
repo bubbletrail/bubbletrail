@@ -5,18 +5,15 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  static const Color _primaryColor = Color(0xFF0099CC);
-  static const Color _secondaryColor = Color(0xFF99DD55);
-  static const Color _darkSecondaryBackground = _primaryColor; // Color(0xFF3366BB);
-  // static const Color _lightSecondaryBackground = Color(0xFF80C0FF);
+  static const Color _d1 = Color(0xFF011A1A); // gradient
+  static const Color _d2 = Color(0xFF01403A); // gradient
+  static const Color _d3 = Color(0xFF04BFAD); // primary
+  static const Color _d4 = Color(0xFF9AEBA3); // secondary
 
-  static const Color _darkBackgroundGradientTop = Color(0xFF001020);
-  static const Color _darkBackgroundGradientBottom = Color(0xFF204060);
-  static const Color _darkBackgroundGradientDivider = Color(0xFF305070);
-
-  static const Color _lightBackgroundGradientTop = Color(0xFFA0F0FF);
-  static const Color _lightBackgroundGradientBottom = Color(0xFF80B0F0);
-  static const Color _lightBackgroundGradientDivider = Color(0xFF4080C0);
+  static const Color _l1 = Color(0xFFC2EDF2); // gradient
+  static const Color _l2 = Color(0xFF7AB8BF); // gradient
+  static const Color _l3 = Color(0xFF3E848C); // primary
+  static const Color _l4 = Color(0xFF025159); // secondary
 
   static final density = Platform.isAndroid || Platform.isIOS ? VisualDensity.standard : VisualDensity.compact;
 
@@ -35,13 +32,14 @@ class AppTheme {
     visualDensity: density,
     colorScheme: ColorScheme.fromSeed(
       brightness: Brightness.dark,
-      seedColor: AppTheme._primaryColor,
-      primary: AppTheme._primaryColor,
-      secondary: AppTheme._secondaryColor,
-      secondaryContainer: _darkSecondaryBackground,
-      tertiaryContainer: _darkBackgroundGradientTop,
-      onTertiaryContainer: _darkBackgroundGradientDivider,
-      onTertiaryFixedVariant: _darkBackgroundGradientBottom,
+      seedColor: _d3,
+      primary: _d3,
+      secondary: _d4,
+
+      // Background gradient and divider line
+      tertiaryContainer: _d1,
+      onTertiaryFixedVariant: _d2,
+      onTertiaryContainer: _d2,
     ),
     appBarTheme: AppBarTheme(backgroundColor: Colors.transparent, elevation: 0, scrolledUnderElevation: 0, centerTitle: false, toolbarHeight: 48),
     navigationRailTheme: NavigationRailThemeData(backgroundColor: Colors.transparent),
@@ -53,12 +51,14 @@ class AppTheme {
     visualDensity: density,
     colorScheme: ColorScheme.fromSeed(
       brightness: Brightness.light,
-      seedColor: AppTheme._primaryColor,
-      primary: AppTheme._primaryColor,
-      secondary: AppTheme._secondaryColor,
-      tertiaryContainer: _lightBackgroundGradientTop,
-      onTertiaryContainer: _lightBackgroundGradientDivider,
-      onTertiaryFixedVariant: _lightBackgroundGradientBottom,
+      seedColor: _l3,
+      primary: _l3,
+      secondary: _l4,
+
+      // Background gradient and divider line
+      tertiaryContainer: _l1,
+      onTertiaryFixedVariant: _l2,
+      onTertiaryContainer: _l2,
     ),
     appBarTheme: AppBarTheme(backgroundColor: Colors.transparent, elevation: 0, scrolledUnderElevation: 0, centerTitle: false, toolbarHeight: 48),
     navigationRailTheme: NavigationRailThemeData(backgroundColor: Colors.transparent),
