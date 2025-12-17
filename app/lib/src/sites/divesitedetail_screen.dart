@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
+import '../app_routes.dart';
 import '../bloc/divelist_bloc.dart';
 import '../common/common.dart';
 import 'divesitemap_widget.dart';
@@ -22,6 +24,13 @@ class DiveSiteDetailScreen extends StatelessWidget {
 
     return ScreenScaffold(
       title: Text(site.name),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.edit),
+          tooltip: 'Edit',
+          onPressed: () => context.goNamed(AppRouteName.sitesDetailsEdit, pathParameters: {'siteID': siteID}),
+        ),
+      ],
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),

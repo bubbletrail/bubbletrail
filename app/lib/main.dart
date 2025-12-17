@@ -11,12 +11,14 @@ import 'src/app_routes.dart';
 import 'src/bloc/ble_bloc.dart';
 import 'src/bloc/divedetails_bloc.dart';
 import 'src/bloc/divelist_bloc.dart';
+import 'src/bloc/divesitedetails_bloc.dart';
 import 'src/common/common.dart';
 import 'src/dives/ble_scan_screen.dart';
 import 'src/dives/divedetails_screen.dart';
 import 'src/dives/diveedit_screen.dart';
 import 'src/dives/divelist_screen.dart';
 import 'src/sites/divesitedetail_screen.dart';
+import 'src/sites/divesiteedit_screen.dart';
 import 'src/sites/divesitelist_screen.dart';
 import 'src/theme/theme.dart';
 
@@ -166,9 +168,27 @@ class _MyAppState extends State<MyApp> {
                   builder: (context, state) => const DiveSiteListScreen(),
                   routes: <RouteBase>[
                     GoRoute(
+                      path: AppRoutePath.sitesNew,
+                      name: AppRouteName.sitesNew,
+                      builder: (context, state) => BlocProvider(
+                        create: (context) => DivesiteDetailsBloc()..add(const NewDivesiteEvent()),
+                        child: DivesiteDetailsAvailable(child: DivesiteEditScreen()),
+                      ),
+                    ),
+                    GoRoute(
                       path: AppRoutePath.sitesDetails,
                       name: AppRouteName.sitesDetails,
                       builder: (context, state) => DiveSiteDetailScreen(siteID: state.pathParameters['siteID']!),
+                      routes: [
+                        GoRoute(
+                          path: AppRoutePath.sitesDetailsEdit,
+                          name: AppRouteName.sitesDetailsEdit,
+                          builder: (context, state) => BlocProvider(
+                            create: (context) => DivesiteDetailsBloc()..add(LoadDivesiteDetails(state.pathParameters['siteID']!)),
+                            child: DivesiteDetailsAvailable(child: DivesiteEditScreen()),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

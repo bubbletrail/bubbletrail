@@ -6,6 +6,8 @@ abstract class AppRouteName {
 
   static const sites = 'sites';
   static const sitesDetails = 'site-details';
+  static const sitesDetailsEdit = 'site-edit';
+  static const sitesNew = 'new-site';
 
   static const connect = 'connect';
 }
@@ -18,6 +20,8 @@ abstract class AppRoutePath {
 
   static const sites = '/sites';
   static const sitesDetails = ':siteID';
+  static const sitesDetailsEdit = 'edit';
+  static const sitesNew = 'new';
 
   static const connect = '/connect';
 }
