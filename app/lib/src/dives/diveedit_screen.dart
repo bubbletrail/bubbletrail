@@ -18,35 +18,14 @@ class _EditableDiveCylinder {
   double? start;
   double? end;
 
-  _EditableDiveCylinder({
-    required this.cylinderId,
-    this.cylinder,
-    this.o2,
-    this.he,
-    this.start,
-    this.end,
-  });
+  _EditableDiveCylinder({required this.cylinderId, this.cylinder, this.o2, this.he, this.start, this.end});
 
   factory _EditableDiveCylinder.fromDiveCylinder(ssrf.DiveCylinder dc) {
-    return _EditableDiveCylinder(
-      cylinderId: dc.cylinderId,
-      cylinder: dc.cylinder,
-      o2: dc.o2,
-      he: dc.he,
-      start: dc.start,
-      end: dc.end,
-    );
+    return _EditableDiveCylinder(cylinderId: dc.cylinderId, cylinder: dc.cylinder, o2: dc.o2, he: dc.he, start: dc.start, end: dc.end);
   }
 
   ssrf.DiveCylinder toDiveCylinder() {
-    return ssrf.DiveCylinder(
-      cylinderId: cylinderId,
-      cylinder: cylinder,
-      o2: o2,
-      he: he,
-      start: start,
-      end: end,
-    );
+    return ssrf.DiveCylinder(cylinderId: cylinderId, cylinder: cylinder, o2: o2, he: he, start: start, end: end);
   }
 
   String get gasDescription {
@@ -84,7 +63,7 @@ class DiveEditScreen extends StatefulWidget {
 
 class _DiveEditScreenState extends State<DiveEditScreen> {
   late final ssrf.Dive dive;
-  late final TextEditingController _durationController;
+  late int _durationSeconds;
   late final TextEditingController _divemasterController;
   late final TextEditingController _buddiesController;
   late final TextEditingController _notesController;
@@ -100,7 +79,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     super.initState();
     dive = (context.read<DiveDetailsBloc>().state as DiveDetailsLoaded).dive;
     _selectedDateTime = dive.start;
-    _durationController = TextEditingController(text: (dive.duration / 60).toStringAsFixed(1));
+    _durationSeconds = dive.duration;
     _divemasterController = TextEditingController(text: dive.divemaster ?? '');
     _buddiesController = TextEditingController(text: dive.buddies.join(', '));
     _notesController = TextEditingController(text: dive.notes ?? '');
@@ -116,10 +95,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     for (final dcLog in dive.divecomputers) {
       for (final event in dcLog.events) {
         if (event.name == 'gaschange' && event.cylinder != null) {
-          _gasChanges.add(_EditableGasChange(
-            timeSeconds: event.time,
-            cylinderIndex: event.cylinder!,
-          ));
+          _gasChanges.add(_EditableGasChange(timeSeconds: event.time, cylinderIndex: event.cylinder!));
         }
       }
     }
@@ -129,7 +105,6 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
 
   @override
   void dispose() {
-    _durationController.dispose();
     _divemasterController.dispose();
     _buddiesController.dispose();
     _notesController.dispose();
@@ -153,6 +128,28 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
         _selectedDateTime = DateTime(_selectedDateTime.year, _selectedDateTime.month, _selectedDateTime.day, picked.hour, picked.minute, 0);
       });
     }
+  }
+
+  Future<void> _selectDuration() async {
+    final result = await showDialog<int>(
+      context: context,
+      builder: (dialogContext) => DurationPickerDialog(initialSeconds: _durationSeconds),
+    );
+
+    if (result != null) {
+      setState(() {
+        _durationSeconds = result;
+      });
+    }
+  }
+
+  String get _durationFormatted {
+    final minutes = _durationSeconds ~/ 60;
+    final seconds = _durationSeconds % 60;
+    if (seconds == 0) {
+      return '$minutes min';
+    }
+    return '$minutes:${seconds.toString().padLeft(2, '0')} min';
   }
 
   Future<void> _selectDivesite() async {
@@ -193,9 +190,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
             },
           ),
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(null), child: const Text('Cancel')),
-        ],
+        actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(null), child: const Text('Cancel'))],
       ),
     );
 
@@ -230,10 +225,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
             itemCount: cylinders.length,
             itemBuilder: (context, index) {
               final cyl = cylinders[index];
-              final subtitle = [
-                if (cyl.size != null) '${cyl.size}L',
-                if (cyl.workpressure != null) '${cyl.workpressure} bar',
-              ].join(' @ ');
+              final subtitle = [if (cyl.size != null) '${cyl.size}L', if (cyl.workpressure != null) '${cyl.workpressure} bar'].join(' @ ');
               return ListTile(
                 leading: const Icon(Icons.scuba_diving),
                 title: Text(cyl.description ?? 'Cylinder ${cyl.id}'),
@@ -243,20 +235,13 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
             },
           ),
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(null), child: const Text('Cancel')),
-        ],
+        actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(null), child: const Text('Cancel'))],
       ),
     );
 
     if (selected != null) {
       setState(() {
-        _cylinders.add(_EditableDiveCylinder(
-          cylinderId: selected.id,
-          cylinder: selected,
-          o2: 21,
-          he: 0,
-        ));
+        _cylinders.add(_EditableDiveCylinder(cylinderId: selected.id, cylinder: selected, o2: 21, he: 0));
       });
     }
   }
@@ -306,63 +291,91 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     final startController = TextEditingController(text: cyl.start?.toString() ?? '');
     final endController = TextEditingController(text: cyl.end?.toString() ?? '');
 
+    final cylinderState = context.read<CylinderListBloc>().state;
+    final availableCylinders = cylinderState is CylinderListLoaded ? cylinderState.cylinders : <ssrf.Cylinder>[];
+    ssrf.Cylinder? selectedCylinder = cyl.cylinder;
+
     final result = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text('Edit ${cyl.cylinder?.description ?? 'Cylinder ${index + 1}'}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: o2Controller,
-                    decoration: const InputDecoration(labelText: 'O2 %', border: OutlineInputBorder()),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  ),
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text('Edit ${selectedCylinder?.description ?? 'Cylinder ${index + 1}'}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (availableCylinders.isNotEmpty) ...[
+                DropdownButtonFormField<int>(
+                  initialValue: selectedCylinder?.id,
+                  decoration: const InputDecoration(labelText: 'Cylinder Type', border: OutlineInputBorder()),
+                  items: availableCylinders.map((c) {
+                    final subtitle = [if (c.size != null) '${c.size}L', if (c.workpressure != null) '${c.workpressure} bar'].join(' @ ');
+                    return DropdownMenuItem(value: c.id, child: Text(c.description ?? 'Cylinder ${c.id}${subtitle.isNotEmpty ? ' ($subtitle)' : ''}'));
+                  }).toList(),
+                  onChanged: (id) {
+                    if (id != null) {
+                      setDialogState(() {
+                        selectedCylinder = availableCylinders.firstWhere((c) => c.id == id);
+                      });
+                    }
+                  },
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextField(
-                    controller: heController,
-                    decoration: const InputDecoration(labelText: 'He %', border: OutlineInputBorder()),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  ),
-                ),
+                const SizedBox(height: 16),
               ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: startController,
-                    decoration: const InputDecoration(labelText: 'Start (bar)', border: OutlineInputBorder()),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: o2Controller,
+                      decoration: const InputDecoration(labelText: 'O2 %', border: OutlineInputBorder()),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextField(
-                    controller: endController,
-                    decoration: const InputDecoration(labelText: 'End (bar)', border: OutlineInputBorder()),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: TextField(
+                      controller: heController,
+                      decoration: const InputDecoration(labelText: 'He %', border: OutlineInputBorder()),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: startController,
+                      decoration: const InputDecoration(labelText: 'Start (bar)', border: OutlineInputBorder()),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: TextField(
+                      controller: endController,
+                      decoration: const InputDecoration(labelText: 'End (bar)', border: OutlineInputBorder()),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancel')),
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Save')),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Save')),
-        ],
       ),
     );
 
     if (result == true) {
       setState(() {
+        if (selectedCylinder != null) {
+          cyl.cylinderId = selectedCylinder!.id;
+          cyl.cylinder = selectedCylinder;
+        }
         cyl.o2 = double.tryParse(o2Controller.text);
         cyl.he = double.tryParse(heController.text);
         cyl.start = double.tryParse(startController.text);
@@ -377,57 +390,9 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   }
 
   Future<void> _addGasChange(int cylinderIndex) async {
-    final minutesController = TextEditingController();
-    final secondsController = TextEditingController();
-    final maxSeconds = dive.duration;
-
-    final result = await showDialog<int?>(
+    final result = await showDialog<int>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Gas Change Time'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Enter time into dive (max ${maxSeconds ~/ 60}:${(maxSeconds % 60).toString().padLeft(2, '0')})'),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: minutesController,
-                    decoration: const InputDecoration(labelText: 'Minutes', border: OutlineInputBorder()),
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
-                const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text(':')),
-                Expanded(
-                  child: TextField(
-                    controller: secondsController,
-                    decoration: const InputDecoration(labelText: 'Seconds', border: OutlineInputBorder()),
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(null), child: const Text('Cancel')),
-          TextButton(
-            onPressed: () {
-              final minutes = int.tryParse(minutesController.text) ?? 0;
-              final seconds = int.tryParse(secondsController.text) ?? 0;
-              final totalSeconds = minutes * 60 + seconds;
-              if (totalSeconds >= 0 && totalSeconds <= maxSeconds) {
-                Navigator.of(dialogContext).pop(totalSeconds);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Time must be within dive duration')));
-              }
-            },
-            child: const Text('Add'),
-          ),
-        ],
-      ),
+      builder: (dialogContext) => DurationPickerDialog(initialSeconds: 0, maxSeconds: _durationSeconds, title: 'Gas Change Time'),
     );
 
     if (result != null) {
@@ -436,9 +401,6 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
         _gasChanges.sort((a, b) => a.timeSeconds.compareTo(b.timeSeconds));
       });
     }
-
-    minutesController.dispose();
-    secondsController.dispose();
   }
 
   void _removeGasChange(int index) {
@@ -449,11 +411,9 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
 
   void _saveDive() {
     try {
-      final durationMinutes = double.parse(_durationController.text);
-
       // Update dive properties
       dive.start = _selectedDateTime;
-      dive.duration = (durationMinutes * 60).toInt();
+      dive.duration = _durationSeconds;
       dive.rating = _rating;
       dive.divesiteid = _selectedDivesiteId;
       dive.divemaster = _divemasterController.text.trim().isEmpty ? null : _divemasterController.text.trim();
@@ -558,10 +518,12 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                 ),
               ],
             ),
-            TextField(
-              controller: _durationController,
-              decoration: const InputDecoration(labelText: 'Duration (minutes)', border: OutlineInputBorder()),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            InkWell(
+              onTap: _selectDuration,
+              child: InputDecorator(
+                decoration: const InputDecoration(labelText: 'Duration', border: OutlineInputBorder(), suffixIcon: Icon(Icons.timer)),
+                child: Text(_durationFormatted),
+              ),
             ),
             Builder(
               builder: (context) {
@@ -614,10 +576,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        cyl.cylinder?.description ?? 'Cylinder ${index + 1}',
-                                        style: Theme.of(context).textTheme.titleSmall,
-                                      ),
+                                      Text(cyl.cylinder?.description ?? 'Cylinder ${index + 1}', style: Theme.of(context).textTheme.titleSmall),
                                       Text(
                                         '${cyl.gasDescription}${cyl.start != null || cyl.end != null ? ' • ${cyl.start?.toInt() ?? '?'} → ${cyl.end?.toInt() ?? '?'} bar' : ''}',
                                         style: Theme.of(context).textTheme.bodySmall,
@@ -625,16 +584,8 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                                     ],
                                   ),
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.edit, size: 20),
-                                  onPressed: () => _editCylinderGas(index),
-                                  tooltip: 'Edit gas mix',
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete, size: 20),
-                                  onPressed: () => _removeCylinder(index),
-                                  tooltip: 'Remove cylinder',
-                                ),
+                                IconButton(icon: const Icon(Icons.edit, size: 20), onPressed: () => _editCylinderGas(index), tooltip: 'Edit gas mix'),
+                                IconButton(icon: const Icon(Icons.delete, size: 20), onPressed: () => _removeCylinder(index), tooltip: 'Remove cylinder'),
                               ],
                             ),
                             const SizedBox(height: 8),
@@ -656,10 +607,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                                         style: Theme.of(context).textTheme.bodySmall,
                                       ),
                                     ),
-                                    InkWell(
-                                      onTap: () => _removeGasChange(gcIndex),
-                                      child: const Icon(Icons.close, size: 16),
-                                    ),
+                                    InkWell(onTap: () => _removeGasChange(gcIndex), child: const Icon(Icons.close, size: 16)),
                                   ],
                                 ),
                               );
