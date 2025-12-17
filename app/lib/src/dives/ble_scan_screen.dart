@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../bloc/ble_bloc.dart';
-import '../common/common_widgets.dart';
+import '../common/common.dart';
 
 class BleScanScreen extends StatelessWidget {
   const BleScanScreen({super.key});

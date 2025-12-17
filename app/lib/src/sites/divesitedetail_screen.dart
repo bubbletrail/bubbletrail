@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../bloc/divelist_bloc.dart';
-import '../common/common_widgets.dart';
-import '../common/divetable_widget.dart';
+import '../common/common.dart';
 import 'divesitemap_widget.dart';
 
 class DiveSiteDetailScreen extends StatelessWidget {

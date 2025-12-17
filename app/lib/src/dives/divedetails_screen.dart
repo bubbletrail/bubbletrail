@@ -6,8 +6,7 @@ import 'package:intl/intl.dart';
 import '../app_routes.dart';
 import '../bloc/divedetails_bloc.dart';
 import '../bloc/divelist_bloc.dart';
-import '../common/common_widgets.dart';
-import '../common/divesitemap_widget.dart';
+import '../common/common.dart';
 import '../ssrf/ssrf.dart' as ssrf;
 import 'depthprofile_widget.dart';
 

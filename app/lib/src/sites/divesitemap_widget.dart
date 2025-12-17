@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../common/divesitemap_widget.dart';
+import '../common/common.dart';
 import '../ssrf/ssrf.dart' as ssrf;
 
 class DiveSiteMapWidget extends StatelessWidget {

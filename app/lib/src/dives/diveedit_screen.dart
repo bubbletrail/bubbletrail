@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../bloc/divedetails_bloc.dart';
-import '../common/common_widgets.dart';
+import '../common/common.dart';
 import '../ssrf/ssrf.dart' as ssrf;
 
 class DiveEditScreen extends StatefulWidget {

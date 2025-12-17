@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../app_routes.dart';
 import '../bloc/divelist_bloc.dart';
-import '../common/common_widgets.dart';
+import '../common/common.dart';
 
 class DiveSiteListScreen extends StatelessWidget {
   const DiveSiteListScreen({super.key});
