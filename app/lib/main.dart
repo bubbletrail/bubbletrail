@@ -9,6 +9,8 @@ import 'package:intl/intl.dart';
 
 import 'src/app_routes.dart';
 import 'src/bloc/ble_bloc.dart';
+import 'src/bloc/cylinderdetails_bloc.dart';
+import 'src/bloc/cylinderlist_bloc.dart';
 import 'src/bloc/divedetails_bloc.dart';
 import 'src/bloc/divelist_bloc.dart';
 import 'src/bloc/divesitedetails_bloc.dart';
@@ -17,6 +19,9 @@ import 'src/dives/ble_scan_screen.dart';
 import 'src/dives/divedetails_screen.dart';
 import 'src/dives/diveedit_screen.dart';
 import 'src/dives/divelist_screen.dart';
+import 'src/equipment/cylinder_edit_screen.dart';
+import 'src/equipment/cylinder_list_screen.dart';
+import 'src/equipment/equipment_screen.dart';
 import 'src/sites/divesitedetail_screen.dart';
 import 'src/sites/divesiteedit_screen.dart';
 import 'src/sites/divesitelist_screen.dart';
@@ -37,6 +42,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   static const _channel = MethodChannel('org.divepath.app/file_handler');
   final _diveListBloc = DiveListBloc();
+  final _cylinderListBloc = CylinderListBloc();
 
   @override
   void initState() {
@@ -72,7 +78,12 @@ class _MyAppState extends State<MyApp> {
         StatefulShellRoute.indexedStack(
           builder: (BuildContext context, GoRouterState state, StatefulNavigationShell shell) {
             final appBarTheme = Theme.of(context).appBarTheme;
-            const destinations = [(icon: Icons.waves, label: 'Dives'), (icon: Icons.place, label: 'Sites'), (icon: Icons.bluetooth, label: 'Connect')];
+            const destinations = [
+              (icon: Icons.waves, label: 'Dives'),
+              (icon: Icons.place, label: 'Sites'),
+              (icon: Icons.settings, label: 'Equipment'),
+              (icon: Icons.bluetooth, label: 'Connect'),
+            ];
 
             final cs = Theme.of(context).colorScheme;
             final decoration = BoxDecoration(
@@ -195,6 +206,40 @@ class _MyAppState extends State<MyApp> {
               ],
             ),
             StatefulShellBranch(
+              routes: <RouteBase>[
+                GoRoute(
+                  path: AppRoutePath.equipment,
+                  name: AppRouteName.equipment,
+                  builder: (context, state) => const EquipmentScreen(),
+                  routes: <RouteBase>[
+                    GoRoute(
+                      path: AppRoutePath.cylinders,
+                      name: AppRouteName.cylinders,
+                      builder: (context, state) => const CylinderListScreen(),
+                      routes: <RouteBase>[
+                        GoRoute(
+                          path: AppRoutePath.cylindersNew,
+                          name: AppRouteName.cylindersNew,
+                          builder: (context, state) => BlocProvider(
+                            create: (context) => CylinderDetailsBloc()..add(const NewCylinderEvent()),
+                            child: CylinderDetailsAvailable(child: CylinderEditScreen()),
+                          ),
+                        ),
+                        GoRoute(
+                          path: AppRoutePath.cylindersDetails,
+                          name: AppRouteName.cylindersDetails,
+                          builder: (context, state) => BlocProvider(
+                            create: (context) => CylinderDetailsBloc()..add(LoadCylinderDetails(int.parse(state.pathParameters['cylinderID']!))),
+                            child: CylinderDetailsAvailable(child: CylinderEditScreen()),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            StatefulShellBranch(
               routes: <RouteBase>[GoRoute(path: AppRoutePath.connect, name: AppRouteName.connect, builder: (context, state) => const BleScanScreen())],
             ),
           ],
@@ -204,6 +249,7 @@ class _MyAppState extends State<MyApp> {
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(value: _diveListBloc),
+        BlocProvider.value(value: _cylinderListBloc),
         BlocProvider(create: (context) => BleBloc()..add(const BleStarted())),
       ],
       child: MaterialApp.router(
