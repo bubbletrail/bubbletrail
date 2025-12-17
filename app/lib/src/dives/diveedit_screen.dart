@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../bloc/divedetails_bloc.dart';
+import '../bloc/divelist_bloc.dart';
 import '../common/common.dart';
 import '../ssrf/ssrf.dart' as ssrf;
 
@@ -23,6 +24,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   late final TextEditingController _tagsController;
   late DateTime _selectedDateTime;
   late int? _rating;
+  String? _selectedDivesiteId;
 
   @override
   void initState() {
@@ -35,6 +37,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     _notesController = TextEditingController(text: dive.notes ?? '');
     _tagsController = TextEditingController(text: dive.tags.join(', '));
     _rating = dive.rating;
+    _selectedDivesiteId = dive.divesiteid;
   }
 
   @override
@@ -65,6 +68,57 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     }
   }
 
+  Future<void> _selectDivesite() async {
+    final diveListState = context.read<DiveListBloc>().state;
+    if (diveListState is! DiveListLoaded) return;
+
+    final diveSites = diveListState.diveSites;
+    if (diveSites.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No dive sites available')));
+      return;
+    }
+
+    final selected = await showDialog<String?>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Select Dive Site'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: diveSites.length + 1,
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return ListTile(
+                  leading: const Icon(Icons.clear),
+                  title: const Text('No site'),
+                  selected: _selectedDivesiteId == null,
+                  onTap: () => Navigator.of(dialogContext).pop(''),
+                );
+              }
+              final site = diveSites[index - 1];
+              return ListTile(
+                leading: const Icon(Icons.location_on),
+                title: Text(site.name),
+                selected: site.uuid == _selectedDivesiteId,
+                onTap: () => Navigator.of(dialogContext).pop(site.uuid),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(null), child: const Text('Cancel')),
+        ],
+      ),
+    );
+
+    if (selected != null) {
+      setState(() {
+        _selectedDivesiteId = selected.isEmpty ? null : selected;
+      });
+    }
+  }
+
   void _saveDive() {
     try {
       final durationMinutes = double.parse(_durationController.text);
@@ -73,6 +127,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       dive.start = _selectedDateTime;
       dive.duration = (durationMinutes * 60).toInt();
       dive.rating = _rating;
+      dive.divesiteid = _selectedDivesiteId;
       dive.divemaster = _divemasterController.text.trim().isEmpty ? null : _divemasterController.text.trim();
       dive.notes = _notesController.text.trim().isEmpty ? null : _notesController.text.trim();
 
@@ -134,6 +189,21 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
               controller: _durationController,
               decoration: const InputDecoration(labelText: 'Duration (minutes)', border: OutlineInputBorder()),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            ),
+            Builder(
+              builder: (context) {
+                final diveListState = context.watch<DiveListBloc>().state;
+                final diveSites = diveListState is DiveListLoaded ? diveListState.diveSites : <ssrf.Divesite>[];
+                final selectedSite = _selectedDivesiteId != null ? diveSites.where((s) => s.uuid == _selectedDivesiteId).firstOrNull : null;
+
+                return InkWell(
+                  onTap: _selectDivesite,
+                  child: InputDecorator(
+                    decoration: const InputDecoration(labelText: 'Dive Site', border: OutlineInputBorder(), suffixIcon: Icon(Icons.location_on)),
+                    child: Text(selectedSite?.name ?? 'No site selected', style: selectedSite == null ? TextStyle(color: Theme.of(context).hintColor) : null),
+                  ),
+                );
+              },
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
