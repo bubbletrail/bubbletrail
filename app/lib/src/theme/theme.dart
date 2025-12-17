@@ -8,7 +8,7 @@ class AppTheme {
   static const Color _primaryColor = Color(0xFF0099CC);
   static const Color _secondaryColor = Color(0xFF99DD55);
   static const Color _darkSecondaryBackground = _primaryColor; // Color(0xFF3366BB);
-  static const Color _lightSecondaryBackground = Color(0xFF80C0FF);
+  // static const Color _lightSecondaryBackground = Color(0xFF80C0FF);
 
   static const Color _darkBackgroundGradientTop = Color(0xFF001020);
   static const Color _darkBackgroundGradientBottom = Color(0xFF204060);
@@ -22,11 +22,11 @@ class AppTheme {
 
   static const transitions = PageTransitionsTheme(
     builders: <TargetPlatform, PageTransitionsBuilder>{
-      TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
-      TargetPlatform.iOS: FadeForwardsPageTransitionsBuilder(),
-      TargetPlatform.linux: FadeForwardsPageTransitionsBuilder(),
-      TargetPlatform.macOS: FadeForwardsPageTransitionsBuilder(),
-      TargetPlatform.windows: FadeForwardsPageTransitionsBuilder(),
+      TargetPlatform.android: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
+      TargetPlatform.iOS: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
+      TargetPlatform.linux: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
+      TargetPlatform.macOS: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
+      TargetPlatform.windows: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
     },
   );
 
