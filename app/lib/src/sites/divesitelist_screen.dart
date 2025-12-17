@@ -50,8 +50,10 @@ class DiveSiteListScreen extends StatelessWidget {
                 child: DataTable(
                   columns: const [
                     DataColumn(label: Text('Name')),
-                    DataColumn(label: Text('Latitude')),
-                    DataColumn(label: Text('Longitude')),
+                    DataColumn(label: Text('Country')),
+                    DataColumn(label: Text('Location')),
+                    DataColumn(label: Text('Body of Water')),
+                    DataColumn(label: Text('Difficulty')),
                     DataColumn(label: Text('# Dives')),
                   ],
                   dividerThickness: 0,
@@ -68,8 +70,10 @@ class DiveSiteListScreen extends StatelessWidget {
                       },
                       cells: [
                         DataCell(Text(site.name)),
-                        DataCell(Text(site.position?.lat.toStringAsFixed(6) ?? '-')),
-                        DataCell(Text(site.position?.lon.toStringAsFixed(6) ?? '-')),
+                        DataCell(Text(site.country ?? '-')),
+                        DataCell(Text(site.location ?? '-')),
+                        DataCell(Text(site.bodyOfWater ?? '-')),
+                        DataCell(Text(site.difficulty ?? '-')),
                         DataCell(Text(divesAtSite.toString())),
                       ],
                     );

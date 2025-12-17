@@ -3,7 +3,7 @@ import 'package:path/path.dart';
 
 class SsrfDatabase {
   static Database? _database;
-  static const int _version = 1;
+  static const int _version = 2;
   static Future<Database> Function()? _testDatabaseFactory;
 
   static Future<Database> get database async {
@@ -26,7 +26,16 @@ class SsrfDatabase {
 
   static Future<Database> _initDatabase() async {
     final path = join(await getDatabasesPath(), 'divepath.db');
-    return openDatabase(path, version: _version, onCreate: _onCreate);
+    return openDatabase(path, version: _version, onCreate: _onCreate, onUpgrade: _onUpgrade);
+  }
+
+  static Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE divesites ADD COLUMN country TEXT');
+      await db.execute('ALTER TABLE divesites ADD COLUMN location TEXT');
+      await db.execute('ALTER TABLE divesites ADD COLUMN body_of_water TEXT');
+      await db.execute('ALTER TABLE divesites ADD COLUMN difficulty TEXT');
+    }
   }
 
   static Future<void> _onCreate(Database db, int version) async {
@@ -35,7 +44,11 @@ class SsrfDatabase {
         uuid TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         lat REAL,
-        lon REAL
+        lon REAL,
+        country TEXT,
+        location TEXT,
+        body_of_water TEXT,
+        difficulty TEXT
       )
     ''');
 

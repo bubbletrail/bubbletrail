@@ -390,7 +390,37 @@ extension DivesiteXml on Divesite {
       }
     }
 
-    return Divesite(uuid: ensureUUID(elem.getAttribute('uuid')) ?? '', name: elem.getAttribute('name') ?? '', position: position);
+    // Parse extradata elements for additional fields
+    String? country;
+    String? location;
+    String? bodyOfWater;
+    String? difficulty;
+    for (final extradataElem in elem.findElements('extradata')) {
+      final key = extradataElem.getAttribute('key');
+      final value = extradataElem.getAttribute('value');
+      if (key != null && value != null) {
+        switch (key) {
+          case 'country':
+            country = value;
+          case 'location':
+            location = value;
+          case 'body_of_water':
+            bodyOfWater = value;
+          case 'difficulty':
+            difficulty = value;
+        }
+      }
+    }
+
+    return Divesite(
+      uuid: ensureUUID(elem.getAttribute('uuid')) ?? '',
+      name: elem.getAttribute('name') ?? '',
+      position: position,
+      country: country,
+      location: location,
+      bodyOfWater: bodyOfWater,
+      difficulty: difficulty,
+    );
   }
 
   XmlElement toXml() {
@@ -403,6 +433,32 @@ extension DivesiteXml on Divesite {
 
         if (position != null) {
           builder.attribute('gps', '${position!.lat.toStringAsFixed(6)} ${position!.lon.toStringAsFixed(6)}');
+        }
+
+        // Add extradata elements for additional fields
+        if (country != null) {
+          builder.element('extradata', nest: () {
+            builder.attribute('key', 'country');
+            builder.attribute('value', country!);
+          });
+        }
+        if (location != null) {
+          builder.element('extradata', nest: () {
+            builder.attribute('key', 'location');
+            builder.attribute('value', location!);
+          });
+        }
+        if (bodyOfWater != null) {
+          builder.element('extradata', nest: () {
+            builder.attribute('key', 'body_of_water');
+            builder.attribute('value', bodyOfWater!);
+          });
+        }
+        if (difficulty != null) {
+          builder.element('extradata', nest: () {
+            builder.attribute('key', 'difficulty');
+            builder.attribute('value', difficulty!);
+          });
         }
       },
     );

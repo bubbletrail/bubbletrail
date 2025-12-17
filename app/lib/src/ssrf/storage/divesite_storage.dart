@@ -44,6 +44,10 @@ class DivesiteStorage {
         'name': site.name,
         'lat': site.position?.lat,
         'lon': site.position?.lon,
+        'country': site.country,
+        'location': site.location,
+        'body_of_water': site.bodyOfWater,
+        'difficulty': site.difficulty,
       };
 
   Divesite _fromMap(Map<String, Object?> m) {
@@ -57,6 +61,10 @@ class DivesiteStorage {
       uuid: m['uuid'] as String,
       name: m['name'] as String,
       position: position,
+      country: m['country'] as String?,
+      location: m['location'] as String?,
+      bodyOfWater: m['body_of_water'] as String?,
+      difficulty: m['difficulty'] as String?,
     );
   }
 }

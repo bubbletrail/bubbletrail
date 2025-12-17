@@ -30,11 +30,20 @@ class DiveSiteDetailScreen extends StatelessWidget {
             children: [
               infoCard(context, 'Location Information', [
                 infoRow('Name', site.name),
+                if (site.country != null) infoRow('Country', site.country!),
+                if (site.location != null) infoRow('Location', site.location!),
+                if (site.bodyOfWater != null) infoRow('Body of Water', site.bodyOfWater!),
                 if (site.position != null) ...[
                   infoRow('Latitude', site.position!.lat.toStringAsFixed(6)),
                   infoRow('Longitude', site.position!.lon.toStringAsFixed(6)),
                 ],
               ]),
+              if (site.difficulty != null) ...[
+                const SizedBox(height: 16),
+                infoCard(context, 'Dive Information', [
+                  infoRow('Difficulty', site.difficulty!),
+                ]),
+              ],
               const SizedBox(height: 16),
               DiveSiteMapWidget(divesite: site),
               const SizedBox(height: 16),
