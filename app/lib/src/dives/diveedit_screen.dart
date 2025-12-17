@@ -3,10 +3,77 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../bloc/cylinderlist_bloc.dart';
 import '../bloc/divedetails_bloc.dart';
 import '../bloc/divelist_bloc.dart';
 import '../common/common.dart';
 import '../ssrf/ssrf.dart' as ssrf;
+
+/// Editable wrapper for a dive cylinder with mutable fields
+class _EditableDiveCylinder {
+  int cylinderId;
+  ssrf.Cylinder? cylinder;
+  double? o2;
+  double? he;
+  double? start;
+  double? end;
+
+  _EditableDiveCylinder({
+    required this.cylinderId,
+    this.cylinder,
+    this.o2,
+    this.he,
+    this.start,
+    this.end,
+  });
+
+  factory _EditableDiveCylinder.fromDiveCylinder(ssrf.DiveCylinder dc) {
+    return _EditableDiveCylinder(
+      cylinderId: dc.cylinderId,
+      cylinder: dc.cylinder,
+      o2: dc.o2,
+      he: dc.he,
+      start: dc.start,
+      end: dc.end,
+    );
+  }
+
+  ssrf.DiveCylinder toDiveCylinder() {
+    return ssrf.DiveCylinder(
+      cylinderId: cylinderId,
+      cylinder: cylinder,
+      o2: o2,
+      he: he,
+      start: start,
+      end: end,
+    );
+  }
+
+  String get gasDescription {
+    final o2Val = o2 ?? 21;
+    final heVal = he ?? 0;
+    if (heVal > 0) {
+      return 'Tx${o2Val.round()}/${heVal.round()}';
+    } else if (o2Val != 21) {
+      return 'EAN${o2Val.round()}';
+    }
+    return 'Air';
+  }
+}
+
+/// Editable gas change event
+class _EditableGasChange {
+  int timeSeconds;
+  int cylinderIndex;
+
+  _EditableGasChange({required this.timeSeconds, required this.cylinderIndex});
+
+  String get timeFormatted {
+    final minutes = timeSeconds ~/ 60;
+    final seconds = timeSeconds % 60;
+    return '$minutes:${seconds.toString().padLeft(2, '0')}';
+  }
+}
 
 class DiveEditScreen extends StatefulWidget {
   const DiveEditScreen({super.key});
@@ -25,6 +92,8 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   late DateTime _selectedDateTime;
   late int? _rating;
   String? _selectedDivesiteId;
+  late List<_EditableDiveCylinder> _cylinders;
+  late List<_EditableGasChange> _gasChanges;
 
   @override
   void initState() {
@@ -38,6 +107,24 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     _tagsController = TextEditingController(text: dive.tags.join(', '));
     _rating = dive.rating;
     _selectedDivesiteId = dive.divesiteid;
+
+    // Initialize cylinders from dive
+    _cylinders = dive.cylinders.map((dc) => _EditableDiveCylinder.fromDiveCylinder(dc)).toList();
+
+    // Extract gaschange events from all dive computer logs
+    _gasChanges = [];
+    for (final dcLog in dive.divecomputers) {
+      for (final event in dcLog.events) {
+        if (event.name == 'gaschange' && event.cylinder != null) {
+          _gasChanges.add(_EditableGasChange(
+            timeSeconds: event.time,
+            cylinderIndex: event.cylinder!,
+          ));
+        }
+      }
+    }
+    // Sort by time
+    _gasChanges.sort((a, b) => a.timeSeconds.compareTo(b.timeSeconds));
   }
 
   @override
@@ -119,6 +206,247 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     }
   }
 
+  Future<void> _addCylinder() async {
+    final cylinderState = context.read<CylinderListBloc>().state;
+    if (cylinderState is! CylinderListLoaded) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Loading cylinders...')));
+      return;
+    }
+
+    final cylinders = cylinderState.cylinders;
+    if (cylinders.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No cylinders defined. Add cylinders in Equipment first.')));
+      return;
+    }
+
+    final selected = await showDialog<ssrf.Cylinder?>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Select Cylinder'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: cylinders.length,
+            itemBuilder: (context, index) {
+              final cyl = cylinders[index];
+              final subtitle = [
+                if (cyl.size != null) '${cyl.size}L',
+                if (cyl.workpressure != null) '${cyl.workpressure} bar',
+              ].join(' @ ');
+              return ListTile(
+                leading: const Icon(Icons.scuba_diving),
+                title: Text(cyl.description ?? 'Cylinder ${cyl.id}'),
+                subtitle: subtitle.isNotEmpty ? Text(subtitle) : null,
+                onTap: () => Navigator.of(dialogContext).pop(cyl),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(null), child: const Text('Cancel')),
+        ],
+      ),
+    );
+
+    if (selected != null) {
+      setState(() {
+        _cylinders.add(_EditableDiveCylinder(
+          cylinderId: selected.id,
+          cylinder: selected,
+          o2: 21,
+          he: 0,
+        ));
+      });
+    }
+  }
+
+  void _removeCylinder(int index) {
+    final hasGasChanges = _gasChanges.any((gc) => gc.cylinderIndex == index);
+    if (hasGasChanges) {
+      showDialog(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Remove Cylinder'),
+          content: const Text('This cylinder has gas change events. Removing it will also remove those events.'),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Cancel')),
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                _doRemoveCylinder(index);
+              },
+              child: const Text('Remove'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      _doRemoveCylinder(index);
+    }
+  }
+
+  void _doRemoveCylinder(int index) {
+    setState(() {
+      _cylinders.removeAt(index);
+      // Remove gas changes for this cylinder and reindex others
+      _gasChanges.removeWhere((gc) => gc.cylinderIndex == index);
+      for (final gc in _gasChanges) {
+        if (gc.cylinderIndex > index) {
+          gc.cylinderIndex--;
+        }
+      }
+    });
+  }
+
+  Future<void> _editCylinderGas(int index) async {
+    final cyl = _cylinders[index];
+    final o2Controller = TextEditingController(text: (cyl.o2 ?? 21).toString());
+    final heController = TextEditingController(text: (cyl.he ?? 0).toString());
+    final startController = TextEditingController(text: cyl.start?.toString() ?? '');
+    final endController = TextEditingController(text: cyl.end?.toString() ?? '');
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Edit ${cyl.cylinder?.description ?? 'Cylinder ${index + 1}'}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: o2Controller,
+                    decoration: const InputDecoration(labelText: 'O2 %', border: OutlineInputBorder()),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextField(
+                    controller: heController,
+                    decoration: const InputDecoration(labelText: 'He %', border: OutlineInputBorder()),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: startController,
+                    decoration: const InputDecoration(labelText: 'Start (bar)', border: OutlineInputBorder()),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextField(
+                    controller: endController,
+                    decoration: const InputDecoration(labelText: 'End (bar)', border: OutlineInputBorder()),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Save')),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      setState(() {
+        cyl.o2 = double.tryParse(o2Controller.text);
+        cyl.he = double.tryParse(heController.text);
+        cyl.start = double.tryParse(startController.text);
+        cyl.end = double.tryParse(endController.text);
+      });
+    }
+
+    o2Controller.dispose();
+    heController.dispose();
+    startController.dispose();
+    endController.dispose();
+  }
+
+  Future<void> _addGasChange(int cylinderIndex) async {
+    final minutesController = TextEditingController();
+    final secondsController = TextEditingController();
+    final maxSeconds = dive.duration;
+
+    final result = await showDialog<int?>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Gas Change Time'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Enter time into dive (max ${maxSeconds ~/ 60}:${(maxSeconds % 60).toString().padLeft(2, '0')})'),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: minutesController,
+                    decoration: const InputDecoration(labelText: 'Minutes', border: OutlineInputBorder()),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text(':')),
+                Expanded(
+                  child: TextField(
+                    controller: secondsController,
+                    decoration: const InputDecoration(labelText: 'Seconds', border: OutlineInputBorder()),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(null), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              final minutes = int.tryParse(minutesController.text) ?? 0;
+              final seconds = int.tryParse(secondsController.text) ?? 0;
+              final totalSeconds = minutes * 60 + seconds;
+              if (totalSeconds >= 0 && totalSeconds <= maxSeconds) {
+                Navigator.of(dialogContext).pop(totalSeconds);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Time must be within dive duration')));
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        _gasChanges.add(_EditableGasChange(timeSeconds: result, cylinderIndex: cylinderIndex));
+        _gasChanges.sort((a, b) => a.timeSeconds.compareTo(b.timeSeconds));
+      });
+    }
+
+    minutesController.dispose();
+    secondsController.dispose();
+  }
+
+  void _removeGasChange(int index) {
+    setState(() {
+      _gasChanges.removeAt(index);
+    });
+  }
+
   void _saveDive() {
     try {
       final durationMinutes = double.parse(_durationController.text);
@@ -138,6 +466,51 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       // Update tags
       final tagsText = _tagsController.text.trim();
       dive.tags = tagsText.isEmpty ? {} : tagsText.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toSet();
+
+      // Update cylinders
+      dive.cylinders = _cylinders.map((c) => c.toDiveCylinder()).toList();
+
+      // Update gas change events
+      // Find existing "Manual Entry" dive computer log or prepare to create one
+      const manualEntryModel = 'Manual Entry';
+      ssrf.DiveComputerLog? manualLog = dive.divecomputers.where((dc) => dc.diveComputer?.model == manualEntryModel).firstOrNull;
+
+      if (_gasChanges.isNotEmpty) {
+        // Convert gas changes to events
+        final events = _gasChanges.map((gc) {
+          final cyl = _cylinders[gc.cylinderIndex];
+          return ssrf.Event(
+            time: gc.timeSeconds,
+            type: 11, // gaschange type
+            name: 'gaschange',
+            cylinder: gc.cylinderIndex,
+            value: (cyl.o2 ?? 21).toInt(),
+          );
+        }).toList();
+
+        if (manualLog != null) {
+          // Update existing manual log's events
+          manualLog.events.clear();
+          manualLog.events.addAll(events);
+        } else {
+          // Create new manual log
+          manualLog = ssrf.DiveComputerLog(
+            diveComputerId: 0,
+            diveComputer: const ssrf.DiveComputer(id: 0, model: manualEntryModel),
+            maxDepth: dive.maxDepth ?? 0,
+            meanDepth: dive.meanDepth ?? 0,
+            events: events,
+          );
+          dive.divecomputers.add(manualLog);
+        }
+      } else if (manualLog != null) {
+        // No gas changes, remove manual log if it only had events
+        if (manualLog.samples.isEmpty) {
+          dive.divecomputers.remove(manualLog);
+        } else {
+          manualLog.events.clear();
+        }
+      }
 
       // Send update event to bloc
       context.read<DiveDetailsBloc>().add(UpdateDiveDetails(dive));
@@ -204,6 +577,106 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                   ),
                 );
               },
+            ),
+            // Cylinders section
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Cylinders', style: Theme.of(context).textTheme.titleMedium),
+                    IconButton(icon: const Icon(Icons.add), onPressed: _addCylinder, tooltip: 'Add cylinder'),
+                  ],
+                ),
+                if (_cylinders.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text('No cylinders. Tap + to add one.', style: TextStyle(color: Theme.of(context).hintColor)),
+                  )
+                else
+                  ...List.generate(_cylinders.length, (index) {
+                    final cyl = _cylinders[index];
+                    final gasChangesForCyl = _gasChanges.where((gc) => gc.cylinderIndex == index).toList();
+                    final isFirstCylinder = index == 0;
+                    final hasGasChangeAtStart = gasChangesForCyl.any((gc) => gc.timeSeconds == 0);
+
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        cyl.cylinder?.description ?? 'Cylinder ${index + 1}',
+                                        style: Theme.of(context).textTheme.titleSmall,
+                                      ),
+                                      Text(
+                                        '${cyl.gasDescription}${cyl.start != null || cyl.end != null ? ' • ${cyl.start?.toInt() ?? '?'} → ${cyl.end?.toInt() ?? '?'} bar' : ''}',
+                                        style: Theme.of(context).textTheme.bodySmall,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.edit, size: 20),
+                                  onPressed: () => _editCylinderGas(index),
+                                  tooltip: 'Edit gas mix',
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete, size: 20),
+                                  onPressed: () => _removeCylinder(index),
+                                  tooltip: 'Remove cylinder',
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text('Gas changes:', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+                            if (isFirstCylinder && !hasGasChangeAtStart)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8, top: 4),
+                                child: Text('• Start of dive', style: Theme.of(context).textTheme.bodySmall),
+                              ),
+                            ...gasChangesForCyl.map((gc) {
+                              final gcIndex = _gasChanges.indexOf(gc);
+                              return Padding(
+                                padding: const EdgeInsets.only(left: 8, top: 4),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        gc.timeSeconds == 0 ? '• Start of dive' : '• ${gc.timeFormatted} switch to this cylinder',
+                                        style: Theme.of(context).textTheme.bodySmall,
+                                      ),
+                                    ),
+                                    InkWell(
+                                      onTap: () => _removeGasChange(gcIndex),
+                                      child: const Icon(Icons.close, size: 16),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
+                            const SizedBox(height: 4),
+                            TextButton.icon(
+                              onPressed: () => _addGasChange(index),
+                              icon: const Icon(Icons.add, size: 16),
+                              label: const Text('Add Gas Change'),
+                              style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 32)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+              ],
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
