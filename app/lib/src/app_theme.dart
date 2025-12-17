@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import 'common/common.dart';
+
 class AppTheme {
   AppTheme._();
 
@@ -37,9 +39,9 @@ class AppTheme {
       secondary: _d4,
 
       // Background gradient and divider line
-      tertiaryContainer: _d1,
-      onTertiaryFixedVariant: _d2,
-      onTertiaryContainer: _d2,
+      tertiaryContainer: _d2,
+      onTertiaryFixedVariant: _d1,
+      onTertiaryContainer: lighten(_d2),
     ),
     appBarTheme: AppBarTheme(backgroundColor: Colors.transparent, elevation: 0, scrolledUnderElevation: 0, centerTitle: false, toolbarHeight: 48),
     navigationRailTheme: NavigationRailThemeData(backgroundColor: Colors.transparent),
@@ -58,7 +60,7 @@ class AppTheme {
       // Background gradient and divider line
       tertiaryContainer: _l1,
       onTertiaryFixedVariant: _l2,
-      onTertiaryContainer: _l2,
+      onTertiaryContainer: darken(_l2),
     ),
     appBarTheme: AppBarTheme(backgroundColor: Colors.transparent, elevation: 0, scrolledUnderElevation: 0, centerTitle: false, toolbarHeight: 48),
     navigationRailTheme: NavigationRailThemeData(backgroundColor: Colors.transparent),

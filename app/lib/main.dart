@@ -25,7 +25,7 @@ import 'src/equipment/equipment_screen.dart';
 import 'src/sites/divesitedetail_screen.dart';
 import 'src/sites/divesiteedit_screen.dart';
 import 'src/sites/divesitelist_screen.dart';
-import 'src/theme/theme.dart';
+import 'src/app_theme.dart';
 
 void main() {
   Intl.defaultLocale = 'sv_SE'; // XXX
@@ -90,8 +90,7 @@ class _MyAppState extends State<MyApp> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [cs.tertiaryContainer, cs.onTertiaryFixedVariant, cs.tertiaryContainer, cs.onTertiaryFixedVariant],
-                stops: [0.1, 0.25, 0.4, 0.8],
+                colors: [cs.tertiaryContainer, cs.onTertiaryFixedVariant],
                 tileMode: TileMode.mirror,
               ),
             );
