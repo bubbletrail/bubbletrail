@@ -13,6 +13,37 @@ class ScreenScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context);
+
+    final inner = io.Platform.isIOS
+        ? DecoratedBox(
+            decoration: BoxDecoration(color: t.canvasColor),
+            child: body,
+          )
+        : DecoratedBox(
+            decoration: BoxDecoration(
+              border: BoxBorder.all(color: t.colorScheme.onTertiaryContainer),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(8),
+                topRight: Radius.circular(8),
+                bottomLeft: Radius.circular(8),
+                bottomRight: Radius.circular(8),
+              ),
+              color: t.canvasColor,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(1.0), // the border
+              child: ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8),
+                  topRight: Radius.circular(8),
+                  bottomLeft: Radius.circular(8),
+                  bottomRight: Radius.circular(8),
+                ),
+                child: body,
+              ),
+            ),
+          );
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(title: title, backgroundColor: Colors.transparent, actions: actions),
@@ -20,34 +51,7 @@ class ScreenScaffold extends StatelessWidget {
         padding: io.Platform.isIOS ? const EdgeInsets.all(0) : const EdgeInsets.only(right: 4.0, bottom: 4.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  border: BoxBorder.all(color: t.colorScheme.onTertiaryContainer),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(8),
-                    topRight: Radius.circular(8),
-                    bottomLeft: Radius.circular(8),
-                    bottomRight: Radius.circular(14),
-                  ),
-                  color: t.canvasColor,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(1.0), // the border
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(8),
-                      topRight: Radius.circular(8),
-                      bottomLeft: Radius.circular(8),
-                      bottomRight: Radius.circular(14),
-                    ),
-                    child: body,
-                  ),
-                ),
-              ),
-            ),
-          ],
+          children: [Expanded(child: inner)],
         ),
       ),
       floatingActionButton: floatingActionButton,

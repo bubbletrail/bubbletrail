@@ -4,6 +4,10 @@ import 'package:intl/intl.dart';
 
 import '../app_routes.dart';
 import '../ssrf/ssrf.dart' as ssrf;
+import 'dive_list_item_card.dart';
+
+/// Breakpoint width for switching between card (narrow) and table (wide) layouts.
+const double _narrowLayoutBreakpoint = 600;
 
 class DiveTableWidget extends StatefulWidget {
   final List<ssrf.Dive> dives;
@@ -67,12 +71,42 @@ class _DiveTableWidgetState extends State<DiveTableWidget> {
     });
   }
 
+  ssrf.Divesite? _getDiveSite(ssrf.Dive dive) {
+    if (dive.divesiteid == null) return null;
+    return widget.diveSites.where((s) => s.uuid.trim() == dive.divesiteid).firstOrNull;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.dives.isEmpty) {
       return const Center(child: Text('No dives to display'));
     }
 
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < _narrowLayoutBreakpoint;
+        return isNarrow ? _buildCardList() : _buildDataTable(context);
+      },
+    );
+  }
+
+  Widget _buildCardList() {
+    final sortedDives = _getSortedDives();
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: sortedDives.length,
+      itemBuilder: (context, index) {
+        final dive = sortedDives[index];
+        return DiveListItemCard(
+          dive: dive,
+          diveSite: _getDiveSite(dive),
+          showSite: widget.showSiteColumn,
+        );
+      },
+    );
+  }
+
+  Widget _buildDataTable(BuildContext context) {
     final columns = [
       DataColumn(label: const Text('Dive #'), onSort: _onSort),
       DataColumn(label: const Text('Start'), onSort: _onSort),
@@ -98,7 +132,7 @@ class _DiveTableWidgetState extends State<DiveTableWidget> {
           showCheckboxColumn: false,
           rows: _getSortedDives().map((dive) {
             final maxDepth = dive.maxDepth ?? 0.0;
-            final diveSite = dive.divesiteid != null ? widget.diveSites.where((s) => s.uuid.trim() == dive.divesiteid).firstOrNull : null;
+            final diveSite = _getDiveSite(dive);
             final siteName = diveSite?.name ?? '';
 
             final cells = [
