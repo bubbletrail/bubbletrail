@@ -9,6 +9,7 @@ import '../bloc/divelist_bloc.dart';
 import '../common/common.dart';
 import '../ssrf/ssrf.dart' as ssrf;
 import 'depthprofile_widget.dart';
+import 'fullscreen_profile_screen.dart';
 
 class DiveDetailsScreen extends StatelessWidget {
   const DiveDetailsScreen({super.key});
@@ -102,19 +103,9 @@ class _DiveDetails extends StatelessWidget {
     final regularSections = <Widget>[];
 
     for (final section in sections) {
-      if (section is Card && section.child is Padding) {
-        final padding = section.child as Padding;
-        if (padding.child is Column) {
-          final column = padding.child as Column;
-          final children = column.children;
-          if (children.isNotEmpty && children.first is Text) {
-            final text = children.first as Text;
-            if (text.data == 'Depth Profile') {
-              fullWidthSections.add(section);
-              continue;
-            }
-          }
-        }
+      if (section is _WideCard) {
+        fullWidthSections.add(section);
+        continue;
       }
       if (section is SizedBox) continue; // Skip spacing
       regularSections.add(section);
@@ -242,14 +233,31 @@ class _DiveDetails extends StatelessWidget {
         const SizedBox(height: 16),
       ],
       if (dive.divecomputers.isNotEmpty && dive.divecomputers[0].samples.isNotEmpty) ...[
-        Card(
+        _WideCard(
           elevation: 2,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Depth Profile', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text('Depth Profile', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.fullscreen),
+                      onPressed: () {
+                        Navigator.of(context, rootNavigator: true).push(
+                          MaterialPageRoute(
+                            builder: (context) => FullscreenProfileScreen(diveComputerLog: dive.divecomputers[0], title: 'Dive #${dive.number}'),
+                          ),
+                        );
+                      },
+                      tooltip: 'View fullscreen',
+                    ),
+                  ],
+                ),
                 const Divider(),
                 DepthProfileWidget(diveComputerLog: dive.divecomputers[0]),
               ],
@@ -307,4 +315,21 @@ class _DivesiteCard extends StatelessWidget {
       ),
     );
   }
+}
+
+// ignore_for_file: unused_element_parameter
+class _WideCard extends Card {
+  const _WideCard({
+    super.key,
+    super.color,
+    super.shadowColor,
+    super.surfaceTintColor,
+    super.elevation,
+    super.shape,
+    super.borderOnForeground,
+    super.margin,
+    super.clipBehavior,
+    super.child,
+    super.semanticContainer,
+  });
 }
