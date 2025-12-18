@@ -5,7 +5,7 @@ import 'formatting.dart';
 import 'types.dart';
 
 extension SsrfXml on Ssrf {
-  static fromXml(XmlElement elem) {
+  static Ssrf fromXml(XmlElement elem) {
     final settingsElem = elem.getElement('settings');
     final divesitesElem = elem.getElement('divesites');
     final divesElem = elem.getElement('dives');
@@ -437,28 +437,40 @@ extension DivesiteXml on Divesite {
 
         // Add extradata elements for additional fields
         if (country != null) {
-          builder.element('extradata', nest: () {
-            builder.attribute('key', 'country');
-            builder.attribute('value', country!);
-          });
+          builder.element(
+            'extradata',
+            nest: () {
+              builder.attribute('key', 'country');
+              builder.attribute('value', country!);
+            },
+          );
         }
         if (location != null) {
-          builder.element('extradata', nest: () {
-            builder.attribute('key', 'location');
-            builder.attribute('value', location!);
-          });
+          builder.element(
+            'extradata',
+            nest: () {
+              builder.attribute('key', 'location');
+              builder.attribute('value', location!);
+            },
+          );
         }
         if (bodyOfWater != null) {
-          builder.element('extradata', nest: () {
-            builder.attribute('key', 'body_of_water');
-            builder.attribute('value', bodyOfWater!);
-          });
+          builder.element(
+            'extradata',
+            nest: () {
+              builder.attribute('key', 'body_of_water');
+              builder.attribute('value', bodyOfWater!);
+            },
+          );
         }
         if (difficulty != null) {
-          builder.element('extradata', nest: () {
-            builder.attribute('key', 'difficulty');
-            builder.attribute('value', difficulty!);
-          });
+          builder.element(
+            'extradata',
+            nest: () {
+              builder.attribute('key', 'difficulty');
+              builder.attribute('value', difficulty!);
+            },
+          );
         }
       },
     );

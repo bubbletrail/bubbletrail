@@ -410,7 +410,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     });
 
     try {
-      await event.device.connect(timeout: const Duration(seconds: 15));
+      await event.device.connect(license: License.free, timeout: const Duration(seconds: 15));
       emit(state.copyWith(connectedDevice: event.device));
 
       // Discover services
@@ -457,10 +457,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     emit(state.copyWith(isDownloading: true, downloadedDives: [], clearError: true));
 
     try {
-      final iostream = BleIOStream(
-        rxCharacteristic: charPair.rx,
-        txCharacteristic: charPair.tx,
-      );
+      final iostream = BleIOStream(rxCharacteristic: charPair.rx, txCharacteristic: charPair.tx);
       await iostream.setupNotifications();
 
       final dives = await _performDownload(event.computer, iostream);
