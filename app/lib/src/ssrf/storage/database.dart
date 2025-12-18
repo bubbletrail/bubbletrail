@@ -25,7 +25,7 @@ class SsrfDatabase {
   static Future<void> createSchema(Database db) => _onCreate(db, _version);
 
   static Future<Database> _initDatabase() async {
-    final path = join(await getDatabasesPath(), 'divepath.db');
+    final path = join(await getDatabasesPath(), 'bubbletrail.db');
     return openDatabase(path, version: _version, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
 

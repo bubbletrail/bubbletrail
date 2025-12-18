@@ -5,10 +5,10 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = divepath
+PRODUCT_NAME = bubbletrail
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = org.divepath.divepath
+PRODUCT_BUNDLE_IDENTIFIER = app.bubbletrail.bubbletrail
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2025 org.divepath. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2025 app.bubbletrail. All rights reserved.

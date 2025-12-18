@@ -1,4 +1,4 @@
-package org.divepath.divepath
+package app.bubbletrail.bubbletrail
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:divepath/src/ssrf/ssrf.dart';
-import 'package:divepath/src/ssrf/storage/storage.dart';
+import 'package:bubbletrail/src/ssrf/ssrf.dart';
+import 'package:bubbletrail/src/ssrf/storage/storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:xml/xml.dart';

@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "org.divepath" "\0"
-            VALUE "FileDescription", "divepath" "\0"
+            VALUE "CompanyName", "app.bubbletrail" "\0"
+            VALUE "FileDescription", "bubbletrail" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "divepath" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 org.divepath. All rights reserved." "\0"
-            VALUE "OriginalFilename", "divepath.exe" "\0"
-            VALUE "ProductName", "divepath" "\0"
+            VALUE "InternalName", "bubbletrail" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 app.bubbletrail. All rights reserved." "\0"
+            VALUE "OriginalFilename", "bubbletrail.exe" "\0"
+            VALUE "ProductName", "bubbletrail" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

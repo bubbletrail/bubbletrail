@@ -31,7 +31,7 @@ class _DiveSiteMapState extends State<DiveSiteMap> {
       mapController: _mapController,
       options: MapOptions(initialCenter: latlng, initialZoom: 15.0, minZoom: 3.0, maxZoom: 18.0),
       children: [
-        TileLayer(urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', userAgentPackageName: 'org.divepath.divepath', maxZoom: 19),
+        TileLayer(urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', userAgentPackageName: 'app.bubbletrail.bubbletrail', maxZoom: 19),
         MarkerLayer(
           markers: [
             Marker(

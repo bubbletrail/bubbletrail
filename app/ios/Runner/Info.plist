@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Divepath</string>
+	<string>Bubbletrail</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -31,7 +31,7 @@
 			<string>Owner</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>org.divepath.ssrf</string>
+				<string>app.bubbletrail.ssrf</string>
 			</array>
 		</dict>
 	</array>
@@ -42,7 +42,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>divepath</string>
+	<string>bubbletrail</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -84,7 +84,7 @@
 			<key>UTTypeDescription</key>
 			<string>Subsurface Dive Log</string>
 			<key>UTTypeIdentifier</key>
-			<string>org.divepath.ssrf</string>
+			<string>app.bubbletrail.ssrf</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>

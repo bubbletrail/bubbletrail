@@ -40,7 +40,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  static const _channel = MethodChannel('org.divepath.app/file_handler');
+  static const _channel = MethodChannel('app.bubbletrail.app/file_handler');
   final _diveListBloc = DiveListBloc();
   final _cylinderListBloc = CylinderListBloc();
 
@@ -258,7 +258,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(create: (context) => BleBloc()..add(const BleStarted())),
       ],
       child: MaterialApp.router(
-        title: 'Divepath',
+        title: 'Bubbletrail',
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.system,

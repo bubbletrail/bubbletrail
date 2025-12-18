@@ -12,7 +12,7 @@ import UIKit
   ) -> Bool {
     let controller = window?.rootViewController as! FlutterViewController
     methodChannel = FlutterMethodChannel(
-      name: "org.divepath.app/file_handler",
+      name: "app.bubbletrail.app/file_handler",
       binaryMessenger: controller.binaryMessenger
     )
 
