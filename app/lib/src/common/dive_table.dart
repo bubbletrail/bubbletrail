@@ -11,10 +11,10 @@ const double _narrowLayoutBreakpoint = 600;
 
 class DiveTableWidget extends StatefulWidget {
   final List<ssrf.Dive> dives;
-  final List<ssrf.Divesite> diveSites;
+  final Map<String, ssrf.Divesite> diveSitesByUuid;
   final bool showSiteColumn;
 
-  const DiveTableWidget({super.key, required this.dives, required this.diveSites, this.showSiteColumn = true});
+  const DiveTableWidget({super.key, required this.dives, required this.diveSitesByUuid, this.showSiteColumn = true});
 
   @override
   State<DiveTableWidget> createState() => _DiveTableWidgetState();
@@ -46,10 +46,8 @@ class _DiveTableWidgetState extends State<DiveTableWidget> {
         break;
       case 4: // Site (only if showSiteColumn is true)
         comparison = (a, b) {
-          final aSite = a.divesiteid != null ? widget.diveSites.where((s) => s.uuid.trim() == a.divesiteid).firstOrNull : null;
-          final bSite = b.divesiteid != null ? widget.diveSites.where((s) => s.uuid.trim() == b.divesiteid).firstOrNull : null;
-          final aSiteName = aSite?.name ?? '';
-          final bSiteName = bSite?.name ?? '';
+          final aSiteName = a.divesiteid != null ? widget.diveSitesByUuid[a.divesiteid]?.name ?? '' : '';
+          final bSiteName = b.divesiteid != null ? widget.diveSitesByUuid[b.divesiteid]?.name ?? '' : '';
           return aSiteName.compareTo(bSiteName);
         };
         break;
@@ -73,7 +71,7 @@ class _DiveTableWidgetState extends State<DiveTableWidget> {
 
   ssrf.Divesite? _getDiveSite(ssrf.Dive dive) {
     if (dive.divesiteid == null) return null;
-    return widget.diveSites.where((s) => s.uuid.trim() == dive.divesiteid).firstOrNull;
+    return widget.diveSitesByUuid[dive.divesiteid];
   }
 
   @override

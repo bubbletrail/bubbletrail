@@ -162,7 +162,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       return;
     }
 
-    final currentSite = _selectedDivesiteId != null ? diveSites.where((s) => s.uuid == _selectedDivesiteId).firstOrNull : null;
+    final currentSite = _selectedDivesiteId != null ? diveListState.diveSitesByUuid[_selectedDivesiteId] : null;
 
     final result = await showSelectionDialog<ssrf.Divesite>(
       context: context,
@@ -492,8 +492,9 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
             Builder(
               builder: (context) {
                 final diveListState = context.watch<DiveListBloc>().state;
-                final diveSites = diveListState is DiveListLoaded ? diveListState.diveSites : <ssrf.Divesite>[];
-                final selectedSite = _selectedDivesiteId != null ? diveSites.where((s) => s.uuid == _selectedDivesiteId).firstOrNull : null;
+                final selectedSite = _selectedDivesiteId != null && diveListState is DiveListLoaded
+                    ? diveListState.diveSitesByUuid[_selectedDivesiteId]
+                    : null;
 
                 return InkWell(
                   onTap: _selectDivesite,

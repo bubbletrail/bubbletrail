@@ -28,7 +28,20 @@ class DiveListLoaded extends DiveListState {
   final List<ssrf.Dive> dives;
   final List<ssrf.Divesite> diveSites;
 
-  const DiveListLoaded(this.dives, this.diveSites);
+  /// Index map for O(1) dive lookup by ID
+  late final Map<String, ssrf.Dive> divesById;
+
+  /// Index map for O(1) dive list index lookup by ID
+  late final Map<String, int> diveIndexById;
+
+  /// Index map for O(1) dive site lookup by UUID
+  late final Map<String, ssrf.Divesite> diveSitesByUuid;
+
+  DiveListLoaded(this.dives, this.diveSites) {
+    divesById = {for (final d in dives) d.id: d};
+    diveIndexById = {for (var i = 0; i < dives.length; i++) dives[i].id: i};
+    diveSitesByUuid = {for (final s in diveSites) s.uuid: s};
+  }
 
   @override
   List<Object?> get props => [dives, diveSites];

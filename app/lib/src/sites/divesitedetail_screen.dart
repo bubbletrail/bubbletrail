@@ -19,7 +19,7 @@ class DiveSiteDetailScreen extends StatelessWidget {
       return Placeholder();
     }
 
-    final site = state.diveSites.firstWhere((s) => s.uuid == siteID);
+    final site = state.diveSitesByUuid[siteID]!;
     final dives = state.dives.where((s) => s.divesiteid == siteID).toList();
 
     return ScreenScaffold(
@@ -66,7 +66,7 @@ class DiveSiteDetailScreen extends StatelessWidget {
                       children: [
                         Text('Dives at this site (${dives.length})', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                         const Divider(),
-                        DiveTableWidget(dives: dives, diveSites: state.diveSites, showSiteColumn: false),
+                        DiveTableWidget(dives: dives, diveSitesByUuid: state.diveSitesByUuid, showSiteColumn: false),
                       ],
                     ),
                   ),

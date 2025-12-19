@@ -26,8 +26,8 @@ class DiveDetailsScreen extends StatelessWidget {
         String? prevDiveID;
 
         if (listState is DiveListLoaded) {
-          final diveIdx = listState.dives.indexWhere((d) => d.id == state.dive.id);
-          if (diveIdx != -1) {
+          final diveIdx = listState.diveIndexById[state.dive.id];
+          if (diveIdx != null) {
             nextDiveID = diveIdx < listState.dives.length - 1 ? listState.dives[diveIdx + 1].id : null;
             prevDiveID = diveIdx > 0 ? listState.dives[diveIdx - 1].id : null;
           }

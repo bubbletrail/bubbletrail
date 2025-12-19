@@ -52,13 +52,12 @@ class DiveListScreen extends StatelessWidget {
 
         if (state is DiveListLoaded) {
           final dives = state.dives;
-          final diveSites = state.diveSites;
 
           if (dives.isEmpty) {
             return const EmptyStateWidget(message: 'No dives yet. Add your first dive!', icon: Icons.scuba_diving);
           }
 
-          return DiveTableWidget(dives: dives, diveSites: diveSites, showSiteColumn: true);
+          return DiveTableWidget(dives: dives, diveSitesByUuid: state.diveSitesByUuid, showSiteColumn: true);
         }
 
         return const Center(child: Text('Unknown state'));
