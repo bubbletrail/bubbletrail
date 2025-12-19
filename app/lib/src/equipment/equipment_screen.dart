@@ -13,7 +13,7 @@ class EquipmentScreen extends StatelessWidget {
       title: const Text('Equipment'),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: [_EquipmentCategoryCard(icon: Icons.scuba_diving, title: 'Cylinders', onTap: () => context.goNamed(AppRouteName.cylinders))],
+        children: [_EquipmentCategoryCard(icon: Icons.scuba_diving, title: 'Cylinders', onTap: () => context.pushNamed(AppRouteName.cylinders))],
       ),
     );
   }
@@ -22,10 +22,9 @@ class EquipmentScreen extends StatelessWidget {
 class _EquipmentCategoryCard extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String? subtitle;
   final VoidCallback onTap;
 
-  const _EquipmentCategoryCard({required this.icon, required this.title, this.subtitle, required this.onTap});
+  const _EquipmentCategoryCard({required this.icon, required this.title, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +32,6 @@ class _EquipmentCategoryCard extends StatelessWidget {
       child: ListTile(
         leading: Icon(icon, size: 32),
         title: Text(title, style: Theme.of(context).textTheme.titleMedium),
-        subtitle: subtitle != null ? Text(subtitle!) : null,
         trailing: const Icon(Icons.chevron_right),
         onTap: onTap,
       ),

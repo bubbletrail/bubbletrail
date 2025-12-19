@@ -136,10 +136,7 @@ class _MyAppState extends State<MyApp> {
                 GoRoute(
                   path: AppRoutePath.dives,
                   name: AppRouteName.dives,
-                  builder: (BuildContext context, GoRouterState state) {
-                    context.read<DiveListBloc>().add(LoadDives());
-                    return const DiveListScreen();
-                  },
+                  builder: (BuildContext context, GoRouterState state) => const DiveListScreen(),
                   routes: [
                     GoRoute(
                       path: AppRoutePath.divesNew,

@@ -28,7 +28,7 @@ class DiveSiteListItemCard extends StatelessWidget {
     return Card(
       child: InkWell(
         onTap: () {
-          context.goNamed(AppRouteName.sitesDetails, pathParameters: {'siteID': site.uuid});
+          context.pushNamed(AppRouteName.sitesDetails, pathParameters: {'siteID': site.uuid});
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(

@@ -13,13 +13,7 @@ class CylinderListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenScaffold(
       title: const Text('Cylinders'),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.add),
-          tooltip: 'Add new cylinder',
-          onPressed: () => context.goNamed(AppRouteName.cylindersNew),
-        ),
-      ],
+      actions: [IconButton(icon: const Icon(Icons.add), tooltip: 'Add new cylinder', onPressed: () => context.pushNamed(AppRouteName.cylindersNew))],
       body: BlocBuilder<CylinderListBloc, CylinderListState>(
         builder: (context, state) {
           if (state is CylinderListInitial || state is CylinderListLoading) {
@@ -52,10 +46,7 @@ class CylinderListScreen extends StatelessWidget {
                     title: Text(cylinder.description ?? 'Cylinder #${cylinder.id}'),
                     subtitle: specs.isNotEmpty ? Text(specs) : null,
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () => context.goNamed(
-                      AppRouteName.cylindersDetails,
-                      pathParameters: {'cylinderID': cylinder.id.toString()},
-                    ),
+                    onTap: () => context.goNamed(AppRouteName.cylindersDetails, pathParameters: {'cylinderID': cylinder.id.toString()}),
                   ),
                 );
               },

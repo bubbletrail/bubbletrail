@@ -37,10 +37,20 @@ class DiveListLoaded extends DiveListState {
   /// Index map for O(1) dive site lookup by UUID
   late final Map<String, ssrf.Divesite> diveSitesByUuid;
 
+  /// Index map for O(1) dive count lookup by site UUID
+  late final Map<String, int> diveCountBySiteId;
+
   DiveListLoaded(this.dives, this.diveSites) {
     divesById = {for (final d in dives) d.id: d};
     diveIndexById = {for (var i = 0; i < dives.length; i++) dives[i].id: i};
     diveSitesByUuid = {for (final s in diveSites) s.uuid: s};
+    // Build dive count map
+    diveCountBySiteId = {};
+    for (final d in dives) {
+      if (d.divesiteid != null) {
+        diveCountBySiteId[d.divesiteid!] = (diveCountBySiteId[d.divesiteid!] ?? 0) + 1;
+      }
+    }
   }
 
   @override

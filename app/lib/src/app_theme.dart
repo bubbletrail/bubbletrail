@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 import 'common/common.dart';
 
@@ -65,5 +66,25 @@ class AppTheme {
     appBarTheme: AppBarTheme(backgroundColor: Colors.transparent, elevation: 0, scrolledUnderElevation: 0, centerTitle: false, toolbarHeight: 48),
     navigationRailTheme: NavigationRailThemeData(backgroundColor: Colors.transparent),
     pageTransitionsTheme: transitions,
+  );
+
+  static TrinaGridConfiguration trinaGridConfiguration(BuildContext context) => TrinaGridConfiguration(
+    style: TrinaGridStyleConfig(
+      rowHeight: 32,
+      columnHeight: 45,
+      gridBorderColor: Colors.transparent, // Theme.of(context).dividerColor,
+      enableCellBorderHorizontal: false,
+      enableCellBorderVertical: false,
+      enableColumnBorderVertical: false,
+      oddRowColor: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
+      activatedBorderColor: Colors.transparent, // Theme.of(context).colorScheme.primary,
+      activatedColor: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+      gridBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      rowColor: Theme.of(context).scaffoldBackgroundColor,
+      cellTextStyle: Theme.of(context).textTheme.bodyMedium ?? const TextStyle(),
+      columnTextStyle: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold) ?? const TextStyle(),
+    ),
+    columnSize: TrinaGridColumnSizeConfig(autoSizeMode: TrinaAutoSizeMode.scale),
+    scrollbar: TrinaGridScrollbarConfig(isAlwaysShown: false),
   );
 }

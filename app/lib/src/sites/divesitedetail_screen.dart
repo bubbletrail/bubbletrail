@@ -28,7 +28,7 @@ class DiveSiteDetailScreen extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.edit),
           tooltip: 'Edit',
-          onPressed: () => context.goNamed(AppRouteName.sitesDetailsEdit, pathParameters: {'siteID': siteID}),
+          onPressed: () => context.pushNamed(AppRouteName.sitesDetailsEdit, pathParameters: {'siteID': siteID}),
         ),
       ],
       body: SingleChildScrollView(
@@ -49,9 +49,7 @@ class DiveSiteDetailScreen extends StatelessWidget {
               ]),
               if (site.difficulty != null) ...[
                 const SizedBox(height: 16),
-                infoCard(context, 'Dive Information', [
-                  infoRow('Difficulty', site.difficulty!),
-                ]),
+                infoCard(context, 'Dive Information', [infoRow('Difficulty', site.difficulty!)]),
               ],
               const SizedBox(height: 16),
               DiveSiteMapWidget(divesite: site),
@@ -66,7 +64,10 @@ class DiveSiteDetailScreen extends StatelessWidget {
                       children: [
                         Text('Dives at this site (${dives.length})', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                         const Divider(),
-                        DiveTableWidget(dives: dives, diveSitesByUuid: state.diveSitesByUuid, showSiteColumn: false),
+                        AspectRatio(
+                          aspectRatio: 2,
+                          child: DiveTableWidget(dives: dives, diveSitesByUuid: state.diveSitesByUuid, showSiteColumn: false),
+                        ),
                       ],
                     ),
                   ),

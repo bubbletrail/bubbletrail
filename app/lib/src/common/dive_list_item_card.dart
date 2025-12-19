@@ -21,7 +21,7 @@ class DiveListItemCard extends StatelessWidget {
     return Card(
       child: InkWell(
         onTap: () {
-          context.goNamed(AppRouteName.divesDetails, pathParameters: {'diveID': dive.id});
+          context.pushNamed(AppRouteName.divesDetails, pathParameters: {'diveID': dive.id});
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
