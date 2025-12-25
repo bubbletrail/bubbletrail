@@ -268,7 +268,7 @@ class _MyAppState extends State<MyApp> {
       providers: [
         BlocProvider.value(value: _diveListBloc),
         BlocProvider.value(value: _cylinderListBloc),
-        BlocProvider(create: (context) => BleBloc()..add(const BleStarted())),
+        BlocProvider(create: (context) => BleBloc(_diveListBloc)..add(const BleStarted())),
       ],
       child: MaterialApp.router(
         title: 'Bubbletrail',

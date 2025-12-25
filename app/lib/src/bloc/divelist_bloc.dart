@@ -5,9 +5,12 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:xml/xml.dart';
+import 'package:logging/logging.dart';
 
 import '../ssrf/ssrf.dart' as ssrf;
 import '../ssrf/storage/storage.dart';
+
+final _log = Logger('DiveListBloc');
 
 abstract class DiveListState extends Equatable {
   const DiveListState();
@@ -136,9 +139,11 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       if (event.dive.number <= 0) {
         event.dive.number = currentState.dives.isEmpty ? 1 : currentState.dives.map((d) => d.number).reduce(max) + 1;
         await _storage.dives.insert(event.dive);
+        _log.info('Inserted new dive #${event.dive.number}');
       } else {
         // Update existing dive
         await _storage.dives.update(event.dive);
+        _log.fine('Updated dive #${event.dive.number}');
       }
 
       // Reload overview list after update

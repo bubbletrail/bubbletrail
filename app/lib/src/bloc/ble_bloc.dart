@@ -4,9 +4,12 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:libdivecomputer/libdivecomputer.dart';
+import 'package:libdivecomputer/libdivecomputer.dart' as dc;
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
+
+import '../ssrf/ssrf.dart';
+import 'divelist_bloc.dart';
 
 final _log = Logger('BleBloc');
 
@@ -97,7 +100,7 @@ class _BleServicesDiscovered extends BleEvent {
 }
 
 class BleStartDownload extends BleEvent {
-  final ComputerDescriptor computer;
+  final dc.ComputerDescriptor computer;
 
   const BleStartDownload(this.computer);
 
@@ -124,7 +127,7 @@ class _BleDownloadFailed extends BleEvent {
 }
 
 class _BleDownloadProgress extends BleEvent {
-  final DownloadProgress progress;
+  final dc.DownloadProgress progress;
 
   const _BleDownloadProgress(this.progress);
 
@@ -133,7 +136,7 @@ class _BleDownloadProgress extends BleEvent {
 }
 
 class _BleLoadedSupportedComputers extends BleEvent {
-  final List<ComputerDescriptor> computers;
+  final List<dc.ComputerDescriptor> computers;
 
   const _BleLoadedSupportedComputers(this.computers);
 
@@ -143,9 +146,9 @@ class _BleLoadedSupportedComputers extends BleEvent {
 
 // State
 class BleState extends Equatable {
-  final List<ComputerDescriptor> supportedComputers;
+  final List<dc.ComputerDescriptor> supportedComputers;
   final BluetoothAdapterState adapterState;
-  final List<(ScanResult, List<ComputerDescriptor>)> scanResults;
+  final List<(ScanResult, List<dc.ComputerDescriptor>)> scanResults;
   final bool isScanning;
   final bool showAllDevices;
   final BluetoothDevice? connectedDevice;
@@ -153,7 +156,7 @@ class BleState extends Equatable {
   final List<BluetoothService> discoveredServices;
   final bool isDiscoveringServices;
   final bool isDownloading;
-  final DownloadProgress? downloadProgress;
+  final dc.DownloadProgress? downloadProgress;
   final List<Dive> downloadedDives;
   final String? error;
 
@@ -181,9 +184,9 @@ class BleState extends Equatable {
   }
 
   BleState copyWith({
-    List<ComputerDescriptor>? supportedComputers,
+    List<dc.ComputerDescriptor>? supportedComputers,
     BluetoothAdapterState? adapterState,
-    List<(ScanResult, List<ComputerDescriptor>)>? scanResults,
+    List<(ScanResult, List<dc.ComputerDescriptor>)>? scanResults,
     bool? isScanning,
     bool? showAllDevices,
     BluetoothDevice? connectedDevice,
@@ -192,7 +195,7 @@ class BleState extends Equatable {
     List<BluetoothService>? discoveredServices,
     bool? isDiscoveringServices,
     bool? isDownloading,
-    DownloadProgress? downloadProgress,
+    dc.DownloadProgress? downloadProgress,
     bool clearDownloadProgress = false,
     List<Dive>? downloadedDives,
     String? error,
@@ -235,16 +238,17 @@ class BleState extends Equatable {
 
 // Bloc
 class BleBloc extends Bloc<BleEvent, BleState> {
+  final DiveListBloc _diveListBloc;
   StreamSubscription<BluetoothAdapterState>? _adapterStateSubscription;
   StreamSubscription<List<ScanResult>>? _scanSubscription;
   StreamSubscription<bool>? _scanStatusSubscription;
   StreamSubscription<BluetoothConnectionState>? _connectionSubscription;
-  final _matchedDevices = <String, List<ComputerDescriptor>>{};
+  final _matchedDevices = <String, List<dc.ComputerDescriptor>>{};
 
-  BleBloc() : super(const BleState()) {
+  BleBloc(this._diveListBloc) : super(const BleState()) {
     on<BleEvent>(_onEvent, transformer: sequential());
 
-    dcDescriptorIterate().then((comps) => add(_BleLoadedSupportedComputers(comps)));
+    dc.dcDescriptorIterate().then((comps) => add(_BleLoadedSupportedComputers(comps)));
   }
 
   Future<void> _onEvent(BleEvent event, Emitter<BleState> emit) async {
@@ -316,7 +320,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
   Future<void> _onScanResultsUpdated(List<ScanResult> results, Emitter<BleState> emit) async {
     for (final res in results) {
       if (!_matchedDevices.containsKey(res.device.platformName)) {
-        _matchedDevices[res.device.platformName] = await dcDescriptorIterate(filterForName: res.device.platformName);
+        _matchedDevices[res.device.platformName] = await dc.dcDescriptorIterate(filterForName: res.device.platformName);
       }
     }
     final scanResults = results.map((e) => (e, _matchedDevices[e.device.platformName] ?? [])).toList();
@@ -359,7 +363,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     }
   }
 
-  Future<void> _onStartDownload(ComputerDescriptor computer, Emitter<BleState> emit) async {
+  Future<void> _onStartDownload(dc.ComputerDescriptor computer, Emitter<BleState> emit) async {
     if (state.discoveredServices.isEmpty) {
       emit(state.copyWith(error: 'No services discovered'));
       return;
@@ -382,27 +386,29 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     }
 
     // Create BLE characteristics wrapper for the download
-    final ble = BleCharacteristics(read: charPair.rx.onValueReceived, write: charPair.rx.write);
+    final ble = dc.BleCharacteristics(read: charPair.rx.onValueReceived, write: charPair.rx.write);
 
     // Start the download and process events
     final dir = await getApplicationSupportDirectory();
-    final sub = startDownload(ble: ble, computer: computer, fifoDirectory: dir.path).listen((event) {
+    final sub = dc.startDownload(ble: ble, computer: computer, fifoDirectory: dir.path).listen((event) {
       switch (event) {
-        case DownloadStarted():
+        case dc.DownloadStarted():
           _log.info('Download started');
-        case DownloadProgressEvent(:final progress):
+        case dc.DownloadProgressEvent(:final progress):
           add(_BleDownloadProgress(progress));
-        case DownloadDeviceInfo(:final info):
+        case dc.DownloadDeviceInfo(:final info):
           _log.info('Device info: $info');
-        case DownloadDiveReceived(:final dive):
+        case dc.DownloadDiveReceived(:final dive):
+          final ssrfDive = convertDcDive(dive);
+          _diveListBloc.add(UpdateDive(ssrfDive));
           _log.fine('Received dive: $dive');
-        case DownloadCompleted(:final diveCount):
+        case dc.DownloadCompleted(:final diveCount):
           _log.info('Download completed: $diveCount dives');
           add(_BleDownloadCompleted(const []));
-        case DownloadError(:final message):
+        case dc.DownloadError(:final message):
           _log.warning('Download error: $message');
           add(_BleDownloadFailed(message));
-        case DownloadWaiting():
+        case dc.DownloadWaiting():
           _log.info('Waiting for user action on device');
       }
     });

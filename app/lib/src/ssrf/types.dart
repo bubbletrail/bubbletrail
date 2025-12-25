@@ -113,15 +113,7 @@ class Divesite {
   final String? bodyOfWater;
   final String? difficulty;
 
-  const Divesite({
-    required this.uuid,
-    required this.name,
-    this.position,
-    this.country,
-    this.location,
-    this.bodyOfWater,
-    this.difficulty,
-  });
+  const Divesite({required this.uuid, required this.name, this.position, this.country, this.location, this.bodyOfWater, this.difficulty});
 }
 
 class GPSPosition {
