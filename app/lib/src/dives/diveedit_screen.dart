@@ -1,3 +1,4 @@
+import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -7,12 +8,11 @@ import '../bloc/cylinderlist_bloc.dart';
 import '../bloc/divedetails_bloc.dart';
 import '../bloc/divelist_bloc.dart';
 import '../common/common.dart';
-import '../ssrf/ssrf.dart' as ssrf;
 
 /// Editable wrapper for a dive cylinder with mutable fields
 class _EditableDiveCylinder {
   int cylinderId;
-  ssrf.Cylinder? cylinder;
+  Cylinder? cylinder;
   double? o2;
   double? he;
   double? start;
@@ -20,12 +20,12 @@ class _EditableDiveCylinder {
 
   _EditableDiveCylinder({required this.cylinderId, this.cylinder, this.o2, this.he, this.start, this.end});
 
-  factory _EditableDiveCylinder.fromDiveCylinder(ssrf.DiveCylinder dc) {
+  factory _EditableDiveCylinder.fromDiveCylinder(DiveCylinder dc) {
     return _EditableDiveCylinder(cylinderId: dc.cylinderId, cylinder: dc.cylinder, o2: dc.o2, he: dc.he, start: dc.start, end: dc.end);
   }
 
-  ssrf.DiveCylinder toDiveCylinder() {
-    return ssrf.DiveCylinder(cylinderId: cylinderId, cylinder: cylinder, o2: o2, he: he, start: start, end: end);
+  DiveCylinder toDiveCylinder() {
+    return DiveCylinder(cylinderId: cylinderId, cylinder: cylinder, o2: o2, he: he, start: start, end: end);
   }
 
   String get gasDescription {
@@ -62,7 +62,7 @@ class DiveEditScreen extends StatefulWidget {
 }
 
 class _DiveEditScreenState extends State<DiveEditScreen> {
-  late final ssrf.Dive dive;
+  late final Dive dive;
   late int _durationSeconds;
   late final TextEditingController _divemasterController;
   late final TextEditingController _buddiesController;
@@ -164,16 +164,13 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
 
     final currentSite = _selectedDivesiteId != null ? diveListState.diveSitesByUuid[_selectedDivesiteId] : null;
 
-    final result = await showSelectionDialog<ssrf.Divesite>(
+    final result = await showSelectionDialog<Divesite>(
       context: context,
       title: 'Select Dive Site',
       items: diveSites,
       selectedItem: currentSite,
       noneOption: 'No site',
-      itemBuilder: (site) => ListTile(
-        leading: const Icon(Icons.location_on),
-        title: Text(site.name),
-      ),
+      itemBuilder: (site) => ListTile(leading: const Icon(Icons.location_on), title: Text(site.name)),
     );
 
     if (!result.cancelled) {
@@ -196,7 +193,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       return;
     }
 
-    final result = await showSelectionDialog<ssrf.Cylinder>(
+    final result = await showSelectionDialog<Cylinder>(
       context: context,
       title: 'Select Cylinder',
       items: cylinders,
@@ -256,8 +253,8 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     final endController = TextEditingController(text: cyl.end?.toString() ?? '');
 
     final cylinderState = context.read<CylinderListBloc>().state;
-    final availableCylinders = cylinderState is CylinderListLoaded ? cylinderState.cylinders : <ssrf.Cylinder>[];
-    ssrf.Cylinder? selectedCylinder = cyl.cylinder;
+    final availableCylinders = cylinderState is CylinderListLoaded ? cylinderState.cylinders : <Cylinder>[];
+    Cylinder? selectedCylinder = cyl.cylinder;
 
     final result = await showDialog<bool>(
       context: context,
@@ -397,13 +394,13 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       // Update gas change events
       // Find existing "Manual Entry" dive computer log or prepare to create one
       const manualEntryModel = 'Manual Entry';
-      ssrf.DiveComputerLog? manualLog = dive.divecomputers.where((dc) => dc.diveComputer?.model == manualEntryModel).firstOrNull;
+      DiveComputerLog? manualLog = dive.divecomputers.where((dc) => dc.diveComputer?.model == manualEntryModel).firstOrNull;
 
       if (_gasChanges.isNotEmpty) {
         // Convert gas changes to events
         final events = _gasChanges.map((gc) {
           final cyl = _cylinders[gc.cylinderIndex];
-          return ssrf.Event(
+          return Event(
             time: gc.timeSeconds,
             type: 11, // gaschange type
             name: 'gaschange',
@@ -418,9 +415,9 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
           manualLog.events.addAll(events);
         } else {
           // Create new manual log
-          manualLog = ssrf.DiveComputerLog(
+          manualLog = DiveComputerLog(
             diveComputerId: 0,
-            diveComputer: const ssrf.DiveComputer(id: 0, model: manualEntryModel),
+            diveComputer: const DiveComputer(id: 0, model: manualEntryModel),
             maxDepth: dive.maxDepth ?? 0,
             meanDepth: dive.meanDepth ?? 0,
             events: events,
@@ -492,9 +489,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
             Builder(
               builder: (context) {
                 final diveListState = context.watch<DiveListBloc>().state;
-                final selectedSite = _selectedDivesiteId != null && diveListState is DiveListLoaded
-                    ? diveListState.diveSitesByUuid[_selectedDivesiteId]
-                    : null;
+                final selectedSite = _selectedDivesiteId != null && diveListState is DiveListLoaded ? diveListState.diveSitesByUuid[_selectedDivesiteId] : null;
 
                 return InkWell(
                   onTap: _selectDivesite,

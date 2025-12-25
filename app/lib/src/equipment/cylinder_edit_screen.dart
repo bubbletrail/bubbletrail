@@ -1,3 +1,4 @@
+import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -5,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../bloc/cylinderdetails_bloc.dart';
 import '../bloc/cylinderlist_bloc.dart';
 import '../common/common.dart';
-import '../ssrf/ssrf.dart' as ssrf;
 
 class CylinderEditScreen extends StatefulWidget {
   const CylinderEditScreen({super.key});
@@ -15,7 +15,7 @@ class CylinderEditScreen extends StatefulWidget {
 }
 
 class _CylinderEditScreenState extends State<CylinderEditScreen> {
-  late final ssrf.Cylinder _originalCylinder;
+  late final Cylinder _originalCylinder;
   late final bool _isNew;
   late final TextEditingController _descriptionController;
   late final TextEditingController _sizeController;
@@ -59,12 +59,7 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
         return;
       }
 
-      final updatedCylinder = ssrf.Cylinder(
-        id: _originalCylinder.id,
-        description: description.isEmpty ? null : description,
-        size: size,
-        workpressure: workpressure,
-      );
+      final updatedCylinder = Cylinder(id: _originalCylinder.id, description: description.isEmpty ? null : description, size: size, workpressure: workpressure);
 
       // Send update event to bloc
       context.read<CylinderDetailsBloc>().add(UpdateCylinderDetails(updatedCylinder));
@@ -94,28 +89,16 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
           children: [
             TextField(
               controller: _descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                border: OutlineInputBorder(),
-                hintText: 'e.g., AL80, Steel HP100',
-              ),
+              decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder(), hintText: 'e.g., AL80, Steel HP100'),
             ),
             TextField(
               controller: _sizeController,
-              decoration: const InputDecoration(
-                labelText: 'Size (liters)',
-                border: OutlineInputBorder(),
-                hintText: 'e.g., 11.1',
-              ),
+              decoration: const InputDecoration(labelText: 'Size (liters)', border: OutlineInputBorder(), hintText: 'e.g., 11.1'),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
             TextField(
               controller: _workpressureController,
-              decoration: const InputDecoration(
-                labelText: 'Working Pressure (bar)',
-                border: OutlineInputBorder(),
-                hintText: 'e.g., 207',
-              ),
+              decoration: const InputDecoration(labelText: 'Working Pressure (bar)', border: OutlineInputBorder(), hintText: 'e.g., 207'),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
             SizedBox(

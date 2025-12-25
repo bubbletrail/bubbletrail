@@ -1,9 +1,8 @@
+import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 
-import '../ssrf/ssrf.dart' as ssrf;
-import '../ssrf/storage/storage.dart';
 import 'details_state.dart';
 
 abstract class DivesiteDetailsState extends Equatable with DetailsStateMixin {
@@ -22,7 +21,7 @@ class DivesiteDetailsLoading extends DivesiteDetailsState with DetailsLoadingMix
 }
 
 class DivesiteDetailsLoaded extends DivesiteDetailsState with DetailsLoadedMixin {
-  final ssrf.Divesite divesite;
+  final Divesite divesite;
   final bool isNew;
 
   const DivesiteDetailsLoaded(this.divesite, this.isNew);
@@ -65,7 +64,7 @@ class NewDivesiteEvent extends DivesiteDetailsEvent {
 }
 
 class UpdateDivesiteDetails extends DivesiteDetailsEvent {
-  final ssrf.Divesite divesite;
+  final Divesite divesite;
 
   const UpdateDivesiteDetails(this.divesite);
 
@@ -111,7 +110,7 @@ class DivesiteDetailsBloc extends Bloc<DivesiteDetailsEvent, DivesiteDetailsStat
   }
 
   Future<void> _onNewDivesite(NewDivesiteEvent event, Emitter<DivesiteDetailsState> emit) async {
-    final divesite = ssrf.Divesite(uuid: const Uuid().v4(), name: '');
+    final divesite = Divesite(uuid: const Uuid().v4(), name: '');
     emit(DivesiteDetailsLoaded(divesite, true));
   }
 }

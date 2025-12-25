@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -8,7 +9,6 @@ import 'package:libdivecomputer/libdivecomputer.dart' as dc;
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../ssrf/ssrf.dart';
 import 'divelist_bloc.dart';
 
 final _log = Logger('BleBloc');

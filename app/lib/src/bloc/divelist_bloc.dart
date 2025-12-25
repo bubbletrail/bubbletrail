@@ -2,13 +2,11 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:xml/xml.dart';
 import 'package:logging/logging.dart';
-
-import '../ssrf/ssrf.dart' as ssrf;
-import '../ssrf/storage/storage.dart';
 
 final _log = Logger('DiveListBloc');
 
@@ -28,17 +26,17 @@ class DiveListLoading extends DiveListState {
 }
 
 class DiveListLoaded extends DiveListState {
-  final List<ssrf.Dive> dives;
-  final List<ssrf.Divesite> diveSites;
+  final List<Dive> dives;
+  final List<Divesite> diveSites;
 
   /// Index map for O(1) dive lookup by ID
-  late final Map<String, ssrf.Dive> divesById;
+  late final Map<String, Dive> divesById;
 
   /// Index map for O(1) dive list index lookup by ID
   late final Map<String, int> diveIndexById;
 
   /// Index map for O(1) dive site lookup by UUID
-  late final Map<String, ssrf.Divesite> diveSitesByUuid;
+  late final Map<String, Divesite> diveSitesByUuid;
 
   /// Index map for O(1) dive count lookup by site UUID
   late final Map<String, int> diveCountBySiteId;
@@ -81,7 +79,7 @@ class LoadDives extends DiveListEvent {
 }
 
 class UpdateDive extends DiveListEvent {
-  final ssrf.Dive dive;
+  final Dive dive;
 
   const UpdateDive(this.dive);
 
@@ -159,7 +157,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       // Read the SSRF file
       final xmlData = await File(event.filePath).readAsString();
       final doc = XmlDocument.parse(xmlData);
-      final importedSsrf = ssrf.SsrfXml.fromXml(doc.rootElement);
+      final importedSsrf = SsrfXml.fromXml(doc.rootElement);
 
       if (state is DiveListLoaded) {
         final currentState = state as DiveListLoaded;

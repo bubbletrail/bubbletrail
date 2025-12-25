@@ -1,15 +1,14 @@
 import 'dart:io' show Platform;
 
+import 'package:divestore/divestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../ssrf/ssrf.dart' as ssrf;
-
 /// A fullscreen view of the dive depth profile.
 /// On mobile devices (iOS/Android), this screen forces landscape orientation.
 class FullscreenProfileScreen extends StatefulWidget {
-  final ssrf.DiveComputerLog diveComputerLog;
+  final DiveComputerLog diveComputerLog;
   final String? title;
 
   const FullscreenProfileScreen({super.key, required this.diveComputerLog, this.title});
@@ -143,7 +142,7 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
                     getTooltipItems: (touchedSpots) {
                       return touchedSpots.map((spot) {
                         return LineTooltipItem(
-                          '${ssrf.formatDuration((spot.x * 60).toInt())}\n${spot.y.toStringAsFixed(1).replaceFirst('-', '')} m',
+                          '${formatDuration((spot.x * 60).toInt())}\n${spot.y.toStringAsFixed(1).replaceFirst('-', '')} m',
                           TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 14),
                         );
                       }).toList();

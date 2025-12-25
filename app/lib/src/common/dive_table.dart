@@ -1,3 +1,4 @@
+import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -5,20 +6,19 @@ import 'package:trina_grid/trina_grid.dart';
 
 import '../app_routes.dart';
 import '../app_theme.dart';
-import '../ssrf/ssrf.dart' as ssrf;
 import 'dive_list_item_card.dart';
 
 /// Breakpoint width for switching between card (narrow) and table (wide) layouts.
 const double _narrowLayoutBreakpoint = 600;
 
 class DiveTableWidget extends StatelessWidget {
-  final List<ssrf.Dive> dives;
-  final Map<String, ssrf.Divesite> diveSitesByUuid;
+  final List<Dive> dives;
+  final Map<String, Divesite> diveSitesByUuid;
   final bool showSiteColumn;
 
   const DiveTableWidget({super.key, required this.dives, required this.diveSitesByUuid, this.showSiteColumn = true});
 
-  ssrf.Divesite? _getDiveSite(ssrf.Dive dive) {
+  Divesite? _getDiveSite(Dive dive) {
     if (dive.divesiteid == null) return null;
     return diveSitesByUuid[dive.divesiteid];
   }
@@ -39,7 +39,7 @@ class DiveTableWidget extends StatelessWidget {
 
   Widget _buildCardList(BuildContext context) {
     // Sort by date descending for card list
-    final sortedDives = List<ssrf.Dive>.from(dives)..sort((a, b) => b.start.compareTo(a.start));
+    final sortedDives = List<Dive>.from(dives)..sort((a, b) => b.start.compareTo(a.start));
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: sortedDives.length,
@@ -66,7 +66,7 @@ class DiveTableWidget extends StatelessWidget {
           'number': TrinaCell(value: dive.number),
           'start': TrinaCell(value: DateFormat.yMd().add_jm().format(dive.start)),
           'maxDepth': TrinaCell(value: dive.maxDepth ?? 0.0),
-          'duration': TrinaCell(value: ssrf.formatDuration(dive.duration)),
+          'duration': TrinaCell(value: formatDuration(dive.duration)),
           'site': TrinaCell(value: diveSite?.name ?? ''),
           '_id': TrinaCell(value: dive.id), // Hidden field for navigation
         },

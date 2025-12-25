@@ -1,12 +1,12 @@
+import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_routes.dart';
-import '../ssrf/ssrf.dart' as ssrf;
 
 /// A card widget for displaying a dive site in a mobile-friendly list layout.
 class DiveSiteListItemCard extends StatelessWidget {
-  final ssrf.Divesite site;
+  final Divesite site;
   final int diveCount;
 
   const DiveSiteListItemCard({super.key, required this.site, required this.diveCount});

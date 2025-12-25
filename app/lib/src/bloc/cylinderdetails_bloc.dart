@@ -1,8 +1,7 @@
+import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../ssrf/ssrf.dart' as ssrf;
-import '../ssrf/storage/storage.dart';
 import 'details_state.dart';
 
 abstract class CylinderDetailsState extends Equatable with DetailsStateMixin {
@@ -21,7 +20,7 @@ class CylinderDetailsLoading extends CylinderDetailsState with DetailsLoadingMix
 }
 
 class CylinderDetailsLoaded extends CylinderDetailsState with DetailsLoadedMixin {
-  final ssrf.Cylinder cylinder;
+  final Cylinder cylinder;
   final bool isNew;
 
   const CylinderDetailsLoaded(this.cylinder, this.isNew);
@@ -64,7 +63,7 @@ class NewCylinderEvent extends CylinderDetailsEvent {
 }
 
 class UpdateCylinderDetails extends CylinderDetailsEvent {
-  final ssrf.Cylinder cylinder;
+  final Cylinder cylinder;
 
   const UpdateCylinderDetails(this.cylinder);
 
@@ -111,7 +110,7 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
   }
 
   Future<void> _onNewCylinder(NewCylinderEvent event, Emitter<CylinderDetailsState> emit) async {
-    const cylinder = ssrf.Cylinder(id: 0);
+    const cylinder = Cylinder(id: 0);
     emit(const CylinderDetailsLoaded(cylinder, true));
   }
 }

@@ -1,3 +1,4 @@
+import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -7,7 +8,6 @@ import '../app_routes.dart';
 import '../app_theme.dart';
 import '../bloc/divelist_bloc.dart';
 import '../common/common.dart';
-import '../ssrf/ssrf.dart' as ssrf;
 
 /// Breakpoint width for switching between card (narrow) and table (wide) layouts.
 const double _narrowLayoutBreakpoint = 600;
@@ -51,7 +51,7 @@ class DiveSiteListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCardList(BuildContext context, List<ssrf.Divesite> diveSites, Map<String, int> diveCountBySiteId) {
+  Widget _buildCardList(BuildContext context, List<Divesite> diveSites, Map<String, int> diveCountBySiteId) {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: diveSites.length,
@@ -63,7 +63,7 @@ class DiveSiteListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTrinaGrid(BuildContext context, List<ssrf.Divesite> diveSites, Map<String, int> diveCountBySiteId) {
+  Widget _buildTrinaGrid(BuildContext context, List<Divesite> diveSites, Map<String, int> diveCountBySiteId) {
     final columns = <TrinaColumn>[
       TrinaColumn(title: 'Name', field: 'name', type: TrinaColumnType.text(), width: 200, readOnly: true),
       TrinaColumn(title: 'Country', field: 'country', type: TrinaColumnType.text(), width: 120, readOnly: true),

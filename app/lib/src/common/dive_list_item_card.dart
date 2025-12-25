@@ -1,14 +1,14 @@
+import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../app_routes.dart';
-import '../ssrf/ssrf.dart' as ssrf;
 
 /// A card widget for displaying a dive in a mobile-friendly list layout.
 class DiveListItemCard extends StatelessWidget {
-  final ssrf.Dive dive;
-  final ssrf.Divesite? diveSite;
+  final Dive dive;
+  final Divesite? diveSite;
   final bool showSite;
 
   const DiveListItemCard({super.key, required this.dive, this.diveSite, this.showSite = true});
@@ -56,7 +56,7 @@ class DiveListItemCard extends StatelessWidget {
                 children: [
                   _InfoChip(icon: Icons.arrow_downward, label: '${maxDepth.toStringAsFixed(1)} m', theme: theme),
                   const SizedBox(width: 12),
-                  _InfoChip(icon: Icons.timer, label: ssrf.formatDuration(dive.duration), theme: theme),
+                  _InfoChip(icon: Icons.timer, label: formatDuration(dive.duration), theme: theme),
                   const Spacer(),
                   Text(DateFormat.jm().format(dive.start), style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],

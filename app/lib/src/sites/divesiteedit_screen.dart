@@ -1,3 +1,4 @@
+import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -5,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../bloc/divelist_bloc.dart';
 import '../bloc/divesitedetails_bloc.dart';
 import '../common/common.dart';
-import '../ssrf/ssrf.dart' as ssrf;
 
 class DivesiteEditScreen extends StatefulWidget {
   const DivesiteEditScreen({super.key});
@@ -15,7 +15,7 @@ class DivesiteEditScreen extends StatefulWidget {
 }
 
 class _DivesiteEditScreenState extends State<DivesiteEditScreen> {
-  late final ssrf.Divesite _originalDivesite;
+  late final Divesite _originalDivesite;
   late final bool _isNew;
   late final TextEditingController _nameController;
   late final TextEditingController _countryController;
@@ -61,18 +61,18 @@ class _DivesiteEditScreenState extends State<DivesiteEditScreen> {
 
     try {
       // Parse GPS position if provided
-      ssrf.GPSPosition? position;
+      GPSPosition? position;
       final latText = _latController.text.trim();
       final lonText = _lonController.text.trim();
       if (latText.isNotEmpty && lonText.isNotEmpty) {
         final lat = double.tryParse(latText);
         final lon = double.tryParse(lonText);
         if (lat != null && lon != null) {
-          position = ssrf.GPSPosition(lat, lon);
+          position = GPSPosition(lat, lon);
         }
       }
 
-      final updatedDivesite = ssrf.Divesite(
+      final updatedDivesite = Divesite(
         uuid: _originalDivesite.uuid,
         name: name,
         position: position,
