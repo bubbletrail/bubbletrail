@@ -383,6 +383,8 @@ class BleBloc extends Bloc<BleEvent, BleState> {
           case DownloadError(:final message):
             print('Download error: $message');
             add(_BleDownloadFailed(message));
+          case DownloadWaiting():
+            print('Download waiting');
         }
       }
     } catch (e) {

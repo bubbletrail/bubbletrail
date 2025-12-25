@@ -206,30 +206,34 @@ void _downloadIsolateEntry(DownloadRequest request) {
     return;
   }
 
-  // Set up event callback using NativeCallable
+  // Set up event callback using NativeCallable.isolateLocal for synchronous execution
   int diveCount = 0;
 
-  final eventCallback = ffi.NativeCallable<bindings.dc_event_callback_tFunction>.listener((
+  final eventCallback = ffi.NativeCallable<bindings.dc_event_callback_tFunction>.isolateLocal((
     ffi.Pointer<bindings.dc_device_t> dev,
     int eventType,
     ffi.Pointer<ffi.Void> data,
     ffi.Pointer<ffi.Void> userdata,
   ) {
-    print('event');
-    if (eventType == bindings.dc_event_type_t.DC_EVENT_PROGRESS.value) {
-      print('progress');
+    if (eventType == bindings.dc_event_type_t.DC_EVENT_WAITING.value) {
+      sendPort.send(DownloadWaiting());
+    } else if (eventType == bindings.dc_event_type_t.DC_EVENT_PROGRESS.value) {
       final progress = data.cast<bindings.dc_event_progress_t>().ref;
       sendPort.send(DownloadProgressEvent(DownloadProgress(progress.current, progress.maximum)));
     } else if (eventType == bindings.dc_event_type_t.DC_EVENT_DEVINFO.value) {
-      print('device info');
       final devinfo = data.cast<bindings.dc_event_devinfo_t>().ref;
       sendPort.send(DownloadDeviceInfo(DeviceInfo(model: devinfo.model, firmware: devinfo.firmware, serial: devinfo.serial)));
     }
   });
 
+  // Subscribe to all useful events
+  final events = bindings.dc_event_type_t.DC_EVENT_WAITING.value |
+      bindings.dc_event_type_t.DC_EVENT_PROGRESS.value |
+      bindings.dc_event_type_t.DC_EVENT_DEVINFO.value;
+
   final eventsStatus = bindings.dc_device_set_events(
     device.value,
-    bindings.dc_event_type_t.DC_EVENT_PROGRESS.value | bindings.dc_event_type_t.DC_EVENT_DEVINFO.value,
+    events,
     eventCallback.nativeFunction,
     ffi.nullptr,
   );

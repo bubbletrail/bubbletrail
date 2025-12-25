@@ -47,6 +47,9 @@ sealed class DownloadEvent {}
 
 class DownloadStarted extends DownloadEvent {}
 
+/// Indicates the device is waiting for user action (e.g., activating transfer mode).
+class DownloadWaiting extends DownloadEvent {}
+
 class DownloadProgressEvent extends DownloadEvent {
   final DownloadProgress progress;
   DownloadProgressEvent(this.progress);
