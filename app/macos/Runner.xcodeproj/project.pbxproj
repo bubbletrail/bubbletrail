@@ -22,7 +22,7 @@
 
 /* Begin PBXBuildFile section */
 		1EA017B856A3821FA38FCC22 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E11C850A9C7690D2FE23691 /* Pods_RunnerTests.framework */; };
-		2933AB472EF55AF600CCF7A3 /* bubbletrail.icon in Resources */ = {isa = PBXBuildFile; fileRef = 2933AB462EF55AF600CCF7A3 /* bubbletrail.icon */; };
+		291FEDC12EF8031900BF85E8 /* bubbletrail.icon in Resources */ = {isa = PBXBuildFile; fileRef = 291FEDC02EF8031900BF85E8 /* bubbletrail.icon */; };
 		331C80D8294CF71000263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C80D7294CF71000263BE5 /* RunnerTests.swift */; };
 		335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */; };
 		33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC10F02044A3C60003C045 /* AppDelegate.swift */; };
@@ -64,7 +64,7 @@
 
 /* Begin PBXFileReference section */
 		190A00E924D0BFA4F1D7F145 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
-		2933AB462EF55AF600CCF7A3 /* bubbletrail.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; name = bubbletrail.icon; path = /Users/jb/src/divepath/divepath/assets/bubbletrail.icon; sourceTree = "<absolute>"; };
+		291FEDC02EF8031900BF85E8 /* bubbletrail.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = bubbletrail.icon; sourceTree = "<group>"; };
 		331C80D5294CF71000263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		331C80D7294CF71000263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		333000ED22D3DE5D00554162 /* Warnings.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Warnings.xcconfig; sourceTree = "<group>"; };
@@ -158,7 +158,7 @@
 				33CC10F22044A3C60003C045 /* Assets.xcassets */,
 				33CC10F42044A3C60003C045 /* MainMenu.xib */,
 				33CC10F72044A3C60003C045 /* Info.plist */,
-				2933AB462EF55AF600CCF7A3 /* bubbletrail.icon */,
+				291FEDC02EF8031900BF85E8 /* bubbletrail.icon */,
 			);
 			name = Resources;
 			path = ..;
@@ -319,7 +319,7 @@
 			files = (
 				33CC10F32044A3C60003C045 /* Assets.xcassets in Resources */,
 				33CC10F62044A3C60003C045 /* MainMenu.xib in Resources */,
-				2933AB472EF55AF600CCF7A3 /* bubbletrail.icon in Resources */,
+				291FEDC12EF8031900BF85E8 /* bubbletrail.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

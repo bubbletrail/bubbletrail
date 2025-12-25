@@ -147,11 +147,11 @@ class BleScanScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FilledButton.icon(
-            onPressed: state.supportedBleComputers.isEmpty ? null : () => _showComputerSelectionDialog(context, state),
+            onPressed: state.supportedComputers.isEmpty ? null : () => _showComputerSelectionDialog(context, state),
             icon: const Icon(Icons.download),
             label: const Text('Download Dives'),
           ),
-          if (state.supportedBleComputers.isEmpty)
+          if (state.supportedComputers.isEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Text('Loading supported computers...', style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
@@ -162,9 +162,9 @@ class BleScanScreen extends StatelessWidget {
   }
 
   void _showComputerSelectionDialog(BuildContext context, BleState state) {
-    final deviceName = state.connectedDevice?.platformName ?? '';
-    final filteredComputers = filterComputersByDeviceName(state.supportedBleComputers, deviceName);
-    final hasMatches = filteredComputers.length < state.supportedBleComputers.length;
+    final dev = state.connectedDevice!;
+    final deviceName = dev.platformName;
+    final matchedComputers = state.scanResults.firstWhere((r) => r.$1.device.remoteId == dev.remoteId).$2;
 
     showDialog(
       context: context,
@@ -176,7 +176,7 @@ class BleScanScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (hasMatches)
+              if (matchedComputers.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: Text('Suggested for "$deviceName":', style: Theme.of(dialogContext).textTheme.bodySmall),
@@ -184,11 +184,11 @@ class BleScanScreen extends StatelessWidget {
               Flexible(
                 child: ListView.builder(
                   shrinkWrap: true,
-                  itemCount: filteredComputers.length,
+                  itemCount: matchedComputers.length,
                   itemBuilder: (context, index) {
-                    final computer = filteredComputers[index];
+                    final computer = matchedComputers[index];
                     return ListTile(
-                      title: Text('${computer.vendor} ${computer.product}'),
+                      title: Text('${computer.vendor} ${computer.model}'),
                       onTap: () {
                         Navigator.of(dialogContext).pop();
                         context.read<BleBloc>().add(BleStartDownload(computer));
@@ -197,7 +197,7 @@ class BleScanScreen extends StatelessWidget {
                   },
                 ),
               ),
-              if (hasMatches) ...[
+              if (state.supportedComputers.isNotEmpty) ...[
                 const Divider(),
                 TextButton(
                   onPressed: () {
@@ -224,11 +224,11 @@ class BleScanScreen extends StatelessWidget {
           width: double.maxFinite,
           height: 400,
           child: ListView.builder(
-            itemCount: state.supportedBleComputers.length,
+            itemCount: state.supportedComputers.length,
             itemBuilder: (context, index) {
-              final computer = state.supportedBleComputers[index];
+              final computer = state.supportedComputers[index];
               return ListTile(
-                title: Text('${computer.vendor} ${computer.product}'),
+                title: Text('${computer.vendor} ${computer.model}'),
                 onTap: () {
                   Navigator.of(dialogContext).pop();
                   context.read<BleBloc>().add(BleStartDownload(computer));
@@ -243,24 +243,25 @@ class BleScanScreen extends StatelessWidget {
   }
 
   Widget _buildDownloadedDives(BuildContext context, BleState state) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Downloaded ${state.downloadedDives.length} dive(s)', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          ...state.downloadedDives.map(
-            (dive) => ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.scuba_diving),
-              title: Text(dive.dateTime?.toString() ?? 'Unknown date'),
-              subtitle: Text('Max depth: ${dive.maxDepth?.toStringAsFixed(1) ?? '?'}m'),
-            ),
-          ),
-        ],
-      ),
-    );
+    return Placeholder();
+    // return Padding(
+    //   padding: const EdgeInsets.all(16.0),
+    //   child: Column(
+    //     crossAxisAlignment: CrossAxisAlignment.start,
+    //     children: [
+    //       Text('Downloaded ${state.downloadedDives.length} dive(s)', style: Theme.of(context).textTheme.titleMedium),
+    //       const SizedBox(height: 8),
+    //       ...state.downloadedDives.map(
+    //         (dive) => ListTile(
+    //           contentPadding: EdgeInsets.zero,
+    //           leading: const Icon(Icons.scuba_diving),
+    //           title: Text(dive.dateTime?.toString() ?? 'Unknown date'),
+    //           subtitle: Text('Max depth: ${dive.maxDepth?.toStringAsFixed(1) ?? '?'}m'),
+    //         ),
+    //       ),
+    //     ],
+    //   ),
+    // );
   }
 
   Widget _buildEmptyState(BuildContext context, BleState state) {

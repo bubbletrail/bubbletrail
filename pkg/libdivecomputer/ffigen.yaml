@@ -1,0 +1,34 @@
+# Run with `dart run ffigen --config ffigen.yaml`.
+name: LibdivecomputerBindings
+description: |
+  Bindings for `src/libdivecomputer.h`.
+
+  Regenerate bindings with `dart run ffigen --config ffigen.yaml`.
+output: 'lib/libdivecomputer_bindings_generated.dart'
+headers:
+  entry-points:
+    - 'src/libdivecomputer.h'
+    - 'src/fifos.h'
+    - 'libdivecomputer-0.9.0/include/libdivecomputer/context.h'
+    - 'libdivecomputer-0.9.0/include/libdivecomputer/descriptor.h'
+    - 'libdivecomputer-0.9.0/include/libdivecomputer/iterator.h'
+    - 'libdivecomputer-0.9.0/include/libdivecomputer/iostream.h'
+    - 'libdivecomputer-0.9.0/include/libdivecomputer/device.h'
+    - 'libdivecomputer-0.9.0/include/libdivecomputer/parser.h'
+  include-directives:
+    - 'src/libdivecomputer.h'
+    - 'src/fifos.h'
+    - 'libdivecomputer-0.9.0/include/libdivecomputer/context.h'
+    - 'libdivecomputer-0.9.0/include/libdivecomputer/descriptor.h'
+    - 'libdivecomputer-0.9.0/include/libdivecomputer/iterator.h'
+    - 'libdivecomputer-0.9.0/include/libdivecomputer/iostream.h'
+    - 'libdivecomputer-0.9.0/include/libdivecomputer/device.h'
+    - 'libdivecomputer-0.9.0/include/libdivecomputer/parser.h'
+ffi-native:
+preamble: |
+  // ignore_for_file: always_specify_types
+  // ignore_for_file: camel_case_types
+  // ignore_for_file: non_constant_identifier_names
+comments:
+  style: any
+  length: full

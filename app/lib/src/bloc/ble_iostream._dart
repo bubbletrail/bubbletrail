@@ -1,0 +1,190 @@
+import 'dart:async';
+import 'dart:ffi' as ffi;
+
+import 'package:dive_computer/framework/custom_iostream.dart';
+import 'package:dive_computer/framework/dive_computer_ffi_bindings_generated.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+
+/// A simple binary semaphore for signaling data availability.
+class _DataSemaphore {
+  Completer<void>? _completer;
+
+  /// Signal that data is available. Wakes up any waiting poll().
+  void signal() {
+    if (_completer != null && !_completer!.isCompleted) {
+      _completer!.complete();
+    }
+  }
+
+  /// Wait for data with timeout. Returns true if signaled, false if timeout.
+  Future<bool> wait(Duration timeout) async {
+    _completer = Completer<void>();
+    try {
+      await _completer!.future.timeout(timeout);
+      return true;
+    } on TimeoutException {
+      return false;
+    }
+  }
+
+  /// Non-blocking check and reset.
+  void reset() {
+    _completer = null;
+  }
+}
+
+class BleIOStream extends CustomIOStream {
+  BleIOStream({required this.rxCharacteristic, required this.txCharacteristic});
+
+  final BluetoothCharacteristic rxCharacteristic;
+  final BluetoothCharacteristic txCharacteristic;
+
+  final List<int> _readBuffer = [];
+  int _timeout = -1;
+  final _dataSemaphore = _DataSemaphore();
+
+  /// Completer for the current blocking wait, if any.
+  Completer<int>? _pollCompleter;
+
+  static String _bytesToHex(List<int> bytes) {
+    return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ');
+  }
+
+  Future<void> setupNotifications() async {
+    debugPrint('BLE iostream: Setting up notifications on RX characteristic');
+    await rxCharacteristic.setNotifyValue(true);
+    rxCharacteristic.onValueReceived.listen((data) {
+      debugPrint('BLE iostream: Received ${data.length} bytes: ${_bytesToHex(data)}');
+      _readBuffer.addAll(data);
+      debugPrint('BLE iostream: Buffer now has ${_readBuffer.length} bytes');
+      // Signal that data is available
+      _dataSemaphore.signal();
+      // Also complete any pending poll
+      if (_pollCompleter != null && !_pollCompleter!.isCompleted) {
+        _pollCompleter!.complete(dc_status_t.DC_STATUS_SUCCESS);
+      }
+    });
+    debugPrint('BLE iostream: Notifications set up');
+  }
+
+  @override
+  int setTimeout(int timeout) {
+    debugPrint('BLE iostream: setTimeout($timeout)');
+    _timeout = timeout;
+    return dc_status_t.DC_STATUS_SUCCESS;
+  }
+
+  /// Async poll that properly waits for data without blocking the event loop.
+  Future<int> pollAsync(int timeout) async {
+    debugPrint('BLE iostream: pollAsync($timeout), buffer has ${_readBuffer.length} bytes');
+
+    if (_readBuffer.isNotEmpty) {
+      return dc_status_t.DC_STATUS_SUCCESS;
+    }
+
+    if (timeout == 0) {
+      // Non-blocking check
+      return dc_status_t.DC_STATUS_TIMEOUT;
+    }
+
+    // Wait for data with timeout
+    _pollCompleter = Completer<int>();
+
+    final Duration waitDuration;
+    if (timeout < 0) {
+      // Infinite timeout - use a very long duration
+      waitDuration = const Duration(hours: 1);
+    } else {
+      waitDuration = Duration(milliseconds: timeout);
+    }
+
+    try {
+      final result = await _pollCompleter!.future.timeout(waitDuration);
+      return result;
+    } on TimeoutException {
+      debugPrint('BLE iostream: pollAsync timeout after $timeout ms');
+      return dc_status_t.DC_STATUS_TIMEOUT;
+    } finally {
+      _pollCompleter = null;
+    }
+  }
+
+  @override
+  int poll(int timeout) {
+    // This is called synchronously from FFI. We can't truly async wait here,
+    // but we can check if data is already available.
+    debugPrint('BLE iostream: poll($timeout), buffer has ${_readBuffer.length} bytes');
+
+    if (_readBuffer.isNotEmpty) {
+      return dc_status_t.DC_STATUS_SUCCESS;
+    }
+
+    // For sync poll, we return TIMEOUT if no data available.
+    // The caller should handle retry logic.
+    // NOTE: This won't work well with libdivecomputer which expects poll to block.
+    // For proper async support, we need to restructure the download to use pollAsync.
+    return dc_status_t.DC_STATUS_TIMEOUT;
+  }
+
+  @override
+  int read(ffi.Pointer<ffi.Void> data, int size, ffi.Pointer<ffi.Size> actual) {
+    debugPrint('BLE iostream: read() called, requested size: $size, buffer has: ${_readBuffer.length} bytes');
+
+    if (_readBuffer.isEmpty) {
+      debugPrint('BLE iostream: Buffer empty, polling with timeout: $_timeout');
+      return dc_status_t.DC_STATUS_SUCCESS;
+      final pollResult = poll(_timeout);
+      if (pollResult != dc_status_t.DC_STATUS_SUCCESS) {
+        debugPrint('BLE iostream: Poll failed/timeout, returning status: $pollResult');
+        actual.value = 0;
+        return pollResult;
+      }
+    }
+
+    final bytesToRead = _readBuffer.length < size ? _readBuffer.length : size;
+    final buffer = data.cast<ffi.Uint8>();
+
+    for (int i = 0; i < bytesToRead; i++) {
+      buffer[i] = _readBuffer[i];
+    }
+
+    final readBytes = _readBuffer.sublist(0, bytesToRead);
+    _readBuffer.removeRange(0, bytesToRead);
+    actual.value = bytesToRead;
+    debugPrint('BLE iostream: Read $bytesToRead bytes: ${_bytesToHex(readBytes)}');
+    return dc_status_t.DC_STATUS_SUCCESS;
+  }
+
+  @override
+  int write(ffi.Pointer<ffi.Void> data, int size, ffi.Pointer<ffi.Size> actual) {
+    final buffer = data.cast<ffi.Uint8>().asTypedList(size);
+    debugPrint('BLE iostream: write() called, size: $size, data: ${_bytesToHex(buffer.toList())}');
+    txCharacteristic.write(buffer.toList(), withoutResponse: false);
+    actual.value = size;
+    debugPrint('BLE iostream: Write complete');
+    return dc_status_t.DC_STATUS_SUCCESS;
+  }
+
+  @override
+  int flush() => dc_status_t.DC_STATUS_SUCCESS;
+
+  @override
+  int purge(int direction) {
+    if (direction & dc_direction_t.DC_DIRECTION_INPUT != 0) {
+      _readBuffer.clear();
+    }
+    return dc_status_t.DC_STATUS_SUCCESS;
+  }
+
+  @override
+  int onClose() {
+    _readBuffer.clear();
+    rxCharacteristic.setNotifyValue(false);
+    return dc_status_t.DC_STATUS_SUCCESS;
+  }
+
+  @override
+  int configure(int baudrate, int databits, int parity, int stopbits, int flowcontrol) => dc_status_t.DC_STATUS_SUCCESS;
+}
+

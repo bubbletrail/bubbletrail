@@ -1,6 +1,4 @@
 PODS:
-  - dive_computer (0.0.1):
-    - FlutterMacOS
   - file_picker (0.0.1):
     - FlutterMacOS
   - flutter_blue_plus_darwin (0.0.2):
@@ -15,7 +13,6 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
-  - dive_computer (from `Flutter/ephemeral/.symlinks/plugins/dive_computer/macos`)
   - file_picker (from `Flutter/ephemeral/.symlinks/plugins/file_picker/macos`)
   - flutter_blue_plus_darwin (from `Flutter/ephemeral/.symlinks/plugins/flutter_blue_plus_darwin/darwin`)
   - FlutterMacOS (from `Flutter/ephemeral`)
@@ -23,8 +20,6 @@ DEPENDENCIES:
   - sqflite_darwin (from `Flutter/ephemeral/.symlinks/plugins/sqflite_darwin/darwin`)
 
 EXTERNAL SOURCES:
-  dive_computer:
-    :path: Flutter/ephemeral/.symlinks/plugins/dive_computer/macos
   file_picker:
     :path: Flutter/ephemeral/.symlinks/plugins/file_picker/macos
   flutter_blue_plus_darwin:
@@ -37,7 +32,6 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/sqflite_darwin/darwin
 
 SPEC CHECKSUMS:
-  dive_computer: 717f7f74cc3fba06817b5db368bfe75fd880ef53
   file_picker: 7584aae6fa07a041af2b36a2655122d42f578c1a
   flutter_blue_plus_darwin: 20a08bfeaa0f7804d524858d3d8744bcc1b6dbc3
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1

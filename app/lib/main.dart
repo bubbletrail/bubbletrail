@@ -242,7 +242,7 @@ class _MyAppState extends State<MyApp> {
               ],
             ),
             StatefulShellBranch(
-              routes: <RouteBase>[GoRoute(path: AppRoutePath.connect, name: AppRouteName.connect, builder: (context, state) => const BleScanScreen())],
+              routes: <RouteBase>[GoRoute(path: AppRoutePath.connect, name: AppRouteName.connect, builder: (context, state) => BleScanScreen())],
             ),
           ],
         ),
