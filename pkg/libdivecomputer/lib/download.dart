@@ -4,11 +4,12 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:divestore/divestore.dart';
 import 'package:ffi/ffi.dart';
 import 'package:logging/logging.dart';
 
-import 'libdivecomputer_bindings_generated.dart' as bindings;
 import 'libdivecomputer.dart';
+import 'libdivecomputer_bindings_generated.dart' as bindings;
 
 final _log = Logger('libdivecomputer.download');
 

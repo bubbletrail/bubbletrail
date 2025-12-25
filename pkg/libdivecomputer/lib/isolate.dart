@@ -3,12 +3,13 @@ import 'dart:ffi' as ffi;
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:divestore/divestore.dart';
 import 'package:ffi/ffi.dart';
 import 'package:logging/logging.dart';
 
 import 'download.dart';
-import 'dive.dart';
 import 'libdivecomputer_bindings_generated.dart' as bindings;
+import 'parser.dart';
 
 final _log = Logger('libdivecomputer.isolate');
 

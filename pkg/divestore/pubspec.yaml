@@ -1,0 +1,13 @@
+name: divestore
+description: "A new Flutter package project."
+version: 0.0.1
+publish_to: 'none'
+
+environment:
+  sdk: ^3.10.4
+
+dependencies:
+  json_annotation: ^4.9.0
+
+dev_dependencies:
+  json_serializable: ^6.11.3
