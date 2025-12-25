@@ -2,12 +2,16 @@ import 'dart:ffi' as ffi;
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 import 'libdivecomputer_bindings_generated.dart' as dc;
+
+part 'dive.g.dart';
 
 // --- Enums ---
 
 /// Water type for salinity.
+@JsonEnum()
 enum WaterType {
   fresh,
   salt;
@@ -20,6 +24,7 @@ enum WaterType {
 }
 
 /// Dive mode.
+@JsonEnum()
 enum DiveMode {
   freedive,
   gauge,
@@ -38,6 +43,7 @@ enum DiveMode {
 }
 
 /// Gas usage type.
+@JsonEnum()
 enum GasUsage {
   none,
   oxygen,
@@ -54,6 +60,7 @@ enum GasUsage {
 }
 
 /// Tank volume type.
+@JsonEnum()
 enum TankVolumeType {
   none,
   metric,
@@ -68,6 +75,7 @@ enum TankVolumeType {
 }
 
 /// Decompression model type.
+@JsonEnum()
 enum DecoModelType {
   none,
   buhlmann,
@@ -86,6 +94,7 @@ enum DecoModelType {
 }
 
 /// Decompression stop type (in samples).
+@JsonEnum()
 enum DecoStopType {
   ndl,
   safetyStop,
@@ -102,6 +111,7 @@ enum DecoStopType {
 }
 
 /// Sample event type.
+@JsonEnum()
 enum SampleEventType {
   none,
   decoStop,
@@ -162,6 +172,7 @@ enum SampleEventType {
 }
 
 /// Sample event flags.
+@JsonSerializable()
 class SampleEventFlags {
   static const int none = 0;
   static const int begin = 1 << 0;
@@ -170,6 +181,9 @@ class SampleEventFlags {
   final int value;
   const SampleEventFlags(this.value);
 
+  factory SampleEventFlags.fromJson(Map<String, dynamic> json) => _$SampleEventFlagsFromJson(json);
+  Map<String, dynamic> toJson() => _$SampleEventFlagsToJson(this);
+
   bool get isBegin => (value & begin) != 0;
   bool get isEnd => (value & end) != 0;
 }
@@ -177,17 +191,22 @@ class SampleEventFlags {
 // --- Supporting Classes ---
 
 /// Water salinity information.
+@JsonSerializable()
 class Salinity {
   final WaterType type;
   final double density; // kg/m³
 
   const Salinity({required this.type, required this.density});
 
+  factory Salinity.fromJson(Map<String, dynamic> json) => _$SalinityFromJson(json);
+  Map<String, dynamic> toJson() => _$SalinityToJson(this);
+
   @override
   String toString() => '${type.name} (${density.toStringAsFixed(1)} kg/m³)';
 }
 
 /// Gas mix composition.
+@JsonSerializable()
 class GasMix {
   final double oxygen; // Fraction (0.0 - 1.0)
   final double helium; // Fraction (0.0 - 1.0)
@@ -195,6 +214,9 @@ class GasMix {
   final GasUsage usage;
 
   const GasMix({required this.oxygen, required this.helium, required this.nitrogen, this.usage = GasUsage.none});
+
+  factory GasMix.fromJson(Map<String, dynamic> json) => _$GasMixFromJson(json);
+  Map<String, dynamic> toJson() => _$GasMixToJson(this);
 
   /// Oxygen percentage (0-100).
   int get o2Percent => (oxygen * 100).round();
@@ -224,6 +246,7 @@ class GasMix {
 }
 
 /// Tank information.
+@JsonSerializable(includeIfNull: false)
 class Tank {
   final int? gasMixIndex; // Index into gasMixes list, null if unknown
   final TankVolumeType volumeType;
@@ -243,6 +266,9 @@ class Tank {
     this.usage = GasUsage.none,
   });
 
+  factory Tank.fromJson(Map<String, dynamic> json) => _$TankFromJson(json);
+  Map<String, dynamic> toJson() => _$TankToJson(this);
+
   /// Gas consumed in bar (if begin and end pressures are available).
   double? get pressureUsed {
     if (beginPressure != null && endPressure != null) {
@@ -260,6 +286,7 @@ class Tank {
 }
 
 /// Decompression model settings.
+@JsonSerializable(includeIfNull: false)
 class DecoModel {
   final DecoModelType type;
   final int conservatism; // Personal adjustment (-ve aggressive, +ve conservative)
@@ -267,6 +294,9 @@ class DecoModel {
   final int? gfHigh; // Gradient factor high (Buhlmann only)
 
   const DecoModel({required this.type, this.conservatism = 0, this.gfLow, this.gfHigh});
+
+  factory DecoModel.fromJson(Map<String, dynamic> json) => _$DecoModelFromJson(json);
+  Map<String, dynamic> toJson() => _$DecoModelToJson(this);
 
   @override
   String toString() {
@@ -278,12 +308,16 @@ class DecoModel {
 }
 
 /// GPS location.
+@JsonSerializable(includeIfNull: false)
 class Location {
   final double latitude; // Decimal degrees
   final double longitude; // Decimal degrees
   final double? altitude; // Meters (optional)
 
   const Location({required this.latitude, required this.longitude, this.altitude});
+
+  factory Location.fromJson(Map<String, dynamic> json) => _$LocationFromJson(json);
+  Map<String, dynamic> toJson() => _$LocationToJson(this);
 
   @override
   String toString() {
@@ -296,9 +330,13 @@ class Location {
 // --- Sample Types ---
 
 /// Pressure reading from a tank sensor.
+@JsonSerializable()
 class TankPressure {
   final int tankIndex;
   final double pressure; // Bar
+
+  factory TankPressure.fromJson(Map<String, dynamic> json) => _$TankPressureFromJson(json);
+  Map<String, dynamic> toJson() => _$TankPressureToJson(this);
 
   const TankPressure({required this.tankIndex, required this.pressure});
 
@@ -307,95 +345,115 @@ class TankPressure {
 }
 
 /// PPO2 reading from a sensor.
+@JsonSerializable()
 class Ppo2Reading {
   final int sensorIndex;
   final double value; // Bar
 
   const Ppo2Reading({required this.sensorIndex, required this.value});
 
+  factory Ppo2Reading.fromJson(Map<String, dynamic> json) => _$Ppo2ReadingFromJson(json);
+  Map<String, dynamic> toJson() => _$Ppo2ReadingToJson(this);
+
   @override
   String toString() => 'Sensor $sensorIndex: ${value.toStringAsFixed(2)} bar';
 }
 
 /// Decompression status at a sample point.
+@JsonSerializable()
 class DecoStatus {
   final DecoStopType type;
-  final Duration time; // Time at this stop / NDL remaining
+  final int time; // Time at this stop / NDL remaining
   final double depth; // Stop depth in meters (0 for NDL)
-  final Duration tts; // Time to surface
+  final int tts; // Time to surface
 
   const DecoStatus({required this.type, required this.time, required this.depth, required this.tts});
+
+  factory DecoStatus.fromJson(Map<String, dynamic> json) => _$DecoStatusFromJson(json);
+  Map<String, dynamic> toJson() => _$DecoStatusToJson(this);
 
   @override
   String toString() {
     if (type == DecoStopType.ndl) {
-      return 'NDL: ${time.inMinutes}min';
+      return 'NDL: ${time / 60}min';
     }
-    return '${type.name} at ${depth.toStringAsFixed(0)}m for ${time.inSeconds}s (TTS: ${tts.inMinutes}min)';
+    return '${type.name} at ${depth.toStringAsFixed(0)}m for ${time}s (TTS: ${tts / 60}min)';
   }
 }
 
 /// An event that occurred during the dive.
+@JsonSerializable()
 class SampleEvent {
   final SampleEventType type;
-  final Duration time;
+  final int time;
   final SampleEventFlags flags;
   final int value;
 
   const SampleEvent({required this.type, required this.time, required this.flags, required this.value});
 
+  factory SampleEvent.fromJson(Map<String, dynamic> json) => _$SampleEventFromJson(json);
+  Map<String, dynamic> toJson() => _$SampleEventToJson(this);
+
   @override
-  String toString() => '${type.name} at ${time.inSeconds}s';
+  String toString() => '${type.name} at ${time}s';
 }
 
 /// Vendor-specific data.
+@JsonSerializable()
 class VendorData {
   final int type;
-  final Uint8List data;
+  final String data;
 
   const VendorData({required this.type, required this.data});
+
+  factory VendorData.fromJson(Map<String, dynamic> json) => _$VendorDataFromJson(json);
+  Map<String, dynamic> toJson() => _$VendorDataToJson(this);
 
   @override
   String toString() => 'Vendor type $type (${data.length} bytes)';
 }
 
 /// A single sample point in the dive profile.
+@JsonSerializable(includeIfNull: false)
 class Sample {
-  final Duration time;
+  final double time;
   final double? depth; // Meters
   final double? temperature; // Celsius
-  final List<TankPressure> pressures;
-  final List<SampleEvent> events;
+  final List<TankPressure>? pressures;
+  final List<SampleEvent>? events;
   final int? rbt; // Remaining bottom time (minutes)
   final int? heartbeat; // Heart rate (bpm)
   final int? bearing; // Compass bearing (degrees)
   final double? setpoint; // CCR setpoint (bar)
-  final List<Ppo2Reading> ppo2;
+  final List<Ppo2Reading>? ppo2;
   final double? cns; // CNS percentage (0-100+)
   final DecoStatus? deco;
   final int? gasMixIndex; // Current gas mix index
-  final List<VendorData> vendorData;
+  final List<VendorData>? vendorData;
 
   const Sample({
     required this.time,
     this.depth,
     this.temperature,
-    this.pressures = const [],
-    this.events = const [],
+    this.pressures,
+    this.events,
     this.rbt,
     this.heartbeat,
     this.bearing,
     this.setpoint,
-    this.ppo2 = const [],
+    this.ppo2,
     this.cns,
     this.deco,
     this.gasMixIndex,
-    this.vendorData = const [],
+    this.vendorData,
   });
+
+  factory Sample.fromJson(Map<String, dynamic> json) => _$SampleFromJson(json);
+  Map<String, dynamic> toJson() => _$SampleToJson(this);
 
   @override
   String toString() {
-    final parts = <String>['${time.inSeconds}s'];
+    final parts = <String>['${time}s'];
     if (depth != null) parts.add('${depth!.toStringAsFixed(1)}m');
     if (temperature != null) parts.add('${temperature!.toStringAsFixed(1)}°C');
     return parts.join(' ');
@@ -404,7 +462,7 @@ class Sample {
 
 /// Builder for constructing samples incrementally.
 class SampleBuilder {
-  Duration? time;
+  double? time;
   double? depth;
   double? temperature;
   final List<TankPressure> pressures = [];
@@ -420,20 +478,20 @@ class SampleBuilder {
   final List<VendorData> vendorData = [];
 
   Sample build() => Sample(
-    time: time ?? Duration.zero,
+    time: time ?? 0,
     depth: depth,
     temperature: temperature,
-    pressures: List.unmodifiable(pressures),
-    events: List.unmodifiable(events),
+    pressures: orNull(pressures),
+    events: orNull(events),
     rbt: rbt,
     heartbeat: heartbeat,
     bearing: bearing,
     setpoint: setpoint,
-    ppo2: List.unmodifiable(ppo2),
+    ppo2: orNull(ppo2),
     cns: cns,
     deco: deco,
     gasMixIndex: gasMixIndex,
-    vendorData: List.unmodifiable(vendorData),
+    vendorData: orNull(vendorData),
   );
 
   void reset() {
@@ -454,13 +512,19 @@ class SampleBuilder {
   }
 }
 
+List<T>? orNull<T>(List<T> l) {
+  if (l.isEmpty) return null;
+  return List.unmodifiable(l);
+}
+
 // --- Main Dive Class ---
 
 /// Complete dive data parsed from a dive computer.
+@JsonSerializable(includeIfNull: false)
 class Dive {
   // --- Basic Info ---
   final DateTime? dateTime;
-  final Duration? diveTime;
+  final int? diveTime;
   final int? number; // Dive number (if available)
 
   // --- Depth ---
@@ -493,7 +557,7 @@ class Dive {
   final List<Sample> samples;
 
   // --- Raw Data ---
-  final Uint8List? fingerprint; // Unique identifier for this dive
+  final String? fingerprint; // Unique identifier for this dive
 
   const Dive({
     this.dateTime,
@@ -515,21 +579,15 @@ class Dive {
     this.fingerprint,
   });
 
-  /// Surface interval before this dive (requires dateTime of previous dive).
-  Duration? surfaceIntervalFrom(Dive previousDive) {
-    if (dateTime == null || previousDive.dateTime == null || previousDive.diveTime == null) {
-      return null;
-    }
-    final previousEnd = previousDive.dateTime!.add(previousDive.diveTime!);
-    return dateTime!.difference(previousEnd);
-  }
+  factory Dive.fromJson(Map<String, dynamic> json) => _$DiveFromJson(json);
+  Map<String, dynamic> toJson() => _$DiveToJson(this);
 
   @override
   String toString() {
     final parts = <String>[];
     if (number != null) parts.add('Dive #$number');
     if (dateTime != null) parts.add(dateTime!.toIso8601String());
-    if (diveTime != null) parts.add('${diveTime!.inMinutes}min');
+    if (diveTime != null) parts.add('${diveTime! / 60}min');
     if (maxDepth != null) parts.add('${maxDepth!.toStringAsFixed(1)}m');
     return parts.join(' | ');
   }
@@ -538,8 +596,7 @@ class Dive {
 /// Builder for constructing Dive objects incrementally during parsing.
 class DiveBuilder {
   DateTime? dateTime;
-  Duration? diveTime;
-  int? number;
+  int? diveTime;
   double? maxDepth;
   double? avgDepth;
   double? surfaceTemperature;
@@ -553,13 +610,11 @@ class DiveBuilder {
   final List<GasMix> gasMixes = [];
   final List<Tank> tanks = [];
   final List<Sample> samples = [];
-  Uint8List? fingerprint;
-  Uint8List? rawData;
+  String? fingerprint;
 
   Dive build() => Dive(
     dateTime: dateTime,
     diveTime: diveTime,
-    number: number,
     maxDepth: maxDepth,
     avgDepth: avgDepth,
     surfaceTemperature: surfaceTemperature,
@@ -583,13 +638,8 @@ class DiveBuilder {
 ///
 /// This function must be called from an isolate where FFI is available.
 /// The [parser] must be a valid dc_parser_t pointer created via dc_parser_new.
-///
-/// Optionally provide [fingerprint] and [rawData] to include in the result.
-/// The [diveNumber] is an optional dive number to assign.
-Dive parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {Uint8List? fingerprint, int? diveNumber}) {
-  final builder = DiveBuilder()
-    ..number = diveNumber
-    ..fingerprint = fingerprint;
+Dive parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {String? fingerprint}) {
+  final builder = DiveBuilder()..fingerprint = fingerprint;
 
   // --- DateTime ---
   final datetime = calloc<dc.dc_datetime_t>();
@@ -601,7 +651,7 @@ Dive parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {Uint8List? fingerp
   // --- Dive Time ---
   final diveTimePtr = calloc<ffi.UnsignedInt>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_DIVETIME, diveTimePtr.cast())) {
-    builder.diveTime = Duration(seconds: diveTimePtr.value);
+    builder.diveTime = diveTimePtr.value;
   }
   calloc.free(diveTimePtr);
 
@@ -788,7 +838,7 @@ void _sampleCallback(int typeValue, ffi.Pointer<dc.dc_sample_value_t> value, ffi
         diveBuilder.samples.add(builder.build());
         builder.reset();
       }
-      builder.time = Duration(milliseconds: value.ref.time);
+      builder.time = value.ref.time / 1000;
 
     case dc.dc_sample_type_t.DC_SAMPLE_DEPTH:
       builder.depth = value.ref.depth;
@@ -803,7 +853,7 @@ void _sampleCallback(int typeValue, ffi.Pointer<dc.dc_sample_value_t> value, ffi
       builder.events.add(
         SampleEvent(
           type: SampleEventType.fromDcValue(value.ref.event.type),
-          time: Duration(seconds: value.ref.event.time),
+          time: value.ref.event.time,
           flags: SampleEventFlags(value.ref.event.flags),
           value: value.ref.event.value,
         ),
@@ -826,7 +876,7 @@ void _sampleCallback(int typeValue, ffi.Pointer<dc.dc_sample_value_t> value, ffi
         for (var i = 0; i < vendorData.size; i++) {
           bytes[i] = dataPtr[i];
         }
-        builder.vendorData.add(VendorData(type: vendorData.type, data: bytes));
+        builder.vendorData.add(VendorData(type: vendorData.type, data: bytes.toString()));
       }
 
     case dc.dc_sample_type_t.DC_SAMPLE_SETPOINT:
@@ -841,9 +891,9 @@ void _sampleCallback(int typeValue, ffi.Pointer<dc.dc_sample_value_t> value, ffi
     case dc.dc_sample_type_t.DC_SAMPLE_DECO:
       builder.deco = DecoStatus(
         type: DecoStopType.fromDcValue(value.ref.deco.type),
-        time: Duration(seconds: value.ref.deco.time),
+        time: value.ref.deco.time,
         depth: value.ref.deco.depth,
-        tts: Duration(seconds: value.ref.deco.tts),
+        tts: value.ref.deco.tts,
       );
 
     case dc.dc_sample_type_t.DC_SAMPLE_GASMIX:

@@ -230,16 +230,10 @@ void _downloadIsolateEntry(DownloadRequest request) {
   });
 
   // Subscribe to all useful events
-  final events = bindings.dc_event_type_t.DC_EVENT_WAITING.value |
-      bindings.dc_event_type_t.DC_EVENT_PROGRESS.value |
-      bindings.dc_event_type_t.DC_EVENT_DEVINFO.value;
+  final events =
+      bindings.dc_event_type_t.DC_EVENT_WAITING.value | bindings.dc_event_type_t.DC_EVENT_PROGRESS.value | bindings.dc_event_type_t.DC_EVENT_DEVINFO.value;
 
-  final eventsStatus = bindings.dc_device_set_events(
-    device.value,
-    events,
-    eventCallback.nativeFunction,
-    ffi.nullptr,
-  );
+  final eventsStatus = bindings.dc_device_set_events(device.value, events, eventCallback.nativeFunction, ffi.nullptr);
 
   if (eventsStatus != bindings.dc_status_t.DC_STATUS_SUCCESS) {
     _log.warning('Failed to set event callback: $eventsStatus');
@@ -265,7 +259,7 @@ void _downloadIsolateEntry(DownloadRequest request) {
       final parserStatus = bindings.dc_parser_new(parser, device.value, data, size);
 
       if (parserStatus == bindings.dc_status_t.DC_STATUS_SUCCESS) {
-        final dive = parseDiveFromParser(parser.value, fingerprint: fpBytes, diveNumber: diveCount);
+        final dive = parseDiveFromParser(parser.value, fingerprint: fpBytes.toString());
 
         sendPort.send(DownloadDiveReceived(dive));
 
@@ -273,7 +267,7 @@ void _downloadIsolateEntry(DownloadRequest request) {
       } else {
         _log.warning('Failed to parse dive: $parserStatus');
         // Send a minimal dive with just the number and raw data
-        sendPort.send(DownloadDiveReceived(Dive(number: diveCount, fingerprint: fpBytes)));
+        sendPort.send(DownloadDiveReceived(Dive(number: diveCount, fingerprint: fpBytes?.toString())));
       }
 
       calloc.free(parser);

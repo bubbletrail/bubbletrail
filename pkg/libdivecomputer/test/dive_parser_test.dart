@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ffi' as ffi;
 import 'dart:io';
 
@@ -38,12 +39,12 @@ void main() {
           expect(status, bindings.dc_status_t.DC_STATUS_SUCCESS, reason: 'Failed to create parser: $status');
 
           // Parse the dive
-          final dive = parseDiveFromParser(parser.value, diveNumber: 1);
+          final dive = parseDiveFromParser(parser.value);
 
           // --- Verify basic info ---
-          expect(dive.number, 1);
+          expect(dive.number, isNull);
           expect(dive.dateTime, DateTime(2025, 11, 22, 13, 54, 17));
-          expect(dive.diveTime, const Duration(minutes: 87, seconds: 48));
+          expect(dive.diveTime, 87 * 60 + 48);
 
           // --- Verify depth ---
           expect(dive.maxDepth, closeTo(22.6, 0.1));
@@ -77,17 +78,17 @@ void main() {
 
           // First sample (at surface, starting descent)
           final firstSample = dive.samples[0];
-          expect(firstSample.time.inSeconds, 2);
+          expect(firstSample.time, 2);
           expect(firstSample.depth, closeTo(1.3, 0.1));
           expect(firstSample.temperature, closeTo(8.0, 0.1));
-          expect(firstSample.pressures.length, 1);
-          expect(firstSample.pressures[0].tankIndex, 0);
-          expect(firstSample.pressures[0].pressure, closeTo(206, 1));
+          expect(firstSample.pressures?.length, 1);
+          expect(firstSample.pressures![0].tankIndex, 0);
+          expect(firstSample.pressures![0].pressure, closeTo(206, 1));
 
           // Sample from middle of dive (around max depth area, ~sample 500)
           // At 1000s into the dive (sample index ~500)
           final midSample = dive.samples[500];
-          expect(midSample.time.inSeconds, 1002);
+          expect(midSample.time, 1002);
           expect(midSample.depth, isNotNull);
           expect(midSample.depth!, greaterThan(15)); // Should be at depth
           expect(midSample.temperature, isNotNull);
@@ -99,7 +100,7 @@ void main() {
 
           // Last sample (at surface)
           final lastSample = dive.samples.last;
-          expect(lastSample.time.inSeconds, 5574);
+          expect(lastSample.time, 5574);
           expect(lastSample.depth, closeTo(0.0, 0.1));
           expect(lastSample.deco, isNotNull);
           expect(lastSample.deco!.type, DecoStopType.ndl);
