@@ -4,10 +4,13 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
+import 'package:logging/logging.dart';
 
 import 'download.dart';
 import 'dive.dart';
 import 'libdivecomputer_bindings_generated.dart' as bindings;
+
+final _log = Logger('libdivecomputer.isolate');
 
 class ComputerDescriptor {
   final int handle;
@@ -239,7 +242,7 @@ void _downloadIsolateEntry(DownloadRequest request) {
   );
 
   if (eventsStatus != bindings.dc_status_t.DC_STATUS_SUCCESS) {
-    print('Warning: Failed to set event callback: $eventsStatus');
+    _log.warning('Failed to set event callback: $eventsStatus');
   }
 
   // Set up dive callback using NativeCallable.isolateLocal (supports non-void return)
@@ -268,7 +271,7 @@ void _downloadIsolateEntry(DownloadRequest request) {
 
         bindings.dc_parser_destroy(parser.value);
       } else {
-        print('Download isolate: Failed to parse dive: $parserStatus');
+        _log.warning('Failed to parse dive: $parserStatus');
         // Send a minimal dive with just the number and raw data
         sendPort.send(DownloadDiveReceived(Dive(number: diveCount, fingerprint: fpBytes)));
       }

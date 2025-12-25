@@ -1,11 +1,13 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:logging/logging.dart';
 
 import 'src/app_routes.dart';
 import 'src/bloc/ble_bloc.dart';
@@ -28,8 +30,22 @@ import 'src/sites/divesitelist_screen.dart';
 import 'src/app_theme.dart';
 
 void main() {
+  _initLogging();
   Intl.defaultLocale = 'sv_SE'; // XXX
   runApp(const MyApp());
+}
+
+void _initLogging() {
+  Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
+  Logger.root.onRecord.listen((record) {
+    debugPrint('${record.level.name}: ${record.loggerName}: ${record.message}');
+    if (record.error != null) {
+      debugPrint('Error: ${record.error}');
+    }
+    if (record.stackTrace != null) {
+      debugPrint('${record.stackTrace}');
+    }
+  });
 }
 
 class MyApp extends StatefulWidget {

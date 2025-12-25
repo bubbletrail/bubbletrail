@@ -5,7 +5,10 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:libdivecomputer/libdivecomputer.dart';
+import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
+
+final _log = Logger('BleBloc');
 
 // Events
 abstract class BleEvent extends Equatable {
@@ -386,21 +389,21 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     final sub = startDownload(ble: ble, computer: computer, fifoDirectory: dir.path).listen((event) {
       switch (event) {
         case DownloadStarted():
-          print('Download started');
+          _log.info('Download started');
         case DownloadProgressEvent(:final progress):
           add(_BleDownloadProgress(progress));
         case DownloadDeviceInfo(:final info):
-          print('Device info: $info');
+          _log.info('Device info: $info');
         case DownloadDiveReceived(:final dive):
-          print('Received dive: $dive');
+          _log.fine('Received dive: $dive');
         case DownloadCompleted(:final diveCount):
-          print('Download completed: $diveCount dives');
+          _log.info('Download completed: $diveCount dives');
           add(_BleDownloadCompleted(const []));
         case DownloadError(:final message):
-          print('Download error: $message');
+          _log.warning('Download error: $message');
           add(_BleDownloadFailed(message));
         case DownloadWaiting():
-          print('Download waiting');
+          _log.info('Waiting for user action on device');
       }
     });
     sub.onError((e) {

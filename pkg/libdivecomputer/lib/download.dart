@@ -5,9 +5,12 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
+import 'package:logging/logging.dart';
 
 import 'libdivecomputer_bindings_generated.dart' as bindings;
 import 'libdivecomputer.dart';
+
+final _log = Logger('libdivecomputer.download');
 
 /// Represents a BLE characteristic pair for communication.
 class BleCharacteristics {
@@ -140,7 +143,7 @@ Stream<DownloadEvent> startDownload({required BleCharacteristics ble, required C
       try {
         await toDeviceFifo?.writeFrom(data);
       } catch (e) {
-        print('Error writing BLE data to FIFO: $e');
+        _log.warning('Error writing BLE data to FIFO: $e');
       }
     });
 
@@ -155,7 +158,7 @@ Stream<DownloadEvent> startDownload({required BleCharacteristics ble, required C
           }
         } catch (e) {
           if (running) {
-            print('Error reading from FIFO: $e');
+            _log.warning('Error reading from FIFO: $e');
           }
           break;
         }
