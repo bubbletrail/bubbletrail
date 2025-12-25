@@ -120,6 +120,15 @@ class _BleDownloadFailed extends BleEvent {
   List<Object?> get props => [error];
 }
 
+class _BleDownloadProgress extends BleEvent {
+  final DownloadProgress progress;
+
+  const _BleDownloadProgress(this.progress);
+
+  @override
+  List<Object?> get props => [progress];
+}
+
 class _BleLoadedSupportedComputers extends BleEvent {
   final List<ComputerDescriptor> computers;
 
@@ -141,6 +150,7 @@ class BleState extends Equatable {
   final List<BluetoothService> discoveredServices;
   final bool isDiscoveringServices;
   final bool isDownloading;
+  final DownloadProgress? downloadProgress;
   final List<Dive> downloadedDives;
   final String? error;
 
@@ -155,6 +165,7 @@ class BleState extends Equatable {
     this.discoveredServices = const [],
     this.isDiscoveringServices = false,
     this.isDownloading = false,
+    this.downloadProgress,
     this.downloadedDives = const [],
     this.error,
   });
@@ -178,6 +189,8 @@ class BleState extends Equatable {
     List<BluetoothService>? discoveredServices,
     bool? isDiscoveringServices,
     bool? isDownloading,
+    DownloadProgress? downloadProgress,
+    bool clearDownloadProgress = false,
     List<Dive>? downloadedDives,
     String? error,
     bool clearError = false,
@@ -193,6 +206,7 @@ class BleState extends Equatable {
       discoveredServices: discoveredServices ?? this.discoveredServices,
       isDiscoveringServices: isDiscoveringServices ?? this.isDiscoveringServices,
       isDownloading: isDownloading ?? this.isDownloading,
+      downloadProgress: clearDownloadProgress ? null : (downloadProgress ?? this.downloadProgress),
       downloadedDives: downloadedDives ?? this.downloadedDives,
       error: clearError ? null : (error ?? this.error),
     );
@@ -210,6 +224,7 @@ class BleState extends Equatable {
     discoveredServices,
     isDiscoveringServices,
     isDownloading,
+    downloadProgress,
     downloadedDives,
     error,
   ];
@@ -256,9 +271,11 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       case BleStartDownload(:final computer):
         await _onStartDownload(computer, emit);
       case _BleDownloadCompleted(:final dives):
-        emit(state.copyWith(isDownloading: false, downloadedDives: dives));
+        emit(state.copyWith(isDownloading: false, clearDownloadProgress: true, downloadedDives: dives));
       case _BleDownloadFailed(:final error):
-        emit(state.copyWith(isDownloading: false, error: error));
+        emit(state.copyWith(isDownloading: false, clearDownloadProgress: true, error: error));
+      case _BleDownloadProgress(:final progress):
+        emit(state.copyWith(downloadProgress: progress));
       case BleDisconnect():
         await _onDisconnect(emit);
       case BleTurnOn():
@@ -351,7 +368,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       return;
     }
 
-    emit(state.copyWith(isDownloading: true, downloadedDives: [], clearError: true));
+    emit(state.copyWith(isDownloading: true, clearDownloadProgress: true, downloadedDives: [], clearError: true));
 
     // Set up BLE notifications on the RX characteristic
     try {
@@ -365,36 +382,35 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     final ble = BleCharacteristics(read: charPair.rx.onValueReceived, write: charPair.rx.write);
 
     // Start the download and process events
-    try {
-      final dir = await getApplicationSupportDirectory();
-      await for (final event in startDownload(ble: ble, computer: computer, fifoDirectory: dir.path)) {
-        switch (event) {
-          case DownloadStarted():
-            print('Download started');
-          case DownloadProgressEvent(:final progress):
-            print('Download progress: ${progress.current}/${progress.maximum}');
-          case DownloadDeviceInfo(:final info):
-            print('Device info: $info');
-          case DownloadDiveReceived(:final dive):
-            print('Received dive: $dive');
-          case DownloadCompleted(:final diveCount):
-            print('Download completed: $diveCount dives');
-            add(_BleDownloadCompleted(const []));
-          case DownloadError(:final message):
-            print('Download error: $message');
-            add(_BleDownloadFailed(message));
-          case DownloadWaiting():
-            print('Download waiting');
-        }
+    final dir = await getApplicationSupportDirectory();
+    final sub = startDownload(ble: ble, computer: computer, fifoDirectory: dir.path).listen((event) {
+      switch (event) {
+        case DownloadStarted():
+          print('Download started');
+        case DownloadProgressEvent(:final progress):
+          add(_BleDownloadProgress(progress));
+        case DownloadDeviceInfo(:final info):
+          print('Device info: $info');
+        case DownloadDiveReceived(:final dive):
+          print('Received dive: $dive');
+        case DownloadCompleted(:final diveCount):
+          print('Download completed: $diveCount dives');
+          add(_BleDownloadCompleted(const []));
+        case DownloadError(:final message):
+          print('Download error: $message');
+          add(_BleDownloadFailed(message));
+        case DownloadWaiting():
+          print('Download waiting');
       }
-    } catch (e) {
+    });
+    sub.onError((e) {
       add(_BleDownloadFailed('Download exception: $e'));
-    } finally {
-      // Disable notifications
+    });
+    sub.onDone(() async {
       try {
         await charPair.rx.setNotifyValue(false);
       } catch (_) {}
-    }
+    });
   }
 
   Future<void> _onDisconnect(Emitter<BleState> emit) async {

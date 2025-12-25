@@ -121,13 +121,29 @@ class BleScanScreen extends StatelessWidget {
               ),
             )
           else if (state.isDownloading)
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Row(
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
-                  SizedBox(width: 12),
-                  Text('Downloading dives...'),
+                  Row(
+                    children: [
+                      const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                      const SizedBox(width: 12),
+                      Text(state.downloadProgress != null
+                          ? 'Downloading... ${state.downloadProgress!.current} / ${state.downloadProgress!.maximum}'
+                          : 'Downloading dives...'),
+                    ],
+                  ),
+                  if (state.downloadProgress != null) ...[
+                    const SizedBox(height: 12),
+                    LinearProgressIndicator(value: state.downloadProgress!.fraction),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${(state.downloadProgress!.fraction * 100).toStringAsFixed(0)}%',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
                 ],
               ),
             )
