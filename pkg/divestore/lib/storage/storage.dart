@@ -27,9 +27,7 @@ class SsrfStorage {
   Future<void> saveAll(Ssrf ssrf) async {
     final db = await SsrfDatabase.database;
     await db.transaction((txn) async {
-      await txn.delete('events');
-      await txn.delete('samples');
-      await txn.delete('dive_computer_logs');
+      await txn.delete('computer_dives');
       await txn.delete('weightsystems');
       await txn.delete('dive_cylinders');
       await txn.delete('dive_tags');

@@ -3,7 +3,7 @@ import 'package:path/path.dart';
 
 class SsrfDatabase {
   static Database? _database;
-  static const int _version = 2;
+  static const int _version = 3;
   static Future<Database> Function()? _testDatabaseFactory;
 
   static Future<Database> get database async {
@@ -35,6 +35,24 @@ class SsrfDatabase {
       await db.execute('ALTER TABLE divesites ADD COLUMN location TEXT');
       await db.execute('ALTER TABLE divesites ADD COLUMN body_of_water TEXT');
       await db.execute('ALTER TABLE divesites ADD COLUMN difficulty TEXT');
+    }
+    if (oldVersion < 3) {
+      // Drop old dive computer log tables
+      await db.execute('DROP TABLE IF EXISTS samples');
+      await db.execute('DROP TABLE IF EXISTS events');
+      await db.execute('DROP TABLE IF EXISTS dive_computer_logs');
+
+      // Create new computer_dives table with JSON storage
+      await db.execute('''
+        CREATE TABLE computer_dives (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          dive_id TEXT NOT NULL,
+          idx INTEGER NOT NULL,
+          data TEXT NOT NULL,
+          FOREIGN KEY (dive_id) REFERENCES dives (id) ON DELETE CASCADE
+        )
+      ''');
+      await db.execute('CREATE INDEX idx_computer_dives_dive_id ON computer_dives (dive_id)');
     }
   }
 
@@ -152,43 +170,12 @@ class SsrfDatabase {
     ''');
 
     await db.execute('''
-      CREATE TABLE dive_computer_logs (
+      CREATE TABLE computer_dives (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         dive_id TEXT NOT NULL,
-        divecomputer_id INTEGER NOT NULL,
         idx INTEGER NOT NULL,
-        max_depth REAL NOT NULL,
-        mean_depth REAL NOT NULL,
-        air_temperature REAL,
-        water_temperature REAL,
-        extradata TEXT,
-        FOREIGN KEY (dive_id) REFERENCES dives (id) ON DELETE CASCADE,
-        FOREIGN KEY (divecomputer_id) REFERENCES divecomputers (id)
-      )
-    ''');
-
-    await db.execute('''
-      CREATE TABLE samples (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        dive_computer_log_id INTEGER NOT NULL,
-        time INTEGER NOT NULL,
-        depth REAL NOT NULL,
-        temp REAL,
-        pressure REAL,
-        FOREIGN KEY (dive_computer_log_id) REFERENCES dive_computer_logs (id) ON DELETE CASCADE
-      )
-    ''');
-
-    await db.execute('''
-      CREATE TABLE events (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        dive_computer_log_id INTEGER NOT NULL,
-        time INTEGER NOT NULL,
-        type INTEGER,
-        value INTEGER,
-        name TEXT,
-        cylinder INTEGER,
-        FOREIGN KEY (dive_computer_log_id) REFERENCES dive_computer_logs (id) ON DELETE CASCADE
+        data TEXT NOT NULL,
+        FOREIGN KEY (dive_id) REFERENCES dives (id) ON DELETE CASCADE
       )
     ''');
 
@@ -198,9 +185,7 @@ class SsrfDatabase {
     await db.execute('CREATE INDEX idx_dive_buddies_dive_id ON dive_buddies (dive_id)');
     await db.execute('CREATE INDEX idx_dive_cylinders_dive_id ON dive_cylinders (dive_id)');
     await db.execute('CREATE INDEX idx_weightsystems_dive_id ON weightsystems (dive_id)');
-    await db.execute('CREATE INDEX idx_dive_computer_logs_dive_id ON dive_computer_logs (dive_id)');
-    await db.execute('CREATE INDEX idx_samples_dive_computer_log_id ON samples (dive_computer_log_id)');
-    await db.execute('CREATE INDEX idx_events_dive_computer_log_id ON events (dive_computer_log_id)');
+    await db.execute('CREATE INDEX idx_computer_dives_dive_id ON computer_dives (dive_id)');
   }
 
   static Future<void> close() async {

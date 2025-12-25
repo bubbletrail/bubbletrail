@@ -151,14 +151,14 @@ class _DiveDetails extends StatelessWidget {
       ]),
       const SizedBox(height: 16),
       if (diveSite != null) ...[_DivesiteCard(divesite: diveSite!), const SizedBox(height: 16)],
-      if (dive.divecomputers.isNotEmpty) ...[
+      if (dive.computerDives.isNotEmpty) ...[
         infoCard(context, 'Dive Computer Data', [
-          infoRow('Max Depth', '${dive.divecomputers[0].maxDepth.toStringAsFixed(1)} m'),
-          infoRow('Mean Depth', '${dive.divecomputers[0].meanDepth.toStringAsFixed(1)} m'),
-          if (dive.divecomputers[0].environment?.airTemperature != null)
-            infoRow('Air Temperature', '${dive.divecomputers[0].environment!.airTemperature!.toStringAsFixed(1)} °C'),
-          if (dive.divecomputers[0].environment?.waterTemperature != null)
-            infoRow('Water Temperature', '${dive.divecomputers[0].environment!.waterTemperature!.toStringAsFixed(1)} °C'),
+          if (dive.computerDives[0].maxDepth != null) infoRow('Max Depth', '${dive.computerDives[0].maxDepth!.toStringAsFixed(1)} m'),
+          if (dive.computerDives[0].avgDepth != null) infoRow('Mean Depth', '${dive.computerDives[0].avgDepth!.toStringAsFixed(1)} m'),
+          if (dive.computerDives[0].surfaceTemperature != null)
+            infoRow('Air Temperature', '${dive.computerDives[0].surfaceTemperature!.toStringAsFixed(1)} °C'),
+          if (dive.computerDives[0].minTemperature != null)
+            infoRow('Water Temperature', '${dive.computerDives[0].minTemperature!.toStringAsFixed(1)} °C'),
         ]),
         const SizedBox(height: 16),
       ],
@@ -232,7 +232,7 @@ class _DiveDetails extends StatelessWidget {
         ]),
         const SizedBox(height: 16),
       ],
-      if (dive.divecomputers.isNotEmpty && dive.divecomputers[0].samples.isNotEmpty) ...[
+      if (dive.computerDives.isNotEmpty && dive.computerDives[0].samples.isNotEmpty) ...[
         _WideCard(
           elevation: 2,
           child: Padding(
@@ -250,7 +250,7 @@ class _DiveDetails extends StatelessWidget {
                       onPressed: () {
                         Navigator.of(context, rootNavigator: true).push(
                           MaterialPageRoute(
-                            builder: (context) => FullscreenProfileScreen(diveComputerLog: dive.divecomputers[0], title: 'Dive #${dive.number}'),
+                            builder: (context) => FullscreenProfileScreen(computerDive: dive.computerDives[0], title: 'Dive #${dive.number}'),
                           ),
                         );
                       },
@@ -259,7 +259,7 @@ class _DiveDetails extends StatelessWidget {
                   ],
                 ),
                 const Divider(),
-                DepthProfileWidget(diveComputerLog: dive.divecomputers[0]),
+                DepthProfileWidget(computerDive: dive.computerDives[0]),
               ],
             ),
           ),

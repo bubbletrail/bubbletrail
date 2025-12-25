@@ -1,12 +1,11 @@
-import 'dart:typed_data';
+import 'dart:convert';
 
-import 'package:bubbletrail/src/ssrf/ssrf.dart';
-import 'package:divestore/divestore.dart' as ds;
+import 'package:divestore/divestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Convert basic dive info', () {
-    final dcDive = ds.ComputerDive(dateTime: DateTime(2024, 6, 15, 10, 30, 0), diveTime: 45 * 60 + 30, number: 42, maxDepth: 25.5, avgDepth: 15.2);
+    final dcDive = ComputerDive(dateTime: DateTime(2024, 6, 15, 10, 30, 0), diveTime: 45 * 60 + 30, number: 42, maxDepth: 25.5, avgDepth: 15.2);
 
     final ssrfDive = convertDcDive(dcDive, diveNumber: 100);
 
@@ -17,70 +16,50 @@ void main() {
     expect(ssrfDive.meanDepth, 15.2);
   });
 
-  test('Convert samples', () {
-    final dcDive = ds.ComputerDive(
+  test('Attach ComputerDive to Dive', () {
+    final dcDive = ComputerDive(
       dateTime: DateTime(2024, 6, 15, 10, 30, 0),
       diveTime: 30 * 60,
       maxDepth: 20.0,
       avgDepth: 12.0,
       samples: [
-        ds.ComputerSample(time: 0, depth: 0.0, temperature: 28.0),
-        ds.ComputerSample(time: 60, depth: 5.5, temperature: 26.0, pressures: [const ds.TankPressure(tankIndex: 0, pressure: 195.0)]),
-        ds.ComputerSample(time: 120, depth: 10.2, temperature: 24.5, pressures: [const ds.TankPressure(tankIndex: 0, pressure: 185.0)]),
-        ds.ComputerSample(time: 180, depth: 15.8, temperature: 22.0, pressures: [const ds.TankPressure(tankIndex: 0, pressure: 170.0)]),
-        ds.ComputerSample(time: 900, depth: 20.0, temperature: 20.0, pressures: [const ds.TankPressure(tankIndex: 0, pressure: 120.0)]),
-        ds.ComputerSample(time: 1800, depth: 5.0, temperature: 24.0, pressures: [const ds.TankPressure(tankIndex: 0, pressure: 60.0)]),
+        ComputerSample(time: 0, depth: 0.0, temperature: 28.0),
+        ComputerSample(time: 60, depth: 5.5, temperature: 26.0, pressures: [const TankPressure(tankIndex: 0, pressure: 195.0)]),
+        ComputerSample(time: 120, depth: 10.2, temperature: 24.5, pressures: [const TankPressure(tankIndex: 0, pressure: 185.0)]),
+        ComputerSample(time: 180, depth: 15.8, temperature: 22.0, pressures: [const TankPressure(tankIndex: 0, pressure: 170.0)]),
+        ComputerSample(time: 900, depth: 20.0, temperature: 20.0, pressures: [const TankPressure(tankIndex: 0, pressure: 120.0)]),
+        ComputerSample(time: 1800, depth: 5.0, temperature: 24.0, pressures: [const TankPressure(tankIndex: 0, pressure: 60.0)]),
       ],
     );
 
     final ssrfDive = convertDcDive(dcDive);
 
-    expect(ssrfDive.divecomputers.length, 1);
-    final dcLog = ssrfDive.divecomputers[0];
+    expect(ssrfDive.computerDives.length, 1);
+    final cd = ssrfDive.computerDives[0];
 
-    expect(dcLog.maxDepth, 20.0);
-    expect(dcLog.meanDepth, 12.0);
+    expect(cd.maxDepth, 20.0);
+    expect(cd.avgDepth, 12.0);
 
-    // Check samples
-    expect(dcLog.samples.length, 6);
-
-    // First sample
-    expect(dcLog.samples[0].time, 0);
-    expect(dcLog.samples[0].depth, 0.0);
-    expect(dcLog.samples[0].temp, 28.0);
-    expect(dcLog.samples[0].pressure, isNull);
-
-    // Second sample
-    expect(dcLog.samples[1].time, 60);
-    expect(dcLog.samples[1].depth, 5.5);
-    expect(dcLog.samples[1].temp, 26.0);
-    expect(dcLog.samples[1].pressure, 195.0);
-
-    // Middle sample
-    expect(dcLog.samples[3].time, 180);
-    expect(dcLog.samples[3].depth, 15.8);
-    expect(dcLog.samples[3].temp, 22.0);
-    expect(dcLog.samples[3].pressure, 170.0);
-
-    // Last sample
-    expect(dcLog.samples[5].time, 1800);
-    expect(dcLog.samples[5].depth, 5.0);
-    expect(dcLog.samples[5].pressure, 60.0);
+    // ComputerDive preserves all samples
+    expect(cd.samples.length, 6);
+    expect(cd.samples[0].time, 0);
+    expect(cd.samples[0].depth, 0.0);
+    expect(cd.samples[0].temperature, 28.0);
   });
 
   test('Convert tanks with gas mixes', () {
-    final dcDive = ds.ComputerDive(
+    final dcDive = ComputerDive(
       dateTime: DateTime(2024, 6, 15, 10, 30, 0),
       diveTime: 45 * 60,
       maxDepth: 30.0,
       avgDepth: 18.0,
       gasMixes: const [
-        ds.GasMix(oxygen: 0.32, helium: 0.0, nitrogen: 0.68), // EAN32
-        ds.GasMix(oxygen: 0.21, helium: 0.35, nitrogen: 0.44), // Trimix 21/35
+        GasMix(oxygen: 0.32, helium: 0.0, nitrogen: 0.68), // EAN32
+        GasMix(oxygen: 0.21, helium: 0.35, nitrogen: 0.44), // Trimix 21/35
       ],
       tanks: const [
-        ds.Tank(gasMixIndex: 0, volume: 12.0, workPressure: 200.0, beginPressure: 200.0, endPressure: 50.0),
-        ds.Tank(gasMixIndex: 1, volume: 12.0, workPressure: 232.0, beginPressure: 230.0, endPressure: 80.0),
+        Tank(gasMixIndex: 0, volume: 12.0, workPressure: 200.0, beginPressure: 200.0, endPressure: 50.0),
+        Tank(gasMixIndex: 1, volume: 12.0, workPressure: 232.0, beginPressure: 230.0, endPressure: 80.0),
       ],
     );
 
@@ -104,13 +83,13 @@ void main() {
   });
 
   test('Convert gas mixes only (no tanks)', () {
-    final dcDive = ds.ComputerDive(
+    final dcDive = ComputerDive(
       dateTime: DateTime(2024, 6, 15, 10, 30, 0),
       diveTime: 30 * 60,
       maxDepth: 18.0,
       avgDepth: 12.0,
       gasMixes: const [
-        ds.GasMix(oxygen: 0.36, helium: 0.0, nitrogen: 0.64), // EAN36
+        GasMix(oxygen: 0.36, helium: 0.0, nitrogen: 0.64), // EAN36
       ],
     );
 
@@ -123,8 +102,8 @@ void main() {
     expect(ssrfDive.cylinders[0].end, isNull);
   });
 
-  test('Convert environment data', () {
-    final dcDive = ds.ComputerDive(
+  test('ComputerDive preserves temperature data', () {
+    final dcDive = ComputerDive(
       dateTime: DateTime(2024, 6, 15, 10, 30, 0),
       diveTime: 40 * 60,
       maxDepth: 22.0,
@@ -135,141 +114,77 @@ void main() {
 
     final ssrfDive = convertDcDive(dcDive);
 
-    expect(ssrfDive.divecomputers.length, 1);
-    final dcLog = ssrfDive.divecomputers[0];
+    expect(ssrfDive.computerDives.length, 1);
+    final cd = ssrfDive.computerDives[0];
 
-    expect(dcLog.environment, isNotNull);
-    expect(dcLog.environment!.airTemperature, 30.0);
-    expect(dcLog.environment!.waterTemperature, 18.0);
+    expect(cd.surfaceTemperature, 30.0);
+    expect(cd.minTemperature, 18.0);
   });
 
-  test('Convert dive mode and deco model to extradata', () {
-    final dcDive = ds.ComputerDive(
+  test('ComputerDive preserves dive mode and metadata', () {
+    final dcDive = ComputerDive(
       dateTime: DateTime(2024, 6, 15, 10, 30, 0),
       diveTime: 50 * 60,
       maxDepth: 35.0,
       avgDepth: 20.0,
-      diveMode: ds.DiveMode.openCircuit,
-      decoModel: const ds.DecoModel(type: ds.DecoModelType.buhlmann, gfLow: 40, gfHigh: 85),
-      salinity: const ds.Salinity(type: ds.WaterType.salt, density: 1025.0),
+      diveMode: DiveMode.openCircuit,
+      decoModel: const DecoModel(type: DecoModelType.buhlmann, gfLow: 40, gfHigh: 85),
+      salinity: const Salinity(type: WaterType.salt, density: 1025.0),
       atmosphericPressure: 1.013,
     );
 
     final ssrfDive = convertDcDive(dcDive);
 
-    expect(ssrfDive.divecomputers.length, 1);
-    final dcLog = ssrfDive.divecomputers[0];
+    expect(ssrfDive.computerDives.length, 1);
+    final cd = ssrfDive.computerDives[0];
 
-    expect(dcLog.extradata['divemode'], 'openCircuit');
-    expect(dcLog.extradata['decomodel'], 'Bühlmann GF 40/85');
-    expect(dcLog.extradata['salinity'], 'salt');
-    expect(dcLog.extradata['density'], '1025.0');
-    expect(dcLog.extradata['atmospheric'], '1.013');
+    expect(cd.diveMode, DiveMode.openCircuit);
+    expect(cd.decoModel?.type, DecoModelType.buhlmann);
+    expect(cd.salinity?.type, WaterType.salt);
+    expect(cd.atmosphericPressure, 1.013);
   });
 
-  test('Convert fingerprint to base64 extradata', () {
-    final fingerprint = Uint8List.fromList([0x01, 0x02, 0x03, 0x04, 0xAB, 0xCD, 0xEF]);
-    final dcDive = ds.ComputerDive(
+  test('Extract fingerprint from ComputerDive', () {
+    const fingerprintBase64 = 'AQIDBKvN7w=='; // base64 of [1, 2, 3, 4, 171, 205, 239]
+    final dcDive = ComputerDive(
       dateTime: DateTime(2024, 6, 15, 10, 30, 0),
       diveTime: 30 * 60,
       maxDepth: 15.0,
       avgDepth: 10.0,
-      fingerprint: fingerprint.toString(),
+      fingerprint: fingerprintBase64,
     );
 
     final ssrfDive = convertDcDive(dcDive);
 
-    expect(ssrfDive.divecomputers.length, 1);
-    final dcLog = ssrfDive.divecomputers[0];
-
-    expect(dcLog.extradata['fingerprint'], isNotNull);
-    expect(dcLog.extradata['fingerprint'], 'AQIDBKvN7w==');
+    expect(ssrfDive.computerDives.length, 1);
+    expect(ssrfDive.computerDives[0].fingerprint, fingerprintBase64);
 
     // Verify extraction
     final extracted = extractFingerprint(ssrfDive);
     expect(extracted, isNotNull);
-    expect(extracted, fingerprint);
+    expect(extracted, base64Decode(fingerprintBase64));
   });
 
-  test('Convert events from samples', () {
-    final dcDive = ds.ComputerDive(
-      dateTime: DateTime(2024, 6, 15, 10, 30, 0),
-      diveTime: 30 * 60,
-      maxDepth: 20.0,
-      avgDepth: 12.0,
-      samples: [
-        ds.ComputerSample(
-          time: 0,
-          depth: 0.0,
-          events: const [ds.SampleEvent(type: ds.SampleEventType.gasChange, time: 0, flags: ds.SampleEventFlags(0), value: 0)],
-        ),
-        ds.ComputerSample(
-          time: 600,
-          depth: 15.0,
-          events: const [ds.SampleEvent(type: ds.SampleEventType.bookmark, time: 600, flags: ds.SampleEventFlags(0), value: 1)],
-        ),
-      ],
-    );
+  test('Add model and serial to ComputerDive', () {
+    final dcDive = ComputerDive(dateTime: DateTime(2024, 6, 15, 10, 30, 0), diveTime: 30 * 60, maxDepth: 15.0, avgDepth: 10.0);
+
+    final ssrfDive = convertDcDive(dcDive, model: 'Suunto EON Core', serial: '12345678');
+
+    expect(ssrfDive.computerDives.length, 1);
+    expect(ssrfDive.computerDives[0].model, 'Suunto EON Core');
+    expect(ssrfDive.computerDives[0].serial, '12345678');
+  });
+
+  test('No computerDive when no samples and no depth', () {
+    final dcDive = ComputerDive(dateTime: DateTime(2024, 6, 15, 10, 30, 0), diveTime: 30 * 60, maxDepth: null, avgDepth: null, samples: const []);
 
     final ssrfDive = convertDcDive(dcDive);
 
-    expect(ssrfDive.divecomputers.length, 1);
-    final dcLog = ssrfDive.divecomputers[0];
-
-    expect(dcLog.events.length, 2);
-    expect(dcLog.events[0].time, 0);
-    expect(dcLog.events[0].name, 'gasChange');
-    expect(dcLog.events[1].time, 600);
-    expect(dcLog.events[1].name, 'bookmark');
-  });
-
-  test('Skip samples without depth', () {
-    final dcDive = ds.ComputerDive(
-      dateTime: DateTime(2024, 6, 15, 10, 30, 0),
-      diveTime: 30 * 60,
-      maxDepth: 20.0,
-      avgDepth: 12.0,
-      samples: [
-        ds.ComputerSample(time: 0, depth: 0.0),
-        const ds.ComputerSample(
-          time: 30,
-          depth: null, // No depth - should be skipped
-          temperature: 25.0,
-        ),
-        ds.ComputerSample(time: 60, depth: 5.0),
-      ],
-    );
-
-    final ssrfDive = convertDcDive(dcDive);
-
-    expect(ssrfDive.divecomputers.length, 1);
-    final dcLog = ssrfDive.divecomputers[0];
-
-    // Only 2 samples (the one without depth is skipped)
-    expect(dcLog.samples.length, 2);
-    expect(dcLog.samples[0].time, 0);
-    expect(dcLog.samples[1].time, 60);
-  });
-
-  test('Use diveComputerId parameter', () {
-    final dcDive = ds.ComputerDive(dateTime: DateTime(2024, 6, 15, 10, 30, 0), diveTime: 30 * 60, maxDepth: 15.0, avgDepth: 10.0);
-
-    final ssrfDive = convertDcDive(dcDive, diveComputerId: 42);
-
-    expect(ssrfDive.divecomputers.length, 1);
-    expect(ssrfDive.divecomputers[0].diveComputerId, 42);
-  });
-
-  test('No divecomputer log when no samples and no depth', () {
-    final dcDive = ds.ComputerDive(dateTime: DateTime(2024, 6, 15, 10, 30, 0), diveTime: 30 * 60, maxDepth: null, avgDepth: null, samples: const []);
-
-    final ssrfDive = convertDcDive(dcDive);
-
-    expect(ssrfDive.divecomputers.length, 0);
+    expect(ssrfDive.computerDives.length, 0);
   });
 
   test('Handle null datetime', () {
-    final dcDive = ds.ComputerDive(dateTime: null, diveTime: 30 * 60, maxDepth: 15.0);
+    final dcDive = ComputerDive(dateTime: null, diveTime: 30 * 60, maxDepth: 15.0);
 
     final ssrfDive = convertDcDive(dcDive);
 

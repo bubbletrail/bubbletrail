@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:sqflite/sqflite.dart';
 
+import '../computerdive.dart';
 import '../types.dart';
 import 'database.dart';
 
@@ -125,29 +126,13 @@ class DiveStorage {
     for (var i = 0; i < dive.weightsystems.length; i++) {
       await txn.insert('weightsystems', _weightsystemToMap(dive.id, i, dive.weightsystems[i]));
     }
-    for (var i = 0; i < dive.divecomputers.length; i++) {
-      final dcLog = dive.divecomputers[i];
-      var diveComputerId = dcLog.diveComputerId;
-      // If diveComputerId is 0, we need to get or create the dive computer from the embedded data
-      if (diveComputerId == 0 && dcLog.diveComputer != null) {
-        diveComputerId = await _getOrCreateDiveComputer(txn, dcLog.diveComputer!);
-      }
-      final logId = await txn.insert('dive_computer_logs', {
+    for (var i = 0; i < dive.computerDives.length; i++) {
+      final cd = dive.computerDives[i];
+      await txn.insert('computer_dives', {
         'dive_id': dive.id,
-        'divecomputer_id': diveComputerId,
         'idx': i,
-        'max_depth': dcLog.maxDepth,
-        'mean_depth': dcLog.meanDepth,
-        'air_temperature': dcLog.environment?.airTemperature,
-        'water_temperature': dcLog.environment?.waterTemperature,
-        'extradata': dcLog.extradata.isNotEmpty ? jsonEncode(dcLog.extradata) : null,
+        'data': jsonEncode(cd.toJson()),
       });
-      for (final sample in dcLog.samples) {
-        await txn.insert('samples', _sampleToMap(logId, sample));
-      }
-      for (final event in dcLog.events) {
-        await txn.insert('events', _eventToMap(logId, event));
-      }
     }
   }
 
@@ -179,35 +164,10 @@ class DiveStorage {
     return txn.insert('cylinders', {'size': c.size, 'workpressure': c.workpressure, 'description': c.description});
   }
 
-  Future<int> _getOrCreateDiveComputer(Transaction txn, DiveComputer dc) async {
-    // Try to find by model (and serial if provided)
-    if (dc.serial != null) {
-      final exact = await txn.query('divecomputers', where: 'model = ? AND serial = ?', whereArgs: [dc.model, dc.serial]);
-      if (exact.isNotEmpty) return exact.first['id'] as int;
-    }
-    // Try by model only
-    final byModel = await txn.query('divecomputers', where: 'model = ?', whereArgs: [dc.model]);
-    if (byModel.isNotEmpty) {
-      final existing = byModel.first;
-      // Update serial if we now have one and the existing doesn't
-      if (dc.serial != null && existing['serial'] == null) {
-        await txn.update('divecomputers', {'serial': dc.serial}, where: 'id = ?', whereArgs: [existing['id']]);
-      }
-      return existing['id'] as int;
-    }
-    // Create new
-    return txn.insert('divecomputers', {'model': dc.model, 'serial': dc.serial});
-  }
-
   Future<void> _deleteChildren(Transaction txn, String diveId) async {
     await txn.delete('dive_tags', where: 'dive_id = ?', whereArgs: [diveId]);
     await txn.delete('dive_buddies', where: 'dive_id = ?', whereArgs: [diveId]);
-    final logIds = await txn.query('dive_computer_logs', columns: ['id'], where: 'dive_id = ?', whereArgs: [diveId]);
-    for (final log in logIds) {
-      await txn.delete('samples', where: 'dive_computer_log_id = ?', whereArgs: [log['id']]);
-      await txn.delete('events', where: 'dive_computer_log_id = ?', whereArgs: [log['id']]);
-    }
-    await txn.delete('dive_computer_logs', where: 'dive_id = ?', whereArgs: [diveId]);
+    await txn.delete('computer_dives', where: 'dive_id = ?', whereArgs: [diveId]);
     await txn.delete('dive_cylinders', where: 'dive_id = ?', whereArgs: [diveId]);
     await txn.delete('weightsystems', where: 'dive_id = ?', whereArgs: [diveId]);
   }
@@ -235,22 +195,6 @@ class DiveStorage {
     'description': w.description,
   };
 
-  Map<String, Object?> _sampleToMap(int diveComputerLogId, Sample s) => {
-    'dive_computer_log_id': diveComputerLogId,
-    'time': s.time,
-    'depth': s.depth,
-    'temp': s.temp,
-    'pressure': s.pressure,
-  };
-
-  Map<String, Object?> _eventToMap(int diveComputerLogId, Event e) => {
-    'dive_computer_log_id': diveComputerLogId,
-    'time': e.time,
-    'type': e.type,
-    'value': e.value,
-    'name': e.name,
-    'cylinder': e.cylinder,
-  };
 
   Future<Dive> _mapToDive(Database db, Map<String, Object?> m) async {
     final diveId = m['id'] as String;
@@ -275,7 +219,7 @@ class DiveStorage {
     dive.buddies = await _loadBuddies(db, diveId);
     dive.cylinders = await _loadCylinders(db, diveId);
     dive.weightsystems = await _loadWeightsystems(db, diveId);
-    dive.divecomputers = await _loadDivecomputers(db, diveId);
+    dive.computerDives = await _loadComputerDives(db, diveId);
 
     return dive;
   }
@@ -339,65 +283,8 @@ class DiveStorage {
     return maps.map((m) => Weightsystem(weight: m['weight'] as double?, description: m['description'] as String?)).toList();
   }
 
-  Future<List<DiveComputerLog>> _loadDivecomputers(Database db, String diveId) async {
-    final maps = await db.rawQuery(
-      '''
-      SELECT dcl.*, dc.model, dc.serial
-      FROM dive_computer_logs dcl
-      INNER JOIN divecomputers dc ON dc.id = dcl.divecomputer_id
-      WHERE dcl.dive_id = ?
-      ORDER BY dcl.idx
-    ''',
-      [diveId],
-    );
-    final result = <DiveComputerLog>[];
-    for (final m in maps) {
-      final logId = m['id'] as int;
-      final samples = await _loadSamples(db, logId);
-      final events = await _loadEvents(db, logId);
-
-      Environment? environment;
-      final airTemp = m['air_temperature'] as double?;
-      final waterTemp = m['water_temperature'] as double?;
-      if (airTemp != null || waterTemp != null) {
-        environment = Environment(airTemperature: airTemp, waterTemperature: waterTemp);
-      }
-
-      Map<String, String>? extradata;
-      final extradataJson = m['extradata'] as String?;
-      if (extradataJson != null) {
-        extradata = Map<String, String>.from(jsonDecode(extradataJson));
-      }
-
-      result.add(
-        DiveComputerLog(
-          diveComputerId: m['divecomputer_id'] as int,
-          diveComputer: DiveComputer(id: m['divecomputer_id'] as int, model: m['model'] as String, serial: m['serial'] as String?),
-          maxDepth: m['max_depth'] as double,
-          meanDepth: m['mean_depth'] as double,
-          environment: environment,
-          samples: samples,
-          events: events,
-          extradata: extradata,
-        ),
-      );
-    }
-    return result;
-  }
-
-  Future<List<Sample>> _loadSamples(Database db, int diveComputerLogId) async {
-    final maps = await db.query('samples', where: 'dive_computer_log_id = ?', whereArgs: [diveComputerLogId], orderBy: 'time');
-    return maps
-        .map((m) => Sample(time: m['time'] as int, depth: m['depth'] as double, temp: m['temp'] as double?, pressure: m['pressure'] as double?))
-        .toList();
-  }
-
-  Future<List<Event>> _loadEvents(Database db, int diveComputerLogId) async {
-    final maps = await db.query('events', where: 'dive_computer_log_id = ?', whereArgs: [diveComputerLogId], orderBy: 'time');
-    return maps
-        .map(
-          (m) => Event(time: m['time'] as int, type: m['type'] as int?, value: m['value'] as int?, name: m['name'] as String?, cylinder: m['cylinder'] as int?),
-        )
-        .toList();
+  Future<List<ComputerDive>> _loadComputerDives(Database db, String diveId) async {
+    final maps = await db.query('computer_dives', where: 'dive_id = ?', whereArgs: [diveId], orderBy: 'idx');
+    return maps.map((m) => ComputerDive.fromJson(jsonDecode(m['data'] as String))).toList();
   }
 }

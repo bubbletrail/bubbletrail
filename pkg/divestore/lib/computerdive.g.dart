@@ -250,6 +250,8 @@ Map<String, dynamic> _$ComputerSampleToJson(ComputerSample instance) =>
     };
 
 ComputerDive _$ComputerDiveFromJson(Map<String, dynamic> json) => ComputerDive(
+  model: json['model'] as String?,
+  serial: json['serial'] as String?,
   dateTime: json['dateTime'] == null
       ? null
       : DateTime.parse(json['dateTime'] as String),
@@ -286,11 +288,18 @@ ComputerDive _$ComputerDiveFromJson(Map<String, dynamic> json) => ComputerDive(
           ?.map((e) => ComputerSample.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  events:
+      (json['events'] as List<dynamic>?)
+          ?.map((e) => SampleEvent.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
   fingerprint: json['fingerprint'] as String?,
 );
 
 Map<String, dynamic> _$ComputerDiveToJson(ComputerDive instance) =>
     <String, dynamic>{
+      'model': ?instance.model,
+      'serial': ?instance.serial,
       'dateTime': ?instance.dateTime?.toIso8601String(),
       'diveTime': ?instance.diveTime,
       'number': ?instance.number,
@@ -307,6 +316,7 @@ Map<String, dynamic> _$ComputerDiveToJson(ComputerDive instance) =>
       'gasMixes': instance.gasMixes,
       'tanks': instance.tanks,
       'samples': instance.samples,
+      'events': instance.events,
       'fingerprint': ?instance.fingerprint,
     };
 

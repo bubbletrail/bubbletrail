@@ -1,7 +1,6 @@
 import 'dart:io';
 
-import 'package:bubbletrail/src/ssrf/ssrf.dart';
-import 'package:bubbletrail/src/ssrf/storage/storage.dart';
+import 'package:divestore/divestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:xml/xml.dart';
@@ -80,22 +79,22 @@ void main() {
     expect(loadedFirst.weightsystems.length, originalFirst.weightsystems.length);
     expect(loadedFirst.weightsystems[0].weight, originalFirst.weightsystems[0].weight);
 
-    // Verify dive computer log data
-    expect(loadedFirst.divecomputers.length, originalFirst.divecomputers.length);
-    final originalDcLog = originalFirst.divecomputers[0];
-    final loadedDcLog = loadedFirst.divecomputers[0];
-    expect(loadedDcLog.maxDepth, closeTo(originalDcLog.maxDepth, 0.01));
-    expect(loadedDcLog.meanDepth, closeTo(originalDcLog.meanDepth, 0.001));
-    expect(loadedDcLog.environment?.waterTemperature, originalDcLog.environment?.waterTemperature);
+    // Verify computer dive data
+    expect(loadedFirst.computerDives.length, originalFirst.computerDives.length);
+    final originalCd = originalFirst.computerDives[0];
+    final loadedCd = loadedFirst.computerDives[0];
+    expect(loadedCd.maxDepth, closeTo(originalCd.maxDepth!, 0.01));
+    expect(loadedCd.avgDepth, closeTo(originalCd.avgDepth!, 0.001));
+    expect(loadedCd.minTemperature, originalCd.minTemperature);
 
     // Verify samples
-    expect(loadedDcLog.samples.length, originalDcLog.samples.length);
-    expect(loadedDcLog.samples[0].depth, closeTo(originalDcLog.samples[0].depth, 0.01));
-    expect(loadedDcLog.samples[0].time, originalDcLog.samples[0].time);
+    expect(loadedCd.samples.length, originalCd.samples.length);
+    expect(loadedCd.samples[0].depth, closeTo(originalCd.samples[0].depth!, 0.01));
+    expect(loadedCd.samples[0].time, originalCd.samples[0].time);
 
     // Verify events
-    expect(loadedDcLog.events.length, originalDcLog.events.length);
-    expect(loadedDcLog.events[0].name, originalDcLog.events[0].name);
+    expect(loadedCd.events.length, originalCd.events.length);
+    expect(loadedCd.events[0].type, originalCd.events[0].type);
 
     // Verify last dive (dive #310)
     final originalLast = originalSsrf.dives[53];
@@ -105,8 +104,8 @@ void main() {
     expect(loadedLast.duration, originalLast.duration);
     expect(loadedLast.maxDepth, closeTo(originalLast.maxDepth!, 0.01));
     expect(loadedLast.meanDepth, closeTo(originalLast.meanDepth!, 0.001));
-    expect(loadedLast.divecomputers.length, greaterThan(0));
-    expect(loadedLast.divecomputers[0].maxDepth, closeTo(originalLast.divecomputers[0].maxDepth, 0.01));
+    expect(loadedLast.computerDives.length, greaterThan(0));
+    expect(loadedLast.computerDives[0].maxDepth, closeTo(originalLast.computerDives[0].maxDepth!, 0.01));
 
     // Verify a dive site
     final originalSite = originalSsrf.diveSites[0];
@@ -114,28 +113,6 @@ void main() {
     expect(loadedSite.name, originalSite.name);
     expect(loadedSite.position?.lat, closeTo(originalSite.position!.lat, 0.000001));
     expect(loadedSite.position?.lon, closeTo(originalSite.position!.lon, 0.000001));
-  });
-
-  test('Dive computer normalization', () async {
-    // Load sample XML file
-    final xmlData = await File('./test/testdata/subsurface-sample.xml').readAsString();
-    final doc = XmlDocument.parse(xmlData);
-    final originalSsrf = SsrfXml.fromXml(doc.rootElement);
-
-    // Store in database
-    await storage.saveAll(originalSsrf);
-
-    // Get all dive computers from storage
-    final diveComputers = await storage.divecomputers.getAll();
-
-    // All 54 dives should reference a limited set of dive computers
-    // (normalized by model name)
-    expect(diveComputers.length, lessThan(originalSsrf.dives.length));
-
-    // Verify each dive computer has a model
-    for (final dc in diveComputers) {
-      expect(dc.model, isNotEmpty);
-    }
   });
 
   test('Tags and buddies normalization', () async {
@@ -197,18 +174,19 @@ void main() {
       o2: 32.0,
     ));
     dive.weightsystems.add(const Weightsystem(weight: 4.0, description: 'Belt'));
-    dive.divecomputers.add(DiveComputerLog(
-      diveComputerId: 0,
-      diveComputer: const DiveComputer(id: 0, model: 'Test Computer', serial: 'TEST123'),
+    dive.computerDives.add(ComputerDive(
+      model: 'Test Computer',
+      serial: 'TEST123',
       maxDepth: 25.5,
-      meanDepth: 15.2,
-      environment: Environment(airTemperature: 25.0, waterTemperature: 20.0),
+      avgDepth: 15.2,
+      surfaceTemperature: 25.0,
+      minTemperature: 20.0,
       samples: [
-        const Sample(time: 0, depth: 0.0),
-        const Sample(time: 60, depth: 10.0, temp: 20.0),
-        const Sample(time: 120, depth: 25.5, temp: 19.5, pressure: 180.0),
+        ComputerSample(time: 0, depth: 0.0),
+        ComputerSample(time: 60, depth: 10.0, temperature: 20.0),
+        ComputerSample(time: 120, depth: 25.5, temperature: 19.5, pressures: [const TankPressure(tankIndex: 0, pressure: 180.0)]),
       ],
-      events: [const Event(time: 0, name: 'gaschange', type: 11, value: 32, cylinder: 0)],
+      events: [const SampleEvent(time: 0, type: SampleEventType.gasChange, flags: SampleEventFlags(0), value: 32)],
     ));
 
     // Insert
@@ -227,9 +205,9 @@ void main() {
     expect(loaded.cylinders.length, 1);
     expect(loaded.cylinders[0].o2, 32.0);
     expect(loaded.weightsystems.length, 1);
-    expect(loaded.divecomputers.length, 1);
-    expect(loaded.divecomputers[0].samples.length, 3);
-    expect(loaded.divecomputers[0].events.length, 1);
+    expect(loaded.computerDives.length, 1);
+    expect(loaded.computerDives[0].samples.length, 3);
+    expect(loaded.computerDives[0].events.length, 1);
 
     // Update
     dive.rating = 4;

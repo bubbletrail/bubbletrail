@@ -90,12 +90,13 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     // Initialize cylinders from dive
     _cylinders = dive.cylinders.map((dc) => _EditableDiveCylinder.fromDiveCylinder(dc)).toList();
 
-    // Extract gaschange events from all dive computer logs
+    // Extract gaschange events from all computer dives
     _gasChanges = [];
-    for (final dcLog in dive.divecomputers) {
-      for (final event in dcLog.events) {
-        if (event.name == 'gaschange' && event.cylinder != null) {
-          _gasChanges.add(_EditableGasChange(timeSeconds: event.time, cylinderIndex: event.cylinder!));
+    for (final cd in dive.computerDives) {
+      for (final event in cd.events) {
+        if (event.type == SampleEventType.gasChange) {
+          // The value field stores the cylinder index
+          _gasChanges.add(_EditableGasChange(timeSeconds: event.time, cylinderIndex: event.value));
         }
       }
     }
@@ -392,44 +393,37 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       dive.cylinders = _cylinders.map((c) => c.toDiveCylinder()).toList();
 
       // Update gas change events
-      // Find existing "Manual Entry" dive computer log or prepare to create one
+      // Find existing "Manual Entry" computer dive or prepare to create one
       const manualEntryModel = 'Manual Entry';
-      DiveComputerLog? manualLog = dive.divecomputers.where((dc) => dc.diveComputer?.model == manualEntryModel).firstOrNull;
+      ComputerDive? manualCd = dive.computerDives.where((cd) => cd.model == manualEntryModel).firstOrNull;
 
       if (_gasChanges.isNotEmpty) {
         // Convert gas changes to events
         final events = _gasChanges.map((gc) {
-          final cyl = _cylinders[gc.cylinderIndex];
-          return Event(
+          return SampleEvent(
             time: gc.timeSeconds,
-            type: 11, // gaschange type
-            name: 'gaschange',
-            cylinder: gc.cylinderIndex,
-            value: (cyl.o2 ?? 21).toInt(),
+            type: SampleEventType.gasChange,
+            flags: const SampleEventFlags(0),
+            value: gc.cylinderIndex,
           );
         }).toList();
 
-        if (manualLog != null) {
-          // Update existing manual log's events
-          manualLog.events.clear();
-          manualLog.events.addAll(events);
-        } else {
-          // Create new manual log
-          manualLog = DiveComputerLog(
-            diveComputerId: 0,
-            diveComputer: const DiveComputer(id: 0, model: manualEntryModel),
-            maxDepth: dive.maxDepth ?? 0,
-            meanDepth: dive.meanDepth ?? 0,
-            events: events,
-          );
-          dive.divecomputers.add(manualLog);
+        if (manualCd != null) {
+          // Replace the manual computer dive with updated events
+          dive.computerDives.remove(manualCd);
         }
-      } else if (manualLog != null) {
-        // No gas changes, remove manual log if it only had events
-        if (manualLog.samples.isEmpty) {
-          dive.divecomputers.remove(manualLog);
-        } else {
-          manualLog.events.clear();
+        // Create new manual computer dive
+        manualCd = ComputerDive(
+          model: manualEntryModel,
+          maxDepth: dive.maxDepth,
+          avgDepth: dive.meanDepth,
+          events: events,
+        );
+        dive.computerDives.add(manualCd);
+      } else if (manualCd != null) {
+        // No gas changes, remove manual computer dive if it only had events
+        if (manualCd.samples.isEmpty) {
+          dive.computerDives.remove(manualCd);
         }
       }
 

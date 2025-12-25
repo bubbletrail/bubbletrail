@@ -1,5 +1,7 @@
 import 'package:uuid/uuid.dart';
 
+import 'computerdive.dart';
+
 class Ssrf {
   final List<Dive> dives;
   final List<Divesite> diveSites;
@@ -32,7 +34,7 @@ class Dive {
   String? notes;
   List<DiveCylinder> cylinders = [];
   List<Weightsystem> weightsystems = [];
-  List<DiveComputerLog> divecomputers = [];
+  List<ComputerDive> computerDives = [];
 
   Dive({
     String? id,
@@ -60,48 +62,6 @@ class DiveComputer {
   final String? fingerprintData;
 
   const DiveComputer({required this.id, required this.model, this.serial, this.deviceid, this.diveid, this.fingerprintData});
-}
-
-class DiveComputerLog {
-  final int diveComputerId;
-  final DiveComputer? diveComputer; // populated when loaded from storage
-  final double maxDepth; // meters
-  final double meanDepth; // meters
-  final Environment? environment;
-  late final List<Sample> samples;
-  late final List<Event> events;
-  late final Map<String, String> extradata;
-
-  DiveComputerLog({
-    required this.diveComputerId,
-    this.diveComputer,
-    required this.maxDepth,
-    required this.meanDepth,
-    this.environment,
-    samples,
-    events,
-    extradata,
-  }) {
-    this.samples = samples ?? [];
-    this.events = events ?? [];
-    this.extradata = extradata ?? {};
-  }
-}
-
-class Environment {
-  final double? airTemperature; // degrees celsius
-  final double? waterTemperature; // degrees celsius
-
-  Environment({this.airTemperature, this.waterTemperature});
-}
-
-class Sample {
-  final int time; // seconds
-  final double depth; // meters
-  final double? temp; // degrees celsius
-  final double? pressure; // bars
-
-  const Sample({required this.time, required this.depth, this.temp, this.pressure});
 }
 
 class Divesite {
@@ -148,14 +108,4 @@ class Weightsystem {
   final String? description;
 
   const Weightsystem({this.weight, this.description});
-}
-
-class Event {
-  final int time; // seconds
-  final int? type;
-  final int? value;
-  final String? name;
-  final int? cylinder;
-
-  const Event({required this.time, this.type, this.value, this.name, this.cylinder});
 }

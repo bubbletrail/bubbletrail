@@ -3,22 +3,25 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 class DepthProfileWidget extends StatelessWidget {
-  final DiveComputerLog diveComputerLog;
+  final ComputerDive computerDive;
 
-  const DepthProfileWidget({super.key, required this.diveComputerLog});
+  const DepthProfileWidget({super.key, required this.computerDive});
 
   @override
   Widget build(BuildContext context) {
-    if (diveComputerLog.samples.isEmpty) {
+    // Filter out samples without depth data
+    final samplesWithDepth = computerDive.samples.where((s) => s.depth != null).toList();
+
+    if (samplesWithDepth.isEmpty) {
       return const Center(
         child: Padding(padding: EdgeInsets.all(16.0), child: Text('No depth profile data available')),
       );
     }
 
     // Inverting depth, so that depths are negative for graph purposes
-    final maxDepth = -diveComputerLog.samples.map((s) => s.depth).reduce((a, b) => a > b ? a : b);
-    final maxTime = diveComputerLog.samples.map((s) => s.time).reduce((a, b) => a > b ? a : b) / 60;
-    final spots = diveComputerLog.samples.map((sample) => FlSpot(sample.time / 60, -sample.depth)).toList();
+    final maxDepth = -samplesWithDepth.map((s) => s.depth!).reduce((a, b) => a > b ? a : b);
+    final maxTime = samplesWithDepth.map((s) => s.time).reduce((a, b) => a > b ? a : b) / 60;
+    final spots = samplesWithDepth.map((sample) => FlSpot(sample.time / 60, -sample.depth!)).toList();
 
     final colorScheme = Theme.of(context).colorScheme;
     final primaryColor = colorScheme.primary;

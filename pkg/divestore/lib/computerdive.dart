@@ -516,6 +516,11 @@ List<T>? orNull<T>(List<T> l) {
 /// Complete dive data parsed from a dive computer.
 @JsonSerializable(includeIfNull: false)
 class ComputerDive {
+  // Dive computer identity
+  final String? model;
+  final String? serial;
+
+  // Dive metadata
   final DateTime? dateTime;
   final int? diveTime;
   final int? number; // Dive number (if available)
@@ -532,9 +537,12 @@ class ComputerDive {
   final List<GasMix> gasMixes;
   final List<Tank> tanks;
   final List<ComputerSample> samples;
+  final List<SampleEvent> events; // Top-level events list
   final String? fingerprint;
 
   const ComputerDive({
+    this.model,
+    this.serial,
     this.dateTime,
     this.diveTime,
     this.number,
@@ -551,6 +559,7 @@ class ComputerDive {
     this.gasMixes = const [],
     this.tanks = const [],
     this.samples = const [],
+    this.events = const [],
     this.fingerprint,
   });
 
@@ -570,6 +579,8 @@ class ComputerDive {
 
 /// Builder for constructing Dive objects incrementally during parsing.
 class ComputerDiveBuilder {
+  String? model;
+  String? serial;
   DateTime? dateTime;
   int? diveTime;
   double? maxDepth;
@@ -585,9 +596,12 @@ class ComputerDiveBuilder {
   final List<GasMix> gasMixes = [];
   final List<Tank> tanks = [];
   final List<ComputerSample> samples = [];
+  final List<SampleEvent> events = [];
   String? fingerprint;
 
   ComputerDive build() => ComputerDive(
+    model: model,
+    serial: serial,
     dateTime: dateTime,
     diveTime: diveTime,
     maxDepth: maxDepth,
@@ -603,6 +617,7 @@ class ComputerDiveBuilder {
     gasMixes: List.unmodifiable(gasMixes),
     tanks: List.unmodifiable(tanks),
     samples: List.unmodifiable(samples),
+    events: List.unmodifiable(events),
     fingerprint: fingerprint,
   );
 }
