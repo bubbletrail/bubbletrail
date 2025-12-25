@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Convert basic dive info', () {
-    final dcDive = ds.Dive(dateTime: DateTime(2024, 6, 15, 10, 30, 0), diveTime: 45 * 60 + 30, number: 42, maxDepth: 25.5, avgDepth: 15.2);
+    final dcDive = ds.ComputerDive(dateTime: DateTime(2024, 6, 15, 10, 30, 0), diveTime: 45 * 60 + 30, number: 42, maxDepth: 25.5, avgDepth: 15.2);
 
     final ssrfDive = convertDcDive(dcDive, diveNumber: 100);
 
@@ -18,18 +18,18 @@ void main() {
   });
 
   test('Convert samples', () {
-    final dcDive = ds.Dive(
+    final dcDive = ds.ComputerDive(
       dateTime: DateTime(2024, 6, 15, 10, 30, 0),
       diveTime: 30 * 60,
       maxDepth: 20.0,
       avgDepth: 12.0,
       samples: [
-        ds.Sample(time: 0, depth: 0.0, temperature: 28.0),
-        ds.Sample(time: 60, depth: 5.5, temperature: 26.0, pressures: [const ds.TankPressure(tankIndex: 0, pressure: 195.0)]),
-        ds.Sample(time: 120, depth: 10.2, temperature: 24.5, pressures: [const ds.TankPressure(tankIndex: 0, pressure: 185.0)]),
-        ds.Sample(time: 180, depth: 15.8, temperature: 22.0, pressures: [const ds.TankPressure(tankIndex: 0, pressure: 170.0)]),
-        ds.Sample(time: 900, depth: 20.0, temperature: 20.0, pressures: [const ds.TankPressure(tankIndex: 0, pressure: 120.0)]),
-        ds.Sample(time: 1800, depth: 5.0, temperature: 24.0, pressures: [const ds.TankPressure(tankIndex: 0, pressure: 60.0)]),
+        ds.ComputerSample(time: 0, depth: 0.0, temperature: 28.0),
+        ds.ComputerSample(time: 60, depth: 5.5, temperature: 26.0, pressures: [const ds.TankPressure(tankIndex: 0, pressure: 195.0)]),
+        ds.ComputerSample(time: 120, depth: 10.2, temperature: 24.5, pressures: [const ds.TankPressure(tankIndex: 0, pressure: 185.0)]),
+        ds.ComputerSample(time: 180, depth: 15.8, temperature: 22.0, pressures: [const ds.TankPressure(tankIndex: 0, pressure: 170.0)]),
+        ds.ComputerSample(time: 900, depth: 20.0, temperature: 20.0, pressures: [const ds.TankPressure(tankIndex: 0, pressure: 120.0)]),
+        ds.ComputerSample(time: 1800, depth: 5.0, temperature: 24.0, pressures: [const ds.TankPressure(tankIndex: 0, pressure: 60.0)]),
       ],
     );
 
@@ -69,7 +69,7 @@ void main() {
   });
 
   test('Convert tanks with gas mixes', () {
-    final dcDive = ds.Dive(
+    final dcDive = ds.ComputerDive(
       dateTime: DateTime(2024, 6, 15, 10, 30, 0),
       diveTime: 45 * 60,
       maxDepth: 30.0,
@@ -104,7 +104,7 @@ void main() {
   });
 
   test('Convert gas mixes only (no tanks)', () {
-    final dcDive = ds.Dive(
+    final dcDive = ds.ComputerDive(
       dateTime: DateTime(2024, 6, 15, 10, 30, 0),
       diveTime: 30 * 60,
       maxDepth: 18.0,
@@ -124,7 +124,7 @@ void main() {
   });
 
   test('Convert environment data', () {
-    final dcDive = ds.Dive(
+    final dcDive = ds.ComputerDive(
       dateTime: DateTime(2024, 6, 15, 10, 30, 0),
       diveTime: 40 * 60,
       maxDepth: 22.0,
@@ -144,7 +144,7 @@ void main() {
   });
 
   test('Convert dive mode and deco model to extradata', () {
-    final dcDive = ds.Dive(
+    final dcDive = ds.ComputerDive(
       dateTime: DateTime(2024, 6, 15, 10, 30, 0),
       diveTime: 50 * 60,
       maxDepth: 35.0,
@@ -169,7 +169,13 @@ void main() {
 
   test('Convert fingerprint to base64 extradata', () {
     final fingerprint = Uint8List.fromList([0x01, 0x02, 0x03, 0x04, 0xAB, 0xCD, 0xEF]);
-    final dcDive = ds.Dive(dateTime: DateTime(2024, 6, 15, 10, 30, 0), diveTime: 30 * 60, maxDepth: 15.0, avgDepth: 10.0, fingerprint: fingerprint.toString());
+    final dcDive = ds.ComputerDive(
+      dateTime: DateTime(2024, 6, 15, 10, 30, 0),
+      diveTime: 30 * 60,
+      maxDepth: 15.0,
+      avgDepth: 10.0,
+      fingerprint: fingerprint.toString(),
+    );
 
     final ssrfDive = convertDcDive(dcDive);
 
@@ -186,18 +192,18 @@ void main() {
   });
 
   test('Convert events from samples', () {
-    final dcDive = ds.Dive(
+    final dcDive = ds.ComputerDive(
       dateTime: DateTime(2024, 6, 15, 10, 30, 0),
       diveTime: 30 * 60,
       maxDepth: 20.0,
       avgDepth: 12.0,
       samples: [
-        ds.Sample(
+        ds.ComputerSample(
           time: 0,
           depth: 0.0,
           events: const [ds.SampleEvent(type: ds.SampleEventType.gasChange, time: 0, flags: ds.SampleEventFlags(0), value: 0)],
         ),
-        ds.Sample(
+        ds.ComputerSample(
           time: 600,
           depth: 15.0,
           events: const [ds.SampleEvent(type: ds.SampleEventType.bookmark, time: 600, flags: ds.SampleEventFlags(0), value: 1)],
@@ -218,19 +224,19 @@ void main() {
   });
 
   test('Skip samples without depth', () {
-    final dcDive = ds.Dive(
+    final dcDive = ds.ComputerDive(
       dateTime: DateTime(2024, 6, 15, 10, 30, 0),
       diveTime: 30 * 60,
       maxDepth: 20.0,
       avgDepth: 12.0,
       samples: [
-        ds.Sample(time: 0, depth: 0.0),
-        const ds.Sample(
+        ds.ComputerSample(time: 0, depth: 0.0),
+        const ds.ComputerSample(
           time: 30,
           depth: null, // No depth - should be skipped
           temperature: 25.0,
         ),
-        ds.Sample(time: 60, depth: 5.0),
+        ds.ComputerSample(time: 60, depth: 5.0),
       ],
     );
 
@@ -246,7 +252,7 @@ void main() {
   });
 
   test('Use diveComputerId parameter', () {
-    final dcDive = ds.Dive(dateTime: DateTime(2024, 6, 15, 10, 30, 0), diveTime: 30 * 60, maxDepth: 15.0, avgDepth: 10.0);
+    final dcDive = ds.ComputerDive(dateTime: DateTime(2024, 6, 15, 10, 30, 0), diveTime: 30 * 60, maxDepth: 15.0, avgDepth: 10.0);
 
     final ssrfDive = convertDcDive(dcDive, diveComputerId: 42);
 
@@ -255,7 +261,7 @@ void main() {
   });
 
   test('No divecomputer log when no samples and no depth', () {
-    final dcDive = ds.Dive(dateTime: DateTime(2024, 6, 15, 10, 30, 0), diveTime: 30 * 60, maxDepth: null, avgDepth: null, samples: const []);
+    final dcDive = ds.ComputerDive(dateTime: DateTime(2024, 6, 15, 10, 30, 0), diveTime: 30 * 60, maxDepth: null, avgDepth: null, samples: const []);
 
     final ssrfDive = convertDcDive(dcDive);
 
@@ -263,7 +269,7 @@ void main() {
   });
 
   test('Handle null datetime', () {
-    final dcDive = ds.Dive(dateTime: null, diveTime: 30 * 60, maxDepth: 15.0);
+    final dcDive = ds.ComputerDive(dateTime: null, diveTime: 30 * 60, maxDepth: 15.0);
 
     final ssrfDive = convertDcDive(dcDive);
 

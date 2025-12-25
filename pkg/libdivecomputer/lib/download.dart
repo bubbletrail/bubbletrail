@@ -65,7 +65,7 @@ class DownloadDeviceInfo extends DownloadEvent {
 }
 
 class DownloadDiveReceived extends DownloadEvent {
-  final Dive dive;
+  final ComputerDive dive;
   DownloadDiveReceived(this.dive);
 }
 

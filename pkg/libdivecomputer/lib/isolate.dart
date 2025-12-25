@@ -268,7 +268,7 @@ void _downloadIsolateEntry(DownloadRequest request) {
       } else {
         _log.warning('Failed to parse dive: $parserStatus');
         // Send a minimal dive with just the number and raw data
-        sendPort.send(DownloadDiveReceived(Dive(number: diveCount, fingerprint: fpBytes?.toString())));
+        sendPort.send(DownloadDiveReceived(ComputerDive(number: diveCount, fingerprint: fpBytes?.toString())));
       }
 
       calloc.free(parser);

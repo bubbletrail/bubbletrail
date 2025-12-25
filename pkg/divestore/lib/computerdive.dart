@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'dive.g.dart';
+part 'computerdive.g.dart';
 
 // --- Enums ---
 
@@ -409,7 +409,7 @@ class VendorData {
 
 /// A single sample point in the dive profile.
 @JsonSerializable(includeIfNull: false)
-class Sample {
+class ComputerSample {
   final double time;
   final double? depth; // Meters
   final double? temperature; // Celsius
@@ -425,7 +425,7 @@ class Sample {
   final int? gasMixIndex; // Current gas mix index
   final List<VendorData>? vendorData;
 
-  const Sample({
+  const ComputerSample({
     required this.time,
     this.depth,
     this.temperature,
@@ -442,8 +442,8 @@ class Sample {
     this.vendorData,
   });
 
-  factory Sample.fromJson(Map<String, dynamic> json) => _$SampleFromJson(json);
-  Map<String, dynamic> toJson() => _$SampleToJson(this);
+  factory ComputerSample.fromJson(Map<String, dynamic> json) => _$ComputerSampleFromJson(json);
+  Map<String, dynamic> toJson() => _$ComputerSampleToJson(this);
 
   @override
   String toString() {
@@ -455,7 +455,7 @@ class Sample {
 }
 
 /// Builder for constructing samples incrementally.
-class SampleBuilder {
+class ComputerSampleBuilder {
   double? time;
   double? depth;
   double? temperature;
@@ -471,7 +471,7 @@ class SampleBuilder {
   int? gasMixIndex;
   final List<VendorData> vendorData = [];
 
-  Sample build() => Sample(
+  ComputerSample build() => ComputerSample(
     time: time ?? 0,
     depth: depth,
     temperature: temperature,
@@ -515,45 +515,26 @@ List<T>? orNull<T>(List<T> l) {
 
 /// Complete dive data parsed from a dive computer.
 @JsonSerializable(includeIfNull: false)
-class Dive {
-  // --- Basic Info ---
+class ComputerDive {
   final DateTime? dateTime;
   final int? diveTime;
   final int? number; // Dive number (if available)
-
-  // --- Depth ---
   final double? maxDepth; // Meters
   final double? avgDepth; // Meters
-
-  // --- Temperature ---
   final double? surfaceTemperature; // Celsius
   final double? minTemperature; // Celsius
   final double? maxTemperature; // Celsius
-
-  // --- Environment ---
   final Salinity? salinity;
   final double? atmosphericPressure; // Bar
-
-  // --- Dive Mode & Deco Model ---
   final DiveMode? diveMode;
   final DecoModel? decoModel;
-
-  // --- Location ---
   final Location? location;
-
-  // --- Gas Mixes ---
   final List<GasMix> gasMixes;
-
-  // --- Tanks ---
   final List<Tank> tanks;
+  final List<ComputerSample> samples;
+  final String? fingerprint;
 
-  // --- Profile Data ---
-  final List<Sample> samples;
-
-  // --- Raw Data ---
-  final String? fingerprint; // Unique identifier for this dive
-
-  const Dive({
+  const ComputerDive({
     this.dateTime,
     this.diveTime,
     this.number,
@@ -573,8 +554,8 @@ class Dive {
     this.fingerprint,
   });
 
-  factory Dive.fromJson(Map<String, dynamic> json) => _$DiveFromJson(json);
-  Map<String, dynamic> toJson() => _$DiveToJson(this);
+  factory ComputerDive.fromJson(Map<String, dynamic> json) => _$ComputerDiveFromJson(json);
+  Map<String, dynamic> toJson() => _$ComputerDiveToJson(this);
 
   @override
   String toString() {
@@ -588,7 +569,7 @@ class Dive {
 }
 
 /// Builder for constructing Dive objects incrementally during parsing.
-class DiveBuilder {
+class ComputerDiveBuilder {
   DateTime? dateTime;
   int? diveTime;
   double? maxDepth;
@@ -603,10 +584,10 @@ class DiveBuilder {
   Location? location;
   final List<GasMix> gasMixes = [];
   final List<Tank> tanks = [];
-  final List<Sample> samples = [];
+  final List<ComputerSample> samples = [];
   String? fingerprint;
 
-  Dive build() => Dive(
+  ComputerDive build() => ComputerDive(
     dateTime: dateTime,
     diveTime: diveTime,
     maxDepth: maxDepth,

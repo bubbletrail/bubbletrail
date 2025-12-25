@@ -12,8 +12,8 @@ import 'libdivecomputer_bindings_generated.dart' as dc;
 ///
 /// This function must be called from an isolate where FFI is available.
 /// The [parser] must be a valid dc_parser_t pointer created via dc_parser_new.
-Dive parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {String? fingerprint}) {
-  final builder = DiveBuilder()..fingerprint = fingerprint;
+ComputerDive parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {String? fingerprint}) {
+  final builder = ComputerDiveBuilder()..fingerprint = fingerprint;
 
   // --- DateTime ---
   final datetime = calloc<dc.dc_datetime_t>();
@@ -176,13 +176,13 @@ bool _getFieldIndexed(ffi.Pointer<dc.dc_parser_t> parser, dc.dc_field_type_t typ
 }
 
 /// Global state for sample callback (needed because NativeCallable can't capture closures).
-DiveBuilder? _currentDiveBuilder;
-SampleBuilder? _currentSampleBuilder;
+ComputerDiveBuilder? _currentDiveBuilder;
+ComputerSampleBuilder? _currentSampleBuilder;
 
 /// Parse samples from the parser.
-void _parseSamples(ffi.Pointer<dc.dc_parser_t> parser, DiveBuilder builder) {
+void _parseSamples(ffi.Pointer<dc.dc_parser_t> parser, ComputerDiveBuilder builder) {
   _currentDiveBuilder = builder;
-  _currentSampleBuilder = SampleBuilder();
+  _currentSampleBuilder = ComputerSampleBuilder();
 
   final callback = ffi.NativeCallable<dc.dc_sample_callback_tFunction>.isolateLocal(_sampleCallback);
 

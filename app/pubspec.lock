@@ -215,7 +215,7 @@ packages:
       path: "../pkg/divestore"
       relative: true
     source: path
-    version: "0.0.1"
+    version: "1.0.0"
   equatable:
     dependency: "direct main"
     description:
@@ -482,7 +482,7 @@ packages:
       path: "../pkg/libdivecomputer"
       relative: true
     source: path
-    version: "0.0.1"
+    version: "1.0.0"
   lints:
     dependency: transitive
     description:

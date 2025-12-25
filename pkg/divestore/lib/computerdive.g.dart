@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'dive.dart';
+part of 'computerdive.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
@@ -203,51 +203,53 @@ VendorData _$VendorDataFromJson(Map<String, dynamic> json) => VendorData(
 Map<String, dynamic> _$VendorDataToJson(VendorData instance) =>
     <String, dynamic>{'type': instance.type, 'data': instance.data};
 
-Sample _$SampleFromJson(Map<String, dynamic> json) => Sample(
-  time: (json['time'] as num).toDouble(),
-  depth: (json['depth'] as num?)?.toDouble(),
-  temperature: (json['temperature'] as num?)?.toDouble(),
-  pressures: (json['pressures'] as List<dynamic>?)
-      ?.map((e) => TankPressure.fromJson(e as Map<String, dynamic>))
-      .toList(),
-  events: (json['events'] as List<dynamic>?)
-      ?.map((e) => SampleEvent.fromJson(e as Map<String, dynamic>))
-      .toList(),
-  rbt: (json['rbt'] as num?)?.toInt(),
-  heartbeat: (json['heartbeat'] as num?)?.toInt(),
-  bearing: (json['bearing'] as num?)?.toInt(),
-  setpoint: (json['setpoint'] as num?)?.toDouble(),
-  ppo2: (json['ppo2'] as List<dynamic>?)
-      ?.map((e) => Ppo2Reading.fromJson(e as Map<String, dynamic>))
-      .toList(),
-  cns: (json['cns'] as num?)?.toDouble(),
-  deco: json['deco'] == null
-      ? null
-      : DecoStatus.fromJson(json['deco'] as Map<String, dynamic>),
-  gasMixIndex: (json['gasMixIndex'] as num?)?.toInt(),
-  vendorData: (json['vendorData'] as List<dynamic>?)
-      ?.map((e) => VendorData.fromJson(e as Map<String, dynamic>))
-      .toList(),
-);
+ComputerSample _$ComputerSampleFromJson(Map<String, dynamic> json) =>
+    ComputerSample(
+      time: (json['time'] as num).toDouble(),
+      depth: (json['depth'] as num?)?.toDouble(),
+      temperature: (json['temperature'] as num?)?.toDouble(),
+      pressures: (json['pressures'] as List<dynamic>?)
+          ?.map((e) => TankPressure.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      events: (json['events'] as List<dynamic>?)
+          ?.map((e) => SampleEvent.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      rbt: (json['rbt'] as num?)?.toInt(),
+      heartbeat: (json['heartbeat'] as num?)?.toInt(),
+      bearing: (json['bearing'] as num?)?.toInt(),
+      setpoint: (json['setpoint'] as num?)?.toDouble(),
+      ppo2: (json['ppo2'] as List<dynamic>?)
+          ?.map((e) => Ppo2Reading.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      cns: (json['cns'] as num?)?.toDouble(),
+      deco: json['deco'] == null
+          ? null
+          : DecoStatus.fromJson(json['deco'] as Map<String, dynamic>),
+      gasMixIndex: (json['gasMixIndex'] as num?)?.toInt(),
+      vendorData: (json['vendorData'] as List<dynamic>?)
+          ?.map((e) => VendorData.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
 
-Map<String, dynamic> _$SampleToJson(Sample instance) => <String, dynamic>{
-  'time': instance.time,
-  'depth': ?instance.depth,
-  'temperature': ?instance.temperature,
-  'pressures': ?instance.pressures,
-  'events': ?instance.events,
-  'rbt': ?instance.rbt,
-  'heartbeat': ?instance.heartbeat,
-  'bearing': ?instance.bearing,
-  'setpoint': ?instance.setpoint,
-  'ppo2': ?instance.ppo2,
-  'cns': ?instance.cns,
-  'deco': ?instance.deco,
-  'gasMixIndex': ?instance.gasMixIndex,
-  'vendorData': ?instance.vendorData,
-};
+Map<String, dynamic> _$ComputerSampleToJson(ComputerSample instance) =>
+    <String, dynamic>{
+      'time': instance.time,
+      'depth': ?instance.depth,
+      'temperature': ?instance.temperature,
+      'pressures': ?instance.pressures,
+      'events': ?instance.events,
+      'rbt': ?instance.rbt,
+      'heartbeat': ?instance.heartbeat,
+      'bearing': ?instance.bearing,
+      'setpoint': ?instance.setpoint,
+      'ppo2': ?instance.ppo2,
+      'cns': ?instance.cns,
+      'deco': ?instance.deco,
+      'gasMixIndex': ?instance.gasMixIndex,
+      'vendorData': ?instance.vendorData,
+    };
 
-Dive _$DiveFromJson(Map<String, dynamic> json) => Dive(
+ComputerDive _$ComputerDiveFromJson(Map<String, dynamic> json) => ComputerDive(
   dateTime: json['dateTime'] == null
       ? null
       : DateTime.parse(json['dateTime'] as String),
@@ -281,31 +283,32 @@ Dive _$DiveFromJson(Map<String, dynamic> json) => Dive(
       const [],
   samples:
       (json['samples'] as List<dynamic>?)
-          ?.map((e) => Sample.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => ComputerSample.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
   fingerprint: json['fingerprint'] as String?,
 );
 
-Map<String, dynamic> _$DiveToJson(Dive instance) => <String, dynamic>{
-  'dateTime': ?instance.dateTime?.toIso8601String(),
-  'diveTime': ?instance.diveTime,
-  'number': ?instance.number,
-  'maxDepth': ?instance.maxDepth,
-  'avgDepth': ?instance.avgDepth,
-  'surfaceTemperature': ?instance.surfaceTemperature,
-  'minTemperature': ?instance.minTemperature,
-  'maxTemperature': ?instance.maxTemperature,
-  'salinity': ?instance.salinity,
-  'atmosphericPressure': ?instance.atmosphericPressure,
-  'diveMode': ?_$DiveModeEnumMap[instance.diveMode],
-  'decoModel': ?instance.decoModel,
-  'location': ?instance.location,
-  'gasMixes': instance.gasMixes,
-  'tanks': instance.tanks,
-  'samples': instance.samples,
-  'fingerprint': ?instance.fingerprint,
-};
+Map<String, dynamic> _$ComputerDiveToJson(ComputerDive instance) =>
+    <String, dynamic>{
+      'dateTime': ?instance.dateTime?.toIso8601String(),
+      'diveTime': ?instance.diveTime,
+      'number': ?instance.number,
+      'maxDepth': ?instance.maxDepth,
+      'avgDepth': ?instance.avgDepth,
+      'surfaceTemperature': ?instance.surfaceTemperature,
+      'minTemperature': ?instance.minTemperature,
+      'maxTemperature': ?instance.maxTemperature,
+      'salinity': ?instance.salinity,
+      'atmosphericPressure': ?instance.atmosphericPressure,
+      'diveMode': ?_$DiveModeEnumMap[instance.diveMode],
+      'decoModel': ?instance.decoModel,
+      'location': ?instance.location,
+      'gasMixes': instance.gasMixes,
+      'tanks': instance.tanks,
+      'samples': instance.samples,
+      'fingerprint': ?instance.fingerprint,
+    };
 
 const _$DiveModeEnumMap = {
   DiveMode.freedive: 'freedive',

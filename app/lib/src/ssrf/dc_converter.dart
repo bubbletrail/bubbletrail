@@ -12,7 +12,7 @@ import 'types.dart';
 ///
 /// If [diveComputerId] is provided, a DiveComputerLog will be created with
 /// that ID. Otherwise, a placeholder ID of 0 is used.
-Dive convertDcDive(ds.Dive dcDive, {int diveNumber = 0, int diveComputerId = 0}) {
+Dive convertDcDive(ds.ComputerDive dcDive, {int diveNumber = 0, int diveComputerId = 0}) {
   final dive = Dive(
     number: diveNumber,
     start: dcDive.dateTime ?? DateTime.now(),
@@ -33,7 +33,7 @@ Dive convertDcDive(ds.Dive dcDive, {int diveNumber = 0, int diveComputerId = 0})
 }
 
 /// Converts libdivecomputer tanks and gas mixes to SSRF DiveCylinders.
-List<DiveCylinder> _convertCylinders(ds.Dive dcDive) {
+List<DiveCylinder> _convertCylinders(ds.ComputerDive dcDive) {
   final cylinders = <DiveCylinder>[];
 
   for (var i = 0; i < dcDive.tanks.length; i++) {
@@ -71,7 +71,7 @@ List<DiveCylinder> _convertCylinders(ds.Dive dcDive) {
 }
 
 /// Creates a DiveComputerLog from the libdivecomputer dive data.
-DiveComputerLog _createDiveComputerLog(ds.Dive dcDive, int diveComputerId) {
+DiveComputerLog _createDiveComputerLog(ds.ComputerDive dcDive, int diveComputerId) {
   // Convert samples
   final samples = <Sample>[];
   for (final dcSample in dcDive.samples) {

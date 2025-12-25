@@ -1,6 +1,6 @@
 name: divestore
-description: "A new Flutter package project."
-version: 0.0.1
+description: "Types and storage for dive data"
+version: 1.0.0
 publish_to: 'none'
 
 environment:
@@ -11,3 +11,4 @@ dependencies:
 
 dev_dependencies:
   json_serializable: ^6.11.3
+  build_runner: ^2.10.4
