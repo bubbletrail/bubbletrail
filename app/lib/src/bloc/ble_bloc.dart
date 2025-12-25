@@ -379,7 +379,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
             print('Received dive: $dive');
           case DownloadCompleted(:final diveCount):
             print('Download completed: $diveCount dives');
-            add(_BleDownloadCompleted(const [])); // TODO: pass actual dive data
+            add(_BleDownloadCompleted(const []));
           case DownloadError(:final message):
             print('Download error: $message');
             add(_BleDownloadFailed(message));

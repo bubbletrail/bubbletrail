@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:ffi' as ffi;
-import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
+import 'download.dart';
+import 'dive.dart';
 import 'libdivecomputer_bindings_generated.dart' as bindings;
-import 'libdivecomputer.dart';
 
 class ComputerDescriptor {
   final int handle;
@@ -173,15 +173,11 @@ void _downloadIsolateEntry(DownloadRequest request) {
   }
 
   final descriptor = _descriptorCache[request.descriptorIndex];
-  final model = bindings.dc_descriptor_get_product(descriptor).cast<Utf8>().toDartString();
-  print('Got descriptor for $model');
 
   // Open FIFOs
   final iostream = calloc<ffi.Pointer<bindings.dc_iostream_t>>();
   final readPathNative = request.readFifoPath.toNativeUtf8().cast<ffi.Char>();
   final writePathNative = request.writeFifoPath.toNativeUtf8().cast<ffi.Char>();
-
-  print('Download isolate: Opening FIFOs...');
 
   final openStatus = bindings.dc_fifos_open(iostream, _context.value, readPathNative, writePathNative);
 
@@ -195,8 +191,6 @@ void _downloadIsolateEntry(DownloadRequest request) {
     calloc.free(_context);
     return;
   }
-
-  print('Download isolate: FIFOs opened, opening device...');
 
   // Open device
   final device = calloc<ffi.Pointer<bindings.dc_device_t>>();
@@ -212,8 +206,6 @@ void _downloadIsolateEntry(DownloadRequest request) {
     return;
   }
 
-  print('Download isolate: Device opened, setting up callbacks...');
-
   // Set up event callback using NativeCallable
   int diveCount = 0;
 
@@ -223,10 +215,13 @@ void _downloadIsolateEntry(DownloadRequest request) {
     ffi.Pointer<ffi.Void> data,
     ffi.Pointer<ffi.Void> userdata,
   ) {
+    print('event');
     if (eventType == bindings.dc_event_type_t.DC_EVENT_PROGRESS.value) {
+      print('progress');
       final progress = data.cast<bindings.dc_event_progress_t>().ref;
       sendPort.send(DownloadProgressEvent(DownloadProgress(progress.current, progress.maximum)));
     } else if (eventType == bindings.dc_event_type_t.DC_EVENT_DEVINFO.value) {
+      print('device info');
       final devinfo = data.cast<bindings.dc_event_devinfo_t>().ref;
       sendPort.send(DownloadDeviceInfo(DeviceInfo(model: devinfo.model, firmware: devinfo.firmware, serial: devinfo.serial)));
     }
@@ -248,48 +243,30 @@ void _downloadIsolateEntry(DownloadRequest request) {
   final diveCallback = ffi.NativeCallable<bindings.dc_dive_callback_tFunction>.isolateLocal(
     (ffi.Pointer<ffi.UnsignedChar> data, int size, ffi.Pointer<ffi.UnsignedChar> fingerprint, int fsize, ffi.Pointer<ffi.Void> userdata) {
       diveCount++;
-      print('Download isolate: Received dive #$diveCount, size=$size bytes');
 
-      // Parse basic dive info
+      // Copy fingerprint if available
+      Uint8List? fpBytes;
+      if (fsize > 0 && fingerprint != ffi.nullptr) {
+        fpBytes = Uint8List(fsize);
+        for (var i = 0; i < fsize; i++) {
+          fpBytes[i] = fingerprint[i];
+        }
+      }
+
+      // Parse dive using the parser
       final parser = calloc<ffi.Pointer<bindings.dc_parser_t>>();
       final parserStatus = bindings.dc_parser_new(parser, device.value, data, size);
 
       if (parserStatus == bindings.dc_status_t.DC_STATUS_SUCCESS) {
-        // Get datetime
-        final datetime = calloc<bindings.dc_datetime_t>();
-        DateTime? diveDateTime;
-        if (bindings.dc_parser_get_datetime(parser.value, datetime) == bindings.dc_status_t.DC_STATUS_SUCCESS) {
-          diveDateTime = DateTime(datetime.ref.year, datetime.ref.month, datetime.ref.day, datetime.ref.hour, datetime.ref.minute, datetime.ref.second);
-        }
-        calloc.free(datetime);
+        final dive = parseDiveFromParser(parser.value, fingerprint: fpBytes, diveNumber: diveCount);
 
-        // Get dive time
-        final diveTimePtr = calloc<ffi.UnsignedInt>();
-        Duration? diveTime;
-        if (bindings.dc_parser_get_field(parser.value, bindings.dc_field_type_t.DC_FIELD_DIVETIME, 0, diveTimePtr.cast()) ==
-            bindings.dc_status_t.DC_STATUS_SUCCESS) {
-          diveTime = Duration(seconds: diveTimePtr.value);
-        }
-        calloc.free(diveTimePtr);
-
-        // Get max depth
-        final maxDepthPtr = calloc<ffi.Double>();
-        double? maxDepth;
-        if (bindings.dc_parser_get_field(parser.value, bindings.dc_field_type_t.DC_FIELD_MAXDEPTH, 0, maxDepthPtr.cast()) ==
-            bindings.dc_status_t.DC_STATUS_SUCCESS) {
-          maxDepth = maxDepthPtr.value;
-        }
-        calloc.free(maxDepthPtr);
-
-        final diveInfo = DiveInfo(number: diveCount, dateTime: diveDateTime, diveTime: diveTime, maxDepth: maxDepth);
-
-        print('Download isolate: $diveInfo');
-        sendPort.send(DownloadDiveReceived(diveInfo));
+        sendPort.send(DownloadDiveReceived(dive));
 
         bindings.dc_parser_destroy(parser.value);
       } else {
         print('Download isolate: Failed to parse dive: $parserStatus');
-        sendPort.send(DownloadDiveReceived(DiveInfo(number: diveCount)));
+        // Send a minimal dive with just the number and raw data
+        sendPort.send(DownloadDiveReceived(Dive(number: diveCount, fingerprint: fpBytes)));
       }
 
       calloc.free(parser);
@@ -300,12 +277,8 @@ void _downloadIsolateEntry(DownloadRequest request) {
     exceptionalReturn: 0, // Return 0 (abort) if exception is thrown
   );
 
-  print('Download isolate: Starting dive download...');
-
   // Download dives
   final foreachStatus = bindings.dc_device_foreach(device.value, diveCallback.nativeFunction, ffi.nullptr);
-
-  print('Download isolate: Download finished with status: $foreachStatus');
 
   // Cleanup
   // eventCallback.close();

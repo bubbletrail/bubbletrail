@@ -21,12 +21,7 @@ void main() {
       final directory = '/tmp'.toNativeUtf8().cast<ffi.Char>();
 
       try {
-        final status = bindings.dc_fifos_create(
-          context.value,
-          directory,
-          readPathPtr,
-          writePathPtr,
-        );
+        final status = bindings.dc_fifos_create(context.value, directory, readPathPtr, writePathPtr);
 
         expect(status, bindings.dc_status_t.DC_STATUS_SUCCESS);
 
@@ -59,11 +54,7 @@ void main() {
 
       final result = await _runWithFifos<_IoResult>(
         isolateEntry: _iostreamReaderIsolate,
-        makeRequest: (paths, sendPort) => _IoRequest(
-          paths: paths,
-          sendPort: sendPort,
-          expectedReadSize: testData.length,
-        ),
+        makeRequest: (paths, sendPort) => _IoRequest(paths: paths, sendPort: sendPort, expectedReadSize: testData.length),
         dartWork: (dartWriter, dartReader) async {
           await dartWriter.writeFrom(testData);
           await dartWriter.close();
@@ -80,11 +71,7 @@ void main() {
 
       final result = await _runWithFifos<_IoResult>(
         isolateEntry: _iostreamWriterIsolate,
-        makeRequest: (paths, sendPort) => _IoRequest(
-          paths: paths,
-          sendPort: sendPort,
-          dataToWrite: testData,
-        ),
+        makeRequest: (paths, sendPort) => _IoRequest(paths: paths, sendPort: sendPort, dataToWrite: testData),
         dartWork: (dartWriter, dartReader) async {
           final buffer = Uint8List(testData.length);
           final bytesRead = await _readWithTimeout(dartReader, buffer, _timeout);
@@ -104,12 +91,7 @@ void main() {
 
       final result = await _runWithFifos<_IoResult>(
         isolateEntry: _iostreamEchoIsolate,
-        makeRequest: (paths, sendPort) => _IoRequest(
-          paths: paths,
-          sendPort: sendPort,
-          expectedReadSize: dartToIostream.length,
-          dataToWrite: iostreamToDart,
-        ),
+        makeRequest: (paths, sendPort) => _IoRequest(paths: paths, sendPort: sendPort, expectedReadSize: dartToIostream.length, dataToWrite: iostreamToDart),
         dartWork: (dartWriter, dartReader) async {
           await dartWriter.writeFrom(dartToIostream);
           await dartWriter.close();
@@ -150,10 +132,7 @@ Future<T> _runWithFifos<T>({
     cleanup.receivePort = receivePort;
 
     // Start opening FIFOs from Dart side FIRST (they block waiting for C side)
-    final openFutures = Future.wait([
-      File(paths.read).open(mode: FileMode.writeOnly),
-      File(paths.write).open(mode: FileMode.read),
-    ]);
+    final openFutures = Future.wait([File(paths.read).open(mode: FileMode.writeOnly), File(paths.write).open(mode: FileMode.read)]);
 
     // Spawn isolate - when it starts, it will open C side and unblock our opens
     cleanup.isolate = await Isolate.spawn(
@@ -162,15 +141,13 @@ Future<T> _runWithFifos<T>({
     ).timeout(_timeout, onTimeout: () => throw TimeoutException('Isolate spawn timed out'));
 
     // Wait for FIFO opens to complete
-    final files = await openFutures
-        .timeout(_timeout, onTimeout: () => throw TimeoutException('Opening FIFOs timed out'));
+    final files = await openFutures.timeout(_timeout, onTimeout: () => throw TimeoutException('Opening FIFOs timed out'));
 
     // Do the test-specific work
     await dartWork(files[0], files[1]);
 
     // Get result from isolate
-    return await receivePort.first
-        .timeout(_timeout, onTimeout: () => throw TimeoutException('Waiting for isolate result timed out')) as T;
+    return await receivePort.first.timeout(_timeout, onTimeout: () => throw TimeoutException('Waiting for isolate result timed out')) as T;
   } finally {
     cleanup.dispose();
   }
@@ -185,14 +162,16 @@ Future<int> _readWithTimeout(RandomAccessFile file, Uint8List buffer, Duration t
     }
   });
 
-  unawaited(Future(() {
-    try {
-      final bytesRead = file.readIntoSync(buffer);
-      if (!completer.isCompleted) completer.complete(bytesRead);
-    } catch (e) {
-      if (!completer.isCompleted) completer.completeError(e);
-    }
-  }));
+  unawaited(
+    Future(() {
+      try {
+        final bytesRead = file.readIntoSync(buffer);
+        if (!completer.isCompleted) completer.complete(bytesRead);
+      } catch (e) {
+        if (!completer.isCompleted) completer.completeError(e);
+      }
+    }),
+  );
 
   try {
     return await completer.future;
@@ -225,12 +204,7 @@ class _FifoCleanup {
     _writePathPtr = calloc<ffi.Pointer<ffi.Char>>();
     _directory = '/tmp'.toNativeUtf8().cast<ffi.Char>();
 
-    final status = bindings.dc_fifos_create(
-      _context!.value,
-      _directory!,
-      _readPathPtr!,
-      _writePathPtr!,
-    );
+    final status = bindings.dc_fifos_create(_context!.value, _directory!, _readPathPtr!, _writePathPtr!);
 
     if (status != bindings.dc_status_t.DC_STATUS_SUCCESS) {
       throw Exception('Failed to create FIFOs: $status');
@@ -272,12 +246,7 @@ class _IoRequest {
   final int? expectedReadSize;
   final Uint8List? dataToWrite;
 
-  const _IoRequest({
-    required this.paths,
-    required this.sendPort,
-    this.expectedReadSize,
-    this.dataToWrite,
-  });
+  const _IoRequest({required this.paths, required this.sendPort, this.expectedReadSize, this.dataToWrite});
 }
 
 class _IoResult {
@@ -285,7 +254,6 @@ class _IoResult {
   final Uint8List? data;
   final String? error;
 
-  const _IoResult({required this.success, this.data, this.error});
   const _IoResult.ok([this.data]) : success = true, error = null;
   const _IoResult.fail(this.error) : success = false, data = null;
 }
@@ -293,11 +261,7 @@ class _IoResult {
 // --- Isolate Entry Points ---
 
 /// Opens iostream, optionally reads, optionally writes, returns result.
-void _runIsolateWork(
-  _IoRequest request, {
-  bool doRead = false,
-  bool doWrite = false,
-}) {
+void _runIsolateWork(_IoRequest request, {bool doRead = false, bool doWrite = false}) {
   final context = calloc<ffi.Pointer<bindings.dc_context_t>>();
   bindings.dc_context_new(context);
 
@@ -306,12 +270,7 @@ void _runIsolateWork(
   final writePathNative = request.paths.write.toNativeUtf8().cast<ffi.Char>();
 
   try {
-    final openStatus = bindings.dc_fifos_open(
-      iostream,
-      context.value,
-      readPathNative,
-      writePathNative,
-    );
+    final openStatus = bindings.dc_fifos_open(iostream, context.value, readPathNative, writePathNative);
 
     if (openStatus != bindings.dc_status_t.DC_STATUS_SUCCESS) {
       request.sendPort.send(_IoResult.fail('Failed to open FIFOs: $openStatus'));
@@ -325,12 +284,7 @@ void _runIsolateWork(
       final buffer = calloc<ffi.UnsignedChar>(256);
       final actual = calloc<ffi.Size>();
 
-      final readStatus = bindings.dc_iostream_read(
-        iostream.value,
-        buffer.cast<ffi.Void>(),
-        request.expectedReadSize!,
-        actual,
-      );
+      final readStatus = bindings.dc_iostream_read(iostream.value, buffer.cast<ffi.Void>(), request.expectedReadSize!, actual);
 
       if (readStatus != bindings.dc_status_t.DC_STATUS_SUCCESS) {
         calloc.free(buffer);
@@ -357,12 +311,7 @@ void _runIsolateWork(
       }
       final actual = calloc<ffi.Size>();
 
-      final writeStatus = bindings.dc_iostream_write(
-        iostream.value,
-        buffer.cast<ffi.Void>(),
-        data.length,
-        actual,
-      );
+      final writeStatus = bindings.dc_iostream_write(iostream.value, buffer.cast<ffi.Void>(), data.length, actual);
 
       calloc.free(buffer);
       calloc.free(actual);

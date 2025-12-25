@@ -42,25 +42,6 @@ class DeviceInfo {
   String toString() => 'Model: $model, FW: $firmware, Serial: $serial';
 }
 
-/// Basic dive information extracted from downloaded data.
-class DiveInfo {
-  final int number;
-  final DateTime? dateTime;
-  final Duration? diveTime;
-  final double? maxDepth;
-
-  const DiveInfo({required this.number, this.dateTime, this.diveTime, this.maxDepth});
-
-  @override
-  String toString() {
-    final parts = <String>['Dive #$number'];
-    if (dateTime != null) parts.add('Date: $dateTime');
-    if (diveTime != null) parts.add('Duration: ${diveTime!.inMinutes}min');
-    if (maxDepth != null) parts.add('Max depth: ${maxDepth!.toStringAsFixed(1)}m');
-    return parts.join(', ');
-  }
-}
-
 /// Events emitted during download.
 sealed class DownloadEvent {}
 
@@ -77,7 +58,7 @@ class DownloadDeviceInfo extends DownloadEvent {
 }
 
 class DownloadDiveReceived extends DownloadEvent {
-  final DiveInfo dive;
+  final Dive dive;
   DownloadDiveReceived(this.dive);
 }
 
@@ -126,8 +107,6 @@ Stream<DownloadEvent> startDownload({required BleCharacteristics ble, required C
     readPath = readPathPtr.value.cast<Utf8>().toDartString();
     writePath = writePathPtr.value.cast<Utf8>().toDartString();
 
-    print('Created FIFOs: read=$readPath, write=$writePath');
-
     // Set up receive port for messages from download isolate
     receivePort = ReceivePort();
     final eventController = StreamController<DownloadEvent>();
@@ -141,7 +120,6 @@ Stream<DownloadEvent> startDownload({required BleCharacteristics ble, required C
     // Start opening FIFOs from Dart side FIRST (they block waiting for C side)
     // We write to the "read" FIFO (what libdivecomputer reads)
     // We read from the "write" FIFO (what libdivecomputer writes)
-    print('Opening FIFOs from Dart side...');
     final fifoOpenFuture = Future.wait([File(readPath).open(mode: FileMode.writeOnly), File(writePath).open(mode: FileMode.read)]);
 
     // Spawn the download isolate - when it starts, it will open C side and unblock our opens
@@ -153,7 +131,6 @@ Stream<DownloadEvent> startDownload({required BleCharacteristics ble, required C
     toDeviceFifo = files[0];
     fromDeviceFifo = files[1];
 
-    print('FIFOs opened from Dart side');
     bool running = true;
 
     bleSubscription = ble.read.listen((data) async {
