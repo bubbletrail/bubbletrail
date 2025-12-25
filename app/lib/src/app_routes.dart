@@ -16,6 +16,8 @@ abstract class AppRouteName {
   static const cylindersNew = 'new-cylinder';
 
   static const connect = 'connect';
+
+  static const settings = 'settings';
 }
 
 abstract class AppRoutePath {
@@ -36,4 +38,6 @@ abstract class AppRoutePath {
   static const cylindersNew = 'new';
 
   static const connect = '/connect';
+
+  static const settings = 'settings';
 }

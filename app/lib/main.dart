@@ -16,6 +16,7 @@ import 'src/bloc/cylinderlist_bloc.dart';
 import 'src/bloc/divedetails_bloc.dart';
 import 'src/bloc/divelist_bloc.dart';
 import 'src/bloc/divesitedetails_bloc.dart';
+import 'src/bloc/preferences_bloc.dart';
 import 'src/common/common.dart';
 import 'src/dives/ble_scan_screen.dart';
 import 'src/dives/divedetails_screen.dart';
@@ -24,6 +25,7 @@ import 'src/dives/divelist_screen.dart';
 import 'src/equipment/cylinder_edit_screen.dart';
 import 'src/equipment/cylinder_list_screen.dart';
 import 'src/equipment/equipment_screen.dart';
+import 'src/preferences/preferences_screen.dart';
 import 'src/sites/divesitedetail_screen.dart';
 import 'src/sites/divesiteedit_screen.dart';
 import 'src/sites/divesitelist_screen.dart';
@@ -59,6 +61,7 @@ class _MyAppState extends State<MyApp> {
   static const _channel = MethodChannel('app.bubbletrail.app/file_handler');
   final _diveListBloc = DiveListBloc();
   final _cylinderListBloc = CylinderListBloc();
+  final _preferencesBloc = PreferencesBloc();
 
   @override
   void initState() {
@@ -253,6 +256,7 @@ class _MyAppState extends State<MyApp> {
                         ),
                       ],
                     ),
+                    GoRoute(path: AppRoutePath.settings, name: AppRouteName.settings, builder: (context, state) => const PreferencesScreen()),
                   ],
                 ),
               ],
@@ -268,16 +272,22 @@ class _MyAppState extends State<MyApp> {
       providers: [
         BlocProvider.value(value: _diveListBloc),
         BlocProvider.value(value: _cylinderListBloc),
+        BlocProvider.value(value: _preferencesBloc),
         BlocProvider(create: (context) => BleBloc(_diveListBloc)..add(const BleStarted())),
       ],
-      child: MaterialApp.router(
-        title: 'Bubbletrail',
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system,
-        debugShowCheckedModeBanner: false,
-        routerConfig: router,
-        localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
+      child: BlocBuilder<PreferencesBloc, PreferencesState>(
+        builder: (context, state) {
+          final themeMode = state is PreferencesLoaded ? state.preferences.themeMode : ThemeMode.system;
+          return MaterialApp.router(
+            title: 'Bubbletrail',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeMode,
+            debugShowCheckedModeBanner: false,
+            routerConfig: router,
+            localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
+          );
+        },
       ),
     );
   }
