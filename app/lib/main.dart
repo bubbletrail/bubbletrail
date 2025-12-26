@@ -8,8 +8,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
+import 'package:window_manager/window_manager.dart';
 
 import 'src/app_routes.dart';
+import 'src/preferences/window_preferences.dart';
 import 'src/bloc/ble_bloc.dart';
 import 'src/bloc/cylinderdetails_bloc.dart';
 import 'src/bloc/cylinderlist_bloc.dart';
@@ -31,8 +33,10 @@ import 'src/sites/divesiteedit_screen.dart';
 import 'src/sites/divesitelist_screen.dart';
 import 'src/app_theme.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   _initLogging();
+  await WindowPreferences.initialize();
   Intl.defaultLocale = 'sv_SE'; // XXX
   runApp(const MyApp());
 }
@@ -57,7 +61,7 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WindowListener {
   static const _channel = MethodChannel('app.bubbletrail.app/file_handler');
   final _diveListBloc = DiveListBloc();
   final _cylinderListBloc = CylinderListBloc();
@@ -67,7 +71,30 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _setupFileHandler();
+    if (WindowPreferences.isSupported) {
+      windowManager.addListener(this);
+    }
   }
+
+  @override
+  void dispose() {
+    if (WindowPreferences.isSupported) {
+      windowManager.removeListener(this);
+    }
+    super.dispose();
+  }
+
+  @override
+  void onWindowResized() => WindowPreferences.save();
+
+  @override
+  void onWindowMoved() => WindowPreferences.save();
+
+  @override
+  void onWindowMaximize() => WindowPreferences.save();
+
+  @override
+  void onWindowUnmaximize() => WindowPreferences.save();
 
   void _setupFileHandler() {
     _channel.setMethodCallHandler((call) async {
