@@ -14,6 +14,16 @@ String formatDepth(BuildContext context, num depth) {
   }
 }
 
+int convertDepth(BuildContext context, num depth) {
+  final unit = context.read<PreferencesBloc>().state.preferences.depthUnit;
+  switch (unit) {
+    case DepthUnit.meters:
+      return depth.round();
+    case DepthUnit.feet:
+      return (depth * 3.28).round();
+  }
+}
+
 String formatTemperature(BuildContext context, num temperature) {
   final unit = context.read<PreferencesBloc>().state.preferences.temperatureUnit;
   switch (unit) {

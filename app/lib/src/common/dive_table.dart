@@ -1,12 +1,13 @@
-import 'package:divestore/divestore.dart';
+import 'package:divestore/divestore.dart' hide formatDepth;
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 import '../app_routes.dart';
 import '../app_theme.dart';
-import 'dive_list_item_card.dart';
+import '../bloc/preferences_bloc.dart';
+import 'common.dart';
 
 /// Breakpoint width for switching between card (narrow) and table (wide) layouts.
 const double _narrowLayoutBreakpoint = 600;
@@ -40,12 +41,16 @@ class DiveTableWidget extends StatelessWidget {
   Widget _buildCardList(BuildContext context) {
     // Sort by date descending for card list
     final sortedDives = List<Dive>.from(dives)..sort((a, b) => b.start.compareTo(a.start));
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: sortedDives.length,
-      itemBuilder: (context, index) {
-        final dive = sortedDives[index];
-        return DiveListItemCard(dive: dive, diveSite: _getDiveSite(dive), showSite: showSiteColumn);
+    return BlocBuilder<PreferencesBloc, PreferencesState>(
+      builder: (context, state) {
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          itemCount: sortedDives.length,
+          itemBuilder: (context, index) {
+            final dive = sortedDives[index];
+            return DiveListItemCard(dive: dive, diveSite: _getDiveSite(dive), showSite: showSiteColumn);
+          },
+        );
       },
     );
   }
@@ -53,37 +58,41 @@ class DiveTableWidget extends StatelessWidget {
   Widget _buildTrinaGrid(BuildContext context) {
     final columns = <TrinaColumn>[
       TrinaColumn(title: 'Dive #', field: 'number', type: TrinaColumnType.number(), width: 80, readOnly: true),
-      TrinaColumn(title: 'Start', field: 'start', type: TrinaColumnType.text(), width: 180, readOnly: true),
-      TrinaColumn(title: 'Max Depth (m)', field: 'maxDepth', type: TrinaColumnType.number(), width: 120, readOnly: true),
-      TrinaColumn(title: 'Duration', field: 'duration', type: TrinaColumnType.text(), width: 100, readOnly: true),
+      TrinaColumn(title: 'Start', field: 'start', type: TrinaColumnType.dateTime(), width: 120, readOnly: true),
+      TrinaColumn(title: 'Max Depth', field: 'maxDepth', type: TrinaColumnType.number(), width: 80, readOnly: true),
+      TrinaColumn(title: 'Duration', field: 'duration', type: TrinaColumnType.number(), width: 80, readOnly: true),
       if (showSiteColumn) TrinaColumn(title: 'Site', field: 'site', type: TrinaColumnType.text(), width: 200, readOnly: true),
     ];
 
-    final rows = dives.map((dive) {
-      final diveSite = _getDiveSite(dive);
-      return TrinaRow(
-        cells: {
-          'number': TrinaCell(value: dive.number),
-          'start': TrinaCell(value: DateFormat.yMd().add_jm().format(dive.start)),
-          'maxDepth': TrinaCell(value: dive.maxDepth ?? 0.0),
-          'duration': TrinaCell(value: formatDuration(dive.duration)),
-          'site': TrinaCell(value: diveSite?.name ?? ''),
-          '_id': TrinaCell(value: dive.id), // Hidden field for navigation
-        },
-      );
-    }).toList();
-
-    return TrinaGrid(
-      columns: columns,
-      rows: rows,
-      mode: TrinaGridMode.selectWithOneTap,
-      onRowDoubleTap: (event) {
-        final diveId = event.row.cells['_id']?.value as String?;
-        if (diveId != null) {
-          context.pushNamed(AppRouteName.divesDetails, pathParameters: {'diveID': diveId});
-        }
+    return BlocBuilder<PreferencesBloc, PreferencesState>(
+      builder: (context, state) {
+        final rows = dives.map((dive) {
+          final diveSite = _getDiveSite(dive);
+          return TrinaRow(
+            cells: {
+              'number': TrinaCell(value: dive.number),
+              'start': TrinaCell(value: dive.start),
+              'maxDepth': TrinaCell(value: convertDepth(context, dive.maxDepth ?? 0.0)),
+              'duration': TrinaCell(value: dive.duration, renderer: (rendererContext) => Text(formatDuration(rendererContext.cell.value))),
+              'site': TrinaCell(value: diveSite?.name ?? ''),
+              '_id': TrinaCell(value: dive.id), // Hidden field for navigation
+            },
+          );
+        }).toList();
+        return TrinaGrid(
+          key: ValueKey(state.preferences), // ensure recreation when preferences change... do we need to be more specific?
+          columns: columns,
+          rows: rows,
+          mode: TrinaGridMode.selectWithOneTap,
+          onRowDoubleTap: (event) {
+            final diveId = event.row.cells['_id']?.value as String?;
+            if (diveId != null) {
+              context.pushNamed(AppRouteName.divesDetails, pathParameters: {'diveID': diveId});
+            }
+          },
+          configuration: AppTheme.trinaGridConfiguration(context),
+        );
       },
-      configuration: AppTheme.trinaGridConfiguration(context),
     );
   }
 }
