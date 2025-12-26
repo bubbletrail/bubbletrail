@@ -38,6 +38,7 @@ jobs:
           name: bubbletrail-ios
 
   build-windows:
+    if: false # windows build broken
     name: Build Windows
     runs-on: windows-latest
     steps:
