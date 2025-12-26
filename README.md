@@ -1,16 +1,30 @@
-# Yet another dive log
+<img src="assets/icon-1024.png" alt="Bubbletrail" width="128" height="128">
 
-Born out of dissatisfaction with the existing options.
+# Bubbletrail
 
-Initial short/medium term goals:
+> A dive log application for scuba divers
 
-- [ ] Import of Subsurface `ssrf` type files
-- [ ] Display of dive log in list format
-- [ ] Display single dive details
-- [ ] Technical view: show all information we know from dive computer
-- [ ] Add dive manually
-- [ ] Import dives via libdivecomputer
+## About
 
-Longer term goals
+Bubbletrail is a cross-platform, Flutter-based dive log application.
 
-- [ ] Buhlman implementation for internal display of deco information
+## Features
+
+- Connect to dive computers via Bluetooth LE using libdivecomputer
+- Import dives from Subsurface (`.ssrf` XML format)
+- View dive profiles with depth, temperature, and tank pressure charts
+- Manage dive sites with GPS coordinates
+- Track equipment (cylinders, weights)
+- Support for technical diving (multiple gases, O2/He percentages)
+
+## Building
+
+```bash
+cd app
+flutter pub get
+flutter run
+```
+
+## License
+
+EUPL-1.2
