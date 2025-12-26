@@ -8,6 +8,8 @@ enum TemperatureUnit { celsius, fahrenheit }
 
 enum VolumeUnit { liters, cuft }
 
+enum WeightUnit { kg, lbs }
+
 enum DateFormatPref { iso, us, eu }
 
 enum TimeFormatPref { h24, h12 }
@@ -17,6 +19,7 @@ class Preferences {
   final PressureUnit pressureUnit;
   final TemperatureUnit temperatureUnit;
   final VolumeUnit volumeUnit;
+  final WeightUnit weightUnit;
   final DateFormatPref dateFormat;
   final TimeFormatPref timeFormat;
   final ThemeMode themeMode;
@@ -26,6 +29,7 @@ class Preferences {
     this.pressureUnit = PressureUnit.bar,
     this.temperatureUnit = TemperatureUnit.celsius,
     this.volumeUnit = VolumeUnit.liters,
+    this.weightUnit = WeightUnit.kg,
     this.dateFormat = DateFormatPref.iso,
     this.timeFormat = TimeFormatPref.h24,
     this.themeMode = ThemeMode.system,
@@ -36,6 +40,7 @@ class Preferences {
     PressureUnit? pressureUnit,
     TemperatureUnit? temperatureUnit,
     VolumeUnit? volumeUnit,
+    WeightUnit? weightUnit,
     DateFormatPref? dateFormat,
     TimeFormatPref? timeFormat,
     ThemeMode? themeMode,
@@ -45,6 +50,7 @@ class Preferences {
       pressureUnit: pressureUnit ?? this.pressureUnit,
       temperatureUnit: temperatureUnit ?? this.temperatureUnit,
       volumeUnit: volumeUnit ?? this.volumeUnit,
+      weightUnit: weightUnit ?? this.weightUnit,
       dateFormat: dateFormat ?? this.dateFormat,
       timeFormat: timeFormat ?? this.timeFormat,
       themeMode: themeMode ?? this.themeMode,
@@ -59,11 +65,12 @@ class Preferences {
         other.pressureUnit == pressureUnit &&
         other.temperatureUnit == temperatureUnit &&
         other.volumeUnit == volumeUnit &&
+        other.weightUnit == weightUnit &&
         other.dateFormat == dateFormat &&
         other.timeFormat == timeFormat &&
         other.themeMode == themeMode;
   }
 
   @override
-  int get hashCode => Object.hash(depthUnit, pressureUnit, temperatureUnit, volumeUnit, dateFormat, timeFormat, themeMode);
+  int get hashCode => Object.hash(depthUnit, pressureUnit, temperatureUnit, volumeUnit, weightUnit, dateFormat, timeFormat, themeMode);
 }

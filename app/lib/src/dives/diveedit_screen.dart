@@ -199,7 +199,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       title: 'Select Cylinder',
       items: cylinders,
       itemBuilder: (cyl) {
-        final subtitle = [if (cyl.size != null) '${cyl.size}L', if (cyl.workpressure != null) '${cyl.workpressure} bar'].join(' @ ');
+        final subtitle = [if (cyl.size != null) formatVolume(context, cyl.size!), if (cyl.workpressure != null) formatPressure(context, cyl.workpressure!)].join(' @ ');
         return ListTile(
           leading: const Icon(Icons.scuba_diving),
           title: Text(cyl.description ?? 'Cylinder ${cyl.id}'),
@@ -270,7 +270,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                   initialValue: selectedCylinder?.id,
                   decoration: const InputDecoration(labelText: 'Cylinder Type', border: OutlineInputBorder()),
                   items: availableCylinders.map((c) {
-                    final subtitle = [if (c.size != null) '${c.size}L', if (c.workpressure != null) '${c.workpressure} bar'].join(' @ ');
+                    final subtitle = [if (c.size != null) formatVolume(context, c.size!), if (c.workpressure != null) formatPressure(context, c.workpressure!)].join(' @ ');
                     return DropdownMenuItem(value: c.id, child: Text(c.description ?? 'Cylinder ${c.id}${subtitle.isNotEmpty ? ' ($subtitle)' : ''}'));
                   }).toList(),
                   onChanged: (id) {
@@ -532,7 +532,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                                     children: [
                                       Text(cyl.cylinder?.description ?? 'Cylinder ${index + 1}', style: Theme.of(context).textTheme.titleSmall),
                                       Text(
-                                        '${cyl.gasDescription}${cyl.start != null || cyl.end != null ? ' • ${cyl.start?.toInt() ?? '?'} → ${cyl.end?.toInt() ?? '?'} bar' : ''}',
+                                        '${cyl.gasDescription}${cyl.start != null || cyl.end != null ? ' • ${cyl.start != null ? formatPressure(context, cyl.start!) : '?'} → ${cyl.end != null ? formatPressure(context, cyl.end!) : '?'}' : ''}',
                                         style: Theme.of(context).textTheme.bodySmall,
                                       ),
                                     ],

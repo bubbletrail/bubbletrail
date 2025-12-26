@@ -18,6 +18,10 @@ Widget infoCard(BuildContext context, String title, List<Widget> children) {
 }
 
 Widget infoRow(String label, String value) {
+  return infoWidgetRow(label, Text(value));
+}
+
+Widget infoWidgetRow(String label, Widget value) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 4.0),
     child: Row(
@@ -27,7 +31,7 @@ Widget infoRow(String label, String value) {
           width: 150,
           child: Text('$label:', style: const TextStyle(fontWeight: FontWeight.w600)),
         ),
-        Expanded(child: Text(value)),
+        Expanded(child: value),
       ],
     ),
   );

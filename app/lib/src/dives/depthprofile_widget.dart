@@ -1,6 +1,11 @@
-import 'package:divestore/divestore.dart';
+import 'package:divestore/divestore.dart' hide formatDepth;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../bloc/preferences_bloc.dart';
+import '../common/units.dart';
+import '../preferences/preferences.dart';
 
 class DepthProfileWidget extends StatelessWidget {
   final ComputerDive computerDive;
@@ -12,6 +17,9 @@ class DepthProfileWidget extends StatelessWidget {
     // Filter out samples without depth data
     final samplesWithDepth = computerDive.samples.where((s) => s.depth != null).toList();
 
+    final unit = context.watch<PreferencesBloc>().state.preferences.depthUnit;
+    final mult = unit == DepthUnit.feet ? 3.28 : 1.0;
+
     if (samplesWithDepth.isEmpty) {
       return const Center(
         child: Padding(padding: EdgeInsets.all(16.0), child: Text('No depth profile data available')),
@@ -19,9 +27,9 @@ class DepthProfileWidget extends StatelessWidget {
     }
 
     // Inverting depth, so that depths are negative for graph purposes
-    final maxDepth = -samplesWithDepth.map((s) => s.depth!).reduce((a, b) => a > b ? a : b);
+    final maxDepth = mult * -samplesWithDepth.map((s) => s.depth!).reduce((a, b) => a > b ? a : b);
     final maxTime = samplesWithDepth.map((s) => s.time).reduce((a, b) => a > b ? a : b) / 60;
-    final spots = samplesWithDepth.map((sample) => FlSpot(sample.time / 60, -sample.depth!)).toList();
+    final spots = samplesWithDepth.map((sample) => FlSpot(sample.time / 60, mult * -sample.depth!)).toList();
 
     final colorScheme = Theme.of(context).colorScheme;
     final primaryColor = colorScheme.primary;
@@ -36,7 +44,7 @@ class DepthProfileWidget extends StatelessWidget {
             gridData: FlGridData(show: true, drawVerticalLine: true, drawHorizontalLine: true),
             titlesData: FlTitlesData(
               leftTitles: AxisTitles(
-                axisNameWidget: const Text('Depth (m)'),
+                axisNameWidget: Text('Depth (${unit.name})'),
                 sideTitles: SideTitles(
                   showTitles: true,
                   minIncluded: false,
@@ -82,7 +90,7 @@ class DepthProfileWidget extends StatelessWidget {
                 getTooltipItems: (touchedSpots) {
                   return touchedSpots.map((spot) {
                     return LineTooltipItem(
-                      '${formatDuration((spot.x * 60).toInt())}\n${spot.y.toStringAsFixed(1).replaceFirst('-', '')} m',
+                      '${formatDuration((spot.x * 60).toInt())}\n${formatDepth(context, -spot.y)}',
                       TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 12),
                     );
                   }).toList();

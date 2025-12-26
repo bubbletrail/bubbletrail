@@ -153,12 +153,10 @@ class _DiveDetails extends StatelessWidget {
       if (diveSite != null) ...[_DivesiteCard(divesite: diveSite!), const SizedBox(height: 16)],
       if (dive.computerDives.isNotEmpty) ...[
         infoCard(context, 'Dive Computer Data', [
-          if (dive.computerDives[0].maxDepth != null) infoRow('Max Depth', '${dive.computerDives[0].maxDepth!.toStringAsFixed(1)} m'),
-          if (dive.computerDives[0].avgDepth != null) infoRow('Mean Depth', '${dive.computerDives[0].avgDepth!.toStringAsFixed(1)} m'),
-          if (dive.computerDives[0].surfaceTemperature != null)
-            infoRow('Air Temperature', '${dive.computerDives[0].surfaceTemperature!.toStringAsFixed(1)} °C'),
-          if (dive.computerDives[0].minTemperature != null)
-            infoRow('Water Temperature', '${dive.computerDives[0].minTemperature!.toStringAsFixed(1)} °C'),
+          if (dive.computerDives[0].maxDepth != null) infoWidgetRow('Max Depth', DepthText(dive.computerDives[0].maxDepth!)),
+          if (dive.computerDives[0].avgDepth != null) infoWidgetRow('Mean Depth', DepthText(dive.computerDives[0].avgDepth!)),
+          if (dive.computerDives[0].surfaceTemperature != null) infoWidgetRow('Air Temperature', TemperatureText(dive.computerDives[0].surfaceTemperature!)),
+          if (dive.computerDives[0].minTemperature != null) infoWidgetRow('Water Temperature', TemperatureText(dive.computerDives[0].minTemperature!)),
         ]),
         const SizedBox(height: 16),
       ],
@@ -200,10 +198,10 @@ class _DiveDetails extends StatelessWidget {
               }
             }
 
-            if (cyl.cylinder?.size != null) details.add('${cyl.cylinder!.size!.toStringAsFixed(1)} l');
-            if (cyl.cylinder?.workpressure != null) details.add('${cyl.cylinder!.workpressure!.toStringAsFixed(0)} bar');
-            if (cyl.start != null) details.add('Start: ${cyl.start!.toStringAsFixed(0)} bar');
-            if (cyl.end != null) details.add('End: ${cyl.end!.toStringAsFixed(0)} bar');
+            if (cyl.cylinder?.size != null) details.add(formatVolume(context, cyl.cylinder!.size!));
+            if (cyl.cylinder?.workpressure != null) details.add(formatPressure(context, cyl.cylinder!.workpressure!));
+            if (cyl.start != null) details.add('Start: ${formatPressure(context, cyl.start!)}');
+            if (cyl.end != null) details.add('End: ${formatPressure(context, cyl.end!)}');
             return infoRow(desc, details.join(', '));
           }).toList(),
         ),
@@ -217,7 +215,7 @@ class _DiveDetails extends StatelessWidget {
             final idx = entry.key;
             final ws = entry.value;
             final desc = ws.description ?? 'Weight ${idx + 1}';
-            final weight = ws.weight != null ? '${ws.weight!.toStringAsFixed(1)} kg' : '';
+            final weight = ws.weight != null ? formatWeight(context, ws.weight!) : '';
             return infoRow(desc, weight);
           }).toList(),
         ),

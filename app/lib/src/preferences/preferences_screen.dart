@@ -14,10 +14,6 @@ class PreferencesScreen extends StatelessWidget {
       title: const Text('Settings'),
       body: BlocBuilder<PreferencesBloc, PreferencesState>(
         builder: (context, state) {
-          if (state is! PreferencesLoaded) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
           final prefs = state.preferences;
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -72,6 +68,19 @@ class PreferencesScreen extends StatelessWidget {
                   selected: {prefs.volumeUnit},
                   onSelectionChanged: (value) {
                     context.read<PreferencesBloc>().add(UpdateVolumeUnit(value.first));
+                  },
+                ),
+              ),
+              _PreferencesTile(
+                title: 'Weight',
+                trailing: SegmentedButton<WeightUnit>(
+                  segments: const [
+                    ButtonSegment(value: WeightUnit.kg, label: Text('kg'), icon: Icon(null)),
+                    ButtonSegment(value: WeightUnit.lbs, label: Text('lbs'), icon: Icon(null)),
+                  ],
+                  selected: {prefs.weightUnit},
+                  onSelectionChanged: (value) {
+                    context.read<PreferencesBloc>().add(UpdateWeightUnit(value.first));
                   },
                 ),
               ),

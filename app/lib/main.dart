@@ -277,7 +277,7 @@ class _MyAppState extends State<MyApp> {
       ],
       child: BlocBuilder<PreferencesBloc, PreferencesState>(
         builder: (context, state) {
-          final themeMode = state is PreferencesLoaded ? state.preferences.themeMode : ThemeMode.system;
+          final themeMode = state.preferences.themeMode;
           return MaterialApp.router(
             title: 'Bubbletrail',
             theme: AppTheme.lightTheme,

@@ -6,21 +6,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../preferences/preferences.dart';
 import '../preferences/preferences_storage.dart';
 
-abstract class PreferencesState extends Equatable {
-  const PreferencesState();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class PreferencesInitial extends PreferencesState {
-  const PreferencesInitial();
-}
-
-class PreferencesLoaded extends PreferencesState {
+class PreferencesState extends Equatable {
   final Preferences preferences;
 
-  const PreferencesLoaded(this.preferences);
+  const PreferencesState(this.preferences);
 
   @override
   List<Object?> get props => [preferences];
@@ -73,6 +62,15 @@ class UpdateVolumeUnit extends PreferencesEvent {
   List<Object?> get props => [volumeUnit];
 }
 
+class UpdateWeightUnit extends PreferencesEvent {
+  final WeightUnit weightUnit;
+
+  const UpdateWeightUnit(this.weightUnit);
+
+  @override
+  List<Object?> get props => [weightUnit];
+}
+
 class UpdateDateFormat extends PreferencesEvent {
   final DateFormatPref dateFormat;
 
@@ -103,7 +101,7 @@ class UpdateThemeMode extends PreferencesEvent {
 class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
   final PreferencesStorage _storage = PreferencesStorage();
 
-  PreferencesBloc() : super(const PreferencesInitial()) {
+  PreferencesBloc() : super(const PreferencesState(Preferences())) {
     on<PreferencesEvent>((event, emit) async {
       if (event is LoadPreferences) {
         await _onLoad(event, emit);
@@ -113,6 +111,10 @@ class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
         await _onUpdatePressureUnit(event, emit);
       } else if (event is UpdateTemperatureUnit) {
         await _onUpdateTemperatureUnit(event, emit);
+      } else if (event is UpdateVolumeUnit) {
+        await _onUpdateVolumeUnit(event, emit);
+      } else if (event is UpdateWeightUnit) {
+        await _onUpdateWeightUnit(event, emit);
       } else if (event is UpdateDateFormat) {
         await _onUpdateDateFormat(event, emit);
       } else if (event is UpdateTimeFormat) {
@@ -127,54 +129,62 @@ class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
 
   Future<void> _onLoad(LoadPreferences event, Emitter<PreferencesState> emit) async {
     final preferences = await _storage.load();
-    emit(PreferencesLoaded(preferences));
+    emit(PreferencesState(preferences));
   }
 
   Future<void> _onUpdateDepthUnit(UpdateDepthUnit event, Emitter<PreferencesState> emit) async {
-    if (state is! PreferencesLoaded) return;
-    final current = (state as PreferencesLoaded).preferences;
+    final current = state.preferences;
     final updated = current.copyWith(depthUnit: event.depthUnit);
     await _storage.save(updated);
-    emit(PreferencesLoaded(updated));
+    emit(PreferencesState(updated));
   }
 
   Future<void> _onUpdatePressureUnit(UpdatePressureUnit event, Emitter<PreferencesState> emit) async {
-    if (state is! PreferencesLoaded) return;
-    final current = (state as PreferencesLoaded).preferences;
+    final current = state.preferences;
     final updated = current.copyWith(pressureUnit: event.pressureUnit);
     await _storage.save(updated);
-    emit(PreferencesLoaded(updated));
+    emit(PreferencesState(updated));
   }
 
   Future<void> _onUpdateTemperatureUnit(UpdateTemperatureUnit event, Emitter<PreferencesState> emit) async {
-    if (state is! PreferencesLoaded) return;
-    final current = (state as PreferencesLoaded).preferences;
+    final current = state.preferences;
     final updated = current.copyWith(temperatureUnit: event.temperatureUnit);
     await _storage.save(updated);
-    emit(PreferencesLoaded(updated));
+    emit(PreferencesState(updated));
+  }
+
+  Future<void> _onUpdateVolumeUnit(UpdateVolumeUnit event, Emitter<PreferencesState> emit) async {
+    final current = state.preferences;
+    final updated = current.copyWith(volumeUnit: event.volumeUnit);
+    await _storage.save(updated);
+    emit(PreferencesState(updated));
+  }
+
+  Future<void> _onUpdateWeightUnit(UpdateWeightUnit event, Emitter<PreferencesState> emit) async {
+    final current = state.preferences;
+    final updated = current.copyWith(weightUnit: event.weightUnit);
+    await _storage.save(updated);
+    emit(PreferencesState(updated));
   }
 
   Future<void> _onUpdateDateFormat(UpdateDateFormat event, Emitter<PreferencesState> emit) async {
-    if (state is! PreferencesLoaded) return;
-    final current = (state as PreferencesLoaded).preferences;
+    final current = state.preferences;
     final updated = current.copyWith(dateFormat: event.dateFormat);
     await _storage.save(updated);
-    emit(PreferencesLoaded(updated));
+    emit(PreferencesState(updated));
   }
 
   Future<void> _onUpdateTimeFormat(UpdateTimeFormat event, Emitter<PreferencesState> emit) async {
-    if (state is! PreferencesLoaded) return;
-    final current = (state as PreferencesLoaded).preferences;
+    final current = state.preferences;
     final updated = current.copyWith(timeFormat: event.timeFormat);
     await _storage.save(updated);
-    emit(PreferencesLoaded(updated));
+    emit(PreferencesState(updated));
   }
 
   Future<void> _onUpdateThemeMode(UpdateThemeMode event, Emitter<PreferencesState> emit) async {
-    if (state is! PreferencesLoaded) return;
-    final current = (state as PreferencesLoaded).preferences;
+    final current = state.preferences;
     final updated = current.copyWith(themeMode: event.themeMode);
     await _storage.save(updated);
-    emit(PreferencesLoaded(updated));
+    emit(PreferencesState(updated));
   }
 }

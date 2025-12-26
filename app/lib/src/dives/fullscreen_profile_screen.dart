@@ -1,9 +1,11 @@
 import 'dart:io' show Platform;
 
-import 'package:divestore/divestore.dart';
+import 'package:divestore/divestore.dart' hide formatDepth;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import '../common/units.dart';
 
 /// A fullscreen view of the dive depth profile.
 /// On mobile devices (iOS/Android), this screen forces landscape orientation.
@@ -143,7 +145,7 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
                     getTooltipItems: (touchedSpots) {
                       return touchedSpots.map((spot) {
                         return LineTooltipItem(
-                          '${formatDuration((spot.x * 60).toInt())}\n${spot.y.toStringAsFixed(1).replaceFirst('-', '')} m',
+                          '${formatDuration((spot.x * 60).toInt())}\n${formatDepth(context, -spot.y)}',
                           TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 14),
                         );
                       }).toList();

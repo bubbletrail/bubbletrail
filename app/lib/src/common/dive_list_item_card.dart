@@ -1,9 +1,10 @@
-import 'package:divestore/divestore.dart';
+import 'package:divestore/divestore.dart' hide formatDepth;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../app_routes.dart';
+import 'units.dart';
 
 /// A card widget for displaying a dive in a mobile-friendly list layout.
 class DiveListItemCard extends StatelessWidget {
@@ -54,7 +55,7 @@ class DiveListItemCard extends StatelessWidget {
               // Bottom row: Depth and duration
               Row(
                 children: [
-                  _InfoChip(icon: Icons.arrow_downward, label: '${maxDepth.toStringAsFixed(1)} m', theme: theme),
+                  _InfoChip(icon: Icons.arrow_downward, label: formatDepth(context, maxDepth), theme: theme),
                   const SizedBox(width: 12),
                   _InfoChip(icon: Icons.timer, label: formatDuration(dive.duration), theme: theme),
                   const Spacer(),

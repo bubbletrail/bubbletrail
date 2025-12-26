@@ -36,8 +36,8 @@ class CylinderListScreen extends StatelessWidget {
               itemCount: cylinders.length,
               itemBuilder: (context, index) {
                 final cylinder = cylinders[index];
-                final sizeStr = cylinder.size != null ? '${cylinder.size!.toStringAsFixed(1)} L' : null;
-                final wpStr = cylinder.workpressure != null ? '${cylinder.workpressure!.toInt()} bar' : null;
+                final sizeStr = cylinder.size != null ? formatVolume(context, cylinder.size!) : null;
+                final wpStr = cylinder.workpressure != null ? formatPressure(context, cylinder.workpressure!) : null;
                 final specs = [sizeStr, wpStr].where((s) => s != null).join(' / ');
 
                 return Card(
