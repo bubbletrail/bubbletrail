@@ -1,0 +1,12 @@
+name: Build info
+description: Compute build info
+runs:
+  using: composite
+  steps:
+    - id: build-info
+      shell: bash
+      run: |
+        echo "MARKET_VERSION=$(./script/next-version.dart)" >> $GITHUB_ENV
+        echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        echo "BUILD_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
+        echo "SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)" >> $GITHUB_ENV

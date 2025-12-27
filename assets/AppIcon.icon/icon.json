@@ -1,17 +1,27 @@
 {
   "fill" : {
-    "automatic-gradient" : "extended-srgb:0.00000,0.53333,1.00000,1.00000"
+    "linear-gradient" : [
+      "display-p3:0.00392,0.25098,0.22745,1.00000",
+      "srgb:0.00392,0.10196,0.10196,1.00000"
+    ],
+    "orientation" : {
+      "start" : {
+        "x" : 0.5,
+        "y" : 0
+      },
+      "stop" : {
+        "x" : 0.5,
+        "y" : 0.7
+      }
+    }
   },
   "groups" : [
     {
       "blur-material" : null,
       "layers" : [
         {
-          "fill" : "none",
-          "glass" : true,
-          "hidden" : false,
-          "image-name" : "icon-1024.png",
-          "name" : "icon-1024"
+          "image-name" : "Icon-1024.png",
+          "name" : "Icon-1024"
         }
       ],
       "lighting" : "individual",

@@ -1,0 +1,25 @@
+default_platform(:ios)
+
+platform :ios do
+  lane :push do
+    api_key = app_store_connect_api_key()
+    sync_code_signing(
+      api_key: api_key,
+      type: "appstore",
+      app_identifier: "app.bubbletrail.bubbletrail",
+      team_id: "LQE5SYM783",
+    )
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      export_team_id: "LQE5SYM783",
+      skip_build_archive: true,
+      archive_path: "../build/ios/archive/Runner.xcarchive",
+    )
+    pilot(
+      api_key: api_key,
+      skip_submission: true,
+      skip_waiting_for_build_processing: true,
+    )
+  end
+end

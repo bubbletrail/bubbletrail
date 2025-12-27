@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  flutter_blue_plus_winrt
   screen_retriever_windows
   window_manager
 )
