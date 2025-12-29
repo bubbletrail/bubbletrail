@@ -16,6 +16,11 @@ class DepthProfileWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     // Filter out samples without depth data
     final samplesWithDepth = log.samples.where((s) => s.hasDepth()).toList();
+    final lastNonZeroIdx = samplesWithDepth.lastIndexWhere((s) => s.depth != 0);
+    if (lastNonZeroIdx < samplesWithDepth.length - 2) {
+      // Trim tail of zero samples
+      samplesWithDepth.removeRange(lastNonZeroIdx + 2, samplesWithDepth.length);
+    }
 
     final unit = context.watch<PreferencesBloc>().state.preferences.depthUnit;
     final mult = unit == DepthUnit.feet ? 3.28 : 1.0;
