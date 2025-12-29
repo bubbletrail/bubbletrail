@@ -121,6 +121,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.4"
+  chips_input_autocomplete:
+    dependency: "direct main"
+    description:
+      name: chips_input_autocomplete
+      sha256: c74ef2c0b08f9b0c0bc9d751d0dccef8a563c0b5fd9872c3aed9e37020e90559
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.2"
   clock:
     dependency: transitive
     description:

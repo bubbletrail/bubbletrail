@@ -32,6 +32,8 @@ class DiveListLoaded extends DiveListState {
   final List<Dive> dives;
   final List<Site> sites;
   final Log? lastLog;
+  final Set<String> tags;
+  final Set<String> buddies;
 
   /// Index map for O(1) dive lookup by ID
   late final Map<String, Dive> divesById;
@@ -45,7 +47,7 @@ class DiveListLoaded extends DiveListState {
   /// Index map for O(1) dive count lookup by site UUID
   late final Map<String, int> diveCountBySiteId;
 
-  DiveListLoaded(this.dives, this.sites, this.lastLog) {
+  DiveListLoaded(this.dives, this.sites, this.lastLog, this.tags, this.buddies) {
     divesById = {for (final d in dives) d.id: d};
     diveIndexById = {for (var i = 0; i < dives.length; i++) dives[i].id: i};
     sitesByUuid = {for (final s in sites) s.id: s};
@@ -59,7 +61,7 @@ class DiveListLoaded extends DiveListState {
   }
 
   @override
-  List<Object?> get props => [dives, sites];
+  List<Object?> get props => [dives, sites, tags, buddies];
 }
 
 class DiveListError extends DiveListState {
@@ -145,7 +147,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       if (dives.isNotEmpty) {
         lastLog = (await _store.dives.getById(dives.first.id))?.logs.firstOrNull;
       }
-      emit(DiveListLoaded(dives, sites, lastLog));
+      emit(DiveListLoaded(dives, sites, lastLog, _store.dives.tags, _store.dives.buddies));
     } catch (e) {
       emit(DiveListError('Failed to load dives: $e'));
     }

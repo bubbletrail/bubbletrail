@@ -29,6 +29,7 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   bloc_concurrency: ^0.3.0
+  chips_input_autocomplete: ^1.2.2
   collection: ^1.19.1
   cupertino_icons: ^1.0.8
   divestore:

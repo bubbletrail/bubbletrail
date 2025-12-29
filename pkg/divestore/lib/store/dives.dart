@@ -21,12 +21,14 @@ class Dives {
   final bool readonly;
   Map<String, Dive> _dives = {};
   Set<String> _tags = {};
+  Set<String> _buddies = {};
   Set<String> _dirty = {};
   Timer? _saveTimer;
 
   Dives(this.pathPrefix, {this.readonly = false});
 
   Set<String> get tags => _tags;
+  Set<String> get buddies => _buddies;
 
   Future<String> insert(Dive dive) async {
     if (readonly) throw Exception('readonly');
@@ -45,6 +47,7 @@ class Dives {
     }
     _dives[dive.id] = dive;
     _tags.addAll(dive.tags);
+    _buddies.addAll(dive.buddies);
     _scheduleSave(dive.id);
     return dive.id;
   }
@@ -70,6 +73,7 @@ class Dives {
         _dirty.add(dive.id);
       }
       _tags.addAll(dive.tags);
+      _buddies.addAll(dive.buddies);
     }
     _scheduleSave(null);
   }
@@ -79,6 +83,7 @@ class Dives {
     dive.updatedAt = Timestamp.fromDateTime(DateTime.now());
     _dives[dive.id] = dive;
     _tags.addAll(dive.tags);
+    _buddies.addAll(dive.buddies);
     _scheduleSave(dive.id);
   }
 
@@ -86,6 +91,7 @@ class Dives {
     if (readonly) throw Exception('readonly');
     _dives[dive.id] = dive;
     _tags.addAll(dive.tags);
+    _buddies.addAll(dive.buddies);
     _scheduleSave(dive.id);
   }
 
@@ -123,6 +129,7 @@ class Dives {
         Dive dive = await _loadMeta(match.path);
         _dives[dive.id] = dive;
         _tags.addAll(dive.tags);
+        _buddies.addAll(dive.buddies);
       } catch (_) {}
     }
   }

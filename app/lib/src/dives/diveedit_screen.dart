@@ -1,3 +1,4 @@
+import 'package:chips_input_autocomplete/chips_input_autocomplete.dart';
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -80,9 +81,9 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   late final Dive dive;
   late int _durationSeconds;
   late final TextEditingController _divemasterController;
-  late final TextEditingController _buddiesController;
   late final TextEditingController _notesController;
-  late final TextEditingController _tagsController;
+  late final ChipsAutocompleteController _tagsController;
+  late final ChipsAutocompleteController _buddiesController;
   late DateTime _selectedDateTime;
   late int? _rating;
   String? _selectedSiteId;
@@ -96,9 +97,9 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     _selectedDateTime = dive.start.toDateTime();
     _durationSeconds = dive.duration;
     _divemasterController = TextEditingController(text: dive.divemaster);
-    _buddiesController = TextEditingController(text: dive.buddies.join(', '));
     _notesController = TextEditingController(text: dive.notes);
-    _tagsController = TextEditingController(text: dive.tags.join(', '));
+    _tagsController = ChipsAutocompleteController();
+    _buddiesController = ChipsAutocompleteController();
     _rating = dive.hasRating() ? dive.rating : null;
     _selectedSiteId = dive.siteId.isEmpty ? null : dive.siteId;
 
@@ -124,9 +125,9 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   @override
   void dispose() {
     _divemasterController.dispose();
-    _buddiesController.dispose();
     _notesController.dispose();
-    _tagsController.dispose();
+    // _tagsController.dispose();
+    // _buddiesController.dispose();
     super.dispose();
   }
 
@@ -409,18 +410,12 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       dive.notes = _notesController.text.trim();
 
       // Update buddies
-      final buddiesText = _buddiesController.text.trim();
       dive.buddies.clear();
-      if (buddiesText.isNotEmpty) {
-        dive.buddies.addAll(buddiesText.split(',').map((b) => b.trim()).where((b) => b.isNotEmpty));
-      }
+      dive.buddies.addAll(_buddiesController.chips);
 
       // Update tags
-      final tagsText = _tagsController.text.trim();
       dive.tags.clear();
-      if (tagsText.isNotEmpty) {
-        dive.tags.addAll(tagsText.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty));
-      }
+      dive.tags.addAll(_tagsController.chips);
 
       // Update cylinders
       dive.cylinders.clear();
@@ -632,19 +627,43 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                 ),
               ],
             ),
-            TextField(
-              controller: _tagsController,
-              decoration: const InputDecoration(labelText: 'Tags', border: OutlineInputBorder(), helperText: 'Comma-separated'),
-              maxLines: 2,
+            Builder(
+              builder: (context) {
+                final diveListState = context.watch<DiveListBloc>().state;
+                final suggestions = diveListState is DiveListLoaded ? diveListState.tags.toList() : <String>[];
+                suggestions.sort();
+                return ChipsInputAutocomplete(
+                  controller: _tagsController,
+                  options: suggestions,
+                  initialChips: dive.tags.toList(),
+                  decorationTextField: const InputDecoration(labelText: 'Tags', border: OutlineInputBorder()),
+                  addChipOnSelection: true,
+                  placeChipsSectionAbove: false,
+                  paddingInsideWidgetContainer: EdgeInsets.zero,
+                  secondaryTheme: true,
+                );
+              },
             ),
             TextField(
               controller: _divemasterController,
               decoration: const InputDecoration(labelText: 'Divemaster', border: OutlineInputBorder()),
             ),
-            TextField(
-              controller: _buddiesController,
-              decoration: const InputDecoration(labelText: 'Buddies', border: OutlineInputBorder(), helperText: 'Comma-separated'),
-              maxLines: 2,
+            Builder(
+              builder: (context) {
+                final diveListState = context.watch<DiveListBloc>().state;
+                final suggestions = diveListState is DiveListLoaded ? diveListState.buddies.toList() : <String>[];
+                suggestions.sort();
+                return ChipsInputAutocomplete(
+                  controller: _buddiesController,
+                  options: suggestions,
+                  initialChips: dive.buddies.toList(),
+                  decorationTextField: const InputDecoration(labelText: 'Buddies', border: OutlineInputBorder()),
+                  addChipOnSelection: true,
+                  placeChipsSectionAbove: false,
+                  paddingInsideWidgetContainer: EdgeInsets.zero,
+                  secondaryTheme: true,
+                );
+              },
             ),
             TextField(
               controller: _notesController,
