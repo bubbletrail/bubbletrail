@@ -8,6 +8,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:libdivecomputer/libdivecomputer.dart' as dc;
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'divelist_bloc.dart';
 
@@ -394,6 +395,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       switch (event) {
         case dc.DownloadStarted():
           _log.info('Download started');
+          WakelockPlus.enable();
         case dc.DownloadProgressEvent(:final progress):
           add(_BleDownloadProgress(progress));
         case dc.DownloadDeviceInfo(:final info):
@@ -405,9 +407,11 @@ class BleBloc extends Bloc<BleEvent, BleState> {
         case dc.DownloadCompleted():
           _log.info('Download completed');
           add(_BleDownloadCompleted(const []));
+          WakelockPlus.disable();
         case dc.DownloadError(:final message):
           _log.warning('Download error: $message');
           add(_BleDownloadFailed(message));
+          WakelockPlus.disable();
         case dc.DownloadWaiting():
           _log.info('Waiting for user action on device');
       }
