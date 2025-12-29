@@ -95,7 +95,6 @@ Stream<DownloadEvent> startDownload({required BleCharacteristics ble, required C
   String? writePath;
   RandomAccessFile? toDeviceFifo;
   RandomAccessFile? fromDeviceFifo;
-  StreamSubscription<List<int>>? bleSubscription;
   ReceivePort? receivePort;
 
   try {
@@ -137,17 +136,19 @@ Stream<DownloadEvent> startDownload({required BleCharacteristics ble, required C
     toDeviceFifo = files[0];
     fromDeviceFifo = files[1];
 
-    bool running = true;
-
-    bleSubscription = ble.read.listen((data) async {
-      try {
-        await toDeviceFifo?.writeFrom(data);
-      } catch (e) {
-        _log.warning('Error writing BLE data to FIFO: $e');
+    // Start BLE -> FIFO bridge (in background)
+    Future.microtask(() async {
+      await for (final packet in ble.read) {
+        try {
+          await toDeviceFifo?.writeFrom(packet);
+        } catch (e) {
+          _log.warning('Error writing BLE data to FIFO: $e');
+        }
       }
     });
 
-    // Start FIFO -> BLE TX bridge (in background)
+    // Start FIFO -> BLE bridge (in background)
+    bool running = true;
     Future.microtask(() async {
       final buffer = Uint8List(512);
       while (running) {
@@ -174,9 +175,6 @@ Stream<DownloadEvent> startDownload({required BleCharacteristics ble, required C
       }
     }
   } finally {
-    // Cleanup
-    await bleSubscription?.cancel();
-
     try {
       toDeviceFifo?.closeSync();
     } catch (_) {}
