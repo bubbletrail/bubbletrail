@@ -4,44 +4,37 @@ import 'dart:io';
 
 void main() async {
   // Get the latest "publish-1.22.3" or plain "1.22.3" style tag
-  final latestTagResult = await cmd('git', [
-    'describe',
-    '--all',
-    '--abbrev=0',
-    '--match',
-    'publish-?.*',
-    '--match',
-    '[0-9].*',
-  ]);
+  final latestTagResult = await cmd('git', ['describe', '--all', '--abbrev=0', '--match', 'publish-?.*', '--match', '[0-9].*']);
   if (latestTagResult == null) {
     exit(1);
   }
   final latest = parseVersion(latestTagResult);
 
   // Get the commit logs since that tag
-  final logsSinceLatest = await cmd('git', [
-    'log',
-    '--pretty=format:%s',
-    '$latestTagResult..HEAD',
-  ]);
+  final logsSinceLatest = await cmd('git', ['log', '--pretty=format:%s', '$latestTagResult..HEAD']);
   if (logsSinceLatest == null) {
     exit(1);
   }
 
   // Check if the next version should be a feature or a patch release
   var nextIsFeature = false;
+  var count = 0;
   for (final line in logsSinceLatest.split('\n')) {
+    if (line.trim().isEmpty) continue;
+    count++;
     if (line.startsWith('feat')) {
       nextIsFeature = true;
       break;
     }
   }
 
-  if (nextIsFeature) {
-    latest[1]++;
-    latest[2] = 0;
-  } else {
-    latest[2]++;
+  if (count > 0) {
+    if (nextIsFeature) {
+      latest[1]++;
+      latest[2] = 0;
+    } else {
+      latest[2]++;
+    }
   }
 
   print(latest.join('.'));
