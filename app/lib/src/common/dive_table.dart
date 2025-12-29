@@ -87,7 +87,7 @@ class DiveTableWidget extends StatelessWidget {
           onRowDoubleTap: (event) {
             final diveId = event.row.cells['_id']?.value as String?;
             if (diveId != null) {
-              context.pushNamed(AppRouteName.divesDetails, pathParameters: {'diveID': diveId});
+              context.goNamed(AppRouteName.divesDetails, pathParameters: {'diveID': diveId});
             }
           },
           configuration: AppTheme.trinaGridConfiguration(context),

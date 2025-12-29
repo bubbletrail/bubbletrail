@@ -28,7 +28,7 @@ class SiteListItemCard extends StatelessWidget {
     return Card(
       child: InkWell(
         onTap: () {
-          context.pushNamed(AppRouteName.sitesDetails, pathParameters: {'siteID': site.id});
+          context.goNamed(AppRouteName.sitesDetails, pathParameters: {'siteID': site.id});
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(

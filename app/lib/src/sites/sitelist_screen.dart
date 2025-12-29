@@ -19,7 +19,7 @@ class SiteListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenScaffold(
       title: const Text('Dive Sites'),
-      actions: [IconButton(icon: const Icon(Icons.add), tooltip: 'Add new dive site', onPressed: () => context.pushNamed(AppRouteName.sitesNew))],
+      actions: [IconButton(icon: const Icon(Icons.add), tooltip: 'Add new dive site', onPressed: () => context.goNamed(AppRouteName.sitesNew))],
       body: BlocBuilder<DiveListBloc, DiveListState>(
         builder: (context, state) {
           if (state is DiveListInitial || state is DiveListLoading) {
@@ -95,7 +95,7 @@ class SiteListScreen extends StatelessWidget {
       onRowDoubleTap: (event) {
         final siteId = event.row.cells['_uuid']?.value as String?;
         if (siteId != null) {
-          context.pushNamed(AppRouteName.sitesDetails, pathParameters: {'siteID': siteId});
+          context.goNamed(AppRouteName.sitesDetails, pathParameters: {'siteID': siteId});
         }
       },
       configuration: AppTheme.trinaGridConfiguration(context),

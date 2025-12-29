@@ -26,8 +26,8 @@ class EquipmentScreen extends StatelessWidget {
               ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  _EquipmentCategoryCard(icon: Icons.scuba_diving, title: 'Cylinders', onTap: () => context.pushNamed(AppRouteName.cylinders)),
-                  _EquipmentCategoryCard(icon: Icons.settings, title: 'Preferences', onTap: () => context.pushNamed(AppRouteName.settings)),
+                  _EquipmentCategoryCard(icon: Icons.scuba_diving, title: 'Cylinders', onTap: () => context.goNamed(AppRouteName.cylinders)),
+                  _EquipmentCategoryCard(icon: Icons.settings, title: 'Preferences', onTap: () => context.goNamed(AppRouteName.settings)),
                 ],
               ),
               Positioned(

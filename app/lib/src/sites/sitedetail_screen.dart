@@ -28,7 +28,7 @@ class SiteDetailScreen extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.edit),
           tooltip: 'Edit',
-          onPressed: () => context.pushNamed(AppRouteName.sitesDetailsEdit, pathParameters: {'siteID': siteID}),
+          onPressed: () => context.goNamed(AppRouteName.sitesDetailsEdit, pathParameters: {'siteID': siteID}),
         ),
       ],
       body: SingleChildScrollView(
