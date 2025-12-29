@@ -26,6 +26,7 @@ Dive convertDcDive(Log dl) {
   if (dl.hasDateTime()) {
     dive.start = dl.dateTime;
   }
+
   if (dl.hasDiveTime()) {
     dive.duration = dl.diveTime;
   }

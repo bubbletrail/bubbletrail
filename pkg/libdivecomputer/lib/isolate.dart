@@ -160,8 +160,9 @@ class DownloadRequest extends RequestBase {
   final String writeFifoPath;
   final int descriptorIndex;
   final SendPort sendPort;
+  final Log? lastDiveLog;
 
-  DownloadRequest({required this.readFifoPath, required this.writeFifoPath, required this.descriptorIndex, required this.sendPort});
+  DownloadRequest({required this.readFifoPath, required this.writeFifoPath, required this.descriptorIndex, required this.sendPort, this.lastDiveLog});
 }
 
 /// Entry point for the download isolate.
@@ -262,20 +263,40 @@ void _downloadIsolateEntry(DownloadRequest request) {
       final parserStatus = bindings.dc_parser_new(parser, device.value, data, size);
 
       if (parserStatus == bindings.dc_status_t.DC_STATUS_SUCCESS) {
-        final dive = parseDiveFromParser(parser.value, fingerprint: fpBytes, model: deviceModel, serial: deviceSerial);
+        try {
+          final dive = parseDiveFromParser(parser.value, fingerprint: fpBytes, model: deviceModel, serial: deviceSerial);
 
-        sendPort.send(DownloadDiveReceived(dive));
+          print("comparing last dive fp ${request.lastDiveLog?.fingerprint} to ${dive.fingerprint}");
+          _log.info("comparing last dive fp ${request.lastDiveLog?.fingerprint} to ${dive.fingerprint}");
+          if (request.lastDiveLog != null && request.lastDiveLog!.fingerprint == dive.fingerprint) {
+            // We've already seen this one.
+            // calloc.free(parser);
+            return 0;
+          }
+          print("comparing last dive date ${request.lastDiveLog?.dateTime.seconds} to ${dive.dateTime.seconds}");
+          _log.info("comparing last dive date ${request.lastDiveLog?.dateTime.seconds} to ${dive.dateTime.seconds}");
+          if (request.lastDiveLog != null && request.lastDiveLog!.dateTime.seconds.compareTo(dive.dateTime.seconds) >= 0) {
+            // XXX: This should definitely be optional
+            // The last dive is newer than what we're importing now
+            // calloc.free(parser);
+            return 0;
+          }
 
-        bindings.dc_parser_destroy(parser.value);
+          sendPort.send(DownloadDiveReceived(dive));
+        } catch (e) {
+          print('Exception while parsing dive: $e');
+          _log.warning('Exception while parsing dive: $e');
+        } finally {
+          bindings.dc_parser_destroy(parser.value);
+        }
       } else {
+        print('Failed to parse dive: $parserStatus');
         _log.warning('Failed to parse dive: $parserStatus');
         // Send a minimal dive with just the number and raw data
         sendPort.send(DownloadDiveReceived(Log(fingerprint: fpBytes)));
       }
 
       calloc.free(parser);
-
-      // Return 1 to continue, 0 to abort
       return 1;
     },
     exceptionalReturn: 0, // Return 0 (abort) if exception is thrown

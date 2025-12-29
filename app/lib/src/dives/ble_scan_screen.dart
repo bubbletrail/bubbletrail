@@ -130,25 +130,22 @@ class BleScanScreen extends StatelessWidget {
                     children: [
                       const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
                       const SizedBox(width: 12),
-                      Text(state.downloadProgress != null
-                          ? 'Downloading... ${state.downloadProgress!.current} / ${state.downloadProgress!.maximum}'
-                          : 'Downloading dives...'),
+                      Text(
+                        state.downloadProgress != null
+                            ? 'Downloading... ${state.downloadProgress!.current} / ${state.downloadProgress!.maximum}'
+                            : 'Downloading dives...',
+                      ),
                     ],
                   ),
                   if (state.downloadProgress != null) ...[
                     const SizedBox(height: 12),
                     LinearProgressIndicator(value: state.downloadProgress!.fraction),
                     const SizedBox(height: 4),
-                    Text(
-                      '${(state.downloadProgress!.fraction * 100).toStringAsFixed(0)}%',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
+                    Text('${(state.downloadProgress!.fraction * 100).toStringAsFixed(0)}%', style: Theme.of(context).textTheme.bodySmall),
                   ],
                 ],
               ),
             )
-          else if (state.downloadedDives.isNotEmpty)
-            _buildDownloadedDives(context, state)
           else if (state.discoveredServices.isNotEmpty)
             _buildDownloadSection(context, state),
         ],
@@ -181,6 +178,7 @@ class BleScanScreen extends StatelessWidget {
     final dev = state.connectedDevice!;
     final deviceName = dev.platformName;
     final matchedComputers = state.scanResults.firstWhere((r) => r.$1.device.remoteId == dev.remoteId).$2;
+    matchedComputers.sort((a, b) => '${a.vendor} ${a.model}'.compareTo('${b.vendor} ${b.model}'));
 
     showDialog(
       context: context,
@@ -256,28 +254,6 @@ class BleScanScreen extends StatelessWidget {
         actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Cancel'))],
       ),
     );
-  }
-
-  Widget _buildDownloadedDives(BuildContext context, BleState state) {
-    return Placeholder();
-    // return Padding(
-    //   padding: const EdgeInsets.all(16.0),
-    //   child: Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       Text('Downloaded ${state.downloadedDives.length} dive(s)', style: Theme.of(context).textTheme.titleMedium),
-    //       const SizedBox(height: 8),
-    //       ...state.downloadedDives.map(
-    //         (dive) => ListTile(
-    //           contentPadding: EdgeInsets.zero,
-    //           leading: const Icon(Icons.scuba_diving),
-    //           title: Text(dive.dateTime?.toString() ?? 'Unknown date'),
-    //           subtitle: Text('Max depth: ${dive.maxDepth?.toStringAsFixed(1) ?? '?'}m'),
-    //         ),
-    //       ),
-    //     ],
-    //   ),
-    // );
   }
 
   Widget _buildEmptyState(BuildContext context, BleState state) {

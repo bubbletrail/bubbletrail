@@ -110,12 +110,19 @@ class BleStartDownload extends BleEvent {
 }
 
 class _BleDownloadCompleted extends BleEvent {
-  final List<Dive> dives;
-
-  const _BleDownloadCompleted(this.dives);
+  const _BleDownloadCompleted();
 
   @override
-  List<Object?> get props => [dives];
+  List<Object?> get props => [];
+}
+
+class _BleDownloadedDive extends BleEvent {
+  final Dive dive;
+
+  const _BleDownloadedDive(this.dive);
+
+  @override
+  List<Object?> get props => [dive];
 }
 
 class _BleDownloadFailed extends BleEvent {
@@ -240,6 +247,8 @@ class BleState extends Equatable {
 // Bloc
 class BleBloc extends Bloc<BleEvent, BleState> {
   final DiveListBloc _diveListBloc;
+  Log? _lastDiveLog;
+  StreamSubscription? _diveListBlocSubscription;
   StreamSubscription<BluetoothAdapterState>? _adapterStateSubscription;
   StreamSubscription<List<ScanResult>>? _scanSubscription;
   StreamSubscription<bool>? _scanStatusSubscription;
@@ -248,8 +257,17 @@ class BleBloc extends Bloc<BleEvent, BleState> {
 
   BleBloc(this._diveListBloc) : super(const BleState()) {
     on<BleEvent>(_onEvent, transformer: sequential());
-
     dc.dcDescriptorIterate().then((comps) => add(_BleLoadedSupportedComputers(comps)));
+
+    final curState = _diveListBloc.state;
+    if (curState is DiveListLoaded) {
+      _lastDiveLog = curState.lastLog;
+    }
+    _diveListBlocSubscription = _diveListBloc.stream.listen((state) {
+      if (state is DiveListLoaded) {
+        _lastDiveLog = state.lastLog;
+      }
+    });
   }
 
   Future<void> _onEvent(BleEvent event, Emitter<BleState> emit) async {
@@ -278,8 +296,11 @@ class BleBloc extends Bloc<BleEvent, BleState> {
         emit(state.copyWith(showAllDevices: !state.showAllDevices));
       case BleStartDownload(:final computer):
         await _onStartDownload(computer, emit);
-      case _BleDownloadCompleted(:final dives):
-        emit(state.copyWith(isDownloading: false, clearDownloadProgress: true, downloadedDives: dives));
+      case _BleDownloadedDive(:final dive):
+        emit(state.copyWith(downloadedDives: state.downloadedDives + [dive]));
+      case _BleDownloadCompleted():
+        _diveListBloc.add(DownloadedDives(state.downloadedDives));
+        emit(state.copyWith(isDownloading: false, clearDownloadProgress: true));
       case _BleDownloadFailed(:final error):
         emit(state.copyWith(isDownloading: false, clearDownloadProgress: true, error: error));
       case _BleDownloadProgress(:final progress):
@@ -391,7 +412,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
 
     // Start the download and process events
     final dir = await getApplicationSupportDirectory();
-    final sub = dc.startDownload(ble: ble, computer: computer, fifoDirectory: dir.path).listen((event) {
+    final sub = dc.startDownload(ble: ble, computer: computer, fifoDirectory: dir.path, lastDiveLog: _lastDiveLog).listen((event) {
       switch (event) {
         case dc.DownloadStarted():
           _log.info('Download started');
@@ -401,12 +422,12 @@ class BleBloc extends Bloc<BleEvent, BleState> {
         case dc.DownloadDeviceInfo(:final info):
           _log.info('Device info: $info');
         case dc.DownloadDiveReceived(:final dive):
-          final ssrfDive = convertDcDive(dive);
-          _diveListBloc.add(UpdateDive(ssrfDive));
-          _log.fine('Received dive: $dive');
+          _log.fine('Received dive ${dive.dateTime.toDateTime()}');
+          final cdive = convertDcDive(dive);
+          add(_BleDownloadedDive(cdive));
         case dc.DownloadCompleted():
           _log.info('Download completed');
-          add(_BleDownloadCompleted(const []));
+          add(_BleDownloadCompleted());
           WakelockPlus.disable();
         case dc.DownloadError(:final message):
           _log.warning('Download error: $message');
@@ -439,6 +460,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     _scanSubscription?.cancel();
     _scanStatusSubscription?.cancel();
     _connectionSubscription?.cancel();
+    _diveListBlocSubscription?.cancel();
     return super.close();
   }
 }

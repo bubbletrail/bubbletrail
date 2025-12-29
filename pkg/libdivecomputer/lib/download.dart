@@ -81,7 +81,12 @@ class DownloadError extends DownloadEvent {
 /// Starts a dive log download from a BLE dive computer.
 ///
 /// Returns a stream of [DownloadEvent]s indicating progress and results.
-Stream<DownloadEvent> startDownload({required BleCharacteristics ble, required ComputerDescriptor computer, String fifoDirectory = '/tmp'}) async* {
+Stream<DownloadEvent> startDownload({
+  required BleCharacteristics ble,
+  required ComputerDescriptor computer,
+  required String fifoDirectory,
+  Log? lastDiveLog,
+}) async* {
   yield DownloadStarted();
 
   // Create FIFOs
@@ -128,7 +133,13 @@ Stream<DownloadEvent> startDownload({required BleCharacteristics ble, required C
     final fifoOpenFuture = Future.wait([File(readPath).open(mode: FileMode.writeOnly), File(writePath).open(mode: FileMode.read)]);
 
     // Spawn the download isolate - when it starts, it will open C side and unblock our opens
-    final request = DownloadRequest(readFifoPath: readPath, writeFifoPath: writePath, descriptorIndex: computer.handle, sendPort: receivePort.sendPort);
+    final request = DownloadRequest(
+      readFifoPath: readPath,
+      writeFifoPath: writePath,
+      descriptorIndex: computer.handle,
+      sendPort: receivePort.sendPort,
+      lastDiveLog: lastDiveLog,
+    );
     dcStartDownload(request);
 
     // Now wait for FIFO opens to complete
@@ -137,18 +148,21 @@ Stream<DownloadEvent> startDownload({required BleCharacteristics ble, required C
     fromDeviceFifo = files[1];
 
     // Start BLE -> FIFO bridge (in background)
+    bool running = true;
     Future.microtask(() async {
       await for (final packet in ble.read) {
         try {
           await toDeviceFifo?.writeFrom(packet);
         } catch (e) {
-          _log.warning('Error writing BLE data to FIFO: $e');
+          if (running) {
+            _log.warning('Error writing BLE data to FIFO: $e');
+          }
+          break;
         }
       }
     });
 
     // Start FIFO -> BLE bridge (in background)
-    bool running = true;
     Future.microtask(() async {
       final buffer = Uint8List(512);
       while (running) {

@@ -107,6 +107,11 @@ extension DiveXml on Dive {
     // Parse divecomputers
     dive.logs.addAll(elem.findElements('divecomputer').map(ComputerDiveXml.fromXml));
 
+    // Set time on logs, not present in SSRF import
+    for (final l in dive.logs) {
+      l.dateTime = dive.start;
+    }
+
     // Populate depth summary from first dive computer
     if (dive.logs.isNotEmpty) {
       final firstComputer = dive.logs[0];

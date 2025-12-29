@@ -28,6 +28,7 @@ class DiveListLoading extends DiveListState {
 class DiveListLoaded extends DiveListState {
   final List<Dive> dives;
   final List<Site> sites;
+  final Log? lastLog;
 
   /// Index map for O(1) dive lookup by ID
   late final Map<String, Dive> divesById;
@@ -41,7 +42,7 @@ class DiveListLoaded extends DiveListState {
   /// Index map for O(1) dive count lookup by site UUID
   late final Map<String, int> diveCountBySiteId;
 
-  DiveListLoaded(this.dives, this.sites) {
+  DiveListLoaded(this.dives, this.sites, this.lastLog) {
     divesById = {for (final d in dives) d.id: d};
     diveIndexById = {for (var i = 0; i < dives.length; i++) dives[i].id: i};
     sitesByUuid = {for (final s in sites) s.id: s};
@@ -87,6 +88,15 @@ class UpdateDive extends DiveListEvent {
   List<Object?> get props => [dive];
 }
 
+class DownloadedDives extends DiveListEvent {
+  final List<Dive> dives;
+
+  const DownloadedDives(this.dives);
+
+  @override
+  List<Object?> get props => [dives];
+}
+
 class ImportDives extends DiveListEvent {
   final String filePath;
 
@@ -107,6 +117,8 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
         await _onUpdateDive(event, emit);
       } else if (event is ImportDives) {
         await _onImportDives(event, emit);
+      } else if (event is DownloadedDives) {
+        await _onDownloadedDives(event, emit);
       }
     }, transformer: sequential());
 
@@ -115,13 +127,14 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   }
 
   Future<void> _onLoadDives(LoadDives event, Emitter<DiveListState> emit) async {
-    emit(const DiveListLoading());
-
     try {
-      // Load only overview data (from dives table) for efficiency
       final dives = await _storage.dives.getAll();
       final sites = await _storage.sites.getAll();
-      emit(DiveListLoaded(dives, sites));
+      Log? lastLog;
+      if (dives.isNotEmpty) {
+        lastLog = (await _storage.dives.getById(dives.first.id))?.logs.firstOrNull;
+      }
+      emit(DiveListLoaded(dives, sites, lastLog));
     } catch (e) {
       emit(DiveListError('Failed to load dives: $e'));
     }
@@ -145,8 +158,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       }
 
       // Reload overview list after update
-      final dives = await _storage.dives.getAll();
-      emit(DiveListLoaded(dives, currentState.sites));
+      add(LoadDives());
     } catch (e) {
       emit(DiveListError('Failed to update dive: $e'));
     }
@@ -185,10 +197,27 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       // Insert all imported dives
       await _storage.dives.insertAll(importedSsrf.dives);
 
-      // Reload overview list after import
-      final dives = await _storage.dives.getAll();
-      final sites = await _storage.sites.getAll();
-      emit(DiveListLoaded(dives, sites));
+      // Reload overview list after update
+      add(LoadDives());
+    } catch (e) {
+      emit(DiveListError('Failed to import dives: $e'));
+    }
+  }
+
+  Future<void> _onDownloadedDives(DownloadedDives event, Emitter<DiveListState> emit) async {
+    try {
+      // Sort dives by time, number them, insert.
+      final downloaded = event.dives;
+      downloaded.sort((a, b) => a.start.seconds.compareTo(b.start.seconds));
+      var nextID = await _storage.dives.nextDiveNo;
+      for (final d in downloaded) {
+        d.number = nextID;
+        nextID++;
+      }
+      await _storage.dives.insertAll(downloaded);
+
+      // Reload overview list after update
+      add(LoadDives());
     } catch (e) {
       emit(DiveListError('Failed to import dives: $e'));
     }
