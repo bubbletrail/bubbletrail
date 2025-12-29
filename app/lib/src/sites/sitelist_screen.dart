@@ -12,8 +12,8 @@ import '../common/common.dart';
 /// Breakpoint width for switching between card (narrow) and table (wide) layouts.
 const double _narrowLayoutBreakpoint = 600;
 
-class DiveSiteListScreen extends StatelessWidget {
-  const DiveSiteListScreen({super.key});
+class SiteListScreen extends StatelessWidget {
+  const SiteListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,16 +31,16 @@ class DiveSiteListScreen extends StatelessWidget {
           }
 
           if (state is DiveListLoaded) {
-            final diveSites = state.diveSites;
+            final sites = state.sites;
 
-            if (diveSites.isEmpty) {
+            if (sites.isEmpty) {
               return const EmptyStateWidget(message: 'No dive sites yet.', icon: Icons.location_on);
             }
 
             return LayoutBuilder(
               builder: (context, constraints) {
                 final isNarrow = constraints.maxWidth < _narrowLayoutBreakpoint;
-                return isNarrow ? _buildCardList(context, diveSites, state.diveCountBySiteId) : _buildTrinaGrid(context, diveSites, state.diveCountBySiteId);
+                return isNarrow ? _buildCardList(context, sites, state.diveCountBySiteId) : _buildTrinaGrid(context, sites, state.diveCountBySiteId);
               },
             );
           }
@@ -51,19 +51,19 @@ class DiveSiteListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCardList(BuildContext context, List<Divesite> diveSites, Map<String, int> diveCountBySiteId) {
+  Widget _buildCardList(BuildContext context, List<Site> sites, Map<String, int> diveCountBySiteId) {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: diveSites.length,
+      itemCount: sites.length,
       itemBuilder: (context, index) {
-        final site = diveSites[index];
-        final diveCount = diveCountBySiteId[site.uuid] ?? 0;
-        return DiveSiteListItemCard(site: site, diveCount: diveCount);
+        final site = sites[index];
+        final diveCount = diveCountBySiteId[site.id] ?? 0;
+        return SiteListItemCard(site: site, diveCount: diveCount);
       },
     );
   }
 
-  Widget _buildTrinaGrid(BuildContext context, List<Divesite> diveSites, Map<String, int> diveCountBySiteId) {
+  Widget _buildTrinaGrid(BuildContext context, List<Site> sites, Map<String, int> diveCountBySiteId) {
     final columns = <TrinaColumn>[
       TrinaColumn(title: 'Name', field: 'name', type: TrinaColumnType.text(), width: 200, readOnly: true),
       TrinaColumn(title: 'Country', field: 'country', type: TrinaColumnType.text(), width: 120, readOnly: true),
@@ -73,17 +73,17 @@ class DiveSiteListScreen extends StatelessWidget {
       TrinaColumn(title: '# Dives', field: 'diveCount', type: TrinaColumnType.number(), width: 80, readOnly: true),
     ];
 
-    final rows = diveSites.map((site) {
-      final diveCount = diveCountBySiteId[site.uuid] ?? 0;
+    final rows = sites.map((site) {
+      final diveCount = diveCountBySiteId[site.id] ?? 0;
       return TrinaRow(
         cells: {
           'name': TrinaCell(value: site.name),
-          'country': TrinaCell(value: site.country ?? '-'),
-          'location': TrinaCell(value: site.location ?? '-'),
-          'bodyOfWater': TrinaCell(value: site.bodyOfWater ?? '-'),
-          'difficulty': TrinaCell(value: site.difficulty ?? '-'),
+          'country': TrinaCell(value: site.country.isEmpty ? '-' : site.country),
+          'location': TrinaCell(value: site.location.isEmpty ? '-' : site.location),
+          'bodyOfWater': TrinaCell(value: site.bodyOfWater.isEmpty ? '-' : site.bodyOfWater),
+          'difficulty': TrinaCell(value: site.difficulty.isEmpty ? '-' : site.difficulty),
           'diveCount': TrinaCell(value: diveCount),
-          '_uuid': TrinaCell(value: site.uuid), // Hidden field for navigation
+          '_uuid': TrinaCell(value: site.id), // Hidden field for navigation
         },
       );
     }).toList();

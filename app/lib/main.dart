@@ -17,7 +17,7 @@ import 'src/bloc/cylinderdetails_bloc.dart';
 import 'src/bloc/cylinderlist_bloc.dart';
 import 'src/bloc/divedetails_bloc.dart';
 import 'src/bloc/divelist_bloc.dart';
-import 'src/bloc/divesitedetails_bloc.dart';
+import 'src/bloc/sitedetails_bloc.dart';
 import 'src/bloc/preferences_bloc.dart';
 import 'src/common/common.dart';
 import 'src/dives/ble_scan_screen.dart';
@@ -28,9 +28,9 @@ import 'src/equipment/cylinder_edit_screen.dart';
 import 'src/equipment/cylinder_list_screen.dart';
 import 'src/equipment/equipment_screen.dart';
 import 'src/preferences/preferences_screen.dart';
-import 'src/sites/divesitedetail_screen.dart';
-import 'src/sites/divesiteedit_screen.dart';
-import 'src/sites/divesitelist_screen.dart';
+import 'src/sites/sitedetail_screen.dart';
+import 'src/sites/siteedit_screen.dart';
+import 'src/sites/sitelist_screen.dart';
 import 'src/app_theme.dart';
 
 void main() async {
@@ -224,27 +224,27 @@ class _MyAppState extends State<MyApp> with WindowListener {
                 GoRoute(
                   path: AppRoutePath.sites,
                   name: AppRouteName.sites,
-                  builder: (context, state) => const DiveSiteListScreen(),
+                  builder: (context, state) => const SiteListScreen(),
                   routes: <RouteBase>[
                     GoRoute(
                       path: AppRoutePath.sitesNew,
                       name: AppRouteName.sitesNew,
                       builder: (context, state) => BlocProvider(
-                        create: (context) => DivesiteDetailsBloc()..add(const NewDivesiteEvent()),
-                        child: DetailsAvailable<DivesiteDetailsBloc, DivesiteDetailsState>(child: DivesiteEditScreen()),
+                        create: (context) => SiteDetailsBloc()..add(const NewSiteEvent()),
+                        child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: SiteEditScreen()),
                       ),
                     ),
                     GoRoute(
                       path: AppRoutePath.sitesDetails,
                       name: AppRouteName.sitesDetails,
-                      builder: (context, state) => DiveSiteDetailScreen(siteID: state.pathParameters['siteID']!),
+                      builder: (context, state) => SiteDetailScreen(siteID: state.pathParameters['siteID']!),
                       routes: [
                         GoRoute(
                           path: AppRoutePath.sitesDetailsEdit,
                           name: AppRouteName.sitesDetailsEdit,
                           builder: (context, state) => BlocProvider(
-                            create: (context) => DivesiteDetailsBloc()..add(LoadDivesiteDetails(state.pathParameters['siteID']!)),
-                            child: DetailsAvailable<DivesiteDetailsBloc, DivesiteDetailsState>(child: DivesiteEditScreen()),
+                            create: (context) => SiteDetailsBloc()..add(LoadSiteDetails(state.pathParameters['siteID']!)),
+                            child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: SiteEditScreen()),
                           ),
                         ),
                       ],
@@ -277,7 +277,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           path: AppRoutePath.cylindersDetails,
                           name: AppRouteName.cylindersDetails,
                           builder: (context, state) => BlocProvider(
-                            create: (context) => CylinderDetailsBloc()..add(LoadCylinderDetails(int.parse(state.pathParameters['cylinderID']!))),
+                            create: (context) => CylinderDetailsBloc()..add(LoadCylinderDetails(state.pathParameters['cylinderID']!)),
                             child: DetailsAvailable<CylinderDetailsBloc, CylinderDetailsState>(child: CylinderEditScreen()),
                           ),
                         ),

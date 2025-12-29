@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package divestore;
+
+import "google/protobuf/timestamp.proto";
+import "log.proto";
+import "types.proto";
+
+// A single dive log entry.
+message Dive {
+  string id = 1;
+
+  google.protobuf.Timestamp created_at = 2;
+  google.protobuf.Timestamp updated_at = 3;
+  google.protobuf.Timestamp deleted_at = 4;
+
+  int32 number = 8; // Dive number, human readable/assigned
+  int32 rating = 9; // 0-5 stars
+  repeated string tags = 10; // Free-form tag strings
+  google.protobuf.Timestamp start = 11; // Unix epoch timestamp (seconds)
+
+  // Summary data (populated from dive computer data, but editable by the user)
+  int32 duration = 12; // Seconds
+  double max_depth = 13; // Meters
+  double mean_depth = 14; // Meters
+
+  // Additional attributes
+  double sac = 15; // l/min
+  int32 otu = 16;
+  int32 cns = 17; // Percentage
+
+  // Link to dive site
+  string site_id = 18;
+
+  // Child elements
+  string instructor = 19;
+  string divemaster = 20;
+  repeated string buddies = 21;
+  string notes = 22;
+  repeated DiveCylinder cylinders = 23;
+  repeated Weightsystem weightsystems = 24;
+
+  // Raw dive computer data
+  repeated Log logs = 25;
+
+  // Events like gas changed, initially extracted from dive computer data
+  // but editable.
+  repeated SampleEvent events = 26;
+}
+
+// Per-dive cylinder usage information.
+message DiveCylinder {
+  string cylinder_id = 1;
+  double begin_pressure = 2; // Bar
+  double end_pressure = 3; // Bar
+  double oxygen = 4; // Fraction (0.0-1.0)
+  double helium = 5; // Fraction (0.0-1.0)
+
+  // Set temporarily when importing SSRF only
+  Cylinder cylinder = 32;
+}
+
+// Weight system information.
+message Weightsystem {
+  double weight = 1; // Kg
+  string description = 2;
+}

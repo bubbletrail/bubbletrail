@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package divestore;
+
+import "google/protobuf/timestamp.proto";
+
+// GPS position (latitude/longitude).
+message Position {
+  double latitude = 1; // Degrees north
+  double longitude = 2; // Degrees east
+  double altitude = 3; // Meters above sea level
+}
+
+// Cylinder/tank definition.
+message Cylinder {
+  string id = 1;
+
+  google.protobuf.Timestamp created_at = 2;
+  google.protobuf.Timestamp updated_at = 3;
+  google.protobuf.Timestamp deleted_at = 4;
+
+  double size = 5; // Liters
+  double workpressure = 6; // Bar
+  string description = 7;
+}

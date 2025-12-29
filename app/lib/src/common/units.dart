@@ -64,6 +64,15 @@ String formatWeight(BuildContext context, num weight) {
   }
 }
 
+String formatDuration(int seconds) {
+  final minutes = seconds ~/ 60;
+  final secs = seconds % 60;
+  if (secs == 0) {
+    return '${minutes}m';
+  }
+  return '${minutes}m ${secs}s';
+}
+
 class DepthText extends StatelessWidget {
   final num depth;
 

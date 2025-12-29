@@ -1,4 +1,4 @@
-import 'package:divestore/divestore.dart' hide formatDepth;
+import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -14,14 +14,14 @@ const double _narrowLayoutBreakpoint = 600;
 
 class DiveTableWidget extends StatelessWidget {
   final List<Dive> dives;
-  final Map<String, Divesite> diveSitesByUuid;
+  final Map<String, Site> sitesByUuid;
   final bool showSiteColumn;
 
-  const DiveTableWidget({super.key, required this.dives, required this.diveSitesByUuid, this.showSiteColumn = true});
+  const DiveTableWidget({super.key, required this.dives, required this.sitesByUuid, this.showSiteColumn = true});
 
-  Divesite? _getDiveSite(Dive dive) {
-    if (dive.divesiteid == null) return null;
-    return diveSitesByUuid[dive.divesiteid];
+  Site? _getSite(Dive dive) {
+    if (dive.siteId.isEmpty) return null;
+    return sitesByUuid[dive.siteId];
   }
 
   @override
@@ -40,7 +40,7 @@ class DiveTableWidget extends StatelessWidget {
 
   Widget _buildCardList(BuildContext context) {
     // Sort by date descending for card list
-    final sortedDives = List<Dive>.from(dives)..sort((a, b) => b.start.compareTo(a.start));
+    final sortedDives = List<Dive>.from(dives)..sort((a, b) => b.start.toDateTime().compareTo(a.start.toDateTime()));
     return BlocBuilder<PreferencesBloc, PreferencesState>(
       builder: (context, state) {
         return ListView.builder(
@@ -48,7 +48,7 @@ class DiveTableWidget extends StatelessWidget {
           itemCount: sortedDives.length,
           itemBuilder: (context, index) {
             final dive = sortedDives[index];
-            return DiveListItemCard(dive: dive, diveSite: _getDiveSite(dive), showSite: showSiteColumn);
+            return DiveListItemCard(dive: dive, site: _getSite(dive), showSite: showSiteColumn);
           },
         );
       },
@@ -57,7 +57,7 @@ class DiveTableWidget extends StatelessWidget {
 
   Widget _buildTrinaGrid(BuildContext context) {
     final columns = <TrinaColumn>[
-      TrinaColumn(title: 'Dive #', field: 'number', type: TrinaColumnType.number(), width: 80, readOnly: true),
+      TrinaColumn(title: 'Dive #', field: 'number', type: TrinaColumnType.number(), width: 80, readOnly: true, sort: TrinaColumnSort.descending),
       TrinaColumn(title: 'Start', field: 'start', type: TrinaColumnType.dateTime(), width: 120, readOnly: true),
       TrinaColumn(title: 'Max Depth', field: 'maxDepth', type: TrinaColumnType.number(), width: 80, readOnly: true),
       TrinaColumn(title: 'Duration', field: 'duration', type: TrinaColumnType.number(), width: 80, readOnly: true),
@@ -67,14 +67,14 @@ class DiveTableWidget extends StatelessWidget {
     return BlocBuilder<PreferencesBloc, PreferencesState>(
       builder: (context, state) {
         final rows = dives.map((dive) {
-          final diveSite = _getDiveSite(dive);
+          final site = _getSite(dive);
           return TrinaRow(
             cells: {
               'number': TrinaCell(value: dive.number),
-              'start': TrinaCell(value: dive.start),
-              'maxDepth': TrinaCell(value: convertDepth(context, dive.maxDepth ?? 0.0)),
+              'start': TrinaCell(value: dive.start.toDateTime()),
+              'maxDepth': TrinaCell(value: convertDepth(context, dive.maxDepth)),
               'duration': TrinaCell(value: dive.duration, renderer: (rendererContext) => Text(formatDuration(rendererContext.cell.value))),
-              'site': TrinaCell(value: diveSite?.name ?? ''),
+              'site': TrinaCell(value: site?.name ?? ''),
               '_id': TrinaCell(value: dive.id), // Hidden field for navigation
             },
           );

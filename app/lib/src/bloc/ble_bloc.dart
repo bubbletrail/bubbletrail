@@ -402,8 +402,8 @@ class BleBloc extends Bloc<BleEvent, BleState> {
           final ssrfDive = convertDcDive(dive);
           _diveListBloc.add(UpdateDive(ssrfDive));
           _log.fine('Received dive: $dive');
-        case dc.DownloadCompleted(:final diveCount):
-          _log.info('Download completed: $diveCount dives');
+        case dc.DownloadCompleted():
+          _log.info('Download completed');
           add(_BleDownloadCompleted(const []));
         case dc.DownloadError(:final message):
           _log.warning('Download error: $message');

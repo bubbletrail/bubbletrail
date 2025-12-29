@@ -5,12 +5,12 @@ import 'package:go_router/go_router.dart';
 import '../app_routes.dart';
 import '../bloc/divelist_bloc.dart';
 import '../common/common.dart';
-import 'divesitemap_widget.dart';
+import 'sitemap_widget.dart';
 
-class DiveSiteDetailScreen extends StatelessWidget {
+class SiteDetailScreen extends StatelessWidget {
   final String siteID;
 
-  const DiveSiteDetailScreen({super.key, required this.siteID});
+  const SiteDetailScreen({super.key, required this.siteID});
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +19,8 @@ class DiveSiteDetailScreen extends StatelessWidget {
       return Placeholder();
     }
 
-    final site = state.diveSitesByUuid[siteID]!;
-    final dives = state.dives.where((s) => s.divesiteid == siteID).toList();
+    final site = state.sitesByUuid[siteID]!;
+    final dives = state.dives.where((s) => s.siteId == siteID).toList();
 
     return ScreenScaffold(
       title: Text(site.name),
@@ -39,20 +39,20 @@ class DiveSiteDetailScreen extends StatelessWidget {
             children: [
               infoCard(context, 'Location Information', [
                 infoRow('Name', site.name),
-                if (site.country != null) infoRow('Country', site.country!),
-                if (site.location != null) infoRow('Location', site.location!),
-                if (site.bodyOfWater != null) infoRow('Body of Water', site.bodyOfWater!),
-                if (site.position != null) ...[
-                  infoRow('Latitude', site.position!.lat.toStringAsFixed(6)),
-                  infoRow('Longitude', site.position!.lon.toStringAsFixed(6)),
+                if (site.country.isNotEmpty) infoRow('Country', site.country),
+                if (site.location.isNotEmpty) infoRow('Location', site.location),
+                if (site.bodyOfWater.isNotEmpty) infoRow('Body of Water', site.bodyOfWater),
+                if (site.hasPosition()) ...[
+                  infoRow('Latitude', site.position.latitude.toStringAsFixed(6)),
+                  infoRow('Longitude', site.position.longitude.toStringAsFixed(6)),
                 ],
               ]),
-              if (site.difficulty != null) ...[
+              if (site.difficulty.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                infoCard(context, 'Dive Information', [infoRow('Difficulty', site.difficulty!)]),
+                infoCard(context, 'Dive Information', [infoRow('Difficulty', site.difficulty)]),
               ],
               const SizedBox(height: 16),
-              DiveSiteMapWidget(divesite: site),
+              SiteMapWidget(site: site),
               const SizedBox(height: 16),
               if (dives.isNotEmpty) ...[
                 Card(
@@ -66,7 +66,7 @@ class DiveSiteDetailScreen extends StatelessWidget {
                         const Divider(),
                         AspectRatio(
                           aspectRatio: 2,
-                          child: DiveTableWidget(dives: dives, diveSitesByUuid: state.diveSitesByUuid, showSiteColumn: false),
+                          child: DiveTableWidget(dives: dives, sitesByUuid: state.sitesByUuid, showSiteColumn: false),
                         ),
                       ],
                     ),

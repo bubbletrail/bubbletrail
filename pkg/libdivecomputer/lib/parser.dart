@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:divestore/divestore.dart';
 import 'package:ffi/ffi.dart';
+import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 
 import 'libdivecomputer_bindings_generated.dart' as dc;
 
@@ -12,71 +13,81 @@ import 'libdivecomputer_bindings_generated.dart' as dc;
 ///
 /// This function must be called from an isolate where FFI is available.
 /// The [parser] must be a valid dc_parser_t pointer created via dc_parser_new.
-ComputerDive parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {String? fingerprint}) {
-  final builder = ComputerDiveBuilder()..fingerprint = fingerprint;
+Log parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {Uint8List? fingerprint, String? model, String? serial}) {
+  final dive = Log();
+  if (fingerprint != null) {
+    dive.fingerprint = fingerprint;
+  }
+  if (model != null) {
+    dive.model = model;
+  }
+  if (serial != null) {
+    dive.serial = serial;
+  }
 
   // --- DateTime ---
   final datetime = calloc<dc.dc_datetime_t>();
   if (dc.dc_parser_get_datetime(parser, datetime) == dc.dc_status_t.DC_STATUS_SUCCESS) {
-    builder.dateTime = DateTime(datetime.ref.year, datetime.ref.month, datetime.ref.day, datetime.ref.hour, datetime.ref.minute, datetime.ref.second);
+    final dt = DateTime(datetime.ref.year, datetime.ref.month, datetime.ref.day, datetime.ref.hour, datetime.ref.minute, datetime.ref.second);
+    dive.dateTime = Timestamp.fromDateTime(dt);
   }
   calloc.free(datetime);
 
   // --- Dive Time ---
   final diveTimePtr = calloc<ffi.UnsignedInt>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_DIVETIME, diveTimePtr.cast())) {
-    builder.diveTime = diveTimePtr.value;
+    dive.diveTime = diveTimePtr.value;
   }
   calloc.free(diveTimePtr);
 
   // --- Max Depth ---
   final maxDepthPtr = calloc<ffi.Double>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_MAXDEPTH, maxDepthPtr.cast())) {
-    builder.maxDepth = maxDepthPtr.value;
+    dive.maxDepth = maxDepthPtr.value;
   }
   calloc.free(maxDepthPtr);
 
   // --- Avg Depth ---
   final avgDepthPtr = calloc<ffi.Double>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_AVGDEPTH, avgDepthPtr.cast())) {
-    builder.avgDepth = avgDepthPtr.value;
+    dive.avgDepth = avgDepthPtr.value;
   }
   calloc.free(avgDepthPtr);
 
   // --- Surface Temperature ---
   final surfaceTempPtr = calloc<ffi.Double>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_TEMPERATURE_SURFACE, surfaceTempPtr.cast())) {
-    builder.surfaceTemperature = surfaceTempPtr.value;
+    dive.surfaceTemperature = surfaceTempPtr.value;
   }
   calloc.free(surfaceTempPtr);
 
   // --- Min Temperature ---
   final minTempPtr = calloc<ffi.Double>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_TEMPERATURE_MINIMUM, minTempPtr.cast())) {
-    builder.minTemperature = minTempPtr.value;
+    dive.minTemperature = minTempPtr.value;
   }
   calloc.free(minTempPtr);
 
   // --- Max Temperature ---
   final maxTempPtr = calloc<ffi.Double>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_TEMPERATURE_MAXIMUM, maxTempPtr.cast())) {
-    builder.maxTemperature = maxTempPtr.value;
+    dive.maxTemperature = maxTempPtr.value;
   }
   calloc.free(maxTempPtr);
 
   // --- Atmospheric Pressure ---
   final atmosphericPtr = calloc<ffi.Double>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_ATMOSPHERIC, atmosphericPtr.cast())) {
-    builder.atmosphericPressure = atmosphericPtr.value;
+    dive.atmosphericPressure = atmosphericPtr.value;
   }
   calloc.free(atmosphericPtr);
 
   // --- Salinity ---
   final salinityPtr = calloc<dc.dc_salinity_t>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_SALINITY, salinityPtr.cast())) {
-    final waterType = WaterType.fromDcValue(salinityPtr.ref.type);
+    final waterType = _convertWaterType(salinityPtr.ref.type);
     if (waterType != null) {
-      builder.salinity = Salinity(type: waterType, density: salinityPtr.ref.density);
+      dive.salinity = Salinity(type: waterType, density: salinityPtr.ref.density);
     }
   }
   calloc.free(salinityPtr);
@@ -84,27 +95,30 @@ ComputerDive parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {String? fi
   // --- Dive Mode ---
   final diveModePtr = calloc<ffi.UnsignedInt>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_DIVEMODE, diveModePtr.cast())) {
-    builder.diveMode = DiveMode.fromDcValue(diveModePtr.value);
+    final mode = _convertDiveMode(diveModePtr.value);
+    if (mode != null) {
+      dive.diveMode = mode;
+    }
   }
   calloc.free(diveModePtr);
 
   // --- Deco Model ---
   final decoModelPtr = calloc<dc.dc_decomodel_t>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_DECOMODEL, decoModelPtr.cast())) {
-    final type = DecoModelType.fromDcValue(decoModelPtr.ref.type);
+    final type = _convertDecoModelType(decoModelPtr.ref.type);
     int? gfLow, gfHigh;
-    if (type == DecoModelType.buhlmann) {
+    if (type == DecoModelType.DECO_MODEL_TYPE_BUHLMANN) {
       gfLow = decoModelPtr.ref.params.gf.low;
       gfHigh = decoModelPtr.ref.params.gf.high;
     }
-    builder.decoModel = DecoModel(type: type, conservatism: decoModelPtr.ref.conservatism, gfLow: gfLow, gfHigh: gfHigh);
+    dive.decoModel = DecoModel(type: type, conservatism: decoModelPtr.ref.conservatism, gfLow: gfLow, gfHigh: gfHigh);
   }
   calloc.free(decoModelPtr);
 
   // --- Location ---
   final locationPtr = calloc<dc.dc_location_t>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_LOCATION, locationPtr.cast())) {
-    builder.location = Location(
+    dive.position = Position(
       latitude: locationPtr.ref.latitude,
       longitude: locationPtr.ref.longitude,
       altitude: locationPtr.ref.altitude != 0 ? locationPtr.ref.altitude : null,
@@ -119,13 +133,8 @@ ComputerDive parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {String? fi
     final gasMixPtr = calloc<dc.dc_gasmix_t>();
     for (var i = 0; i < count; i++) {
       if (_getFieldIndexed(parser, dc.dc_field_type_t.DC_FIELD_GASMIX, i, gasMixPtr.cast())) {
-        builder.gasMixes.add(
-          GasMix(
-            oxygen: gasMixPtr.ref.oxygen,
-            helium: gasMixPtr.ref.helium,
-            nitrogen: gasMixPtr.ref.nitrogen,
-            usage: GasUsage.fromDcValue(gasMixPtr.ref.usage),
-          ),
+        dive.gasMixes.add(
+          GasMix(oxygen: gasMixPtr.ref.oxygen, helium: gasMixPtr.ref.helium, nitrogen: gasMixPtr.ref.nitrogen, usage: _convertGasUsage(gasMixPtr.ref.usage)),
         );
       }
     }
@@ -142,15 +151,15 @@ ComputerDive parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {String? fi
       if (_getFieldIndexed(parser, dc.dc_field_type_t.DC_FIELD_TANK, i, tankPtr.cast())) {
         // DC_GASMIX_UNKNOWN is 0xFFFFFFFF
         final gasMixIndex = tankPtr.ref.gasmix == 0xFFFFFFFF ? null : tankPtr.ref.gasmix;
-        builder.tanks.add(
+        dive.tanks.add(
           Tank(
             gasMixIndex: gasMixIndex,
-            volumeType: TankVolumeType.fromDcValue(tankPtr.ref.type),
+            volumeType: _convertTankVolumeType(tankPtr.ref.type),
             volume: tankPtr.ref.volume,
             workPressure: tankPtr.ref.workpressure > 0 ? tankPtr.ref.workpressure : null,
             beginPressure: tankPtr.ref.beginpressure > 0 ? tankPtr.ref.beginpressure : null,
             endPressure: tankPtr.ref.endpressure > 0 ? tankPtr.ref.endpressure : null,
-            usage: GasUsage.fromDcValue(tankPtr.ref.usage),
+            usage: _convertGasUsage(tankPtr.ref.usage),
           ),
         );
       }
@@ -160,9 +169,9 @@ ComputerDive parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {String? fi
   calloc.free(tankCountPtr);
 
   // --- Samples ---
-  _parseSamples(parser, builder);
+  _parseSamples(parser, dive);
 
-  return builder.build();
+  return dive;
 }
 
 /// Helper to get a field from the parser.
@@ -176,13 +185,13 @@ bool _getFieldIndexed(ffi.Pointer<dc.dc_parser_t> parser, dc.dc_field_type_t typ
 }
 
 /// Global state for sample callback (needed because NativeCallable can't capture closures).
-ComputerDiveBuilder? _currentDiveBuilder;
-ComputerSampleBuilder? _currentSampleBuilder;
+Log? _currentDive;
+LogSample? _currentSample;
 
 /// Parse samples from the parser.
-void _parseSamples(ffi.Pointer<dc.dc_parser_t> parser, ComputerDiveBuilder builder) {
-  _currentDiveBuilder = builder;
-  _currentSampleBuilder = ComputerSampleBuilder();
+void _parseSamples(ffi.Pointer<dc.dc_parser_t> parser, Log dive) {
+  _currentDive = dive;
+  _currentSample = null;
 
   final callback = ffi.NativeCallable<dc.dc_sample_callback_tFunction>.isolateLocal(_sampleCallback);
 
@@ -191,56 +200,54 @@ void _parseSamples(ffi.Pointer<dc.dc_parser_t> parser, ComputerDiveBuilder build
   callback.close();
 
   // Add the last sample if it has data
-  if (_currentSampleBuilder!.time != null) {
-    builder.samples.add(_currentSampleBuilder!.build());
+  if (_currentSample != null) {
+    dive.samples.add(_currentSample!);
   }
 
-  _currentDiveBuilder = null;
-  _currentSampleBuilder = null;
+  _currentDive = null;
+  _currentSample = null;
 }
 
 /// Sample callback for dc_parser_samples_foreach.
 void _sampleCallback(int typeValue, ffi.Pointer<dc.dc_sample_value_t> value, ffi.Pointer<ffi.Void> userdata) {
-  final builder = _currentSampleBuilder!;
-  final diveBuilder = _currentDiveBuilder!;
+  final dive = _currentDive!;
   final type = dc.dc_sample_type_t.fromValue(typeValue);
 
   switch (type) {
     case dc.dc_sample_type_t.DC_SAMPLE_TIME:
       // New sample starts with TIME - save previous sample if exists
-      if (builder.time != null) {
-        diveBuilder.samples.add(builder.build());
-        builder.reset();
+      if (_currentSample != null) {
+        dive.samples.add(_currentSample!);
       }
-      builder.time = value.ref.time / 1000;
+      _currentSample = LogSample(time: value.ref.time / 1000);
 
     case dc.dc_sample_type_t.DC_SAMPLE_DEPTH:
-      builder.depth = value.ref.depth;
+      _currentSample?.depth = value.ref.depth;
 
     case dc.dc_sample_type_t.DC_SAMPLE_PRESSURE:
-      builder.pressures.add(TankPressure(tankIndex: value.ref.pressure.tank, pressure: value.ref.pressure.value));
+      _currentSample?.pressures.add(TankPressure(tankIndex: value.ref.pressure.tank, pressure: value.ref.pressure.value));
 
     case dc.dc_sample_type_t.DC_SAMPLE_TEMPERATURE:
-      builder.temperature = value.ref.temperature;
+      _currentSample?.temperature = value.ref.temperature;
 
     case dc.dc_sample_type_t.DC_SAMPLE_EVENT:
-      builder.events.add(
+      _currentSample?.events.add(
         SampleEvent(
-          type: SampleEventType.fromDcValue(value.ref.event.type),
+          type: _convertSampleEventType(value.ref.event.type),
           time: value.ref.event.time,
-          flags: SampleEventFlags(value.ref.event.flags),
+          flags: value.ref.event.flags,
           value: value.ref.event.value,
         ),
       );
 
     case dc.dc_sample_type_t.DC_SAMPLE_RBT:
-      builder.rbt = value.ref.rbt;
+      _currentSample?.rbt = value.ref.rbt;
 
     case dc.dc_sample_type_t.DC_SAMPLE_HEARTBEAT:
-      builder.heartbeat = value.ref.heartbeat;
+      _currentSample?.heartbeat = value.ref.heartbeat;
 
     case dc.dc_sample_type_t.DC_SAMPLE_BEARING:
-      builder.bearing = value.ref.bearing;
+      _currentSample?.bearing = value.ref.bearing;
 
     case dc.dc_sample_type_t.DC_SAMPLE_VENDOR:
       final vendorData = value.ref.vendor;
@@ -250,27 +257,127 @@ void _sampleCallback(int typeValue, ffi.Pointer<dc.dc_sample_value_t> value, ffi
         for (var i = 0; i < vendorData.size; i++) {
           bytes[i] = dataPtr[i];
         }
-        builder.vendorData.add(VendorData(type: vendorData.type, data: bytes.toString()));
+        _currentSample?.vendorData.add(VendorData(type: vendorData.type, data: bytes));
       }
 
     case dc.dc_sample_type_t.DC_SAMPLE_SETPOINT:
-      builder.setpoint = value.ref.setpoint;
+      _currentSample?.setpoint = value.ref.setpoint;
 
     case dc.dc_sample_type_t.DC_SAMPLE_PPO2:
-      builder.ppo2.add(Ppo2Reading(sensorIndex: value.ref.ppo2.sensor, value: value.ref.ppo2.value));
+      _currentSample?.ppo2.add(Ppo2Reading(sensorIndex: value.ref.ppo2.sensor, value: value.ref.ppo2.value));
 
     case dc.dc_sample_type_t.DC_SAMPLE_CNS:
-      builder.cns = value.ref.cns;
+      _currentSample?.cns = value.ref.cns;
 
     case dc.dc_sample_type_t.DC_SAMPLE_DECO:
-      builder.deco = DecoStatus(
-        type: DecoStopType.fromDcValue(value.ref.deco.type),
+      _currentSample?.deco = DecoStatus(
+        type: _convertDecoStopType(value.ref.deco.type),
         time: value.ref.deco.time,
         depth: value.ref.deco.depth,
         tts: value.ref.deco.tts,
       );
 
     case dc.dc_sample_type_t.DC_SAMPLE_GASMIX:
-      builder.gasMixIndex = value.ref.gasmix;
+      _currentSample?.gasMixIndex = value.ref.gasmix;
   }
+}
+
+// --- Enum Conversion Functions ---
+
+/// Convert libdivecomputer water type to protobuf WaterType.
+WaterType? _convertWaterType(int dcValue) {
+  return switch (dcValue) {
+    0 => WaterType.WATER_TYPE_FRESH,
+    1 => WaterType.WATER_TYPE_SALT,
+    _ => null,
+  };
+}
+
+/// Convert libdivecomputer dive mode to protobuf DiveMode.
+DiveMode? _convertDiveMode(int dcValue) {
+  return switch (dcValue) {
+    0 => DiveMode.DIVE_MODE_FREEDIVE,
+    1 => DiveMode.DIVE_MODE_GAUGE,
+    2 => DiveMode.DIVE_MODE_OPENCIRCUIT,
+    3 => DiveMode.DIVE_MODE_CLOSED_CIRCUIT_REBREATHER,
+    4 => DiveMode.DIVE_MODE_SEMI_CLOSED_REBREATHER,
+    _ => null,
+  };
+}
+
+/// Convert libdivecomputer gas usage to protobuf GasUsage.
+GasUsage? _convertGasUsage(int dcValue) {
+  return switch (dcValue) {
+    0 => GasUsage.GAS_USAGE_NONE,
+    1 => GasUsage.GAS_USAGE_OXYGEN,
+    2 => GasUsage.GAS_USAGE_DILUENT,
+    3 => GasUsage.GAS_USAGE_SIDEMOUNT,
+    _ => null,
+  };
+}
+
+/// Convert libdivecomputer tank volume type to protobuf TankVolumeType.
+TankVolumeType? _convertTankVolumeType(int dcValue) {
+  return switch (dcValue) {
+    0 => TankVolumeType.TANK_VOLUME_TYPE_NONE,
+    1 => TankVolumeType.TANK_VOLUME_TYPE_METRIC,
+    2 => TankVolumeType.TANK_VOLUME_TYPE_IMPERIAL,
+    _ => null,
+  };
+}
+
+/// Convert libdivecomputer deco model type to protobuf DecoModelType.
+DecoModelType? _convertDecoModelType(int dcValue) {
+  return switch (dcValue) {
+    0 => DecoModelType.DECO_MODEL_TYPE_NONE,
+    1 => DecoModelType.DECO_MODEL_TYPE_BUHLMANN,
+    2 => DecoModelType.DECO_MODEL_TYPE_VPM,
+    3 => DecoModelType.DECO_MODEL_TYPE_RGBM,
+    4 => DecoModelType.DECO_MODEL_TYPE_DCIEM,
+    _ => null,
+  };
+}
+
+/// Convert libdivecomputer deco stop type to protobuf DecoStopType.
+DecoStopType? _convertDecoStopType(int dcValue) {
+  return switch (dcValue) {
+    0 => DecoStopType.DECO_STOP_TYPE_NDL,
+    1 => DecoStopType.DECO_STOP_TYPE_SAFETY_STOP,
+    2 => DecoStopType.DECO_STOP_TYPE_DECO_STOP,
+    3 => DecoStopType.DECO_STOP_TYPE_DEEP_STOP,
+    _ => null,
+  };
+}
+
+/// Convert libdivecomputer sample event type to protobuf SampleEventType.
+SampleEventType _convertSampleEventType(int dcValue) {
+  return switch (dcValue) {
+    0 => SampleEventType.SAMPLE_EVENT_TYPE_NONE,
+    1 => SampleEventType.SAMPLE_EVENT_TYPE_DECO_STOP,
+    2 => SampleEventType.SAMPLE_EVENT_TYPE_RBT,
+    3 => SampleEventType.SAMPLE_EVENT_TYPE_ASCENT,
+    4 => SampleEventType.SAMPLE_EVENT_TYPE_CEILING,
+    5 => SampleEventType.SAMPLE_EVENT_TYPE_WORKLOAD,
+    6 => SampleEventType.SAMPLE_EVENT_TYPE_TRANSMITTER,
+    7 => SampleEventType.SAMPLE_EVENT_TYPE_VIOLATION,
+    8 => SampleEventType.SAMPLE_EVENT_TYPE_BOOKMARK,
+    9 => SampleEventType.SAMPLE_EVENT_TYPE_SURFACE,
+    10 => SampleEventType.SAMPLE_EVENT_TYPE_SAFETY_STOP,
+    11 => SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE,
+    12 => SampleEventType.SAMPLE_EVENT_TYPE_SAFETY_STOP_VOLUNTARY,
+    13 => SampleEventType.SAMPLE_EVENT_TYPE_SAFETY_STOP_MANDATORY,
+    14 => SampleEventType.SAMPLE_EVENT_TYPE_DEEP_STOP,
+    15 => SampleEventType.SAMPLE_EVENT_TYPE_CEILING_SAFETY_STOP,
+    16 => SampleEventType.SAMPLE_EVENT_TYPE_FLOOR,
+    17 => SampleEventType.SAMPLE_EVENT_TYPE_DIVE_TIME,
+    18 => SampleEventType.SAMPLE_EVENT_TYPE_MAX_DEPTH,
+    19 => SampleEventType.SAMPLE_EVENT_TYPE_OLF,
+    20 => SampleEventType.SAMPLE_EVENT_TYPE_PO2,
+    21 => SampleEventType.SAMPLE_EVENT_TYPE_AIR_TIME,
+    22 => SampleEventType.SAMPLE_EVENT_TYPE_RGBM,
+    23 => SampleEventType.SAMPLE_EVENT_TYPE_HEADING,
+    24 => SampleEventType.SAMPLE_EVENT_TYPE_TISSUE_LEVEL,
+    25 => SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE_2,
+    _ => SampleEventType.SAMPLE_EVENT_TYPE_NONE,
+  };
 }

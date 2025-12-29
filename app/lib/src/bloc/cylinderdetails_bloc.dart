@@ -47,7 +47,7 @@ abstract class CylinderDetailsEvent extends Equatable {
 }
 
 class LoadCylinderDetails extends CylinderDetailsEvent {
-  final int cylinderId;
+  final String cylinderId;
 
   const LoadCylinderDetails(this.cylinderId);
 
@@ -72,9 +72,9 @@ class UpdateCylinderDetails extends CylinderDetailsEvent {
 }
 
 class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsState> {
-  final SsrfStorage _storage;
+  final Store _store = Store();
 
-  CylinderDetailsBloc({SsrfStorage? storage}) : _storage = storage ?? SsrfStorage(), super(const CylinderDetailsInitial()) {
+  CylinderDetailsBloc() : super(const CylinderDetailsInitial()) {
     on<LoadCylinderDetails>(_onLoadCylinderDetails);
     on<UpdateCylinderDetails>(_onUpdateCylinderDetails);
     on<NewCylinderEvent>(_onNewCylinder);
@@ -82,7 +82,7 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
 
   Future<void> _onLoadCylinderDetails(LoadCylinderDetails event, Emitter<CylinderDetailsState> emit) async {
     try {
-      final cylinder = await _storage.cylinders.getById(event.cylinderId);
+      final cylinder = await _store.cylinders.getById(event.cylinderId);
       if (cylinder == null) {
         emit(const CylinderDetailsError('Cylinder not found'));
         return;
@@ -98,10 +98,10 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
     try {
       final s = state as CylinderDetailsLoaded;
       if (s.isNew) {
-        final id = await _storage.cylinders.insert(event.cylinder);
+        final id = await _store.cylinders.insert(event.cylinder);
         add(LoadCylinderDetails(id));
       } else {
-        await _storage.cylinders.update(event.cylinder);
+        await _store.cylinders.update(event.cylinder);
         add(LoadCylinderDetails(event.cylinder.id));
       }
     } catch (e) {
@@ -110,7 +110,6 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
   }
 
   Future<void> _onNewCylinder(NewCylinderEvent event, Emitter<CylinderDetailsState> emit) async {
-    const cylinder = Cylinder(id: 0);
-    emit(const CylinderDetailsLoaded(cylinder, true));
+    emit(CylinderDetailsLoaded(Cylinder(), true));
   }
 }

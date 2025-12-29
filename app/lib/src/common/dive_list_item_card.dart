@@ -1,4 +1,4 @@
-import 'package:divestore/divestore.dart' hide formatDepth;
+import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -9,15 +9,17 @@ import 'units.dart';
 /// A card widget for displaying a dive in a mobile-friendly list layout.
 class DiveListItemCard extends StatelessWidget {
   final Dive dive;
-  final Divesite? diveSite;
+  final Site? site;
   final bool showSite;
 
-  const DiveListItemCard({super.key, required this.dive, this.diveSite, this.showSite = true});
+  const DiveListItemCard({super.key, required this.dive, this.site, this.showSite = true});
+
+  DateTime get _startDateTime => dive.start.toDateTime();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final maxDepth = dive.maxDepth ?? 0.0;
+    final maxDepth = dive.hasMaxDepth() ? dive.maxDepth : 0.0;
 
     return Card(
       child: InkWell(
@@ -35,18 +37,18 @@ class DiveListItemCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('Dive #${dive.number}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                  Text(DateFormat.yMd().format(dive.start), style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                  Text(DateFormat.yMd().format(_startDateTime), style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],
               ),
               const SizedBox(height: 8),
               // Middle row: Site name (if shown)
-              if (showSite && diveSite != null) ...[
+              if (showSite && site != null) ...[
                 Row(
                   children: [
                     Icon(Icons.location_on, size: 16, color: theme.colorScheme.primary),
                     const SizedBox(width: 4),
                     Expanded(
-                      child: Text(diveSite!.name, style: theme.textTheme.bodyMedium, overflow: TextOverflow.ellipsis),
+                      child: Text(site!.name, style: theme.textTheme.bodyMedium, overflow: TextOverflow.ellipsis),
                     ),
                   ],
                 ),
@@ -59,7 +61,7 @@ class DiveListItemCard extends StatelessWidget {
                   const SizedBox(width: 12),
                   _InfoChip(icon: Icons.timer, label: formatDuration(dive.duration), theme: theme),
                   const Spacer(),
-                  Text(DateFormat.jm().format(dive.start), style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                  Text(DateFormat.jm().format(_startDateTime), style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],
               ),
             ],

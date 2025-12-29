@@ -36,14 +36,14 @@ class CylinderListScreen extends StatelessWidget {
               itemCount: cylinders.length,
               itemBuilder: (context, index) {
                 final cylinder = cylinders[index];
-                final sizeStr = cylinder.size != null ? formatVolume(context, cylinder.size!) : null;
-                final wpStr = cylinder.workpressure != null ? formatPressure(context, cylinder.workpressure!) : null;
+                final sizeStr = cylinder.hasSize() ? formatVolume(context, cylinder.size) : null;
+                final wpStr = cylinder.hasWorkpressure() ? formatPressure(context, cylinder.workpressure) : null;
                 final specs = [sizeStr, wpStr].where((s) => s != null).join(' / ');
 
                 return Card(
                   child: ListTile(
                     leading: const Icon(Icons.propane_tank),
-                    title: Text(cylinder.description ?? 'Cylinder #${cylinder.id}'),
+                    title: Text(cylinder.description.isNotEmpty ? cylinder.description : 'Cylinder #${cylinder.id}'),
                     subtitle: specs.isNotEmpty ? Text(specs) : null,
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.goNamed(AppRouteName.cylindersDetails, pathParameters: {'cylinderID': cylinder.id.toString()}),

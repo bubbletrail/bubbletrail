@@ -5,8 +5,8 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:xml/xml.dart';
 import 'package:logging/logging.dart';
+import 'package:xml/xml.dart';
 
 final _log = Logger('DiveListBloc');
 
@@ -27,7 +27,7 @@ class DiveListLoading extends DiveListState {
 
 class DiveListLoaded extends DiveListState {
   final List<Dive> dives;
-  final List<Divesite> diveSites;
+  final List<Site> sites;
 
   /// Index map for O(1) dive lookup by ID
   late final Map<String, Dive> divesById;
@@ -36,26 +36,26 @@ class DiveListLoaded extends DiveListState {
   late final Map<String, int> diveIndexById;
 
   /// Index map for O(1) dive site lookup by UUID
-  late final Map<String, Divesite> diveSitesByUuid;
+  late final Map<String, Site> sitesByUuid;
 
   /// Index map for O(1) dive count lookup by site UUID
   late final Map<String, int> diveCountBySiteId;
 
-  DiveListLoaded(this.dives, this.diveSites) {
+  DiveListLoaded(this.dives, this.sites) {
     divesById = {for (final d in dives) d.id: d};
     diveIndexById = {for (var i = 0; i < dives.length; i++) dives[i].id: i};
-    diveSitesByUuid = {for (final s in diveSites) s.uuid: s};
+    sitesByUuid = {for (final s in sites) s.id: s};
     // Build dive count map
     diveCountBySiteId = {};
     for (final d in dives) {
-      if (d.divesiteid != null) {
-        diveCountBySiteId[d.divesiteid!] = (diveCountBySiteId[d.divesiteid!] ?? 0) + 1;
+      if (d.hasSiteId()) {
+        diveCountBySiteId[d.siteId] = (diveCountBySiteId[d.siteId] ?? 0) + 1;
       }
     }
   }
 
   @override
-  List<Object?> get props => [dives, diveSites];
+  List<Object?> get props => [dives, sites];
 }
 
 class DiveListError extends DiveListState {
@@ -97,7 +97,7 @@ class ImportDives extends DiveListEvent {
 }
 
 class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
-  final SsrfStorage _storage = SsrfStorage();
+  final Store _storage = Store();
 
   DiveListBloc() : super(const DiveListInitial()) {
     on<DiveListEvent>((event, emit) async {
@@ -119,9 +119,9 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
 
     try {
       // Load only overview data (from dives table) for efficiency
-      final dives = await _storage.dives.getAllOverview();
-      final diveSites = await _storage.divesites.getAll();
-      emit(DiveListLoaded(dives, diveSites));
+      final dives = await _storage.dives.getAll();
+      final sites = await _storage.sites.getAll();
+      emit(DiveListLoaded(dives, sites));
     } catch (e) {
       emit(DiveListError('Failed to load dives: $e'));
     }
@@ -145,8 +145,8 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       }
 
       // Reload overview list after update
-      final dives = await _storage.dives.getAllOverview();
-      emit(DiveListLoaded(dives, currentState.diveSites));
+      final dives = await _storage.dives.getAll();
+      emit(DiveListLoaded(dives, currentState.sites));
     } catch (e) {
       emit(DiveListError('Failed to update dive: $e'));
     }
@@ -159,32 +159,38 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       final doc = XmlDocument.parse(xmlData);
       final importedSsrf = SsrfXml.fromXml(doc.rootElement);
 
-      if (state is DiveListLoaded) {
-        final currentState = state as DiveListLoaded;
+      final currentState = state as DiveListLoaded;
 
-        // Merge dive sites: only add new ones (check by uuid)
-        final existingSiteUuids = currentState.diveSites.map((s) => s.uuid).toSet();
-        final newSites = importedSsrf.diveSites.where((s) => !existingSiteUuids.contains(s.uuid)).toList();
-        await _storage.divesites.insertAll(newSites);
+      // Merge dive sites: only add new ones (check by uuid)
+      final existingSiteUuids = currentState.sites.map((s) => s.id).toSet();
+      final newSites = importedSsrf.sites.where((s) => !existingSiteUuids.contains(s.id)).toList();
+      await _storage.sites.insertAll(newSites);
 
-        // Insert all imported dives
-        await _storage.dives.insertAll(importedSsrf.dives);
-      } else {
-        await _storage.saveAll(importedSsrf);
+      // Process cylinders
+      for (final dive in importedSsrf.dives) {
+        for (final cyl in dive.cylinders) {
+          if (cyl.hasCylinder()) {
+            final c = cyl.cylinder;
+            final cr = await _storage.cylinders.getOrCreate(
+              c.hasSize() ? c.size : null,
+              c.hasWorkpressure() ? c.workpressure : null,
+              c.hasDescription() ? c.description : null,
+            );
+            cyl.cylinderId = cr.id;
+            cyl.clearCylinder();
+          }
+        }
       }
 
+      // Insert all imported dives
+      await _storage.dives.insertAll(importedSsrf.dives);
+
       // Reload overview list after import
-      final dives = await _storage.dives.getAllOverview();
-      final diveSites = await _storage.divesites.getAll();
-      emit(DiveListLoaded(dives, diveSites));
+      final dives = await _storage.dives.getAll();
+      final sites = await _storage.sites.getAll();
+      emit(DiveListLoaded(dives, sites));
     } catch (e) {
       emit(DiveListError('Failed to import dives: $e'));
     }
-  }
-
-  @override
-  Future<void> close() {
-    _storage.close();
-    return super.close();
   }
 }

@@ -177,6 +177,9 @@ void _downloadIsolateEntry(DownloadRequest request) {
   }
 
   final descriptor = _descriptorCache[request.descriptorIndex];
+  final vendor = bindings.dc_descriptor_get_vendor(descriptor).cast<Utf8>().toDartString();
+  final product = bindings.dc_descriptor_get_product(descriptor).cast<Utf8>().toDartString();
+  final deviceModel = "$vendor $product";
 
   // Open FIFOs
   final iostream = calloc<ffi.Pointer<bindings.dc_iostream_t>>();
@@ -210,8 +213,8 @@ void _downloadIsolateEntry(DownloadRequest request) {
     return;
   }
 
-  // Set up event callback using NativeCallable.isolateLocal for synchronous execution
-  int diveCount = 0;
+  // Remember the device info
+  String deviceSerial = "";
 
   final eventCallback = ffi.NativeCallable<bindings.dc_event_callback_tFunction>.isolateLocal((
     ffi.Pointer<bindings.dc_device_t> dev,
@@ -226,6 +229,7 @@ void _downloadIsolateEntry(DownloadRequest request) {
       sendPort.send(DownloadProgressEvent(DownloadProgress(progress.current, progress.maximum)));
     } else if (eventType == bindings.dc_event_type_t.DC_EVENT_DEVINFO.value) {
       final devinfo = data.cast<bindings.dc_event_devinfo_t>().ref;
+      deviceSerial = devinfo.serial.toString();
       sendPort.send(DownloadDeviceInfo(DeviceInfo(model: devinfo.model, firmware: devinfo.firmware, serial: devinfo.serial)));
     }
   });
@@ -244,8 +248,6 @@ void _downloadIsolateEntry(DownloadRequest request) {
   // The exceptionalReturn value (0) is returned if the callback throws an exception
   final diveCallback = ffi.NativeCallable<bindings.dc_dive_callback_tFunction>.isolateLocal(
     (ffi.Pointer<ffi.UnsignedChar> data, int size, ffi.Pointer<ffi.UnsignedChar> fingerprint, int fsize, ffi.Pointer<ffi.Void> userdata) {
-      diveCount++;
-
       // Copy fingerprint if available
       Uint8List? fpBytes;
       if (fsize > 0 && fingerprint != ffi.nullptr) {
@@ -260,7 +262,7 @@ void _downloadIsolateEntry(DownloadRequest request) {
       final parserStatus = bindings.dc_parser_new(parser, device.value, data, size);
 
       if (parserStatus == bindings.dc_status_t.DC_STATUS_SUCCESS) {
-        final dive = parseDiveFromParser(parser.value, fingerprint: fpBytes.toString());
+        final dive = parseDiveFromParser(parser.value, fingerprint: fpBytes, model: deviceModel, serial: deviceSerial);
 
         sendPort.send(DownloadDiveReceived(dive));
 
@@ -268,7 +270,7 @@ void _downloadIsolateEntry(DownloadRequest request) {
       } else {
         _log.warning('Failed to parse dive: $parserStatus');
         // Send a minimal dive with just the number and raw data
-        sendPort.send(DownloadDiveReceived(ComputerDive(number: diveCount, fingerprint: fpBytes?.toString())));
+        sendPort.send(DownloadDiveReceived(Log(fingerprint: fpBytes)));
       }
 
       calloc.free(parser);
@@ -293,7 +295,7 @@ void _downloadIsolateEntry(DownloadRequest request) {
   calloc.free(iostream);
 
   if (foreachStatus == bindings.dc_status_t.DC_STATUS_SUCCESS) {
-    sendPort.send(DownloadCompleted(diveCount));
+    sendPort.send(DownloadCompleted());
   } else {
     sendPort.send(DownloadError('Download failed: $foreachStatus'));
   }

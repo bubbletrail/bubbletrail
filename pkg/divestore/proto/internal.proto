@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package divestore;
+
+import "log.proto";
+import "site.proto";
+import "types.proto";
+
+message InternalCylinderList {
+  repeated Cylinder cylinders = 1;
+}
+
+message InternalSiteList {
+  repeated Site sites = 1;
+}
+
+message InternalDiveLogList {
+  repeated Log divelogs = 1;
+}

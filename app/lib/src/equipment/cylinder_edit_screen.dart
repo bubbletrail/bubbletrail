@@ -27,9 +27,9 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
     final state = context.read<CylinderDetailsBloc>().state as CylinderDetailsLoaded;
     _originalCylinder = state.cylinder;
     _isNew = state.isNew;
-    _descriptionController = TextEditingController(text: _originalCylinder.description ?? '');
-    _sizeController = TextEditingController(text: _originalCylinder.size?.toString() ?? '');
-    _workpressureController = TextEditingController(text: _originalCylinder.workpressure?.toString() ?? '');
+    _descriptionController = TextEditingController(text: _originalCylinder.description);
+    _sizeController = TextEditingController(text: _originalCylinder.hasSize() ? _originalCylinder.size.toString() : '');
+    _workpressureController = TextEditingController(text: _originalCylinder.hasWorkpressure() ? _originalCylinder.workpressure.toString() : '');
   }
 
   @override

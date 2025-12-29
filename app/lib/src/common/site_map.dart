@@ -3,29 +3,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
-class DiveSiteMap extends StatefulWidget {
-  const DiveSiteMap({super.key, required this.position});
+class SiteMap extends StatefulWidget {
+  const SiteMap({super.key, required this.position});
 
-  final GPSPosition position;
+  final Position position;
 
   @override
-  State<DiveSiteMap> createState() => _DiveSiteMapState();
+  State<SiteMap> createState() => _SiteMapState();
 }
 
-class _DiveSiteMapState extends State<DiveSiteMap> {
+class _SiteMapState extends State<SiteMap> {
   final MapController _mapController = MapController();
 
   @override
-  void didUpdateWidget(DiveSiteMap oldWidget) {
+  void didUpdateWidget(SiteMap oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.position.lat != widget.position.lat || oldWidget.position.lon != widget.position.lon) {
-      _mapController.move(LatLng(widget.position.lat, widget.position.lon), _mapController.camera.zoom);
+    if (oldWidget.position.latitude != widget.position.latitude || oldWidget.position.longitude != widget.position.longitude) {
+      _mapController.move(LatLng(widget.position.latitude, widget.position.longitude), _mapController.camera.zoom);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final latlng = LatLng(widget.position.lat, widget.position.lon);
+    final latlng = LatLng(widget.position.latitude, widget.position.longitude);
     return FlutterMap(
       mapController: _mapController,
       options: MapOptions(initialCenter: latlng, initialZoom: 15.0, minZoom: 3.0, maxZoom: 18.0),

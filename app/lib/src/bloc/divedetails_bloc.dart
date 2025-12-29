@@ -1,6 +1,7 @@
 import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 
 import 'details_state.dart';
 
@@ -21,13 +22,13 @@ class DiveDetailsLoading extends DiveDetailsState with DetailsLoadingMixin {
 
 class DiveDetailsLoaded extends DiveDetailsState with DetailsLoadedMixin {
   final Dive dive;
-  final Divesite? diveSite;
+  final Site? site;
   final bool newDive;
 
-  const DiveDetailsLoaded(this.dive, this.diveSite, this.newDive);
+  const DiveDetailsLoaded(this.dive, this.site, this.newDive);
 
   @override
-  List<Object?> get props => [dive, diveSite, newDive];
+  List<Object?> get props => [dive, site, newDive];
 }
 
 class DiveDetailsError extends DiveDetailsState with DetailsErrorMixin {
@@ -73,9 +74,9 @@ class UpdateDiveDetails extends DiveDetailsEvent {
 }
 
 class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
-  final SsrfStorage _storage;
+  final Store _storage = Store();
 
-  DiveDetailsBloc({SsrfStorage? storage}) : _storage = storage ?? SsrfStorage(), super(const DiveDetailsInitial()) {
+  DiveDetailsBloc() : super(const DiveDetailsInitial()) {
     on<LoadDiveDetails>(_onLoadDiveDetails);
     on<UpdateDiveDetails>(_onUpdateDiveDetails);
     on<NewDiveEvent>(_onNewDive);
@@ -91,12 +92,12 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
       }
 
       // Load dive site if available
-      Divesite? diveSite;
-      if (dive.divesiteid != null) {
-        diveSite = await _storage.divesites.getById(dive.divesiteid!);
+      Site? site;
+      if (dive.hasSiteId()) {
+        site = await _storage.sites.getById(dive.siteId);
       }
 
-      emit(DiveDetailsLoaded(dive, diveSite, false));
+      emit(DiveDetailsLoaded(dive, site, false));
     } catch (e) {
       emit(DiveDetailsError('Failed to load dive details: $e'));
     }
@@ -118,7 +119,7 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
 
   Future<void> _onNewDive(NewDiveEvent event, Emitter<DiveDetailsState> emit) async {
     final diveNo = await _storage.dives.nextDiveNo;
-    final dive = Dive(number: diveNo, start: DateTime.now(), duration: 0);
+    final dive = Dive(number: diveNo, start: Timestamp.fromDateTime(DateTime.now()), duration: 0);
     emit(DiveDetailsLoaded(dive, null, true));
   }
 }

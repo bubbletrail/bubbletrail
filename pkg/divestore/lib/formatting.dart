@@ -6,7 +6,9 @@ double? tryParseUnitString(String? s) {
 
   // Handle percentage (e.g., "32.0%")
   if (s.endsWith('%')) {
-    return double.tryParse(s.substring(0, s.length - 1));
+    final d = double.tryParse(s.substring(0, s.length - 1));
+    if (d != null) return d / 100.0;
+    return null;
   }
 
   final parts = s.split(' ');

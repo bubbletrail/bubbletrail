@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart' as proto;
 
 import '../bloc/cylinderlist_bloc.dart';
 import '../bloc/divedetails_bloc.dart';
@@ -11,26 +12,40 @@ import '../common/common.dart';
 
 /// Editable wrapper for a dive cylinder with mutable fields
 class _EditableDiveCylinder {
-  int cylinderId;
+  String cylinderId;
   Cylinder? cylinder;
-  double? o2;
-  double? he;
-  double? start;
-  double? end;
+  int oxygen;
+  int helium;
+  int? beginPressure;
+  int? endPressure;
 
-  _EditableDiveCylinder({required this.cylinderId, this.cylinder, this.o2, this.he, this.start, this.end});
+  _EditableDiveCylinder({required this.cylinderId, this.cylinder, required this.oxygen, required this.helium, this.beginPressure, this.endPressure});
 
   factory _EditableDiveCylinder.fromDiveCylinder(DiveCylinder dc) {
-    return _EditableDiveCylinder(cylinderId: dc.cylinderId, cylinder: dc.cylinder, o2: dc.o2, he: dc.he, start: dc.start, end: dc.end);
+    return _EditableDiveCylinder(
+      cylinderId: dc.cylinderId,
+      cylinder: dc.hasCylinder() ? dc.cylinder : null,
+      oxygen: (dc.oxygen * 100).toInt(),
+      helium: (dc.helium * 100).toInt(),
+      beginPressure: dc.beginPressure.toInt(),
+      endPressure: dc.endPressure.toInt(),
+    );
   }
 
   DiveCylinder toDiveCylinder() {
-    return DiveCylinder(cylinderId: cylinderId, cylinder: cylinder, o2: o2, he: he, start: start, end: end);
+    return DiveCylinder(
+      cylinderId: cylinderId,
+      cylinder: cylinder,
+      oxygen: oxygen.toDouble() / 100,
+      helium: helium.toDouble() / 100,
+      beginPressure: beginPressure?.toDouble(),
+      endPressure: endPressure?.toDouble(),
+    );
   }
 
   String get gasDescription {
-    final o2Val = o2 ?? 21;
-    final heVal = he ?? 0;
+    final o2Val = oxygen;
+    final heVal = helium;
     if (heVal > 0) {
       return 'Tx${o2Val.round()}/${heVal.round()}';
     } else if (o2Val != 21) {
@@ -70,7 +85,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   late final TextEditingController _tagsController;
   late DateTime _selectedDateTime;
   late int? _rating;
-  String? _selectedDivesiteId;
+  String? _selectedSiteId;
   late List<_EditableDiveCylinder> _cylinders;
   late List<_EditableGasChange> _gasChanges;
 
@@ -78,25 +93,27 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   void initState() {
     super.initState();
     dive = (context.read<DiveDetailsBloc>().state as DiveDetailsLoaded).dive;
-    _selectedDateTime = dive.start;
+    _selectedDateTime = dive.start.toDateTime();
     _durationSeconds = dive.duration;
-    _divemasterController = TextEditingController(text: dive.divemaster ?? '');
+    _divemasterController = TextEditingController(text: dive.divemaster);
     _buddiesController = TextEditingController(text: dive.buddies.join(', '));
-    _notesController = TextEditingController(text: dive.notes ?? '');
+    _notesController = TextEditingController(text: dive.notes);
     _tagsController = TextEditingController(text: dive.tags.join(', '));
-    _rating = dive.rating;
-    _selectedDivesiteId = dive.divesiteid;
+    _rating = dive.hasRating() ? dive.rating : null;
+    _selectedSiteId = dive.siteId.isEmpty ? null : dive.siteId;
 
     // Initialize cylinders from dive
     _cylinders = dive.cylinders.map((dc) => _EditableDiveCylinder.fromDiveCylinder(dc)).toList();
 
-    // Extract gaschange events from all computer dives
+    // Extract gaschange events from all computer dives (events are in samples)
     _gasChanges = [];
-    for (final cd in dive.computerDives) {
-      for (final event in cd.events) {
-        if (event.type == SampleEventType.gasChange) {
-          // The value field stores the cylinder index
-          _gasChanges.add(_EditableGasChange(timeSeconds: event.time, cylinderIndex: event.value));
+    for (final cd in dive.logs) {
+      for (final sample in cd.samples) {
+        for (final event in sample.events) {
+          if (event.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE) {
+            // The value field stores the cylinder index
+            _gasChanges.add(_EditableGasChange(timeSeconds: event.time, cylinderIndex: event.value));
+          }
         }
       }
     }
@@ -153,22 +170,22 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     return '$minutes:${seconds.toString().padLeft(2, '0')} min';
   }
 
-  Future<void> _selectDivesite() async {
+  Future<void> _selectSite() async {
     final diveListState = context.read<DiveListBloc>().state;
     if (diveListState is! DiveListLoaded) return;
 
-    final diveSites = diveListState.diveSites;
-    if (diveSites.isEmpty) {
+    final sites = diveListState.sites;
+    if (sites.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No dive sites available')));
       return;
     }
 
-    final currentSite = _selectedDivesiteId != null ? diveListState.diveSitesByUuid[_selectedDivesiteId] : null;
+    final currentSite = _selectedSiteId != null ? diveListState.sitesByUuid[_selectedSiteId] : null;
 
-    final result = await showSelectionDialog<Divesite>(
+    final result = await showSelectionDialog<Site>(
       context: context,
       title: 'Select Dive Site',
-      items: diveSites,
+      items: sites,
       selectedItem: currentSite,
       noneOption: 'No site',
       itemBuilder: (site) => ListTile(leading: const Icon(Icons.location_on), title: Text(site.name)),
@@ -176,7 +193,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
 
     if (!result.cancelled) {
       setState(() {
-        _selectedDivesiteId = result.value?.uuid;
+        _selectedSiteId = result.value?.id;
       });
     }
   }
@@ -199,10 +216,10 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       title: 'Select Cylinder',
       items: cylinders,
       itemBuilder: (cyl) {
-        final subtitle = [if (cyl.size != null) formatVolume(context, cyl.size!), if (cyl.workpressure != null) formatPressure(context, cyl.workpressure!)].join(' @ ');
+        final subtitle = [if (cyl.hasSize()) formatVolume(context, cyl.size), if (cyl.hasWorkpressure()) formatPressure(context, cyl.workpressure)].join(' @ ');
         return ListTile(
           leading: const Icon(Icons.scuba_diving),
-          title: Text(cyl.description ?? 'Cylinder ${cyl.id}'),
+          title: Text(cyl.description.isNotEmpty ? cyl.description : 'Cylinder ${cyl.id}'),
           subtitle: subtitle.isNotEmpty ? Text(subtitle) : null,
         );
       },
@@ -210,7 +227,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
 
     if (!result.cancelled && result.value != null) {
       setState(() {
-        _cylinders.add(_EditableDiveCylinder(cylinderId: result.value!.id, cylinder: result.value, o2: 21, he: 0));
+        _cylinders.add(_EditableDiveCylinder(cylinderId: result.value!.id, cylinder: result.value, oxygen: 21, helium: 0));
       });
     }
   }
@@ -248,10 +265,10 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
 
   Future<void> _editCylinderGas(int index) async {
     final cyl = _cylinders[index];
-    final o2Controller = TextEditingController(text: (cyl.o2 ?? 21).toString());
-    final heController = TextEditingController(text: (cyl.he ?? 0).toString());
-    final startController = TextEditingController(text: cyl.start?.toString() ?? '');
-    final endController = TextEditingController(text: cyl.end?.toString() ?? '');
+    final o2Controller = TextEditingController(text: cyl.oxygen.toString());
+    final heController = TextEditingController(text: cyl.helium.toString());
+    final startController = TextEditingController(text: cyl.beginPressure?.toString() ?? '');
+    final endController = TextEditingController(text: cyl.endPressure?.toString() ?? '');
 
     final cylinderState = context.read<CylinderListBloc>().state;
     final availableCylinders = cylinderState is CylinderListLoaded ? cylinderState.cylinders : <Cylinder>[];
@@ -266,12 +283,18 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (availableCylinders.isNotEmpty) ...[
-                DropdownButtonFormField<int>(
+                DropdownButtonFormField<String>(
                   initialValue: selectedCylinder?.id,
                   decoration: const InputDecoration(labelText: 'Cylinder Type', border: OutlineInputBorder()),
                   items: availableCylinders.map((c) {
-                    final subtitle = [if (c.size != null) formatVolume(context, c.size!), if (c.workpressure != null) formatPressure(context, c.workpressure!)].join(' @ ');
-                    return DropdownMenuItem(value: c.id, child: Text(c.description ?? 'Cylinder ${c.id}${subtitle.isNotEmpty ? ' ($subtitle)' : ''}'));
+                    final subtitle = [
+                      if (c.hasSize()) formatVolume(context, c.size),
+                      if (c.hasWorkpressure()) formatPressure(context, c.workpressure),
+                    ].join(' @ ');
+                    return DropdownMenuItem(
+                      value: c.id,
+                      child: Text('${c.description.isNotEmpty ? c.description : 'Cylinder ${c.id}'}${subtitle.isNotEmpty ? ' ($subtitle)' : ''}'),
+                    );
                   }).toList(),
                   onChanged: (id) {
                     if (id != null) {
@@ -288,7 +311,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                   Expanded(
                     child: TextField(
                       controller: o2Controller,
-                      decoration: const InputDecoration(labelText: 'O2 %', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(labelText: 'Oxygen %', border: OutlineInputBorder()),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     ),
                   ),
@@ -296,7 +319,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                   Expanded(
                     child: TextField(
                       controller: heController,
-                      decoration: const InputDecoration(labelText: 'He %', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(labelText: 'Helium %', border: OutlineInputBorder()),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     ),
                   ),
@@ -338,10 +361,10 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
           cyl.cylinderId = selectedCylinder!.id;
           cyl.cylinder = selectedCylinder;
         }
-        cyl.o2 = double.tryParse(o2Controller.text);
-        cyl.he = double.tryParse(heController.text);
-        cyl.start = double.tryParse(startController.text);
-        cyl.end = double.tryParse(endController.text);
+        cyl.oxygen = int.tryParse(o2Controller.text) ?? 0;
+        cyl.helium = int.tryParse(heController.text) ?? 0;
+        cyl.beginPressure = int.tryParse(startController.text);
+        cyl.endPressure = int.tryParse(endController.text);
       });
     }
 
@@ -374,56 +397,65 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   void _saveDive() {
     try {
       // Update dive properties
-      dive.start = _selectedDateTime;
+      dive.start = proto.Timestamp.fromDateTime(_selectedDateTime);
       dive.duration = _durationSeconds;
-      dive.rating = _rating;
-      dive.divesiteid = _selectedDivesiteId;
-      dive.divemaster = _divemasterController.text.trim().isEmpty ? null : _divemasterController.text.trim();
-      dive.notes = _notesController.text.trim().isEmpty ? null : _notesController.text.trim();
+      if (_rating != null) {
+        dive.rating = _rating!;
+      } else {
+        dive.clearRating();
+      }
+      dive.siteId = _selectedSiteId ?? '';
+      dive.divemaster = _divemasterController.text.trim();
+      dive.notes = _notesController.text.trim();
 
       // Update buddies
       final buddiesText = _buddiesController.text.trim();
-      dive.buddies = buddiesText.isEmpty ? {} : buddiesText.split(',').map((b) => b.trim()).where((b) => b.isNotEmpty).toSet();
+      dive.buddies.clear();
+      if (buddiesText.isNotEmpty) {
+        dive.buddies.addAll(buddiesText.split(',').map((b) => b.trim()).where((b) => b.isNotEmpty));
+      }
 
       // Update tags
       final tagsText = _tagsController.text.trim();
-      dive.tags = tagsText.isEmpty ? {} : tagsText.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toSet();
+      dive.tags.clear();
+      if (tagsText.isNotEmpty) {
+        dive.tags.addAll(tagsText.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty));
+      }
 
       // Update cylinders
-      dive.cylinders = _cylinders.map((c) => c.toDiveCylinder()).toList();
+      dive.cylinders.clear();
+      dive.cylinders.addAll(_cylinders.map((c) => c.toDiveCylinder()));
 
       // Update gas change events
       // Find existing "Manual Entry" computer dive or prepare to create one
       const manualEntryModel = 'Manual Entry';
-      ComputerDive? manualCd = dive.computerDives.where((cd) => cd.model == manualEntryModel).firstOrNull;
+      Log? manualCd = dive.logs.where((cd) => cd.model == manualEntryModel).firstOrNull;
 
       if (_gasChanges.isNotEmpty) {
-        // Convert gas changes to events
-        final events = _gasChanges.map((gc) {
-          return SampleEvent(
-            time: gc.timeSeconds,
-            type: SampleEventType.gasChange,
-            flags: const SampleEventFlags(0),
-            value: gc.cylinderIndex,
+        // Convert gas changes to sample events
+        final samples = _gasChanges.map((gc) {
+          return LogSample(
+            time: gc.timeSeconds.toDouble(),
+            events: [SampleEvent(time: gc.timeSeconds, type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, flags: 0, value: gc.cylinderIndex)],
           );
         }).toList();
 
         if (manualCd != null) {
           // Replace the manual computer dive with updated events
-          dive.computerDives.remove(manualCd);
+          dive.logs.remove(manualCd);
         }
         // Create new manual computer dive
-        manualCd = ComputerDive(
+        manualCd = Log(
           model: manualEntryModel,
-          maxDepth: dive.maxDepth,
-          avgDepth: dive.meanDepth,
-          events: events,
+          maxDepth: dive.hasMaxDepth() ? dive.maxDepth : null,
+          avgDepth: dive.hasMeanDepth() ? dive.meanDepth : null,
+          samples: samples,
         );
-        dive.computerDives.add(manualCd);
+        dive.logs.add(manualCd);
       } else if (manualCd != null) {
         // No gas changes, remove manual computer dive if it only had events
         if (manualCd.samples.isEmpty) {
-          dive.computerDives.remove(manualCd);
+          dive.logs.remove(manualCd);
         }
       }
 
@@ -483,10 +515,10 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
             Builder(
               builder: (context) {
                 final diveListState = context.watch<DiveListBloc>().state;
-                final selectedSite = _selectedDivesiteId != null && diveListState is DiveListLoaded ? diveListState.diveSitesByUuid[_selectedDivesiteId] : null;
+                final selectedSite = _selectedSiteId != null && diveListState is DiveListLoaded ? diveListState.sitesByUuid[_selectedSiteId] : null;
 
                 return InkWell(
-                  onTap: _selectDivesite,
+                  onTap: _selectSite,
                   child: InputDecorator(
                     decoration: const InputDecoration(labelText: 'Dive Site', border: OutlineInputBorder(), suffixIcon: Icon(Icons.location_on)),
                     child: Text(selectedSite?.name ?? 'No site selected', style: selectedSite == null ? TextStyle(color: Theme.of(context).hintColor) : null),
@@ -532,7 +564,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                                     children: [
                                       Text(cyl.cylinder?.description ?? 'Cylinder ${index + 1}', style: Theme.of(context).textTheme.titleSmall),
                                       Text(
-                                        '${cyl.gasDescription}${cyl.start != null || cyl.end != null ? ' • ${cyl.start != null ? formatPressure(context, cyl.start!) : '?'} → ${cyl.end != null ? formatPressure(context, cyl.end!) : '?'}' : ''}',
+                                        '${cyl.gasDescription}${cyl.beginPressure != null || cyl.endPressure != null ? ' • ${cyl.beginPressure != null ? formatPressure(context, cyl.beginPressure!) : '?'} → ${cyl.endPressure != null ? formatPressure(context, cyl.endPressure!) : '?'}' : ''}',
                                         style: Theme.of(context).textTheme.bodySmall,
                                       ),
                                     ],

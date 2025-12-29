@@ -4,7 +4,7 @@ import 'dart:math';
 final random = Random(42); // Fixed seed for reproducibility
 
 // Dive sites pool
-final diveSites = [
+final sites = [
   ('Sweden / Blekinge / Järnavik', 56.179390, 15.070710),
   ('Thailand / Koh Tao / White Rock', 10.110830, 99.813260),
   ('Sweden / Kullen / Arild, Tussan', 56.277450, 12.571350),
@@ -248,15 +248,15 @@ void main(List<String> args) async {
 
   // Generate site UUIDs
   final siteUuids = <String>[];
-  sink.writeln('<divesites>');
-  for (final site in diveSites) {
+  sink.writeln('<sites>');
+  for (final site in sites) {
     final uuid = generateUuid();
     siteUuids.add(uuid);
     final name = site.$1.replaceAll('&', '&amp;');
     sink.writeln("<site uuid='$uuid' name='$name' gps='${site.$2.toStringAsFixed(6)} ${site.$3.toStringAsFixed(6)}'>");
     sink.writeln('</site>');
   }
-  sink.writeln('</divesites>');
+  sink.writeln('</sites>');
 
   // Generate dives
   sink.writeln('<dives>');
@@ -292,7 +292,7 @@ void main(List<String> args) async {
         '${currentDate.hour.toString().padLeft(2, '0')}:${currentDate.minute.toString().padLeft(2, '0')}:${currentDate.second.toString().padLeft(2, '0')}';
 
     sink.writeln(
-      "<dive number='$diveNum' rating='$rating' sac='${sac.toStringAsFixed(3)} l/min' tags='$tagsStr' divesiteid='$siteUuid' date='$dateStr' time='$timeStr' duration='${formatDuration(durationSecs)}'>",
+      "<dive number='$diveNum' rating='$rating' sac='${sac.toStringAsFixed(3)} l/min' tags='$tagsStr' siteid='$siteUuid' date='$dateStr' time='$timeStr' duration='${formatDuration(durationSecs)}'>",
     );
 
     // Divemaster (50% chance)

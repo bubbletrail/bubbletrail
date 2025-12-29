@@ -47,18 +47,17 @@ class LoadCylinders extends CylinderListEvent {
 }
 
 class CylinderListBloc extends Bloc<CylinderListEvent, CylinderListState> {
-  final SsrfStorage _storage;
+  final Store _store = Store();
 
-  CylinderListBloc({SsrfStorage? storage}) : _storage = storage ?? SsrfStorage(), super(const CylinderListInitial()) {
+  CylinderListBloc() : super(const CylinderListInitial()) {
     on<LoadCylinders>(_onLoadCylinders);
-
     add(const LoadCylinders());
   }
 
   Future<void> _onLoadCylinders(LoadCylinders event, Emitter<CylinderListState> emit) async {
     emit(const CylinderListLoading());
     try {
-      final cylinders = await _storage.cylinders.getAll();
+      final cylinders = await _store.cylinders.getAll();
       emit(CylinderListLoaded(cylinders));
     } catch (e) {
       emit(CylinderListError('Failed to load cylinders: $e'));

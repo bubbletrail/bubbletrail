@@ -65,13 +65,12 @@ class DownloadDeviceInfo extends DownloadEvent {
 }
 
 class DownloadDiveReceived extends DownloadEvent {
-  final ComputerDive dive;
+  final Log dive;
   DownloadDiveReceived(this.dive);
 }
 
 class DownloadCompleted extends DownloadEvent {
-  final int diveCount;
-  DownloadCompleted(this.diveCount);
+  DownloadCompleted();
 }
 
 class DownloadError extends DownloadEvent {

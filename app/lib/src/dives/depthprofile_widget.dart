@@ -1,4 +1,4 @@
-import 'package:divestore/divestore.dart' hide formatDepth;
+import 'package:divestore/divestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,14 +8,14 @@ import '../common/units.dart';
 import '../preferences/preferences.dart';
 
 class DepthProfileWidget extends StatelessWidget {
-  final ComputerDive computerDive;
+  final Log log;
 
-  const DepthProfileWidget({super.key, required this.computerDive});
+  const DepthProfileWidget({super.key, required this.log});
 
   @override
   Widget build(BuildContext context) {
     // Filter out samples without depth data
-    final samplesWithDepth = computerDive.samples.where((s) => s.depth != null).toList();
+    final samplesWithDepth = log.samples.where((s) => s.hasDepth()).toList();
 
     final unit = context.watch<PreferencesBloc>().state.preferences.depthUnit;
     final mult = unit == DepthUnit.feet ? 3.28 : 1.0;
@@ -27,9 +27,9 @@ class DepthProfileWidget extends StatelessWidget {
     }
 
     // Inverting depth, so that depths are negative for graph purposes
-    final maxDepth = mult * -samplesWithDepth.map((s) => s.depth!).reduce((a, b) => a > b ? a : b);
+    final maxDepth = mult * -samplesWithDepth.map((s) => s.depth).reduce((a, b) => a > b ? a : b);
     final maxTime = samplesWithDepth.map((s) => s.time).reduce((a, b) => a > b ? a : b) / 60;
-    final spots = samplesWithDepth.map((sample) => FlSpot(sample.time / 60, mult * -sample.depth!)).toList();
+    final spots = samplesWithDepth.map((sample) => FlSpot(sample.time / 60, mult * -sample.depth)).toList();
 
     final colorScheme = Theme.of(context).colorScheme;
     final primaryColor = colorScheme.primary;

@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 
 import '../common/common.dart';
 
-class DiveSiteMapWidget extends StatelessWidget {
-  final Divesite divesite;
+class SiteMapWidget extends StatelessWidget {
+  final Site site;
   final double height;
 
-  const DiveSiteMapWidget({super.key, required this.divesite, this.height = 300});
+  const SiteMapWidget({super.key, required this.site, this.height = 300});
 
   @override
   Widget build(BuildContext context) {
-    if (divesite.position == null) {
+    if (!site.hasPosition()) {
       return Card(
         elevation: 2,
         child: Container(height: height, alignment: Alignment.center, child: const Text('No location data available')),
@@ -23,7 +23,7 @@ class DiveSiteMapWidget extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: SizedBox(
         height: height,
-        child: DiveSiteMap(position: divesite.position!),
+        child: SiteMap(position: site.position),
       ),
     );
   }

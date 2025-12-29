@@ -1,6 +1,6 @@
 import 'dart:io' show Platform;
 
-import 'package:divestore/divestore.dart' hide formatDepth;
+import 'package:divestore/divestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,10 +10,10 @@ import '../common/units.dart';
 /// A fullscreen view of the dive depth profile.
 /// On mobile devices (iOS/Android), this screen forces landscape orientation.
 class FullscreenProfileScreen extends StatefulWidget {
-  final ComputerDive computerDive;
+  final Log log;
   final String? title;
 
-  const FullscreenProfileScreen({super.key, required this.computerDive, this.title});
+  const FullscreenProfileScreen({super.key, required this.log, this.title});
 
   @override
   State<FullscreenProfileScreen> createState() => _FullscreenProfileScreenState();
@@ -55,7 +55,7 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
     final primaryColor = colorScheme.primary;
 
     // Filter out samples without depth data
-    final samples = widget.computerDive.samples.where((s) => s.depth != null).toList();
+    final samples = widget.log.samples.where((s) => s.hasDepth()).toList();
     if (samples.isEmpty) {
       return Scaffold(
         backgroundColor: Colors.black,
@@ -66,9 +66,9 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
       );
     }
 
-    final maxDepth = -samples.map((s) => s.depth!).reduce((a, b) => a > b ? a : b);
+    final maxDepth = -samples.map((s) => s.depth).reduce((a, b) => a > b ? a : b);
     final maxTime = samples.map((s) => s.time).reduce((a, b) => a > b ? a : b) / 60;
-    final spots = samples.map((sample) => FlSpot(sample.time / 60, -sample.depth!)).toList();
+    final spots = samples.map((sample) => FlSpot(sample.time / 60, -sample.depth)).toList();
 
     return Padding(
       padding: Platform.isMacOS ? const EdgeInsets.only(top: 16.0) : EdgeInsetsGeometry.only(), // avoid the window buttons on macos

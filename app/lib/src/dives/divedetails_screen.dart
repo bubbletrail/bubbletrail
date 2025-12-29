@@ -33,7 +33,7 @@ class DiveDetailsScreen extends StatelessWidget {
           }
         }
 
-        return _DiveDetails(dive: state.dive, diveSite: state.diveSite, nextID: nextDiveID, prevID: prevDiveID);
+        return _DiveDetails(dive: state.dive, site: state.site, nextID: nextDiveID, prevID: prevDiveID);
       },
     );
   }
@@ -41,16 +41,16 @@ class DiveDetailsScreen extends StatelessWidget {
 
 class _DiveDetails extends StatelessWidget {
   final Dive dive;
-  final Divesite? diveSite;
+  final Site? site;
   final String? nextID;
   final String? prevID;
 
-  const _DiveDetails({required this.dive, required this.diveSite, required this.nextID, required this.prevID});
+  const _DiveDetails({required this.dive, required this.site, required this.nextID, required this.prevID});
 
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
-      title: Text('Dive #${dive.number}: ${diveSite?.name ?? 'Unknown site'}'),
+      title: Text('Dive #${dive.number}: ${site?.name ?? 'Unknown site'}'),
       actions: [
         IconButton(
           icon: const Icon(Icons.edit),
@@ -141,36 +141,38 @@ class _DiveDetails extends StatelessWidget {
     );
   }
 
+  DateTime get _startDateTime => dive.start.toDateTime();
+
   List<Widget> _buildAllSections(BuildContext context) {
     return [
       infoCard(context, 'General Information', [
-        infoRow('Start', DateFormat.yMd().add_jm().format(dive.start)),
+        infoRow('Start', DateFormat.yMd().add_jm().format(_startDateTime)),
         infoRow('Duration', formatDuration(dive.duration)),
-        if (dive.rating != null) infoRow('Rating', '★' * dive.rating!),
+        if (dive.hasRating()) infoRow('Rating', '★' * dive.rating),
         if (dive.tags.isNotEmpty) infoRow('Tags', dive.tags.join(', ')),
       ]),
       const SizedBox(height: 16),
-      if (diveSite != null) ...[_DivesiteCard(divesite: diveSite!), const SizedBox(height: 16)],
-      if (dive.computerDives.isNotEmpty) ...[
+      if (site != null) ...[_SiteCard(site: site!), const SizedBox(height: 16)],
+      if (dive.logs.isNotEmpty) ...[
         infoCard(context, 'Dive Computer Data', [
-          if (dive.computerDives[0].maxDepth != null) infoWidgetRow('Max Depth', DepthText(dive.computerDives[0].maxDepth!)),
-          if (dive.computerDives[0].avgDepth != null) infoWidgetRow('Mean Depth', DepthText(dive.computerDives[0].avgDepth!)),
-          if (dive.computerDives[0].surfaceTemperature != null) infoWidgetRow('Air Temperature', TemperatureText(dive.computerDives[0].surfaceTemperature!)),
-          if (dive.computerDives[0].minTemperature != null) infoWidgetRow('Water Temperature', TemperatureText(dive.computerDives[0].minTemperature!)),
+          if (dive.logs[0].hasMaxDepth()) infoWidgetRow('Max Depth', DepthText(dive.logs[0].maxDepth)),
+          if (dive.logs[0].hasAvgDepth()) infoWidgetRow('Mean Depth', DepthText(dive.logs[0].avgDepth)),
+          if (dive.logs[0].hasSurfaceTemperature()) infoWidgetRow('Air Temperature', TemperatureText(dive.logs[0].surfaceTemperature)),
+          if (dive.logs[0].hasMinTemperature()) infoWidgetRow('Water Temperature', TemperatureText(dive.logs[0].minTemperature)),
         ]),
         const SizedBox(height: 16),
       ],
-      if (dive.sac != null || dive.otu != null || dive.cns != null) ...[
+      if (dive.hasSac() || dive.hasOtu() || dive.hasCns()) ...[
         infoCard(context, 'Physiological Data', [
-          if (dive.sac != null) infoRow('SAC', '${dive.sac!.toStringAsFixed(1)} l/min'),
-          if (dive.otu != null) infoRow('OTU', dive.otu.toString()),
-          if (dive.cns != null) infoRow('CNS', '${dive.cns}%'),
+          if (dive.hasSac()) infoRow('SAC', '${dive.sac.toStringAsFixed(1)} l/min'),
+          if (dive.hasOtu()) infoRow('OTU', dive.otu.toString()),
+          if (dive.hasCns()) infoRow('CNS', '${dive.cns}%'),
         ]),
         const SizedBox(height: 16),
       ],
-      if (dive.divemaster != null || dive.buddies.isNotEmpty) ...[
+      if (dive.divemaster.isNotEmpty || dive.buddies.isNotEmpty) ...[
         infoCard(context, 'People', [
-          if (dive.divemaster != null) infoRow('Divemaster', dive.divemaster!),
+          if (dive.divemaster.isNotEmpty) infoRow('Divemaster', dive.divemaster),
           if (dive.buddies.isNotEmpty) infoRow('Buddies', dive.buddies.join(', ')),
         ]),
         const SizedBox(height: 16),
@@ -182,26 +184,25 @@ class _DiveDetails extends StatelessWidget {
           dive.cylinders.asMap().entries.map((entry) {
             final idx = entry.key;
             final cyl = entry.value;
-            final desc = cyl.cylinder?.description ?? 'Cylinder ${idx + 1}';
+            final desc = cyl.hasCylinder() && cyl.cylinder.description.isNotEmpty ? cyl.cylinder.description : 'Cylinder ${idx + 1}';
             final details = <String>[];
 
             // Gas mixture
-            if (cyl.o2 != null || cyl.he != null) {
-              final o2 = cyl.o2 ?? 21.0;
-              final he = cyl.he ?? 0.0;
-              if (he > 0) {
-                details.add('Tx${o2.toStringAsFixed(0)}/${he.toStringAsFixed(0)}');
+            if (cyl.hasOxygen() || cyl.hasHelium()) {
+              final o2 = cyl.hasOxygen() ? cyl.oxygen : 0.21;
+              if (cyl.helium > 0) {
+                details.add('Tx${o2.toStringAsFixed(0)}/${(cyl.helium * 100).toStringAsFixed(0)}');
               } else if (o2 != 21.0) {
-                details.add('EAN${o2.toStringAsFixed(0)}');
+                details.add('EAN${(o2 * 100).toStringAsFixed(0)}');
               } else {
                 details.add('Air');
               }
             }
 
-            if (cyl.cylinder?.size != null) details.add(formatVolume(context, cyl.cylinder!.size!));
-            if (cyl.cylinder?.workpressure != null) details.add(formatPressure(context, cyl.cylinder!.workpressure!));
-            if (cyl.start != null) details.add('Start: ${formatPressure(context, cyl.start!)}');
-            if (cyl.end != null) details.add('End: ${formatPressure(context, cyl.end!)}');
+            if (cyl.hasCylinder() && cyl.cylinder.hasSize()) details.add(formatVolume(context, cyl.cylinder.size));
+            if (cyl.hasCylinder() && cyl.cylinder.hasWorkpressure()) details.add(formatPressure(context, cyl.cylinder.workpressure));
+            if (cyl.hasBeginPressure()) details.add('Start: ${formatPressure(context, cyl.beginPressure)}');
+            if (cyl.hasEndPressure()) details.add('End: ${formatPressure(context, cyl.endPressure)}');
             return infoRow(desc, details.join(', '));
           }).toList(),
         ),
@@ -214,23 +215,23 @@ class _DiveDetails extends StatelessWidget {
           dive.weightsystems.asMap().entries.map((entry) {
             final idx = entry.key;
             final ws = entry.value;
-            final desc = ws.description ?? 'Weight ${idx + 1}';
-            final weight = ws.weight != null ? formatWeight(context, ws.weight!) : '';
+            final desc = ws.description.isNotEmpty ? ws.description : 'Weight ${idx + 1}';
+            final weight = ws.hasWeight() ? formatWeight(context, ws.weight) : '';
             return infoRow(desc, weight);
           }).toList(),
         ),
         const SizedBox(height: 16),
       ],
-      if (dive.notes != null && dive.notes!.isNotEmpty) ...[
+      if (dive.notes.isNotEmpty) ...[
         infoCard(context, 'Notes', [
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
-            child: Text(dive.notes!, style: Theme.of(context).textTheme.bodyMedium),
+            child: Text(dive.notes, style: Theme.of(context).textTheme.bodyMedium),
           ),
         ]),
         const SizedBox(height: 16),
       ],
-      if (dive.computerDives.isNotEmpty && dive.computerDives[0].samples.isNotEmpty) ...[
+      if (dive.logs.isNotEmpty && dive.logs[0].samples.isNotEmpty) ...[
         _WideCard(
           elevation: 2,
           child: Padding(
@@ -248,7 +249,7 @@ class _DiveDetails extends StatelessWidget {
                       onPressed: () {
                         Navigator.of(context, rootNavigator: true).push(
                           MaterialPageRoute(
-                            builder: (context) => FullscreenProfileScreen(computerDive: dive.computerDives[0], title: 'Dive #${dive.number}'),
+                            builder: (context) => FullscreenProfileScreen(log: dive.logs[0], title: 'Dive #${dive.number}'),
                           ),
                         );
                       },
@@ -257,7 +258,7 @@ class _DiveDetails extends StatelessWidget {
                   ],
                 ),
                 const Divider(),
-                DepthProfileWidget(computerDive: dive.computerDives[0]),
+                DepthProfileWidget(log: dive.logs[0]),
               ],
             ),
           ),
@@ -267,10 +268,10 @@ class _DiveDetails extends StatelessWidget {
   }
 }
 
-class _DivesiteCard extends StatelessWidget {
-  final Divesite divesite;
+class _SiteCard extends StatelessWidget {
+  final Site site;
 
-  const _DivesiteCard({required this.divesite});
+  const _SiteCard({required this.site});
 
   @override
   Widget build(BuildContext context) {
@@ -279,13 +280,13 @@ class _DivesiteCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          context.goNamed(AppRouteName.sitesDetails, pathParameters: {'siteID': divesite.uuid});
+          context.goNamed(AppRouteName.sitesDetails, pathParameters: {'siteID': site.id});
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Map preview (only if position exists)
-            if (divesite.position != null) SizedBox(height: 150, child: DiveSiteMap(position: divesite.position!)),
+            if (site.hasPosition()) SizedBox(height: 150, child: SiteMap(position: site.position)),
             // Site information
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -295,15 +296,15 @@ class _DivesiteCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(divesite.name, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                        child: Text(site.name, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                       ),
                       Icon(Icons.arrow_forward_ios, size: 16, color: Theme.of(context).colorScheme.primary),
                     ],
                   ),
                   const Divider(),
-                  if (divesite.position != null) ...[
-                    infoRow('Latitude', divesite.position!.lat.toStringAsFixed(6)),
-                    infoRow('Longitude', divesite.position!.lon.toStringAsFixed(6)),
+                  if (site.hasPosition()) ...[
+                    infoRow('Latitude', site.position.latitude.toStringAsFixed(6)),
+                    infoRow('Longitude', site.position.longitude.toStringAsFixed(6)),
                   ],
                 ],
               ),

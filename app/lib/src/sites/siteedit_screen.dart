@@ -4,18 +4,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../bloc/divelist_bloc.dart';
-import '../bloc/divesitedetails_bloc.dart';
+import '../bloc/sitedetails_bloc.dart';
 import '../common/common.dart';
 
-class DivesiteEditScreen extends StatefulWidget {
-  const DivesiteEditScreen({super.key});
+class SiteEditScreen extends StatefulWidget {
+  const SiteEditScreen({super.key});
 
   @override
-  State<DivesiteEditScreen> createState() => _DivesiteEditScreenState();
+  State<SiteEditScreen> createState() => _SiteEditScreenState();
 }
 
-class _DivesiteEditScreenState extends State<DivesiteEditScreen> {
-  late final Divesite _originalDivesite;
+class _SiteEditScreenState extends State<SiteEditScreen> {
+  late final Site _originalSite;
   late final bool _isNew;
   late final TextEditingController _nameController;
   late final TextEditingController _countryController;
@@ -28,16 +28,16 @@ class _DivesiteEditScreenState extends State<DivesiteEditScreen> {
   @override
   void initState() {
     super.initState();
-    final state = context.read<DivesiteDetailsBloc>().state as DivesiteDetailsLoaded;
-    _originalDivesite = state.divesite;
+    final state = context.read<SiteDetailsBloc>().state as SiteDetailsLoaded;
+    _originalSite = state.site;
     _isNew = state.isNew;
-    _nameController = TextEditingController(text: _originalDivesite.name);
-    _countryController = TextEditingController(text: _originalDivesite.country ?? '');
-    _locationController = TextEditingController(text: _originalDivesite.location ?? '');
-    _bodyOfWaterController = TextEditingController(text: _originalDivesite.bodyOfWater ?? '');
-    _difficultyController = TextEditingController(text: _originalDivesite.difficulty ?? '');
-    _latController = TextEditingController(text: _originalDivesite.position?.lat.toString() ?? '');
-    _lonController = TextEditingController(text: _originalDivesite.position?.lon.toString() ?? '');
+    _nameController = TextEditingController(text: _originalSite.name);
+    _countryController = TextEditingController(text: _originalSite.country);
+    _locationController = TextEditingController(text: _originalSite.location);
+    _bodyOfWaterController = TextEditingController(text: _originalSite.bodyOfWater);
+    _difficultyController = TextEditingController(text: _originalSite.difficulty);
+    _latController = TextEditingController(text: _originalSite.hasPosition() ? _originalSite.position.latitude.toString() : '');
+    _lonController = TextEditingController(text: _originalSite.hasPosition() ? _originalSite.position.longitude.toString() : '');
   }
 
   @override
@@ -52,7 +52,7 @@ class _DivesiteEditScreenState extends State<DivesiteEditScreen> {
     super.dispose();
   }
 
-  void _saveDivesite() {
+  void _saveSite() {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Name is required')));
@@ -61,29 +61,29 @@ class _DivesiteEditScreenState extends State<DivesiteEditScreen> {
 
     try {
       // Parse GPS position if provided
-      GPSPosition? position;
+      Position? position;
       final latText = _latController.text.trim();
       final lonText = _lonController.text.trim();
       if (latText.isNotEmpty && lonText.isNotEmpty) {
         final lat = double.tryParse(latText);
         final lon = double.tryParse(lonText);
         if (lat != null && lon != null) {
-          position = GPSPosition(lat, lon);
+          position = Position(latitude: lat, longitude: lon);
         }
       }
 
-      final updatedDivesite = Divesite(
-        uuid: _originalDivesite.uuid,
+      final updatedSite = Site(
+        id: _originalSite.id,
         name: name,
         position: position,
-        country: _countryController.text.trim().isEmpty ? null : _countryController.text.trim(),
-        location: _locationController.text.trim().isEmpty ? null : _locationController.text.trim(),
-        bodyOfWater: _bodyOfWaterController.text.trim().isEmpty ? null : _bodyOfWaterController.text.trim(),
-        difficulty: _difficultyController.text.trim().isEmpty ? null : _difficultyController.text.trim(),
+        country: _countryController.text.trim(),
+        location: _locationController.text.trim(),
+        bodyOfWater: _bodyOfWaterController.text.trim(),
+        difficulty: _difficultyController.text.trim(),
       );
 
       // Send update event to bloc
-      context.read<DivesiteDetailsBloc>().add(UpdateDivesiteDetails(updatedDivesite));
+      context.read<SiteDetailsBloc>().add(UpdateSiteDetails(updatedSite));
 
       // Reload dive list to reflect changes
       context.read<DiveListBloc>().add(const LoadDives());
@@ -100,8 +100,8 @@ class _DivesiteEditScreenState extends State<DivesiteEditScreen> {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
-      title: Text(_isNew ? 'New Dive Site' : 'Edit ${_originalDivesite.name}'),
-      actions: [IconButton(icon: const Icon(Icons.save), onPressed: _saveDivesite, tooltip: 'Save')],
+      title: Text(_isNew ? 'New Dive Site' : 'Edit ${_originalSite.name}'),
+      actions: [IconButton(icon: const Icon(Icons.save), onPressed: _saveSite, tooltip: 'Save')],
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -154,7 +154,7 @@ class _DivesiteEditScreenState extends State<DivesiteEditScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _saveDivesite,
+                onPressed: _saveSite,
                 style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
                 child: Text(_isNew ? 'Create Dive Site' : 'Save Changes', style: const TextStyle(fontSize: 16)),
               ),
