@@ -14,11 +14,5 @@
 	<array>
 		<string>iCloud.app.bubbletrail</string>
 	</array>
-	<key>com.apple.security.app-sandbox</key>
-	<true/>
-	<key>com.apple.security.cs.allow-jit</key>
-	<true/>
-	<key>com.apple.security.network.server</key>
-	<true/>
 </dict>
 </plist>

@@ -11,8 +11,6 @@ import 'download.dart';
 import 'libdivecomputer_bindings_generated.dart' as bindings;
 import 'parser.dart';
 
-final _log = Logger('libdivecomputer.isolate');
-
 class ComputerDescriptor {
   final int handle;
   final String vendor;
@@ -167,6 +165,8 @@ class DownloadRequest extends RequestBase {
 
 /// Entry point for the download isolate.
 void _downloadIsolateEntry(DownloadRequest request) {
+  final _log = Logger('libdivecomputer.isolate');
+
   final sendPort = request.sendPort;
 
   // Set log level to see what's happening
@@ -266,14 +266,12 @@ void _downloadIsolateEntry(DownloadRequest request) {
         try {
           final dive = parseDiveFromParser(parser.value, fingerprint: fpBytes, model: deviceModel, serial: deviceSerial);
 
-          print("comparing last dive fp ${request.lastDiveLog?.fingerprint} to ${dive.fingerprint}");
           _log.info("comparing last dive fp ${request.lastDiveLog?.fingerprint} to ${dive.fingerprint}");
           if (request.lastDiveLog != null && request.lastDiveLog!.fingerprint == dive.fingerprint) {
             // We've already seen this one.
             // calloc.free(parser);
             return 0;
           }
-          print("comparing last dive date ${request.lastDiveLog?.dateTime.seconds} to ${dive.dateTime.seconds}");
           _log.info("comparing last dive date ${request.lastDiveLog?.dateTime.seconds} to ${dive.dateTime.seconds}");
           if (request.lastDiveLog != null && request.lastDiveLog!.dateTime.seconds.compareTo(dive.dateTime.seconds) >= 0) {
             // XXX: This should definitely be optional
@@ -284,13 +282,11 @@ void _downloadIsolateEntry(DownloadRequest request) {
 
           sendPort.send(DownloadDiveReceived(dive));
         } catch (e) {
-          print('Exception while parsing dive: $e');
           _log.warning('Exception while parsing dive: $e');
         } finally {
           bindings.dc_parser_destroy(parser.value);
         }
       } else {
-        print('Failed to parse dive: $parserStatus');
         _log.warning('Failed to parse dive: $parserStatus');
         // Send a minimal dive with just the number and raw data
         sendPort.send(DownloadDiveReceived(Log(fingerprint: fpBytes)));

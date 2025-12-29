@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'details_state.dart';
+import 'sync_bloc.dart';
 
 abstract class CylinderDetailsState extends Equatable with DetailsStateMixin {
   const CylinderDetailsState();
@@ -72,9 +73,9 @@ class UpdateCylinderDetails extends CylinderDetailsEvent {
 }
 
 class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsState> {
-  final Store _store = Store();
+  final SyncBloc _syncBloc;
 
-  CylinderDetailsBloc() : super(const CylinderDetailsInitial()) {
+  CylinderDetailsBloc(this._syncBloc) : super(const CylinderDetailsInitial()) {
     on<LoadCylinderDetails>(_onLoadCylinderDetails);
     on<UpdateCylinderDetails>(_onUpdateCylinderDetails);
     on<NewCylinderEvent>(_onNewCylinder);
@@ -82,7 +83,8 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
 
   Future<void> _onLoadCylinderDetails(LoadCylinderDetails event, Emitter<CylinderDetailsState> emit) async {
     try {
-      final cylinder = await _store.cylinders.getById(event.cylinderId);
+      final store = await _syncBloc.store;
+      final cylinder = await store.cylinders.getById(event.cylinderId);
       if (cylinder == null) {
         emit(const CylinderDetailsError('Cylinder not found'));
         return;
@@ -96,12 +98,13 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
 
   Future<void> _onUpdateCylinderDetails(UpdateCylinderDetails event, Emitter<CylinderDetailsState> emit) async {
     try {
-      final s = state as CylinderDetailsLoaded;
-      if (s.isNew) {
-        final id = await _store.cylinders.insert(event.cylinder);
+      final details = state as CylinderDetailsLoaded;
+      final store = await _syncBloc.store;
+      if (details.isNew) {
+        final id = await store.cylinders.insert(event.cylinder);
         add(LoadCylinderDetails(id));
       } else {
-        await _store.cylinders.update(event.cylinder);
+        await store.cylinders.update(event.cylinder);
         add(LoadCylinderDetails(event.cylinder.id));
       }
     } catch (e) {

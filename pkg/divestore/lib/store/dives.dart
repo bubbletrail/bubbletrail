@@ -1,39 +1,35 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:divestore/store/fileio.dart';
 import 'package:glob/glob.dart';
 import 'package:glob/list_local_fs.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
+import 'package:logging/logging.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
-import 'package:intl/intl.dart';
 
 import '../gen/gen.dart';
 import '../gen/internal.pb.dart';
 
+final _log = Logger('store/dives');
+
 class Dives {
-  static Dives _instance = Dives._();
-
-  factory Dives() {
-    return _instance;
-  }
-
-  Dives._() {}
-
-  late final String pathPrefix;
+  final String pathPrefix;
+  final bool readonly;
   Map<String, Dive> _dives = {};
   Set<String> _tags = {};
   Set<String> _dirty = {};
-  bool _loaded = false;
   Timer? _saveTimer;
+
+  Dives(this.pathPrefix, {this.readonly = false});
 
   Set<String> get tags => _tags;
 
   Future<String> insert(Dive dive) async {
-    if (!_loaded) await _load();
+    if (readonly) throw Exception('readonly');
     if (!dive.hasId()) {
       dive.id = Uuid().v4().toString();
     }
@@ -54,7 +50,7 @@ class Dives {
   }
 
   Future<void> insertAll(Iterable<Dive> dives) async {
-    if (!_loaded) await _load();
+    if (readonly) throw Exception('readonly');
     for (final dive in dives) {
       if (!dive.hasId()) {
         dive.id = Uuid().v4().toString();
@@ -79,21 +75,27 @@ class Dives {
   }
 
   Future<void> update(Dive dive) async {
-    if (!_loaded) await _load();
+    if (readonly) throw Exception('readonly');
     dive.updatedAt = Timestamp.fromDateTime(DateTime.now());
     _dives[dive.id] = dive;
     _tags.addAll(dive.tags);
     _scheduleSave(dive.id);
   }
 
+  Future<void> _import(Dive dive) async {
+    if (readonly) throw Exception('readonly');
+    _dives[dive.id] = dive;
+    _tags.addAll(dive.tags);
+    _scheduleSave(dive.id);
+  }
+
   Future<void> delete(String id) async {
-    if (!_loaded) await _load();
+    if (readonly) throw Exception('readonly');
     _dives[id]?.deletedAt = Timestamp.fromDateTime(DateTime.now());
     _scheduleSave(id);
   }
 
   Future<Dive?> getById(String id) async {
-    if (!_loaded) await _load();
     final dive = _dives[id];
     if (dive == null) return null;
     if (dive.logs.isEmpty) {
@@ -104,7 +106,6 @@ class Dives {
   }
 
   Future<List<Dive>> getAll() async {
-    if (!_loaded) await _load();
     final dives = _dives.values.where((d) => !d.hasDeletedAt()).toList();
     dives.sort((a, b) => -a.number.compareTo(b.number));
     return dives;
@@ -116,29 +117,24 @@ class Dives {
     return next;
   }
 
-  Future<void> _load() async {
-    final dir = await getApplicationDocumentsDirectory();
-    pathPrefix = "${dir.path}/dives";
-    try {
-      await for (final match in Glob("$pathPrefix/*/*.meta.json").list()) {
+  Future<void> init() async {
+    await for (final match in Glob("$pathPrefix/*/*.meta.binpb").list()) {
+      try {
         Dive dive = await _loadMeta(match.path);
         _dives[dive.id] = dive;
         _tags.addAll(dive.tags);
-      }
-    } catch (_) {
-    } finally {
-      _loaded = true;
+      } catch (_) {}
     }
   }
 
   Future<Dive> _loadMeta(String path) async {
-    final bs = await File(path).readAsString();
-    return Dive.create()..mergeFromProto3Json(jsonDecode(bs));
+    final bs = await File(path).readAsBytes();
+    return Dive.fromBuffer(bs);
   }
 
   Future<List<Log>> _loadLogs(String path) async {
     final bs = await File(path).readAsBytes();
-    return InternalDiveLogList.fromBuffer(bs).divelogs;
+    return InternalLogList.fromBuffer(bs).logs;
   }
 
   void _scheduleSave(String? id) {
@@ -151,24 +147,49 @@ class Dives {
     try {
       for (final id in _dirty) {
         final dive = _dives[id]!;
-        final dlBuf = InternalDiveLogList(divelogs: dive.logs).writeToBuffer();
 
         final dir = diveDir(dive);
         await Directory(dir).create(recursive: true);
 
-        dive.logs.clear();
-        atomicWriteJSON(metaName(dir, dive), dive.toProto3Json());
+        atomicWriteProto(dlName(dir, dive), InternalLogList(logs: dive.logs));
 
-        atomicWrite(dlName(dir, dive), dlBuf);
+        dive.logs.clear();
+        atomicWriteProto(metaName(dir, dive), dive);
       }
+
+      _log.info("saved ${_dirty.length} dives");
       _dirty.clear();
-      print("saved dives");
     } catch (e) {
-      print("failed to save dives: $e");
+      _log.warning("failed to save dives: $e");
+    }
+  }
+
+  Future<Uint8List> mergedDives() async {
+    final dl = InternalDiveList();
+    for (final id in _dives.keys) {
+      final dive = await getById(id);
+      if (dive != null) dl.dives.add(dive);
+    }
+    return dl.writeToBuffer();
+  }
+
+  Future<void> importFrom(Dives other) async {
+    for (final dive in await other.getAll()) {
+      final cur = _dives[dive.id];
+      if (dive.hasDeletedAt()) {
+        if (cur != null) {
+          print("delete dive ${dive.id}");
+          await delete(dive.id);
+        }
+      } else if (cur == null || dive.updatedAt.toDateTime().isAfter(cur.updatedAt.toDateTime())) {
+        final rdive = await other.getById(dive.id);
+        print("import dive ${rdive!.id}");
+        await _import(rdive);
+      }
     }
   }
 
   String diveDir(Dive dive) => "$pathPrefix/${DateFormat('yyyy-MM').format(dive.createdAt.toDateTime())}";
-  String dlName(String dir, Dive dive) => "$dir/${DateFormat('yyyy-MM-dd').format(dive.createdAt.toDateTime())}-${dive.id}.logs.binpb";
-  String metaName(String dir, Dive dive) => "$dir/${DateFormat('yyyy-MM-dd').format(dive.createdAt.toDateTime())}-${dive.id}.meta.json";
+  String dlName(String dir, Dive dive) => "$dir/${DateFormat('yyyy-MM-dd').format(dive.createdAt.toDateTime())}.${dive.id}.logs.binpb";
+  String metaName(String dir, Dive dive) => "$dir/${DateFormat('yyyy-MM-dd').format(dive.createdAt.toDateTime())}.${dive.id}.meta.binpb";
 }

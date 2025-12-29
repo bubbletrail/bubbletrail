@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package divestore;
 
+import "dive.proto";
 import "log.proto";
 import "site.proto";
 import "types.proto";
@@ -14,6 +15,10 @@ message InternalSiteList {
   repeated Site sites = 1;
 }
 
-message InternalDiveLogList {
-  repeated Log divelogs = 1;
+message InternalDiveList {
+  repeated Dive dives = 1;
+}
+
+message InternalLogList {
+  repeated Log logs = 1;
 }

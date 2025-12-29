@@ -55,22 +55,34 @@ final $typed_data.Uint8List internalSiteListDescriptor = $convert.base64Decode(
     'ChBJbnRlcm5hbFNpdGVMaXN0EiUKBXNpdGVzGAEgAygLMg8uZGl2ZXN0b3JlLlNpdGVSBXNpdG'
     'Vz');
 
-@$core.Deprecated('Use internalDiveLogListDescriptor instead')
-const InternalDiveLogList$json = {
-  '1': 'InternalDiveLogList',
+@$core.Deprecated('Use internalDiveListDescriptor instead')
+const InternalDiveList$json = {
+  '1': 'InternalDiveList',
   '2': [
     {
-      '1': 'divelogs',
+      '1': 'dives',
       '3': 1,
       '4': 3,
       '5': 11,
-      '6': '.divestore.Log',
-      '10': 'divelogs'
+      '6': '.divestore.Dive',
+      '10': 'dives'
     },
   ],
 };
 
-/// Descriptor for `InternalDiveLogList`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List internalDiveLogListDescriptor = $convert.base64Decode(
-    'ChNJbnRlcm5hbERpdmVMb2dMaXN0EioKCGRpdmVsb2dzGAEgAygLMg4uZGl2ZXN0b3JlLkxvZ1'
-    'IIZGl2ZWxvZ3M=');
+/// Descriptor for `InternalDiveList`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List internalDiveListDescriptor = $convert.base64Decode(
+    'ChBJbnRlcm5hbERpdmVMaXN0EiUKBWRpdmVzGAEgAygLMg8uZGl2ZXN0b3JlLkRpdmVSBWRpdm'
+    'Vz');
+
+@$core.Deprecated('Use internalLogListDescriptor instead')
+const InternalLogList$json = {
+  '1': 'InternalLogList',
+  '2': [
+    {'1': 'logs', '3': 1, '4': 3, '5': 11, '6': '.divestore.Log', '10': 'logs'},
+  ],
+};
+
+/// Descriptor for `InternalLogList`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List internalLogListDescriptor = $convert.base64Decode(
+    'Cg9JbnRlcm5hbExvZ0xpc3QSIgoEbG9ncxgBIAMoCzIOLmRpdmVzdG9yZS5Mb2dSBGxvZ3M=');

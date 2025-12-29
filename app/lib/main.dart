@@ -11,14 +11,15 @@ import 'package:logging/logging.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'src/app_routes.dart';
-import 'src/preferences/window_preferences.dart';
+import 'src/app_theme.dart';
 import 'src/bloc/ble_bloc.dart';
 import 'src/bloc/cylinderdetails_bloc.dart';
 import 'src/bloc/cylinderlist_bloc.dart';
 import 'src/bloc/divedetails_bloc.dart';
 import 'src/bloc/divelist_bloc.dart';
-import 'src/bloc/sitedetails_bloc.dart';
 import 'src/bloc/preferences_bloc.dart';
+import 'src/bloc/sitedetails_bloc.dart';
+import 'src/bloc/sync_bloc.dart';
 import 'src/common/common.dart';
 import 'src/dives/ble_scan_screen.dart';
 import 'src/dives/divedetails_screen.dart';
@@ -28,10 +29,10 @@ import 'src/equipment/cylinder_edit_screen.dart';
 import 'src/equipment/cylinder_list_screen.dart';
 import 'src/equipment/equipment_screen.dart';
 import 'src/preferences/preferences_screen.dart';
+import 'src/preferences/window_preferences.dart';
 import 'src/sites/sitedetail_screen.dart';
 import 'src/sites/siteedit_screen.dart';
 import 'src/sites/sitelist_screen.dart';
-import 'src/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,13 +64,17 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WindowListener {
   static const _channel = MethodChannel('app.bubbletrail.app/file_handler');
-  final _diveListBloc = DiveListBloc();
-  final _cylinderListBloc = CylinderListBloc();
+  late final SyncBloc _syncBloc;
+  late final DiveListBloc _diveListBloc;
+  late final CylinderListBloc _cylinderListBloc;
   final _preferencesBloc = PreferencesBloc();
 
   @override
   void initState() {
     super.initState();
+    _syncBloc = SyncBloc();
+    _diveListBloc = DiveListBloc(_syncBloc);
+    _cylinderListBloc = CylinderListBloc(_syncBloc);
     _setupFileHandler();
     if (WindowPreferences.isSupported) {
       windowManager.addListener(this);
@@ -188,7 +193,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       path: AppRoutePath.divesNew,
                       name: AppRouteName.divesNew,
                       builder: (context, state) => BlocProvider.value(
-                        value: DiveDetailsBloc()..add(NewDiveEvent()),
+                        value: DiveDetailsBloc(_syncBloc)..add(NewDiveEvent()),
                         child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: DiveEditScreen()),
                       ),
                     ),
@@ -196,7 +201,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       path: AppRoutePath.divesDetails,
                       name: AppRouteName.divesDetails,
                       builder: (context, state) => BlocProvider(
-                        create: (context) => DiveDetailsBloc(),
+                        create: (context) => DiveDetailsBloc(_syncBloc),
                         child: Builder(
                           builder: (context) {
                             context.read<DiveDetailsBloc>().add(LoadDiveDetails(state.pathParameters['diveID']!));
@@ -209,7 +214,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           path: AppRoutePath.divesDetailsEdit,
                           name: AppRouteName.divesDetailsEdit,
                           builder: (context, state) => BlocProvider.value(
-                            value: DiveDetailsBloc()..add(LoadDiveDetails(state.pathParameters['diveID']!)),
+                            value: DiveDetailsBloc(_syncBloc)..add(LoadDiveDetails(state.pathParameters['diveID']!)),
                             child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: DiveEditScreen()),
                           ),
                         ),
@@ -230,7 +235,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       path: AppRoutePath.sitesNew,
                       name: AppRouteName.sitesNew,
                       builder: (context, state) => BlocProvider(
-                        create: (context) => SiteDetailsBloc()..add(const NewSiteEvent()),
+                        create: (context) => SiteDetailsBloc(_syncBloc)..add(const NewSiteEvent()),
                         child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: SiteEditScreen()),
                       ),
                     ),
@@ -243,7 +248,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           path: AppRoutePath.sitesDetailsEdit,
                           name: AppRouteName.sitesDetailsEdit,
                           builder: (context, state) => BlocProvider(
-                            create: (context) => SiteDetailsBloc()..add(LoadSiteDetails(state.pathParameters['siteID']!)),
+                            create: (context) => SiteDetailsBloc(_syncBloc)..add(LoadSiteDetails(state.pathParameters['siteID']!)),
                             child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: SiteEditScreen()),
                           ),
                         ),
@@ -269,7 +274,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           path: AppRoutePath.cylindersNew,
                           name: AppRouteName.cylindersNew,
                           builder: (context, state) => BlocProvider(
-                            create: (context) => CylinderDetailsBloc()..add(const NewCylinderEvent()),
+                            create: (context) => CylinderDetailsBloc(_syncBloc)..add(const NewCylinderEvent()),
                             child: DetailsAvailable<CylinderDetailsBloc, CylinderDetailsState>(child: CylinderEditScreen()),
                           ),
                         ),
@@ -277,7 +282,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           path: AppRoutePath.cylindersDetails,
                           name: AppRouteName.cylindersDetails,
                           builder: (context, state) => BlocProvider(
-                            create: (context) => CylinderDetailsBloc()..add(LoadCylinderDetails(state.pathParameters['cylinderID']!)),
+                            create: (context) => CylinderDetailsBloc(_syncBloc)..add(LoadCylinderDetails(state.pathParameters['cylinderID']!)),
                             child: DetailsAvailable<CylinderDetailsBloc, CylinderDetailsState>(child: CylinderEditScreen()),
                           ),
                         ),
@@ -297,6 +302,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
     );
     return MultiBlocProvider(
       providers: [
+        BlocProvider.value(value: _syncBloc),
         BlocProvider.value(value: _diveListBloc),
         BlocProvider.value(value: _cylinderListBloc),
         BlocProvider.value(value: _preferencesBloc),

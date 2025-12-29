@@ -1,32 +1,28 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:divestore/store/fileio.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:logging/logging.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 
 import '../gen/gen.dart';
 import '../gen/internal.pb.dart';
 
+final _log = Logger('store/cylinders');
+
 class Cylinders {
-  static Cylinders _instance = Cylinders._();
+  final String path;
+  final bool readonly;
 
-  factory Cylinders() {
-    return _instance;
-  }
-
-  Cylinders._() {}
-
-  late final String path;
   Map<String, Cylinder> _cylinders = Map();
-  bool _loaded = false;
   Timer? _saveTimer;
 
+  Cylinders(this.path, {this.readonly = false});
+
   Future<String> insert(Cylinder cylinder) async {
-    if (!_loaded) await _load();
+    if (readonly) throw Exception('readonly');
     if (!cylinder.hasId()) {
       cylinder.id = Uuid().v4().toString();
     }
@@ -42,7 +38,7 @@ class Cylinders {
   }
 
   Future<void> update(Cylinder cylinder) async {
-    if (!_loaded) await _load();
+    if (readonly) throw Exception('readonly');
     cylinder.updatedAt = Timestamp.fromDateTime(DateTime.now());
     if (!cylinder.hasCreatedAt()) {
       cylinder.createdAt = cylinder.updatedAt;
@@ -51,24 +47,27 @@ class Cylinders {
     _scheduleSave();
   }
 
+  Future<void> _import(Cylinder cylinder) async {
+    if (readonly) throw Exception('readonly');
+    _cylinders[cylinder.id] = cylinder;
+    _scheduleSave();
+  }
+
   Future<void> delete(String id) async {
-    if (!_loaded) await _load();
+    if (readonly) throw Exception('readonly');
     _cylinders[id]?.deletedAt = Timestamp.fromDateTime(DateTime.now());
     _scheduleSave();
   }
 
   Future<Cylinder?> getById(String id) async {
-    if (!_loaded) await _load();
     return _cylinders[id];
   }
 
   Future<List<Cylinder>> getAll() async {
-    if (!_loaded) await _load();
     return _cylinders.values.where((c) => !c.hasDeletedAt()).toList();
   }
 
   Future<Cylinder?> findByProperties(double? size, double? workpressure, String? description) async {
-    if (!_loaded) await _load();
     return _cylinders.values.firstWhereOrNull((c) {
       if (c.hasDeletedAt()) return false;
       if (size != null && size != c.size) return false;
@@ -79,7 +78,7 @@ class Cylinders {
   }
 
   Future<Cylinder> getOrCreate(double? size, double? workpressure, String? description) async {
-    if (!_loaded) await _load();
+    if (readonly) throw Exception('readonly');
     final existing = await findByProperties(size, workpressure, description);
     if (existing != null) return existing;
 
@@ -88,19 +87,14 @@ class Cylinders {
     return c;
   }
 
-  Future<void> _load() async {
-    final dir = await getApplicationDocumentsDirectory();
-    path = "${dir.path}/cylinders.json";
+  Future<void> init() async {
     try {
-      final bs = await File(path).readAsString();
-      final cl = InternalCylinderList.create()..mergeFromProto3Json(jsonDecode(bs));
+      final bs = await File(path).readAsBytes();
+      final cl = InternalCylinderList.fromBuffer(bs);
       for (final c in cl.cylinders) {
         _cylinders[c.id] = c;
       }
-    } catch (_) {
-    } finally {
-      _loaded = true;
-    }
+    } catch (_) {}
   }
 
   void _scheduleSave() {
@@ -111,9 +105,25 @@ class Cylinders {
   Future<void> _save() async {
     try {
       final cl = InternalCylinderList(cylinders: _cylinders.values);
-      atomicWriteJSON(path, cl.toProto3Json());
+      atomicWriteProto(path, cl);
+      _log.info('saved ${_cylinders.length} cylinders');
     } catch (e) {
-      print("failed to save cylinders: $e");
+      _log.warning("failed to save cylinders: $e");
+    }
+  }
+
+  Future<void> importFrom(Cylinders other) async {
+    for (final cyl in await other.getAll()) {
+      final cur = _cylinders[cyl.id];
+      if (cyl.hasDeletedAt()) {
+        if (cur != null) {
+          print('delete cylinder ${cyl.id}');
+          await delete(cyl.id);
+        }
+      } else if (cur == null || cyl.updatedAt.toDateTime().isAfter(cur.updatedAt.toDateTime())) {
+        print('import cylinder ${cyl.id}');
+        await _import(cyl);
+      }
     }
   }
 }

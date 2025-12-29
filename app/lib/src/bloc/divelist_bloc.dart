@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
@@ -7,6 +8,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 import 'package:xml/xml.dart';
+
+import 'sync_bloc.dart';
 
 final _log = Logger('DiveListBloc');
 
@@ -107,9 +110,11 @@ class ImportDives extends DiveListEvent {
 }
 
 class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
-  final Store _storage = Store();
+  final SyncBloc _syncBloc;
+  late final Store _store;
+  StreamSubscription? _syncBlocSub;
 
-  DiveListBloc() : super(const DiveListInitial()) {
+  DiveListBloc(this._syncBloc) : super(const DiveListInitial()) {
     on<DiveListEvent>((event, emit) async {
       if (event is LoadDives) {
         await _onLoadDives(event, emit);
@@ -122,17 +127,23 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       }
     }, transformer: sequential());
 
-    // Automatically load dives when the bloc is created
-    add(const LoadDives());
+    _syncBloc.store.then((value) {
+      _store = value;
+      add(LoadDives());
+    });
+
+    _syncBlocSub = _syncBloc.stream.listen((state) {
+      add(LoadDives());
+    });
   }
 
   Future<void> _onLoadDives(LoadDives event, Emitter<DiveListState> emit) async {
     try {
-      final dives = await _storage.dives.getAll();
-      final sites = await _storage.sites.getAll();
+      final dives = await _store.dives.getAll();
+      final sites = await _store.sites.getAll();
       Log? lastLog;
       if (dives.isNotEmpty) {
-        lastLog = (await _storage.dives.getById(dives.first.id))?.logs.firstOrNull;
+        lastLog = (await _store.dives.getById(dives.first.id))?.logs.firstOrNull;
       }
       emit(DiveListLoaded(dives, sites, lastLog));
     } catch (e) {
@@ -149,11 +160,11 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       // Is it a new dive? If so, set the dive number and insert it.
       if (event.dive.number <= 0) {
         event.dive.number = currentState.dives.isEmpty ? 1 : currentState.dives.map((d) => d.number).reduce(max) + 1;
-        await _storage.dives.insert(event.dive);
+        await _store.dives.insert(event.dive);
         _log.info('Inserted new dive #${event.dive.number}');
       } else {
         // Update existing dive
-        await _storage.dives.update(event.dive);
+        await _store.dives.update(event.dive);
         _log.fine('Updated dive #${event.dive.number}');
       }
 
@@ -176,14 +187,14 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       // Merge dive sites: only add new ones (check by uuid)
       final existingSiteUuids = currentState.sites.map((s) => s.id).toSet();
       final newSites = importedSsrf.sites.where((s) => !existingSiteUuids.contains(s.id)).toList();
-      await _storage.sites.insertAll(newSites);
+      await _store.sites.insertAll(newSites);
 
       // Process cylinders
       for (final dive in importedSsrf.dives) {
         for (final cyl in dive.cylinders) {
           if (cyl.hasCylinder()) {
             final c = cyl.cylinder;
-            final cr = await _storage.cylinders.getOrCreate(
+            final cr = await _store.cylinders.getOrCreate(
               c.hasSize() ? c.size : null,
               c.hasWorkpressure() ? c.workpressure : null,
               c.hasDescription() ? c.description : null,
@@ -195,7 +206,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       }
 
       // Insert all imported dives
-      await _storage.dives.insertAll(importedSsrf.dives);
+      await _store.dives.insertAll(importedSsrf.dives);
 
       // Reload overview list after update
       add(LoadDives());
@@ -209,17 +220,23 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       // Sort dives by time, number them, insert.
       final downloaded = event.dives;
       downloaded.sort((a, b) => a.start.seconds.compareTo(b.start.seconds));
-      var nextID = await _storage.dives.nextDiveNo;
+      var nextID = await _store.dives.nextDiveNo;
       for (final d in downloaded) {
         d.number = nextID;
         nextID++;
       }
-      await _storage.dives.insertAll(downloaded);
+      await _store.dives.insertAll(downloaded);
 
       // Reload overview list after update
       add(LoadDives());
     } catch (e) {
       emit(DiveListError('Failed to import dives: $e'));
     }
+  }
+
+  @override
+  Future<void> close() {
+    _syncBlocSub?.cancel();
+    return super.close();
   }
 }

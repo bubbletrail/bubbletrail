@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 
 import 'details_state.dart';
+import 'sync_bloc.dart';
 
 abstract class DiveDetailsState extends Equatable with DetailsStateMixin {
   const DiveDetailsState();
@@ -74,9 +75,9 @@ class UpdateDiveDetails extends DiveDetailsEvent {
 }
 
 class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
-  final Store _storage = Store();
+  final SyncBloc _syncBloc;
 
-  DiveDetailsBloc() : super(const DiveDetailsInitial()) {
+  DiveDetailsBloc(this._syncBloc) : super(const DiveDetailsInitial()) {
     on<LoadDiveDetails>(_onLoadDiveDetails);
     on<UpdateDiveDetails>(_onUpdateDiveDetails);
     on<NewDiveEvent>(_onNewDive);
@@ -84,8 +85,9 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
 
   Future<void> _onLoadDiveDetails(LoadDiveDetails event, Emitter<DiveDetailsState> emit) async {
     try {
+      final store = await _syncBloc.store;
       // Load full dive data with all children
-      final dive = await _storage.dives.getById(event.diveId);
+      final dive = await store.dives.getById(event.diveId);
       if (dive == null) {
         emit(const DiveDetailsError('Dive not found'));
         return;
@@ -94,7 +96,7 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
       // Load dive site if available
       Site? site;
       if (dive.hasSiteId()) {
-        site = await _storage.sites.getById(dive.siteId);
+        site = await store.sites.getById(dive.siteId);
       }
 
       emit(DiveDetailsLoaded(dive, site, false));
@@ -105,11 +107,12 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
 
   Future<void> _onUpdateDiveDetails(UpdateDiveDetails event, Emitter<DiveDetailsState> emit) async {
     try {
-      final s = state as DiveDetailsLoaded;
-      if (s.newDive) {
-        await _storage.dives.insert(event.dive);
+      final details = state as DiveDetailsLoaded;
+      final store = await _syncBloc.store;
+      if (details.newDive) {
+        await store.dives.insert(event.dive);
       } else {
-        await _storage.dives.update(event.dive);
+        await store.dives.update(event.dive);
       }
       add(LoadDiveDetails(event.dive.id));
     } catch (e) {
@@ -118,7 +121,8 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
   }
 
   Future<void> _onNewDive(NewDiveEvent event, Emitter<DiveDetailsState> emit) async {
-    final diveNo = await _storage.dives.nextDiveNo;
+    final store = await _syncBloc.store;
+    final diveNo = await store.dives.nextDiveNo;
     final dive = Dive(number: diveNo, start: Timestamp.fromDateTime(DateTime.now()), duration: 0);
     emit(DiveDetailsLoaded(dive, null, true));
   }

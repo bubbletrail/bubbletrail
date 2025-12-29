@@ -14,7 +14,8 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'log.pb.dart' as $2;
+import 'dive.pb.dart' as $2;
+import 'log.pb.dart' as $3;
 import 'site.pb.dart' as $1;
 import 'types.pb.dart' as $0;
 
@@ -118,53 +119,101 @@ class InternalSiteList extends $pb.GeneratedMessage {
   $pb.PbList<$1.Site> get sites => $_getList(0);
 }
 
-class InternalDiveLogList extends $pb.GeneratedMessage {
-  factory InternalDiveLogList({
-    $core.Iterable<$2.Log>? divelogs,
+class InternalDiveList extends $pb.GeneratedMessage {
+  factory InternalDiveList({
+    $core.Iterable<$2.Dive>? dives,
   }) {
     final result = create();
-    if (divelogs != null) result.divelogs.addAll(divelogs);
+    if (dives != null) result.dives.addAll(dives);
     return result;
   }
 
-  InternalDiveLogList._();
+  InternalDiveList._();
 
-  factory InternalDiveLogList.fromBuffer($core.List<$core.int> data,
+  factory InternalDiveList.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory InternalDiveLogList.fromJson($core.String json,
+  factory InternalDiveList.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'InternalDiveLogList',
+      _omitMessageNames ? '' : 'InternalDiveList',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
       createEmptyInstance: create)
-    ..pPM<$2.Log>(1, _omitFieldNames ? '' : 'divelogs',
-        subBuilder: $2.Log.create)
+    ..pPM<$2.Dive>(1, _omitFieldNames ? '' : 'dives',
+        subBuilder: $2.Dive.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  InternalDiveLogList clone() => deepCopy();
+  InternalDiveList clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  InternalDiveLogList copyWith(void Function(InternalDiveLogList) updates) =>
-      super.copyWith((message) => updates(message as InternalDiveLogList))
-          as InternalDiveLogList;
+  InternalDiveList copyWith(void Function(InternalDiveList) updates) =>
+      super.copyWith((message) => updates(message as InternalDiveList))
+          as InternalDiveList;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static InternalDiveLogList create() => InternalDiveLogList._();
+  static InternalDiveList create() => InternalDiveList._();
   @$core.override
-  InternalDiveLogList createEmptyInstance() => create();
+  InternalDiveList createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static InternalDiveLogList getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<InternalDiveLogList>(create);
-  static InternalDiveLogList? _defaultInstance;
+  static InternalDiveList getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<InternalDiveList>(create);
+  static InternalDiveList? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $pb.PbList<$2.Log> get divelogs => $_getList(0);
+  $pb.PbList<$2.Dive> get dives => $_getList(0);
+}
+
+class InternalLogList extends $pb.GeneratedMessage {
+  factory InternalLogList({
+    $core.Iterable<$3.Log>? logs,
+  }) {
+    final result = create();
+    if (logs != null) result.logs.addAll(logs);
+    return result;
+  }
+
+  InternalLogList._();
+
+  factory InternalLogList.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory InternalLogList.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'InternalLogList',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
+      createEmptyInstance: create)
+    ..pPM<$3.Log>(1, _omitFieldNames ? '' : 'logs', subBuilder: $3.Log.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  InternalLogList clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  InternalLogList copyWith(void Function(InternalLogList) updates) =>
+      super.copyWith((message) => updates(message as InternalLogList))
+          as InternalLogList;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static InternalLogList create() => InternalLogList._();
+  @$core.override
+  InternalLogList createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static InternalLogList getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<InternalLogList>(create);
+  static InternalLogList? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$3.Log> get logs => $_getList(0);
 }
 
 const $core.bool _omitFieldNames =

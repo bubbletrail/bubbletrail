@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'sync_bloc.dart';
 
 abstract class CylinderListState extends Equatable {
   const CylinderListState();
@@ -47,20 +51,32 @@ class LoadCylinders extends CylinderListEvent {
 }
 
 class CylinderListBloc extends Bloc<CylinderListEvent, CylinderListState> {
-  final Store _store = Store();
+  final SyncBloc _syncBloc;
+  StreamSubscription? _syncBlocSub;
 
-  CylinderListBloc() : super(const CylinderListInitial()) {
+  CylinderListBloc(this._syncBloc) : super(const CylinderListInitial()) {
     on<LoadCylinders>(_onLoadCylinders);
     add(const LoadCylinders());
+
+    _syncBlocSub = _syncBloc.stream.listen((state) {
+      add(LoadCylinders());
+    });
   }
 
   Future<void> _onLoadCylinders(LoadCylinders event, Emitter<CylinderListState> emit) async {
     emit(const CylinderListLoading());
     try {
-      final cylinders = await _store.cylinders.getAll();
+      final store = await _syncBloc.store;
+      final cylinders = await store.cylinders.getAll();
       emit(CylinderListLoaded(cylinders));
     } catch (e) {
       emit(CylinderListError('Failed to load cylinders: $e'));
     }
+  }
+
+  @override
+  Future<void> close() {
+    _syncBlocSub?.cancel();
+    return super.close();
   }
 }

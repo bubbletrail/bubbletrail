@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 
 import 'details_state.dart';
+import 'sync_bloc.dart';
 
 abstract class SiteDetailsState extends Equatable with DetailsStateMixin {
   const SiteDetailsState();
@@ -73,9 +74,9 @@ class UpdateSiteDetails extends SiteDetailsEvent {
 }
 
 class SiteDetailsBloc extends Bloc<SiteDetailsEvent, SiteDetailsState> {
-  final _store = Store();
+  final SyncBloc _syncBloc;
 
-  SiteDetailsBloc({Store? storage}) : super(const SiteDetailsInitial()) {
+  SiteDetailsBloc(this._syncBloc) : super(const SiteDetailsInitial()) {
     on<LoadSiteDetails>(_onLoadSiteDetails);
     on<UpdateSiteDetails>(_onUpdateSiteDetails);
     on<NewSiteEvent>(_onNewSite);
@@ -83,7 +84,8 @@ class SiteDetailsBloc extends Bloc<SiteDetailsEvent, SiteDetailsState> {
 
   Future<void> _onLoadSiteDetails(LoadSiteDetails event, Emitter<SiteDetailsState> emit) async {
     try {
-      final site = await _store.sites.getById(event.siteId);
+      final store = await _syncBloc.store;
+      final site = await store.sites.getById(event.siteId);
       if (site == null) {
         emit(const SiteDetailsError('Dive site not found'));
         return;
@@ -97,11 +99,12 @@ class SiteDetailsBloc extends Bloc<SiteDetailsEvent, SiteDetailsState> {
 
   Future<void> _onUpdateSiteDetails(UpdateSiteDetails event, Emitter<SiteDetailsState> emit) async {
     try {
-      final s = state as SiteDetailsLoaded;
-      if (s.isNew) {
-        await _store.sites.insert(event.site);
+      final details = state as SiteDetailsLoaded;
+      final store = await _syncBloc.store;
+      if (details.isNew) {
+        await store.sites.insert(event.site);
       } else {
-        await _store.sites.update(event.site);
+        await store.sites.update(event.site);
       }
       add(LoadSiteDetails(event.site.id));
     } catch (e) {

@@ -8,8 +8,10 @@
       "version": "1.0.0",
       "dependencies": [
         "collection",
+        "glob",
         "intl",
         "json_annotation",
+        "logging",
         "path_provider",
         "protobuf",
         "uuid",
@@ -147,6 +149,11 @@
       ]
     },
     {
+      "name": "logging",
+      "version": "1.3.0",
+      "dependencies": []
+    },
+    {
       "name": "json_annotation",
       "version": "4.9.0",
       "dependencies": [
@@ -160,6 +167,17 @@
         "clock",
         "meta",
         "path"
+      ]
+    },
+    {
+      "name": "glob",
+      "version": "2.1.3",
+      "dependencies": [
+        "async",
+        "collection",
+        "file",
+        "path",
+        "string_scanner"
       ]
     },
     {
@@ -441,26 +459,10 @@
       "dependencies": []
     },
     {
-      "name": "logging",
-      "version": "1.3.0",
-      "dependencies": []
-    },
-    {
       "name": "graphs",
       "version": "2.3.2",
       "dependencies": [
         "collection"
-      ]
-    },
-    {
-      "name": "glob",
-      "version": "2.1.3",
-      "dependencies": [
-        "async",
-        "collection",
-        "file",
-        "path",
-        "string_scanner"
       ]
     },
     {
@@ -680,6 +682,14 @@
       ]
     },
     {
+      "name": "file",
+      "version": "7.0.1",
+      "dependencies": [
+        "meta",
+        "path"
+      ]
+    },
+    {
       "name": "web_socket",
       "version": "1.0.1",
       "dependencies": [
@@ -748,14 +758,6 @@
       "version": "92.0.0",
       "dependencies": [
         "meta"
-      ]
-    },
-    {
-      "name": "file",
-      "version": "7.0.1",
-      "dependencies": [
-        "meta",
-        "path"
       ]
     },
     {
