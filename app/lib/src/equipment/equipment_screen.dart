@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
+import '../app_metadata.dart';
 import '../app_routes.dart';
 import '../bloc/sync_bloc.dart';
 import '../common/common.dart';
@@ -17,19 +19,25 @@ class EquipmentScreen extends StatelessWidget {
           title: const Text('Equipment'),
           floatingActionButton: FloatingActionButton(
             onPressed: state.syncing ? null : () => context.read<SyncBloc>().add(const StartSyncing()),
-            child: state.syncing
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.sync),
+            child: state.syncing ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.sync),
           ),
-          body: ListView(
-            padding: const EdgeInsets.all(16),
+          body: Stack(
             children: [
-              _EquipmentCategoryCard(icon: Icons.scuba_diving, title: 'Cylinders', onTap: () => context.pushNamed(AppRouteName.cylinders)),
-              _EquipmentCategoryCard(icon: Icons.settings, title: 'Preferences', onTap: () => context.pushNamed(AppRouteName.settings)),
+              ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  _EquipmentCategoryCard(icon: Icons.scuba_diving, title: 'Cylinders', onTap: () => context.pushNamed(AppRouteName.cylinders)),
+                  _EquipmentCategoryCard(icon: Icons.settings, title: 'Preferences', onTap: () => context.pushNamed(AppRouteName.settings)),
+                ],
+              ),
+              Positioned(
+                left: 16,
+                bottom: 16,
+                child: Text(
+                  'Bubbletrail $appVer ($gitVer)\n${DateFormat('yyyy-MM-dd').format(buildTime)}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
+                ),
+              ),
             ],
           ),
         );

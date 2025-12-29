@@ -30,8 +30,12 @@ jobs:
             #     --build-name=$MARKET_VERSION
             flutter build ipa \
                 --release --no-pub --no-codesign \
-                --build-number=$BUILD_NUMBER \
-                --build-name=$MARKET_VERSION
+                --build-number="$BUILD_NUMBER" \
+                --build-name="$MARKET_VERSION" \
+                --dart-define=BUILD="$BUILD_NUMBER" \
+                --dart-define=MARKETINGVERSION="$MARKET_VERSION" \
+                --dart-define=BUILDSECONDS="$SOURCE_DATE_EPOCH" \
+                --dart-define=GITSHA="$GIT_SHA"
 
       - name: Push
         if: github.ref == 'refs/heads/release'
