@@ -19,11 +19,19 @@ final _log = Logger('SyncBloc');
 
 class SyncState extends Equatable {
   final DateTime? lastSynced;
+  final bool syncing;
 
-  const SyncState({this.lastSynced});
+  const SyncState({this.lastSynced, this.syncing = false});
+
+  SyncState copyWith({DateTime? lastSynced, bool? syncing}) {
+    return SyncState(
+      lastSynced: lastSynced ?? this.lastSynced,
+      syncing: syncing ?? this.syncing,
+    );
+  }
 
   @override
-  List<Object?> get props => [lastSynced];
+  List<Object?> get props => [lastSynced, syncing];
 }
 
 class SyncEvent {
@@ -34,8 +42,8 @@ class _InitStore extends SyncEvent {
   const _InitStore();
 }
 
-class _StartSyncing extends SyncEvent {
-  const _StartSyncing();
+class StartSyncing extends SyncEvent {
+  const StartSyncing();
 }
 
 class SyncBloc extends Bloc<SyncEvent, SyncState> {
@@ -66,7 +74,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     on<SyncEvent>((event, emit) async {
       if (event is _InitStore) {
         await _onInitStore(event, emit);
-      } else if (event is _StartSyncing) {
+      } else if (event is StartSyncing) {
         await _onStartSyncing(event, emit);
       }
     }, transformer: sequential());
@@ -80,11 +88,13 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     final store = Store(dir);
     await store.init();
     _storeCompleter.complete(store);
-    add(const _StartSyncing());
+    add(const StartSyncing());
   }
 
-  Future<void> _onStartSyncing(_StartSyncing event, Emitter<SyncState> emit) async {
+  Future<void> _onStartSyncing(StartSyncing event, Emitter<SyncState> emit) async {
     _log.info('start sync');
+    emit(state.copyWith(syncing: true));
+
     final myID = await systemID;
     final files = await _icloud.getCloudFiles(containerId: containerId);
     for (final file in files) {
@@ -99,7 +109,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     _log.info('exporting to cloud');
     await _uploadExport();
 
-    emit(SyncState(lastSynced: DateTime.now()));
+    emit(state.copyWith(lastSynced: DateTime.now(), syncing: false));
   }
 
   Future<void> _uploadExport() async {
