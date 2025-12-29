@@ -46,7 +46,7 @@ class ScreenScaffold extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: title, backgroundColor: Colors.transparent, actions: actions),
+      appBar: AppBar(title: title, backgroundColor: Colors.transparent, actions: actions, actionsPadding: EdgeInsets.only(right: 16)),
       body: Padding(
         padding: io.Platform.isIOS ? const EdgeInsets.all(0) : const EdgeInsets.only(right: 4.0, bottom: 4.0),
         child: Row(

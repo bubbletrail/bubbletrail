@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:protobuf/protobuf.dart';
 
 import '../app_routes.dart';
 import '../bloc/divedetails_bloc.dart';
@@ -60,7 +61,7 @@ class _DiveDetails extends StatelessWidget {
           tooltip: 'Edit dive',
         ),
         IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
+          icon: const Icon(Icons.arrow_upward),
           onPressed: prevID != null
               ? () {
                   context.goNamed(AppRouteName.divesDetails, pathParameters: {'diveID': prevID!});
@@ -69,13 +70,24 @@ class _DiveDetails extends StatelessWidget {
           tooltip: 'Previous dive',
         ),
         IconButton(
-          icon: const Icon(Icons.arrow_forward_ios),
+          icon: const Icon(Icons.arrow_downward),
           onPressed: nextID != null
               ? () {
                   context.goNamed(AppRouteName.divesDetails, pathParameters: {'diveID': nextID!});
                 }
               : null,
           tooltip: 'Next dive',
+        ),
+        PopupMenuButton<String>(
+          onSelected: (value) {
+            if (value == 'debug') {
+              showDialog(
+                context: context,
+                builder: (context) => _RawDiveDataScreen(dive: dive),
+              );
+            }
+          },
+          itemBuilder: (context) => [const PopupMenuItem(value: 'debug', child: Text('Raw Dive Data'))],
         ),
       ],
       body: LayoutBuilder(
@@ -331,4 +343,20 @@ class _WideCard extends Card {
     super.child,
     super.semanticContainer,
   });
+}
+
+class _RawDiveDataScreen extends StatelessWidget {
+  final Dive dive;
+
+  const _RawDiveDataScreen({required this.dive});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: SelectableText(dive.toTextFormat(), style: Theme.of(context).textTheme.bodyMedium?.apply(fontFamily: 'Courier')),
+      ),
+    );
+  }
 }
