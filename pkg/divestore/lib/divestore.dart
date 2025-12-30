@@ -51,14 +51,10 @@ Dive convertDcDive(Log dl) {
     }
 
     // Get gas mix info if available
-    if (tank.hasGasMixIndex() && tank.gasMixIndex < dl.gasMixes.length) {
+    if (tank.gasMixIndex < dl.gasMixes.length) {
       final gasMix = dl.gasMixes[tank.gasMixIndex];
-      if (gasMix.hasOxygen()) {
-        diveCylinder.oxygen = gasMix.oxygen;
-      }
-      if (gasMix.hasHelium()) {
-        diveCylinder.helium = gasMix.helium;
-      }
+      diveCylinder.oxygen = gasMix.oxygen;
+      diveCylinder.helium = gasMix.helium;
     }
 
     dive.cylinders.add(diveCylinder);
