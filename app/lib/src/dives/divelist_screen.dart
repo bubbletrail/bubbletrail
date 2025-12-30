@@ -46,10 +46,6 @@ class DiveListScreen extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (state is DiveListError) {
-          return ErrorStateWidget(title: 'Error loading dives', message: state.message);
-        }
-
         if (state is DiveListLoaded) {
           final dives = state.dives;
 

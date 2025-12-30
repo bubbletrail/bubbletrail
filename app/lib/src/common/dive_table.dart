@@ -80,7 +80,7 @@ class DiveTableWidget extends StatelessWidget {
           );
         }).toList();
         return TrinaGrid(
-          key: ValueKey(state.preferences), // ensure recreation when preferences change... do we need to be more specific?
+          key: ValueKey((state.preferences, dives)), // ensure recreation when preferences change... do we need to be more specific?
           columns: columns,
           rows: rows,
           mode: TrinaGridMode.selectWithOneTap,

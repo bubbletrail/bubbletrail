@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../bloc/cylinderdetails_bloc.dart';
-import '../bloc/cylinderlist_bloc.dart';
 import '../common/common.dart';
 
 class CylinderEditScreen extends StatefulWidget {
@@ -60,11 +59,7 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
 
     final updatedCylinder = Cylinder(id: _originalCylinder.id, description: description.isEmpty ? null : description, size: size, workpressure: workpressure);
 
-    // Send update event to bloc
     context.read<CylinderDetailsBloc>().add(UpdateCylinderDetails(updatedCylinder));
-
-    // Reload cylinder list to reflect changes
-    context.read<CylinderListBloc>().add(const LoadCylinders());
 
     return true;
   }

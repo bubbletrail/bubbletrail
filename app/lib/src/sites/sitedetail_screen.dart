@@ -8,9 +8,7 @@ import '../common/common.dart';
 import 'sitemap_widget.dart';
 
 class SiteDetailScreen extends StatelessWidget {
-  final String siteID;
-
-  const SiteDetailScreen({super.key, required this.siteID});
+  const SiteDetailScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +17,8 @@ class SiteDetailScreen extends StatelessWidget {
       return Placeholder();
     }
 
-    final site = state.sitesByUuid[siteID]!;
-    final dives = state.dives.where((s) => s.siteId == siteID).toList();
+    final site = state.selectedSite!;
+    final dives = state.dives.where((s) => s.siteId == site.id).toList();
 
     return ScreenScaffold(
       title: Text(site.name),
@@ -28,7 +26,7 @@ class SiteDetailScreen extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.edit),
           tooltip: 'Edit',
-          onPressed: () => context.goNamed(AppRouteName.sitesDetailsEdit, pathParameters: {'siteID': siteID}),
+          onPressed: () => context.goNamed(AppRouteName.sitesDetailsEdit, pathParameters: {'siteID': site.id}),
         ),
       ],
       body: SingleChildScrollView(

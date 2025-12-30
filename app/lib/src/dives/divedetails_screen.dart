@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:protobuf/protobuf.dart';
 
 import '../app_routes.dart';
-import '../bloc/divedetails_bloc.dart';
 import '../bloc/divelist_bloc.dart';
 import '../common/common.dart';
 import 'depthprofile_widget.dart';
@@ -17,24 +16,25 @@ class DiveDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get prev/next dive IDs from the overview list
-    final listState = context.watch<DiveListBloc>().state;
-    return BlocBuilder<DiveDetailsBloc, DiveDetailsState>(
+    return BlocBuilder<DiveListBloc, DiveListState>(
       builder: (context, state) {
-        state as DiveDetailsLoaded;
+        if (state is! DiveListLoaded || state.selectedDive == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final dive = state.selectedDive!;
+        final site = state.selectedDiveSite;
 
         String? nextDiveID;
         String? prevDiveID;
 
-        if (listState is DiveListLoaded) {
-          final diveIdx = listState.diveIndexById[state.dive.id];
-          if (diveIdx != null) {
-            nextDiveID = diveIdx < listState.dives.length - 1 ? listState.dives[diveIdx + 1].id : null;
-            prevDiveID = diveIdx > 0 ? listState.dives[diveIdx - 1].id : null;
-          }
+        final diveIdx = state.diveIndexById[dive.id];
+        if (diveIdx != null) {
+          nextDiveID = diveIdx < state.dives.length - 1 ? state.dives[diveIdx + 1].id : null;
+          prevDiveID = diveIdx > 0 ? state.dives[diveIdx - 1].id : null;
         }
 
-        return _DiveDetails(dive: state.dive, site: state.site, nextID: nextDiveID, prevID: prevDiveID);
+        return _DiveDetails(dive: dive, site: site, nextID: nextDiveID, prevID: prevDiveID);
       },
     );
   }

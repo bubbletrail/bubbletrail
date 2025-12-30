@@ -20,10 +20,6 @@ class CylinderListScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (state is CylinderListError) {
-            return ErrorStateWidget(title: 'Error loading cylinders', message: state.message);
-          }
-
           if (state is CylinderListLoaded) {
             final cylinders = state.cylinders;
 

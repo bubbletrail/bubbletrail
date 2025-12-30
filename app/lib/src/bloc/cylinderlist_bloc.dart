@@ -30,15 +30,6 @@ class CylinderListLoaded extends CylinderListState {
   List<Object?> get props => [cylinders];
 }
 
-class CylinderListError extends CylinderListState {
-  final String message;
-
-  const CylinderListError(this.message);
-
-  @override
-  List<Object?> get props => [message];
-}
-
 abstract class CylinderListEvent extends Equatable {
   const CylinderListEvent();
 
@@ -46,37 +37,45 @@ abstract class CylinderListEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadCylinders extends CylinderListEvent {
-  const LoadCylinders();
+class _Init extends CylinderListEvent {
+  const _Init();
+}
+
+class _LoadedCylinders extends CylinderListEvent {
+  final List<Cylinder> cylinders;
+
+  const _LoadedCylinders(this.cylinders);
+
+  @override
+  List<Object?> get props => [cylinders];
 }
 
 class CylinderListBloc extends Bloc<CylinderListEvent, CylinderListState> {
   final SyncBloc _syncBloc;
-  StreamSubscription? _syncBlocSub;
+  StreamSubscription? _cylindersSub;
 
   CylinderListBloc(this._syncBloc) : super(const CylinderListInitial()) {
-    on<LoadCylinders>(_onLoadCylinders);
-    add(const LoadCylinders());
-
-    _syncBlocSub = _syncBloc.stream.listen((state) {
-      add(LoadCylinders());
-    });
+    on<_Init>(_onInit);
+    on<_LoadedCylinders>(_onLoadedCylinders);
+    add(const _Init());
   }
 
-  Future<void> _onLoadCylinders(LoadCylinders event, Emitter<CylinderListState> emit) async {
-    emit(const CylinderListLoading());
-    try {
-      final store = await _syncBloc.store;
-      final cylinders = await store.cylinders.getAll();
-      emit(CylinderListLoaded(cylinders));
-    } catch (e) {
-      emit(CylinderListError('Failed to load cylinders: $e'));
-    }
+  Future<void> _onInit(_Init event, Emitter<CylinderListState> emit) async {
+    final store = await _syncBloc.store;
+    _cylindersSub = store.cylinders.changes.listen((cylinders) {
+      add(_LoadedCylinders(cylinders));
+    });
+    final cylinders = await store.cylinders.getAll();
+    emit(CylinderListLoaded(cylinders));
+  }
+
+  Future<void> _onLoadedCylinders(_LoadedCylinders event, Emitter<CylinderListState> emit) async {
+    emit(CylinderListLoaded(event.cylinders));
   }
 
   @override
   Future<void> close() {
-    _syncBlocSub?.cancel();
+    _cylindersSub?.cancel();
     return super.close();
   }
 }

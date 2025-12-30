@@ -22,45 +22,46 @@ class Sites {
 
   Set<String> get tags => _tags;
 
-  Future<String> insert(Site site) async {
+  Future<Site> insert(Site site) async {
     if (readonly) throw Exception('readonly');
-    if (!site.hasId()) {
-      site.id = Uuid().v4().toString();
-    }
-    site.updatedAt = Timestamp.fromDateTime(DateTime.now());
-    if (!site.hasCreatedAt()) {
-      site.createdAt = site.updatedAt;
-    }
-    _sites[site.id] = site;
-    _tags.addAll(site.tags);
+    site = _insert(site);
     _scheduleSave();
-    return site.id;
+    return site;
   }
 
   Future<void> insertAll(Iterable<Site> sites) async {
     if (readonly) throw Exception('readonly');
     for (final site in sites) {
-      if (!site.hasId()) {
-        site.id = Uuid().v4().toString();
-      }
-      if (!_sites.containsKey(site.id)) {
-        site.updatedAt = Timestamp.fromDateTime(DateTime.now());
-        if (!site.hasCreatedAt()) {
-          site.createdAt = site.updatedAt;
-        }
-        _sites[site.id] = site;
-      }
-      _tags.addAll(site.tags);
+      _insert(site);
     }
     _scheduleSave();
   }
 
+  Site _insert(Site site) {
+    if (!site.isFrozen) site.freeze();
+    site = site.rebuild((site) {
+      if (!site.hasId()) {
+        site.id = Uuid().v4().toString();
+      }
+      site.updatedAt = Timestamp.fromDateTime(DateTime.now());
+      if (!site.hasCreatedAt()) {
+        site.createdAt = site.updatedAt;
+      }
+    });
+    _sites[site.id] = site;
+    _tags.addAll(site.tags);
+    return site;
+  }
+
   Future<void> update(Site site) async {
     if (readonly) throw Exception('readonly');
-    site.updatedAt = Timestamp.fromDateTime(DateTime.now());
-    if (!site.hasCreatedAt()) {
-      site.createdAt = site.updatedAt;
-    }
+    if (!site.isFrozen) site.freeze();
+    site = site.rebuild((site) {
+      site.updatedAt = Timestamp.fromDateTime(DateTime.now());
+      if (!site.hasCreatedAt()) {
+        site.createdAt = site.updatedAt;
+      }
+    });
     _sites[site.id] = site;
     _tags.addAll(site.tags);
     _scheduleSave();
@@ -75,7 +76,11 @@ class Sites {
 
   Future<void> delete(String id) async {
     if (readonly) throw Exception('readonly');
-    _sites[id]?.deletedAt = Timestamp.fromDateTime(DateTime.now());
+    if (_sites.containsKey(id)) {
+      _sites[id] = _sites[id]!.rebuild((site) {
+        site.deletedAt = Timestamp.fromDateTime(DateTime.now());
+      });
+    }
     _scheduleSave();
   }
 
@@ -93,6 +98,7 @@ class Sites {
     try {
       final bs = await File(path).readAsBytes();
       final dss = InternalSiteList.fromBuffer(bs);
+      dss.freeze();
       for (final site in dss.sites) {
         _sites[site.id] = site;
         _tags.addAll(site.tags);

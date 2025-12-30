@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../bloc/divelist_bloc.dart';
-import '../bloc/sitedetails_bloc.dart';
 import '../common/common.dart';
 
 class SiteEditScreen extends StatefulWidget {
@@ -30,9 +29,9 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
   @override
   void initState() {
     super.initState();
-    final state = context.read<SiteDetailsBloc>().state as SiteDetailsLoaded;
-    _originalSite = state.site;
-    _isNew = state.isNew;
+    final state = context.read<DiveListBloc>().state as DiveListLoaded;
+    _originalSite = state.selectedSite!;
+    _isNew = state.isNewSite;
     _nameController = TextEditingController(text: _originalSite.name);
     _countryController = TextEditingController(text: _originalSite.country);
     _locationController = TextEditingController(text: _originalSite.location);
@@ -87,10 +86,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
     );
 
     // Send update event to bloc
-    context.read<SiteDetailsBloc>().add(UpdateSiteDetails(updatedSite));
-
-    // Reload dive list to reflect changes
-    context.read<DiveListBloc>().add(const LoadDives());
+    context.read<DiveListBloc>().add(UpdateSite(updatedSite));
 
     return true;
   }

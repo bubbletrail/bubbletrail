@@ -32,19 +32,22 @@ class Dives {
 
   Future<String> insert(Dive dive) async {
     if (readonly) throw Exception('readonly');
-    if (!dive.hasId()) {
-      dive.id = Uuid().v4().toString();
-    }
-    dive.updatedAt = Timestamp.fromDateTime(DateTime.now());
-    if (!dive.hasCreatedAt()) {
-      if (dive.hasStart()) {
-        dive.createdAt = dive.start;
-      } else if (dive.logs.isNotEmpty) {
-        dive.createdAt = dive.logs.first.dateTime;
-      } else {
-        dive.createdAt = dive.updatedAt;
+    if (!dive.isFrozen) dive.freeze();
+    dive = dive.rebuild((dive) {
+      if (!dive.hasId()) {
+        dive.id = Uuid().v4().toString();
       }
-    }
+      dive.updatedAt = Timestamp.fromDateTime(DateTime.now());
+      if (!dive.hasCreatedAt()) {
+        if (dive.hasStart()) {
+          dive.createdAt = dive.start;
+        } else if (dive.logs.isNotEmpty) {
+          dive.createdAt = dive.logs.first.dateTime;
+        } else {
+          dive.createdAt = dive.updatedAt;
+        }
+      }
+    });
     _dives[dive.id] = dive;
     _tags.addAll(dive.tags);
     _buddies.addAll(dive.buddies);
@@ -54,11 +57,12 @@ class Dives {
 
   Future<void> insertAll(Iterable<Dive> dives) async {
     if (readonly) throw Exception('readonly');
-    for (final dive in dives) {
-      if (!dive.hasId()) {
-        dive.id = Uuid().v4().toString();
-      }
-      if (!_dives.containsKey(dive.id)) {
+    for (var dive in dives) {
+      if (!dive.isFrozen) dive.freeze();
+      dive = dive.rebuild((dive) {
+        if (!dive.hasId()) {
+          dive.id = Uuid().v4().toString();
+        }
         dive.updatedAt = Timestamp.fromDateTime(DateTime.now());
         if (!dive.hasCreatedAt()) {
           if (dive.hasStart()) {
@@ -69,6 +73,8 @@ class Dives {
             dive.createdAt = dive.updatedAt;
           }
         }
+      });
+      if (!_dives.containsKey(dive.id)) {
         _dives[dive.id] = dive;
         _dirty.add(dive.id);
       }
@@ -80,7 +86,10 @@ class Dives {
 
   Future<void> update(Dive dive) async {
     if (readonly) throw Exception('readonly');
-    dive.updatedAt = Timestamp.fromDateTime(DateTime.now());
+    if (!dive.isFrozen) dive.freeze();
+    dive = dive.rebuild((dive) {
+      dive.updatedAt = Timestamp.fromDateTime(DateTime.now());
+    });
     _dives[dive.id] = dive;
     _tags.addAll(dive.tags);
     _buddies.addAll(dive.buddies);
@@ -89,6 +98,7 @@ class Dives {
 
   Future<void> _import(Dive dive) async {
     if (readonly) throw Exception('readonly');
+    if (!dive.isFrozen) dive.freeze();
     _dives[dive.id] = dive;
     _tags.addAll(dive.tags);
     _buddies.addAll(dive.buddies);
@@ -97,16 +107,22 @@ class Dives {
 
   Future<void> delete(String id) async {
     if (readonly) throw Exception('readonly');
-    _dives[id]?.deletedAt = Timestamp.fromDateTime(DateTime.now());
+    if (_dives.containsKey(id)) {
+      _dives[id] = _dives[id]!.rebuild((dive) {
+        dive.deletedAt = Timestamp.fromDateTime(DateTime.now());
+      });
+    }
     _scheduleSave(id);
   }
 
   Future<Dive?> getById(String id) async {
-    final dive = _dives[id];
+    var dive = _dives[id];
     if (dive == null) return null;
     if (dive.logs.isEmpty) {
       final logs = await _loadLogs(dlName(diveDir(dive), dive));
-      dive.logs.addAll(logs);
+      dive = dive.rebuild((dive) {
+        dive.logs.addAll(logs);
+      });
     }
     return dive;
   }
@@ -136,12 +152,16 @@ class Dives {
 
   Future<Dive> _loadMeta(String path) async {
     final bs = await File(path).readAsBytes();
-    return Dive.fromBuffer(bs);
+    final dive = Dive.fromBuffer(bs);
+    dive.freeze();
+    return dive;
   }
 
   Future<List<Log>> _loadLogs(String path) async {
     final bs = await File(path).readAsBytes();
-    return InternalLogList.fromBuffer(bs).logs;
+    final ll = InternalLogList.fromBuffer(bs);
+    ll.freeze();
+    return ll.logs;
   }
 
   void _scheduleSave(String? id) {
@@ -160,8 +180,10 @@ class Dives {
 
         atomicWriteProto(dlName(dir, dive), InternalLogList(logs: dive.logs));
 
-        dive.logs.clear();
-        atomicWriteProto(metaName(dir, dive), dive);
+        final metaOnly = dive.rebuild((dive) {
+          dive.logs.clear();
+        });
+        atomicWriteProto(metaName(dir, dive), metaOnly);
       }
 
       _log.info("saved ${_dirty.length} dives");

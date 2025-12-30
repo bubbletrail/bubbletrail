@@ -26,10 +26,6 @@ class SiteListScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (state is DiveListError) {
-            return ErrorStateWidget(title: 'Error loading dive sites', message: state.message);
-          }
-
           if (state is DiveListLoaded) {
             final sites = state.sites;
 
@@ -89,6 +85,7 @@ class SiteListScreen extends StatelessWidget {
     }).toList();
 
     return TrinaGrid(
+      key: ValueKey(sites),
       columns: columns,
       rows: rows,
       mode: TrinaGridMode.selectWithOneTap,

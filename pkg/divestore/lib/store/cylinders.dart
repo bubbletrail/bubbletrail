@@ -18,44 +18,58 @@ class Cylinders {
 
   Map<String, Cylinder> _cylinders = Map();
   Timer? _saveTimer;
+  final _changes = StreamController<List<Cylinder>>.broadcast();
+
+  Stream<List<Cylinder>> get changes => _changes.stream;
 
   Cylinders(this.path, {this.readonly = false});
 
-  Future<String> insert(Cylinder cylinder) async {
+  Future<Cylinder> insert(Cylinder cylinder) async {
     if (readonly) throw Exception('readonly');
-    if (!cylinder.hasId()) {
-      cylinder.id = Uuid().v4().toString();
-    }
-    if (!_cylinders.containsKey(cylinder.id)) {
+    if (!cylinder.isFrozen) cylinder.freeze();
+    cylinder = cylinder.rebuild((cylinder) {
+      if (!cylinder.hasId()) {
+        cylinder.id = Uuid().v4().toString();
+      }
       cylinder.updatedAt = Timestamp.fromDateTime(DateTime.now());
       if (!cylinder.hasCreatedAt()) {
         cylinder.createdAt = cylinder.updatedAt;
       }
+    });
+    if (!_cylinders.containsKey(cylinder.id)) {
       _cylinders[cylinder.id] = cylinder;
       _scheduleSave();
     }
-    return cylinder.id;
+    return cylinder;
   }
 
   Future<void> update(Cylinder cylinder) async {
     if (readonly) throw Exception('readonly');
-    cylinder.updatedAt = Timestamp.fromDateTime(DateTime.now());
-    if (!cylinder.hasCreatedAt()) {
-      cylinder.createdAt = cylinder.updatedAt;
-    }
+    if (!cylinder.isFrozen) cylinder.freeze();
+    cylinder = cylinder.rebuild((cylinder) {
+      cylinder.updatedAt = Timestamp.fromDateTime(DateTime.now());
+      if (!cylinder.hasCreatedAt()) {
+        cylinder.createdAt = cylinder.updatedAt;
+      }
+    });
     _cylinders[cylinder.id] = cylinder;
     _scheduleSave();
   }
 
   Future<void> _import(Cylinder cylinder) async {
     if (readonly) throw Exception('readonly');
+    if (!cylinder.isFrozen) cylinder.freeze();
     _cylinders[cylinder.id] = cylinder;
     _scheduleSave();
   }
 
   Future<void> delete(String id) async {
     if (readonly) throw Exception('readonly');
-    _cylinders[id]?.deletedAt = Timestamp.fromDateTime(DateTime.now());
+    if (_cylinders.containsKey(id)) {
+      _cylinders[id] = _cylinders[id]!.rebuild((cylinder) {
+        cylinder.deletedAt = Timestamp.fromDateTime(DateTime.now());
+      });
+    }
     _scheduleSave();
   }
 
@@ -64,7 +78,9 @@ class Cylinders {
   }
 
   Future<List<Cylinder>> getAll() async {
-    return _cylinders.values.where((c) => !c.hasDeletedAt()).toList();
+    final vals = _cylinders.values.where((c) => !c.hasDeletedAt()).toList();
+    vals.sort((a, b) => a.description.compareTo(b.description));
+    return vals;
   }
 
   Future<Cylinder?> findByProperties(double? size, double? workpressure, String? description) async {
@@ -83,14 +99,14 @@ class Cylinders {
     if (existing != null) return existing;
 
     final c = Cylinder(size: size, workpressure: workpressure, description: description);
-    c.id = await insert(c);
-    return c;
+    return await insert(c);
   }
 
   Future<void> init() async {
     try {
       final bs = await File(path).readAsBytes();
       final cl = InternalCylinderList.fromBuffer(bs);
+      cl.freeze();
       for (final c in cl.cylinders) {
         _cylinders[c.id] = c;
       }
@@ -104,8 +120,11 @@ class Cylinders {
 
   Future<void> _save() async {
     try {
-      final cl = InternalCylinderList(cylinders: _cylinders.values);
+      final vals = _cylinders.values.toList();
+      vals.sort((a, b) => a.description.compareTo(b.description));
+      final cl = InternalCylinderList(cylinders: vals);
       atomicWriteProto(path, cl);
+      _changes.add(vals);
       _log.info('saved ${_cylinders.length} cylinders');
     } catch (e) {
       _log.warning("failed to save cylinders: $e");

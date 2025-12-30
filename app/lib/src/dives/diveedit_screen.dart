@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart' as proto;
 
 import '../bloc/cylinderlist_bloc.dart';
-import '../bloc/divedetails_bloc.dart';
 import '../bloc/divelist_bloc.dart';
 import '../common/common.dart';
 
@@ -110,7 +109,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   @override
   void initState() {
     super.initState();
-    dive = (context.read<DiveDetailsBloc>().state as DiveDetailsLoaded).dive;
+    dive = (context.read<DiveListBloc>().state as DiveListLoaded).selectedDive!;
     _selectedDateTime = dive.start.toDateTime();
     _durationSeconds = dive.duration;
     _divemasterController = TextEditingController(text: dive.divemaster);
@@ -500,69 +499,70 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   }
 
   void _saveDive() {
-    // Update dive properties
-    dive.start = proto.Timestamp.fromDateTime(_selectedDateTime);
-    dive.duration = _durationSeconds;
-    if (_rating != null) {
-      dive.rating = _rating!;
-    } else {
-      dive.clearRating();
-    }
-    dive.siteId = _selectedSiteId ?? '';
-    dive.divemaster = _divemasterController.text.trim();
-    dive.notes = _notesController.text.trim();
+    final upd = dive.rebuild((dive) {
+      // Update dive properties
+      dive.start = proto.Timestamp.fromDateTime(_selectedDateTime);
+      dive.duration = _durationSeconds;
+      if (_rating != null) {
+        dive.rating = _rating!;
+      } else {
+        dive.clearRating();
+      }
+      dive.siteId = _selectedSiteId ?? '';
+      dive.divemaster = _divemasterController.text.trim();
+      dive.notes = _notesController.text.trim();
 
-    // Update buddies
-    dive.buddies.clear();
-    dive.buddies.addAll(_buddiesController.chips);
+      // Update buddies
+      dive.buddies.clear();
+      dive.buddies.addAll(_buddiesController.chips);
 
-    // Update tags
-    dive.tags.clear();
-    dive.tags.addAll(_tagsController.chips);
+      // Update tags
+      dive.tags.clear();
+      dive.tags.addAll(_tagsController.chips);
 
-    // Update cylinders
-    dive.cylinders.clear();
-    dive.cylinders.addAll(_cylinders.map((c) => c.toDiveCylinder()));
+      // Update cylinders
+      dive.cylinders.clear();
+      dive.cylinders.addAll(_cylinders.map((c) => c.toDiveCylinder()));
 
-    // Update weight systems
-    dive.weightsystems.clear();
-    dive.weightsystems.addAll(_weightsystems.map((ws) => ws.toWeightsystem()));
+      // Update weight systems
+      dive.weightsystems.clear();
+      dive.weightsystems.addAll(_weightsystems.map((ws) => ws.toWeightsystem()));
 
-    // Update gas change events
-    // Find existing "Manual Entry" computer dive or prepare to create one
-    const manualEntryModel = 'Manual Entry';
-    Log? manualCd = dive.logs.where((cd) => cd.model == manualEntryModel).firstOrNull;
+      // Update gas change events
+      // Find existing "Manual Entry" computer dive or prepare to create one
+      const manualEntryModel = 'Manual Entry';
+      Log? manualCd = dive.logs.where((cd) => cd.model == manualEntryModel).firstOrNull;
 
-    if (_gasChanges.isNotEmpty) {
-      // Convert gas changes to sample events
-      final samples = _gasChanges.map((gc) {
-        return LogSample(
-          time: gc.timeSeconds.toDouble(),
-          events: [SampleEvent(time: gc.timeSeconds, type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, flags: 0, value: gc.cylinderIndex)],
+      if (_gasChanges.isNotEmpty) {
+        // Convert gas changes to sample events
+        final samples = _gasChanges.map((gc) {
+          return LogSample(
+            time: gc.timeSeconds.toDouble(),
+            events: [SampleEvent(time: gc.timeSeconds, type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, flags: 0, value: gc.cylinderIndex)],
+          );
+        }).toList();
+
+        if (manualCd != null) {
+          // Replace the manual computer dive with updated events
+          dive.logs.remove(manualCd);
+        }
+        // Create new manual computer dive
+        manualCd = Log(
+          model: manualEntryModel,
+          maxDepth: dive.hasMaxDepth() ? dive.maxDepth : null,
+          avgDepth: dive.hasMeanDepth() ? dive.meanDepth : null,
+          samples: samples,
         );
-      }).toList();
-
-      if (manualCd != null) {
-        // Replace the manual computer dive with updated events
-        dive.logs.remove(manualCd);
+        dive.logs.add(manualCd);
+      } else if (manualCd != null) {
+        // No gas changes, remove manual computer dive if it only had events
+        if (manualCd.samples.isEmpty) {
+          dive.logs.remove(manualCd);
+        }
       }
-      // Create new manual computer dive
-      manualCd = Log(
-        model: manualEntryModel,
-        maxDepth: dive.hasMaxDepth() ? dive.maxDepth : null,
-        avgDepth: dive.hasMeanDepth() ? dive.meanDepth : null,
-        samples: samples,
-      );
-      dive.logs.add(manualCd);
-    } else if (manualCd != null) {
-      // No gas changes, remove manual computer dive if it only had events
-      if (manualCd.samples.isEmpty) {
-        dive.logs.remove(manualCd);
-      }
-    }
-
+    });
     // Send update event to bloc
-    context.read<DiveDetailsBloc>().add(UpdateDiveDetails(dive));
+    context.read<DiveListBloc>().add(UpdateDive(upd));
   }
 
   void _saveAndPop() {

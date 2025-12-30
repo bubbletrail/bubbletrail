@@ -1,9 +1,12 @@
 import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logging/logging.dart';
 
 import 'details_state.dart';
 import 'sync_bloc.dart';
+
+final _log = Logger('CylinderDetailsBloc');
 
 abstract class CylinderDetailsState extends Equatable with DetailsStateMixin {
   const CylinderDetailsState();
@@ -101,13 +104,14 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
       final details = state as CylinderDetailsLoaded;
       final store = await _syncBloc.store;
       if (details.isNew) {
-        final id = await store.cylinders.insert(event.cylinder);
-        add(LoadCylinderDetails(id));
+        final cyl = await store.cylinders.insert(event.cylinder);
+        add(LoadCylinderDetails(cyl.id));
       } else {
         await store.cylinders.update(event.cylinder);
         add(LoadCylinderDetails(event.cylinder.id));
       }
     } catch (e) {
+      _log.warning('failed to update cylinder: $e');
       emit(CylinderDetailsError('Failed to update cylinder: $e'));
     }
   }
