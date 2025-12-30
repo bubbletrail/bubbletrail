@@ -4,9 +4,11 @@ on:
 name: Build
 
 jobs:
-  build-macos-ios:
-    name: Build macOS & iOS
+  build-macos:
+    name: Build for macOS
     runs-on: macos-26
+    if: github.ref == 'refs/heads/release'
+    environment: release
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -20,14 +22,53 @@ jobs:
 
       - uses: ./.github/actions/build-info
 
-      - name: Build
+      - name: Build & push
         run: |
+          brew install pipx
+          pipx install codemagic-cli-tools
+          pushd app
+          ./build-macos.sh
+        env:
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          MAC_APP_DISTRIBUTION_CERT: ${{ secrets.MAC_APP_DISTRIBUTION_CERT }}
+          # DEVELOPER_ID_APPLICATION_CERT: ${{ secrets.DEVELOPER_ID_APPLICATION_CERT }}
+          # DEVELOPER_ID_INSTALLER_CERT: ${{ secrets.DEVELOPER_ID_INSTALLER_CERT }}
+
+      # - name: Save artifacts (macOS)
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     path: app/macos/Bubbletrail.pkg
+      #     name: bubbletrail-macos-${{ env.MARKET_VERSION }}
+
+  build-ios:
+    name: Build for iOS
+    runs-on: macos-26
+    if: github.ref == 'refs/heads/release'
+    environment: release
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - uses: ./.github/actions/build-info
+
+      - name: Build & push
+        run: |
+            security create-keychain -p $MATCH_KEYCHAIN_PASSWORD $MATCH_KEYCHAIN_NAME
+            security unlock-keychain -p $MATCH_KEYCHAIN_PASSWORD $MATCH_KEYCHAIN_NAME
+            security set-keychain-settings -lut 21600 $MATCH_KEYCHAIN_NAME
+            security default-keychain -d user -s $MATCH_KEYCHAIN_NAME
+
             cd app
             flutter pub get
-            # flutter build macos \
-            #     --release --no-pub \
-            #     --build-number=$BUILD_NUMBER \
-            #     --build-name=$MARKET_VERSION
             flutter build ipa \
                 --release --no-pub --no-codesign \
                 --build-number="$BUILD_NUMBER" \
@@ -37,14 +78,7 @@ jobs:
                 --dart-define=BUILDSECONDS="$SOURCE_DATE_EPOCH" \
                 --dart-define=GITSHA="$GIT_SHA"
 
-      - name: Push
-        if: github.ref == 'refs/heads/release'
-        run: |
-            security create-keychain -p $MATCH_KEYCHAIN_PASSWORD $MATCH_KEYCHAIN_NAME
-            security unlock-keychain -p $MATCH_KEYCHAIN_PASSWORD $MATCH_KEYCHAIN_NAME
-            security set-keychain-settings -lut 21600 $MATCH_KEYCHAIN_NAME
-            security default-keychain -d user -s $MATCH_KEYCHAIN_NAME
-            cd app/ios
+            cd ios
             fastlane push
         env:
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
@@ -55,14 +89,3 @@ jobs:
           MATCH_KEYCHAIN_PASSWORD: ${{ secrets.MATCH_KEYCHAIN_PASSWORD }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_KEYCHAIN_NAME: ${{ runner.temp }}/bubbletrain.keychain
-
-      # - name: Save artifacts (macOS)
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     path: app/build/macos/Build/Products/Release
-      #     name: bubbletrail-macos
-      # - name: Save artifacts (iOS)
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     path: app/build/ios/iphoneos
-      #     name: bubbletrail-ios
