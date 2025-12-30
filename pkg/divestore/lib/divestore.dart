@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:divestore/gen/gen.dart';
 
 export '../gen/gen.dart';
@@ -27,15 +29,28 @@ Dive convertDcDive(Log dl) {
     dive.start = dl.dateTime;
   }
 
-  if (dl.hasDiveTime()) {
-    dive.duration = dl.diveTime;
+  // Process samples, calculating depths, durations, etc.
+
+  double maxDepth = 0.0;
+  double totDepth = 0.0;
+  double prevDepth = 0.0;
+  double prevTime = 0.0;
+  double duration = 0;
+
+  for (final sample in dl.samples) {
+    maxDepth = max(maxDepth, sample.depth);
+    totDepth += (sample.depth + prevDepth) / 2 * (sample.time - prevTime);
+    if (sample.depth > 0) {
+      duration = sample.time;
+    }
+    for (final event in sample.events) {
+      dive.events.add(event);
+    }
   }
-  if (dl.hasMaxDepth()) {
-    dive.maxDepth = dl.maxDepth;
-  }
-  if (dl.hasAvgDepth()) {
-    dive.meanDepth = dl.avgDepth;
-  }
+
+  dive.duration = duration.round();
+  dive.maxDepth = maxDepth;
+  dive.meanDepth = totDepth / duration;
 
   // Convert tanks to cylinders
   for (var i = 0; i < dl.tanks.length; i++) {
@@ -58,13 +73,6 @@ Dive convertDcDive(Log dl) {
     }
 
     dive.cylinders.add(diveCylinder);
-  }
-
-  // Extract events from samples
-  for (final sample in dl.samples) {
-    for (final event in sample.events) {
-      dive.events.add(event);
-    }
   }
 
   return dive;
