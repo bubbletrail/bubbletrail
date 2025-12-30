@@ -147,7 +147,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       if (dives.isNotEmpty) {
         lastLog = (await _store.dives.getById(dives.first.id))?.logs.firstOrNull;
       }
-      emit(DiveListLoaded(dives, sites, lastLog, _store.dives.tags, _store.dives.buddies));
+      emit(DiveListLoaded(dives, sites, lastLog, _store.tags, _store.dives.buddies));
     } catch (e) {
       emit(DiveListError('Failed to load dives: $e'));
     }

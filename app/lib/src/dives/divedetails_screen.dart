@@ -161,7 +161,11 @@ class _DiveDetails extends StatelessWidget {
         infoRow('Start', DateFormat.yMd().add_jm().format(_startDateTime)),
         infoRow('Duration', formatDuration(dive.duration)),
         if (dive.hasRating()) infoRow('Rating', '★' * dive.rating),
-        if (dive.tags.isNotEmpty) infoRow('Tags', dive.tags.join(', ')),
+        tagsRow(
+          context,
+          dive.tags.toList(),
+          secondaryTags: site?.tags.where((t) => !dive.tags.contains(t)).toList(),
+        ),
       ]),
       const SizedBox(height: 16),
       if (site != null) ...[_SiteCard(site: site!), const SizedBox(height: 16)],

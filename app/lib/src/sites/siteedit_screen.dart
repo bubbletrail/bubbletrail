@@ -1,3 +1,4 @@
+import 'package:chips_input_autocomplete/chips_input_autocomplete.dart';
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,6 +25,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
   late final TextEditingController _difficultyController;
   late final TextEditingController _latController;
   late final TextEditingController _lonController;
+  late final ChipsAutocompleteController _tagsController;
 
   @override
   void initState() {
@@ -38,6 +40,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
     _difficultyController = TextEditingController(text: _originalSite.difficulty);
     _latController = TextEditingController(text: _originalSite.hasPosition() ? _originalSite.position.latitude.toString() : '');
     _lonController = TextEditingController(text: _originalSite.hasPosition() ? _originalSite.position.longitude.toString() : '');
+    _tagsController = ChipsAutocompleteController();
   }
 
   @override
@@ -49,6 +52,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
     _difficultyController.dispose();
     _latController.dispose();
     _lonController.dispose();
+    // _tagsController.dispose();
     super.dispose();
   }
 
@@ -80,6 +84,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
         location: _locationController.text.trim(),
         bodyOfWater: _bodyOfWaterController.text.trim(),
         difficulty: _difficultyController.text.trim(),
+        tags: _tagsController.chips,
       );
 
       // Send update event to bloc
@@ -131,6 +136,23 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
             TextField(
               controller: _difficultyController,
               decoration: const InputDecoration(labelText: 'Difficulty', border: OutlineInputBorder()),
+            ),
+            Builder(
+              builder: (context) {
+                final diveListState = context.watch<DiveListBloc>().state;
+                final suggestions = diveListState is DiveListLoaded ? diveListState.tags.toList() : <String>[];
+                suggestions.sort();
+                return ChipsInputAutocomplete(
+                  controller: _tagsController,
+                  options: suggestions,
+                  initialChips: _originalSite.tags.toList(),
+                  decorationTextField: const InputDecoration(labelText: 'Tags', border: OutlineInputBorder()),
+                  addChipOnSelection: true,
+                  placeChipsSectionAbove: false,
+                  paddingInsideWidgetContainer: EdgeInsets.zero,
+                  secondaryTheme: true,
+                );
+              },
             ),
             Row(
               spacing: 16,

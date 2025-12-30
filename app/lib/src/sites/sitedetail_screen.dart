@@ -47,9 +47,12 @@ class SiteDetailScreen extends StatelessWidget {
                   infoRow('Longitude', site.position.longitude.toStringAsFixed(6)),
                 ],
               ]),
-              if (site.difficulty.isNotEmpty) ...[
+              if (site.difficulty.isNotEmpty || site.tags.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                infoCard(context, 'Dive Information', [infoRow('Difficulty', site.difficulty)]),
+                infoCard(context, 'Dive Information', [
+                  if (site.difficulty.isNotEmpty) infoRow('Difficulty', site.difficulty),
+                  if (site.tags.isNotEmpty) tagsRow(context, site.tags.toList()),
+                ]),
               ],
               const SizedBox(height: 16),
               SiteMapWidget(site: site),
