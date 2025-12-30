@@ -169,6 +169,15 @@ class UpdateSite extends DiveListEvent {
   List<Object?> get props => [site];
 }
 
+class DeleteDive extends DiveListEvent {
+  final String diveId;
+
+  const DeleteDive(this.diveId);
+
+  @override
+  List<Object?> get props => [diveId];
+}
+
 class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   final SyncBloc _syncBloc;
   late final Store _store;
@@ -194,6 +203,8 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
         await _onSelectNewSite(event, emit);
       } else if (event is UpdateSite) {
         await _onUpdateSite(event, emit);
+      } else if (event is DeleteDive) {
+        await _onDeleteDive(event, emit);
       }
     }, transformer: sequential());
 
@@ -364,6 +375,16 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     }
 
     // Reload list after update
+    add(LoadDives());
+  }
+
+  Future<void> _onDeleteDive(DeleteDive event, Emitter<DiveListState> emit) async {
+    if (state is! DiveListLoaded) return;
+
+    await _store.dives.delete(event.diveId);
+    _log.info('Deleted dive ${event.diveId}');
+
+    // Reload list after delete
     add(LoadDives());
   }
 

@@ -79,15 +79,30 @@ class _DiveDetails extends StatelessWidget {
           tooltip: 'Next dive',
         ),
         PopupMenuButton<String>(
-          onSelected: (value) {
+          onSelected: (value) async {
             if (value == 'debug') {
               showDialog(
                 context: context,
                 builder: (context) => _RawDiveDataScreen(dive: dive),
               );
+            } else if (value == 'delete') {
+              final confirmed = await showConfirmationDialog(
+                context: context,
+                title: 'Delete Dive',
+                message: 'Are you sure you want to delete dive #${dive.number}? This cannot be undone.',
+                confirmText: 'Delete',
+                isDestructive: true,
+              );
+              if (confirmed && context.mounted) {
+                context.read<DiveListBloc>().add(DeleteDive(dive.id));
+                context.goNamed(AppRouteName.dives);
+              }
             }
           },
-          itemBuilder: (context) => [const PopupMenuItem(value: 'debug', child: Text('Raw Dive Data'))],
+          itemBuilder: (context) => [
+            const PopupMenuItem(value: 'debug', child: Text('View Raw Data')),
+            const PopupMenuItem(value: 'delete', child: Text('Delete Dive')),
+          ],
         ),
       ],
       body: LayoutBuilder(
