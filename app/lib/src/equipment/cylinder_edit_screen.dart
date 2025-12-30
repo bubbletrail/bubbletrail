@@ -40,76 +40,79 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
     super.dispose();
   }
 
-  void _saveCylinder() {
-    try {
-      final description = _descriptionController.text.trim();
-      final sizeText = _sizeController.text.trim();
-      final wpText = _workpressureController.text.trim();
+  bool _saveCylinder() {
+    final description = _descriptionController.text.trim();
+    final sizeText = _sizeController.text.trim();
+    final wpText = _workpressureController.text.trim();
 
-      final size = sizeText.isNotEmpty ? double.tryParse(sizeText) : null;
-      final workpressure = wpText.isNotEmpty ? double.tryParse(wpText) : null;
+    final size = sizeText.isNotEmpty ? double.tryParse(sizeText) : null;
+    final workpressure = wpText.isNotEmpty ? double.tryParse(wpText) : null;
 
-      if (sizeText.isNotEmpty && size == null) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid size value')));
-        return;
-      }
-
-      if (wpText.isNotEmpty && workpressure == null) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid working pressure value')));
-        return;
-      }
-
-      final updatedCylinder = Cylinder(id: _originalCylinder.id, description: description.isEmpty ? null : description, size: size, workpressure: workpressure);
-
-      // Send update event to bloc
-      context.read<CylinderDetailsBloc>().add(UpdateCylinderDetails(updatedCylinder));
-
-      // Reload cylinder list to reflect changes
-      context.read<CylinderListBloc>().add(const LoadCylinders());
-
-      // Navigate back
-      context.pop();
-
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_isNew ? 'Cylinder created successfully' : 'Cylinder updated successfully')));
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error saving cylinder: $e')));
+    if (sizeText.isNotEmpty && size == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid size value')));
+      return false;
     }
+
+    if (wpText.isNotEmpty && workpressure == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid working pressure value')));
+      return false;
+    }
+
+    final updatedCylinder = Cylinder(id: _originalCylinder.id, description: description.isEmpty ? null : description, size: size, workpressure: workpressure);
+
+    // Send update event to bloc
+    context.read<CylinderDetailsBloc>().add(UpdateCylinderDetails(updatedCylinder));
+
+    // Reload cylinder list to reflect changes
+    context.read<CylinderListBloc>().add(const LoadCylinders());
+
+    return true;
+  }
+
+  void _saveAndPop() {
+    if (_saveCylinder()) {
+      context.pop();
+    }
+  }
+
+  void _cancel() {
+    context.pop();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ScreenScaffold(
-      title: Text(_isNew ? 'New Cylinder' : 'Edit Cylinder'),
-      actions: [IconButton(icon: const Icon(Icons.save), onPressed: _saveCylinder, tooltip: 'Save')],
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 16,
-          children: [
-            TextField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder(), hintText: 'e.g., AL80, Steel HP100'),
-            ),
-            TextField(
-              controller: _sizeController,
-              decoration: const InputDecoration(labelText: 'Size (liters)', border: OutlineInputBorder(), hintText: 'e.g., 11.1'),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            ),
-            TextField(
-              controller: _workpressureController,
-              decoration: const InputDecoration(labelText: 'Working Pressure (bar)', border: OutlineInputBorder(), hintText: 'e.g., 207'),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            ),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _saveCylinder,
-                style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-                child: Text(_isNew ? 'Create Cylinder' : 'Save Changes', style: const TextStyle(fontSize: 16)),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          _saveAndPop();
+        }
+      },
+      child: ScreenScaffold(
+        title: Text(_isNew ? 'New Cylinder' : 'Edit Cylinder'),
+        actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes')],
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 16,
+            children: [
+              TextField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder(), hintText: 'e.g., AL80, Steel HP100'),
               ),
-            ),
-          ],
+              TextField(
+                controller: _sizeController,
+                decoration: const InputDecoration(labelText: 'Size (liters)', border: OutlineInputBorder(), hintText: 'e.g., 11.1'),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              ),
+              TextField(
+                controller: _workpressureController,
+                decoration: const InputDecoration(labelText: 'Working Pressure (bar)', border: OutlineInputBorder(), hintText: 'e.g., 207'),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              ),
+            ],
+          ),
         ),
       ),
     );
