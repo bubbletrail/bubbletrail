@@ -17,9 +17,10 @@ class EquipmentScreen extends StatelessWidget {
       builder: (context, state) {
         return ScreenScaffold(
           title: const Text('Equipment'),
-          floatingActionButton: FloatingActionButton(
+          floatingActionButton: FloatingActionButton.extended(
             onPressed: state.syncing ? null : () => context.read<SyncBloc>().add(const StartSyncing()),
-            child: state.syncing ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.sync),
+            label: Text(state.syncing ? 'Syncing...' : 'Sync'),
+            icon: state.syncing ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.sync),
           ),
           body: Stack(
             children: [
