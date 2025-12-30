@@ -70,6 +70,22 @@ class _EditableGasChange {
   }
 }
 
+/// Editable wrapper for a weight system
+class _EditableWeightsystem {
+  String description;
+  double? weight;
+
+  _EditableWeightsystem({required this.description, this.weight});
+
+  factory _EditableWeightsystem.fromWeightsystem(Weightsystem ws) {
+    return _EditableWeightsystem(description: ws.description, weight: ws.hasWeight() ? ws.weight : null);
+  }
+
+  Weightsystem toWeightsystem() {
+    return Weightsystem(description: description, weight: weight);
+  }
+}
+
 class DiveEditScreen extends StatefulWidget {
   const DiveEditScreen({super.key});
 
@@ -89,6 +105,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   String? _selectedSiteId;
   late List<_EditableDiveCylinder> _cylinders;
   late List<_EditableGasChange> _gasChanges;
+  late List<_EditableWeightsystem> _weightsystems;
 
   @override
   void initState() {
@@ -105,6 +122,9 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
 
     // Initialize cylinders from dive
     _cylinders = dive.cylinders.map((dc) => _EditableDiveCylinder.fromDiveCylinder(dc)).toList();
+
+    // Initialize weightsystems from dive
+    _weightsystems = dive.weightsystems.map((ws) => _EditableWeightsystem.fromWeightsystem(ws)).toList();
 
     // Extract gaschange events from all computer dives (events are in samples)
     _gasChanges = [];
@@ -395,6 +415,90 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     });
   }
 
+  static const _defaultWeightTypes = ['Backplate', 'Belt', 'Harness', 'Integrated', 'Trim'];
+
+  void _addWeightsystem() {
+    setState(() {
+      _weightsystems.add(_EditableWeightsystem(description: '', weight: null));
+    });
+    // Immediately open the edit dialog for the new weight
+    _editWeightsystem(_weightsystems.length - 1);
+  }
+
+  void _removeWeightsystem(int index) {
+    setState(() {
+      _weightsystems.removeAt(index);
+    });
+  }
+
+  Future<void> _editWeightsystem(int index) async {
+    final ws = _weightsystems[index];
+    final descController = TextEditingController(text: ws.description);
+    final weightController = TextEditingController(text: ws.weight?.toString() ?? '');
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(ws.description.isNotEmpty ? 'Edit ${ws.description}' : 'Add Weight'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Autocomplete<String>(
+              initialValue: TextEditingValue(text: ws.description),
+              optionsBuilder: (textEditingValue) {
+                if (textEditingValue.text.isEmpty) {
+                  return _defaultWeightTypes;
+                }
+                return _defaultWeightTypes.where((type) => type.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+              },
+              onSelected: (selection) {
+                descController.text = selection;
+              },
+              fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                // Sync the autocomplete controller with our descController
+                controller.text = descController.text;
+                controller.addListener(() {
+                  descController.text = controller.text;
+                });
+                return TextField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  decoration: const InputDecoration(labelText: 'Type', border: OutlineInputBorder()),
+                  textCapitalization: TextCapitalization.words,
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: weightController,
+              decoration: const InputDecoration(labelText: 'Weight (kg)', border: OutlineInputBorder()),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Save')),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      setState(() {
+        ws.description = descController.text.trim();
+        ws.weight = double.tryParse(weightController.text);
+      });
+    } else if (ws.description.isEmpty && ws.weight == null) {
+      // User cancelled on a new empty weight, remove it
+      setState(() {
+        _weightsystems.removeAt(index);
+      });
+    }
+
+    descController.dispose();
+    weightController.dispose();
+  }
+
   void _saveDive() {
     try {
       // Update dive properties
@@ -420,6 +524,10 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       // Update cylinders
       dive.cylinders.clear();
       dive.cylinders.addAll(_cylinders.map((c) => c.toDiveCylinder()));
+
+      // Update weight systems
+      dive.weightsystems.clear();
+      dive.weightsystems.addAll(_weightsystems.map((ws) => ws.toWeightsystem()));
 
       // Update gas change events
       // Find existing "Manual Entry" computer dive or prepare to create one
@@ -600,6 +708,49 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                               label: const Text('Add Gas Change'),
                               style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 32)),
                             ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+              ],
+            ),
+            // Weight systems section
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Weight Systems', style: Theme.of(context).textTheme.titleMedium),
+                    IconButton(icon: const Icon(Icons.add), onPressed: _addWeightsystem, tooltip: 'Add weight'),
+                  ],
+                ),
+                if (_weightsystems.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text('No weight systems. Tap + to add one.', style: TextStyle(color: Theme.of(context).hintColor)),
+                  )
+                else
+                  ...List.generate(_weightsystems.length, (index) {
+                    final ws = _weightsystems[index];
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(ws.description.isNotEmpty ? ws.description : 'Weight ${index + 1}', style: Theme.of(context).textTheme.titleSmall),
+                                  if (ws.weight != null) Text(formatWeight(context, ws.weight!), style: Theme.of(context).textTheme.bodySmall),
+                                ],
+                              ),
+                            ),
+                            IconButton(icon: const Icon(Icons.edit, size: 20), onPressed: () => _editWeightsystem(index), tooltip: 'Edit'),
+                            IconButton(icon: const Icon(Icons.delete, size: 20), onPressed: () => _removeWeightsystem(index), tooltip: 'Remove'),
                           ],
                         ),
                       ),

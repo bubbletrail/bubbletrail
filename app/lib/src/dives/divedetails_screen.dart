@@ -161,11 +161,7 @@ class _DiveDetails extends StatelessWidget {
         infoRow('Start', DateFormat.yMd().add_jm().format(_startDateTime)),
         infoRow('Duration', formatDuration(dive.duration)),
         if (dive.hasRating()) infoRow('Rating', '★' * dive.rating),
-        tagsRow(
-          context,
-          dive.tags.toList(),
-          secondaryTags: site?.tags.where((t) => !dive.tags.contains(t)).toList(),
-        ),
+        tagsRow(context, dive.tags.toList(), secondaryTags: site?.tags.where((t) => !dive.tags.contains(t)).toList()),
       ]),
       const SizedBox(height: 16),
       if (site != null) ...[_SiteCard(site: site!), const SizedBox(height: 16)],
@@ -207,8 +203,8 @@ class _DiveDetails extends StatelessWidget {
             if (cyl.hasOxygen() || cyl.hasHelium()) {
               final o2 = cyl.hasOxygen() ? cyl.oxygen : 0.21;
               if (cyl.helium > 0) {
-                details.add('Tx${o2.toStringAsFixed(0)}/${(cyl.helium * 100).toStringAsFixed(0)}');
-              } else if (o2 != 21.0) {
+                details.add('Tx${(o2 * 100).toStringAsFixed(0)}/${(cyl.helium * 100).toStringAsFixed(0)}');
+              } else if (o2 != 0.21) {
                 details.add('EAN${(o2 * 100).toStringAsFixed(0)}');
               } else {
                 details.add('Air');
