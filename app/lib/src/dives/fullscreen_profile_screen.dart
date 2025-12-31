@@ -40,12 +40,7 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
 
   void _restoreOrientation() {
     if (Platform.isIOS || Platform.isAndroid) {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown,
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     }
   }
 

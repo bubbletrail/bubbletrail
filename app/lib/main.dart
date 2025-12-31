@@ -37,6 +37,9 @@ void main() async {
   _initLogging();
   await WindowPreferences.initialize();
   Intl.defaultLocale = 'sv_SE'; // XXX
+  if (Platform.isIOS || Platform.isAndroid) {
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  }
   runApp(const MyApp());
 }
 
