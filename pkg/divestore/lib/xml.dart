@@ -410,11 +410,22 @@ extension SiteXml on Site {
       }
     }
 
-    // Parse extradata elements for additional fields
     String? country;
     String? location;
+
+    var name = elem.getAttribute('name') ?? '';
+    final nlcExp = RegExp(r'(.+) / (.+) / (.+)');
+    final m = nlcExp.firstMatch(name);
+    if (m != null) {
+      country = m.group(1);
+      location = m.group(2);
+      name = m.group(3)!;
+    }
+
     String? bodyOfWater;
     String? difficulty;
+
+    // Parse extradata elements for additional fields
     for (final extradataElem in elem.findElements('extradata')) {
       final key = extradataElem.getAttribute('key');
       final value = extradataElem.getAttribute('value');
@@ -434,7 +445,7 @@ extension SiteXml on Site {
 
     return Site(
       id: ensureUUID(elem.getAttribute('uuid')) ?? '',
-      name: elem.getAttribute('name') ?? '',
+      name: name,
       position: position,
       country: country,
       location: location,
