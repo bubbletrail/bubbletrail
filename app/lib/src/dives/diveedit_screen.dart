@@ -3,7 +3,6 @@ import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart' as proto;
 
 import '../bloc/cylinderlist_bloc.dart';
@@ -16,8 +15,8 @@ class _EditableDiveCylinder {
   Cylinder? cylinder;
   int oxygen;
   int helium;
-  int? beginPressure;
-  int? endPressure;
+  double? beginPressure;
+  double? endPressure;
 
   _EditableDiveCylinder({required this.cylinderId, this.cylinder, required this.oxygen, required this.helium, this.beginPressure, this.endPressure});
 
@@ -27,8 +26,8 @@ class _EditableDiveCylinder {
       cylinder: dc.hasCylinder() ? dc.cylinder : null,
       oxygen: (dc.oxygen * 100).toInt(),
       helium: (dc.helium * 100).toInt(),
-      beginPressure: dc.beginPressure.toInt(),
-      endPressure: dc.endPressure.toInt(),
+      beginPressure: dc.beginPressure,
+      endPressure: dc.endPressure,
     );
   }
 
@@ -236,12 +235,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       title: 'Select Cylinder',
       items: cylinders,
       itemBuilder: (cyl) {
-        final subtitle = [if (cyl.hasSize()) formatVolume(context, cyl.size), if (cyl.hasWorkpressure()) formatPressure(context, cyl.workpressure)].join(' @ ');
-        return ListTile(
-          leading: const Icon(Icons.scuba_diving),
-          title: Text(cyl.description.isNotEmpty ? cyl.description : 'Cylinder ${cyl.id}'),
-          subtitle: subtitle.isNotEmpty ? Text(subtitle) : null,
-        );
+        return ListTile(leading: const Icon(Icons.scuba_diving), title: Text(cyl.description.isNotEmpty ? cyl.description : 'Cylinder ${cyl.id}'));
       },
     );
 
@@ -287,85 +281,66 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     final cyl = _cylinders[index];
     final o2Controller = TextEditingController(text: cyl.oxygen.toString());
     final heController = TextEditingController(text: cyl.helium.toString());
-    final startController = TextEditingController(text: cyl.beginPressure?.toString() ?? '');
-    final endController = TextEditingController(text: cyl.endPressure?.toString() ?? '');
 
     final cylinderState = context.read<CylinderListBloc>().state;
     final availableCylinders = cylinderState is CylinderListLoaded ? cylinderState.cylinders : <Cylinder>[];
     Cylinder? selectedCylinder = cyl.cylinder;
+
+    // Track pressure values in metric (bar)
+    double? startPressure = cyl.beginPressure?.toDouble();
+    double? endPressure = cyl.endPressure?.toDouble();
 
     final result = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           title: Text('Edit ${selectedCylinder?.description ?? 'Cylinder ${index + 1}'}'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (availableCylinders.isNotEmpty) ...[
-                DropdownButtonFormField<String>(
-                  initialValue: selectedCylinder?.id,
-                  decoration: const InputDecoration(labelText: 'Cylinder Type', border: OutlineInputBorder()),
-                  items: availableCylinders.map((c) {
-                    final subtitle = [
-                      if (c.hasSize()) formatVolume(context, c.size),
-                      if (c.hasWorkpressure()) formatPressure(context, c.workpressure),
-                    ].join(' @ ');
-                    return DropdownMenuItem(
-                      value: c.id,
-                      child: Text('${c.description.isNotEmpty ? c.description : 'Cylinder ${c.id}'}${subtitle.isNotEmpty ? ' ($subtitle)' : ''}'),
-                    );
-                  }).toList(),
-                  onChanged: (id) {
-                    if (id != null) {
-                      setDialogState(() {
-                        selectedCylinder = availableCylinders.firstWhere((c) => c.id == id);
-                      });
-                    }
-                  },
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (availableCylinders.isNotEmpty) ...[
+                  DropdownButtonFormField<String>(
+                    initialValue: selectedCylinder?.id,
+                    decoration: const InputDecoration(labelText: 'Cylinder Type', border: OutlineInputBorder()),
+                    items: availableCylinders.map((c) {
+                      return DropdownMenuItem(value: c.id, child: Text(c.description.isNotEmpty ? c.description : 'Cylinder ${c.id}'));
+                    }).toList(),
+                    onChanged: (id) {
+                      if (id != null) {
+                        setDialogState(() {
+                          selectedCylinder = availableCylinders.firstWhere((c) => c.id == id);
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: o2Controller,
+                        decoration: const InputDecoration(labelText: 'Oxygen %', border: OutlineInputBorder()),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextField(
+                        controller: heController,
+                        decoration: const InputDecoration(labelText: 'Helium %', border: OutlineInputBorder()),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
+                PressureEditor(label: 'Start Pressure', initialValue: startPressure, onChanged: (value) => startPressure = value),
+                const SizedBox(height: 16),
+                PressureEditor(label: 'End Pressure', initialValue: endPressure, onChanged: (value) => endPressure = value),
               ],
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: o2Controller,
-                      decoration: const InputDecoration(labelText: 'Oxygen %', border: OutlineInputBorder()),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      controller: heController,
-                      decoration: const InputDecoration(labelText: 'Helium %', border: OutlineInputBorder()),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: startController,
-                      decoration: const InputDecoration(labelText: 'Start (bar)', border: OutlineInputBorder()),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      controller: endController,
-                      decoration: const InputDecoration(labelText: 'End (bar)', border: OutlineInputBorder()),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
           actions: [
             TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancel')),
@@ -383,15 +358,13 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
         }
         cyl.oxygen = int.tryParse(o2Controller.text) ?? 0;
         cyl.helium = int.tryParse(heController.text) ?? 0;
-        cyl.beginPressure = int.tryParse(startController.text);
-        cyl.endPressure = int.tryParse(endController.text);
+        cyl.beginPressure = startPressure;
+        cyl.endPressure = endPressure;
       });
     }
 
     o2Controller.dispose();
     heController.dispose();
-    startController.dispose();
-    endController.dispose();
   }
 
   Future<void> _addGasChange(int cylinderIndex) async {
@@ -433,7 +406,9 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   Future<void> _editWeightsystem(int index) async {
     final ws = _weightsystems[index];
     final descController = TextEditingController(text: ws.description);
-    final weightController = TextEditingController(text: ws.weight?.toString() ?? '');
+
+    // Track weight in metric (kg)
+    double? weight = ws.weight;
 
     final result = await showDialog<bool>(
       context: context,
@@ -468,11 +443,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
               },
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: weightController,
-              decoration: const InputDecoration(labelText: 'Weight (kg)', border: OutlineInputBorder()),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            ),
+            WeightEditor(label: 'Weight', initialValue: weight, onChanged: (value) => weight = value),
           ],
         ),
         actions: [
@@ -485,7 +456,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     if (result == true) {
       setState(() {
         ws.description = descController.text.trim();
-        ws.weight = double.tryParse(weightController.text);
+        ws.weight = weight;
       });
     } else if (ws.description.isEmpty && ws.weight == null) {
       // User cancelled on a new empty weight, remove it
@@ -495,7 +466,6 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     }
 
     descController.dispose();
-    weightController.dispose();
   }
 
   void _saveDive() {
@@ -600,7 +570,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                       onTap: _selectDate,
                       child: InputDecorator(
                         decoration: const InputDecoration(labelText: 'Date', border: OutlineInputBorder(), suffixIcon: Icon(Icons.calendar_today)),
-                        child: Text(DateFormat.yMd().format(_selectedDateTime)),
+                        child: DateText(_selectedDateTime),
                       ),
                     ),
                   ),
@@ -609,7 +579,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                       onTap: _selectTime,
                       child: InputDecorator(
                         decoration: const InputDecoration(labelText: 'Time', border: OutlineInputBorder(), suffixIcon: Icon(Icons.access_time)),
-                        child: Text(DateFormat.Hms().format(_selectedDateTime)),
+                        child: TimeText(_selectedDateTime),
                       ),
                     ),
                   ),
@@ -666,23 +636,20 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(cyl.cylinder?.description ?? 'Cylinder ${index + 1}', style: Theme.of(context).textTheme.titleSmall),
-                                        Text(
-                                          '${cyl.gasDescription}${cyl.beginPressure != null || cyl.endPressure != null ? ' • ${cyl.beginPressure != null ? formatPressure(context, cyl.beginPressure!) : '?'} → ${cyl.endPressure != null ? formatPressure(context, cyl.endPressure!) : '?'}' : ''}',
-                                          style: Theme.of(context).textTheme.bodySmall,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  IconButton(icon: const Icon(Icons.edit, size: 20), onPressed: () => _editCylinderGas(index), tooltip: 'Edit gas mix'),
-                                  IconButton(icon: const Icon(Icons.delete, size: 20), onPressed: () => _removeCylinder(index), tooltip: 'Remove cylinder'),
-                                ],
+                              CylinderTile(
+                                index: index,
+                                description: cyl.cylinder?.description ?? 'Cylinder ${index + 1}',
+                                oxygenPct: cyl.oxygen,
+                                heliumPct: cyl.helium,
+                                beginPressure: cyl.beginPressure ?? 0,
+                                endPressure: cyl.endPressure ?? 0,
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(icon: const Icon(Icons.edit, size: 20), onPressed: () => _editCylinderGas(index), tooltip: 'Edit gas mix'),
+                                    IconButton(icon: const Icon(Icons.delete, size: 20), onPressed: () => _removeCylinder(index), tooltip: 'Remove cylinder'),
+                                  ],
+                                ),
                               ),
                               const SizedBox(height: 8),
                               Text('Gas changes:', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
@@ -752,7 +719,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(ws.description.isNotEmpty ? ws.description : 'Weight ${index + 1}', style: Theme.of(context).textTheme.titleSmall),
-                                    if (ws.weight != null) Text(formatWeight(context, ws.weight!), style: Theme.of(context).textTheme.bodySmall),
+                                    if (ws.weight != null) WeightText(ws.weight!, style: Theme.of(context).textTheme.bodySmall),
                                   ],
                                 ),
                               ),

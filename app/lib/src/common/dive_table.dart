@@ -56,23 +56,28 @@ class DiveTableWidget extends StatelessWidget {
   }
 
   Widget _buildTrinaGrid(BuildContext context) {
-    final columns = <TrinaColumn>[
-      TrinaColumn(title: 'Dive #', field: 'number', type: TrinaColumnType.number(), width: 80, readOnly: true, sort: TrinaColumnSort.descending),
-      TrinaColumn(title: 'Start', field: 'start', type: TrinaColumnType.dateTime(), width: 120, readOnly: true),
-      TrinaColumn(title: 'Max Depth', field: 'maxDepth', type: TrinaColumnType.number(), width: 80, readOnly: true),
-      TrinaColumn(title: 'Duration', field: 'duration', type: TrinaColumnType.number(), width: 80, readOnly: true),
-      if (showSiteColumn) TrinaColumn(title: 'Site', field: 'site', type: TrinaColumnType.text(), width: 200, readOnly: true),
-    ];
-
     return BlocBuilder<PreferencesBloc, PreferencesState>(
       builder: (context, state) {
+        final columns = <TrinaColumn>[
+          TrinaColumn(title: 'Dive #', field: 'number', type: TrinaColumnType.number(), width: 80, readOnly: true, sort: TrinaColumnSort.descending),
+          TrinaColumn(
+            title: 'Start',
+            field: 'start',
+            type: TrinaColumnType.dateTime(format: state.preferences.dateTimeFormat),
+            width: 120,
+            readOnly: true,
+          ),
+          TrinaColumn(title: 'Max Depth', field: 'maxDepth', type: TrinaColumnType.number(), width: 80, readOnly: true),
+          TrinaColumn(title: 'Duration', field: 'duration', type: TrinaColumnType.number(), width: 80, readOnly: true),
+          if (showSiteColumn) TrinaColumn(title: 'Site', field: 'site', type: TrinaColumnType.text(), width: 200, readOnly: true),
+        ];
         final rows = dives.map((dive) {
           final site = _getSite(dive);
           return TrinaRow(
             cells: {
               'number': TrinaCell(value: dive.number),
               'start': TrinaCell(value: dive.start.toDateTime()),
-              'maxDepth': TrinaCell(value: convertDepth(context, dive.maxDepth)),
+              'maxDepth': TrinaCell(value: dive.maxDepth, renderer: (rendererContext) => DepthText(rendererContext.cell.value)),
               'duration': TrinaCell(value: dive.duration, renderer: (rendererContext) => Text(formatDuration(rendererContext.cell.value))),
               'site': TrinaCell(value: site?.name ?? ''),
               '_id': TrinaCell(value: dive.id), // Hidden field for navigation

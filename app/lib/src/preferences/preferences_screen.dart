@@ -76,7 +76,7 @@ class PreferencesScreen extends StatelessWidget {
                 trailing: SegmentedButton<WeightUnit>(
                   segments: const [
                     ButtonSegment(value: WeightUnit.kg, label: Text('kg'), icon: Icon(null)),
-                    ButtonSegment(value: WeightUnit.lbs, label: Text('lbs'), icon: Icon(null)),
+                    ButtonSegment(value: WeightUnit.lb, label: Text('lbs'), icon: Icon(null)),
                   ],
                   selected: {prefs.weightUnit},
                   onSelectionChanged: (value) {

@@ -1,18 +1,68 @@
 import 'package:flutter/material.dart';
 
-enum DepthUnit { meters, feet }
+enum DepthUnit {
+  meters('m'),
+  feet('ft');
 
-enum PressureUnit { bar, psi }
+  const DepthUnit(this.label);
 
-enum TemperatureUnit { celsius, fahrenheit }
+  final String label;
+}
 
-enum VolumeUnit { liters, cuft }
+enum PressureUnit {
+  bar('bar'),
+  psi('psi');
 
-enum WeightUnit { kg, lbs }
+  const PressureUnit(this.label);
 
-enum DateFormatPref { iso, us, eu }
+  final String label;
+}
 
-enum TimeFormatPref { h24, h12 }
+enum TemperatureUnit {
+  celsius('°C'),
+  fahrenheit('°F');
+
+  const TemperatureUnit(this.label);
+
+  final String label;
+}
+
+enum VolumeUnit {
+  liters('L'),
+  cuft('cuft');
+
+  const VolumeUnit(this.label);
+
+  final String label;
+}
+
+enum WeightUnit {
+  kg('kg'),
+  lb('lb');
+
+  const WeightUnit(this.label);
+
+  final String label;
+}
+
+enum DateFormatPref {
+  iso('yyyy-MM-dd'),
+  us('MM/dd/yyyy'),
+  eu('dd/MM/yyyy');
+
+  const DateFormatPref(this.format);
+
+  final String format;
+}
+
+enum TimeFormatPref {
+  h24('HH:mm'),
+  h12('h:mm a');
+
+  const TimeFormatPref(this.format);
+
+  final String format;
+}
 
 class Preferences {
   final DepthUnit depthUnit;
@@ -23,6 +73,8 @@ class Preferences {
   final DateFormatPref dateFormat;
   final TimeFormatPref timeFormat;
   final ThemeMode themeMode;
+
+  String get dateTimeFormat => '${dateFormat.format} ${timeFormat.format}';
 
   const Preferences({
     this.depthUnit = DepthUnit.meters,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
@@ -34,9 +33,17 @@ class EquipmentScreen extends StatelessWidget {
               Positioned(
                 left: 16,
                 bottom: 16,
-                child: Text(
-                  'Bubbletrail $appVer ($gitVer)\n${DateFormat('yyyy-MM-dd').format(buildTime)}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
+                child: Column(
+                  children: [
+                    Text(
+                      'Bubbletrail $appVer ($gitVer)',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
+                    ),
+                    DateTimeText(
+                      buildTime,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
+                    ),
+                  ],
                 ),
               ),
             ],

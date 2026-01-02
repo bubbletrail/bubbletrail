@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -36,7 +35,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _initLogging();
   await WindowPreferences.initialize();
-  Intl.defaultLocale = 'sv_SE'; // XXX
   if (Platform.isIOS || Platform.isAndroid) {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   }

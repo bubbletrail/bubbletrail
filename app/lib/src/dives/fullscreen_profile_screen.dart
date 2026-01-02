@@ -4,8 +4,11 @@ import 'package:divestore/divestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../bloc/preferences_bloc.dart';
 import '../common/units.dart';
+import '../preferences/preferences.dart';
 
 /// A fullscreen view of the dive depth profile.
 /// On mobile devices (iOS/Android), this screen forces landscape orientation.
@@ -49,6 +52,9 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final primaryColor = colorScheme.primary;
 
+    final depthUnit = context.watch<PreferencesBloc>().state.preferences.depthUnit;
+    final depthMult = depthUnit == DepthUnit.feet ? 3.28 : 1.0;
+
     // Filter out samples without depth data
     final samples = widget.log.samples.where((s) => s.hasDepth()).toList();
     if (samples.isEmpty) {
@@ -61,9 +67,9 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
       );
     }
 
-    final maxDepth = -samples.map((s) => s.depth).reduce((a, b) => a > b ? a : b);
+    final maxDepth = depthMult * -samples.map((s) => s.depth).reduce((a, b) => a > b ? a : b);
     final maxTime = samples.map((s) => s.time).reduce((a, b) => a > b ? a : b) / 60;
-    final spots = samples.map((sample) => FlSpot(sample.time / 60, -sample.depth)).toList();
+    final spots = samples.map((sample) => FlSpot(sample.time / 60, depthMult * -sample.depth)).toList();
 
     return Padding(
       padding: Platform.isMacOS ? const EdgeInsets.only(top: 16.0) : EdgeInsetsGeometry.only(), // avoid the window buttons on macos
@@ -90,7 +96,7 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
                 ),
                 titlesData: FlTitlesData(
                   leftTitles: AxisTitles(
-                    axisNameWidget: const Text('Depth (m)', style: TextStyle(color: Colors.white70)),
+                    axisNameWidget: Text('Depth (${depthUnit.label})', style: const TextStyle(color: Colors.white70)),
                     sideTitles: SideTitles(
                       showTitles: true,
                       minIncluded: false,
@@ -139,8 +145,10 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
                   touchTooltipData: LineTouchTooltipData(
                     getTooltipItems: (touchedSpots) {
                       return touchedSpots.map((spot) {
+                        // spot.y is already in user units, just format with unit label
+                        final depthStr = '${(-spot.y).toStringAsFixed(1)} ${depthUnit.label}';
                         return LineTooltipItem(
-                          '${formatDuration((spot.x * 60).toInt())}\n${formatDepth(context, -spot.y)}',
+                          '${formatDuration((spot.x * 60).toInt())}\n$depthStr',
                           TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 14),
                         );
                       }).toList();

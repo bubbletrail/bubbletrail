@@ -1,7 +1,6 @@
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../app_routes.dart';
 import 'units.dart';
@@ -37,7 +36,7 @@ class DiveListItemCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('Dive #${dive.number}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                  Text(DateFormat.yMd().format(_startDateTime), style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                  DateTimeText(_startDateTime, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],
               ),
               const SizedBox(height: 8),
@@ -57,11 +56,11 @@ class DiveListItemCard extends StatelessWidget {
               // Bottom row: Depth and duration
               Row(
                 children: [
-                  _InfoChip(icon: Icons.arrow_downward, label: formatDepth(context, maxDepth), theme: theme),
+                  _InfoChip(icon: Icons.arrow_downward, label: DepthText(maxDepth), theme: theme),
                   const SizedBox(width: 12),
-                  _InfoChip(icon: Icons.timer, label: formatDuration(dive.duration), theme: theme),
+                  _InfoChip(icon: Icons.timer, label: DurationText(dive.duration), theme: theme),
                   const Spacer(),
-                  Text(DateFormat.jm().format(_startDateTime), style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                  TimeText(_startDateTime, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],
               ),
             ],
@@ -74,7 +73,7 @@ class DiveListItemCard extends StatelessWidget {
 
 class _InfoChip extends StatelessWidget {
   final IconData icon;
-  final String label;
+  final Widget label;
   final ThemeData theme;
 
   const _InfoChip({required this.icon, required this.label, required this.theme});
@@ -86,7 +85,7 @@ class _InfoChip extends StatelessWidget {
       children: [
         Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
         const SizedBox(width: 4),
-        Text(label, style: theme.textTheme.bodyMedium),
+        label,
       ],
     );
   }

@@ -2,7 +2,6 @@ import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:protobuf/protobuf.dart';
 
 import '../app_routes.dart';
@@ -173,7 +172,7 @@ class _DiveDetails extends StatelessWidget {
   List<Widget> _buildAllSections(BuildContext context) {
     return [
       infoCard(context, 'General Information', [
-        infoRow('Start', DateFormat.yMd().add_jm().format(_startDateTime)),
+        infoWidgetRow('Start', DateTimeText(_startDateTime)),
         infoRow('Duration', formatDuration(dive.duration)),
         if (dive.hasRating()) infoRow('Rating', '★' * dive.rating),
         tagsRow(context, dive.tags.toList(), secondaryTags: site?.tags.where((t) => !dive.tags.contains(t)).toList()),
@@ -191,7 +190,7 @@ class _DiveDetails extends StatelessWidget {
       ],
       if (dive.hasSac() || dive.hasOtu() || dive.hasCns()) ...[
         infoCard(context, 'Physiological Data', [
-          if (dive.hasSac()) infoRow('SAC', '${dive.sac.toStringAsFixed(1)} l/min'),
+          if (dive.hasSac()) infoWidgetRow('SAC', VolumeText(dive.sac, suffix: '/min')),
           if (dive.hasOtu()) infoRow('OTU', dive.otu.toString()),
           if (dive.hasCns()) infoRow('CNS', '${dive.cns}%'),
         ]),
@@ -208,29 +207,17 @@ class _DiveDetails extends StatelessWidget {
         infoCard(
           context,
           'Cylinders',
-          dive.cylinders.asMap().entries.map((entry) {
-            final idx = entry.key;
-            final cyl = entry.value;
-            final desc = cyl.hasCylinder() && cyl.cylinder.description.isNotEmpty ? cyl.cylinder.description : 'Cylinder ${idx + 1}';
-            final details = <String>[];
-
-            // Gas mixture
-            if (cyl.hasOxygen() || cyl.hasHelium()) {
-              final o2 = cyl.hasOxygen() ? cyl.oxygen : 0.21;
-              if (cyl.helium > 0) {
-                details.add('Tx${(o2 * 100).toStringAsFixed(0)}/${(cyl.helium * 100).toStringAsFixed(0)}');
-              } else if (o2 != 0.21) {
-                details.add('EAN${(o2 * 100).toStringAsFixed(0)}');
-              } else {
-                details.add('Air');
-              }
-            }
-
-            if (cyl.hasCylinder() && cyl.cylinder.hasSize()) details.add(formatVolume(context, cyl.cylinder.size));
-            if (cyl.hasCylinder() && cyl.cylinder.hasWorkpressure()) details.add(formatPressure(context, cyl.cylinder.workpressure));
-            if (cyl.hasBeginPressure()) details.add('Start: ${formatPressure(context, cyl.beginPressure)}');
-            if (cyl.hasEndPressure()) details.add('End: ${formatPressure(context, cyl.endPressure)}');
-            return infoRow(desc, details.join(', '));
+          dive.cylinders.indexed.map((entry) {
+            final idx = entry.$1;
+            final cyl = entry.$2;
+            return CylinderTile(
+              index: idx,
+              description: cyl.cylinder.description,
+              oxygenPct: (cyl.oxygen * 100).toInt(),
+              heliumPct: (cyl.helium * 100).toInt(),
+              beginPressure: cyl.beginPressure,
+              endPressure: cyl.endPressure,
+            );
           }).toList(),
         ),
         const SizedBox(height: 16),
@@ -243,8 +230,7 @@ class _DiveDetails extends StatelessWidget {
             final idx = entry.key;
             final ws = entry.value;
             final desc = ws.description.isNotEmpty ? ws.description : 'Weight ${idx + 1}';
-            final weight = ws.hasWeight() ? formatWeight(context, ws.weight) : '';
-            return infoRow(desc, weight);
+            return infoWidgetRow(desc, WeightText(ws.weight));
           }).toList(),
         ),
         const SizedBox(height: 16),

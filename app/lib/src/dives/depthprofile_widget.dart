@@ -49,7 +49,7 @@ class DepthProfileWidget extends StatelessWidget {
             gridData: FlGridData(show: true, drawVerticalLine: true, drawHorizontalLine: true),
             titlesData: FlTitlesData(
               leftTitles: AxisTitles(
-                axisNameWidget: Text('Depth (${unit.name})'),
+                axisNameWidget: Text('Depth (${unit.label})'),
                 sideTitles: SideTitles(
                   showTitles: true,
                   minIncluded: false,
@@ -94,8 +94,10 @@ class DepthProfileWidget extends StatelessWidget {
               touchTooltipData: LineTouchTooltipData(
                 getTooltipItems: (touchedSpots) {
                   return touchedSpots.map((spot) {
+                    // spot.y is already in user units, just format with unit label
+                    final depthStr = '${(-spot.y).toStringAsFixed(1)} ${unit.label}';
                     return LineTooltipItem(
-                      '${formatDuration((spot.x * 60).toInt())}\n${formatDepth(context, -spot.y)}',
+                      '${formatDuration((spot.x * 60).toInt())}\n$depthStr',
                       TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 12),
                     );
                   }).toList();

@@ -17,8 +17,10 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
   late final Cylinder _originalCylinder;
   late final bool _isNew;
   late final TextEditingController _descriptionController;
-  late final TextEditingController _sizeController;
-  late final TextEditingController _workpressureController;
+
+  // Store values in metric units
+  double? _size;
+  double? _workpressure;
 
   @override
   void initState() {
@@ -27,37 +29,20 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
     _originalCylinder = state.cylinder;
     _isNew = state.isNew;
     _descriptionController = TextEditingController(text: _originalCylinder.description);
-    _sizeController = TextEditingController(text: _originalCylinder.hasSize() ? _originalCylinder.size.toString() : '');
-    _workpressureController = TextEditingController(text: _originalCylinder.hasWorkpressure() ? _originalCylinder.workpressure.toString() : '');
+    _size = _originalCylinder.hasSize() ? _originalCylinder.size : null;
+    _workpressure = _originalCylinder.hasWorkpressure() ? _originalCylinder.workpressure : null;
   }
 
   @override
   void dispose() {
     _descriptionController.dispose();
-    _sizeController.dispose();
-    _workpressureController.dispose();
     super.dispose();
   }
 
   bool _saveCylinder() {
     final description = _descriptionController.text.trim();
-    final sizeText = _sizeController.text.trim();
-    final wpText = _workpressureController.text.trim();
 
-    final size = sizeText.isNotEmpty ? double.tryParse(sizeText) : null;
-    final workpressure = wpText.isNotEmpty ? double.tryParse(wpText) : null;
-
-    if (sizeText.isNotEmpty && size == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid size value')));
-      return false;
-    }
-
-    if (wpText.isNotEmpty && workpressure == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid working pressure value')));
-      return false;
-    }
-
-    final updatedCylinder = Cylinder(id: _originalCylinder.id, description: description.isEmpty ? null : description, size: size, workpressure: workpressure);
+    final updatedCylinder = Cylinder(id: _originalCylinder.id, description: description.isEmpty ? null : description, size: _size, workpressure: _workpressure);
 
     context.read<CylinderDetailsBloc>().add(UpdateCylinderDetails(updatedCylinder));
 
@@ -94,18 +79,10 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
             children: [
               TextField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder(), hintText: 'e.g., AL80, Steel HP100'),
+                decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder(), hintText: 'e.g., AL80, 12x232'),
               ),
-              TextField(
-                controller: _sizeController,
-                decoration: const InputDecoration(labelText: 'Size (liters)', border: OutlineInputBorder(), hintText: 'e.g., 11.1'),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              ),
-              TextField(
-                controller: _workpressureController,
-                decoration: const InputDecoration(labelText: 'Working Pressure (bar)', border: OutlineInputBorder(), hintText: 'e.g., 207'),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              ),
+              VolumeEditor(label: 'Size', initialValue: _size, onChanged: (value) => _size = value, hintText: 'e.g., 12.0'),
+              PressureEditor(label: 'Working Pressure', initialValue: _workpressure, onChanged: (value) => _workpressure = value, hintText: 'e.g., 232'),
             ],
           ),
         ),
