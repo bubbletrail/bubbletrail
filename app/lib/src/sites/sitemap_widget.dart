@@ -1,5 +1,6 @@
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../common/common.dart';
 
@@ -23,7 +24,7 @@ class SiteMapWidget extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: SizedBox(
         height: height,
-        child: SiteMap(position: site.position),
+        child: SiteMap(position: LatLng(site.position.latitude, site.position.longitude)),
       ),
     );
   }

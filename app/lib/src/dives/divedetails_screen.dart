@@ -2,6 +2,7 @@ import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:protobuf/protobuf.dart';
 
 import '../app_routes.dart';
@@ -299,7 +300,11 @@ class _SiteCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Map preview (only if position exists)
-            if (site.hasPosition()) SizedBox(height: 150, child: SiteMap(position: site.position)),
+            if (site.hasPosition())
+              SizedBox(
+                height: 150,
+                child: IgnorePointer(child: SiteMap(position: LatLng(site.position.latitude, site.position.longitude))),
+              ),
             // Site information
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -315,10 +320,10 @@ class _SiteCard extends StatelessWidget {
                     ],
                   ),
                   const Divider(),
-                  if (site.hasPosition()) ...[
-                    infoRow('Latitude', site.position.latitude.toStringAsFixed(6)),
-                    infoRow('Longitude', site.position.longitude.toStringAsFixed(6)),
-                  ],
+                  if (site.hasCountry()) infoRow('Country', site.country),
+                  if (site.hasCountry()) infoRow('Location', site.location),
+                  if (site.bodyOfWater.isNotEmpty) infoRow('Body of Water', site.bodyOfWater),
+                  if (site.hasPosition()) infoRow('Position', [formatLatitude(site.position.latitude), formatLongitude(site.position.longitude)].join(' ')),
                 ],
               ),
             ),

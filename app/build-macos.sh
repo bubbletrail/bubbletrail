@@ -34,10 +34,11 @@ flutter build macos \
     --release --no-pub \
     --build-number="${BUILD_NUMBER:-9000}" \
     --build-name="${MARKET_VERSION:=0.0.1}" \
+    --dart-define=AZURE_MAPS_SUBSCRIPTION_KEY="${AZURE_MAPS_SUBSCRIPTION_KEY:-}" \
     --dart-define=BUILD="${BUILD_NUMBER:-9000}" \
-    --dart-define=MARKETINGVERSION="${MARKET_VERSION:-0.0.1}" \
     --dart-define=BUILDSECONDS="${SOURCE_DATE_EPOCH:-1234567890}" \
-    --dart-define=GITSHA="${GIT_SHA:-g000000}"
+    --dart-define=GITSHA="${GIT_SHA:-g000000}" \
+    --dart-define=MARKETINGVERSION="${MARKET_VERSION:-0.0.1}"
 
 APP_NAME=$(find build/macos -name "*.app")
 PACKAGE_NAME=$(basename "$APP_NAME" .app).pkg

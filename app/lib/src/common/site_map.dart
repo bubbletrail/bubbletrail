@@ -1,12 +1,15 @@
-import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
-class SiteMap extends StatefulWidget {
-  const SiteMap({super.key, required this.position});
+import '../app_metadata.dart';
 
-  final Position position;
+class SiteMap extends StatefulWidget {
+  final LatLng position;
+  final void Function(TapPosition, LatLng)? onTap;
+  final bool alwaysCenterPosition;
+
+  const SiteMap({super.key, required this.position, this.onTap, this.alwaysCenterPosition = true});
 
   @override
   State<SiteMap> createState() => _SiteMapState();
@@ -18,26 +21,41 @@ class _SiteMapState extends State<SiteMap> {
   @override
   void didUpdateWidget(SiteMap oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.position.latitude != widget.position.latitude || oldWidget.position.longitude != widget.position.longitude) {
+    if (widget.alwaysCenterPosition && oldWidget.position != widget.position) {
       _mapController.move(LatLng(widget.position.latitude, widget.position.longitude), _mapController.camera.zoom);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final latlng = LatLng(widget.position.latitude, widget.position.longitude);
     return FlutterMap(
       mapController: _mapController,
-      options: MapOptions(initialCenter: latlng, initialZoom: 15.0, minZoom: 3.0, maxZoom: 18.0),
+      options: MapOptions(initialCenter: widget.position, initialZoom: 15.0, minZoom: 3.0, maxZoom: 18.0, onTap: widget.onTap),
       children: [
-        TileLayer(urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', userAgentPackageName: 'app.bubbletrail.bubbletrail', maxZoom: 19),
+        // We use Azure layers if we have a key
+        if (azureMapsSubscriptionKey.isNotEmpty)
+          TileLayer(
+            urlTemplate:
+                'https://atlas.microsoft.com/map/tile?api-version=2022-08-01&tilesetId={tilesetId}&zoom={z}&x={x}&y={y}&tileSize={tileSize}&subscription-key={subscriptionKey}',
+            additionalOptions: {'tilesetId': 'microsoft.imagery', 'tileSize': '512', 'subscriptionKey': azureMapsSubscriptionKey},
+          ),
+        if (azureMapsSubscriptionKey.isNotEmpty)
+          TileLayer(
+            urlTemplate:
+                'https://atlas.microsoft.com/map/tile?api-version=2022-08-01&tilesetId={tilesetId}&zoom={z}&x={x}&y={y}&tileSize={tileSize}&subscription-key={subscriptionKey}',
+            additionalOptions: {'tilesetId': 'microsoft.base.hybrid.road', 'tileSize': '512', 'subscriptionKey': azureMapsSubscriptionKey},
+          ),
+        // Otherwise we use an OpenStreetMap layer
+        if (azureMapsSubscriptionKey.isEmpty)
+          TileLayer(urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', userAgentPackageName: 'app.bubbletrail.bubbletrail', maxZoom: 19),
         MarkerLayer(
           markers: [
             Marker(
-              point: latlng,
-              width: 40,
-              height: 40,
-              child: Icon(Icons.location_pin, size: 40, color: Colors.redAccent),
+              point: widget.position,
+              width: 32,
+              height: 32,
+              alignment: Alignment.topCenter, // point is at bottom center
+              child: Icon(Icons.location_pin, size: 32, color: Colors.redAccent),
             ),
           ],
         ),

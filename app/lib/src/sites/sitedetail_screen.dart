@@ -40,10 +40,7 @@ class SiteDetailScreen extends StatelessWidget {
                 if (site.country.isNotEmpty) infoRow('Country', site.country),
                 if (site.location.isNotEmpty) infoRow('Location', site.location),
                 if (site.bodyOfWater.isNotEmpty) infoRow('Body of Water', site.bodyOfWater),
-                if (site.hasPosition()) ...[
-                  infoRow('Latitude', site.position.latitude.toStringAsFixed(6)),
-                  infoRow('Longitude', site.position.longitude.toStringAsFixed(6)),
-                ],
+                if (site.hasPosition()) infoRow('Position', [formatLatitude(site.position.latitude), formatLongitude(site.position.longitude)].join(' ')),
               ]),
               if (site.difficulty.isNotEmpty || site.tags.isNotEmpty) ...[
                 const SizedBox(height: 16),
@@ -53,7 +50,7 @@ class SiteDetailScreen extends StatelessWidget {
                 ]),
               ],
               const SizedBox(height: 16),
-              SiteMapWidget(site: site),
+              IgnorePointer(child: SiteMapWidget(site: site)),
               const SizedBox(height: 16),
               if (dives.isNotEmpty) ...[
                 Card(

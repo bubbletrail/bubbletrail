@@ -4,3 +4,5 @@ const gitSHA = String.fromEnvironment('GITSHA', defaultValue: 'development');
 const _buildSeconds = int.fromEnvironment('BUILDSECONDS', defaultValue: 0);
 final buildTime = _buildSeconds > 0 ? DateTime.fromMillisecondsSinceEpoch(1000 * _buildSeconds) : DateTime.now();
 const gitVer = '$appBuild-$gitSHA';
+
+const azureMapsSubscriptionKey = String.fromEnvironment('AZURE_MAPS_SUBSCRIPTION_KEY', defaultValue: '');

@@ -2,7 +2,9 @@ import 'package:chips_input_autocomplete/chips_input_autocomplete.dart';
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../bloc/divelist_bloc.dart';
 import '../common/common.dart';
@@ -25,6 +27,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
   late final TextEditingController _latController;
   late final TextEditingController _lonController;
   late final ChipsAutocompleteController _tagsController;
+  LatLng? _markerPosition;
 
   @override
   void initState() {
@@ -40,6 +43,9 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
     _latController = TextEditingController(text: _originalSite.hasPosition() ? _originalSite.position.latitude.toString() : '');
     _lonController = TextEditingController(text: _originalSite.hasPosition() ? _originalSite.position.longitude.toString() : '');
     _tagsController = ChipsAutocompleteController();
+    if (_originalSite.hasPosition()) {
+      _markerPosition = LatLng(_originalSite.position.latitude, _originalSite.position.longitude);
+    }
   }
 
   @override
@@ -99,6 +105,14 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
 
   void _cancel() {
     context.pop();
+  }
+
+  void _onMapTap(TapPosition tapPosition, LatLng point) {
+    setState(() {
+      _markerPosition = point;
+      _latController.text = point.latitude.toStringAsFixed(6);
+      _lonController.text = point.longitude.toStringAsFixed(6);
+    });
   }
 
   @override
@@ -178,6 +192,13 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
                     ),
                   ),
                 ],
+              ),
+              AspectRatio(
+                aspectRatio: 2,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SiteMap(position: _markerPosition ?? LatLng(0, 0), onTap: _onMapTap, alwaysCenterPosition: false),
+                ),
               ),
             ],
           ),
