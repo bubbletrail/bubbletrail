@@ -74,15 +74,6 @@ String formatWeight(WeightUnit unit, num weight) {
   }
 }
 
-String formatSAC(VolumeUnit unit, num sac) {
-  switch (unit) {
-    case VolumeUnit.liters:
-      return '${sac.toStringAsFixed(1)} ${unit.label}/min';
-    case VolumeUnit.cuft:
-      return '${(sac * 0.0353).toStringAsFixed(2)} ${unit.label}/min';
-  }
-}
-
 String formatDuration(int seconds) {
   final minutes = seconds ~/ 60;
   final secs = seconds % 60;

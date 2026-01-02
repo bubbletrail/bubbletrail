@@ -80,7 +80,7 @@ class _DiveDetails extends StatelessWidget {
         PopupMenuButton<String>(
           onSelected: (value) async {
             if (value == 'debug') {
-              showDialog(
+              await showDialog(
                 context: context,
                 builder: (context) => _RawDiveDataScreen(dive: dive),
               );

@@ -24,10 +24,7 @@ class SyncState extends Equatable {
   const SyncState({this.lastSynced, this.syncing = false});
 
   SyncState copyWith({DateTime? lastSynced, bool? syncing}) {
-    return SyncState(
-      lastSynced: lastSynced ?? this.lastSynced,
-      syncing: syncing ?? this.syncing,
-    );
+    return SyncState(lastSynced: lastSynced ?? this.lastSynced, syncing: syncing ?? this.syncing);
   }
 
   @override
@@ -50,7 +47,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   final _icloud = IcloudStorageSync();
   final Completer<Store> _storeCompleter = Completer();
 
-  Future<Store> get store async => _storeCompleter.future;
+  Future<Store> get store => _storeCompleter.future;
   Future<String> get storePath async => '${(await getApplicationDocumentsDirectory()).path}/db';
 
   Future<String> get systemID async {

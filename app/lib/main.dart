@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -36,7 +37,7 @@ void main() async {
   _initLogging();
   await WindowPreferences.initialize();
   if (Platform.isIOS || Platform.isAndroid) {
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    unawaited(SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]));
   }
   runApp(const MyApp());
 }

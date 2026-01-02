@@ -313,7 +313,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
   }
 
   Future<void> _onStarted(Emitter<BleState> emit) async {
-    _adapterStateSubscription?.cancel();
+    await _adapterStateSubscription?.cancel();
     _adapterStateSubscription = FlutterBluePlus.adapterState.listen((state) {
       add(_BleAdapterStateChanged(state));
     });
@@ -324,14 +324,14 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     if (state.isScanning) return;
     emit(state.copyWith(scanResults: [], clearError: true));
 
-    _scanSubscription?.cancel();
+    await _scanSubscription?.cancel();
     _scanSubscription = FlutterBluePlus.scanResults.listen((results) {
       final filtered = results.where((r) => r.device.platformName.isNotEmpty).toList();
       filtered.sort((a, b) => a.device.platformName.toLowerCase().compareTo(b.device.platformName.toLowerCase()));
       add(_BleScanResultsUpdated(filtered));
     });
 
-    _scanStatusSubscription?.cancel();
+    await _scanStatusSubscription?.cancel();
     _scanStatusSubscription = FlutterBluePlus.isScanning.listen((scanning) {
       add(_BleScanStatusChanged(scanning));
     });
@@ -351,18 +351,18 @@ class BleBloc extends Bloc<BleEvent, BleState> {
 
   Future<void> _onStopScan(Emitter<BleState> emit) async {
     await FlutterBluePlus.stopScan();
-    _scanSubscription?.cancel();
+    await _scanSubscription?.cancel();
     _scanSubscription = null;
     emit(state.copyWith(isScanning: false));
   }
 
   Future<void> _onConnectToDevice(BluetoothDevice device, Emitter<BleState> emit) async {
     await FlutterBluePlus.stopScan();
-    _scanSubscription?.cancel();
+    await _scanSubscription?.cancel();
     _scanSubscription = null;
     emit(state.copyWith(isScanning: false, clearError: true));
 
-    _connectionSubscription?.cancel();
+    await _connectionSubscription?.cancel();
     _connectionSubscription = device.connectionState.listen((connectionState) {
       add(_BleConnectionStateChanged(connectionState));
     });
