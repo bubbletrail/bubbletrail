@@ -209,4 +209,152 @@ void main() {
       expect(dive.weightsystems[0].description, 'Lead');
     });
   });
+
+  group('UDDF Import - hashtag extraction from notes', () {
+    test('extracts tags from dive notes', () {
+      final xml = '''
+        <uddf xmlns="http://www.streit.cc/uddf/3.2/" version="3.2.0">
+          <profiledata>
+            <repetitiongroup id="rg1">
+              <dive id="dive1">
+                <informationbeforedive>
+                  <divenumber>1</divenumber>
+                  <datetime>2024-01-01T10:00:00</datetime>
+                </informationbeforedive>
+                <informationafterdive>
+                  <notes>Great dive with lots of fish.
+
+#wreck #deep #coldwater</notes>
+                </informationafterdive>
+              </dive>
+            </repetitiongroup>
+          </profiledata>
+        </uddf>
+      ''';
+
+      final xmlDoc = XmlDocument.parse(xml);
+      final ssrf = UddfXml.fromXml(xmlDoc.rootElement);
+
+      expect(ssrf.dives, hasLength(1));
+      final dive = ssrf.dives[0];
+
+      // Tags should be extracted
+      expect(dive.tags, containsAll(['wreck', 'deep', 'coldwater']));
+
+      // Notes should not contain the hashtag line
+      expect(dive.notes, 'Great dive with lots of fish.');
+      expect(dive.notes, isNot(contains('#')));
+    });
+
+    test('extracts tags from site notes', () {
+      final xml = '''
+        <uddf xmlns="http://www.streit.cc/uddf/3.2/" version="3.2.0">
+          <divesite>
+            <site id="site1">
+              <name>Test Site</name>
+              <notes>Beautiful reef location.
+
+#reef #tropical #shallows</notes>
+            </site>
+          </divesite>
+        </uddf>
+      ''';
+
+      final xmlDoc = XmlDocument.parse(xml);
+      final ssrf = UddfXml.fromXml(xmlDoc.rootElement);
+
+      expect(ssrf.sites, hasLength(1));
+      final site = ssrf.sites[0];
+
+      // Tags should be extracted
+      expect(site.tags, containsAll(['reef', 'tropical', 'shallows']));
+
+      // Notes should not contain the hashtag line
+      expect(site.notes, 'Beautiful reef location.');
+      expect(site.notes, isNot(contains('#')));
+    });
+
+    test('preserves notes when no hashtags present', () {
+      final xml = '''
+        <uddf xmlns="http://www.streit.cc/uddf/3.2/" version="3.2.0">
+          <profiledata>
+            <repetitiongroup id="rg1">
+              <dive id="dive1">
+                <informationbeforedive>
+                  <divenumber>1</divenumber>
+                  <datetime>2024-01-01T10:00:00</datetime>
+                </informationbeforedive>
+                <informationafterdive>
+                  <notes>Just a regular note without tags.</notes>
+                </informationafterdive>
+              </dive>
+            </repetitiongroup>
+          </profiledata>
+        </uddf>
+      ''';
+
+      final xmlDoc = XmlDocument.parse(xml);
+      final ssrf = UddfXml.fromXml(xmlDoc.rootElement);
+
+      final dive = ssrf.dives[0];
+      expect(dive.tags, isEmpty);
+      expect(dive.notes, 'Just a regular note without tags.');
+    });
+
+    test('does not extract hashtags from middle of notes', () {
+      final xml = '''
+        <uddf xmlns="http://www.streit.cc/uddf/3.2/" version="3.2.0">
+          <profiledata>
+            <repetitiongroup id="rg1">
+              <dive id="dive1">
+                <informationbeforedive>
+                  <divenumber>1</divenumber>
+                  <datetime>2024-01-01T10:00:00</datetime>
+                </informationbeforedive>
+                <informationafterdive>
+                  <notes>Saw a #shark today.
+More text here.</notes>
+                </informationafterdive>
+              </dive>
+            </repetitiongroup>
+          </profiledata>
+        </uddf>
+      ''';
+
+      final xmlDoc = XmlDocument.parse(xml);
+      final ssrf = UddfXml.fromXml(xmlDoc.rootElement);
+
+      final dive = ssrf.dives[0];
+      // Should not extract since hashtag is not on a dedicated last line
+      expect(dive.tags, isEmpty);
+      expect(dive.notes, contains('#shark'));
+    });
+
+    test('handles notes that are only hashtags', () {
+      final xml = '''
+        <uddf xmlns="http://www.streit.cc/uddf/3.2/" version="3.2.0">
+          <profiledata>
+            <repetitiongroup id="rg1">
+              <dive id="dive1">
+                <informationbeforedive>
+                  <divenumber>1</divenumber>
+                  <datetime>2024-01-01T10:00:00</datetime>
+                </informationbeforedive>
+                <informationafterdive>
+                  <notes>#training #pool</notes>
+                </informationafterdive>
+              </dive>
+            </repetitiongroup>
+          </profiledata>
+        </uddf>
+      ''';
+
+      final xmlDoc = XmlDocument.parse(xml);
+      final ssrf = UddfXml.fromXml(xmlDoc.rootElement);
+
+      final dive = ssrf.dives[0];
+      expect(dive.tags, containsAll(['training', 'pool']));
+      expect(dive.hasNotes(), isFalse);
+    });
+  });
 }

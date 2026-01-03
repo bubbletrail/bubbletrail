@@ -11,6 +11,46 @@ const double _cubicMeterToLiter = 1000.0;
 double? _kelvinToCelsius(double? k) => k != null ? k - _kelvinOffset : null;
 double? _pascalToBarConvert(double? pa) => pa != null ? pa * _pascalToBar : null;
 
+/// Extract hashtags from the last line of notes and return (cleanedNotes, tags).
+/// Tags are expected on the last line in #hashtag format.
+({String? notes, List<String> tags}) _extractTagsFromNotes(String? notes) {
+  if (notes == null || notes.isEmpty) {
+    return (notes: null, tags: []);
+  }
+
+  final lines = notes.split('\n');
+  if (lines.isEmpty) {
+    return (notes: null, tags: []);
+  }
+
+  final lastLine = lines.last;
+  final tagPattern = RegExp(r'#(\w+)');
+  final matches = tagPattern.allMatches(lastLine);
+
+  if (matches.isEmpty) {
+    return (notes: notes, tags: []);
+  }
+
+  // Check if the last line is primarily hashtags (allow spaces between them)
+  final withoutTags = lastLine.replaceAll(tagPattern, '').trim();
+  if (withoutTags.isNotEmpty) {
+    // Last line has non-tag content, don't extract
+    return (notes: notes, tags: []);
+  }
+
+  // Extract tags and remove the last line from notes
+  final tags = matches.map((m) => m.group(1)!).toList();
+  final cleanedLines = lines.sublist(0, lines.length - 1);
+
+  // Trim trailing empty lines
+  while (cleanedLines.isNotEmpty && cleanedLines.last.trim().isEmpty) {
+    cleanedLines.removeLast();
+  }
+
+  final cleanedNotes = cleanedLines.isEmpty ? null : cleanedLines.join('\n');
+  return (notes: cleanedNotes, tags: tags);
+}
+
 /// Convert tank volume to liters.
 /// UDDF spec says m³ (SI), but some programs (e.g., Subsurface) export in liters.
 /// Heuristic: if value < 1, assume m³ and convert; otherwise assume liters.
@@ -130,18 +170,23 @@ extension _UddfSite on Site {
 
     // Parse notes - may have <para> wrapper or plain text
     final notesElem = elem.getElement('notes');
-    String? notes;
+    String? rawNotes;
     if (notesElem != null) {
       final para = notesElem.getElement('para');
       if (para != null) {
-        notes = para.innerText.trim();
+        rawNotes = para.innerText.trim();
       } else {
-        notes = notesElem.innerText.trim();
+        rawNotes = notesElem.innerText.trim();
       }
-      if (notes.isEmpty) notes = null;
+      if (rawNotes.isEmpty) rawNotes = null;
     }
 
-    return Site(id: id, name: name, position: position, country: country, location: location, notes: notes);
+    // Extract tags from notes (last line as #hashtags)
+    final extracted = _extractTagsFromNotes(rawNotes);
+
+    final site = Site(id: id, name: name, position: position, country: country, location: location, notes: extracted.notes);
+    site.tags.addAll(extracted.tags);
+    return site;
   }
 }
 
@@ -203,16 +248,19 @@ extension _UddfDive on Dive {
 
     // Parse notes - may have <para> wrapper or plain text
     final notesElem = infoAfter?.getElement('notes');
-    String? notes;
+    String? rawNotes;
     if (notesElem != null) {
       final para = notesElem.getElement('para');
       if (para != null) {
-        notes = para.innerText.trim();
+        rawNotes = para.innerText.trim();
       } else {
-        notes = notesElem.innerText.trim();
+        rawNotes = notesElem.innerText.trim();
       }
-      if (notes.isEmpty) notes = null;
+      if (rawNotes.isEmpty) rawNotes = null;
     }
+
+    // Extract tags from notes (last line as #hashtags)
+    final extractedNotes = _extractTagsFromNotes(rawNotes);
 
     // Parse tank data
     final cylinders = <DiveCylinder>[];
@@ -253,9 +301,10 @@ extension _UddfDive on Dive {
       maxDepth: greatestDepth,
       rating: rating,
       siteId: siteId,
-      notes: notes,
+      notes: extractedNotes.notes,
     );
 
+    dive.tags.addAll(extractedNotes.tags);
     dive.buddies.addAll(buddyNames);
     dive.cylinders.addAll(cylinders);
     dive.weightsystems.addAll(weightsystems);
