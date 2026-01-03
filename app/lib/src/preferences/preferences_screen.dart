@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../bloc/preferences_bloc.dart';
-import '../bloc/sync_bloc.dart';
 import '../common/screen_scaffold.dart';
 import 'preferences.dart';
 
@@ -263,54 +262,34 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 16,
       children: [
-        const SizedBox(height: 16),
         Text('S3 Configuration', style: Theme.of(context).textTheme.titleSmall),
-        const SizedBox(height: 12),
         TextField(
           controller: _endpointController,
           decoration: const InputDecoration(labelText: 'Endpoint', hintText: 's3.amazonaws.com or minio.example.com', border: OutlineInputBorder()),
           onChanged: (_) => _saveConfig(),
         ),
-        const SizedBox(height: 12),
         TextField(
           controller: _bucketController,
           decoration: const InputDecoration(labelText: 'Bucket', hintText: 'my-bucket-name', border: OutlineInputBorder()),
           onChanged: (_) => _saveConfig(),
         ),
-        const SizedBox(height: 12),
         TextField(
           controller: _regionController,
           decoration: const InputDecoration(labelText: 'Region', hintText: 'us-east-1', border: OutlineInputBorder()),
           onChanged: (_) => _saveConfig(),
         ),
-        const SizedBox(height: 12),
         TextField(
           controller: _accessKeyController,
           decoration: const InputDecoration(labelText: 'Access Key', border: OutlineInputBorder()),
           onChanged: (_) => _saveConfig(),
         ),
-        const SizedBox(height: 12),
         TextField(
           controller: _secretKeyController,
           decoration: const InputDecoration(labelText: 'Secret Key', border: OutlineInputBorder()),
           obscureText: true,
           onChanged: (_) => _saveConfig(),
-        ),
-        const SizedBox(height: 12),
-        BlocBuilder<SyncBloc, SyncState>(
-          builder: (context, syncState) {
-            return Row(
-              children: [
-                if (widget.prefs.s3Config.isConfigured)
-                  const Icon(Icons.check_circle, color: Colors.green)
-                else
-                  const Icon(Icons.warning, color: Colors.orange),
-                const SizedBox(width: 8),
-                Text(widget.prefs.s3Config.isConfigured ? 'Configured' : 'Not configured', style: Theme.of(context).textTheme.bodySmall),
-              ],
-            );
-          },
         ),
       ],
     );

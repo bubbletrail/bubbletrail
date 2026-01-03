@@ -15,7 +15,6 @@ Bubbletrail is a cross-platform, Flutter-based dive log application.
   format).
 - View dive profiles with depth, temperature, and tank pressure charts
 - Manage dive sites with GPS coordinates
-- Track equipment (cylinders, weights)
 - Support for technical diving (multiple gases, O2/He percentages)
 
 ## Building
