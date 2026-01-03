@@ -306,10 +306,18 @@ class _MyAppState extends State<MyApp> with WindowListener {
         BlocProvider.value(value: _preferencesBloc),
         BlocProvider(create: (context) => BleBloc(_diveListBloc)..add(const BleStarted())),
       ],
-      child: BlocBuilder<PreferencesBloc, PreferencesState>(
-        builder: (context, state) {
-          final themeMode = state.preferences.themeMode;
-          return MaterialApp.router(
+      child: BlocListener<PreferencesBloc, PreferencesState>(
+        listener: (context, state) {
+          // Update sync config when preferences change
+          context.read<SyncBloc>().add(UpdateSyncConfig(
+            provider: state.preferences.syncProvider,
+            s3Config: state.preferences.s3Config,
+          ));
+        },
+        child: BlocBuilder<PreferencesBloc, PreferencesState>(
+          builder: (context, state) {
+            final themeMode = state.preferences.themeMode;
+            return MaterialApp.router(
             title: 'Bubbletrail',
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
@@ -318,7 +326,8 @@ class _MyAppState extends State<MyApp> with WindowListener {
             routerConfig: router,
             localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
           );
-        },
+          },
+        ),
       ),
     );
   }

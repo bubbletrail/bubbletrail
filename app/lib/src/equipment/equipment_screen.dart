@@ -32,9 +32,13 @@ class EquipmentScreen extends StatelessWidget {
               ),
               Positioned(
                 left: 16,
+                right: 16,
                 bottom: 16,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    _SyncStatusTile(state: state),
+                    const SizedBox(height: 8),
                     Text(
                       'Bubbletrail $appVer ($gitVer)',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
@@ -50,6 +54,65 @@ class EquipmentScreen extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _SyncStatusTile extends StatelessWidget {
+  final SyncState state;
+
+  const _SyncStatusTile({required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    if (state.syncing) {
+      return _buildTile(
+        context,
+        icon: Icons.sync,
+        iconColor: colorScheme.primary,
+        message: 'Syncing...',
+        isAnimating: true,
+      );
+    }
+
+    if (state.lastSyncSuccess == false) {
+      return _buildTile(
+        context,
+        icon: Icons.error_outline,
+        iconColor: colorScheme.error,
+        message: 'Sync failed: ${state.error ?? "Unknown error"}',
+      );
+    }
+
+    if (state.lastSynced != null) {
+      return _buildTile(
+        context,
+        icon: Icons.check_circle_outline,
+        iconColor: Colors.green,
+        message: 'Last synced',
+        trailing: DateTimeText(state.lastSynced!, style: Theme.of(context).textTheme.bodySmall),
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildTile(BuildContext context, {required IconData icon, required Color iconColor, required String message, bool isAnimating = false, Widget? trailing}) {
+    return Row(
+      children: [
+        if (isAnimating)
+          SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: iconColor))
+        else
+          Icon(icon, size: 16, color: iconColor),
+        const SizedBox(width: 8),
+        Text(message, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: iconColor)),
+        if (trailing != null) ...[
+          const SizedBox(width: 4),
+          trailing,
+        ],
+      ],
     );
   }
 }
