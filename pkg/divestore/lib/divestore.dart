@@ -1,8 +1,8 @@
-import 'dart:math';
-
 import 'package:divestore/gen/gen.dart';
+import 'package:divestore/recalculate.dart';
 
 export '../gen/gen.dart';
+export 'recalculate.dart';
 export 'store/store.dart';
 export 'uddf.dart';
 export 'xml.dart';
@@ -30,29 +30,6 @@ Dive convertDcDive(Log dl) {
     dive.start = dl.dateTime;
   }
 
-  // Process samples, calculating depths, durations, etc.
-
-  double maxDepth = 0.0;
-  double totDepth = 0.0;
-  double prevDepth = 0.0;
-  double prevTime = 0.0;
-  double duration = 0;
-
-  for (final sample in dl.samples) {
-    maxDepth = max(maxDepth, sample.depth);
-    totDepth += (sample.depth + prevDepth) / 2 * (sample.time - prevTime);
-    if (sample.depth > 0) {
-      duration = sample.time;
-    }
-    for (final event in sample.events) {
-      dive.events.add(event);
-    }
-  }
-
-  dive.duration = duration.round();
-  dive.maxDepth = maxDepth;
-  dive.meanDepth = totDepth / duration;
-
   // Convert tanks to cylinders
   for (var i = 0; i < dl.tanks.length; i++) {
     final tank = dl.tanks[i];
@@ -75,6 +52,8 @@ Dive convertDcDive(Log dl) {
 
     dive.cylinders.add(diveCylinder);
   }
+
+  dive.recalculateMedata();
 
   return dive;
 }

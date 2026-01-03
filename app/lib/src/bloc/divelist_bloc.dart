@@ -285,6 +285,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
           cyl.clearCylinder();
         }
       }
+      dive.recalculateMedata();
     }
 
     // Insert all imported dives
