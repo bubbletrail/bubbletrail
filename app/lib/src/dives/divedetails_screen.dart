@@ -180,15 +180,15 @@ class _DiveDetails extends StatelessWidget {
       ]),
       const SizedBox(height: 16),
       if (site != null) ...[_SiteCard(site: site!), const SizedBox(height: 16)],
-      if (dive.logs.isNotEmpty) ...[
-        infoCard(context, 'Dive Computer Data', [
-          if (dive.logs[0].hasMaxDepth()) infoWidgetRow('Max Depth', DepthText(dive.logs[0].maxDepth)),
-          if (dive.logs[0].hasAvgDepth()) infoWidgetRow('Mean Depth', DepthText(dive.logs[0].avgDepth)),
+      infoCard(context, 'Dive Computer Data', [
+        if (dive.hasMaxDepth()) infoWidgetRow('Max Depth', DepthText(dive.maxDepth)),
+        if (dive.hasMeanDepth()) infoWidgetRow('Mean Depth', DepthText(dive.meanDepth)),
+        if (dive.logs.isNotEmpty) ...[
           if (dive.logs[0].hasSurfaceTemperature()) infoWidgetRow('Air Temperature', TemperatureText(dive.logs[0].surfaceTemperature)),
           if (dive.logs[0].hasMinTemperature()) infoWidgetRow('Water Temperature', TemperatureText(dive.logs[0].minTemperature)),
-        ]),
+        ],
         const SizedBox(height: 16),
-      ],
+      ]),
       if (dive.hasSac() || dive.hasOtu() || dive.hasCns()) ...[
         infoCard(context, 'Physiological Data', [
           if (dive.hasSac()) infoWidgetRow('SAC', VolumeText(dive.sac, suffix: '/min')),
