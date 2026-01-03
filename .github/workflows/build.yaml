@@ -34,6 +34,8 @@ jobs:
     runs-on: macos-26
     if: github.event == 'push' && github.ref == 'refs/heads/release'
     environment: release
+    needs:
+      - test
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -71,6 +73,8 @@ jobs:
     runs-on: macos-26
     if: github.event == 'push' && github.ref == 'refs/heads/release'
     environment: release
+    needs:
+      - test
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
