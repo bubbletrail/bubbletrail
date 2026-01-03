@@ -26,6 +26,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
   late final TextEditingController _difficultyController;
   late final TextEditingController _latController;
   late final TextEditingController _lonController;
+  late final TextEditingController _notesController;
   late final ChipsAutocompleteController _tagsController;
   LatLng? _markerPosition;
 
@@ -42,6 +43,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
     _difficultyController = TextEditingController(text: _originalSite.difficulty);
     _latController = TextEditingController(text: _originalSite.hasPosition() ? _originalSite.position.latitude.toString() : '');
     _lonController = TextEditingController(text: _originalSite.hasPosition() ? _originalSite.position.longitude.toString() : '');
+    _notesController = TextEditingController(text: _originalSite.notes);
     _tagsController = ChipsAutocompleteController();
     if (_originalSite.hasPosition()) {
       _markerPosition = LatLng(_originalSite.position.latitude, _originalSite.position.longitude);
@@ -57,6 +59,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
     _difficultyController.dispose();
     _latController.dispose();
     _lonController.dispose();
+    _notesController.dispose();
     // _tagsController.dispose();
     super.dispose();
   }
@@ -89,6 +92,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
       bodyOfWater: _bodyOfWaterController.text.trim(),
       difficulty: _difficultyController.text.trim(),
       tags: _tagsController.chips,
+      notes: _notesController.text.trim(),
     );
 
     // Send update event to bloc
@@ -173,6 +177,12 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
                     secondaryTheme: true,
                   );
                 },
+              ),
+              TextField(
+                controller: _notesController,
+                decoration: const InputDecoration(labelText: 'Notes', border: OutlineInputBorder(), alignLabelWithHint: true),
+                maxLines: 4,
+                textCapitalization: TextCapitalization.sentences,
               ),
               Row(
                 spacing: 16,

@@ -34,6 +34,7 @@ class Site extends $pb.GeneratedMessage {
     $core.String? bodyOfWater,
     $core.String? difficulty,
     $core.Iterable<$core.String>? tags,
+    $core.String? notes,
   }) {
     final result = create();
     if (id != null) result.id = id;
@@ -47,6 +48,7 @@ class Site extends $pb.GeneratedMessage {
     if (bodyOfWater != null) result.bodyOfWater = bodyOfWater;
     if (difficulty != null) result.difficulty = difficulty;
     if (tags != null) result.tags.addAll(tags);
+    if (notes != null) result.notes = notes;
     return result;
   }
 
@@ -78,6 +80,7 @@ class Site extends $pb.GeneratedMessage {
     ..aOS(9, _omitFieldNames ? '' : 'bodyOfWater')
     ..aOS(10, _omitFieldNames ? '' : 'difficulty')
     ..pPS(11, _omitFieldNames ? '' : 'tags')
+    ..aOS(12, _omitFieldNames ? '' : 'notes')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -198,6 +201,15 @@ class Site extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(11)
   $pb.PbList<$core.String> get tags => $_getList(10);
+
+  @$pb.TagNumber(12)
+  $core.String get notes => $_getSZ(11);
+  @$pb.TagNumber(12)
+  set notes($core.String value) => $_setString(11, value);
+  @$pb.TagNumber(12)
+  $core.bool hasNotes() => $_has(11);
+  @$pb.TagNumber(12)
+  void clearNotes() => $_clearField(12);
 }
 
 const $core.bool _omitFieldNames =

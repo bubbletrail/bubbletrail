@@ -49,6 +49,15 @@ class SiteDetailScreen extends StatelessWidget {
                   if (site.tags.isNotEmpty) tagsRow(context, site.tags.toList()),
                 ]),
               ],
+              if (site.notes.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                infoCard(context, 'Notes', [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(site.notes, style: Theme.of(context).textTheme.bodyMedium),
+                  ),
+                ]),
+              ],
               const SizedBox(height: 16),
               IgnorePointer(child: SiteMapWidget(site: site)),
               const SizedBox(height: 16),

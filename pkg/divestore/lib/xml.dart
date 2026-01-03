@@ -443,6 +443,9 @@ extension SiteXml on Site {
       }
     }
 
+    // Parse notes
+    final notes = elem.getElement('notes')?.innerText;
+
     return Site(
       id: ensureUUID(elem.getAttribute('uuid')) ?? '',
       name: name,
@@ -451,6 +454,7 @@ extension SiteXml on Site {
       location: location,
       bodyOfWater: bodyOfWater,
       difficulty: difficulty,
+      notes: notes,
     );
   }
 
@@ -500,6 +504,15 @@ extension SiteXml on Site {
             nest: () {
               builder.attribute('key', 'difficulty');
               builder.attribute('value', difficulty);
+            },
+          );
+        }
+
+        if (hasNotes()) {
+          builder.element(
+            'notes',
+            nest: () {
+              builder.text(notes);
             },
           );
         }

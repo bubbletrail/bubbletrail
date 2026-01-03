@@ -20,4 +20,5 @@ message Site {
   string body_of_water = 9;
   string difficulty = 10;
   repeated string tags = 11;
+  string notes = 12;
 }

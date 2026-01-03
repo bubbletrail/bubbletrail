@@ -128,7 +128,20 @@ extension _UddfSite on Site {
       location = _getElementText(geography, 'location');
     }
 
-    return Site(id: id, name: name, position: position, country: country, location: location);
+    // Parse notes - may have <para> wrapper or plain text
+    final notesElem = elem.getElement('notes');
+    String? notes;
+    if (notesElem != null) {
+      final para = notesElem.getElement('para');
+      if (para != null) {
+        notes = para.innerText.trim();
+      } else {
+        notes = notesElem.innerText.trim();
+      }
+      if (notes.isEmpty) notes = null;
+    }
+
+    return Site(id: id, name: name, position: position, country: country, location: location, notes: notes);
   }
 }
 

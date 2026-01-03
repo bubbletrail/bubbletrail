@@ -58,6 +58,7 @@ const Site$json = {
     {'1': 'body_of_water', '3': 9, '4': 1, '5': 9, '10': 'bodyOfWater'},
     {'1': 'difficulty', '3': 10, '4': 1, '5': 9, '10': 'difficulty'},
     {'1': 'tags', '3': 11, '4': 3, '5': 9, '10': 'tags'},
+    {'1': 'notes', '3': 12, '4': 1, '5': 9, '10': 'notes'},
   ],
 };
 
@@ -70,4 +71,4 @@ final $typed_data.Uint8List siteDescriptor = $convert.base64Decode(
     'CHBvc2l0aW9uGAYgASgLMhMuZGl2ZXN0b3JlLlBvc2l0aW9uUghwb3NpdGlvbhIYCgdjb3VudH'
     'J5GAcgASgJUgdjb3VudHJ5EhoKCGxvY2F0aW9uGAggASgJUghsb2NhdGlvbhIiCg1ib2R5X29m'
     'X3dhdGVyGAkgASgJUgtib2R5T2ZXYXRlchIeCgpkaWZmaWN1bHR5GAogASgJUgpkaWZmaWN1bH'
-    'R5EhIKBHRhZ3MYCyADKAlSBHRhZ3M=');
+    'R5EhIKBHRhZ3MYCyADKAlSBHRhZ3MSFAoFbm90ZXMYDCABKAlSBW5vdGVz');
