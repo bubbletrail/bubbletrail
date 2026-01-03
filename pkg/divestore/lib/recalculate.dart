@@ -27,6 +27,8 @@ extension RecalculateMetadata on Dive {
         // Collect depths
         maxDepth = max(maxDepth, sample.depth);
         totDepth += (sample.depth + prevDepth) / 2 * (sample.time - prevTime);
+        prevTime = sample.time;
+        prevDepth = sample.depth;
         if (sample.depth > 0) {
           duration = sample.time;
         }
