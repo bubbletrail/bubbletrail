@@ -316,7 +316,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     if (state is! DiveListLoaded) return;
     final currentState = state as DiveListLoaded;
 
-    final dive = await _store.dives.getById(event.diveId);
+    final dive = await _store.diveById(event.diveId);
     if (dive == null) {
       _log.warning('Dive ${event.diveId} not found');
       return;
