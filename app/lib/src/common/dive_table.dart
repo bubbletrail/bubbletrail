@@ -77,7 +77,7 @@ class DiveTableWidget extends StatelessWidget {
             cells: {
               'number': TrinaCell(value: dive.number),
               'start': TrinaCell(value: dive.start.toDateTime()),
-              'maxDepth': TrinaCell(value: dive.maxDepth, renderer: (rendererContext) => DepthText(rendererContext.cell.value)),
+              'maxDepth': TrinaCell(value: dive.maxDepth * 10, renderer: (rendererContext) => DepthText(rendererContext.cell.value / 10)),
               'duration': TrinaCell(value: dive.duration, renderer: (rendererContext) => Text(formatDuration(rendererContext.cell.value))),
               'site': TrinaCell(value: site?.name ?? ''),
               '_id': TrinaCell(value: dive.id), // Hidden field for navigation
