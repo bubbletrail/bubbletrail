@@ -4,6 +4,7 @@ import 'package:divestore/gen/gen.dart';
 
 export '../gen/gen.dart';
 export 'store/store.dart';
+export 'uddf.dart';
 export 'xml.dart';
 
 class Ssrf {

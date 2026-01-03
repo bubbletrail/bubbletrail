@@ -40,7 +40,7 @@ import UIKit
   ) -> Bool {
     // Check if this is a file URL we can handle
     let ext = url.pathExtension.lowercased()
-    if ext == "xml" || ext == "ssrf" {
+    if ext == "xml" || ext == "ssrf" || ext=="uddf" {
       // Copy file to app's documents directory to ensure we have access
       let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
       let destinationUrl = documentsPath.appendingPathComponent("import_\(UUID().uuidString).\(ext)")

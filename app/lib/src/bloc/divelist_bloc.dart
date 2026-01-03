@@ -262,7 +262,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     // Read the SSRF file
     final xmlData = await File(event.filePath).readAsString();
     final doc = XmlDocument.parse(xmlData);
-    final importedSsrf = SsrfXml.fromXml(doc.rootElement);
+    final importedSsrf = event.filePath.toLowerCase().endsWith('uddf') ? UddfXml.fromXml(doc.rootElement) : SsrfXml.fromXml(doc.rootElement);
 
     final currentState = state as DiveListLoaded;
 

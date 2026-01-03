@@ -34,6 +34,18 @@
 				<string>app.bubbletrail.ssrf</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>UDDF Dive Log</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>app.bubbletrail.uddf</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
@@ -96,6 +108,23 @@
 				<key>public.filename-extension</key>
 				<array>
 					<string>ssrf</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.xml</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>UDDF Dive Log</string>
+			<key>UTTypeIdentifier</key>
+			<string>app.bubbletrail.uddf</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>uddf</string>
 				</array>
 			</dict>
 		</dict>

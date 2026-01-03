@@ -11,7 +11,8 @@ Bubbletrail is a cross-platform, Flutter-based dive log application.
 ## Features
 
 - Connect to dive computers via Bluetooth LE using libdivecomputer
-- Import dives from Subsurface (`.ssrf` XML format)
+- Import dives from Subsurface (`.ssrf` format) and other programs (`.uddf`
+  format).
 - View dive profiles with depth, temperature, and tank pressure charts
 - Manage dive sites with GPS coordinates
 - Track equipment (cylinders, weights)
