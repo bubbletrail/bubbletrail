@@ -9,15 +9,15 @@ abstract class AppRouteName {
   static const sitesDetailsEdit = 'site-edit';
   static const sitesNew = 'new-site';
 
-  static const equipment = 'equipment';
+  static const preferences = 'preferences';
   static const cylinders = 'cylinders';
   static const cylindersDetails = 'cylinder-details';
   static const cylindersDetailsEdit = 'cylinder-edit';
   static const cylindersNew = 'new-cylinder';
+  static const units = 'units';
+  static const syncing = 'syncing';
 
   static const connect = 'connect';
-
-  static const settings = 'settings';
 }
 
 abstract class AppRoutePath {
@@ -31,13 +31,13 @@ abstract class AppRoutePath {
   static const sitesDetailsEdit = 'edit';
   static const sitesNew = 'new';
 
-  static const equipment = '/equipment';
+  static const preferences = '/preferences';
   static const cylinders = 'cylinders';
   static const cylindersDetails = ':cylinderID';
   static const cylindersDetailsEdit = 'edit';
   static const cylindersNew = 'new';
+  static const units = 'units';
+  static const syncing = 'syncing';
 
   static const connect = '/connect';
-
-  static const settings = 'settings';
 }
