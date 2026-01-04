@@ -1,7 +1,7 @@
-import 'package:divestore/gen/gen.dart';
-import 'package:divestore/recalculate.dart';
+import 'gen/gen.dart';
+import 'recalculate.dart';
 
-export '../gen/gen.dart';
+export 'gen/gen.dart';
 export 'recalculate.dart';
 export 'store/store.dart';
 export 'uddf.dart';

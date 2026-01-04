@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:divestore/store/fileio.dart';
 import 'package:logging/logging.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 
 import '../gen/gen.dart';
 import '../gen/internal.pb.dart';
+import 'fileio.dart';
 
 final _log = Logger('store/cylinders');
 
@@ -123,11 +123,11 @@ class Cylinders {
       final vals = _cylinders.values.toList();
       vals.sort((a, b) => a.description.compareTo(b.description));
       final cl = InternalCylinderList(cylinders: vals);
-      atomicWriteProto(path, cl);
+      await atomicWriteProto(path, cl);
       _changes.add(vals);
       _log.info('saved ${_cylinders.length} cylinders');
     } catch (e) {
-      _log.warning("failed to save cylinders: $e");
+      _log.warning('failed to save cylinders: $e');
     }
   }
 

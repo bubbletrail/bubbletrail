@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:divestore/store/fileio.dart';
 import 'package:logging/logging.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 
 import '../gen/gen.dart';
 import '../gen/internal.pb.dart';
+import 'fileio.dart';
 
 final _log = Logger('store/sites');
 
@@ -114,10 +114,10 @@ class Sites {
   Future<void> _save() async {
     try {
       final cl = InternalSiteList(sites: _sites.values);
-      atomicWriteProto(path, cl);
+      await atomicWriteProto(path, cl);
       _log.info('saved ${_sites.length} sites');
     } catch (e) {
-      _log.warning("failed to save sites: $e");
+      _log.warning('failed to save sites: $e');
     }
   }
 

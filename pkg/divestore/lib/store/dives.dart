@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:divestore/store/fileio.dart';
 import 'package:glob/glob.dart';
 import 'package:glob/list_local_fs.dart';
 import 'package:intl/intl.dart';
@@ -13,6 +12,7 @@ import 'package:uuid/uuid.dart';
 
 import '../gen/gen.dart';
 import '../gen/internal.pb.dart';
+import 'fileio.dart';
 
 final _log = Logger('store/dives');
 
@@ -142,7 +142,7 @@ class Dives {
   Future<void> init() async {
     await for (final match in Glob("$pathPrefix/*/*.meta.binpb").list()) {
       try {
-        Dive dive = await _loadMeta(match.path);
+        final dive = await _loadMeta(match.path);
         _dives[dive.id] = dive;
         _tags.addAll(dive.tags);
         _buddies.addAll(dive.buddies);
@@ -178,12 +178,12 @@ class Dives {
         final dir = diveDir(dive);
         await Directory(dir).create(recursive: true);
 
-        atomicWriteProto(dlName(dir, dive), InternalLogList(logs: dive.logs));
+        await atomicWriteProto(dlName(dir, dive), InternalLogList(logs: dive.logs));
 
         final metaOnly = dive.rebuild((dive) {
           dive.logs.clear();
         });
-        atomicWriteProto(metaName(dir, dive), metaOnly);
+        await atomicWriteProto(metaName(dir, dive), metaOnly);
       }
 
       _log.info("saved ${_dirty.length} dives");
