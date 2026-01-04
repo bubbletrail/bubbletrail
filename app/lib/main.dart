@@ -23,10 +23,12 @@ import 'src/dives/ble_scan_screen.dart';
 import 'src/dives/divedetails_screen.dart';
 import 'src/dives/diveedit_screen.dart';
 import 'src/dives/divelist_screen.dart';
+import 'src/dives/fullscreen_profile_screen.dart';
 import 'src/equipment/cylinder_edit_screen.dart';
 import 'src/equipment/cylinder_list_screen.dart';
-import 'src/equipment/equipment_screen.dart';
 import 'src/preferences/preferences_screen.dart';
+import 'src/preferences/syncing_screen.dart';
+import 'src/preferences/units_screen.dart';
 import 'src/preferences/window_preferences.dart';
 import 'src/sites/sitedetail_screen.dart';
 import 'src/sites/siteedit_screen.dart';
@@ -132,7 +134,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
             const destinations = [
               (icon: Icons.waves, label: 'Dives'),
               (icon: Icons.place, label: 'Sites'),
-              (icon: Icons.settings, label: 'Equipment'),
+              (icon: Icons.settings, label: 'Preferences'),
               (icon: Icons.bluetooth, label: 'Connect'),
             ];
 
@@ -259,9 +261,9 @@ class _MyAppState extends State<MyApp> with WindowListener {
             StatefulShellBranch(
               routes: <RouteBase>[
                 GoRoute(
-                  path: AppRoutePath.equipment,
-                  name: AppRouteName.equipment,
-                  builder: (context, state) => const EquipmentScreen(),
+                  path: AppRoutePath.preferences,
+                  name: AppRouteName.preferences,
+                  builder: (context, state) => const PreferencesScreen(),
                   routes: <RouteBase>[
                     GoRoute(
                       path: AppRoutePath.cylinders,
@@ -286,7 +288,8 @@ class _MyAppState extends State<MyApp> with WindowListener {
                         ),
                       ],
                     ),
-                    GoRoute(path: AppRoutePath.settings, name: AppRouteName.settings, builder: (context, state) => const PreferencesScreen()),
+                    GoRoute(path: AppRoutePath.units, name: AppRouteName.units, builder: (context, state) => const UnitsScreen()),
+                    GoRoute(path: AppRoutePath.syncing, name: AppRouteName.syncing, builder: (context, state) => const SyncingScreen()),
                   ],
                 ),
               ],
@@ -295,6 +298,14 @@ class _MyAppState extends State<MyApp> with WindowListener {
               routes: <RouteBase>[GoRoute(path: AppRoutePath.connect, name: AppRouteName.connect, builder: (context, state) => BleScanScreen())],
             ),
           ],
+        ),
+        GoRoute(
+          path: AppRoutePath.divesDetailsDepthProfile,
+          name: AppRouteName.divesDetailsDepthProfile,
+          builder: (context, state) {
+            context.read<DiveListBloc>().add(SelectDive(state.pathParameters['diveID']!));
+            return _WaitForSelectedDive(child: const FullscreenProfileScreen());
+          },
         ),
       ],
     );
@@ -306,19 +317,25 @@ class _MyAppState extends State<MyApp> with WindowListener {
         BlocProvider.value(value: _preferencesBloc),
         BlocProvider(create: (context) => BleBloc(_diveListBloc)..add(const BleStarted())),
       ],
-      child: BlocBuilder<PreferencesBloc, PreferencesState>(
-        builder: (context, state) {
-          final themeMode = state.preferences.themeMode;
-          return MaterialApp.router(
-            title: 'Bubbletrail',
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: themeMode,
-            debugShowCheckedModeBanner: false,
-            routerConfig: router,
-            localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
-          );
+      child: BlocListener<PreferencesBloc, PreferencesState>(
+        listener: (context, state) {
+          // Update sync config when preferences change
+          context.read<SyncBloc>().add(UpdateSyncConfig(provider: state.preferences.syncProvider, s3Config: state.preferences.s3Config));
         },
+        child: BlocBuilder<PreferencesBloc, PreferencesState>(
+          builder: (context, state) {
+            final themeMode = state.preferences.themeMode;
+            return MaterialApp.router(
+              title: 'Bubbletrail',
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: themeMode,
+              debugShowCheckedModeBanner: false,
+              routerConfig: router,
+              localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
+            );
+          },
+        ),
       ),
     );
   }

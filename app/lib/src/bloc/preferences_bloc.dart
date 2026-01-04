@@ -98,6 +98,24 @@ class UpdateThemeMode extends PreferencesEvent {
   List<Object?> get props => [themeMode];
 }
 
+class UpdateSyncProvider extends PreferencesEvent {
+  final SyncProvider syncProvider;
+
+  const UpdateSyncProvider(this.syncProvider);
+
+  @override
+  List<Object?> get props => [syncProvider];
+}
+
+class UpdateS3Config extends PreferencesEvent {
+  final S3Config s3Config;
+
+  const UpdateS3Config(this.s3Config);
+
+  @override
+  List<Object?> get props => [s3Config];
+}
+
 class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
   final PreferencesStorage _storage = PreferencesStorage();
 
@@ -121,6 +139,10 @@ class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
         await _onUpdateTimeFormat(event, emit);
       } else if (event is UpdateThemeMode) {
         await _onUpdateThemeMode(event, emit);
+      } else if (event is UpdateSyncProvider) {
+        await _onUpdateSyncProvider(event, emit);
+      } else if (event is UpdateS3Config) {
+        await _onUpdateS3Config(event, emit);
       }
     }, transformer: sequential());
 
@@ -184,6 +206,20 @@ class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
   Future<void> _onUpdateThemeMode(UpdateThemeMode event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(themeMode: event.themeMode);
+    await _storage.save(updated);
+    emit(PreferencesState(updated));
+  }
+
+  Future<void> _onUpdateSyncProvider(UpdateSyncProvider event, Emitter<PreferencesState> emit) async {
+    final current = state.preferences;
+    final updated = current.copyWith(syncProvider: event.syncProvider);
+    await _storage.save(updated);
+    emit(PreferencesState(updated));
+  }
+
+  Future<void> _onUpdateS3Config(UpdateS3Config event, Emitter<PreferencesState> emit) async {
+    final current = state.preferences;
+    final updated = current.copyWith(s3Config: event.s3Config);
     await _storage.save(updated);
     emit(PreferencesState(updated));
   }

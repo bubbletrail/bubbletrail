@@ -64,6 +64,44 @@ enum TimeFormatPref {
   final String format;
 }
 
+enum SyncProvider { none, icloud, s3 }
+
+class S3Config {
+  final String endpoint;
+  final String bucket;
+  final String accessKey;
+  final String secretKey;
+  final String region;
+
+  const S3Config({this.endpoint = '', this.bucket = '', this.accessKey = '', this.secretKey = '', this.region = 'us-east-1'});
+
+  bool get isConfigured => endpoint.isNotEmpty && bucket.isNotEmpty && accessKey.isNotEmpty && secretKey.isNotEmpty;
+
+  S3Config copyWith({String? endpoint, String? bucket, String? accessKey, String? secretKey, String? region, bool? useSSL}) {
+    return S3Config(
+      endpoint: endpoint ?? this.endpoint,
+      bucket: bucket ?? this.bucket,
+      accessKey: accessKey ?? this.accessKey,
+      secretKey: secretKey ?? this.secretKey,
+      region: region ?? this.region,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is S3Config &&
+        other.endpoint == endpoint &&
+        other.bucket == bucket &&
+        other.accessKey == accessKey &&
+        other.secretKey == secretKey &&
+        other.region == region;
+  }
+
+  @override
+  int get hashCode => Object.hash(endpoint, bucket, accessKey, secretKey, region);
+}
+
 class Preferences {
   final DepthUnit depthUnit;
   final PressureUnit pressureUnit;
@@ -73,6 +111,8 @@ class Preferences {
   final DateFormatPref dateFormat;
   final TimeFormatPref timeFormat;
   final ThemeMode themeMode;
+  final SyncProvider syncProvider;
+  final S3Config s3Config;
 
   String get dateTimeFormat => '${dateFormat.format} ${timeFormat.format}';
 
@@ -85,6 +125,8 @@ class Preferences {
     this.dateFormat = DateFormatPref.iso,
     this.timeFormat = TimeFormatPref.h24,
     this.themeMode = ThemeMode.system,
+    this.syncProvider = SyncProvider.none,
+    this.s3Config = const S3Config(),
   });
 
   Preferences copyWith({
@@ -96,6 +138,8 @@ class Preferences {
     DateFormatPref? dateFormat,
     TimeFormatPref? timeFormat,
     ThemeMode? themeMode,
+    SyncProvider? syncProvider,
+    S3Config? s3Config,
   }) {
     return Preferences(
       depthUnit: depthUnit ?? this.depthUnit,
@@ -106,6 +150,8 @@ class Preferences {
       dateFormat: dateFormat ?? this.dateFormat,
       timeFormat: timeFormat ?? this.timeFormat,
       themeMode: themeMode ?? this.themeMode,
+      syncProvider: syncProvider ?? this.syncProvider,
+      s3Config: s3Config ?? this.s3Config,
     );
   }
 
@@ -120,9 +166,11 @@ class Preferences {
         other.weightUnit == weightUnit &&
         other.dateFormat == dateFormat &&
         other.timeFormat == timeFormat &&
-        other.themeMode == themeMode;
+        other.themeMode == themeMode &&
+        other.syncProvider == syncProvider &&
+        other.s3Config == s3Config;
   }
 
   @override
-  int get hashCode => Object.hash(depthUnit, pressureUnit, temperatureUnit, volumeUnit, weightUnit, dateFormat, timeFormat, themeMode);
+  int get hashCode => Object.hash(depthUnit, pressureUnit, temperatureUnit, volumeUnit, weightUnit, dateFormat, timeFormat, themeMode, syncProvider, s3Config);
 }

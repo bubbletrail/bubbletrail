@@ -1,3 +1,5 @@
+import 'package:divestore/gen/dive.pb.dart';
+
 import 'cylinders.dart';
 import 'dives.dart';
 import 'sites.dart';
@@ -26,5 +28,26 @@ class Store {
     await cylinders.importFrom(other.cylinders);
     await sites.importFrom(other.sites);
     await dives.importFrom(other.dives);
+  }
+
+  Future<Dive?> diveById(String diveID) async {
+    final dive = await dives.getById(diveID);
+    if (dive == null) {
+      return null;
+    }
+    final mappedCyls = <DiveCylinder>[];
+    for (var dc in dive.cylinders) {
+      final cyl = await cylinders.getById(dc.cylinderId);
+      if (cyl != null) {
+        dc = dc.rebuild((dc) {
+          dc.cylinder = cyl;
+        });
+      }
+      mappedCyls.add(dc);
+    }
+    return dive.rebuild((dive) {
+      dive.cylinders.clear();
+      dive.cylinders.addAll(mappedCyls);
+    });
   }
 }
