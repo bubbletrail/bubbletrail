@@ -39,7 +39,7 @@ jobs:
       - name: Save artifacts (macOS)
         uses: actions/upload-artifact@v4
         with:
-          path: app/macos/Bubbletrail.zip
+          path: app/Bubbletrail.zip
           name: bubbletrail-macos-${{ env.MARKET_VERSION }}
 
   build-ios:
