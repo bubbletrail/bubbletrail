@@ -40,6 +40,8 @@ flutter build macos \
     --dart-define=GITSHA="${GIT_SHA:-g000000}" \
     --dart-define=MARKETINGVERSION="${MARKET_VERSION:-0.0.1}"
 
+# Build installer package for App Store
+
 APP_NAME=$(find build/macos -name "*.app")
 PACKAGE_NAME=$(basename "$APP_NAME" .app).pkg
 xcrun productbuild --component "$APP_NAME" /Applications/ unsigned.pkg
@@ -53,7 +55,16 @@ INSTALLER_CERT_NAME=$(keychain list-certificates \
 xcrun productsign --sign "$INSTALLER_CERT_NAME" unsigned.pkg "$PACKAGE_NAME"
 rm -f unsigned.pkg
 
-app-store-connect publish \
-    --path "$PACKAGE_NAME"
+# Resign app with developer ID and zip it as individual artifact
+
+echo -n "$DEVELOPER_ID_APPLICATION_CERT" | base64 -d > developer-id.p12
+keychain add-certificates -c developer-id.p12
+codesign --force --options runtime --sign "Developer ID Application" "$APP_NAME"
+zip -r $(basename "$APP_NAME" .app).zip "$APP_NAME"
+
+# Publish the App store package
+
+# app-store-connect publish \
+#     --path "$PACKAGE_NAME"
 
 keychain use-login
