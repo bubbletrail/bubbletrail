@@ -1,6 +1,7 @@
 on:
     - pull_request
     - push
+    - workflow_dispatch
 
 name: Build
 
@@ -39,7 +40,7 @@ jobs:
   build-macos:
     name: Build for macOS
     runs-on: macos-26
-    if: github.event == 'push' && github.ref == 'refs/heads/release'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/release'
     environment: release
     needs:
       - test
@@ -78,7 +79,7 @@ jobs:
   build-ios:
     name: Build for iOS
     runs-on: macos-26
-    if: github.event == 'push' && github.ref == 'refs/heads/release'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/release'
     environment: release
     needs:
       - test
