@@ -1,48 +1,52 @@
 import 'package:divestore/divestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/preferences_bloc.dart';
-import '../common/units.dart';
+import '../common/common.dart';
 import '../preferences/preferences.dart';
 
-class DepthProfileWidget extends StatelessWidget {
+class DepthProfileWidget extends StatefulWidget {
   final Log log;
+  final Preferences preferences;
 
-  const DepthProfileWidget({super.key, required this.log});
+  const DepthProfileWidget({super.key, required this.log, required this.preferences});
 
   @override
-  Widget build(BuildContext context) {
+  State<DepthProfileWidget> createState() => _DepthProfileWidgetState();
+}
+
+class _DepthProfileWidgetState extends State<DepthProfileWidget> {
+  LogSample? _displaySample;
+  double _maxTime = 0;
+  double _chartMaxDepth = 0;
+  final List<FlSpot> _tempSpots = [];
+  final List<LogSample> samplesWithDepth = [];
+  final List<FlSpot> _depthSpots = [];
+  final _pressureData = <int, ({List<FlSpot> spots, double minPressure, double maxPressure})>{};
+
+  @override
+  void initState() {
+    super.initState();
+
     // Filter out samples without depth data
-    final samplesWithDepth = log.samples.where((s) => s.hasDepth()).toList();
+    samplesWithDepth.addAll(widget.log.samples.where((s) => s.hasDepth()));
     final lastNonZeroIdx = samplesWithDepth.lastIndexWhere((s) => s.depth != 0);
     if (lastNonZeroIdx < samplesWithDepth.length - 2) {
       // Trim tail of zero samples
       samplesWithDepth.removeRange(lastNonZeroIdx + 2, samplesWithDepth.length);
     }
 
-    final prefs = context.watch<PreferencesBloc>().state.preferences;
-    final depthUnit = prefs.depthUnit;
-    final tempUnit = prefs.temperatureUnit;
-    final pressureUnit = prefs.pressureUnit;
+    final depthUnit = widget.preferences.depthUnit;
     final depthMult = depthUnit == DepthUnit.feet ? 3.28 : 1.0;
-
-    if (samplesWithDepth.isEmpty) {
-      return const Center(
-        child: Padding(padding: EdgeInsets.all(16.0), child: Text('No depth profile data available')),
-      );
-    }
 
     // Depth data
     final maxDepth = depthMult * -samplesWithDepth.map((s) => s.depth).reduce((a, b) => a > b ? a : b);
-    final chartMaxDepth = ((maxDepth ~/ 3) - 1).toDouble() * 3;
-    final maxTime = samplesWithDepth.map((s) => s.time).reduce((a, b) => a > b ? a : b) / 60;
-    final depthSpots = samplesWithDepth.map((sample) => FlSpot(sample.time / 60, depthMult * -sample.depth)).toList();
+    _chartMaxDepth = ((maxDepth ~/ 3) - 1).toDouble() * 3;
+    _maxTime = samplesWithDepth.map((s) => s.time).reduce((a, b) => a > b ? a : b) / 60;
+    _depthSpots.addAll(samplesWithDepth.map((sample) => FlSpot(sample.time / 60, depthMult * -sample.depth)));
 
     // Temperature data - normalize to depth range, step-style
     final samplesWithTemp = samplesWithDepth.where((s) => s.hasTemperature() && s.temperature != 0).toList();
-    List<FlSpot> tempSpots = [];
     double minTemp = 0, maxTemp = 0;
     if (samplesWithTemp.isNotEmpty) {
       minTemp = samplesWithTemp.map((s) => s.temperature).reduce((a, b) => a < b ? a : b);
@@ -54,7 +58,7 @@ class DepthProfileWidget extends StatelessWidget {
           return maxDepth * 0.9 - normalized * (maxDepth * 0.2);
         }
 
-        tempSpots = _buildStepSpots(samplesWithTemp, (s) => s.time / 60, (s) => normalizeTemp(s.temperature), maxTime);
+        _tempSpots.addAll(_buildStepSpots(samplesWithTemp, (s) => s.time / 60, (s) => normalizeTemp(s.temperature), _maxTime));
       }
     }
 
@@ -67,7 +71,6 @@ class DepthProfileWidget extends StatelessWidget {
     }
 
     // Build pressure spots for each tank, normalized to depth range, step-style
-    final pressureData = <int, ({List<FlSpot> spots, double minPressure, double maxPressure})>{};
     for (final tankIndex in tankIndices) {
       final samplesWithPressure = samplesWithDepth.where((s) => s.pressures.any((p) => p.tankIndex == tankIndex && p.pressure > 0)).toList();
       if (samplesWithPressure.isEmpty) continue;
@@ -87,10 +90,19 @@ class DepthProfileWidget extends StatelessWidget {
           samplesWithPressure,
           (s) => s.time / 60,
           (s) => normalizePressure(s.pressures.firstWhere((p) => p.tankIndex == tankIndex).pressure),
-          maxTime,
+          _maxTime,
         );
-        pressureData[tankIndex] = (spots: spots, minPressure: minPressure, maxPressure: maxPressure);
+        _pressureData[tankIndex] = (spots: spots, minPressure: minPressure, maxPressure: maxPressure);
       }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (samplesWithDepth.isEmpty) {
+      return const Center(
+        child: Padding(padding: EdgeInsets.all(16.0), child: Text('No depth profile data available')),
+      );
     }
 
     final colorScheme = Theme.of(context).colorScheme;
@@ -103,7 +115,7 @@ class DepthProfileWidget extends StatelessWidget {
     final lineBars = <LineChartBarData>[
       // Depth line (main)
       LineChartBarData(
-        spots: depthSpots,
+        spots: _depthSpots,
         color: primaryColor,
         barWidth: 2,
         dotData: const FlDotData(show: false),
@@ -112,13 +124,13 @@ class DepthProfileWidget extends StatelessWidget {
     ];
 
     // Temperature line
-    if (tempSpots.isNotEmpty) {
-      lineBars.add(LineChartBarData(spots: tempSpots, color: tempColor, barWidth: 1, dotData: const FlDotData(show: false), dashArray: [4, 2]));
+    if (_tempSpots.isNotEmpty) {
+      lineBars.add(LineChartBarData(spots: _tempSpots, color: tempColor, barWidth: 1, dotData: const FlDotData(show: false), dashArray: [4, 2]));
     }
 
     // Pressure lines
     var pressureColorIdx = 0;
-    for (final entry in pressureData.entries) {
+    for (final entry in _pressureData.entries) {
       lineBars.add(
         LineChartBarData(
           spots: entry.value.spots,
@@ -131,20 +143,33 @@ class DepthProfileWidget extends StatelessWidget {
       pressureColorIdx++;
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: AspectRatio(
-        aspectRatio: 2,
-        child: LineChart(
+    return Stack(
+      children: [
+        // Top info line
+        if (_displaySample != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8, left: 48),
+            child: Row(
+              spacing: 16,
+              children: [
+                Text(formatDuration(_displaySample!.time.toInt())),
+                DepthText(_displaySample!.depth),
+                TemperatureText(_displaySample!.temperature),
+                if (_displaySample!.pressures.isNotEmpty) PressureText(_displaySample!.pressures.first.pressure),
+              ],
+            ),
+          ),
+
+        // Chart
+        LineChart(
           LineChartData(
             gridData: FlGridData(show: true, drawVerticalLine: true, drawHorizontalLine: true),
             titlesData: FlTitlesData(
               leftTitles: AxisTitles(
-                axisNameWidget: Text('Depth (${depthUnit.label})'),
                 sideTitles: SideTitles(
                   showTitles: true,
                   minIncluded: false,
-                  reservedSize: 30,
+                  reservedSize: 24,
                   getTitlesWidget: (value, meta) {
                     return Padding(
                       padding: const EdgeInsets.only(right: 8.0),
@@ -156,11 +181,10 @@ class DepthProfileWidget extends StatelessWidget {
               rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
               topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
               bottomTitles: AxisTitles(
-                axisNameWidget: const Text('Time (min)'),
                 sideTitles: SideTitles(
                   showTitles: true,
                   maxIncluded: false,
-                  reservedSize: 30,
+                  reservedSize: 16,
                   getTitlesWidget: (value, meta) {
                     return Text(value.toStringAsFixed(0), style: const TextStyle(fontSize: 10));
                   },
@@ -169,57 +193,48 @@ class DepthProfileWidget extends StatelessWidget {
             ),
             borderData: FlBorderData(show: true, border: Border.all(color: borderColor)),
             minX: 0,
-            maxX: maxTime + 0.5, // minutes
-            minY: chartMaxDepth,
+            maxX: _maxTime + 0.5, // minutes
+            minY: _chartMaxDepth,
             maxY: 0,
             lineBarsData: lineBars,
             lineTouchData: LineTouchData(
-              touchTooltipData: LineTouchTooltipData(
-                getTooltipItems: (touchedSpots) => touchedSpots.map((spot) {
-                  if (spot.barIndex != 0) return null;
+              touchCallback: (event, resp) {
+                if (event is FlLongPressEnd) {
+                  setState(() {
+                    _displaySample = null;
+                  });
+                  return;
+                }
+                if (resp == null || resp.lineBarSpots == null || resp.lineBarSpots!.isEmpty) {
+                  setState(() {
+                    _displaySample = null;
+                  });
+                  return;
+                }
 
-                  // Find the time from the spot with line bar index zero, the depth line.
-                  final time = touchedSpots.firstWhere((s) => s.barIndex == 0).x;
-                  final timeSeconds = (time * 60).toInt();
+                // Find the time from the spot with line bar index zero, the depth line.
+                final time = resp.lineBarSpots!.firstWhere((s) => s.barIndex == 0).x;
+                final timeSeconds = (time * 60).toInt();
 
-                  // Find the sample closest to this time
-                  final sample = _findClosestSample(samplesWithDepth, timeSeconds);
-                  if (sample == null) return null;
+                // Find the sample closest to this time
+                final sample = _findClosestSample(samplesWithDepth, timeSeconds);
+                if (sample == null) return;
 
-                  // Build tooltip text
-                  final lines = <String>[];
-                  lines.add(formatDuration(sample.time.toInt()));
-                  lines.add(formatDepth(depthUnit, sample.depth));
-
-                  if (sample.hasTemperature() && sample.temperature != 0) {
-                    lines.add(formatTemperature(tempUnit, sample.temperature));
-                  }
-
-                  for (final p in sample.pressures) {
-                    if (p.pressure > 0) {
-                      final tankLabel = sample.pressures.length > 1 ? 'T${p.tankIndex + 1}: ' : '';
-                      lines.add('$tankLabel${formatPressure(pressureUnit, p.pressure)}');
-                    }
-                  }
-
-                  return LineTooltipItem(
-                    lines.join('\n'),
-                    TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 12),
-                    textAlign: TextAlign.right,
-                  );
-                }).toList(),
-                showOnTopOfTheChartBoxArea: true,
-              ),
+                setState(() {
+                  _displaySample = sample;
+                });
+              },
+              touchTooltipData: LineTouchTooltipData(getTooltipItems: (touchedSpots) => [for (var i = 0; i < touchedSpots.length; i++) null]),
               getTouchedSpotIndicator: (barData, spotIndexes) => spotIndexes.map((idx) {
                 if (barData.barWidth < 2) return null; // hack to identify depth line
                 return TouchedSpotIndicatorData(FlLine(color: Theme.of(context).colorScheme.secondary, strokeWidth: 1), FlDotData());
               }).toList(),
               getTouchLineStart: (barData, spotIndex) => 0,
-              getTouchLineEnd: (barData, spotIndex) => chartMaxDepth,
+              getTouchLineEnd: (barData, spotIndex) => _chartMaxDepth,
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 

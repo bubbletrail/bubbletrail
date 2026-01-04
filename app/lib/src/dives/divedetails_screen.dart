@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,9 +9,9 @@ import 'package:protobuf/protobuf.dart';
 
 import '../app_routes.dart';
 import '../bloc/divelist_bloc.dart';
+import '../bloc/preferences_bloc.dart';
 import '../common/common.dart';
 import 'depthprofile_widget.dart';
-import 'fullscreen_profile_screen.dart';
 
 class DiveDetailsScreen extends StatelessWidget {
   const DiveDetailsScreen({super.key});
@@ -108,16 +110,17 @@ class _DiveDetails extends StatelessWidget {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isWideScreen = constraints.maxWidth > 800;
-          return SingleChildScrollView(
-            child: Padding(padding: const EdgeInsets.all(16.0), child: isWideScreen ? _buildWideLayout(context) : _buildNarrowLayout(context)),
-          );
+          return SingleChildScrollView(child: isWideScreen ? _buildWideLayout(context) : _buildNarrowLayout(context));
         },
       ),
     );
   }
 
   Widget _buildNarrowLayout(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: _buildAllSections(context));
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, spacing: 8, children: _buildAllSections(context)),
+    );
   }
 
   Widget _buildWideLayout(BuildContext context) {
@@ -142,29 +145,31 @@ class _DiveDetails extends StatelessWidget {
     for (var i = 0; i < regularSections.length; i++) {
       if (i.isEven) {
         leftColumn.add(regularSections[i]);
-        leftColumn.add(const SizedBox(height: 16));
       } else {
         rightColumn.add(regularSections[i]);
-        rightColumn.add(const SizedBox(height: 16));
       }
     }
 
-    return Column(
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: leftColumn),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: rightColumn),
-            ),
-          ],
-        ),
-        ...fullWidthSections,
-      ],
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        spacing: 8,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 8,
+            children: [
+              Expanded(
+                child: Column(spacing: 8, crossAxisAlignment: CrossAxisAlignment.start, children: leftColumn),
+              ),
+              Expanded(
+                child: Column(spacing: 8, crossAxisAlignment: CrossAxisAlignment.start, children: rightColumn),
+              ),
+            ],
+          ),
+          ...fullWidthSections,
+        ],
+      ),
     );
   }
 
@@ -178,8 +183,7 @@ class _DiveDetails extends StatelessWidget {
         if (dive.hasRating()) infoRow('Rating', '★' * dive.rating),
         tagsRow(context, dive.tags.toList(), secondaryTags: site?.tags.where((t) => !dive.tags.contains(t)).toList()),
       ]),
-      const SizedBox(height: 16),
-      if (site != null) ...[_SiteCard(site: site!), const SizedBox(height: 16)],
+      if (site != null) _SiteCard(site: site!),
       infoCard(context, 'Dive Computer Data', [
         if (dive.hasMaxDepth()) infoWidgetRow('Max Depth', DepthText(dive.maxDepth)),
         if (dive.hasMeanDepth()) infoWidgetRow('Mean Depth', DepthText(dive.meanDepth)),
@@ -187,7 +191,6 @@ class _DiveDetails extends StatelessWidget {
           if (dive.logs[0].hasSurfaceTemperature()) infoWidgetRow('Air Temperature', TemperatureText(dive.logs[0].surfaceTemperature)),
           if (dive.logs[0].hasMinTemperature()) infoWidgetRow('Water Temperature', TemperatureText(dive.logs[0].minTemperature)),
         ],
-        const SizedBox(height: 16),
       ]),
       if (dive.hasSac() || dive.hasOtu() || dive.hasCns()) ...[
         infoCard(context, 'Physiological Data', [
@@ -195,14 +198,12 @@ class _DiveDetails extends StatelessWidget {
           if (dive.hasOtu()) infoRow('OTU', dive.otu.toString()),
           if (dive.hasCns()) infoRow('CNS', '${dive.cns}%'),
         ]),
-        const SizedBox(height: 16),
       ],
       if (dive.divemaster.isNotEmpty || dive.buddies.isNotEmpty) ...[
         infoCard(context, 'People', [
           if (dive.divemaster.isNotEmpty) infoRow('Divemaster', dive.divemaster),
           if (dive.buddies.isNotEmpty) infoRow('Buddies', dive.buddies.join(', ')),
         ]),
-        const SizedBox(height: 16),
       ],
       if (dive.cylinders.isNotEmpty) ...[
         infoCard(
@@ -221,7 +222,6 @@ class _DiveDetails extends StatelessWidget {
             );
           }).toList(),
         ),
-        const SizedBox(height: 16),
       ],
       if (dive.weightsystems.isNotEmpty) ...[
         infoCard(
@@ -234,7 +234,6 @@ class _DiveDetails extends StatelessWidget {
             return infoWidgetRow(desc, WeightText(ws.weight));
           }).toList(),
         ),
-        const SizedBox(height: 16),
       ],
       if (dive.notes.isNotEmpty) ...[
         infoCard(context, 'Notes', [
@@ -243,13 +242,12 @@ class _DiveDetails extends StatelessWidget {
             child: Text(dive.notes, style: Theme.of(context).textTheme.bodyMedium),
           ),
         ]),
-        const SizedBox(height: 16),
       ],
       if (dive.logs.isNotEmpty && dive.logs[0].samples.isNotEmpty) ...[
         _WideCard(
           elevation: 2,
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(12.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -261,18 +259,25 @@ class _DiveDetails extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.fullscreen),
                       onPressed: () {
-                        Navigator.of(context, rootNavigator: true).push(
-                          MaterialPageRoute(
-                            builder: (context) => FullscreenProfileScreen(log: dive.logs[0], title: 'Dive #${dive.number}'),
-                          ),
-                        );
+                        context.pushNamed(AppRouteName.divesDetailsDepthProfile, pathParameters: {'diveID': dive.id});
                       },
                       tooltip: 'View fullscreen',
                     ),
                   ],
                 ),
                 const Divider(),
-                DepthProfileWidget(log: dive.logs[0]),
+                const SizedBox(height: 8),
+                IgnorePointer(
+                  ignoring: Platform.isIOS,
+                  child: AspectRatio(
+                    aspectRatio: 2.0,
+                    child: BlocBuilder<PreferencesBloc, PreferencesState>(
+                      builder: (context, state) {
+                        return DepthProfileWidget(key: ValueKey((dive, state.preferences)), log: dive.logs[0], preferences: state.preferences);
+                      },
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

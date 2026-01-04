@@ -4,7 +4,7 @@ Widget infoCard(BuildContext context, String title, List<Widget> children) {
   return Card(
     elevation: 2,
     child: Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(12.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -58,24 +58,28 @@ Widget tagsRow(BuildContext context, List<String> tags, {List<String>? secondary
             spacing: 6,
             runSpacing: 6,
             children: [
-              ...tags.map((tag) => Chip(
+              ...tags.map(
+                (tag) => Chip(
+                  label: Text(tag),
+                  visualDensity: VisualDensity.compact,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  padding: EdgeInsets.zero,
+                  labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+              ),
+              if (secondaryTags != null)
+                ...secondaryTags.map(
+                  (tag) => Chip(
                     label: Text(tag),
                     visualDensity: VisualDensity.compact,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     padding: EdgeInsets.zero,
                     labelPadding: const EdgeInsets.symmetric(horizontal: 8),
-                  )),
-              if (secondaryTags != null)
-                ...secondaryTags.map((tag) => Chip(
-                      label: Text(tag),
-                      visualDensity: VisualDensity.compact,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      padding: EdgeInsets.zero,
-                      labelPadding: const EdgeInsets.symmetric(horizontal: 8),
-                      backgroundColor: colorScheme.secondaryContainer,
-                      labelStyle: TextStyle(color: colorScheme.onSecondaryContainer),
-                      side: BorderSide.none,
-                    )),
+                    backgroundColor: colorScheme.secondaryContainer,
+                    labelStyle: TextStyle(color: colorScheme.onSecondaryContainer),
+                    side: BorderSide.none,
+                  ),
+                ),
             ],
           ),
         ),

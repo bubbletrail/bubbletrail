@@ -31,9 +31,10 @@ class SiteDetailScreen extends StatelessWidget {
       ],
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 8,
             children: [
               infoCard(context, 'Location Information', [
                 infoRow('Name', site.name),
@@ -43,14 +44,12 @@ class SiteDetailScreen extends StatelessWidget {
                 if (site.hasPosition()) infoRow('Position', [formatLatitude(site.position.latitude), formatLongitude(site.position.longitude)].join(' ')),
               ]),
               if (site.difficulty.isNotEmpty || site.tags.isNotEmpty) ...[
-                const SizedBox(height: 16),
                 infoCard(context, 'Dive Information', [
                   if (site.difficulty.isNotEmpty) infoRow('Difficulty', site.difficulty),
                   if (site.tags.isNotEmpty) tagsRow(context, site.tags.toList()),
                 ]),
               ],
               if (site.notes.isNotEmpty) ...[
-                const SizedBox(height: 16),
                 infoCard(context, 'Notes', [
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
@@ -58,9 +57,7 @@ class SiteDetailScreen extends StatelessWidget {
                   ),
                 ]),
               ],
-              const SizedBox(height: 16),
               IgnorePointer(child: SiteMapWidget(site: site)),
-              const SizedBox(height: 16),
               if (dives.isNotEmpty) ...[
                 Card(
                   elevation: 2,

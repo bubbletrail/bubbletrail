@@ -23,6 +23,7 @@ import 'src/dives/ble_scan_screen.dart';
 import 'src/dives/divedetails_screen.dart';
 import 'src/dives/diveedit_screen.dart';
 import 'src/dives/divelist_screen.dart';
+import 'src/dives/fullscreen_profile_screen.dart';
 import 'src/equipment/cylinder_edit_screen.dart';
 import 'src/equipment/cylinder_list_screen.dart';
 import 'src/preferences/preferences_screen.dart';
@@ -297,6 +298,14 @@ class _MyAppState extends State<MyApp> with WindowListener {
               routes: <RouteBase>[GoRoute(path: AppRoutePath.connect, name: AppRouteName.connect, builder: (context, state) => BleScanScreen())],
             ),
           ],
+        ),
+        GoRoute(
+          path: AppRoutePath.divesDetailsDepthProfile,
+          name: AppRouteName.divesDetailsDepthProfile,
+          builder: (context, state) {
+            context.read<DiveListBloc>().add(SelectDive(state.pathParameters['diveID']!));
+            return _WaitForSelectedDive(child: const FullscreenProfileScreen());
+          },
         ),
       ],
     );
