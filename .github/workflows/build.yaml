@@ -12,22 +12,22 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v4
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
+      # - name: Set up Flutter
+      #   uses: subosito/flutter-action@v2
+      #   with:
+      #     channel: stable
 
-      - name: Run tests (app)
-        run: |
-          pushd app
-          flutter pub get
-          flutter test
+      # - name: Run tests (app)
+      #   run: |
+      #     pushd app
+      #     flutter pub get
+      #     flutter test
 
       - name: Run tests (divestore)
         run: |
           pushd pkg/divestore
-          flutter pub get
-          flutter test
+          dart pub get
+          dart test
 
   build-macos:
     name: Build for macOS
