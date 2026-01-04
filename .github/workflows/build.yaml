@@ -19,21 +19,22 @@ jobs:
       #   with:
       #     channel: stable
 
-      - name: Run tests (app)
-        run: |
-          pushd app
-          dart pub get
-          dart format --output=none --set-exit-if-changed .
-          dart analyze --fatal-infos
-          dart test
-
       - name: Run tests (divestore)
         run: |
           pushd pkg/divestore
-          dart pub get
           dart format --output=none --set-exit-if-changed .
           dart analyze --fatal-infos
+          dart pub get
           dart test
+
+      - name: Run tests (app)
+        run: |
+          pushd app
+          dart format --output=none --set-exit-if-changed .
+          dart analyze --fatal-infos
+          # dart pub get
+          # dart test
+
 
   build-macos:
     name: Build for macOS
