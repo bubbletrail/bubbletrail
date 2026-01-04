@@ -55,23 +55,9 @@ INSTALLER_CERT_NAME=$(keychain list-certificates \
 xcrun productsign --sign "$INSTALLER_CERT_NAME" unsigned.pkg "$PACKAGE_NAME"
 rm -f unsigned.pkg
 
-# Resign app with developer ID and zip it as individual artifact
-
-echo -n "$DEVELOPER_ID_APPLICATION_CERT" | base64 -d > developer-id.p12
-keychain add-certificates -c developer-id.p12
-codesign --force --options runtime --sign "Developer ID Application" "$APP_NAME"
-ZIP_NAME=$(basename "$APP_NAME" .app).zip
-mv "$APP_NAME" .
-zip -r "$ZIP_NAME" $(basename "$APP_NAME")
-
-# Notarize it
-
-echo "$APP_STORE_CONNECT_API_KEY_KEY" > api.key
-xcrun notarytool submit -k api.key -d "$APP_STORE_CONNECT_API_KEY_KEY_ID" -i "$APP_STORE_CONNECT_API_KEY_ISSUER_ID" "$ZIP_NAME"
-
 # Publish the App store package
 
-# app-store-connect publish \
-#     --path "$PACKAGE_NAME"
+app-store-connect publish \
+    --path "$PACKAGE_NAME"
 
 keychain use-login
