@@ -7,7 +7,7 @@ jobs:
   build-macos:
     name: Build for macOS
     runs-on: macos-26
-    if: github.ref == 'refs/heads/release' || github.ref == 'refs/heads/macapp'
+    if: github.ref == 'refs/heads/release'
     environment: release
     steps:
       - name: Clone repository
