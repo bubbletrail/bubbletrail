@@ -27,9 +27,13 @@ class PreferencesTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        spacing: 8,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        runSpacing: 4,
         children: [
-          Expanded(child: Text(title, style: Theme.of(context).textTheme.bodyLarge)),
+          Text(title, style: Theme.of(context).textTheme.bodyLarge),
           trailing,
         ],
       ),
