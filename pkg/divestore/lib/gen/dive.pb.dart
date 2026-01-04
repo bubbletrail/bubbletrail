@@ -13,8 +13,7 @@
 import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
-import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart'
-    as $0;
+import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart' as $0;
 
 import 'log.pb.dart' as $1;
 import 'types.pb.dart' as $2;
@@ -77,54 +76,41 @@ class Dive extends $pb.GeneratedMessage {
 
   Dive._();
 
-  factory Dive.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory Dive.fromBuffer($core.List<$core.int> data, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory Dive.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+  factory Dive.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'Dive',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
-      createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'id')
-    ..aOM<$0.Timestamp>(2, _omitFieldNames ? '' : 'createdAt',
-        subBuilder: $0.Timestamp.create)
-    ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'updatedAt',
-        subBuilder: $0.Timestamp.create)
-    ..aOM<$0.Timestamp>(4, _omitFieldNames ? '' : 'deletedAt',
-        subBuilder: $0.Timestamp.create)
-    ..aI(8, _omitFieldNames ? '' : 'number')
-    ..aI(9, _omitFieldNames ? '' : 'rating')
-    ..pPS(10, _omitFieldNames ? '' : 'tags')
-    ..aOM<$0.Timestamp>(11, _omitFieldNames ? '' : 'start',
-        subBuilder: $0.Timestamp.create)
-    ..aI(12, _omitFieldNames ? '' : 'duration')
-    ..aD(13, _omitFieldNames ? '' : 'maxDepth')
-    ..aD(14, _omitFieldNames ? '' : 'meanDepth')
-    ..aD(15, _omitFieldNames ? '' : 'sac')
-    ..aI(16, _omitFieldNames ? '' : 'otu')
-    ..aI(17, _omitFieldNames ? '' : 'cns')
-    ..aOS(18, _omitFieldNames ? '' : 'siteId')
-    ..aOS(19, _omitFieldNames ? '' : 'instructor')
-    ..aOS(20, _omitFieldNames ? '' : 'divemaster')
-    ..pPS(21, _omitFieldNames ? '' : 'buddies')
-    ..aOS(22, _omitFieldNames ? '' : 'notes')
-    ..pPM<DiveCylinder>(23, _omitFieldNames ? '' : 'cylinders',
-        subBuilder: DiveCylinder.create)
-    ..pPM<Weightsystem>(24, _omitFieldNames ? '' : 'weightsystems',
-        subBuilder: Weightsystem.create)
-    ..pPM<$1.Log>(25, _omitFieldNames ? '' : 'logs', subBuilder: $1.Log.create)
-    ..pPM<$1.SampleEvent>(26, _omitFieldNames ? '' : 'events',
-        subBuilder: $1.SampleEvent.create)
-    ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i =
+      $pb.BuilderInfo(_omitMessageNames ? '' : 'Dive', package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'), createEmptyInstance: create)
+        ..aOS(1, _omitFieldNames ? '' : 'id')
+        ..aOM<$0.Timestamp>(2, _omitFieldNames ? '' : 'createdAt', subBuilder: $0.Timestamp.create)
+        ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'updatedAt', subBuilder: $0.Timestamp.create)
+        ..aOM<$0.Timestamp>(4, _omitFieldNames ? '' : 'deletedAt', subBuilder: $0.Timestamp.create)
+        ..aI(8, _omitFieldNames ? '' : 'number')
+        ..aI(9, _omitFieldNames ? '' : 'rating')
+        ..pPS(10, _omitFieldNames ? '' : 'tags')
+        ..aOM<$0.Timestamp>(11, _omitFieldNames ? '' : 'start', subBuilder: $0.Timestamp.create)
+        ..aI(12, _omitFieldNames ? '' : 'duration')
+        ..aD(13, _omitFieldNames ? '' : 'maxDepth')
+        ..aD(14, _omitFieldNames ? '' : 'meanDepth')
+        ..aD(15, _omitFieldNames ? '' : 'sac')
+        ..aI(16, _omitFieldNames ? '' : 'otu')
+        ..aI(17, _omitFieldNames ? '' : 'cns')
+        ..aOS(18, _omitFieldNames ? '' : 'siteId')
+        ..aOS(19, _omitFieldNames ? '' : 'instructor')
+        ..aOS(20, _omitFieldNames ? '' : 'divemaster')
+        ..pPS(21, _omitFieldNames ? '' : 'buddies')
+        ..aOS(22, _omitFieldNames ? '' : 'notes')
+        ..pPM<DiveCylinder>(23, _omitFieldNames ? '' : 'cylinders', subBuilder: DiveCylinder.create)
+        ..pPM<Weightsystem>(24, _omitFieldNames ? '' : 'weightsystems', subBuilder: Weightsystem.create)
+        ..pPM<$1.Log>(25, _omitFieldNames ? '' : 'logs', subBuilder: $1.Log.create)
+        ..pPM<$1.SampleEvent>(26, _omitFieldNames ? '' : 'events', subBuilder: $1.SampleEvent.create)
+        ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Dive clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Dive copyWith(void Function(Dive) updates) =>
-      super.copyWith((message) => updates(message as Dive)) as Dive;
+  Dive copyWith(void Function(Dive) updates) => super.copyWith((message) => updates(message as Dive)) as Dive;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -134,8 +120,7 @@ class Dive extends $pb.GeneratedMessage {
   @$core.override
   Dive createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static Dive getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Dive>(create);
+  static Dive getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Dive>(create);
   static Dive? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -347,32 +332,24 @@ class DiveCylinder extends $pb.GeneratedMessage {
 
   DiveCylinder._();
 
-  factory DiveCylinder.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory DiveCylinder.fromBuffer($core.List<$core.int> data, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory DiveCylinder.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+  factory DiveCylinder.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'DiveCylinder',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
-      createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DiveCylinder',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'), createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'cylinderId')
     ..aD(2, _omitFieldNames ? '' : 'beginPressure')
     ..aD(3, _omitFieldNames ? '' : 'endPressure')
     ..aD(4, _omitFieldNames ? '' : 'oxygen')
     ..aD(5, _omitFieldNames ? '' : 'helium')
-    ..aOM<$2.Cylinder>(32, _omitFieldNames ? '' : 'cylinder',
-        subBuilder: $2.Cylinder.create)
+    ..aOM<$2.Cylinder>(32, _omitFieldNames ? '' : 'cylinder', subBuilder: $2.Cylinder.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   DiveCylinder clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  DiveCylinder copyWith(void Function(DiveCylinder) updates) =>
-      super.copyWith((message) => updates(message as DiveCylinder))
-          as DiveCylinder;
+  DiveCylinder copyWith(void Function(DiveCylinder) updates) => super.copyWith((message) => updates(message as DiveCylinder)) as DiveCylinder;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -382,8 +359,7 @@ class DiveCylinder extends $pb.GeneratedMessage {
   @$core.override
   DiveCylinder createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static DiveCylinder getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<DiveCylinder>(create);
+  static DiveCylinder getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DiveCylinder>(create);
   static DiveCylinder? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -458,17 +434,12 @@ class Weightsystem extends $pb.GeneratedMessage {
 
   Weightsystem._();
 
-  factory Weightsystem.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory Weightsystem.fromBuffer($core.List<$core.int> data, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory Weightsystem.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+  factory Weightsystem.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'Weightsystem',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
-      createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Weightsystem',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'), createEmptyInstance: create)
     ..aD(1, _omitFieldNames ? '' : 'weight')
     ..aOS(2, _omitFieldNames ? '' : 'description')
     ..hasRequiredFields = false;
@@ -476,9 +447,7 @@ class Weightsystem extends $pb.GeneratedMessage {
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Weightsystem clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Weightsystem copyWith(void Function(Weightsystem) updates) =>
-      super.copyWith((message) => updates(message as Weightsystem))
-          as Weightsystem;
+  Weightsystem copyWith(void Function(Weightsystem) updates) => super.copyWith((message) => updates(message as Weightsystem)) as Weightsystem;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -488,8 +457,7 @@ class Weightsystem extends $pb.GeneratedMessage {
   @$core.override
   Weightsystem createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static Weightsystem getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<Weightsystem>(create);
+  static Weightsystem getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Weightsystem>(create);
   static Weightsystem? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -511,7 +479,5 @@ class Weightsystem extends $pb.GeneratedMessage {
   void clearDescription() => $_clearField(2);
 }
 
-const $core.bool _omitFieldNames =
-    $core.bool.fromEnvironment('protobuf.omit_field_names');
-const $core.bool _omitMessageNames =
-    $core.bool.fromEnvironment('protobuf.omit_message_names');
+const $core.bool _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
+const $core.bool _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');

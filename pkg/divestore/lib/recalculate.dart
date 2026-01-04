@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:divestore/gen/dive.pb.dart';
-import 'package:divestore/gen/gen.dart';
+import 'gen/dive.pb.dart';
+import 'gen/gen.dart';
 
 extension RecalculateMetadata on Dive {
   void recalculateMedata() {

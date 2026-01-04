@@ -1,5 +1,4 @@
-import 'package:divestore/gen/dive.pb.dart';
-
+import '../gen/dive.pb.dart';
 import 'cylinders.dart';
 import 'dives.dart';
 import 'sites.dart';
@@ -12,9 +11,9 @@ class Store {
   final Dives dives;
 
   Store(this.path, {bool readonly = false})
-    : cylinders = Cylinders("$path/cylinders.binpb", readonly: readonly),
-      sites = Sites("$path/sites.binpb", readonly: readonly),
-      dives = Dives("$path/dives", readonly: readonly);
+    : cylinders = Cylinders('$path/cylinders.binpb', readonly: readonly),
+      sites = Sites('$path/sites.binpb', readonly: readonly),
+      dives = Dives('$path/dives', readonly: readonly);
 
   Future<void> init() async {
     await cylinders.init();

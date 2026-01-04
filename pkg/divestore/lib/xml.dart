@@ -11,7 +11,7 @@ extension SsrfXml on Ssrf {
     final divesitesElem = elem.getElement('divesites');
     final divesElem = elem.getElement('dives');
 
-    var divesList = divesElem?.findElements('dive').map(DiveXml.fromXml).toList() ?? [];
+    final divesList = divesElem?.findElements('dive').map(DiveXml.fromXml).toList() ?? [];
     divesList.addAll(divesElem?.findAllElements('trip').map((e) => e.findElements('dive').map(DiveXml.fromXml).toList()).flattened ?? []);
 
     final ssrf = Ssrf();
