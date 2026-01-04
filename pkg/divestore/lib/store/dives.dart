@@ -140,7 +140,7 @@ class Dives {
   }
 
   Future<void> init() async {
-    await for (final match in Glob("$pathPrefix/*/*.meta.binpb").list()) {
+    await for (final match in Glob('$pathPrefix/*/*.meta.binpb').list()) {
       try {
         final dive = await _loadMeta(match.path);
         _dives[dive.id] = dive;
@@ -186,10 +186,10 @@ class Dives {
         await atomicWriteProto(metaName(dir, dive), metaOnly);
       }
 
-      _log.info("saved ${_dirty.length} dives");
+      _log.info('saved ${_dirty.length} dives');
       _dirty.clear();
     } catch (e) {
-      _log.warning("failed to save dives: $e");
+      _log.warning('failed to save dives: $e');
     }
   }
 
@@ -207,12 +207,12 @@ class Dives {
       final cur = _dives[dive.id];
       if (dive.hasDeletedAt()) {
         if (cur != null) {
-          print("delete dive ${dive.id}");
+          print('delete dive ${dive.id}');
           await delete(dive.id);
         }
       } else if (cur == null || dive.updatedAt.toDateTime().isAfter(cur.updatedAt.toDateTime())) {
         final rdive = await other.getById(dive.id);
-        print("import dive ${rdive!.id}");
+        print('import dive ${rdive!.id}');
         await _import(rdive);
       }
     }
