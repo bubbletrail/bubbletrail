@@ -9,12 +9,7 @@ class ErrorStateWidget extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
 
-  const ErrorStateWidget({
-    super.key,
-    required this.title,
-    required this.message,
-    this.onRetry,
-  });
+  const ErrorStateWidget({super.key, required this.title, required this.message, this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +26,7 @@ class ErrorStateWidget extends StatelessWidget {
             Text(message, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: onRetry,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
-              ),
+              FilledButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh), label: const Text('Retry')),
             ],
           ],
         ),
@@ -53,13 +44,7 @@ class EmptyStateWidget extends StatelessWidget {
   final String? actionLabel;
   final VoidCallback? onAction;
 
-  const EmptyStateWidget({
-    super.key,
-    required this.message,
-    this.icon,
-    this.actionLabel,
-    this.onAction,
-  });
+  const EmptyStateWidget({super.key, required this.message, this.icon, this.actionLabel, this.onAction});
 
   @override
   Widget build(BuildContext context) {
@@ -69,22 +54,13 @@ class EmptyStateWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (icon != null) ...[
-              Icon(icon, size: 48, color: Theme.of(context).colorScheme.outline),
-              const SizedBox(height: 16),
-            ],
+            if (icon != null) ...[Icon(icon, size: 48, color: Theme.of(context).colorScheme.outline), const SizedBox(height: 16)],
             Text(
               message,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.outline),
               textAlign: TextAlign.center,
             ),
-            if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: onAction,
-                child: Text(actionLabel!),
-              ),
-            ],
+            if (actionLabel != null && onAction != null) ...[const SizedBox(height: 16), FilledButton(onPressed: onAction, child: Text(actionLabel!))],
           ],
         ),
       ),

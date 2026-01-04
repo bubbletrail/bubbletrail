@@ -5,9 +5,7 @@ class SelectionResult<T> {
   final T? value;
   final bool cancelled;
 
-  const SelectionResult.cancelled()
-      : value = null,
-        cancelled = true;
+  const SelectionResult.cancelled() : value = null, cancelled = true;
   const SelectionResult.selected(this.value) : cancelled = false;
 }
 
@@ -56,12 +54,7 @@ Future<SelectionResult<T>> showSelectionDialog<T>({
           },
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(dialogContext).pop(cancelledSentinel),
-          child: const Text('Cancel'),
-        ),
-      ],
+      actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(cancelledSentinel), child: const Text('Cancel'))],
     ),
   );
 
@@ -88,10 +81,7 @@ Future<bool> showConfirmationDialog({
       title: Text(title),
       content: Text(message),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(dialogContext).pop(false),
-          child: Text(cancelText),
-        ),
+        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(cancelText)),
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(true),
           style: isDestructive ? TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error) : null,

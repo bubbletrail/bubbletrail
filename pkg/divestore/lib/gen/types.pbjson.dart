@@ -26,8 +26,7 @@ const Position$json = {
 };
 
 /// Descriptor for `Position`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List positionDescriptor = $convert.base64Decode(
-    'CghQb3NpdGlvbhIaCghsYXRpdHVkZRgBIAEoAVIIbGF0aXR1ZGUSHAoJbG9uZ2l0dWRlGAIgAS'
+final $typed_data.Uint8List positionDescriptor = $convert.base64Decode('CghQb3NpdGlvbhIaCghsYXRpdHVkZRgBIAEoAVIIbGF0aXR1ZGUSHAoJbG9uZ2l0dWRlGAIgAS'
     'gBUglsb25naXR1ZGUSGgoIYWx0aXR1ZGUYAyABKAFSCGFsdGl0dWRl');
 
 @$core.Deprecated('Use cylinderDescriptor instead')
@@ -35,30 +34,9 @@ const Cylinder$json = {
   '1': 'Cylinder',
   '2': [
     {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
-    {
-      '1': 'created_at',
-      '3': 2,
-      '4': 1,
-      '5': 11,
-      '6': '.google.protobuf.Timestamp',
-      '10': 'createdAt'
-    },
-    {
-      '1': 'updated_at',
-      '3': 3,
-      '4': 1,
-      '5': 11,
-      '6': '.google.protobuf.Timestamp',
-      '10': 'updatedAt'
-    },
-    {
-      '1': 'deleted_at',
-      '3': 4,
-      '4': 1,
-      '5': 11,
-      '6': '.google.protobuf.Timestamp',
-      '10': 'deletedAt'
-    },
+    {'1': 'created_at', '3': 2, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'createdAt'},
+    {'1': 'updated_at', '3': 3, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'updatedAt'},
+    {'1': 'deleted_at', '3': 4, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'deletedAt'},
     {'1': 'size', '3': 5, '4': 1, '5': 1, '10': 'size'},
     {'1': 'workpressure', '3': 6, '4': 1, '5': 1, '10': 'workpressure'},
     {'1': 'description', '3': 7, '4': 1, '5': 9, '10': 'description'},
@@ -66,8 +44,7 @@ const Cylinder$json = {
 };
 
 /// Descriptor for `Cylinder`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List cylinderDescriptor = $convert.base64Decode(
-    'CghDeWxpbmRlchIOCgJpZBgBIAEoCVICaWQSOQoKY3JlYXRlZF9hdBgCIAEoCzIaLmdvb2dsZS'
+final $typed_data.Uint8List cylinderDescriptor = $convert.base64Decode('CghDeWxpbmRlchIOCgJpZBgBIAEoCVICaWQSOQoKY3JlYXRlZF9hdBgCIAEoCzIaLmdvb2dsZS'
     '5wcm90b2J1Zi5UaW1lc3RhbXBSCWNyZWF0ZWRBdBI5Cgp1cGRhdGVkX2F0GAMgASgLMhouZ29v'
     'Z2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJdXBkYXRlZEF0EjkKCmRlbGV0ZWRfYXQYBCABKAsyGi'
     '5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUglkZWxldGVkQXQSEgoEc2l6ZRgFIAEoAVIEc2l6'
