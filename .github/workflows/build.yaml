@@ -24,7 +24,6 @@ jobs:
 
       - name: Build & push
         run: |
-          brew install pipx
           pipx install codemagic-cli-tools
           pushd app
           ./build-macos.sh
