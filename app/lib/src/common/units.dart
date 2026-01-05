@@ -82,18 +82,18 @@ String formatDuration(int seconds) {
 
 String formatLatitude(double val) {
   final d = val >= 0 ? 'N' : 'S';
-  return formatLatLng(d, val);
+  return formatLatLng(d, val.abs());
 }
 
 String formatLongitude(double val) {
   final d = val >= 0 ? 'E' : 'W';
-  return formatLatLng(d, val);
+  return formatLatLng(d, val.abs());
 }
 
-String formatLatLng(String prefix, double val) {
+String formatLatLng(String hemisphere, double val) {
   final degrees = val.toInt();
   final minutes = (val - degrees) * 60;
-  return '$prefix $degrees° ${minutes.toStringAsFixed(3)}\'';
+  return '$degrees° ${minutes.toStringAsFixed(3)}\' $hemisphere';
 }
 
 class DurationText extends StatelessWidget {
