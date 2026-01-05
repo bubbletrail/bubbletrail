@@ -42,21 +42,40 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => SafeArea(
-    child: BlocBuilder<PreferencesBloc, PreferencesState>(
-      builder: (context, prefsState) {
-        return BlocBuilder<DiveListBloc, DiveListState>(
-          builder: (context, divesState) {
-            if (divesState is! DiveListLoaded) return Placeholder(); // can't happen
-            final dive = divesState.selectedDive!;
-            final site = divesState.selectedDiveSite;
-            return ScreenScaffold(
-              title: Text('Dive #${dive.number}: ${site?.name ?? 'Unknown site'}'),
-              body: DepthProfileWidget(key: ValueKey((dive, prefsState.preferences)), log: dive.logs.first, preferences: prefsState.preferences),
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final decoration = BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [cs.tertiaryContainer, cs.onTertiaryFixedVariant],
+        tileMode: TileMode.mirror,
+      ),
+    );
+
+    return Container(
+      decoration: decoration,
+      child: SafeArea(
+        child: BlocBuilder<PreferencesBloc, PreferencesState>(
+          builder: (context, prefsState) {
+            return BlocBuilder<DiveListBloc, DiveListState>(
+              builder: (context, divesState) {
+                if (divesState is! DiveListLoaded) return Placeholder(); // can't happen
+                final dive = divesState.selectedDive!;
+                final site = divesState.selectedDiveSite;
+                return ScreenScaffold(
+                  title: Text('Dive #${dive.number}: ${site?.name ?? 'Unknown site'}'),
+                  body: Padding(
+                    padding: Platform.isIOS ? EdgeInsets.zero : const EdgeInsets.all(8.0),
+                    child: DepthProfileWidget(key: ValueKey((dive, prefsState.preferences)), log: dive.logs.first, preferences: prefsState.preferences),
+                  ),
+                  transparent: true,
+                );
+              },
             );
           },
-        );
-      },
-    ),
-  );
+        ),
+      ),
+    );
+  }
 }

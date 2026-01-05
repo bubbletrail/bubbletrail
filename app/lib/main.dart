@@ -126,6 +126,18 @@ class _MyAppState extends State<MyApp> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
+    // The profile detail route is placed inside the outer navigation shell
+    // on desktop, but outside it on mobile to maximize fullscreen
+    // potential.
+    final profileDetailRoute = GoRoute(
+      path: AppRoutePath.divesDetailsDepthProfile,
+      name: AppRouteName.divesDetailsDepthProfile,
+      builder: (context, state) {
+        context.read<DiveListBloc>().add(SelectDive(state.pathParameters['diveID']!));
+        return _WaitForSelectedDive(child: const FullscreenProfileScreen());
+      },
+    );
+
     final router = GoRouter(
       initialLocation: '/dives',
       routes: [
@@ -220,6 +232,15 @@ class _MyAppState extends State<MyApp> with WindowListener {
                     ),
                   ],
                 ),
+                if (!Platform.isIOS) profileDetailRoute,
+                GoRoute(
+                  path: AppRoutePath.sitesDetailsMap,
+                  name: AppRouteName.sitesDetailsMap,
+                  builder: (context, state) {
+                    context.read<DiveListBloc>().add(SelectSite(state.pathParameters['siteID']!));
+                    return _WaitForSelectedSite(child: const FullscreenMapScreen());
+                  },
+                ),
               ],
             ),
             StatefulShellBranch(
@@ -300,22 +321,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
             ),
           ],
         ),
-        GoRoute(
-          path: AppRoutePath.divesDetailsDepthProfile,
-          name: AppRouteName.divesDetailsDepthProfile,
-          builder: (context, state) {
-            context.read<DiveListBloc>().add(SelectDive(state.pathParameters['diveID']!));
-            return _WaitForSelectedDive(child: const FullscreenProfileScreen());
-          },
-        ),
-        GoRoute(
-          path: AppRoutePath.sitesDetailsMap,
-          name: AppRouteName.sitesDetailsMap,
-          builder: (context, state) {
-            context.read<DiveListBloc>().add(SelectSite(state.pathParameters['siteID']!));
-            return _WaitForSelectedSite(child: const FullscreenMapScreen());
-          },
-        ),
+        if (Platform.isIOS) profileDetailRoute,
       ],
     );
     return MultiBlocProvider(

@@ -10,7 +10,18 @@ class FullscreenMapScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    final cs = Theme.of(context).colorScheme;
+    final decoration = BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [cs.tertiaryContainer, cs.onTertiaryFixedVariant],
+        tileMode: TileMode.mirror,
+      ),
+    );
+
+    return Container(
+      decoration: decoration,
       child: BlocBuilder<DiveListBloc, DiveListState>(
         builder: (context, state) {
           if (state is! DiveListLoaded) return const Placeholder();

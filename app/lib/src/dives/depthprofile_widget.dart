@@ -189,6 +189,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
         // Chart
         LineChart(
           LineChartData(
+            backgroundColor: Colors.transparent,
             gridData: FlGridData(show: true, drawVerticalLine: true, drawHorizontalLine: true),
             titlesData: FlTitlesData(
               leftTitles: AxisTitles(
