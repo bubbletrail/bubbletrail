@@ -42,7 +42,6 @@ void main() {
           final dive = parseDiveFromParser(parser.value);
 
           // --- Verify basic info ---
-          expect(dive.hasNumber(), isFalse);
           expect(dive.dateTime.seconds.toInt(), DateTime(2025, 11, 22, 13, 54, 17).millisecondsSinceEpoch ~/ 1000);
           expect(dive.diveTime, 87 * 60 + 48);
 

@@ -14,7 +14,6 @@ message Log {
   // Dive metadata
   google.protobuf.Timestamp date_time = 3;
   int32 dive_time = 4; // Seconds
-  int32 number = 5; // Dive number
   double max_depth = 6; // Meters
   double avg_depth = 7; // Meters
   double surface_temperature = 8; // Celsius
@@ -33,7 +32,11 @@ message Log {
   // Profile data
   repeated LogSample samples = 18;
 
-  bytes fingerprint = 19;
+  // Fingerprint reported by libdivecomputer
+  bytes ldc_fingerprint = 19;
+
+  // Unique ID calculated by Bubbletrail
+  string uniqueID = 20;
 }
 
 // A single sample point in the dive profile.

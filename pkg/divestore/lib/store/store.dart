@@ -1,5 +1,5 @@
 import '../gen/dive.pb.dart';
-import '../recalculate.dart';
+import '../dive_ext.dart';
 import 'cylinders.dart';
 import 'dives.dart';
 import 'sites.dart';

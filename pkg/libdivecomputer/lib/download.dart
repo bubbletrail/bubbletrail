@@ -140,7 +140,7 @@ Stream<DownloadEvent> startDownload({
       sendPort: receivePort.sendPort,
       lastDiveLog: lastDiveLog,
     );
-    dcStartDownload(request);
+    await dcStartDownload(request);
 
     // Now wait for FIFO opens to complete
     final files = await fifoOpenFuture;
@@ -149,36 +149,40 @@ Stream<DownloadEvent> startDownload({
 
     // Start BLE -> FIFO bridge (in background)
     bool running = true;
-    Future.microtask(() async {
-      await for (final packet in ble.read) {
-        try {
-          await toDeviceFifo?.writeFrom(packet);
-        } catch (e) {
-          if (running) {
-            _log.warning('Error writing BLE data to FIFO: $e');
+    unawaited(
+      Future.microtask(() async {
+        await for (final packet in ble.read) {
+          try {
+            await toDeviceFifo?.writeFrom(packet);
+          } catch (e) {
+            if (running) {
+              _log.warning('Error writing BLE data to FIFO: $e');
+            }
+            break;
           }
-          break;
         }
-      }
-    });
+      }),
+    );
 
     // Start FIFO -> BLE bridge (in background)
-    Future.microtask(() async {
-      final buffer = Uint8List(512);
-      while (running) {
-        try {
-          final bytesRead = (await fromDeviceFifo?.readInto(buffer)) ?? 0;
-          if (bytesRead > 0) {
-            await ble.write(buffer.sublist(0, bytesRead));
+    unawaited(
+      Future.microtask(() async {
+        final buffer = Uint8List(512);
+        while (running) {
+          try {
+            final bytesRead = (await fromDeviceFifo?.readInto(buffer)) ?? 0;
+            if (bytesRead > 0) {
+              await ble.write(buffer.sublist(0, bytesRead));
+            }
+          } catch (e) {
+            if (running) {
+              _log.warning('Error reading from FIFO: $e');
+            }
+            break;
           }
-        } catch (e) {
-          if (running) {
-            _log.warning('Error reading from FIFO: $e');
-          }
-          break;
         }
-      }
-    });
+      }),
+    );
 
     // Yield events from the download isolate
     await for (final event in eventController.stream) {

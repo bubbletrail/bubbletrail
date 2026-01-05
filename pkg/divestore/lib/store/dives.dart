@@ -10,8 +10,10 @@ import 'package:logging/logging.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 
+import '../dc_convert.dart';
 import '../gen/gen.dart';
 import '../gen/internal.pb.dart';
+import '../log_ext.dart';
 import 'fileio.dart';
 
 final _log = Logger('store/dives');
@@ -160,6 +162,9 @@ class Dives {
   Future<List<Log>> _loadLogs(String path) async {
     final bs = await File(path).readAsBytes();
     final ll = InternalLogList.fromBuffer(bs);
+    for (final l in ll.logs) {
+      l.setUniqueID(); // no-op when already set
+    }
     ll.freeze();
     return ll.logs;
   }
@@ -215,6 +220,25 @@ class Dives {
         print('import dive ${rdive!.id}');
         await _import(rdive);
       }
+    }
+
+    // Deduplicate, in case of separate previous imports etc
+    final byUnique = <String, Dive>{};
+    for (final dive in await getAll()) {
+      if (dive.logs.isEmpty) continue;
+      if (!dive.logs.first.hasUniqueID()) continue;
+      final key = dive.logs.first.uniqueID;
+      final exist = byUnique[key];
+      if (exist != null) {
+        // Duplicate. Keep the last modified.
+        if (exist.updatedAt.toDateTime().isAfter(dive.updatedAt.toDateTime())) {
+          await (delete(dive.id));
+          continue;
+        } else {
+          await (delete(exist.id));
+        }
+      }
+      byUnique[key] = dive;
     }
   }
 

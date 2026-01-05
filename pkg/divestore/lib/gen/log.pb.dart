@@ -29,7 +29,6 @@ class Log extends $pb.GeneratedMessage {
     $core.String? serial,
     $0.Timestamp? dateTime,
     $core.int? diveTime,
-    $core.int? number,
     $core.double? maxDepth,
     $core.double? avgDepth,
     $core.double? surfaceTemperature,
@@ -43,14 +42,14 @@ class Log extends $pb.GeneratedMessage {
     $core.Iterable<GasMix>? gasMixes,
     $core.Iterable<Tank>? tanks,
     $core.Iterable<LogSample>? samples,
-    $core.List<$core.int>? fingerprint,
+    $core.List<$core.int>? ldcFingerprint,
+    $core.String? uniqueID,
   }) {
     final result = create();
     if (model != null) result.model = model;
     if (serial != null) result.serial = serial;
     if (dateTime != null) result.dateTime = dateTime;
     if (diveTime != null) result.diveTime = diveTime;
-    if (number != null) result.number = number;
     if (maxDepth != null) result.maxDepth = maxDepth;
     if (avgDepth != null) result.avgDepth = avgDepth;
     if (surfaceTemperature != null) result.surfaceTemperature = surfaceTemperature;
@@ -64,7 +63,8 @@ class Log extends $pb.GeneratedMessage {
     if (gasMixes != null) result.gasMixes.addAll(gasMixes);
     if (tanks != null) result.tanks.addAll(tanks);
     if (samples != null) result.samples.addAll(samples);
-    if (fingerprint != null) result.fingerprint = fingerprint;
+    if (ldcFingerprint != null) result.ldcFingerprint = ldcFingerprint;
+    if (uniqueID != null) result.uniqueID = uniqueID;
     return result;
   }
 
@@ -80,7 +80,6 @@ class Log extends $pb.GeneratedMessage {
         ..aOS(2, _omitFieldNames ? '' : 'serial')
         ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'dateTime', subBuilder: $0.Timestamp.create)
         ..aI(4, _omitFieldNames ? '' : 'diveTime')
-        ..aI(5, _omitFieldNames ? '' : 'number')
         ..aD(6, _omitFieldNames ? '' : 'maxDepth')
         ..aD(7, _omitFieldNames ? '' : 'avgDepth')
         ..aD(8, _omitFieldNames ? '' : 'surfaceTemperature')
@@ -94,7 +93,8 @@ class Log extends $pb.GeneratedMessage {
         ..pPM<GasMix>(16, _omitFieldNames ? '' : 'gasMixes', subBuilder: GasMix.create)
         ..pPM<Tank>(17, _omitFieldNames ? '' : 'tanks', subBuilder: Tank.create)
         ..pPM<LogSample>(18, _omitFieldNames ? '' : 'samples', subBuilder: LogSample.create)
-        ..a<$core.List<$core.int>>(19, _omitFieldNames ? '' : 'fingerprint', $pb.PbFieldType.OY)
+        ..a<$core.List<$core.int>>(19, _omitFieldNames ? '' : 'ldcFingerprint', $pb.PbFieldType.OY)
+        ..aOS(20, _omitFieldNames ? '' : 'uniqueID', protoName: 'uniqueID')
         ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -153,130 +153,132 @@ class Log extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   void clearDiveTime() => $_clearField(4);
 
-  @$pb.TagNumber(5)
-  $core.int get number => $_getIZ(4);
-  @$pb.TagNumber(5)
-  set number($core.int value) => $_setSignedInt32(4, value);
-  @$pb.TagNumber(5)
-  $core.bool hasNumber() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearNumber() => $_clearField(5);
-
   @$pb.TagNumber(6)
-  $core.double get maxDepth => $_getN(5);
+  $core.double get maxDepth => $_getN(4);
   @$pb.TagNumber(6)
-  set maxDepth($core.double value) => $_setDouble(5, value);
+  set maxDepth($core.double value) => $_setDouble(4, value);
   @$pb.TagNumber(6)
-  $core.bool hasMaxDepth() => $_has(5);
+  $core.bool hasMaxDepth() => $_has(4);
   @$pb.TagNumber(6)
   void clearMaxDepth() => $_clearField(6);
 
   @$pb.TagNumber(7)
-  $core.double get avgDepth => $_getN(6);
+  $core.double get avgDepth => $_getN(5);
   @$pb.TagNumber(7)
-  set avgDepth($core.double value) => $_setDouble(6, value);
+  set avgDepth($core.double value) => $_setDouble(5, value);
   @$pb.TagNumber(7)
-  $core.bool hasAvgDepth() => $_has(6);
+  $core.bool hasAvgDepth() => $_has(5);
   @$pb.TagNumber(7)
   void clearAvgDepth() => $_clearField(7);
 
   @$pb.TagNumber(8)
-  $core.double get surfaceTemperature => $_getN(7);
+  $core.double get surfaceTemperature => $_getN(6);
   @$pb.TagNumber(8)
-  set surfaceTemperature($core.double value) => $_setDouble(7, value);
+  set surfaceTemperature($core.double value) => $_setDouble(6, value);
   @$pb.TagNumber(8)
-  $core.bool hasSurfaceTemperature() => $_has(7);
+  $core.bool hasSurfaceTemperature() => $_has(6);
   @$pb.TagNumber(8)
   void clearSurfaceTemperature() => $_clearField(8);
 
   @$pb.TagNumber(9)
-  $core.double get minTemperature => $_getN(8);
+  $core.double get minTemperature => $_getN(7);
   @$pb.TagNumber(9)
-  set minTemperature($core.double value) => $_setDouble(8, value);
+  set minTemperature($core.double value) => $_setDouble(7, value);
   @$pb.TagNumber(9)
-  $core.bool hasMinTemperature() => $_has(8);
+  $core.bool hasMinTemperature() => $_has(7);
   @$pb.TagNumber(9)
   void clearMinTemperature() => $_clearField(9);
 
   @$pb.TagNumber(10)
-  $core.double get maxTemperature => $_getN(9);
+  $core.double get maxTemperature => $_getN(8);
   @$pb.TagNumber(10)
-  set maxTemperature($core.double value) => $_setDouble(9, value);
+  set maxTemperature($core.double value) => $_setDouble(8, value);
   @$pb.TagNumber(10)
-  $core.bool hasMaxTemperature() => $_has(9);
+  $core.bool hasMaxTemperature() => $_has(8);
   @$pb.TagNumber(10)
   void clearMaxTemperature() => $_clearField(10);
 
   @$pb.TagNumber(11)
-  Salinity get salinity => $_getN(10);
+  Salinity get salinity => $_getN(9);
   @$pb.TagNumber(11)
   set salinity(Salinity value) => $_setField(11, value);
   @$pb.TagNumber(11)
-  $core.bool hasSalinity() => $_has(10);
+  $core.bool hasSalinity() => $_has(9);
   @$pb.TagNumber(11)
   void clearSalinity() => $_clearField(11);
   @$pb.TagNumber(11)
-  Salinity ensureSalinity() => $_ensure(10);
+  Salinity ensureSalinity() => $_ensure(9);
 
   @$pb.TagNumber(12)
-  $core.double get atmosphericPressure => $_getN(11);
+  $core.double get atmosphericPressure => $_getN(10);
   @$pb.TagNumber(12)
-  set atmosphericPressure($core.double value) => $_setDouble(11, value);
+  set atmosphericPressure($core.double value) => $_setDouble(10, value);
   @$pb.TagNumber(12)
-  $core.bool hasAtmosphericPressure() => $_has(11);
+  $core.bool hasAtmosphericPressure() => $_has(10);
   @$pb.TagNumber(12)
   void clearAtmosphericPressure() => $_clearField(12);
 
   @$pb.TagNumber(13)
-  DiveMode get diveMode => $_getN(12);
+  DiveMode get diveMode => $_getN(11);
   @$pb.TagNumber(13)
   set diveMode(DiveMode value) => $_setField(13, value);
   @$pb.TagNumber(13)
-  $core.bool hasDiveMode() => $_has(12);
+  $core.bool hasDiveMode() => $_has(11);
   @$pb.TagNumber(13)
   void clearDiveMode() => $_clearField(13);
 
   @$pb.TagNumber(14)
-  DecoModel get decoModel => $_getN(13);
+  DecoModel get decoModel => $_getN(12);
   @$pb.TagNumber(14)
   set decoModel(DecoModel value) => $_setField(14, value);
   @$pb.TagNumber(14)
-  $core.bool hasDecoModel() => $_has(13);
+  $core.bool hasDecoModel() => $_has(12);
   @$pb.TagNumber(14)
   void clearDecoModel() => $_clearField(14);
   @$pb.TagNumber(14)
-  DecoModel ensureDecoModel() => $_ensure(13);
+  DecoModel ensureDecoModel() => $_ensure(12);
 
   @$pb.TagNumber(15)
-  $1.Position get position => $_getN(14);
+  $1.Position get position => $_getN(13);
   @$pb.TagNumber(15)
   set position($1.Position value) => $_setField(15, value);
   @$pb.TagNumber(15)
-  $core.bool hasPosition() => $_has(14);
+  $core.bool hasPosition() => $_has(13);
   @$pb.TagNumber(15)
   void clearPosition() => $_clearField(15);
   @$pb.TagNumber(15)
-  $1.Position ensurePosition() => $_ensure(14);
+  $1.Position ensurePosition() => $_ensure(13);
 
   /// Gas and tank data
   @$pb.TagNumber(16)
-  $pb.PbList<GasMix> get gasMixes => $_getList(15);
+  $pb.PbList<GasMix> get gasMixes => $_getList(14);
 
   @$pb.TagNumber(17)
-  $pb.PbList<Tank> get tanks => $_getList(16);
+  $pb.PbList<Tank> get tanks => $_getList(15);
 
   /// Profile data
   @$pb.TagNumber(18)
-  $pb.PbList<LogSample> get samples => $_getList(17);
+  $pb.PbList<LogSample> get samples => $_getList(16);
 
+  /// Fingerprint reported by libdivecomputer
   @$pb.TagNumber(19)
-  $core.List<$core.int> get fingerprint => $_getN(18);
+  $core.List<$core.int> get ldcFingerprint => $_getN(17);
   @$pb.TagNumber(19)
-  set fingerprint($core.List<$core.int> value) => $_setBytes(18, value);
+  set ldcFingerprint($core.List<$core.int> value) => $_setBytes(17, value);
   @$pb.TagNumber(19)
-  $core.bool hasFingerprint() => $_has(18);
+  $core.bool hasLdcFingerprint() => $_has(17);
   @$pb.TagNumber(19)
-  void clearFingerprint() => $_clearField(19);
+  void clearLdcFingerprint() => $_clearField(19);
+
+  /// Unique ID calculated by Bubbletrail
+  @$pb.TagNumber(20)
+  $core.String get uniqueID => $_getSZ(18);
+  @$pb.TagNumber(20)
+  set uniqueID($core.String value) => $_setString(18, value);
+  @$pb.TagNumber(20)
+  $core.bool hasUniqueID() => $_has(18);
+  @$pb.TagNumber(20)
+  void clearUniqueID() => $_clearField(20);
 }
 
 /// A single sample point in the dive profile.

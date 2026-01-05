@@ -267,7 +267,7 @@ extension ComputerDiveXml on Log {
       return sample;
     }).toList();
 
-    final dive = Log(
+    final log = Log(
       model: model,
       serial: serial,
       maxDepth: tryParseUnitString(depth?.getAttribute('max')),
@@ -275,9 +275,10 @@ extension ComputerDiveXml on Log {
       surfaceTemperature: airTemp,
       minTemperature: waterTemp,
     );
-    dive.samples.addAll(samples);
+    log.samples.addAll(samples);
 
-    return dive;
+    log.setUniqueID();
+    return log;
   }
 
   /// Convert a Log to an SSRF <divecomputer> XML element.

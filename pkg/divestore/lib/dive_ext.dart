@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'gen/gen.dart';
 
-extension RecalculateMetadata on Dive {
+extension DiveExtensions on Dive {
   void recalculateMedata() {
     // Process samples, calculating depths, durations, etc.
 

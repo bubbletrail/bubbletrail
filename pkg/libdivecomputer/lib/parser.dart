@@ -14,71 +14,71 @@ import 'libdivecomputer_bindings_generated.dart' as dc;
 /// This function must be called from an isolate where FFI is available.
 /// The [parser] must be a valid dc_parser_t pointer created via dc_parser_new.
 Log parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {Uint8List? fingerprint, String? model, String? serial}) {
-  final dive = Log();
+  final log = Log();
   if (fingerprint != null) {
-    dive.fingerprint = fingerprint;
+    log.ldcFingerprint = fingerprint;
   }
   if (model != null) {
-    dive.model = model;
+    log.model = model;
   }
   if (serial != null) {
-    dive.serial = serial;
+    log.serial = serial;
   }
 
   // --- DateTime ---
   final datetime = calloc<dc.dc_datetime_t>();
   if (dc.dc_parser_get_datetime(parser, datetime) == dc.dc_status_t.DC_STATUS_SUCCESS) {
     final dt = DateTime(datetime.ref.year, datetime.ref.month, datetime.ref.day, datetime.ref.hour, datetime.ref.minute, datetime.ref.second);
-    dive.dateTime = Timestamp.fromDateTime(dt);
+    log.dateTime = Timestamp.fromDateTime(dt);
   }
   calloc.free(datetime);
 
   // --- Dive Time ---
   final diveTimePtr = calloc<ffi.UnsignedInt>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_DIVETIME, diveTimePtr.cast())) {
-    dive.diveTime = diveTimePtr.value;
+    log.diveTime = diveTimePtr.value;
   }
   calloc.free(diveTimePtr);
 
   // --- Max Depth ---
   final maxDepthPtr = calloc<ffi.Double>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_MAXDEPTH, maxDepthPtr.cast())) {
-    dive.maxDepth = maxDepthPtr.value;
+    log.maxDepth = maxDepthPtr.value;
   }
   calloc.free(maxDepthPtr);
 
   // --- Avg Depth ---
   final avgDepthPtr = calloc<ffi.Double>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_AVGDEPTH, avgDepthPtr.cast())) {
-    dive.avgDepth = avgDepthPtr.value;
+    log.avgDepth = avgDepthPtr.value;
   }
   calloc.free(avgDepthPtr);
 
   // --- Surface Temperature ---
   final surfaceTempPtr = calloc<ffi.Double>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_TEMPERATURE_SURFACE, surfaceTempPtr.cast())) {
-    dive.surfaceTemperature = surfaceTempPtr.value;
+    log.surfaceTemperature = surfaceTempPtr.value;
   }
   calloc.free(surfaceTempPtr);
 
   // --- Min Temperature ---
   final minTempPtr = calloc<ffi.Double>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_TEMPERATURE_MINIMUM, minTempPtr.cast())) {
-    dive.minTemperature = minTempPtr.value;
+    log.minTemperature = minTempPtr.value;
   }
   calloc.free(minTempPtr);
 
   // --- Max Temperature ---
   final maxTempPtr = calloc<ffi.Double>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_TEMPERATURE_MAXIMUM, maxTempPtr.cast())) {
-    dive.maxTemperature = maxTempPtr.value;
+    log.maxTemperature = maxTempPtr.value;
   }
   calloc.free(maxTempPtr);
 
   // --- Atmospheric Pressure ---
   final atmosphericPtr = calloc<ffi.Double>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_ATMOSPHERIC, atmosphericPtr.cast())) {
-    dive.atmosphericPressure = atmosphericPtr.value;
+    log.atmosphericPressure = atmosphericPtr.value;
   }
   calloc.free(atmosphericPtr);
 
@@ -87,7 +87,7 @@ Log parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {Uint8List? fingerpr
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_SALINITY, salinityPtr.cast())) {
     final waterType = _convertWaterType(salinityPtr.ref.type);
     if (waterType != null) {
-      dive.salinity = Salinity(type: waterType, density: salinityPtr.ref.density);
+      log.salinity = Salinity(type: waterType, density: salinityPtr.ref.density);
     }
   }
   calloc.free(salinityPtr);
@@ -97,7 +97,7 @@ Log parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {Uint8List? fingerpr
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_DIVEMODE, diveModePtr.cast())) {
     final mode = _convertDiveMode(diveModePtr.value);
     if (mode != null) {
-      dive.diveMode = mode;
+      log.diveMode = mode;
     }
   }
   calloc.free(diveModePtr);
@@ -111,14 +111,14 @@ Log parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {Uint8List? fingerpr
       gfLow = decoModelPtr.ref.params.gf.low;
       gfHigh = decoModelPtr.ref.params.gf.high;
     }
-    dive.decoModel = DecoModel(type: type, conservatism: decoModelPtr.ref.conservatism, gfLow: gfLow, gfHigh: gfHigh);
+    log.decoModel = DecoModel(type: type, conservatism: decoModelPtr.ref.conservatism, gfLow: gfLow, gfHigh: gfHigh);
   }
   calloc.free(decoModelPtr);
 
   // --- Location ---
   final locationPtr = calloc<dc.dc_location_t>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_LOCATION, locationPtr.cast())) {
-    dive.position = Position(
+    log.position = Position(
       latitude: locationPtr.ref.latitude,
       longitude: locationPtr.ref.longitude,
       altitude: locationPtr.ref.altitude != 0 ? locationPtr.ref.altitude : null,
@@ -133,7 +133,7 @@ Log parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {Uint8List? fingerpr
     final gasMixPtr = calloc<dc.dc_gasmix_t>();
     for (var i = 0; i < count; i++) {
       if (_getFieldIndexed(parser, dc.dc_field_type_t.DC_FIELD_GASMIX, i, gasMixPtr.cast())) {
-        dive.gasMixes.add(
+        log.gasMixes.add(
           GasMix(oxygen: gasMixPtr.ref.oxygen, helium: gasMixPtr.ref.helium, nitrogen: gasMixPtr.ref.nitrogen, usage: _convertGasUsage(gasMixPtr.ref.usage)),
         );
       }
@@ -151,7 +151,7 @@ Log parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {Uint8List? fingerpr
       if (_getFieldIndexed(parser, dc.dc_field_type_t.DC_FIELD_TANK, i, tankPtr.cast())) {
         // DC_GASMIX_UNKNOWN is 0xFFFFFFFF
         final gasMixIndex = tankPtr.ref.gasmix == 0xFFFFFFFF ? null : tankPtr.ref.gasmix;
-        dive.tanks.add(
+        log.tanks.add(
           Tank(
             gasMixIndex: gasMixIndex,
             volumeType: _convertTankVolumeType(tankPtr.ref.type),
@@ -169,9 +169,10 @@ Log parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {Uint8List? fingerpr
   calloc.free(tankCountPtr);
 
   // --- Samples ---
-  _parseSamples(parser, dive);
+  _parseSamples(parser, log);
 
-  return dive;
+  log.setUniqueID();
+  return log;
 }
 
 /// Helper to get a field from the parser.

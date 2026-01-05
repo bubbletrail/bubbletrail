@@ -296,6 +296,8 @@ extension _UddfDive on Dive {
       log.dateTime = Timestamp.fromDateTime(dateTime);
     }
 
+    log.setUniqueID();
+
     // Create dive
     final dive = Dive(
       id: diveId,
