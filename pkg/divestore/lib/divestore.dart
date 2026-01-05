@@ -53,6 +53,13 @@ Dive convertDcDive(Log dl) {
     dive.cylinders.add(diveCylinder);
   }
 
+  // Collect events
+  for (final sample in dl.samples) {
+    for (final event in sample.events) {
+      dive.events.add(event);
+    }
+  }
+
   dive.recalculateMedata();
 
   return dive;

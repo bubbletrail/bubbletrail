@@ -56,7 +56,10 @@ message DiveCylinder {
   double oxygen = 4; // Fraction (0.0-1.0)
   double helium = 5; // Fraction (0.0-1.0)
 
-  // Set temporarily when importing SSRF only
+  double used_volume = 16; // liters, calculated
+  double sac = 17; // liters/min, calculated
+
+  // Set when loaded, to full out volume etc.
   Cylinder cylinder = 32;
 }
 

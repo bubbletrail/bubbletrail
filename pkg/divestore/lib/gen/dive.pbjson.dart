@@ -71,6 +71,8 @@ const DiveCylinder$json = {
     {'1': 'end_pressure', '3': 3, '4': 1, '5': 1, '10': 'endPressure'},
     {'1': 'oxygen', '3': 4, '4': 1, '5': 1, '10': 'oxygen'},
     {'1': 'helium', '3': 5, '4': 1, '5': 1, '10': 'helium'},
+    {'1': 'used_volume', '3': 16, '4': 1, '5': 1, '10': 'usedVolume'},
+    {'1': 'sac', '3': 17, '4': 1, '5': 1, '10': 'sac'},
     {'1': 'cylinder', '3': 32, '4': 1, '5': 11, '6': '.divestore.Cylinder', '10': 'cylinder'},
   ],
 };
@@ -79,7 +81,8 @@ const DiveCylinder$json = {
 final $typed_data.Uint8List diveCylinderDescriptor = $convert.base64Decode('CgxEaXZlQ3lsaW5kZXISHwoLY3lsaW5kZXJfaWQYASABKAlSCmN5bGluZGVySWQSJQoOYmVnaW'
     '5fcHJlc3N1cmUYAiABKAFSDWJlZ2luUHJlc3N1cmUSIQoMZW5kX3ByZXNzdXJlGAMgASgBUgtl'
     'bmRQcmVzc3VyZRIWCgZveHlnZW4YBCABKAFSBm94eWdlbhIWCgZoZWxpdW0YBSABKAFSBmhlbG'
-    'l1bRIvCghjeWxpbmRlchggIAEoCzITLmRpdmVzdG9yZS5DeWxpbmRlclIIY3lsaW5kZXI=');
+    'l1bRIfCgt1c2VkX3ZvbHVtZRgQIAEoAVIKdXNlZFZvbHVtZRIQCgNzYWMYESABKAFSA3NhYxIv'
+    'CghjeWxpbmRlchggIAEoCzITLmRpdmVzdG9yZS5DeWxpbmRlclIIY3lsaW5kZXI=');
 
 @$core.Deprecated('Use weightsystemDescriptor instead')
 const Weightsystem$json = {

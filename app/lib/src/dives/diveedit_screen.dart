@@ -66,6 +66,10 @@ class _EditableGasChange {
     final seconds = timeSeconds % 60;
     return '$minutes:${seconds.toString().padLeft(2, '0')}';
   }
+
+  SampleEvent toSampleEvent() {
+    return SampleEvent(type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, time: timeSeconds, value: cylinderIndex);
+  }
 }
 
 /// Editable wrapper for a weight system
@@ -124,16 +128,12 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     // Initialize weightsystems from dive
     _weightsystems = dive.weightsystems.map((ws) => _EditableWeightsystem.fromWeightsystem(ws)).toList();
 
-    // Extract gaschange events from all computer dives (events are in samples)
+    // Extract gas change events
     _gasChanges = [];
-    for (final cd in dive.logs) {
-      for (final sample in cd.samples) {
-        for (final event in sample.events) {
-          if (event.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE) {
-            // The value field stores the cylinder index
-            _gasChanges.add(_EditableGasChange(timeSeconds: event.time, cylinderIndex: event.value));
-          }
-        }
+    for (final event in dive.events) {
+      if (event.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE) {
+        // The value field stores the cylinder index
+        _gasChanges.add(_EditableGasChange(timeSeconds: event.time, cylinderIndex: event.value));
       }
     }
     // Sort by time
@@ -499,37 +499,11 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       dive.weightsystems.addAll(_weightsystems.map((ws) => ws.toWeightsystem()));
 
       // Update gas change events
-      // Find existing "Manual Entry" computer dive or prepare to create one
-      const manualEntryModel = 'Manual Entry';
-      Log? manualCd = dive.logs.where((cd) => cd.model == manualEntryModel).firstOrNull;
+      dive.events.clear();
+      dive.events.addAll(_gasChanges.map((gs) => gs.toSampleEvent()));
 
-      if (_gasChanges.isNotEmpty) {
-        // Convert gas changes to sample events
-        final samples = _gasChanges.map((gc) {
-          return LogSample(
-            time: gc.timeSeconds.toDouble(),
-            events: [SampleEvent(time: gc.timeSeconds, type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, flags: 0, value: gc.cylinderIndex)],
-          );
-        }).toList();
-
-        if (manualCd != null) {
-          // Replace the manual computer dive with updated events
-          dive.logs.remove(manualCd);
-        }
-        // Create new manual computer dive
-        manualCd = Log(
-          model: manualEntryModel,
-          maxDepth: dive.hasMaxDepth() ? dive.maxDepth : null,
-          avgDepth: dive.hasMeanDepth() ? dive.meanDepth : null,
-          samples: samples,
-        );
-        dive.logs.add(manualCd);
-      } else if (manualCd != null) {
-        // No gas changes, remove manual computer dive if it only had events
-        if (manualCd.samples.isEmpty) {
-          dive.logs.remove(manualCd);
-        }
-      }
+      // Update calculated info.
+      dive.recalculateMedata();
     });
     // Send update event to bloc
     context.read<DiveListBloc>().add(UpdateDive(upd));

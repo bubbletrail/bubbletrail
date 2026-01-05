@@ -318,6 +318,8 @@ class DiveCylinder extends $pb.GeneratedMessage {
     $core.double? endPressure,
     $core.double? oxygen,
     $core.double? helium,
+    $core.double? usedVolume,
+    $core.double? sac,
     $2.Cylinder? cylinder,
   }) {
     final result = create();
@@ -326,6 +328,8 @@ class DiveCylinder extends $pb.GeneratedMessage {
     if (endPressure != null) result.endPressure = endPressure;
     if (oxygen != null) result.oxygen = oxygen;
     if (helium != null) result.helium = helium;
+    if (usedVolume != null) result.usedVolume = usedVolume;
+    if (sac != null) result.sac = sac;
     if (cylinder != null) result.cylinder = cylinder;
     return result;
   }
@@ -343,6 +347,8 @@ class DiveCylinder extends $pb.GeneratedMessage {
     ..aD(3, _omitFieldNames ? '' : 'endPressure')
     ..aD(4, _omitFieldNames ? '' : 'oxygen')
     ..aD(5, _omitFieldNames ? '' : 'helium')
+    ..aD(16, _omitFieldNames ? '' : 'usedVolume')
+    ..aD(17, _omitFieldNames ? '' : 'sac')
     ..aOM<$2.Cylinder>(32, _omitFieldNames ? '' : 'cylinder', subBuilder: $2.Cylinder.create)
     ..hasRequiredFields = false;
 
@@ -407,17 +413,35 @@ class DiveCylinder extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   void clearHelium() => $_clearField(5);
 
-  /// Set temporarily when importing SSRF only
+  @$pb.TagNumber(16)
+  $core.double get usedVolume => $_getN(5);
+  @$pb.TagNumber(16)
+  set usedVolume($core.double value) => $_setDouble(5, value);
+  @$pb.TagNumber(16)
+  $core.bool hasUsedVolume() => $_has(5);
+  @$pb.TagNumber(16)
+  void clearUsedVolume() => $_clearField(16);
+
+  @$pb.TagNumber(17)
+  $core.double get sac => $_getN(6);
+  @$pb.TagNumber(17)
+  set sac($core.double value) => $_setDouble(6, value);
+  @$pb.TagNumber(17)
+  $core.bool hasSac() => $_has(6);
+  @$pb.TagNumber(17)
+  void clearSac() => $_clearField(17);
+
+  /// Set when loaded, to full out volume etc.
   @$pb.TagNumber(32)
-  $2.Cylinder get cylinder => $_getN(5);
+  $2.Cylinder get cylinder => $_getN(7);
   @$pb.TagNumber(32)
   set cylinder($2.Cylinder value) => $_setField(32, value);
   @$pb.TagNumber(32)
-  $core.bool hasCylinder() => $_has(5);
+  $core.bool hasCylinder() => $_has(7);
   @$pb.TagNumber(32)
   void clearCylinder() => $_clearField(32);
   @$pb.TagNumber(32)
-  $2.Cylinder ensureCylinder() => $_ensure(5);
+  $2.Cylinder ensureCylinder() => $_ensure(7);
 }
 
 /// Weight system information.

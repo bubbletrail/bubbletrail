@@ -1,4 +1,5 @@
 import '../gen/dive.pb.dart';
+import '../recalculate.dart';
 import 'cylinders.dart';
 import 'dives.dart';
 import 'sites.dart';
@@ -47,6 +48,7 @@ class Store {
     return dive.rebuild((dive) {
       dive.cylinders.clear();
       dive.cylinders.addAll(mappedCyls);
+      dive.recalculateMedata();
     });
   }
 }
