@@ -1,3 +1,4 @@
+import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -78,6 +79,11 @@ String formatDuration(int seconds) {
   final minutes = seconds ~/ 60;
   final secs = seconds % 60;
   return '$minutes:${secs.toString().padLeft(2, '0')}';
+}
+
+String formatMinutes(int seconds) {
+  final minutes = (seconds / 60).round();
+  return '$minutes min';
 }
 
 String formatLatitude(double val) {
@@ -209,5 +215,64 @@ class WeightText extends StatelessWidget {
   Widget build(BuildContext context) {
     final unit = context.watch<PreferencesBloc>().state.preferences.weightUnit;
     return Text(formatWeight(unit, weight), style: style);
+  }
+}
+
+class DecoModelText extends StatelessWidget {
+  final DecoModel model;
+
+  const DecoModelText(this.model, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(format());
+  }
+
+  String format() {
+    switch (model.type) {
+      case DecoModelType.DECO_MODEL_TYPE_UNSPECIFIED:
+        return 'Unspecified';
+      case DecoModelType.DECO_MODEL_TYPE_NONE:
+        return 'None';
+      case DecoModelType.DECO_MODEL_TYPE_BUHLMANN:
+        if (model.hasGfLow()) {
+          return 'Bühlmann GF ${model.gfLow}/${model.gfHigh}';
+        } else {
+          return 'Bühlmann';
+        }
+      case DecoModelType.DECO_MODEL_TYPE_VPM:
+        return 'VPM ${model.conservatism}';
+      case DecoModelType.DECO_MODEL_TYPE_RGBM:
+        return 'RGBM ${model.conservatism}';
+      case DecoModelType.DECO_MODEL_TYPE_DCIEM:
+        return 'DCIEM ${model.conservatism}';
+      default:
+        return 'Unknown';
+    }
+  }
+}
+
+class DecoStatusText extends StatelessWidget {
+  final DecoStatus status;
+
+  const DecoStatusText(this.status, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final unit = context.watch<PreferencesBloc>().state.preferences.depthUnit;
+    switch (status.type) {
+      case DecoStopType.DECO_STOP_TYPE_DECO_STOP:
+        return Text('Deco ${formatMinutes(status.time)} @ ${formatDepth(unit, status.depth)}');
+      case DecoStopType.DECO_STOP_TYPE_DEEP_STOP:
+        return Text('Deep stop ${formatMinutes(status.time)} @ ${formatDepth(unit, status.depth)}');
+      case DecoStopType.DECO_STOP_TYPE_SAFETY_STOP:
+        return Text('Safety stop ${formatMinutes(status.time)} @ ${formatDepth(unit, status.depth)}');
+      case DecoStopType.DECO_STOP_TYPE_NDL:
+        return Text('${formatMinutes(status.time)} NDL');
+      case DecoStopType.DECO_STOP_TYPE_UNSPECIFIED:
+        return Text('-');
+      default:
+        return Text('Unknown');
+    }
   }
 }

@@ -46,6 +46,8 @@ class Dive extends $pb.GeneratedMessage {
     $core.Iterable<Weightsystem>? weightsystems,
     $core.Iterable<$1.Log>? logs,
     $core.Iterable<$1.SampleEvent>? events,
+    $core.double? minTemp,
+    $core.double? maxTemp,
   }) {
     final result = create();
     if (id != null) result.id = id;
@@ -71,6 +73,8 @@ class Dive extends $pb.GeneratedMessage {
     if (weightsystems != null) result.weightsystems.addAll(weightsystems);
     if (logs != null) result.logs.addAll(logs);
     if (events != null) result.events.addAll(events);
+    if (minTemp != null) result.minTemp = minTemp;
+    if (maxTemp != null) result.maxTemp = maxTemp;
     return result;
   }
 
@@ -105,6 +109,8 @@ class Dive extends $pb.GeneratedMessage {
         ..pPM<Weightsystem>(24, _omitFieldNames ? '' : 'weightsystems', subBuilder: Weightsystem.create)
         ..pPM<$1.Log>(25, _omitFieldNames ? '' : 'logs', subBuilder: $1.Log.create)
         ..pPM<$1.SampleEvent>(26, _omitFieldNames ? '' : 'events', subBuilder: $1.SampleEvent.create)
+        ..aD(27, _omitFieldNames ? '' : 'minTemp')
+        ..aD(28, _omitFieldNames ? '' : 'maxTemp')
         ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -308,6 +314,24 @@ class Dive extends $pb.GeneratedMessage {
   /// but editable.
   @$pb.TagNumber(26)
   $pb.PbList<$1.SampleEvent> get events => $_getList(22);
+
+  @$pb.TagNumber(27)
+  $core.double get minTemp => $_getN(23);
+  @$pb.TagNumber(27)
+  set minTemp($core.double value) => $_setDouble(23, value);
+  @$pb.TagNumber(27)
+  $core.bool hasMinTemp() => $_has(23);
+  @$pb.TagNumber(27)
+  void clearMinTemp() => $_clearField(27);
+
+  @$pb.TagNumber(28)
+  $core.double get maxTemp => $_getN(24);
+  @$pb.TagNumber(28)
+  set maxTemp($core.double value) => $_setDouble(24, value);
+  @$pb.TagNumber(28)
+  $core.bool hasMaxTemp() => $_has(24);
+  @$pb.TagNumber(28)
+  void clearMaxTemp() => $_clearField(28);
 }
 
 /// Per-dive cylinder usage information.

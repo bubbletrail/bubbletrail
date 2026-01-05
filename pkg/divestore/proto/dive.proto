@@ -23,6 +23,8 @@ message Dive {
   int32 duration = 12; // Seconds
   double max_depth = 13; // Meters
   double mean_depth = 14; // Meters
+  double min_temp = 27; // Celsius
+  double max_temp = 28; // Celsius
 
   // Additional attributes
   double sac = 15; // l/min

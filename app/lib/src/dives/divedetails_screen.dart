@@ -176,29 +176,31 @@ class _DiveDetails extends StatelessWidget {
   DateTime get _startDateTime => dive.start.toDateTime();
 
   List<Widget> _buildAllSections(BuildContext context) {
+    final worstDeco = dive.logs.isNotEmpty ? dive.logs.first.worstDecoStatus : null;
     return [
-      infoCard(context, 'General Information', [
+      infoCard(context, 'General', [
         infoWidgetRow('Start', DateTimeText(_startDateTime)),
         infoRow('Duration', formatDuration(dive.duration)),
         if (dive.hasRating()) infoRow('Rating', '★' * dive.rating),
         tagsRow(context, dive.tags.toList(), secondaryTags: site?.tags.where((t) => !dive.tags.contains(t)).toList()),
       ]),
       if (site != null) _SiteCard(site: site!),
-      infoCard(context, 'Dive Computer Data', [
-        if (dive.hasMaxDepth()) infoWidgetRow('Max Depth', DepthText(dive.maxDepth)),
-        if (dive.hasMeanDepth()) infoWidgetRow('Mean Depth', DepthText(dive.meanDepth)),
+      infoCard(context, 'Dive computer', [
+        if (dive.hasMaxDepth()) infoWidgetRow('Max depth', DepthText(dive.maxDepth)),
+        if (dive.hasMeanDepth()) infoWidgetRow('Mean depth', DepthText(dive.meanDepth)),
         if (dive.logs.isNotEmpty) ...[
-          if (dive.logs[0].hasSurfaceTemperature()) infoWidgetRow('Air Temperature', TemperatureText(dive.logs[0].surfaceTemperature)),
-          if (dive.logs[0].hasMinTemperature()) infoWidgetRow('Water Temperature', TemperatureText(dive.logs[0].minTemperature)),
+          if (dive.logs[0].hasSurfaceTemperature()) infoWidgetRow('Air temp', TemperatureText(dive.logs[0].surfaceTemperature)),
+          if (dive.logs[0].hasMinTemperature()) infoWidgetRow('Water temp', TemperatureText(dive.logs[0].minTemperature)),
         ],
+        if (dive.hasMaxTemp()) infoWidgetRow('Max temp', TemperatureText(dive.maxTemp)),
+        if (dive.hasMinTemp()) infoWidgetRow('Min temp', TemperatureText(dive.minTemp)),
+        if (dive.hasOtu()) infoRow('OTU', dive.otu.toString()),
+        if (dive.hasSac()) infoWidgetRow('SAC', VolumeText(dive.sac, suffix: '/min')),
+        if (dive.hasOtu()) infoRow('OTU', dive.otu.toString()),
+        if (dive.hasCns()) infoRow('CNS', '${dive.cns}%'),
+        if (dive.logs.isNotEmpty) ...[if (dive.logs[0].hasDecoModel()) infoWidgetRow('Deco model', DecoModelText(dive.logs[0].decoModel))],
+        if (worstDeco != null) infoWidgetRow('Max deco', DecoStatusText(worstDeco)),
       ]),
-      if (dive.hasSac() || dive.hasOtu() || dive.hasCns()) ...[
-        infoCard(context, 'Physiological Data', [
-          if (dive.hasSac()) infoWidgetRow('SAC', VolumeText(dive.sac, suffix: '/min')),
-          if (dive.hasOtu()) infoRow('OTU', dive.otu.toString()),
-          if (dive.hasCns()) infoRow('CNS', '${dive.cns}%'),
-        ]),
-      ],
       if (dive.divemaster.isNotEmpty || dive.buddies.isNotEmpty) ...[
         infoCard(context, 'People', [
           if (dive.divemaster.isNotEmpty) infoRow('Divemaster', dive.divemaster),
@@ -227,7 +229,7 @@ class _DiveDetails extends StatelessWidget {
       if (dive.weightsystems.isNotEmpty) ...[
         infoCard(
           context,
-          'Weight Systems',
+          'Weights',
           dive.weightsystems.asMap().entries.map((entry) {
             final idx = entry.key;
             final ws = entry.value;
@@ -255,7 +257,7 @@ class _DiveDetails extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Text('Depth Profile', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                      child: Text('Dive profile', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                     ),
                     IconButton.filled(
                       icon: const Icon(Icons.fullscreen),

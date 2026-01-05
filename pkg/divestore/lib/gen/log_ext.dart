@@ -23,4 +23,36 @@ extension LogExtensions on Log {
       this.uniqueID = hex.encode(trunc);
     }
   }
+
+  DecoStatus? get worstDecoStatus {
+    DecoStatus? worst;
+    for (final sample in samples) {
+      if (!sample.hasDeco()) continue;
+      if (worst == null) {
+        if (sample.deco.type != DecoStopType.DECO_STOP_TYPE_NDL || sample.deco.time > 0) worst = sample.deco;
+        continue;
+      }
+      if (worst.type.value < sample.deco.type.value) {
+        worst = sample.deco;
+        continue;
+      }
+      if (worst.type == sample.deco.type) {
+        switch (worst.type) {
+          case DecoStopType.DECO_STOP_TYPE_DECO_STOP:
+          case DecoStopType.DECO_STOP_TYPE_DEEP_STOP:
+          case DecoStopType.DECO_STOP_TYPE_SAFETY_STOP:
+            if (sample.deco.time > worst.time) {
+              worst = sample.deco;
+              continue;
+            }
+          case DecoStopType.DECO_STOP_TYPE_NDL:
+            if (sample.deco.time < worst.time) {
+              worst = sample.deco;
+              continue;
+            }
+        }
+      }
+    }
+    return worst;
+  }
 }

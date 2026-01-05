@@ -51,6 +51,12 @@ extension DiveExtensions on Dive {
       // Calculate depths etc based on samples.
       final dl = this.logs.first;
       for (final sample in dl.samples) {
+        // Temperature bounds
+        if (sample.hasTemperature()) {
+          if (!this.hasMaxTemp() || sample.temperature > this.maxTemp) this.maxTemp = sample.temperature;
+          if (!this.hasMinTemp() || sample.temperature < this.minTemp) this.minTemp = sample.temperature;
+        }
+
         // Collect and update tank pressures as required
         for (final pressure in sample.pressures) {
           if (updateTankIndexes.contains(pressure.tankIndex)) {
@@ -101,6 +107,12 @@ extension DiveExtensions on Dive {
         this.sac = totSAC / totDur;
       } else {
         this.clearSac();
+      }
+
+      if (dl.samples.isNotEmpty && dl.samples.last.cns > 0) {
+        this.cns = (100 * dl.samples.last.cns).round();
+      } else {
+        this.clearCns();
       }
     }
 

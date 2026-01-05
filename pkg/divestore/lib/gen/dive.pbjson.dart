@@ -30,6 +30,8 @@ const Dive$json = {
     {'1': 'duration', '3': 12, '4': 1, '5': 5, '10': 'duration'},
     {'1': 'max_depth', '3': 13, '4': 1, '5': 1, '10': 'maxDepth'},
     {'1': 'mean_depth', '3': 14, '4': 1, '5': 1, '10': 'meanDepth'},
+    {'1': 'min_temp', '3': 27, '4': 1, '5': 1, '10': 'minTemp'},
+    {'1': 'max_temp', '3': 28, '4': 1, '5': 1, '10': 'maxTemp'},
     {'1': 'sac', '3': 15, '4': 1, '5': 1, '10': 'sac'},
     {'1': 'otu', '3': 16, '4': 1, '5': 5, '10': 'otu'},
     {'1': 'cns', '3': 17, '4': 1, '5': 5, '10': 'cns'},
@@ -53,14 +55,15 @@ final $typed_data.Uint8List diveDescriptor = $convert.base64Decode('CgREaXZlEg4K
     'chIWCgZyYXRpbmcYCSABKAVSBnJhdGluZxISCgR0YWdzGAogAygJUgR0YWdzEjAKBXN0YXJ0GA'
     'sgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIFc3RhcnQSGgoIZHVyYXRpb24YDCAB'
     'KAVSCGR1cmF0aW9uEhsKCW1heF9kZXB0aBgNIAEoAVIIbWF4RGVwdGgSHQoKbWVhbl9kZXB0aB'
-    'gOIAEoAVIJbWVhbkRlcHRoEhAKA3NhYxgPIAEoAVIDc2FjEhAKA290dRgQIAEoBVIDb3R1EhAK'
-    'A2NucxgRIAEoBVIDY25zEhcKB3NpdGVfaWQYEiABKAlSBnNpdGVJZBIeCgppbnN0cnVjdG9yGB'
-    'MgASgJUgppbnN0cnVjdG9yEh4KCmRpdmVtYXN0ZXIYFCABKAlSCmRpdmVtYXN0ZXISGAoHYnVk'
-    'ZGllcxgVIAMoCVIHYnVkZGllcxIUCgVub3RlcxgWIAEoCVIFbm90ZXMSNQoJY3lsaW5kZXJzGB'
-    'cgAygLMhcuZGl2ZXN0b3JlLkRpdmVDeWxpbmRlclIJY3lsaW5kZXJzEj0KDXdlaWdodHN5c3Rl'
-    'bXMYGCADKAsyFy5kaXZlc3RvcmUuV2VpZ2h0c3lzdGVtUg13ZWlnaHRzeXN0ZW1zEiIKBGxvZ3'
-    'MYGSADKAsyDi5kaXZlc3RvcmUuTG9nUgRsb2dzEi4KBmV2ZW50cxgaIAMoCzIWLmRpdmVzdG9y'
-    'ZS5TYW1wbGVFdmVudFIGZXZlbnRz');
+    'gOIAEoAVIJbWVhbkRlcHRoEhkKCG1pbl90ZW1wGBsgASgBUgdtaW5UZW1wEhkKCG1heF90ZW1w'
+    'GBwgASgBUgdtYXhUZW1wEhAKA3NhYxgPIAEoAVIDc2FjEhAKA290dRgQIAEoBVIDb3R1EhAKA2'
+    'NucxgRIAEoBVIDY25zEhcKB3NpdGVfaWQYEiABKAlSBnNpdGVJZBIeCgppbnN0cnVjdG9yGBMg'
+    'ASgJUgppbnN0cnVjdG9yEh4KCmRpdmVtYXN0ZXIYFCABKAlSCmRpdmVtYXN0ZXISGAoHYnVkZG'
+    'llcxgVIAMoCVIHYnVkZGllcxIUCgVub3RlcxgWIAEoCVIFbm90ZXMSNQoJY3lsaW5kZXJzGBcg'
+    'AygLMhcuZGl2ZXN0b3JlLkRpdmVDeWxpbmRlclIJY3lsaW5kZXJzEj0KDXdlaWdodHN5c3RlbX'
+    'MYGCADKAsyFy5kaXZlc3RvcmUuV2VpZ2h0c3lzdGVtUg13ZWlnaHRzeXN0ZW1zEiIKBGxvZ3MY'
+    'GSADKAsyDi5kaXZlc3RvcmUuTG9nUgRsb2dzEi4KBmV2ZW50cxgaIAMoCzIWLmRpdmVzdG9yZS'
+    '5TYW1wbGVFdmVudFIGZXZlbnRz');
 
 @$core.Deprecated('Use diveCylinderDescriptor instead')
 const DiveCylinder$json = {
