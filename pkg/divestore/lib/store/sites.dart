@@ -88,8 +88,8 @@ class Sites {
     return _sites[id];
   }
 
-  Future<List<Site>> getAll() async {
-    final sites = _sites.values.where((s) => !s.hasDeletedAt()).toList();
+  Future<List<Site>> getAll({bool withDeleted = false}) async {
+    final sites = _sites.values.where((s) => withDeleted || !s.hasDeletedAt()).toList();
     sites.sort((a, b) => a.name.compareTo(b.name));
     return sites;
   }
@@ -122,7 +122,7 @@ class Sites {
   }
 
   Future<void> importFrom(Sites other) async {
-    for (final site in await other.getAll()) {
+    for (final site in await other.getAll(withDeleted: true)) {
       final cur = _sites[site.id];
       if (site.hasDeletedAt()) {
         if (cur != null) {

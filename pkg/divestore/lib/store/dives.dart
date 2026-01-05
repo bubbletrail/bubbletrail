@@ -129,8 +129,8 @@ class Dives {
     return dive;
   }
 
-  Future<List<Dive>> getAll() async {
-    final dives = _dives.values.where((d) => !d.hasDeletedAt()).toList();
+  Future<List<Dive>> getAll({bool withDeleted = false}) async {
+    final dives = _dives.values.where((d) => withDeleted || !d.hasDeletedAt()).toList();
     dives.sort((a, b) => -a.number.compareTo(b.number));
     return dives;
   }
@@ -208,7 +208,7 @@ class Dives {
   }
 
   Future<void> importFrom(Dives other) async {
-    for (final dive in await other.getAll()) {
+    for (final dive in await other.getAll(withDeleted: true)) {
       final cur = _dives[dive.id];
       if (dive.hasDeletedAt()) {
         if (cur != null) {
@@ -220,25 +220,6 @@ class Dives {
         print('import dive ${rdive!.id}');
         await _import(rdive);
       }
-    }
-
-    // Deduplicate, in case of separate previous imports etc
-    final byUnique = <String, Dive>{};
-    for (final dive in await getAll()) {
-      if (dive.logs.isEmpty) continue;
-      if (!dive.logs.first.hasUniqueID()) continue;
-      final key = dive.logs.first.uniqueID;
-      final exist = byUnique[key];
-      if (exist != null) {
-        // Duplicate. Keep the last modified.
-        if (exist.updatedAt.toDateTime().isAfter(dive.updatedAt.toDateTime())) {
-          await (delete(dive.id));
-          continue;
-        } else {
-          await (delete(exist.id));
-        }
-      }
-      byUnique[key] = dive;
     }
   }
 

@@ -77,8 +77,8 @@ class Cylinders {
     return _cylinders[id];
   }
 
-  Future<List<Cylinder>> getAll() async {
-    final vals = _cylinders.values.where((c) => !c.hasDeletedAt()).toList();
+  Future<List<Cylinder>> getAll({bool withDeleted = false}) async {
+    final vals = _cylinders.values.where((c) => withDeleted || !c.hasDeletedAt()).toList();
     vals.sort((a, b) => a.description.compareTo(b.description));
     return vals;
   }
@@ -132,7 +132,7 @@ class Cylinders {
   }
 
   Future<void> importFrom(Cylinders other) async {
-    for (final cyl in await other.getAll()) {
+    for (final cyl in await other.getAll(withDeleted: true)) {
       final cur = _cylinders[cyl.id];
       if (cyl.hasDeletedAt()) {
         if (cur != null) {
