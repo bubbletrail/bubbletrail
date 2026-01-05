@@ -62,7 +62,13 @@ String formatVolume(VolumeUnit unit, num volume) {
     case VolumeUnit.liters:
       return '${volume.toStringAsFixed(1)} ${unit.label}';
     case VolumeUnit.cuft:
-      return '${(volume * 0.0353).toStringAsFixed(1)} ${unit.label}';
+      final val = volume * 0.0353;
+      final decimals = val < 1
+          ? 2
+          : val < 20
+          ? 1
+          : 0;
+      return '${val.toStringAsFixed(decimals)} ${unit.label}';
   }
 }
 
