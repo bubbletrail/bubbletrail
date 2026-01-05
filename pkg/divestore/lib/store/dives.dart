@@ -13,7 +13,6 @@ import 'package:uuid/uuid.dart';
 import '../dc_convert.dart';
 import '../gen/gen.dart';
 import '../gen/internal.pb.dart';
-import '../gen/log_ext.dart';
 import 'fileio.dart';
 
 final _log = Logger('store/dives');
