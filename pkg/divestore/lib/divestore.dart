@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
+
 import 'gen/gen.dart';
 import 'recalculate.dart';
 
@@ -22,6 +26,15 @@ class Ssrf {
 /// - Stores the original Log in logs
 Dive convertDcDive(Log dl) {
   final dive = Dive()..logs.add(dl);
+
+  // Calculate a unique yet repeatable dive ID, if we have all the
+  // information required. Any given dive computer identified by model &
+  // serial should only have one dive starting at a given point in time.
+  if (dl.hasModel() && dl.hasSerial() && dl.hasDateTime()) {
+    final unique = 'DC${dl.model}/${dl.serial}@${dl.dateTime.seconds}';
+    final hash = sha256.convert(utf8.encode(unique));
+    dive.id = hash.toString().substring(0, 32).toLowerCase();
+  }
 
   if (dl.hasNumber()) {
     dive.number = dl.number;
