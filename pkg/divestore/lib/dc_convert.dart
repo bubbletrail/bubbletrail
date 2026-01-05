@@ -1,11 +1,11 @@
-import 'dive_ext.dart';
+import 'gen/dive_ext.dart';
 import 'gen/gen.dart';
 
-export 'dive_ext.dart';
+export 'gen/dive_ext.dart';
 export 'gen/gen.dart';
-export 'ssrf.dart';
+export 'import/ssrf.dart';
 export 'store/store.dart';
-export 'uddf.dart';
+export 'import/uddf.dart';
 
 /// Converts a Log from a dive computer into a Dive.
 ///

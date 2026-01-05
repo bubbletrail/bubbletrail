@@ -3,8 +3,9 @@ import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
-import 'divestore.dart';
+import '../gen/gen.dart';
 import 'formatting.dart';
+import 'container.dart';
 
 extension SsrfXml on Ssrf {
   static Ssrf fromXml(XmlElement elem) {

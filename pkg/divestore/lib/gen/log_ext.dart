@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:convert/convert.dart';
 
-import 'gen/gen.dart';
+import 'gen.dart';
 
 extension LogExtensions on Log {
   void setUniqueID() {

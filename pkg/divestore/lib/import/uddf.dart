@@ -2,7 +2,8 @@ import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
-import 'divestore.dart';
+import '../gen/gen.dart';
+import 'container.dart';
 
 const double _kelvinOffset = 273.15;
 const double _pascalToBar = 1e-5;

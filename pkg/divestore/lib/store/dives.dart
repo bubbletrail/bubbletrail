@@ -13,7 +13,7 @@ import 'package:uuid/uuid.dart';
 import '../dc_convert.dart';
 import '../gen/gen.dart';
 import '../gen/internal.pb.dart';
-import '../log_ext.dart';
+import '../gen/log_ext.dart';
 import 'fileio.dart';
 
 final _log = Logger('store/dives');
@@ -75,6 +75,11 @@ class Dives {
             dive.createdAt = dive.updatedAt;
           }
         }
+        for (final (idx, cyl) in dive.cylinders.indexed) {
+          dive.cylinders[idx] = cyl.rebuild((cyl) {
+            cyl.clearCylinder();
+          });
+        }
       });
       if (!_dives.containsKey(dive.id)) {
         _dives[dive.id] = dive;
@@ -91,6 +96,11 @@ class Dives {
     if (!dive.isFrozen) dive.freeze();
     dive = dive.rebuild((dive) {
       dive.updatedAt = Timestamp.fromDateTime(DateTime.now());
+      for (final (idx, cyl) in dive.cylinders.indexed) {
+        dive.cylinders[idx] = cyl.rebuild((cyl) {
+          cyl.clearCylinder();
+        });
+      }
     });
     _dives[dive.id] = dive;
     _tags.addAll(dive.tags);

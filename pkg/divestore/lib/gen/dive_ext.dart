@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'gen/gen.dart';
+import 'gen.dart';
 
 extension DiveExtensions on Dive {
   void recalculateMedata() {

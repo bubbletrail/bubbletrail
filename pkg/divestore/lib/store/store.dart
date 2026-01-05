@@ -1,5 +1,5 @@
 import '../gen/dive.pb.dart';
-import '../dive_ext.dart';
+import '../gen/dive_ext.dart';
 import '../gen/types.pb.dart';
 import 'cylinders.dart';
 import 'dives.dart';
