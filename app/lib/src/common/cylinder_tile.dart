@@ -14,6 +14,7 @@ class CylinderTile extends StatelessWidget {
   final double workingPressure;
   final double beginPressure;
   final double endPressure;
+  final double sac;
 
   final Widget? leading;
   final Widget? trailing;
@@ -28,6 +29,7 @@ class CylinderTile extends StatelessWidget {
     this.workingPressure = 0,
     this.beginPressure = 0,
     this.endPressure = 0,
+    this.sac = 0,
     this.leading,
     this.trailing,
     this.onTap,
@@ -55,8 +57,9 @@ class CylinderTile extends StatelessWidget {
 
     if (cylinderSize > 0) details.add(VolumeText(cylinderSize));
     if (workingPressure > 0) details.add(PressureText(workingPressure));
-    if (beginPressure > 0) details.add(PressureText(icon: Icons.battery_5_bar_outlined, beginPressure));
-    if (endPressure > 0) details.add(PressureText(icon: Icons.battery_1_bar_outlined, endPressure));
+    if (beginPressure > 0) details.add(PressureText(beginPressure, icon: Icons.battery_5_bar_outlined));
+    if (endPressure > 0) details.add(PressureText(endPressure, icon: Icons.battery_1_bar_outlined));
+    if (sac > 0) details.add(VolumeText(sac, icon: Icons.av_timer, suffix: '/min'));
 
     return ListTile(
       title: Text(desc),

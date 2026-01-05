@@ -600,8 +600,6 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                     ...List.generate(_cylinders.length, (index) {
                       final cyl = _cylinders[index];
                       final gasChangesForCyl = _gasChanges.where((gc) => gc.cylinderIndex == index).toList();
-                      final isFirstCylinder = index == 0;
-                      final hasGasChangeAtStart = gasChangesForCyl.any((gc) => gc.timeSeconds == 0);
 
                       return Card(
                         margin: const EdgeInsets.only(bottom: 8),
@@ -627,11 +625,6 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text('Gas changes:', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
-                              if (isFirstCylinder && !hasGasChangeAtStart)
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 8, top: 4),
-                                  child: Text('• Start of dive', style: Theme.of(context).textTheme.bodySmall),
-                                ),
                               ...gasChangesForCyl.map((gc) {
                                 final gcIndex = _gasChanges.indexOf(gc);
                                 return Padding(

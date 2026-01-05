@@ -219,6 +219,7 @@ class _DiveDetails extends StatelessWidget {
               heliumPct: (cyl.helium * 100).toInt(),
               beginPressure: cyl.beginPressure,
               endPressure: cyl.endPressure,
+              sac: cyl.sac,
             );
           }).toList(),
         ),

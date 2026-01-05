@@ -186,14 +186,15 @@ class PressureText extends StatelessWidget {
 
 class VolumeText extends StatelessWidget {
   final num volume;
+  final IconData? icon;
   final String suffix;
 
-  const VolumeText(this.volume, {this.suffix = '', super.key});
+  const VolumeText(this.volume, {this.icon, this.suffix = '', super.key});
 
   @override
   Widget build(BuildContext context) {
     final unit = context.watch<PreferencesBloc>().state.preferences.volumeUnit;
-    return Text(formatVolume(unit, volume) + suffix);
+    return IconText(icon, formatVolume(unit, volume) + suffix);
   }
 }
 

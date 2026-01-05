@@ -72,11 +72,11 @@ extension DiveExtensions on Dive {
         }
 
         // For the relevant cylinder
-        final cylIdx = spans.indexWhere((s) => s.end >= sample.time);
-        if (cylIdx >= 0) {
+        try {
+          final cylIdx = spans.firstWhere((s) => s.end >= sample.time).idx;
           final cur = perCylinderDepth[cylIdx] ?? (duration: 0, totDepth: 0);
           perCylinderDepth[cylIdx] = (duration: cur.duration + sampleDuration, totDepth: cur.totDepth + sampleDepth * sampleDuration);
-        }
+        } catch (StateError) {}
       }
 
       // Calculate total SAC based on the cylinders used
@@ -97,7 +97,11 @@ extension DiveExtensions on Dive {
         totDur += durationMin;
       }
 
-      this.sac = totSAC / totDur;
+      if (totSAC > 0) {
+        this.sac = totSAC / totDur;
+      } else {
+        this.clearSac();
+      }
     }
 
     this.duration = duration.round();
