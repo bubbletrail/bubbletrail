@@ -85,9 +85,22 @@ extension DiveExtensions on Dive {
         } catch (StateError) {}
       }
 
-      // Calculate total SAC based on the cylinders used
-      var totSAC = 0.0;
-      var totDur = 0.0;
+      // Update cylinder used gas volumes now that we know pressures
+      for (var (idx, cyl) in this.cylinders.indexed) {
+        if (cyl.isFrozen) cyl = cyl.deepCopy();
+        cyl.usedVolume = cyl.cylinder.size * (cyl.beginPressure - cyl.endPressure);
+        this.cylinders[idx] = cyl;
+      }
+
+      // Calculate total dive SAC based on the sum of all cylinders
+      final totVolume = this.cylinders.fold(0.0, (tot, cyl) => tot + cyl.usedVolume);
+      if (totVolume > 0) {
+        this.sac = totVolume / (1.0 + meanDepth / 10.0) / (duration / 60);
+      } else {
+        this.clearSac();
+      }
+
+      // Calculate per cylinder SAC
       for (final e in perCylinderDepth.entries) {
         final avgDepth = e.value.totDepth / e.value.duration;
         final avgATA = 1.0 + avgDepth / 10.0;
@@ -98,17 +111,9 @@ extension DiveExtensions on Dive {
         cyl.usedVolume = cyl.cylinder.size * (cyl.beginPressure - cyl.endPressure);
         cyl.sac = cyl.usedVolume / avgATA / durationMin;
         this.cylinders[e.key] = cyl;
-
-        totSAC += cyl.sac * durationMin;
-        totDur += durationMin;
       }
 
-      if (totSAC > 0) {
-        this.sac = totSAC / totDur;
-      } else {
-        this.clearSac();
-      }
-
+      // Update CNS percentage
       if (dl.samples.isNotEmpty && dl.samples.last.cns > 0) {
         this.cns = (100 * dl.samples.last.cns).round();
       } else {
