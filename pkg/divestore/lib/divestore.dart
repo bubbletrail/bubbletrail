@@ -76,8 +76,8 @@ Dive convertDcDive(Log dl) {
     if (foundIdx >= 0) {
       gasMixtoCylinderIdx[idx] = foundIdx;
     } else {
+      gasMixtoCylinderIdx[idx] = dive.cylinders.length;
       dive.cylinders.add(DiveCylinder(oxygen: gm.oxygen, helium: gm.helium));
-      gasMixtoCylinderIdx[idx] = dive.cylinders.length - 1;
     }
   }
 

@@ -139,14 +139,22 @@ void main() {
       expect(sampleWithPressure.pressures[0].pressure, closeTo(208.0, 1.0));
     });
 
-    test('parses gas switch events', () {
+    test('parses gas switch events with correct cylinder index', () {
       final dive = ssrf.dives.firstWhere((d) => d.id == '1CB06942-F009-4441-B559-4B3630F893F1');
       final log = dive.logs[0];
 
       // First sample should have a gas switch event (switchmix at start)
       final firstSample = log.samples[0];
       expect(firstSample.events, isNotEmpty);
-      expect(firstSample.events.any((e) => e.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE), isTrue);
+
+      final gasChangeEvent = firstSample.events.firstWhere((e) => e.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE);
+      expect(gasChangeEvent.type, SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE);
+
+      // First dive has Air (21% O2) as first cylinder, value should be 0
+      expect(gasChangeEvent.value, 0);
+
+      // Verify the cylinder at that index is Air
+      expect(dive.cylinders[gasChangeEvent.value].oxygen, closeTo(0.21, 0.01));
     });
   });
 
