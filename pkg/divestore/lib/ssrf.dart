@@ -237,7 +237,7 @@ extension ComputerDiveXml on Log {
     for (final eventElem in elem.findElements('event')) {
       final time = (tryParseUnitString(eventElem.getAttribute('time')) ?? 0).toInt();
       final name = eventElem.getAttribute('name');
-      final value = int.tryParse(eventElem.getAttribute('value') ?? '') ?? 0;
+      final value = int.tryParse(eventElem.getAttribute('cylinder') ?? eventElem.getAttribute('value') ?? '') ?? 0;
 
       final type = _parseSsrfEventType(name);
       final event = SampleEvent(type: type, time: time, flags: 0, value: value);

@@ -9,7 +9,7 @@ export 'gen/gen.dart';
 export 'recalculate.dart';
 export 'store/store.dart';
 export 'uddf.dart';
-export 'xml.dart';
+export 'ssrf.dart';
 
 class Ssrf {
   final List<Dive> dives;

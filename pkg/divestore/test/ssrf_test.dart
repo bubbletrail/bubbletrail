@@ -73,6 +73,7 @@ void main() {
     final allEvents = firstCd.samples.expand((s) => s.events).toList();
     expect(allEvents.length, greaterThan(0));
     expect(allEvents[0].type, SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE);
+    expect(allEvents[0].value, 0); // cylinder idx
 
     // Test samples
     expect(firstCd.samples.length, greaterThan(0));
