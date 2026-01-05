@@ -148,14 +148,15 @@ class DateText extends StatelessWidget {
 }
 
 class DepthText extends StatelessWidget {
+  final String prefix;
   final num depth;
 
-  const DepthText(this.depth, {super.key});
+  const DepthText(this.depth, {this.prefix = '', super.key});
 
   @override
   Widget build(BuildContext context) {
     final unit = context.watch<PreferencesBloc>().state.preferences.depthUnit;
-    return Text(formatDepth(unit, depth));
+    return Text(prefix + formatDepth(unit, depth));
   }
 }
 

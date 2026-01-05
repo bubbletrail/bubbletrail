@@ -22,6 +22,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
   final List<FlSpot> _tempSpots = [];
   final List<LogSample> samplesWithDepth = [];
   final List<FlSpot> _depthSpots = [];
+  final List<FlSpot> _ceilingSpots = [];
   final _pressureData = <int, ({List<FlSpot> spots, double minPressure, double maxPressure})>{};
 
   @override
@@ -60,6 +61,13 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
 
         _tempSpots.addAll(_buildStepSpots(samplesWithTemp, (s) => s.time / 60, (s) => normalizeTemp(s.temperature), _maxTime));
       }
+    }
+
+    // Deco ceiling
+    for (final sample in samplesWithDepth) {
+      final hasCeiling = sample.deco.type == DecoStopType.DECO_STOP_TYPE_DECO_STOP && sample.deco.depth > 0;
+      final ceilingDepth = hasCeiling ? sample.deco.depth : -1.0;
+      _ceilingSpots.add(FlSpot(sample.time / 60, depthMult * -ceilingDepth));
     }
 
     // Pressure data - find all tank indices used
@@ -110,10 +118,27 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
     final borderColor = colorScheme.outline;
     final tempColor = Colors.orange;
     final pressureColors = [Colors.teal, Colors.cyan, Colors.green, Colors.lime];
+    final ceilingColor = Colors.red;
 
     // Build line bars
-    final lineBars = <LineChartBarData>[
-      // Depth line (main)
+    final lineBars = <LineChartBarData>[];
+
+    // Deco ceiling
+    if (_ceilingSpots.isNotEmpty) {
+      lineBars.add(
+        LineChartBarData(
+          spots: _ceilingSpots,
+          color: ceilingColor,
+          barWidth: 1.5,
+          dotData: const FlDotData(show: false),
+          aboveBarData: BarAreaData(show: true, color: ceilingColor.withValues(alpha: 0.5), cutOffY: 0, applyCutOffY: true),
+        ),
+      );
+    }
+
+    // Depth line (main) - track its index for touch handling
+    final depthLineIndex = lineBars.length;
+    lineBars.add(
       LineChartBarData(
         spots: _depthSpots,
         color: primaryColor,
@@ -121,7 +146,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
         dotData: const FlDotData(show: false),
         aboveBarData: BarAreaData(show: true, color: primaryColor.withValues(alpha: 0.3)),
       ),
-    ];
+    );
 
     // Temperature line
     if (_tempSpots.isNotEmpty) {
@@ -156,6 +181,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
                 DepthText(_displaySample!.depth),
                 TemperatureText(_displaySample!.temperature),
                 if (_displaySample!.pressures.isNotEmpty) PressureText(_displaySample!.pressures.first.pressure),
+                if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0) DepthText(_displaySample!.deco.depth, prefix: 'Ceil: '),
               ],
             ),
           ),
@@ -212,8 +238,10 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
                   return;
                 }
 
-                // Find the time from the spot with line bar index zero, the depth line.
-                final time = resp.lineBarSpots!.firstWhere((s) => s.barIndex == 0).x;
+                // Find the time from the depth line spot
+                final depthSpot = resp.lineBarSpots!.where((s) => s.barIndex == depthLineIndex).firstOrNull;
+                if (depthSpot == null) return;
+                final time = depthSpot.x;
                 final timeSeconds = (time * 60).toInt();
 
                 // Find the sample closest to this time
@@ -232,6 +260,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
               getTouchLineStart: (barData, spotIndex) => 0,
               getTouchLineEnd: (barData, spotIndex) => _chartMaxDepth,
             ),
+            clipData: FlClipData.vertical(),
           ),
         ),
       ],
@@ -251,6 +280,9 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
           ..clear()
           ..addAll(sample.pressures);
       }
+      if (sample.hasDeco()) {
+        res.deco = sample.deco;
+      }
     }
     return res;
   }
@@ -258,7 +290,6 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
   /// Builds step-style graph spots from samples.
   /// For each pair of consecutive samples, adds a synthetic point just before
   /// the second sample at the first sample's Y value to create a step effect.
-  /// Extends the last value to maxTime if there's a gap.
   /// Optimization: skips synthetic points when samples are close together
   /// (less than 4 samples apart) as the step wouldn't be visible anyway.
   List<FlSpot> _buildStepSpots(List<LogSample> samples, double Function(LogSample) getX, double Function(LogSample) getY, double maxTime) {
