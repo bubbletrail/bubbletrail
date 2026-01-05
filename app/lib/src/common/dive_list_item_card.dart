@@ -19,6 +19,15 @@ class DiveListItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final maxDepth = dive.hasMaxDepth() ? dive.maxDepth : 0.0;
+    String? siteName;
+    if (site != null) {
+      final parts = [if (site!.hasLocation()) site!.location, if (site!.hasCountry()) site!.country];
+      if (parts.isNotEmpty) {
+        siteName = '${site!.name} (${parts.join(', ')})';
+      } else {
+        siteName = site!.name;
+      }
+    }
 
     return Card(
       child: InkWell(
@@ -41,13 +50,13 @@ class DiveListItemCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               // Middle row: Site name (if shown)
-              if (showSite && site != null) ...[
+              if (showSite && siteName != null) ...[
                 Row(
                   children: [
                     Icon(Icons.location_on, size: 16, color: theme.colorScheme.primary),
                     const SizedBox(width: 4),
                     Expanded(
-                      child: Text(site!.name, style: theme.textTheme.bodyMedium, overflow: TextOverflow.ellipsis),
+                      child: Text(siteName, style: theme.textTheme.bodyMedium, overflow: TextOverflow.ellipsis),
                     ),
                   ],
                 ),
@@ -59,6 +68,14 @@ class DiveListItemCard extends StatelessWidget {
                   _InfoChip(icon: Icons.arrow_downward, label: DepthText(maxDepth), theme: theme),
                   const SizedBox(width: 12),
                   _InfoChip(icon: Icons.timer, label: DurationText(dive.duration), theme: theme),
+                  if (dive.sac > 0) ...[
+                    const SizedBox(width: 12),
+                    _InfoChip(
+                      icon: Icons.av_timer,
+                      label: VolumeText(dive.sac, suffix: '/min'),
+                      theme: theme,
+                    ),
+                  ],
                   const Spacer(),
                   TimeText(_startDateTime, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],
