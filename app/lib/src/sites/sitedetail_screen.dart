@@ -57,7 +57,7 @@ class SiteDetailScreen extends StatelessWidget {
                   ),
                 ]),
               ],
-              IgnorePointer(child: SiteMapWidget(site: site)),
+              SiteMapWidget(site: site, showFullscreenButton: true),
               if (dives.isNotEmpty) ...[
                 Card(
                   elevation: 2,

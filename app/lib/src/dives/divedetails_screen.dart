@@ -257,7 +257,7 @@ class _DiveDetails extends StatelessWidget {
                     Expanded(
                       child: Text('Depth Profile', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                     ),
-                    IconButton(
+                    IconButton.filled(
                       icon: const Icon(Icons.fullscreen),
                       onPressed: () {
                         context.pushNamed(AppRouteName.divesDetailsDepthProfile, pathParameters: {'diveID': dive.id});
@@ -307,9 +307,24 @@ class _SiteCard extends StatelessWidget {
           children: [
             // Map preview (only if position exists)
             if (site.hasPosition())
-              SizedBox(
-                height: 150,
-                child: IgnorePointer(child: SiteMap(position: LatLng(site.position.latitude, site.position.longitude))),
+              Stack(
+                children: [
+                  SizedBox(
+                    height: 150,
+                    child: IgnorePointer(child: SiteMap(position: LatLng(site.position.latitude, site.position.longitude))),
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: IconButton.filled(
+                      icon: const Icon(Icons.fullscreen),
+                      onPressed: () {
+                        context.pushNamed(AppRouteName.sitesDetailsMap, pathParameters: {'siteID': site.id});
+                      },
+                      tooltip: 'View fullscreen',
+                    ),
+                  ),
+                ],
               ),
             // Site information
             Padding(

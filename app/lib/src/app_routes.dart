@@ -7,6 +7,7 @@ abstract class AppRouteName {
   static const divesDetailsDepthProfile = 'dive-depth-profile';
 
   static const sites = 'sites';
+  static const sitesDetailsMap = 'site-map';
   static const sitesDetails = 'site-details';
   static const sitesDetailsEdit = 'site-edit';
   static const sitesNew = 'new-site';
@@ -34,6 +35,8 @@ abstract class AppRoutePath {
   static const sitesDetails = ':siteID';
   static const sitesDetailsEdit = 'edit';
   static const sitesNew = 'new';
+
+  static const sitesDetailsMap = '/sites/:siteID/map';
 
   static const preferences = '/preferences';
   static const cylinders = 'cylinders';
