@@ -33,6 +33,7 @@ flutter build macos \
 
 APP_NAME=$(find build/macos -name "*.app")
 ZIP_NAME=$(basename "$APP_NAME" .app).zip
+spctl -vvv --assess --type exec "$APP_NAME"
 
 mv "$APP_NAME" .
 zip -r --symlinks "$ZIP_NAME" $(basename "$APP_NAME")
