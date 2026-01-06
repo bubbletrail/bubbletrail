@@ -1,3 +1,4 @@
+import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -5,6 +6,10 @@ import 'package:intl/intl.dart';
 import '../bloc/preferences_bloc.dart';
 import '../preferences/preferences.dart';
 import 'common.dart';
+
+const litersToCuft = 0.0353147;
+const kgToLbs = 2.20462;
+const barToPsi = 14.504;
 
 // Date and time formatting
 
@@ -61,7 +66,13 @@ String formatVolume(VolumeUnit unit, num volume) {
     case VolumeUnit.liters:
       return '${volume.toStringAsFixed(1)} ${unit.label}';
     case VolumeUnit.cuft:
-      return '${(volume * 0.0353).toStringAsFixed(1)} ${unit.label}';
+      final val = volume * 0.0353;
+      final decimals = val < 1
+          ? 2
+          : val < 20
+          ? 1
+          : 0;
+      return '${val.toStringAsFixed(decimals)} ${unit.label}';
   }
 }
 
@@ -80,20 +91,25 @@ String formatDuration(int seconds) {
   return '$minutes:${secs.toString().padLeft(2, '0')}';
 }
 
+String formatMinutes(int seconds) {
+  final minutes = (seconds / 60).round();
+  return '$minutes min';
+}
+
 String formatLatitude(double val) {
   final d = val >= 0 ? 'N' : 'S';
-  return formatLatLng(d, val);
+  return formatLatLng(d, val.abs());
 }
 
 String formatLongitude(double val) {
   final d = val >= 0 ? 'E' : 'W';
-  return formatLatLng(d, val);
+  return formatLatLng(d, val.abs());
 }
 
-String formatLatLng(String prefix, double val) {
+String formatLatLng(String hemisphere, double val) {
   final degrees = val.toInt();
   final minutes = (val - degrees) * 60;
-  return '$prefix $degrees° ${minutes.toStringAsFixed(3)}\'';
+  return '$degrees° ${minutes.toStringAsFixed(3)}\' $hemisphere';
 }
 
 class DurationText extends StatelessWidget {
@@ -148,14 +164,15 @@ class DateText extends StatelessWidget {
 }
 
 class DepthText extends StatelessWidget {
+  final String prefix;
   final num depth;
 
-  const DepthText(this.depth, {super.key});
+  const DepthText(this.depth, {this.prefix = '', super.key});
 
   @override
   Widget build(BuildContext context) {
     final unit = context.watch<PreferencesBloc>().state.preferences.depthUnit;
-    return Text(formatDepth(unit, depth));
+    return Text(prefix + formatDepth(unit, depth));
   }
 }
 
@@ -186,14 +203,15 @@ class PressureText extends StatelessWidget {
 
 class VolumeText extends StatelessWidget {
   final num volume;
+  final IconData? icon;
   final String suffix;
 
-  const VolumeText(this.volume, {this.suffix = '', super.key});
+  const VolumeText(this.volume, {this.icon, this.suffix = '', super.key});
 
   @override
   Widget build(BuildContext context) {
     final unit = context.watch<PreferencesBloc>().state.preferences.volumeUnit;
-    return Text(formatVolume(unit, volume) + suffix);
+    return IconText(icon, formatVolume(unit, volume) + suffix);
   }
 }
 
@@ -208,4 +226,80 @@ class WeightText extends StatelessWidget {
     final unit = context.watch<PreferencesBloc>().state.preferences.weightUnit;
     return Text(formatWeight(unit, weight), style: style);
   }
+}
+
+class DecoModelText extends StatelessWidget {
+  final DecoModel model;
+
+  const DecoModelText(this.model, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(format());
+  }
+
+  String format() {
+    switch (model.type) {
+      case DecoModelType.DECO_MODEL_TYPE_UNSPECIFIED:
+        return 'Unspecified';
+      case DecoModelType.DECO_MODEL_TYPE_NONE:
+        return 'None';
+      case DecoModelType.DECO_MODEL_TYPE_BUHLMANN:
+        if (model.hasGfLow()) {
+          return 'Bühlmann GF ${model.gfLow}/${model.gfHigh}';
+        } else {
+          return 'Bühlmann';
+        }
+      case DecoModelType.DECO_MODEL_TYPE_VPM:
+        return 'VPM ${model.conservatism}';
+      case DecoModelType.DECO_MODEL_TYPE_RGBM:
+        return 'RGBM ${model.conservatism}';
+      case DecoModelType.DECO_MODEL_TYPE_DCIEM:
+        return 'DCIEM ${model.conservatism}';
+      default:
+        return 'Unknown';
+    }
+  }
+}
+
+class DecoStatusText extends StatelessWidget {
+  final DecoStatus status;
+
+  const DecoStatusText(this.status, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final unit = context.watch<PreferencesBloc>().state.preferences.depthUnit;
+    switch (status.type) {
+      case DecoStopType.DECO_STOP_TYPE_DECO_STOP:
+        return Text('Deco ${formatMinutes(status.time)} @ ${formatDepth(unit, status.depth)}');
+      case DecoStopType.DECO_STOP_TYPE_DEEP_STOP:
+        return Text('Deep stop ${formatMinutes(status.time)} @ ${formatDepth(unit, status.depth)}');
+      case DecoStopType.DECO_STOP_TYPE_SAFETY_STOP:
+        return Text('Safety stop ${formatMinutes(status.time)} @ ${formatDepth(unit, status.depth)}');
+      case DecoStopType.DECO_STOP_TYPE_NDL:
+        return Text('${formatMinutes(status.time)} NDL');
+      case DecoStopType.DECO_STOP_TYPE_UNSPECIFIED:
+        return Text('-');
+      default:
+        return Text('Unknown');
+    }
+  }
+}
+
+String formatDisplayValue(double value) {
+  // Use reasonable precision
+  var precision = 1;
+  if (value < 1) precision = 2;
+  if (value > 25) precision = 0;
+  final formatted = value.toStringAsFixed(precision);
+  // Remove trailing zeros after decimal point
+  if (formatted.contains('.')) {
+    var result = formatted.replaceAll(RegExp(r'0+$'), '');
+    if (result.endsWith('.')) {
+      result = result.substring(0, result.length - 1);
+    }
+    return result;
+  }
+  return formatted;
 }

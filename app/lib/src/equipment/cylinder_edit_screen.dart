@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,10 +19,21 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
   late final Cylinder _originalCylinder;
   late final bool _isNew;
   late final TextEditingController _descriptionController;
+  late final TextEditingController _volumeLController;
+  late final TextEditingController _volumeCuftController;
+  late final TextEditingController _pressureBarController;
+  late final TextEditingController _pressurePsiController;
 
-  // Store values in metric units
-  double? _size;
-  double? _workpressure;
+  // Metric values (always populated for storage)
+  double _size = 0;
+  double _workpressure = 0;
+
+  // Imperial values (only populated when editing in imperial mode)
+  double _sizeCuft = 0;
+  double _workpressurePsi = 0;
+
+  // Track if we're editing in imperial mode
+  late bool _isImperialMode;
 
   @override
   void initState() {
@@ -29,8 +42,24 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
     _originalCylinder = state.cylinder;
     _isNew = state.isNew;
     _descriptionController = TextEditingController(text: _originalCylinder.description);
-    _size = _originalCylinder.hasSize() ? _originalCylinder.size : null;
-    _workpressure = _originalCylinder.hasWorkpressure() ? _originalCylinder.workpressure : null;
+
+    _isImperialMode = _originalCylinder.hasVolumeCuft();
+
+    _size = _originalCylinder.volumeL;
+    _workpressure = _originalCylinder.workingPressureBar;
+
+    if (_originalCylinder.hasVolumeCuft() && _originalCylinder.hasWorkingPressurePsi()) {
+      _sizeCuft = _originalCylinder.volumeCuft;
+      _workpressurePsi = _originalCylinder.workingPressurePsi;
+    } else {
+      _sizeCuft = lToCuft(_originalCylinder.volumeL * _originalCylinder.workingPressureBar);
+      _workpressurePsi = barToPSI(_originalCylinder.workingPressureBar);
+    }
+
+    _volumeLController = TextEditingController(text: formatDisplayValue(_size));
+    _pressureBarController = TextEditingController(text: formatDisplayValue(_workpressure));
+    _volumeCuftController = TextEditingController(text: formatDisplayValue(_sizeCuft));
+    _pressurePsiController = TextEditingController(text: formatDisplayValue(_workpressurePsi));
   }
 
   @override
@@ -42,7 +71,14 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
   bool _saveCylinder() {
     final description = _descriptionController.text.trim();
 
-    final updatedCylinder = Cylinder(id: _originalCylinder.id, description: description.isEmpty ? null : description, size: _size, workpressure: _workpressure);
+    final updatedCylinder = Cylinder(
+      id: _originalCylinder.id,
+      description: description.isEmpty ? null : description,
+      volumeL: _size,
+      workingPressureBar: _workpressure,
+      volumeCuft: _isImperialMode ? _sizeCuft : null,
+      workingPressurePsi: _isImperialMode ? _workpressurePsi : null,
+    );
 
     context.read<CylinderDetailsBloc>().add(UpdateCylinderDetails(updatedCylinder));
 
@@ -69,24 +105,155 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
         }
       },
       child: ScreenScaffold(
-        title: Text(_isNew ? 'New Cylinder' : 'Edit Cylinder'),
+        title: Text(_isNew ? 'New cylinder' : 'Edit cylinder'),
         actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes')],
-        body: SingleChildScrollView(
+        body: Padding(
           padding: const EdgeInsets.all(16.0),
+          child: Column(spacing: 16, children: [_descriptionCard(), Platform.isIOS ? _verticalCards(context) : _horisontalCards(context)]),
+        ),
+      ),
+    );
+  }
+
+  TextField _descriptionCard() {
+    return TextField(
+      controller: _descriptionController,
+      decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder(), hintText: 'e.g., AL80, 12x232'),
+    );
+  }
+
+  Flex _horisontalCards(BuildContext context) {
+    return Row(
+      spacing: 16,
+      children: [
+        Expanded(child: _metricCard(context)),
+        Expanded(child: _imperialCard(context)),
+      ],
+    );
+  }
+
+  Flex _verticalCards(BuildContext context) {
+    return Column(spacing: 16, children: [_metricCard(context), _imperialCard(context)]);
+  }
+
+  Card _metricCard(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Opacity(
+          opacity: _isImperialMode ? 0.5 : 1.0,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 16,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text('Metric', style: Theme.of(context).textTheme.titleMedium),
               TextField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder(), hintText: 'e.g., AL80, 12x232'),
+                controller: _volumeLController,
+                decoration: InputDecoration(labelText: 'Water volume (L)', border: const OutlineInputBorder(), hintText: 'e.g. 12'),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                onChanged: _didSetVolumeL,
+                onTap: () => setState(() {
+                  _isImperialMode = false;
+                }),
               ),
-              VolumeEditor(label: 'Size', initialValue: _size, onChanged: (value) => _size = value, hintText: 'e.g., 12.0'),
-              PressureEditor(label: 'Working Pressure', initialValue: _workpressure, onChanged: (value) => _workpressure = value, hintText: 'e.g., 232'),
+              TextField(
+                controller: _pressureBarController,
+                decoration: InputDecoration(labelText: 'Working pressure (bar)', border: const OutlineInputBorder(), hintText: 'e.g. 232'),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                onChanged: _didSetPressureBar,
+                onTap: () => setState(() {
+                  _isImperialMode = false;
+                }),
+              ),
             ],
           ),
         ),
       ),
     );
   }
+
+  Card _imperialCard(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Opacity(
+          opacity: _isImperialMode ? 1.0 : 0.5,
+          child: Column(
+            spacing: 16,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Imperial', style: Theme.of(context).textTheme.titleMedium),
+              TextField(
+                controller: _volumeCuftController,
+                decoration: InputDecoration(labelText: 'Size (cuft)', border: const OutlineInputBorder(), hintText: 'e.g. 80'),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                onChanged: _didSetVolumeCuft,
+                onTap: () => setState(() {
+                  _isImperialMode = true;
+                }),
+              ),
+              TextField(
+                controller: _pressurePsiController,
+                decoration: InputDecoration(labelText: 'Working pressure (psi)', border: const OutlineInputBorder(), hintText: 'e.g. 3000'),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                onChanged: _didSetPressurePsi,
+                onTap: () => setState(() {
+                  _isImperialMode = true;
+                }),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _didSetPressureBar(String s) {
+    final val = double.tryParse(s) ?? 0;
+    setState(() {
+      _workpressure = val;
+      _workpressurePsi = barToPSI(val);
+      _pressurePsiController.text = formatDisplayValue(_workpressurePsi);
+      _isImperialMode = false;
+    });
+  }
+
+  void _didSetVolumeL(String s) {
+    final val = double.tryParse(s) ?? 0;
+    setState(() {
+      _size = val;
+      _sizeCuft = lToCuft(_size * _workpressure);
+      _volumeCuftController.text = formatDisplayValue(_sizeCuft);
+      _isImperialMode = false;
+    });
+  }
+
+  void _didSetPressurePsi(String s) {
+    final val = double.tryParse(s) ?? 0;
+    setState(() {
+      _workpressurePsi = val;
+      _workpressure = psiToBar(val);
+      _pressureBarController.text = formatDisplayValue(_workpressure);
+      _size = cuftToL(_sizeCuft) / _workpressure;
+      _volumeLController.text = formatDisplayValue(_size);
+      _isImperialMode = true;
+    });
+  }
+
+  void _didSetVolumeCuft(String s) {
+    final val = double.tryParse(s) ?? 0;
+    setState(() {
+      _sizeCuft = val;
+      _size = cuftToL(_sizeCuft) / _workpressure;
+      _volumeLController.text = formatDisplayValue(_size);
+      _isImperialMode = true;
+    });
+  }
 }
+
+double barToPSI(double bar) => bar * barToPsi;
+double psiToBar(double psi) => psi / barToPsi;
+double lToCuft(double liters) => liters * litersToCuft;
+double cuftToL(double cuft) => cuft / litersToCuft;

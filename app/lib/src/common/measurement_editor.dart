@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../bloc/preferences_bloc.dart';
 import '../preferences/preferences.dart';
+import 'common.dart';
 
 /// A text field for editing measurements with a unit dropdown.
 /// Values are always stored internally in metric/base units.
@@ -65,27 +66,13 @@ class _MeasurementEditorState<T extends Enum> extends State<MeasurementEditor<T>
     final prefs = context.read<PreferencesBloc>().state.preferences;
     _selectedUnit = widget.getPreferredUnit(prefs);
     // Initialize the text field with the converted value
-    _controller = TextEditingController(text: _metricValue != null ? _formatDisplayValue(widget.fromMetric(_metricValue!, _selectedUnit)) : '');
+    _controller = TextEditingController(text: _metricValue != null ? formatDisplayValue(widget.fromMetric(_metricValue!, _selectedUnit)) : '');
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
-  }
-
-  String _formatDisplayValue(double value) {
-    // Use reasonable precision
-    final formatted = value.toStringAsFixed(1);
-    // Remove trailing zeros after decimal point
-    if (formatted.contains('.')) {
-      var result = formatted.replaceAll(RegExp(r'0+$'), '');
-      if (result.endsWith('.')) {
-        result = result.substring(0, result.length - 1);
-      }
-      return result;
-    }
-    return formatted;
   }
 
   void _onTextChanged(String text) {
@@ -110,7 +97,7 @@ class _MeasurementEditorState<T extends Enum> extends State<MeasurementEditor<T>
         // Convert current display value to metric, then to new unit
         final metricValue = widget.toMetric(currentDisplayValue, _selectedUnit);
         final newDisplayValue = widget.fromMetric(metricValue, newUnit);
-        _controller.text = _formatDisplayValue(newDisplayValue);
+        _controller.text = formatDisplayValue(newDisplayValue);
         _metricValue = metricValue;
       }
       _selectedUnit = newUnit;
@@ -160,19 +147,17 @@ class PressureEditor extends StatelessWidget {
 
   const PressureEditor({super.key, required this.label, this.initialValue, this.onChanged, this.hintText});
 
-  static const _barToPsi = 14.504;
-
   static double _fromMetric(double value, PressureUnit unit) {
     return switch (unit) {
       PressureUnit.bar => value,
-      PressureUnit.psi => value * _barToPsi,
+      PressureUnit.psi => value * barToPsi,
     };
   }
 
   static double _toMetric(double value, PressureUnit unit) {
     return switch (unit) {
       PressureUnit.bar => value,
-      PressureUnit.psi => value / _barToPsi,
+      PressureUnit.psi => value / barToPsi,
     };
   }
 
@@ -207,19 +192,17 @@ class VolumeEditor extends StatelessWidget {
 
   const VolumeEditor({super.key, required this.label, this.initialValue, this.onChanged, this.hintText});
 
-  static const _litersToCuft = 0.0353147;
-
   static double _fromMetric(double value, VolumeUnit unit) {
     return switch (unit) {
       VolumeUnit.liters => value,
-      VolumeUnit.cuft => value * _litersToCuft,
+      VolumeUnit.cuft => value * litersToCuft,
     };
   }
 
   static double _toMetric(double value, VolumeUnit unit) {
     return switch (unit) {
       VolumeUnit.liters => value,
-      VolumeUnit.cuft => value / _litersToCuft,
+      VolumeUnit.cuft => value / litersToCuft,
     };
   }
 
@@ -254,19 +237,17 @@ class WeightEditor extends StatelessWidget {
 
   const WeightEditor({super.key, required this.label, this.initialValue, this.onChanged, this.hintText});
 
-  static const _kgToLbs = 2.20462;
-
   static double _fromMetric(double value, WeightUnit unit) {
     return switch (unit) {
       WeightUnit.kg => value,
-      WeightUnit.lb => value * _kgToLbs,
+      WeightUnit.lb => value * kgToLbs,
     };
   }
 
   static double _toMetric(double value, WeightUnit unit) {
     return switch (unit) {
       WeightUnit.kg => value,
-      WeightUnit.lb => value / _kgToLbs,
+      WeightUnit.lb => value / kgToLbs,
     };
   }
 

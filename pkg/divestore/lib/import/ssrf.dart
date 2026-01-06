@@ -3,15 +3,16 @@ import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
-import 'divestore.dart';
+import '../gen/gen.dart';
 import 'formatting.dart';
+import 'container.dart';
 
 extension SsrfXml on Ssrf {
   static Ssrf fromXml(XmlElement elem) {
     final divesitesElem = elem.getElement('divesites');
     final divesElem = elem.getElement('dives');
 
-    var divesList = divesElem?.findElements('dive').map(DiveXml.fromXml).toList() ?? [];
+    final divesList = divesElem?.findElements('dive').map(DiveXml.fromXml).toList() ?? [];
     divesList.addAll(divesElem?.findAllElements('trip').map((e) => e.findElements('dive').map(DiveXml.fromXml).toList()).flattened ?? []);
 
     final ssrf = Ssrf();
@@ -237,7 +238,7 @@ extension ComputerDiveXml on Log {
     for (final eventElem in elem.findElements('event')) {
       final time = (tryParseUnitString(eventElem.getAttribute('time')) ?? 0).toInt();
       final name = eventElem.getAttribute('name');
-      final value = int.tryParse(eventElem.getAttribute('value') ?? '') ?? 0;
+      final value = int.tryParse(eventElem.getAttribute('cylinder') ?? eventElem.getAttribute('value') ?? '') ?? 0;
 
       final type = _parseSsrfEventType(name);
       final event = SampleEvent(type: type, time: time, flags: 0, value: value);
@@ -267,7 +268,7 @@ extension ComputerDiveXml on Log {
       return sample;
     }).toList();
 
-    final dive = Log(
+    final log = Log(
       model: model,
       serial: serial,
       maxDepth: tryParseUnitString(depth?.getAttribute('max')),
@@ -275,9 +276,10 @@ extension ComputerDiveXml on Log {
       surfaceTemperature: airTemp,
       minTemperature: waterTemp,
     );
-    dive.samples.addAll(samples);
+    log.samples.addAll(samples);
 
-    return dive;
+    log.setUniqueID();
+    return log;
   }
 
   /// Convert a Log to an SSRF <divecomputer> XML element.
@@ -527,8 +529,8 @@ extension DiveCylinderXml on DiveCylinder {
   static DiveCylinder fromXml(XmlElement elem) {
     return DiveCylinder(
       cylinder: Cylinder(
-        size: tryParseUnitString(elem.getAttribute('size')),
-        workpressure: tryParseUnitString(elem.getAttribute('workpressure')),
+        volumeL: tryParseUnitString(elem.getAttribute('size')),
+        workingPressureBar: tryParseUnitString(elem.getAttribute('workpressure')),
         description: elem.getAttribute('description'),
       ),
       beginPressure: tryParseUnitString(elem.getAttribute('start')),
@@ -543,11 +545,11 @@ extension DiveCylinderXml on DiveCylinder {
     builder.element(
       'cylinder',
       nest: () {
-        if (hasCylinder() && cylinder.hasSize()) {
-          builder.attribute('size', '${cylinder.size.toStringAsFixed(1)} l');
+        if (hasCylinder() && cylinder.hasVolumeL()) {
+          builder.attribute('size', '${cylinder.volumeL.toStringAsFixed(1)} l');
         }
-        if (hasCylinder() && cylinder.hasWorkpressure()) {
-          builder.attribute('workpressure', '${cylinder.workpressure.toStringAsFixed(1)} bar');
+        if (hasCylinder() && cylinder.hasWorkingPressureBar()) {
+          builder.attribute('workpressure', '${cylinder.workingPressureBar.toStringAsFixed(1)} bar');
         }
         if (hasCylinder() && cylinder.hasDescription()) {
           builder.attribute('description', cylinder.description);

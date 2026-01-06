@@ -259,10 +259,10 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   }
 
   Future<void> _onImportDives(ImportDives event, Emitter<DiveListState> emit) async {
-    // Read the SSRF file
+    // Read the import file
     final xmlData = await File(event.filePath).readAsString();
     final doc = XmlDocument.parse(xmlData);
-    final importedSsrf = event.filePath.toLowerCase().endsWith('uddf') ? UddfXml.fromXml(doc.rootElement) : SsrfXml.fromXml(doc.rootElement);
+    final importedSsrf = importXml(doc);
 
     final currentState = state as DiveListLoaded;
 
@@ -277,12 +277,11 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
         if (cyl.hasCylinder()) {
           final c = cyl.cylinder;
           final cr = await _store.cylinders.getOrCreate(
-            c.hasSize() ? c.size : null,
-            c.hasWorkpressure() ? c.workpressure : null,
+            c.hasVolumeL() ? c.volumeL : null,
+            c.hasWorkingPressureBar() ? c.workingPressureBar : null,
             c.hasDescription() ? c.description : null,
           );
           cyl.cylinderId = cr.id;
-          cyl.clearCylinder();
         }
       }
       dive.recalculateMedata();

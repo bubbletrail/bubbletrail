@@ -14,8 +14,7 @@ class WindowPreferences {
   static const _defaultWidth = 1200.0;
   static const _defaultHeight = 800.0;
 
-  static bool get isSupported =>
-      Platform.isMacOS || Platform.isWindows || Platform.isLinux;
+  static bool get isSupported => Platform.isMacOS || Platform.isWindows || Platform.isLinux;
 
   static Future<void> initialize() async {
     if (!isSupported) return;
@@ -29,11 +28,7 @@ class WindowPreferences {
     final y = prefs.getDouble(_windowYKey);
     final isMaximized = prefs.getBool(_windowMaximizedKey) ?? false;
 
-    final windowOptions = WindowOptions(
-      size: Size(width, height),
-      center: x == null || y == null,
-      minimumSize: const Size(400, 300),
-    );
+    final windowOptions = WindowOptions(size: Size(width, height), center: x == null || y == null, minimumSize: const Size(400, 300));
 
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       if (x != null && y != null) {

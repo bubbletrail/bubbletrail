@@ -19,7 +19,7 @@ class ComputerDescriptor {
   const ComputerDescriptor(this.handle, this.vendor, this.model);
 
   @override
-  String toString() => "$vendor $model";
+  String toString() => '$vendor $model';
 }
 
 Future<List<ComputerDescriptor>> dcDescriptorIterate({String? filterForName}) async {
@@ -115,7 +115,7 @@ Future<SendPort> _helperIsolateSendPort = () async {
     });
 
   // Start the helper isolate.
-  await Isolate.spawn((SendPort sendPort) async {
+  await Isolate.spawn((SendPort sendPort) {
     final ReceivePort helperReceivePort = ReceivePort()
       ..listen((dynamic req) {
         if (req is IterateDescriptorsRequest) {
@@ -180,7 +180,7 @@ void _downloadIsolateEntry(DownloadRequest request) {
   final descriptor = _descriptorCache[request.descriptorIndex];
   final vendor = bindings.dc_descriptor_get_vendor(descriptor).cast<Utf8>().toDartString();
   final product = bindings.dc_descriptor_get_product(descriptor).cast<Utf8>().toDartString();
-  final deviceModel = "$vendor $product";
+  final deviceModel = '$vendor $product';
 
   // Open FIFOs
   final iostream = calloc<ffi.Pointer<bindings.dc_iostream_t>>();
@@ -215,7 +215,7 @@ void _downloadIsolateEntry(DownloadRequest request) {
   }
 
   // Remember the device info
-  String deviceSerial = "";
+  String deviceSerial = '';
 
   final eventCallback = ffi.NativeCallable<bindings.dc_event_callback_tFunction>.isolateLocal((
     ffi.Pointer<bindings.dc_device_t> dev,
@@ -266,13 +266,13 @@ void _downloadIsolateEntry(DownloadRequest request) {
         try {
           final dive = parseDiveFromParser(parser.value, fingerprint: fpBytes, model: deviceModel, serial: deviceSerial);
 
-          _log.info("comparing last dive fp ${request.lastDiveLog?.fingerprint} to ${dive.fingerprint}");
-          if (request.lastDiveLog != null && request.lastDiveLog!.fingerprint == dive.fingerprint) {
+          _log.info('comparing last dive fp ${request.lastDiveLog?.ldcFingerprint} to ${dive.ldcFingerprint}');
+          if (request.lastDiveLog != null && request.lastDiveLog!.ldcFingerprint == dive.ldcFingerprint) {
             // We've already seen this one.
             // calloc.free(parser);
             return 0;
           }
-          _log.info("comparing last dive date ${request.lastDiveLog?.dateTime.seconds} to ${dive.dateTime.seconds}");
+          _log.info('comparing last dive date ${request.lastDiveLog?.dateTime.seconds} to ${dive.dateTime.seconds}');
           if (request.lastDiveLog != null && request.lastDiveLog!.dateTime.seconds.compareTo(dive.dateTime.seconds) >= 0) {
             // XXX: This should definitely be optional
             // The last dive is newer than what we're importing now
@@ -289,7 +289,7 @@ void _downloadIsolateEntry(DownloadRequest request) {
       } else {
         _log.warning('Failed to parse dive: $parserStatus');
         // Send a minimal dive with just the number and raw data
-        sendPort.send(DownloadDiveReceived(Log(fingerprint: fpBytes)));
+        sendPort.send(DownloadDiveReceived(Log(ldcFingerprint: fpBytes)));
       }
 
       calloc.free(parser);

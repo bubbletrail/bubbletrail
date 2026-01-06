@@ -7,18 +7,21 @@ class ScreenScaffold extends StatelessWidget {
   final Widget body;
   final List<Widget>? actions;
   final Widget? floatingActionButton;
+  final bool transparent;
 
-  const ScreenScaffold({super.key, required this.title, required this.body, this.actions, this.floatingActionButton});
+  const ScreenScaffold({super.key, required this.title, required this.body, this.actions, this.floatingActionButton, this.transparent = false});
 
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context);
 
     final inner = io.Platform.isIOS
-        ? DecoratedBox(
-            decoration: BoxDecoration(color: t.canvasColor),
-            child: body,
-          )
+        ? transparent
+              ? body
+              : DecoratedBox(
+                  decoration: BoxDecoration(color: t.canvasColor),
+                  child: body,
+                )
         : DecoratedBox(
             decoration: BoxDecoration(
               border: BoxBorder.all(color: t.colorScheme.onTertiaryContainer),
@@ -44,17 +47,20 @@ class ScreenScaffold extends StatelessWidget {
             ),
           );
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(title: title, backgroundColor: Colors.transparent, actions: actions, actionsPadding: EdgeInsets.only(right: 16)),
-      body: Padding(
-        padding: io.Platform.isIOS ? const EdgeInsets.all(0) : const EdgeInsets.only(right: 4.0, bottom: 4.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [Expanded(child: inner)],
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(title: title, backgroundColor: Colors.transparent, actions: actions, actionsPadding: EdgeInsets.only(right: 16)),
+        body: Padding(
+          padding: io.Platform.isIOS ? const EdgeInsets.all(0) : const EdgeInsets.only(right: 4.0, bottom: 4.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [Expanded(child: inner)],
+          ),
         ),
+        floatingActionButton: floatingActionButton,
       ),
-      floatingActionButton: floatingActionButton,
     );
   }
 }

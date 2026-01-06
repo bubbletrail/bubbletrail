@@ -23,6 +23,8 @@ message Dive {
   int32 duration = 12; // Seconds
   double max_depth = 13; // Meters
   double mean_depth = 14; // Meters
+  double min_temp = 27; // Celsius
+  double max_temp = 28; // Celsius
 
   // Additional attributes
   double sac = 15; // l/min
@@ -56,7 +58,10 @@ message DiveCylinder {
   double oxygen = 4; // Fraction (0.0-1.0)
   double helium = 5; // Fraction (0.0-1.0)
 
-  // Set temporarily when importing SSRF only
+  double used_volume = 16; // liters, calculated
+  double sac = 17; // liters/min, calculated
+
+  // Set when loaded, to full out volume etc.
   Cylinder cylinder = 32;
 }
 

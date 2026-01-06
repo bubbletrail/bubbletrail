@@ -2,7 +2,8 @@ import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
-import 'divestore.dart';
+import '../gen/gen.dart';
+import 'container.dart';
 
 const double _kelvinOffset = 273.15;
 const double _pascalToBar = 1e-5;
@@ -262,12 +263,16 @@ extension _UddfDive on Dive {
     // Extract tags from notes (last line as #hashtags)
     final extractedNotes = _extractTagsFromNotes(rawNotes);
 
-    // Parse tank data
+    // Parse tank data and build gas mix ID to cylinder index mapping
     final cylinders = <DiveCylinder>[];
+    final gasMixIdToCylinderIdx = <String, int>{};
     for (final tankData in elem.findElements('tankdata')) {
-      final cylinder = _parseTankData(tankData, gasMixes);
-      if (cylinder != null) {
-        cylinders.add(cylinder);
+      final result = _parseTankData(tankData, gasMixes);
+      if (result != null) {
+        if (result.gasMixId != null) {
+          gasMixIdToCylinderIdx[result.gasMixId!] = cylinders.length;
+        }
+        cylinders.add(result.cylinder);
       }
     }
 
@@ -276,7 +281,7 @@ extension _UddfDive on Dive {
     final samplesElem = elem.getElement('samples');
     if (samplesElem != null) {
       for (final waypoint in samplesElem.findElements('waypoint')) {
-        final sample = _parseWaypoint(waypoint, gasMixes);
+        final sample = _parseWaypoint(waypoint, gasMixIdToCylinderIdx);
         if (sample != null) {
           samples.add(sample);
         }
@@ -291,6 +296,8 @@ extension _UddfDive on Dive {
     if (dateTime != null) {
       log.dateTime = Timestamp.fromDateTime(dateTime);
     }
+
+    log.setUniqueID();
 
     // Create dive
     final dive = Dive(
@@ -314,10 +321,19 @@ extension _UddfDive on Dive {
   }
 }
 
-DiveCylinder? _parseTankData(XmlElement tankData, Map<String, _GasMix> gasMixes) {
+/// Result of parsing tank data: the cylinder and optionally the gas mix ID it links to.
+class _TankDataResult {
+  final DiveCylinder cylinder;
+  final String? gasMixId;
+
+  _TankDataResult({required this.cylinder, this.gasMixId});
+}
+
+_TankDataResult? _parseTankData(XmlElement tankData, Map<String, _GasMix> gasMixes) {
   // Get gas mix from link
   double oxygen = 0.21;
   double helium = 0.0;
+  String? gasMixId;
 
   for (final link in tankData.findElements('link')) {
     final ref = link.getAttribute('ref');
@@ -325,6 +341,7 @@ DiveCylinder? _parseTankData(XmlElement tankData, Map<String, _GasMix> gasMixes)
       final mix = gasMixes[ref]!;
       oxygen = mix.oxygen;
       helium = mix.helium;
+      gasMixId = ref;
       break;
     }
   }
@@ -336,16 +353,19 @@ DiveCylinder? _parseTankData(XmlElement tankData, Map<String, _GasMix> gasMixes)
   final beginPressure = _pascalToBarConvert(double.tryParse(_getElementText(tankData, 'tankpressurebegin') ?? ''));
   final endPressure = _pascalToBarConvert(double.tryParse(_getElementText(tankData, 'tankpressureend') ?? ''));
 
-  return DiveCylinder(
-    cylinder: Cylinder(size: tankVolume),
-    oxygen: oxygen,
-    helium: helium,
-    beginPressure: beginPressure,
-    endPressure: endPressure,
+  return _TankDataResult(
+    cylinder: DiveCylinder(
+      cylinder: Cylinder(volumeL: tankVolume),
+      oxygen: oxygen,
+      helium: helium,
+      beginPressure: beginPressure,
+      endPressure: endPressure,
+    ),
+    gasMixId: gasMixId,
   );
 }
 
-LogSample? _parseWaypoint(XmlElement waypoint, Map<String, _GasMix> gasMixes) {
+LogSample? _parseWaypoint(XmlElement waypoint, Map<String, int> gasMixIdToCylinderIdx) {
   final depth = double.tryParse(_getElementText(waypoint, 'depth') ?? '');
   final diveTime = double.tryParse(_getElementText(waypoint, 'divetime') ?? '');
 
@@ -367,8 +387,9 @@ LogSample? _parseWaypoint(XmlElement waypoint, Map<String, _GasMix> gasMixes) {
   final switchMix = waypoint.getElement('switchmix');
   if (switchMix != null) {
     final ref = switchMix.getAttribute('ref');
-    if (ref != null && gasMixes.containsKey(ref)) {
-      sample.events.add(SampleEvent(type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, time: diveTime.toInt()));
+    if (ref != null && gasMixIdToCylinderIdx.containsKey(ref)) {
+      final cylinderIdx = gasMixIdToCylinderIdx[ref]!;
+      sample.events.add(SampleEvent(type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, time: diveTime.toInt(), value: cylinderIdx));
     }
   }
 

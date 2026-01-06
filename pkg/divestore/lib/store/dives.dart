@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:divestore/store/fileio.dart';
 import 'package:glob/glob.dart';
 import 'package:glob/list_local_fs.dart';
 import 'package:intl/intl.dart';
@@ -11,8 +10,10 @@ import 'package:logging/logging.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 
+import '../dc_convert.dart';
 import '../gen/gen.dart';
 import '../gen/internal.pb.dart';
+import 'fileio.dart';
 
 final _log = Logger('store/dives');
 
@@ -73,6 +74,11 @@ class Dives {
             dive.createdAt = dive.updatedAt;
           }
         }
+        for (final (idx, cyl) in dive.cylinders.indexed) {
+          dive.cylinders[idx] = cyl.rebuild((cyl) {
+            cyl.clearCylinder();
+          });
+        }
       });
       if (!_dives.containsKey(dive.id)) {
         _dives[dive.id] = dive;
@@ -89,6 +95,11 @@ class Dives {
     if (!dive.isFrozen) dive.freeze();
     dive = dive.rebuild((dive) {
       dive.updatedAt = Timestamp.fromDateTime(DateTime.now());
+      for (final (idx, cyl) in dive.cylinders.indexed) {
+        dive.cylinders[idx] = cyl.rebuild((cyl) {
+          cyl.clearCylinder();
+        });
+      }
     });
     _dives[dive.id] = dive;
     _tags.addAll(dive.tags);
@@ -127,8 +138,8 @@ class Dives {
     return dive;
   }
 
-  Future<List<Dive>> getAll() async {
-    final dives = _dives.values.where((d) => !d.hasDeletedAt()).toList();
+  Future<List<Dive>> getAll({bool withDeleted = false}) async {
+    final dives = _dives.values.where((d) => withDeleted || !d.hasDeletedAt()).toList();
     dives.sort((a, b) => -a.number.compareTo(b.number));
     return dives;
   }
@@ -140,9 +151,9 @@ class Dives {
   }
 
   Future<void> init() async {
-    await for (final match in Glob("$pathPrefix/*/*.meta.binpb").list()) {
+    await for (final match in Glob('$pathPrefix/*/*.meta.binpb').list()) {
       try {
-        Dive dive = await _loadMeta(match.path);
+        final dive = await _loadMeta(match.path);
         _dives[dive.id] = dive;
         _tags.addAll(dive.tags);
         _buddies.addAll(dive.buddies);
@@ -160,6 +171,9 @@ class Dives {
   Future<List<Log>> _loadLogs(String path) async {
     final bs = await File(path).readAsBytes();
     final ll = InternalLogList.fromBuffer(bs);
+    for (final l in ll.logs) {
+      l.setUniqueID(); // no-op when already set
+    }
     ll.freeze();
     return ll.logs;
   }
@@ -178,18 +192,18 @@ class Dives {
         final dir = diveDir(dive);
         await Directory(dir).create(recursive: true);
 
-        atomicWriteProto(dlName(dir, dive), InternalLogList(logs: dive.logs));
+        await atomicWriteProto(dlName(dir, dive), InternalLogList(logs: dive.logs));
 
         final metaOnly = dive.rebuild((dive) {
           dive.logs.clear();
         });
-        atomicWriteProto(metaName(dir, dive), metaOnly);
+        await atomicWriteProto(metaName(dir, dive), metaOnly);
       }
 
-      _log.info("saved ${_dirty.length} dives");
+      _log.info('saved ${_dirty.length} dives');
       _dirty.clear();
     } catch (e) {
-      _log.warning("failed to save dives: $e");
+      _log.warning('failed to save dives: $e');
     }
   }
 
@@ -203,16 +217,16 @@ class Dives {
   }
 
   Future<void> importFrom(Dives other) async {
-    for (final dive in await other.getAll()) {
+    for (final dive in await other.getAll(withDeleted: true)) {
       final cur = _dives[dive.id];
       if (dive.hasDeletedAt()) {
         if (cur != null) {
-          print("delete dive ${dive.id}");
+          print('delete dive ${dive.id}');
           await delete(dive.id);
         }
       } else if (cur == null || dive.updatedAt.toDateTime().isAfter(cur.updatedAt.toDateTime())) {
         final rdive = await other.getById(dive.id);
-        print("import dive ${rdive!.id}");
+        print('import dive ${rdive!.id}');
         await _import(rdive);
       }
     }

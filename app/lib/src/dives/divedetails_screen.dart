@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,9 +9,9 @@ import 'package:protobuf/protobuf.dart';
 
 import '../app_routes.dart';
 import '../bloc/divelist_bloc.dart';
+import '../bloc/preferences_bloc.dart';
 import '../common/common.dart';
 import 'depthprofile_widget.dart';
-import 'fullscreen_profile_screen.dart';
 
 class DiveDetailsScreen extends StatelessWidget {
   const DiveDetailsScreen({super.key});
@@ -108,16 +110,17 @@ class _DiveDetails extends StatelessWidget {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isWideScreen = constraints.maxWidth > 800;
-          return SingleChildScrollView(
-            child: Padding(padding: const EdgeInsets.all(16.0), child: isWideScreen ? _buildWideLayout(context) : _buildNarrowLayout(context)),
-          );
+          return SingleChildScrollView(child: isWideScreen ? _buildWideLayout(context) : _buildNarrowLayout(context));
         },
       ),
     );
   }
 
   Widget _buildNarrowLayout(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: _buildAllSections(context));
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, spacing: 8, children: _buildAllSections(context)),
+    );
   }
 
   Widget _buildWideLayout(BuildContext context) {
@@ -142,67 +145,67 @@ class _DiveDetails extends StatelessWidget {
     for (var i = 0; i < regularSections.length; i++) {
       if (i.isEven) {
         leftColumn.add(regularSections[i]);
-        leftColumn.add(const SizedBox(height: 16));
       } else {
         rightColumn.add(regularSections[i]);
-        rightColumn.add(const SizedBox(height: 16));
       }
     }
 
-    return Column(
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: leftColumn),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: rightColumn),
-            ),
-          ],
-        ),
-        ...fullWidthSections,
-      ],
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        spacing: 8,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 8,
+            children: [
+              Expanded(
+                child: Column(spacing: 8, crossAxisAlignment: CrossAxisAlignment.start, children: leftColumn),
+              ),
+              Expanded(
+                child: Column(spacing: 8, crossAxisAlignment: CrossAxisAlignment.start, children: rightColumn),
+              ),
+            ],
+          ),
+          ...fullWidthSections,
+        ],
+      ),
     );
   }
 
   DateTime get _startDateTime => dive.start.toDateTime();
 
   List<Widget> _buildAllSections(BuildContext context) {
+    final worstDeco = dive.logs.isNotEmpty ? dive.logs.first.worstDecoStatus : null;
     return [
-      infoCard(context, 'General Information', [
+      infoCard(context, 'General', [
         infoWidgetRow('Start', DateTimeText(_startDateTime)),
         infoRow('Duration', formatDuration(dive.duration)),
         if (dive.hasRating()) infoRow('Rating', '★' * dive.rating),
         tagsRow(context, dive.tags.toList(), secondaryTags: site?.tags.where((t) => !dive.tags.contains(t)).toList()),
       ]),
-      const SizedBox(height: 16),
-      if (site != null) ...[_SiteCard(site: site!), const SizedBox(height: 16)],
-      infoCard(context, 'Dive Computer Data', [
-        if (dive.hasMaxDepth()) infoWidgetRow('Max Depth', DepthText(dive.maxDepth)),
-        if (dive.hasMeanDepth()) infoWidgetRow('Mean Depth', DepthText(dive.meanDepth)),
+      if (site != null) _SiteCard(site: site!),
+      infoCard(context, 'Dive computer', [
+        if (dive.hasMaxDepth()) infoWidgetRow('Max depth', DepthText(dive.maxDepth)),
+        if (dive.hasMeanDepth()) infoWidgetRow('Mean depth', DepthText(dive.meanDepth)),
         if (dive.logs.isNotEmpty) ...[
-          if (dive.logs[0].hasSurfaceTemperature()) infoWidgetRow('Air Temperature', TemperatureText(dive.logs[0].surfaceTemperature)),
-          if (dive.logs[0].hasMinTemperature()) infoWidgetRow('Water Temperature', TemperatureText(dive.logs[0].minTemperature)),
+          if (dive.logs[0].hasSurfaceTemperature()) infoWidgetRow('Air temp', TemperatureText(dive.logs[0].surfaceTemperature)),
+          if (dive.logs[0].hasMinTemperature()) infoWidgetRow('Water temp', TemperatureText(dive.logs[0].minTemperature)),
         ],
-        const SizedBox(height: 16),
+        if (dive.hasMaxTemp()) infoWidgetRow('Max temp', TemperatureText(dive.maxTemp)),
+        if (dive.hasMinTemp()) infoWidgetRow('Min temp', TemperatureText(dive.minTemp)),
+        if (dive.hasOtu()) infoRow('OTU', dive.otu.toString()),
+        if (dive.hasSac()) infoWidgetRow('SAC', VolumeText(dive.sac, suffix: '/min')),
+        if (dive.hasOtu()) infoRow('OTU', dive.otu.toString()),
+        if (dive.hasCns()) infoRow('CNS', '${dive.cns}%'),
+        if (dive.logs.isNotEmpty) ...[if (dive.logs[0].hasDecoModel()) infoWidgetRow('Deco model', DecoModelText(dive.logs[0].decoModel))],
+        if (worstDeco != null) infoWidgetRow('Max deco', DecoStatusText(worstDeco)),
       ]),
-      if (dive.hasSac() || dive.hasOtu() || dive.hasCns()) ...[
-        infoCard(context, 'Physiological Data', [
-          if (dive.hasSac()) infoWidgetRow('SAC', VolumeText(dive.sac, suffix: '/min')),
-          if (dive.hasOtu()) infoRow('OTU', dive.otu.toString()),
-          if (dive.hasCns()) infoRow('CNS', '${dive.cns}%'),
-        ]),
-        const SizedBox(height: 16),
-      ],
       if (dive.divemaster.isNotEmpty || dive.buddies.isNotEmpty) ...[
         infoCard(context, 'People', [
           if (dive.divemaster.isNotEmpty) infoRow('Divemaster', dive.divemaster),
           if (dive.buddies.isNotEmpty) infoRow('Buddies', dive.buddies.join(', ')),
         ]),
-        const SizedBox(height: 16),
       ],
       if (dive.cylinders.isNotEmpty) ...[
         infoCard(
@@ -218,15 +221,15 @@ class _DiveDetails extends StatelessWidget {
               heliumPct: (cyl.helium * 100).toInt(),
               beginPressure: cyl.beginPressure,
               endPressure: cyl.endPressure,
+              sac: cyl.sac,
             );
           }).toList(),
         ),
-        const SizedBox(height: 16),
       ],
       if (dive.weightsystems.isNotEmpty) ...[
         infoCard(
           context,
-          'Weight Systems',
+          'Weights',
           dive.weightsystems.asMap().entries.map((entry) {
             final idx = entry.key;
             final ws = entry.value;
@@ -234,7 +237,6 @@ class _DiveDetails extends StatelessWidget {
             return infoWidgetRow(desc, WeightText(ws.weight));
           }).toList(),
         ),
-        const SizedBox(height: 16),
       ],
       if (dive.notes.isNotEmpty) ...[
         infoCard(context, 'Notes', [
@@ -243,36 +245,42 @@ class _DiveDetails extends StatelessWidget {
             child: Text(dive.notes, style: Theme.of(context).textTheme.bodyMedium),
           ),
         ]),
-        const SizedBox(height: 16),
       ],
       if (dive.logs.isNotEmpty && dive.logs[0].samples.isNotEmpty) ...[
         _WideCard(
           elevation: 2,
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(12.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
                     Expanded(
-                      child: Text('Depth Profile', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                      child: Text('Dive profile', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                     ),
-                    IconButton(
+                    IconButton.filled(
                       icon: const Icon(Icons.fullscreen),
                       onPressed: () {
-                        Navigator.of(context, rootNavigator: true).push(
-                          MaterialPageRoute(
-                            builder: (context) => FullscreenProfileScreen(log: dive.logs[0], title: 'Dive #${dive.number}'),
-                          ),
-                        );
+                        context.pushNamed(AppRouteName.divesDetailsDepthProfile, pathParameters: {'diveID': dive.id});
                       },
                       tooltip: 'View fullscreen',
                     ),
                   ],
                 ),
                 const Divider(),
-                DepthProfileWidget(log: dive.logs[0]),
+                const SizedBox(height: 8),
+                IgnorePointer(
+                  ignoring: Platform.isIOS,
+                  child: AspectRatio(
+                    aspectRatio: 2.0,
+                    child: BlocBuilder<PreferencesBloc, PreferencesState>(
+                      builder: (context, state) {
+                        return DepthProfileWidget(key: ValueKey((dive, state.preferences)), log: dive.logs[0], preferences: state.preferences);
+                      },
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -301,9 +309,24 @@ class _SiteCard extends StatelessWidget {
           children: [
             // Map preview (only if position exists)
             if (site.hasPosition())
-              SizedBox(
-                height: 150,
-                child: IgnorePointer(child: SiteMap(position: LatLng(site.position.latitude, site.position.longitude))),
+              Stack(
+                children: [
+                  SizedBox(
+                    height: 150,
+                    child: IgnorePointer(child: SiteMap(position: LatLng(site.position.latitude, site.position.longitude))),
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: IconButton.filled(
+                      icon: const Icon(Icons.fullscreen),
+                      onPressed: () {
+                        context.pushNamed(AppRouteName.sitesDetailsMap, pathParameters: {'siteID': site.id});
+                      },
+                      tooltip: 'View fullscreen',
+                    ),
+                  ),
+                ],
               ),
             // Site information
             Padding(

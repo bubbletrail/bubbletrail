@@ -36,8 +36,8 @@ class UnitsScreen extends StatelessWidget {
                 title: 'Pressure',
                 trailing: SegmentedButton<PressureUnit>(
                   segments: const [
-                    ButtonSegment(value: PressureUnit.bar, label: Text('bar'), icon: Icon(null)),
-                    ButtonSegment(value: PressureUnit.psi, label: Text('psi'), icon: Icon(null)),
+                    ButtonSegment(value: PressureUnit.bar, label: Text('bar')),
+                    ButtonSegment(value: PressureUnit.psi, label: Text('psi')),
                   ],
                   selected: {prefs.pressureUnit},
                   onSelectionChanged: (value) {
@@ -49,8 +49,8 @@ class UnitsScreen extends StatelessWidget {
                 title: 'Temperature',
                 trailing: SegmentedButton<TemperatureUnit>(
                   segments: const [
-                    ButtonSegment(value: TemperatureUnit.celsius, label: Text('°C'), icon: Icon(null)),
-                    ButtonSegment(value: TemperatureUnit.fahrenheit, label: Text('°F'), icon: Icon(null)),
+                    ButtonSegment(value: TemperatureUnit.celsius, label: Text('°C')),
+                    ButtonSegment(value: TemperatureUnit.fahrenheit, label: Text('°F')),
                   ],
                   selected: {prefs.temperatureUnit},
                   onSelectionChanged: (value) {
@@ -62,8 +62,8 @@ class UnitsScreen extends StatelessWidget {
                 title: 'Volume',
                 trailing: SegmentedButton<VolumeUnit>(
                   segments: const [
-                    ButtonSegment(value: VolumeUnit.liters, label: Text('L'), icon: Icon(null)),
-                    ButtonSegment(value: VolumeUnit.cuft, label: Text('cuft'), icon: Icon(null)),
+                    ButtonSegment(value: VolumeUnit.liters, label: Text('L')),
+                    ButtonSegment(value: VolumeUnit.cuft, label: Text('cuft')),
                   ],
                   selected: {prefs.volumeUnit},
                   onSelectionChanged: (value) {
@@ -75,8 +75,8 @@ class UnitsScreen extends StatelessWidget {
                 title: 'Weight',
                 trailing: SegmentedButton<WeightUnit>(
                   segments: const [
-                    ButtonSegment(value: WeightUnit.kg, label: Text('kg'), icon: Icon(null)),
-                    ButtonSegment(value: WeightUnit.lb, label: Text('lbs'), icon: Icon(null)),
+                    ButtonSegment(value: WeightUnit.kg, label: Text('kg')),
+                    ButtonSegment(value: WeightUnit.lb, label: Text('lbs')),
                   ],
                   selected: {prefs.weightUnit},
                   onSelectionChanged: (value) {
@@ -84,14 +84,14 @@ class UnitsScreen extends StatelessWidget {
                   },
                 ),
               ),
-              const SizedBox(height: 16),
+              const Divider(height: 16),
               PreferencesTile(
                 title: 'Date format',
                 trailing: SegmentedButton<DateFormatPref>(
                   segments: const [
-                    ButtonSegment(value: DateFormatPref.iso, label: Text('2024-12-25'), icon: Icon(null)),
-                    ButtonSegment(value: DateFormatPref.us, label: Text('12/25/2024'), icon: Icon(null)),
-                    ButtonSegment(value: DateFormatPref.eu, label: Text('25/12/2024'), icon: Icon(null)),
+                    ButtonSegment(value: DateFormatPref.iso, label: Text('2024-12-25')),
+                    ButtonSegment(value: DateFormatPref.us, label: Text('12/25/2024')),
+                    ButtonSegment(value: DateFormatPref.eu, label: Text('25/12/2024')),
                   ],
                   selected: {prefs.dateFormat},
                   onSelectionChanged: (value) {
@@ -103,8 +103,8 @@ class UnitsScreen extends StatelessWidget {
                 title: 'Time format',
                 trailing: SegmentedButton<TimeFormatPref>(
                   segments: const [
-                    ButtonSegment(value: TimeFormatPref.h24, label: Text('24h'), icon: Icon(null)),
-                    ButtonSegment(value: TimeFormatPref.h12, label: Text('12h'), icon: Icon(null)),
+                    ButtonSegment(value: TimeFormatPref.h24, label: Text('24h')),
+                    ButtonSegment(value: TimeFormatPref.h12, label: Text('12h')),
                   ],
                   selected: {prefs.timeFormat},
                   onSelectionChanged: (value) {

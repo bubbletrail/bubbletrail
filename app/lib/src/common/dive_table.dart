@@ -69,7 +69,10 @@ class DiveTableWidget extends StatelessWidget {
           ),
           TrinaColumn(title: 'Max Depth', field: 'maxDepth', type: TrinaColumnType.number(), width: 80, readOnly: true),
           TrinaColumn(title: 'Duration', field: 'duration', type: TrinaColumnType.number(), width: 80, readOnly: true),
-          if (showSiteColumn) TrinaColumn(title: 'Site', field: 'site', type: TrinaColumnType.text(), width: 200, readOnly: true),
+          if (showSiteColumn) TrinaColumn(title: 'Country', field: 'country', type: TrinaColumnType.text(), width: 120, readOnly: true),
+          if (showSiteColumn) TrinaColumn(title: 'Location', field: 'location', type: TrinaColumnType.text(), width: 120, readOnly: true),
+          if (showSiteColumn) TrinaColumn(title: 'Site', field: 'site', type: TrinaColumnType.text(), width: 120, readOnly: true),
+          TrinaColumn(title: 'SAC', field: 'sac', type: TrinaColumnType.number(), width: 80, readOnly: true),
         ];
         final rows = dives.map((dive) {
           final site = _getSite(dive);
@@ -79,7 +82,13 @@ class DiveTableWidget extends StatelessWidget {
               'start': TrinaCell(value: dive.start.toDateTime()),
               'maxDepth': TrinaCell(value: dive.maxDepth * 10, renderer: (rendererContext) => DepthText(rendererContext.cell.value / 10)),
               'duration': TrinaCell(value: dive.duration, renderer: (rendererContext) => Text(formatDuration(rendererContext.cell.value))),
+              'country': TrinaCell(value: site?.country ?? ''),
+              'location': TrinaCell(value: site?.location ?? ''),
               'site': TrinaCell(value: site?.name ?? ''),
+              'sac': TrinaCell(
+                value: dive.sac * 10,
+                renderer: (rendererContext) => rendererContext.cell.value != 0 ? VolumeText(rendererContext.cell.value / 10, suffix: '/min') : Text('-'),
+              ),
               '_id': TrinaCell(value: dive.id), // Hidden field for navigation
             },
           );

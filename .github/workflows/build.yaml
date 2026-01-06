@@ -1,14 +1,49 @@
 on:
+    - pull_request
     - push
+    - workflow_dispatch
 
 name: Build
 
 jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+      # - name: Install Dart
+      #   uses: dart-lang/setup-dart@v1
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Run tests (divestore)
+        run: |
+          pushd pkg/divestore
+          dart pub get
+          dart analyze --fatal-infos
+          dart format --output=none --set-exit-if-changed .
+          dart test
+
+      - name: Run tests (app)
+        run: |
+          pushd app
+          dart pub get
+          dart analyze --fatal-infos
+          dart format --output=none --set-exit-if-changed .
+          # dart test
+
+
   build-macos:
     name: Build for macOS
     runs-on: macos-26
-    if: github.ref == 'refs/heads/release' || github.ref == 'refs/heads/macapp'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/release' || github.ref == 'refs/heads/macapp')
     environment: release
+    needs:
+      - test
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -44,8 +79,10 @@ jobs:
   build-ios:
     name: Build for iOS
     runs-on: macos-26
-    if: github.ref == 'refs/heads/release'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/release'
     environment: release
+    needs:
+      - test
     steps:
       - name: Clone repository
         uses: actions/checkout@v4

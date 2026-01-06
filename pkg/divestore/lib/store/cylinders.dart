@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:divestore/store/fileio.dart';
 import 'package:logging/logging.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 
 import '../gen/gen.dart';
 import '../gen/internal.pb.dart';
+import 'fileio.dart';
 
 final _log = Logger('store/cylinders');
 
@@ -77,17 +77,17 @@ class Cylinders {
     return _cylinders[id];
   }
 
-  Future<List<Cylinder>> getAll() async {
-    final vals = _cylinders.values.where((c) => !c.hasDeletedAt()).toList();
+  Future<List<Cylinder>> getAll({bool withDeleted = false}) async {
+    final vals = _cylinders.values.where((c) => withDeleted || !c.hasDeletedAt()).toList();
     vals.sort((a, b) => a.description.compareTo(b.description));
     return vals;
   }
 
-  Future<Cylinder?> findByProperties(double? size, double? workpressure, String? description) async {
+  Future<Cylinder?> findByProperties(double? volumeL, double? workingPressureBar, String? description) async {
     return _cylinders.values.firstWhereOrNull((c) {
       if (c.hasDeletedAt()) return false;
-      if (size != null && size != c.size) return false;
-      if (workpressure != null && workpressure != c.workpressure) return false;
+      if (volumeL != null && volumeL != c.volumeL) return false;
+      if (workingPressureBar != null && workingPressureBar != c.workingPressureBar) return false;
       if (description != null && description != c.description) return false;
       return true;
     });
@@ -98,7 +98,7 @@ class Cylinders {
     final existing = await findByProperties(size, workpressure, description);
     if (existing != null) return existing;
 
-    final c = Cylinder(size: size, workpressure: workpressure, description: description);
+    final c = Cylinder(volumeL: size, workingPressureBar: workpressure, description: description);
     return await insert(c);
   }
 
@@ -123,16 +123,16 @@ class Cylinders {
       final vals = _cylinders.values.toList();
       vals.sort((a, b) => a.description.compareTo(b.description));
       final cl = InternalCylinderList(cylinders: vals);
-      atomicWriteProto(path, cl);
+      await atomicWriteProto(path, cl);
       _changes.add(vals);
       _log.info('saved ${_cylinders.length} cylinders');
     } catch (e) {
-      _log.warning("failed to save cylinders: $e");
+      _log.warning('failed to save cylinders: $e');
     }
   }
 
   Future<void> importFrom(Cylinders other) async {
-    for (final cyl in await other.getAll()) {
+    for (final cyl in await other.getAll(withDeleted: true)) {
       final cur = _cylinders[cyl.id];
       if (cyl.hasDeletedAt()) {
         if (cur != null) {

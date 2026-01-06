@@ -36,8 +36,10 @@ class CylinderListScreen extends StatelessWidget {
                   child: CylinderTile(
                     index: index,
                     description: cylinder.description.isNotEmpty ? cylinder.description : 'Cylinder #${cylinder.id}',
-                    size: cylinder.size,
-                    workingPressure: cylinder.workpressure,
+                    volumeL: cylinder.volumeL,
+                    workingPressureBar: cylinder.workingPressureBar,
+                    volumeCuft: cylinder.volumeCuft,
+                    workingPressurePsi: cylinder.workingPressurePsi,
                     leading: const Icon(Icons.propane_tank),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.goNamed(AppRouteName.cylindersDetails, pathParameters: {'cylinderID': cylinder.id.toString()}),

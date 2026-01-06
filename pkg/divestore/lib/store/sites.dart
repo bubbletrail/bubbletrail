@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:divestore/store/fileio.dart';
 import 'package:logging/logging.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 
 import '../gen/gen.dart';
 import '../gen/internal.pb.dart';
+import 'fileio.dart';
 
 final _log = Logger('store/sites');
 
@@ -88,8 +88,8 @@ class Sites {
     return _sites[id];
   }
 
-  Future<List<Site>> getAll() async {
-    final sites = _sites.values.where((s) => !s.hasDeletedAt()).toList();
+  Future<List<Site>> getAll({bool withDeleted = false}) async {
+    final sites = _sites.values.where((s) => withDeleted || !s.hasDeletedAt()).toList();
     sites.sort((a, b) => a.name.compareTo(b.name));
     return sites;
   }
@@ -114,15 +114,15 @@ class Sites {
   Future<void> _save() async {
     try {
       final cl = InternalSiteList(sites: _sites.values);
-      atomicWriteProto(path, cl);
+      await atomicWriteProto(path, cl);
       _log.info('saved ${_sites.length} sites');
     } catch (e) {
-      _log.warning("failed to save sites: $e");
+      _log.warning('failed to save sites: $e');
     }
   }
 
   Future<void> importFrom(Sites other) async {
-    for (final site in await other.getAll()) {
+    for (final site in await other.getAll(withDeleted: true)) {
       final cur = _sites[site.id];
       if (site.hasDeletedAt()) {
         if (cur != null) {
