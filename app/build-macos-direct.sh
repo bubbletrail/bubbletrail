@@ -35,7 +35,7 @@ APP_NAME=$(find build/macos -name "*.app")
 ZIP_NAME=$(basename "$APP_NAME" .app).zip
 
 mv "$APP_NAME" .
-zip -r "$ZIP_NAME" $(basename "$APP_NAME")
+zip -r --symlinks "$ZIP_NAME" $(basename "$APP_NAME")
 
 # Notarize it
 
