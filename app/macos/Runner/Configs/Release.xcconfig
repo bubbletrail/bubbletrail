@@ -1,2 +1,6 @@
 #include "../../Flutter/Flutter-Release.xcconfig"
 #include "Warnings.xcconfig"
+
+CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO
+ENABLE_ENHANCED_SECURITY = YES
+OTHER_CODE_SIGN_FLAGS[sdk=*] = --timestamp
