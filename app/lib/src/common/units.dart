@@ -120,7 +120,7 @@ class DurationText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(formatDuration(seconds), style: style);
+    return Text(formatMinutes(seconds), style: style);
   }
 }
 

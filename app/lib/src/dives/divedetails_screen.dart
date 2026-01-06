@@ -125,28 +125,23 @@ class _DiveDetails extends StatelessWidget {
 
   Widget _buildWideLayout(BuildContext context) {
     final sections = _buildAllSections(context);
+
+    final fullWidthSections = <Widget>[];
     final leftColumn = <Widget>[];
     final rightColumn = <Widget>[];
 
-    // Separate sections that should be full width
-    final fullWidthSections = <Widget>[];
-    final regularSections = <Widget>[];
-
     for (final section in sections) {
-      if (section is _WideCard) {
-        fullWidthSections.add(section);
-        continue;
-      }
-      if (section is SizedBox) continue; // Skip spacing
-      regularSections.add(section);
-    }
-
-    // Distribute regular sections into two columns
-    for (var i = 0; i < regularSections.length; i++) {
-      if (i.isEven) {
-        leftColumn.add(regularSections[i]);
+      if (section is _Positioned) {
+        switch (section.position) {
+          case _Position.wide:
+            fullWidthSections.add(section);
+          case _Position.left:
+            leftColumn.add(section);
+          case _Position.right:
+            rightColumn.add(section);
+        }
       } else {
-        rightColumn.add(regularSections[i]);
+        leftColumn.add(section);
       }
     }
 
@@ -155,6 +150,7 @@ class _DiveDetails extends StatelessWidget {
       child: Column(
         spacing: 8,
         children: [
+          ...fullWidthSections,
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 8,
@@ -167,126 +163,220 @@ class _DiveDetails extends StatelessWidget {
               ),
             ],
           ),
-          ...fullWidthSections,
         ],
       ),
     );
   }
 
-  DateTime get _startDateTime => dive.start.toDateTime();
-
   List<Widget> _buildAllSections(BuildContext context) {
-    final worstDeco = dive.logs.isNotEmpty ? dive.logs.first.worstDecoStatus : null;
     return [
-      infoCard(context, 'General', [
-        infoWidgetRow('Start', DateTimeText(_startDateTime)),
-        infoRow('Duration', formatDuration(dive.duration)),
-        if (dive.hasRating()) infoRow('Rating', '★' * dive.rating),
-        tagsRow(context, dive.tags.toList(), secondaryTags: site?.tags.where((t) => !dive.tags.contains(t)).toList()),
-      ]),
-      if (site != null) _SiteCard(site: site!),
-      infoCard(context, 'Dive computer', [
-        if (dive.hasMaxDepth()) infoWidgetRow('Max depth', DepthText(dive.maxDepth)),
-        if (dive.hasMeanDepth()) infoWidgetRow('Mean depth', DepthText(dive.meanDepth)),
-        if (dive.logs.isNotEmpty) ...[
-          if (dive.logs[0].hasSurfaceTemperature()) infoWidgetRow('Air temp', TemperatureText(dive.logs[0].surfaceTemperature)),
-          if (dive.logs[0].hasMinTemperature()) infoWidgetRow('Water temp', TemperatureText(dive.logs[0].minTemperature)),
-        ],
-        if (dive.hasMaxTemp()) infoWidgetRow('Max temp', TemperatureText(dive.maxTemp)),
-        if (dive.hasMinTemp()) infoWidgetRow('Min temp', TemperatureText(dive.minTemp)),
-        if (dive.hasOtu()) infoRow('OTU', dive.otu.toString()),
-        if (dive.hasSac()) infoWidgetRow('SAC', VolumeText(dive.sac, suffix: '/min')),
-        if (dive.hasOtu()) infoRow('OTU', dive.otu.toString()),
-        if (dive.hasCns()) infoRow('CNS', '${dive.cns}%'),
-        if (dive.logs.isNotEmpty) ...[if (dive.logs[0].hasDecoModel()) infoWidgetRow('Deco model', DecoModelText(dive.logs[0].decoModel))],
-        if (worstDeco != null) infoWidgetRow('Max deco', DecoStatusText(worstDeco)),
-      ]),
-      if (dive.divemaster.isNotEmpty || dive.buddies.isNotEmpty) ...[
-        infoCard(context, 'People', [
-          if (dive.divemaster.isNotEmpty) infoRow('Divemaster', dive.divemaster),
-          if (dive.buddies.isNotEmpty) infoRow('Buddies', dive.buddies.join(', ')),
-        ]),
-      ],
-      if (dive.cylinders.isNotEmpty) ...[
-        infoCard(
-          context,
-          'Cylinders',
-          dive.cylinders.indexed.map((entry) {
-            final idx = entry.$1;
-            final cyl = entry.$2;
-            return CylinderTile(
-              index: idx,
-              description: cyl.cylinder.description,
-              oxygenPct: (cyl.oxygen * 100).toInt(),
-              heliumPct: (cyl.helium * 100).toInt(),
-              beginPressure: cyl.beginPressure,
-              endPressure: cyl.endPressure,
-              sac: cyl.sac,
-            );
-          }).toList(),
+      if (dive.logs.isNotEmpty && dive.logs[0].samples.isNotEmpty)
+        _Positioned(
+          position: _Position.wide,
+          child: _ProfileCard(dive: dive, site: site),
         ),
-      ],
-      if (dive.weightsystems.isNotEmpty) ...[
-        infoCard(
-          context,
-          'Weights',
-          dive.weightsystems.asMap().entries.map((entry) {
-            final idx = entry.key;
-            final ws = entry.value;
-            final desc = ws.description.isNotEmpty ? ws.description : 'Weight ${idx + 1}';
-            return infoWidgetRow(desc, WeightText(ws.weight));
-          }).toList(),
+      if (dive.notes.isNotEmpty)
+        _Positioned(
+          position: _Position.wide,
+          child: infoCard(context, 'Notes', [
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(dive.notes, style: Theme.of(context).textTheme.bodyMedium),
+            ),
+          ]),
         ),
-      ],
-      if (dive.notes.isNotEmpty) ...[
-        infoCard(context, 'Notes', [
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Text(dive.notes, style: Theme.of(context).textTheme.bodyMedium),
+      if (site != null)
+        _Positioned(
+          position: _Position.left,
+          child: _SiteCard(site: site!),
+        ),
+      if (dive.divemaster.isNotEmpty || dive.buddies.isNotEmpty)
+        _Positioned(
+          position: _Position.right,
+          child: infoCard(context, 'People', [
+            if (dive.divemaster.isNotEmpty) infoRow('Divemaster', dive.divemaster),
+            if (dive.buddies.isNotEmpty) infoRow('Buddies', dive.buddies.join(', ')),
+          ]),
+        ),
+      if (dive.cylinders.isNotEmpty)
+        _Positioned(
+          position: _Position.right,
+          child: infoCard(
+            context,
+            'Cylinders',
+            dive.cylinders.indexed.map((entry) {
+              final idx = entry.$1;
+              final cyl = entry.$2;
+              return CylinderTile(
+                index: idx,
+                description: cyl.cylinder.description,
+                oxygenPct: (cyl.oxygen * 100).toInt(),
+                heliumPct: (cyl.helium * 100).toInt(),
+                beginPressure: cyl.beginPressure,
+                endPressure: cyl.endPressure,
+                sac: cyl.sac,
+              );
+            }).toList(),
           ),
-        ]),
-      ],
-      if (dive.logs.isNotEmpty && dive.logs[0].samples.isNotEmpty) ...[
-        _WideCard(
-          elevation: 2,
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+      if (dive.weightsystems.isNotEmpty)
+        _Positioned(
+          position: _Position.right,
+          child: infoCard(
+            context,
+            'Weights',
+            dive.weightsystems.asMap().entries.map((entry) {
+              final idx = entry.key;
+              final ws = entry.value;
+              final desc = ws.description.isNotEmpty ? ws.description : 'Weight ${idx + 1}';
+              return infoWidgetRow(desc, WeightText(ws.weight));
+            }).toList(),
+          ),
+        ),
+    ];
+  }
+}
+
+class _ProfileCard extends StatelessWidget {
+  const _ProfileCard({required this.dive, required this.site});
+
+  final Dive dive;
+  final Site? site;
+
+  @override
+  Widget build(BuildContext context) {
+    final worstDeco = dive.logs.isNotEmpty ? dive.logs.first.worstDecoStatus : null;
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text('Dive profile', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                    ),
-                    IconButton.filled(
-                      icon: const Icon(Icons.fullscreen),
-                      onPressed: () {
-                        context.pushNamed(AppRouteName.divesDetailsDepthProfile, pathParameters: {'diveID': dive.id});
-                      },
-                      tooltip: 'View fullscreen',
-                    ),
-                  ],
+                Expanded(
+                  child: Text('Dive profile', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                 ),
-                const Divider(),
-                const SizedBox(height: 8),
-                IgnorePointer(
-                  ignoring: Platform.isIOS,
-                  child: AspectRatio(
-                    aspectRatio: 2.0,
-                    child: BlocBuilder<PreferencesBloc, PreferencesState>(
-                      builder: (context, state) {
-                        return DepthProfileWidget(key: ValueKey((dive, state.preferences)), log: dive.logs[0], preferences: state.preferences);
-                      },
-                    ),
-                  ),
+                IconButton.filled(
+                  icon: const Icon(Icons.fullscreen),
+                  onPressed: () {
+                    context.pushNamed(AppRouteName.divesDetailsDepthProfile, pathParameters: {'diveID': dive.id});
+                  },
+                  tooltip: 'View fullscreen',
                 ),
               ],
             ),
-          ),
+            const Divider(),
+            const SizedBox(height: 8),
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              runSpacing: 8,
+              spacing: 8,
+              children: [
+                _Labeled(label: 'Start', child: DateTimeText(dive.start.toDateTime())),
+                _Labeled(label: 'Duration', child: DurationText(dive.duration)),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: IgnorePointer(
+                ignoring: Platform.isIOS,
+                child: AspectRatio(
+                  aspectRatio: 3.0,
+                  child: BlocBuilder<PreferencesBloc, PreferencesState>(
+                    builder: (context, state) {
+                      return DepthProfileWidget(key: ValueKey((dive, state.preferences)), log: dive.logs[0], preferences: state.preferences);
+                    },
+                  ),
+                ),
+              ),
+            ),
+            Wrap(
+              // alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              runSpacing: 8,
+              spacing: 8,
+              children: [
+                TagsList(tags: dive.tags, secondaryTags: site?.tags.where((t) => !dive.tags.contains(t)).toList(), prefix: '#'),
+                Text('★' * dive.rating),
+                if (dive.hasMaxDepth()) _Labeled(label: 'Max', child: DepthText(dive.maxDepth)),
+                if (dive.hasMeanDepth()) _Labeled(label: 'Mean', child: DepthText(dive.meanDepth)),
+                if (worstDeco != null) _Labeled(label: 'Deco', child: DecoStatusText(worstDeco)),
+                if (dive.hasMaxTemp() || dive.hasMinTemp()) _Temps(dive),
+                if (dive.hasOtu()) _Labeled(label: 'OTU', child: Text(dive.otu.toString())),
+                if (dive.hasSac())
+                  _Labeled(
+                    label: 'SAC',
+                    child: VolumeText(dive.sac, suffix: '/min'),
+                  ),
+                if (dive.hasOtu()) _Labeled(label: 'OTU', child: Text(dive.otu.toString())),
+                if (dive.hasCns()) _Labeled(label: 'CNS', child: Text('${dive.cns}%')),
+                if (dive.logs.isNotEmpty) ...[if (dive.logs[0].hasDecoModel()) _Labeled(label: 'Model', child: DecoModelText(dive.logs[0].decoModel))],
+              ],
+            ),
+          ],
         ),
-      ],
-    ];
+      ),
+    );
+  }
+}
+
+class _Temps extends StatelessWidget {
+  const _Temps(this.dive);
+
+  final Dive dive;
+
+  @override
+  Widget build(BuildContext context) {
+    if (dive.hasMinTemp() && dive.hasMaxDepth() && dive.minTemp != dive.maxTemp) {
+      return _Labeled(
+        label: 'Temp',
+        child: Row(
+          children: [
+            TemperatureText(dive.minTemp),
+            Opacity(opacity: 0.5, child: Text(' - ')),
+            TemperatureText(dive.maxTemp),
+          ],
+        ),
+      );
+    }
+    if (dive.hasMaxTemp()) {
+      return _Labeled(label: 'Temp', child: TemperatureText(dive.maxTemp));
+    }
+    if (dive.hasMinTemp()) {
+      return _Labeled(label: 'Temp', child: TemperatureText(dive.minTemp));
+    }
+    return const SizedBox();
+  }
+}
+
+class _Labeled extends StatelessWidget {
+  const _Labeled({required this.label, required this.child});
+
+  final String? label;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final inner = (label == null)
+        ? child
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 8,
+            children: [
+              Opacity(opacity: 0.7, child: Text(label!, style: Theme.of(context).textTheme.labelSmall)),
+              child,
+            ],
+          );
+    return Chip(
+      visualDensity: VisualDensity.compact,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      padding: EdgeInsets.zero,
+      labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+      label: inner,
+    );
   }
 }
 
@@ -357,21 +447,18 @@ class _SiteCard extends StatelessWidget {
   }
 }
 
-// ignore_for_file: unused_element_parameter
-class _WideCard extends Card {
-  const _WideCard({
-    super.key,
-    super.color,
-    super.shadowColor,
-    super.surfaceTintColor,
-    super.elevation,
-    super.shape,
-    super.borderOnForeground,
-    super.margin,
-    super.clipBehavior,
-    super.child,
-    super.semanticContainer,
-  });
+enum _Position { left, right, wide }
+
+class _Positioned extends StatelessWidget {
+  const _Positioned({required this.position, required this.child});
+
+  final _Position position;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return child;
+  }
 }
 
 class _RawDiveDataScreen extends StatelessWidget {

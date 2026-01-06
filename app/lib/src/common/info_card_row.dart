@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'tags_list.dart';
+
 Widget infoCard(BuildContext context, String title, List<Widget> children) {
   return Card(
     elevation: 2,
@@ -42,8 +44,6 @@ Widget tagsRow(BuildContext context, List<String> tags, {List<String>? secondary
     return const SizedBox.shrink();
   }
 
-  final colorScheme = Theme.of(context).colorScheme;
-
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 4.0),
     child: Row(
@@ -54,34 +54,7 @@ Widget tagsRow(BuildContext context, List<String> tags, {List<String>? secondary
           child: Text('Tags:', style: TextStyle(fontWeight: FontWeight.w600)),
         ),
         Expanded(
-          child: Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              ...tags.map(
-                (tag) => Chip(
-                  label: Text(tag),
-                  visualDensity: VisualDensity.compact,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  padding: EdgeInsets.zero,
-                  labelPadding: const EdgeInsets.symmetric(horizontal: 8),
-                ),
-              ),
-              if (secondaryTags != null)
-                ...secondaryTags.map(
-                  (tag) => Chip(
-                    label: Text(tag),
-                    visualDensity: VisualDensity.compact,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    padding: EdgeInsets.zero,
-                    labelPadding: const EdgeInsets.symmetric(horizontal: 8),
-                    backgroundColor: colorScheme.secondaryContainer,
-                    labelStyle: TextStyle(color: colorScheme.onSecondaryContainer),
-                    side: BorderSide.none,
-                  ),
-                ),
-            ],
-          ),
+          child: TagsList(tags: tags, secondaryTags: secondaryTags),
         ),
       ],
     ),
