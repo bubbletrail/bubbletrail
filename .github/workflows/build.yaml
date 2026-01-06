@@ -40,7 +40,7 @@ jobs:
   build-macos:
     name: Build for macOS
     runs-on: macos-26
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/release'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/release' || github.ref == 'refs/heads/macapp')
     environment: release
     needs:
       - test
@@ -59,22 +59,22 @@ jobs:
 
       - name: Build & push
         run: |
-          brew install pipx
           pipx install codemagic-cli-tools
           pushd app
-          ./build-macos.sh
+          ./build-macos-direct.sh
         env:
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
           APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
           AZURE_MAPS_SUBSCRIPTION_KEY: ${{ secrets.AZURE_MAPS_SUBSCRIPTION_KEY }}
+          DEVELOPER_ID_APPLICATION_CERT: ${{ secrets.DEVELOPER_ID_APPLICATION_CERT }}
           MAC_APP_DISTRIBUTION_CERT: ${{ secrets.MAC_APP_DISTRIBUTION_CERT }}
 
-      # - name: Save artifacts (macOS)
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     path: app/macos/Bubbletrail.pkg
-      #     name: bubbletrail-macos-${{ env.MARKET_VERSION }}
+      - name: Save artifacts (macOS)
+        uses: actions/upload-artifact@v4
+        with:
+          path: app/Bubbletrail.zip
+          name: bubbletrail-macos-${{ env.MARKET_VERSION }}
 
   build-ios:
     name: Build for iOS

@@ -40,6 +40,8 @@ flutter build macos \
     --dart-define=GITSHA="${GIT_SHA:-g000000}" \
     --dart-define=MARKETINGVERSION="${MARKET_VERSION:-0.0.1}"
 
+# Build installer package for App Store
+
 APP_NAME=$(find build/macos -name "*.app")
 PACKAGE_NAME=$(basename "$APP_NAME" .app).pkg
 xcrun productbuild --component "$APP_NAME" /Applications/ unsigned.pkg
@@ -52,6 +54,8 @@ INSTALLER_CERT_NAME=$(keychain list-certificates \
           | xargs)
 xcrun productsign --sign "$INSTALLER_CERT_NAME" unsigned.pkg "$PACKAGE_NAME"
 rm -f unsigned.pkg
+
+# Publish the App store package
 
 app-store-connect publish \
     --path "$PACKAGE_NAME"
