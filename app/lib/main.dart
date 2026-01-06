@@ -70,6 +70,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
   late final SyncBloc _syncBloc;
   late final DiveListBloc _diveListBloc;
   late final CylinderListBloc _cylinderListBloc;
+  late final GoRouter _router;
   final _preferencesBloc = PreferencesBloc();
 
   @override
@@ -82,50 +83,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
     if (WindowPreferences.isSupported) {
       windowManager.addListener(this);
     }
-  }
 
-  @override
-  void dispose() {
-    if (WindowPreferences.isSupported) {
-      windowManager.removeListener(this);
-    }
-    super.dispose();
-  }
-
-  @override
-  void onWindowResized() => WindowPreferences.save();
-
-  @override
-  void onWindowMoved() => WindowPreferences.save();
-
-  @override
-  void onWindowMaximize() => WindowPreferences.save();
-
-  @override
-  void onWindowUnmaximize() => WindowPreferences.save();
-
-  void _setupFileHandler() {
-    _channel.setMethodCallHandler((call) async {
-      if (call.method == 'fileReceived') {
-        final filePath = call.arguments as String;
-        _diveListBloc.add(ImportDives(filePath));
-      }
-    });
-
-    _channel
-        .invokeMethod<String>('getInitialFile')
-        .then((filePath) {
-          if (filePath != null) {
-            _diveListBloc.add(ImportDives(filePath));
-          }
-        })
-        .onError((_, _) {
-          // Ignore unimplemented error on macOS etc
-        });
-  }
-
-  @override
-  Widget build(BuildContext context) {
     // The profile detail route is placed inside the outer navigation shell
     // on desktop, but outside it on mobile to maximize fullscreen
     // potential.
@@ -138,7 +96,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
       },
     );
 
-    final router = GoRouter(
+    _router = GoRouter(
       initialLocation: '/dives',
       routes: [
         StatefulShellRoute.indexedStack(
@@ -324,6 +282,50 @@ class _MyAppState extends State<MyApp> with WindowListener {
         if (Platform.isIOS) profileDetailRoute,
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    if (WindowPreferences.isSupported) {
+      windowManager.removeListener(this);
+    }
+    super.dispose();
+  }
+
+  @override
+  void onWindowResized() => WindowPreferences.save();
+
+  @override
+  void onWindowMoved() => WindowPreferences.save();
+
+  @override
+  void onWindowMaximize() => WindowPreferences.save();
+
+  @override
+  void onWindowUnmaximize() => WindowPreferences.save();
+
+  void _setupFileHandler() {
+    _channel.setMethodCallHandler((call) async {
+      if (call.method == 'fileReceived') {
+        final filePath = call.arguments as String;
+        _diveListBloc.add(ImportDives(filePath));
+      }
+    });
+
+    _channel
+        .invokeMethod<String>('getInitialFile')
+        .then((filePath) {
+          if (filePath != null) {
+            _diveListBloc.add(ImportDives(filePath));
+          }
+        })
+        .onError((_, _) {
+          // Ignore unimplemented error on macOS etc
+        });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(value: _syncBloc),
@@ -346,7 +348,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
               darkTheme: AppTheme.darkTheme,
               themeMode: themeMode,
               debugShowCheckedModeBanner: false,
-              routerConfig: router,
+              routerConfig: _router,
               localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
             );
           },
