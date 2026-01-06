@@ -88,7 +88,7 @@ extension DiveExtensions on Dive {
       // Update cylinder used gas volumes now that we know pressures
       for (var (idx, cyl) in this.cylinders.indexed) {
         if (cyl.isFrozen) cyl = cyl.deepCopy();
-        cyl.usedVolume = cyl.cylinder.size * (cyl.beginPressure - cyl.endPressure);
+        cyl.usedVolume = cyl.cylinder.volumeL * (cyl.beginPressure - cyl.endPressure);
         this.cylinders[idx] = cyl;
       }
 
@@ -108,7 +108,7 @@ extension DiveExtensions on Dive {
         var cyl = this.cylinders[e.key];
 
         if (cyl.isFrozen) cyl = cyl.deepCopy();
-        cyl.usedVolume = cyl.cylinder.size * (cyl.beginPressure - cyl.endPressure);
+        cyl.usedVolume = cyl.cylinder.volumeL * (cyl.beginPressure - cyl.endPressure);
         cyl.sac = cyl.usedVolume / avgATA / durationMin;
         this.cylinders[e.key] = cyl;
       }

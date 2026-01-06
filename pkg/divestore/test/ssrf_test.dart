@@ -49,8 +49,8 @@ void main() {
 
     // Test cylinder
     expect(firstDive.cylinders.length, 1);
-    expect(firstDive.cylinders[0].cylinder.size, 11.0);
-    expect(firstDive.cylinders[0].cylinder.workpressure, 230.0);
+    expect(firstDive.cylinders[0].cylinder.volumeL, 11.0);
+    expect(firstDive.cylinders[0].cylinder.workingPressureBar, 230.0);
     expect(firstDive.cylinders[0].cylinder.description, 'AL80');
     expect(firstDive.cylinders[0].hasBeginPressure(), isFalse);
     expect(firstDive.cylinders[0].hasEndPressure(), isFalse);
@@ -168,8 +168,8 @@ void main() {
     final elem = XmlDocument.parse(xml).rootElement;
     final cyl = DiveCylinderXml.fromXml(elem);
 
-    expect(cyl.cylinder.size, 11.0);
-    expect(cyl.cylinder.workpressure, 230.0);
+    expect(cyl.cylinder.volumeL, 11.0);
+    expect(cyl.cylinder.workingPressureBar, 230.0);
     expect(cyl.cylinder.description, 'AL80');
     expect(cyl.beginPressure, 200.0);
     expect(cyl.endPressure, 50.0);
@@ -178,7 +178,7 @@ void main() {
 
   test('DiveCylinderXml serialization', () {
     final cyl = DiveCylinder(
-      cylinder: Cylinder(size: 12.0, workpressure: 200.0, description: 'Steel'),
+      cylinder: Cylinder(volumeL: 12.0, workingPressureBar: 200.0, description: 'Steel'),
       beginPressure: 200.0,
       endPressure: 50.0,
       oxygen: 0.32,

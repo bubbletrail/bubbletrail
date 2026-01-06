@@ -277,8 +277,8 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
         if (cyl.hasCylinder()) {
           final c = cyl.cylinder;
           final cr = await _store.cylinders.getOrCreate(
-            c.hasSize() ? c.size : null,
-            c.hasWorkpressure() ? c.workpressure : null,
+            c.hasVolumeL() ? c.volumeL : null,
+            c.hasWorkingPressureBar() ? c.workingPressureBar : null,
             c.hasDescription() ? c.description : null,
           );
           cyl.cylinderId = cr.id;

@@ -529,8 +529,8 @@ extension DiveCylinderXml on DiveCylinder {
   static DiveCylinder fromXml(XmlElement elem) {
     return DiveCylinder(
       cylinder: Cylinder(
-        size: tryParseUnitString(elem.getAttribute('size')),
-        workpressure: tryParseUnitString(elem.getAttribute('workpressure')),
+        volumeL: tryParseUnitString(elem.getAttribute('size')),
+        workingPressureBar: tryParseUnitString(elem.getAttribute('workpressure')),
         description: elem.getAttribute('description'),
       ),
       beginPressure: tryParseUnitString(elem.getAttribute('start')),
@@ -545,11 +545,11 @@ extension DiveCylinderXml on DiveCylinder {
     builder.element(
       'cylinder',
       nest: () {
-        if (hasCylinder() && cylinder.hasSize()) {
-          builder.attribute('size', '${cylinder.size.toStringAsFixed(1)} l');
+        if (hasCylinder() && cylinder.hasVolumeL()) {
+          builder.attribute('size', '${cylinder.volumeL.toStringAsFixed(1)} l');
         }
-        if (hasCylinder() && cylinder.hasWorkpressure()) {
-          builder.attribute('workpressure', '${cylinder.workpressure.toStringAsFixed(1)} bar');
+        if (hasCylinder() && cylinder.hasWorkingPressureBar()) {
+          builder.attribute('workpressure', '${cylinder.workingPressureBar.toStringAsFixed(1)} bar');
         }
         if (hasCylinder() && cylinder.hasDescription()) {
           builder.attribute('description', cylinder.description);

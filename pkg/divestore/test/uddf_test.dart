@@ -100,7 +100,7 @@ void main() {
 
       // Volume: 0.024 m³ = 24 liters
       expect(cyl.hasCylinder(), isTrue);
-      expect(cyl.cylinder.size, closeTo(24.0, 0.1));
+      expect(cyl.cylinder.volumeL, closeTo(24.0, 0.1));
 
       // Begin pressure: 20822167.02 Pa = ~208 bar
       expect(cyl.hasBeginPressure(), isTrue);
@@ -194,7 +194,7 @@ void main() {
 
       // Subsurface exports as liters (24.0) not m³ (0.024)
       expect(cyl.hasCylinder(), isTrue);
-      expect(cyl.cylinder.size, closeTo(24.0, 0.1));
+      expect(cyl.cylinder.volumeL, closeTo(24.0, 0.1));
     });
 
     test('parses air temperature from informationbeforedive', () {

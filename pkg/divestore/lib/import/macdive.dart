@@ -225,7 +225,7 @@ DiveCylinder _parseGas(XmlElement elem) {
   final tankName = _getElementText(elem, 'tankName');
 
   return DiveCylinder(
-    cylinder: Cylinder(size: tankSize, workpressure: workingPressure, description: tankName),
+    cylinder: Cylinder(volumeL: tankSize, workingPressureBar: workingPressure, description: tankName),
     oxygen: oxygen != null ? oxygen / 100.0 : null, // Convert from percentage
     helium: helium != null ? helium / 100.0 : null, // Convert from percentage
     beginPressure: pressureStart,

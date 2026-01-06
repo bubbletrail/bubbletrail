@@ -12,6 +12,9 @@ message Position {
 }
 
 // Cylinder/tank definition.
+// Metric fields (size, workpressure) are always populated for calculations.
+// Imperial fields (size_cuft, workpressure_psi) are optionally stored when
+// the user enters values in imperial units, to avoid rounding errors on display.
 message Cylinder {
   string id = 1;
 
@@ -19,7 +22,11 @@ message Cylinder {
   google.protobuf.Timestamp updated_at = 3;
   google.protobuf.Timestamp deleted_at = 4;
 
-  double size = 5; // Liters
-  double workpressure = 6; // Bar
+  double volume_l = 5; // Water volume in liters
+  double working_pressure_bar = 6; // Working pressure in bar
   string description = 7;
+
+  // Imperial values (set when entered in imperial units for exact round-trip)
+  optional double volume_cuft = 8; // Gas capacity in cuft at working pressure
+  optional double working_pressure_psi = 9; // Working pressure in PSI
 }

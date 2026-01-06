@@ -7,6 +7,10 @@ import '../bloc/preferences_bloc.dart';
 import '../preferences/preferences.dart';
 import 'common.dart';
 
+const litersToCuft = 0.0353147;
+const kgToLbs = 2.20462;
+const barToPsi = 14.504;
+
 // Date and time formatting
 
 String formatDate(DateFormatPref pref, DateTime date) {
@@ -281,4 +285,21 @@ class DecoStatusText extends StatelessWidget {
         return Text('Unknown');
     }
   }
+}
+
+String formatDisplayValue(double value) {
+  // Use reasonable precision
+  var precision = 1;
+  if (value < 1) precision = 2;
+  if (value > 25) precision = 0;
+  final formatted = value.toStringAsFixed(precision);
+  // Remove trailing zeros after decimal point
+  if (formatted.contains('.')) {
+    var result = formatted.replaceAll(RegExp(r'0+$'), '');
+    if (result.endsWith('.')) {
+      result = result.substring(0, result.length - 1);
+    }
+    return result;
+  }
+  return formatted;
 }

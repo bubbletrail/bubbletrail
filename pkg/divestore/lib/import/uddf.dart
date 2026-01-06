@@ -355,7 +355,7 @@ _TankDataResult? _parseTankData(XmlElement tankData, Map<String, _GasMix> gasMix
 
   return _TankDataResult(
     cylinder: DiveCylinder(
-      cylinder: Cylinder(size: tankVolume),
+      cylinder: Cylinder(volumeL: tankVolume),
       oxygen: oxygen,
       helium: helium,
       beginPressure: beginPressure,

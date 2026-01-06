@@ -83,11 +83,11 @@ class Cylinders {
     return vals;
   }
 
-  Future<Cylinder?> findByProperties(double? size, double? workpressure, String? description) async {
+  Future<Cylinder?> findByProperties(double? volumeL, double? workingPressureBar, String? description) async {
     return _cylinders.values.firstWhereOrNull((c) {
       if (c.hasDeletedAt()) return false;
-      if (size != null && size != c.size) return false;
-      if (workpressure != null && workpressure != c.workpressure) return false;
+      if (volumeL != null && volumeL != c.volumeL) return false;
+      if (workingPressureBar != null && workingPressureBar != c.workingPressureBar) return false;
       if (description != null && description != c.description) return false;
       return true;
     });
@@ -98,7 +98,7 @@ class Cylinders {
     final existing = await findByProperties(size, workpressure, description);
     if (existing != null) return existing;
 
-    final c = Cylinder(size: size, workpressure: workpressure, description: description);
+    final c = Cylinder(volumeL: size, workingPressureBar: workpressure, description: description);
     return await insert(c);
   }
 

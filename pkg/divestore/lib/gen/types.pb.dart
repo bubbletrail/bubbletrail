@@ -89,24 +89,31 @@ class Position extends $pb.GeneratedMessage {
 }
 
 /// Cylinder/tank definition.
+/// Metric fields (size, workpressure) are always populated for calculations.
+/// Imperial fields (size_cuft, workpressure_psi) are optionally stored when
+/// the user enters values in imperial units, to avoid rounding errors on display.
 class Cylinder extends $pb.GeneratedMessage {
   factory Cylinder({
     $core.String? id,
     $0.Timestamp? createdAt,
     $0.Timestamp? updatedAt,
     $0.Timestamp? deletedAt,
-    $core.double? size,
-    $core.double? workpressure,
+    $core.double? volumeL,
+    $core.double? workingPressureBar,
     $core.String? description,
+    $core.double? volumeCuft,
+    $core.double? workingPressurePsi,
   }) {
     final result = create();
     if (id != null) result.id = id;
     if (createdAt != null) result.createdAt = createdAt;
     if (updatedAt != null) result.updatedAt = updatedAt;
     if (deletedAt != null) result.deletedAt = deletedAt;
-    if (size != null) result.size = size;
-    if (workpressure != null) result.workpressure = workpressure;
+    if (volumeL != null) result.volumeL = volumeL;
+    if (workingPressureBar != null) result.workingPressureBar = workingPressureBar;
     if (description != null) result.description = description;
+    if (volumeCuft != null) result.volumeCuft = volumeCuft;
+    if (workingPressurePsi != null) result.workingPressurePsi = workingPressurePsi;
     return result;
   }
 
@@ -122,9 +129,11 @@ class Cylinder extends $pb.GeneratedMessage {
         ..aOM<$0.Timestamp>(2, _omitFieldNames ? '' : 'createdAt', subBuilder: $0.Timestamp.create)
         ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'updatedAt', subBuilder: $0.Timestamp.create)
         ..aOM<$0.Timestamp>(4, _omitFieldNames ? '' : 'deletedAt', subBuilder: $0.Timestamp.create)
-        ..aD(5, _omitFieldNames ? '' : 'size')
-        ..aD(6, _omitFieldNames ? '' : 'workpressure')
+        ..aD(5, _omitFieldNames ? '' : 'volumeL')
+        ..aD(6, _omitFieldNames ? '' : 'workingPressureBar')
         ..aOS(7, _omitFieldNames ? '' : 'description')
+        ..aD(8, _omitFieldNames ? '' : 'volumeCuft')
+        ..aD(9, _omitFieldNames ? '' : 'workingPressurePsi')
         ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -186,22 +195,22 @@ class Cylinder extends $pb.GeneratedMessage {
   $0.Timestamp ensureDeletedAt() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  $core.double get size => $_getN(4);
+  $core.double get volumeL => $_getN(4);
   @$pb.TagNumber(5)
-  set size($core.double value) => $_setDouble(4, value);
+  set volumeL($core.double value) => $_setDouble(4, value);
   @$pb.TagNumber(5)
-  $core.bool hasSize() => $_has(4);
+  $core.bool hasVolumeL() => $_has(4);
   @$pb.TagNumber(5)
-  void clearSize() => $_clearField(5);
+  void clearVolumeL() => $_clearField(5);
 
   @$pb.TagNumber(6)
-  $core.double get workpressure => $_getN(5);
+  $core.double get workingPressureBar => $_getN(5);
   @$pb.TagNumber(6)
-  set workpressure($core.double value) => $_setDouble(5, value);
+  set workingPressureBar($core.double value) => $_setDouble(5, value);
   @$pb.TagNumber(6)
-  $core.bool hasWorkpressure() => $_has(5);
+  $core.bool hasWorkingPressureBar() => $_has(5);
   @$pb.TagNumber(6)
-  void clearWorkpressure() => $_clearField(6);
+  void clearWorkingPressureBar() => $_clearField(6);
 
   @$pb.TagNumber(7)
   $core.String get description => $_getSZ(6);
@@ -211,6 +220,25 @@ class Cylinder extends $pb.GeneratedMessage {
   $core.bool hasDescription() => $_has(6);
   @$pb.TagNumber(7)
   void clearDescription() => $_clearField(7);
+
+  /// Imperial values (set when entered in imperial units for exact round-trip)
+  @$pb.TagNumber(8)
+  $core.double get volumeCuft => $_getN(7);
+  @$pb.TagNumber(8)
+  set volumeCuft($core.double value) => $_setDouble(7, value);
+  @$pb.TagNumber(8)
+  $core.bool hasVolumeCuft() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearVolumeCuft() => $_clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.double get workingPressurePsi => $_getN(8);
+  @$pb.TagNumber(9)
+  set workingPressurePsi($core.double value) => $_setDouble(8, value);
+  @$pb.TagNumber(9)
+  $core.bool hasWorkingPressurePsi() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearWorkingPressurePsi() => $_clearField(9);
 }
 
 const $core.bool _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');

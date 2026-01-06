@@ -111,10 +111,10 @@ void main() {
 
       // Tank size: 14 liters
       expect(cyl.hasCylinder(), isTrue);
-      expect(cyl.cylinder.size, closeTo(14.0, 0.1));
+      expect(cyl.cylinder.volumeL, closeTo(14.0, 0.1));
 
       // Working pressure: 300 bar
-      expect(cyl.cylinder.workpressure, closeTo(300.0, 0.1));
+      expect(cyl.cylinder.workingPressureBar, closeTo(300.0, 0.1));
 
       // Begin pressure: 282.96 bar
       expect(cyl.hasBeginPressure(), isTrue);

@@ -52,7 +52,7 @@ class Store {
     // Deduplicate cylinders
     final uniqueCyls = <String, Cylinder>{};
     for (final cyl in await cylinders.getAll()) {
-      final key = '${cyl.size}/${cyl.workpressure}';
+      final key = '${cyl.volumeL}/${cyl.workingPressureBar}';
       final exist = uniqueCyls[key];
       if (exist != null) {
         await (cylinders.delete(cyl.id));
