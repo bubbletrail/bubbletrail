@@ -34,7 +34,6 @@ dependencies:
   crypto: ^3.0.7
   device_info_plus: ^12.3.0
   divestore: {path: ../pkg/divestore}
-  dotted_line: ^3.2.3
   equatable: ^2.0.5
   file_picker: ^10.3.7
   fl_chart: ^1.1.1
