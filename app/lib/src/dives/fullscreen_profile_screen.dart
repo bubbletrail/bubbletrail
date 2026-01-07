@@ -67,7 +67,7 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
                   title: Text('Dive #${dive.number}: ${site?.name ?? 'Unknown site'}'),
                   body: Padding(
                     padding: Platform.isIOS ? EdgeInsets.zero : const EdgeInsets.all(8.0),
-                    child: DepthProfileWidget(key: ValueKey((dive, prefsState.preferences)), log: dive.logs.first, preferences: prefsState.preferences),
+                    child: DepthProfileWidget(key: ValueKey((dive, prefsState.preferences)), log: dive.logs.first, preferences: prefsState.preferences, events: dive.events, cylinders: dive.cylinders),
                   ),
                   transparent: true,
                 );

@@ -49,18 +49,7 @@ class CylinderTile extends StatelessWidget {
       if (volumeL > 0) details.add(LabeledChip(label: 'Volume', child: Text('${formatDisplayValue(volumeL)} L')));
       if (workingPressureBar > 0) details.add(LabeledChip(label: 'WP', child: Text('${formatDisplayValue(workingPressureBar)} bar')));
     }
-
-    // Gas mixture
-    if (oxygenPct + heliumPct > 0) {
-      var mix = 'Air';
-      if (heliumPct > 0) {
-        mix = 'Tx$oxygenPct/$heliumPct';
-      } else if (oxygenPct != 21) {
-        mix = 'EAN$oxygenPct';
-      }
-      details.add(LabeledChip(label: 'Mix', child: Text(mix)));
-    }
-
+    details.add(LabeledChip(label: 'Mix', child: Text(formatGasPercentage(oxygenPct, heliumPct))));
     if (beginPressure > 0) details.add(LabeledChip(label: 'Start', child: PressureText(beginPressure)));
     if (endPressure > 0) details.add(LabeledChip(label: 'End', child: PressureText(endPressure)));
     if (sac > 0) {

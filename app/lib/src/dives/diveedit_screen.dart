@@ -42,16 +42,7 @@ class _EditableDiveCylinder {
     );
   }
 
-  String get gasDescription {
-    final o2Val = oxygen;
-    final heVal = helium;
-    if (heVal > 0) {
-      return 'Tx${o2Val.round()}/${heVal.round()}';
-    } else if (o2Val != 21) {
-      return 'EAN${o2Val.round()}';
-    }
-    return 'Air';
-  }
+  String get gasDescription => formatGasPercentage(oxygen, helium);
 }
 
 /// Editable gas change event

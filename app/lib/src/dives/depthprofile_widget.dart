@@ -8,8 +8,10 @@ import '../preferences/preferences.dart';
 class DepthProfileWidget extends StatefulWidget {
   final Log log;
   final Preferences preferences;
+  final List<SampleEvent> events;
+  final List<DiveCylinder> cylinders;
 
-  const DepthProfileWidget({super.key, required this.log, required this.preferences});
+  const DepthProfileWidget({super.key, required this.log, required this.preferences, required this.events, required this.cylinders});
 
   @override
   State<DepthProfileWidget> createState() => _DepthProfileWidgetState();
@@ -24,6 +26,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
   final List<FlSpot> _depthSpots = [];
   final List<FlSpot> _ceilingSpots = [];
   final _pressureData = <int, ({List<FlSpot> spots, double minPressure, double maxPressure})>{};
+  final _gasSwitches = <({double timeMinutes, String gasName})>[];
 
   @override
   void initState() {
@@ -101,6 +104,24 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
           _maxTime,
         );
         _pressureData[tankIndex] = (spots: spots, minPressure: minPressure, maxPressure: maxPressure);
+      }
+    }
+
+    if (widget.cylinders.length > 1) {
+      // Find gas switches
+      for (final event in widget.events) {
+        if (event.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE) {
+          if (event.value >= widget.cylinders.length) continue;
+          if (event.time > samplesWithDepth.first.time && event.value != 0 && _gasSwitches.isEmpty) {
+            // We're switching to a non-default gas, without having switched
+            // to the default gas, so for illustrative purposes we add a
+            // synthetic switch at the first sample.
+            _gasSwitches.add((timeMinutes: 0, gasName: formatGasFraction(widget.cylinders.first.oxygen, widget.cylinders.first.helium)));
+          }
+          final cyl = widget.cylinders[event.value];
+          final gasName = formatGasFraction(cyl.oxygen, cyl.helium);
+          _gasSwitches.add((timeMinutes: event.time / 60, gasName: gasName));
+        }
       }
     }
   }
@@ -225,6 +246,24 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
             minY: _chartMaxDepth,
             maxY: 0,
             lineBarsData: lineBars,
+            extraLinesData: ExtraLinesData(
+              // gas switches
+              verticalLines: [
+                for (final gs in _gasSwitches)
+                  VerticalLine(
+                    x: gs.timeMinutes,
+                    color: colorScheme.tertiary.withValues(alpha: 0.7),
+                    strokeWidth: 1,
+                    dashArray: [2, 2],
+                    label: VerticalLineLabel(
+                      show: true,
+                      alignment: Alignment.bottomRight,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(color: colorScheme.tertiary),
+                      labelResolver: (line) => gs.gasName,
+                    ),
+                  ),
+              ],
+            ),
             lineTouchData: LineTouchData(
               touchCallback: (event, resp) {
                 if (event is FlLongPressEnd) {

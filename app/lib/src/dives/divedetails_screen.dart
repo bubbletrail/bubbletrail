@@ -255,7 +255,13 @@ class _ProfileCard extends StatelessWidget {
                   maxHeight: 250,
                   child: BlocBuilder<PreferencesBloc, PreferencesState>(
                     builder: (context, state) {
-                      return DepthProfileWidget(key: ValueKey((dive, state.preferences)), log: dive.logs[0], preferences: state.preferences);
+                      return DepthProfileWidget(
+                        key: ValueKey((dive, state.preferences)),
+                        log: dive.logs[0],
+                        preferences: state.preferences,
+                        cylinders: dive.cylinders,
+                        events: dive.events,
+                      );
                     },
                   ),
                 ),
@@ -450,18 +456,7 @@ class _CylinderColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     final desc = description.isNotEmpty ? description : 'Cylinder ${index + 1}';
     final details = <Widget>[_ColumnRow(label: 'Cylinder', child: Text(desc))];
-
-    // Gas mixture
-    if (oxygenPct + heliumPct > 0) {
-      var mix = 'Air';
-      if (heliumPct > 0) {
-        mix = 'Tx$oxygenPct/$heliumPct';
-      } else if (oxygenPct != 21) {
-        mix = 'EAN$oxygenPct';
-      }
-      details.add(_ColumnRow(label: 'Mix', child: Text(mix)));
-    }
-
+    details.add(_ColumnRow(label: 'Mix', child: Text(formatGasPercentage(oxygenPct, heliumPct))));
     if (beginPressure > 0) details.add(_ColumnRow(label: 'Start', child: PressureText(beginPressure)));
     if (endPressure > 0) details.add(_ColumnRow(label: 'End', child: PressureText(endPressure)));
     if (beginPressure > 0 && endPressure > 0 && volumeL > 0) {

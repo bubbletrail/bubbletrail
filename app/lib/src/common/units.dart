@@ -298,3 +298,16 @@ String formatDisplayValue(num value) {
   }
   return formatted;
 }
+
+String formatGasPercentage(num oxygenPct, num heliumPct) {
+  if (heliumPct > 0) {
+    return 'Tx${oxygenPct.round()}/${heliumPct.round()}';
+  } else if (oxygenPct > 0 && oxygenPct.round() != 21) {
+    return 'EAN${oxygenPct.round()}';
+  }
+  return 'Air';
+}
+
+String formatGasFraction(double oxygen, double helium) {
+  return formatGasPercentage(100 * oxygen, 100 * helium);
+}
