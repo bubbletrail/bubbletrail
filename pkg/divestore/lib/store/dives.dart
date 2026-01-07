@@ -135,6 +135,9 @@ class Dives {
         dive.logs.addAll(logs);
       });
     }
+    dive = dive.rebuild((dive) {
+      dive.tags.sort((a, b) => a.compareTo(b));
+    });
     return dive;
   }
 

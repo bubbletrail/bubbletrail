@@ -116,8 +116,8 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
     final colorScheme = Theme.of(context).colorScheme;
     final primaryColor = colorScheme.primary;
     final borderColor = colorScheme.outline;
-    final tempColor = Colors.orange;
-    final pressureColors = [Colors.teal, Colors.cyan, Colors.green, Colors.lime];
+    final tempColor = Colors.cyan;
+    final pressureColors = [Colors.orange, Colors.green, Colors.lime, Colors.teal];
     final ceilingColor = Colors.red;
 
     // Build line bars
@@ -180,7 +180,8 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
                 Text(formatDuration(_displaySample!.time.toInt())),
                 DepthText(_displaySample!.depth),
                 TemperatureText(_displaySample!.temperature),
-                if (_displaySample!.pressures.isNotEmpty) PressureText(_displaySample!.pressures.first.pressure),
+                if (_displaySample!.pressures.isNotEmpty && _displaySample!.pressures.first.pressure > 0)
+                  PressureText(_displaySample!.pressures.first.pressure),
                 if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0) DepthText(_displaySample!.deco.depth, prefix: 'Ceil: '),
               ],
             ),

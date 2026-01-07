@@ -7,6 +7,7 @@ export 'dive_table.dart';
 export 'duration_picker.dart';
 export 'icon_text.dart';
 export 'info_card_row.dart';
+export 'labeled_chip.dart';
 export 'measurement_editor.dart';
 export 'screen_scaffold.dart';
 export 'site_list_item_card.dart';
