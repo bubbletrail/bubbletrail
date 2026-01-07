@@ -40,7 +40,7 @@ jobs:
   build-macos:
     name: Build for macOS
     runs-on: macos-26
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/release' || github.ref == 'refs/heads/macapp')
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/release'
     environment: release
     needs:
       - test
@@ -73,8 +73,7 @@ jobs:
       - name: Save artifacts (macOS)
         uses: actions/upload-artifact@v4
         with:
-          path: app/Bubbletrail.zip
-          name: bubbletrail-macos-${{ env.MARKET_VERSION }}
+          path: app/bubbletrail*.zip
 
   build-ios:
     name: Build for iOS
@@ -127,3 +126,46 @@ jobs:
           MATCH_KEYCHAIN_NAME: ${{ runner.temp }}/bubbletrain.keychain
           MATCH_KEYCHAIN_PASSWORD: ${{ secrets.MATCH_KEYCHAIN_PASSWORD }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+
+  publish-release:
+    name: Publish release
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/release'
+    permissions:
+      contents: write
+    needs:
+      - build-macos
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: dart-lang/setup-dart@v1
+      - uses: ./.github/actions/build-info
+
+      - name: Download packages
+        uses: actions/download-artifact@v7
+        with:
+          path: packages
+
+      - name: Create GitHub releases and push binaries
+        run: |
+          export GH_PROMPT_DISABLED=1
+
+          # If a release does not yet exist, create one
+          if ! gh release view --json name "$MARKET_VERSION" >/dev/null 2>&1 ; then
+            gh release create "$MARKET_VERSION" \
+              --draft \
+              --title "$MARKET_VERSION" \
+              --generate-notes
+          fi
+
+          # Upload packages to the release
+          gh release upload --clobber "$MARKET_VERSION" \
+            packages/*.zip
+
+          # Once packages are uploaded, publish the release
+          gh release edit "$MARKET_VERSION" --draft=false
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -32,7 +32,7 @@ flutter build macos \
     --dart-define=MARKETINGVERSION="${MARKET_VERSION:-0.0.1}"
 
 APP_NAME=$(find build/macos -name "*.app")
-ZIP_NAME=$(basename "$APP_NAME" .app).zip
+ZIP_NAME=bubbletrail-macos-${MARKET_VERSION}.zip
 spctl -vvv --assess --type exec "$APP_NAME"
 
 mv "$APP_NAME" .
