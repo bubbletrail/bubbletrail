@@ -137,6 +137,7 @@ class Dives {
     }
     dive = dive.rebuild((dive) {
       dive.tags.sort((a, b) => a.compareTo(b));
+      dive.events.sort((a, b) => a.time.compareTo(b.time));
     });
     return dive;
   }
