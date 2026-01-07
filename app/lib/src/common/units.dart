@@ -64,15 +64,10 @@ String formatPressure(PressureUnit unit, num pressure) {
 String formatVolume(VolumeUnit unit, num volume) {
   switch (unit) {
     case VolumeUnit.liters:
-      return '${volume.toStringAsFixed(1)} ${unit.label}';
+      return '${formatDisplayValue(volume)} ${unit.label}';
     case VolumeUnit.cuft:
       final val = volume * 0.0353;
-      final decimals = val < 1
-          ? 2
-          : val < 20
-          ? 1
-          : 0;
-      return '${val.toStringAsFixed(decimals)} ${unit.label}';
+      return '${formatDisplayValue(val)} ${unit.label}';
   }
 }
 
@@ -287,7 +282,7 @@ class DecoStatusText extends StatelessWidget {
   }
 }
 
-String formatDisplayValue(double value) {
+String formatDisplayValue(num value) {
   // Use reasonable precision
   var precision = 1;
   if (value < 1) precision = 2;

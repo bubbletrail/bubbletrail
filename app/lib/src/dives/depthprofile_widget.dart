@@ -116,8 +116,8 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
     final colorScheme = Theme.of(context).colorScheme;
     final primaryColor = colorScheme.primary;
     final borderColor = colorScheme.outline;
-    final tempColor = Colors.orange;
-    final pressureColors = [Colors.teal, Colors.cyan, Colors.green, Colors.lime];
+    final tempColor = Colors.cyan;
+    final pressureColors = [Colors.orange, Colors.green, Colors.lime, Colors.teal];
     final ceilingColor = Colors.red;
 
     // Build line bars

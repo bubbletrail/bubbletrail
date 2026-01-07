@@ -85,7 +85,11 @@ class Sites {
   }
 
   Future<Site?> getById(String id) async {
-    return _sites[id];
+    final site = _sites[id];
+    if (site == null) return null;
+    return site.rebuild((site) {
+      site.tags.sort((a, b) => a.compareTo(b));
+    });
   }
 
   Future<List<Site>> getAll({bool withDeleted = false}) async {

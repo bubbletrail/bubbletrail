@@ -43,11 +43,11 @@ class CylinderTile extends StatelessWidget {
     final details = <Widget>[];
 
     if (workingPressurePsi > 0 && volumeCuft > 0) {
-      details.add(Text('${formatDisplayValue(volumeCuft)} cuft'));
-      details.add(Text('${formatDisplayValue(workingPressurePsi)} psi'));
+      details.add(LabeledChip(label: 'Volume', child: Text('${formatDisplayValue(volumeCuft)} cuft')));
+      details.add(LabeledChip(label: 'WP', child: Text('${formatDisplayValue(workingPressurePsi)} psi')));
     } else {
-      if (volumeL > 0) details.add(Text('${formatDisplayValue(volumeL)} L'));
-      if (workingPressureBar > 0) details.add(Text('${formatDisplayValue(workingPressureBar)} bar'));
+      if (volumeL > 0) details.add(LabeledChip(label: 'Volume', child: Text('${formatDisplayValue(volumeL)} L')));
+      if (workingPressureBar > 0) details.add(LabeledChip(label: 'WP', child: Text('${formatDisplayValue(workingPressureBar)} bar')));
     }
 
     // Gas mixture
@@ -58,15 +58,23 @@ class CylinderTile extends StatelessWidget {
       } else if (oxygenPct != 21) {
         mix = 'EAN$oxygenPct';
       }
-      details.add(IconText(Icons.speed, mix));
+      details.add(LabeledChip(label: 'Mix', child: Text(mix)));
     }
 
-    if (beginPressure > 0) details.add(PressureText(beginPressure, icon: Icons.battery_5_bar_outlined));
-    if (endPressure > 0) details.add(PressureText(endPressure, icon: Icons.battery_1_bar_outlined));
-    if (sac > 0) details.add(VolumeText(sac, icon: Icons.av_timer, suffix: '/min'));
+    if (beginPressure > 0) details.add(LabeledChip(label: 'Start', child: PressureText(beginPressure)));
+    if (endPressure > 0) details.add(LabeledChip(label: 'End', child: PressureText(endPressure)));
+    if (sac > 0) {
+      details.add(
+        LabeledChip(
+          label: 'SAC',
+          child: VolumeText(sac, suffix: '/min'),
+        ),
+      );
+    }
 
     return ListTile(
-      title: Text(desc),
+      contentPadding: EdgeInsets.zero,
+      title: Padding(padding: const EdgeInsets.only(left: 8.0, bottom: 8.0), child: Text(desc)),
       subtitle: Wrap(spacing: 8, runSpacing: 8, children: details),
       leading: leading,
       trailing: trailing,

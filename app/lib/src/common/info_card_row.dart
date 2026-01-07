@@ -10,7 +10,7 @@ Widget infoCard(BuildContext context, String title, List<Widget> children) {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+          Text(title, style: Theme.of(context).textTheme.titleMedium),
           const Divider(),
           ...children,
         ],
