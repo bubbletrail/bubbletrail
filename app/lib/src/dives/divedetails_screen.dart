@@ -191,8 +191,8 @@ class _DiveDetails extends StatelessWidget {
     }).toList();
   }
 
-  Column _weightsTable() {
-    return Column(
+  Widget _weightsTable() {
+    return _DataColumn(
       children: dive.weightsystems.indexed.map((entry) {
         final idx = entry.$1;
         final ws = entry.$2;
@@ -202,10 +202,10 @@ class _DiveDetails extends StatelessWidget {
     );
   }
 
-  Column _physioTable() {
+  Widget _physioTable() {
     final worstDeco = dive.logs.isNotEmpty ? dive.logs.first.worstDecoStatus : null;
     final decoModel = dive.logs.isNotEmpty && dive.logs[0].hasDecoModel() ? dive.logs[0].decoModel : null;
-    return Column(
+    return _DataColumn(
       children: [
         if (dive.hasMaxTemp() || dive.hasMinTemp()) _Temps(dive),
         if (dive.hasSac())
@@ -221,8 +221,8 @@ class _DiveDetails extends StatelessWidget {
     );
   }
 
-  Column _depthsTable() {
-    return Column(
+  Widget _depthsTable() {
+    return _DataColumn(
       children: [
         _ColumnRow(label: 'Start', child: DateTimeText(dive.start.toDateTime())),
         _ColumnRow(label: 'Duration', child: DurationText(dive.duration)),
@@ -395,6 +395,17 @@ class _RawDiveDataScreen extends StatelessWidget {
   }
 }
 
+class _DataColumn extends StatelessWidget {
+  const _DataColumn({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return IntrinsicWidth(child: Column(children: children));
+  }
+}
+
 class _ColumnRow extends StatelessWidget {
   const _ColumnRow({required this.label, required this.child});
 
@@ -403,21 +414,14 @@ class _ColumnRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 200,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Opacity(opacity: 0.5, child: Text(label ?? '', style: Theme.of(context).textTheme.labelSmall)),
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 4.0, left: 4.0, right: 4.0),
-              child: DottedLine(dashColor: Colors.grey.withAlpha(128)),
-            ),
-          ),
-          child,
-        ],
-      ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Opacity(opacity: 0.5, child: Text(label ?? '', style: Theme.of(context).textTheme.labelSmall)),
+        SizedBox(width: 16),
+        child,
+      ],
     );
   }
 }
@@ -473,7 +477,7 @@ class _CylinderColumn extends StatelessWidget {
       );
     }
 
-    return Column(children: details);
+    return _DataColumn(children: details);
   }
 }
 
