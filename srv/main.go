@@ -8,15 +8,19 @@ import (
 
 	"github.com/alecthomas/kong"
 
+	"bubbletrail.net/srv/internal/email"
 	"bubbletrail.net/srv/internal/minio"
 )
 
 var cli struct {
-	Endpoint   string `help:"MinIO endpoint" env:"MINIO_ENDPOINT" required:""`
-	AccessKey  string `help:"MinIO admin access key" env:"MINIO_ACCESS_KEY" required:""`
-	SecretKey  string `help:"MinIO admin secret key" env:"MINIO_SECRET_KEY" required:""`
-	UseSSL     bool   `help:"Use SSL for MinIO connection" env:"MINIO_USE_SSL" default:"true"`
-	AdminToken string `help:"Bearer token for admin API endpoints" env:"ADMIN_TOKEN" required:""`
+	Endpoint        string `help:"MinIO endpoint" env:"MINIO_ENDPOINT" required:""`
+	AccessKey       string `help:"MinIO admin access key" env:"MINIO_ACCESS_KEY" required:""`
+	SecretKey       string `help:"MinIO admin secret key" env:"MINIO_SECRET_KEY" required:""`
+	UseSSL          bool   `help:"Use SSL for MinIO connection" env:"MINIO_USE_SSL" default:"true"`
+	AdminToken      string `help:"Bearer token for admin API endpoints" env:"ADMIN_TOKEN" required:""`
+	MailgunDomain   string `help:"Mailgun domain" env:"MAILGUN_DOMAIN" required:""`
+	MailgunAPIKey   string `help:"Mailgun API key" env:"MAILGUN_API_KEY" required:""`
+	MailgunFrom     string `help:"Email from address" env:"MAILGUN_FROM" required:""`
 }
 
 type newUserRequest struct {
@@ -26,10 +30,12 @@ type newUserRequest struct {
 func main() {
 	kong.Parse(&cli)
 
-	client, err := minio.NewClient(cli.Endpoint, cli.AccessKey, cli.SecretKey, cli.UseSSL)
+	minioClient, err := minio.NewClient(cli.Endpoint, cli.AccessKey, cli.SecretKey, cli.UseSSL)
 	if err != nil {
 		log.Fatalf("failed to create minio client: %v", err)
 	}
+
+	emailClient := email.NewClient(cli.MailgunDomain, cli.MailgunAPIKey, cli.MailgunFrom)
 
 	http.HandleFunc("POST /new", func(w http.ResponseWriter, r *http.Request) {
 		var req newUserRequest
@@ -43,10 +49,20 @@ func main() {
 			return
 		}
 
-		result, err := client.CreateUser(r.Context(), req.Email)
+		result, err := minioClient.CreateUser(r.Context(), req.Email)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
+		}
+
+		err = emailClient.SendCredentials(r.Context(), email.Credentials{
+			Email:     req.Email,
+			Bucket:    result.BucketName,
+			AccessKey: result.AccessKey,
+			SecretKey: result.SecretKey,
+		})
+		if err != nil {
+			log.Printf("failed to send credentials email: %v", err)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -66,7 +82,7 @@ func main() {
 			return
 		}
 
-		err := client.DeleteUser(r.Context(), email)
+		err := minioClient.DeleteUser(r.Context(), email)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
