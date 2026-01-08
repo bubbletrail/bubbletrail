@@ -31,7 +31,7 @@ class PreferencesStorage {
       dateFormat: DateFormatPref.values[prefs.getInt(_dateFormatKey) ?? 0],
       timeFormat: TimeFormatPref.values[prefs.getInt(_timeFormatKey) ?? 0],
       themeMode: ThemeMode.values[prefs.getInt(_themeModeKey) ?? 0],
-      syncProvider: SyncProvider.values[prefs.getInt(_syncProviderKey) ?? 0],
+      syncProvider: SyncProviderKind.values[prefs.getInt(_syncProviderKey) ?? 0],
       s3Config: S3Config(
         endpoint: prefs.getString(_s3EndpointKey) ?? '',
         bucket: prefs.getString(_s3BucketKey) ?? '',

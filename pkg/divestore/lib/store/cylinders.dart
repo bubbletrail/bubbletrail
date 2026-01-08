@@ -3,10 +3,11 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
+import 'package:minio/minio.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 
-import '../gen/gen.dart';
+import '../divestore.dart';
 import '../gen/internal.pb.dart';
 import 'fileio.dart';
 
@@ -52,13 +53,6 @@ class Cylinders {
         cylinder.createdAt = cylinder.updatedAt;
       }
     });
-    _cylinders[cylinder.id] = cylinder;
-    _scheduleSave();
-  }
-
-  Future<void> _import(Cylinder cylinder) async {
-    if (readonly) throw Exception('readonly');
-    if (!cylinder.isFrozen) cylinder.freeze();
     _cylinders[cylinder.id] = cylinder;
     _scheduleSave();
   }
@@ -131,18 +125,34 @@ class Cylinders {
     }
   }
 
-  Future<void> importFrom(Cylinders other) async {
-    for (final cyl in await other.getAll(withDeleted: true)) {
-      final cur = _cylinders[cyl.id];
-      if (cyl.hasDeletedAt()) {
-        if (cur != null) {
-          print('delete cylinder ${cyl.id}');
-          await delete(cyl.id);
+  Future<void> syncWith(SyncProvider provider) async {
+    // Get all cylinders, merge with the list.
+    try {
+      final obj = await provider.getObject('cylinders');
+      final cls = InternalCylinderList.fromBuffer(obj);
+      cls.freeze();
+      for (final cyl in cls.cylinders) {
+        final cur = _cylinders[cyl.id];
+        if (cyl.hasDeletedAt()) {
+          if (cur != null) {
+            print('delete cylinder ${cyl.id}');
+            await delete(cyl.id);
+          }
+        } else if (cur == null || cyl.updatedAt.toDateTime().isAfter(cur.updatedAt.toDateTime())) {
+          print('import cylinder ${cyl.id}');
+          _cylinders[cyl.id] = cyl;
         }
-      } else if (cur == null || cyl.updatedAt.toDateTime().isAfter(cur.updatedAt.toDateTime())) {
-        print('import cylinder ${cyl.id}');
-        await _import(cyl);
       }
+    } on MinioError catch (e) {
+      print('failed to load: $e');
     }
+
+    // Upload the new merged set.
+    final vals = _cylinders.values.toList();
+    final cl = InternalCylinderList(cylinders: vals);
+    final bs = cl.writeToBuffer();
+    await provider.putObject('cylinders', bs);
+
+    _scheduleSave();
   }
 }

@@ -99,7 +99,7 @@ class UpdateThemeMode extends PreferencesEvent {
 }
 
 class UpdateSyncProvider extends PreferencesEvent {
-  final SyncProvider syncProvider;
+  final SyncProviderKind syncProvider;
 
   const UpdateSyncProvider(this.syncProvider);
 

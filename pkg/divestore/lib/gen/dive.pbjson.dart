@@ -23,6 +23,7 @@ const Dive$json = {
     {'1': 'created_at', '3': 2, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'createdAt'},
     {'1': 'updated_at', '3': 3, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'updatedAt'},
     {'1': 'deleted_at', '3': 4, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'deletedAt'},
+    {'1': 'synced_etag', '3': 5, '4': 1, '5': 9, '10': 'syncedEtag'},
     {'1': 'number', '3': 8, '4': 1, '5': 5, '10': 'number'},
     {'1': 'rating', '3': 9, '4': 1, '5': 5, '10': 'rating'},
     {'1': 'tags', '3': 10, '4': 3, '5': 9, '10': 'tags'},
@@ -51,19 +52,19 @@ const Dive$json = {
 final $typed_data.Uint8List diveDescriptor = $convert.base64Decode('CgREaXZlEg4KAmlkGAEgASgJUgJpZBI5CgpjcmVhdGVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3'
     'RvYnVmLlRpbWVzdGFtcFIJY3JlYXRlZEF0EjkKCnVwZGF0ZWRfYXQYAyABKAsyGi5nb29nbGUu'
     'cHJvdG9idWYuVGltZXN0YW1wUgl1cGRhdGVkQXQSOQoKZGVsZXRlZF9hdBgEIAEoCzIaLmdvb2'
-    'dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSCWRlbGV0ZWRBdBIWCgZudW1iZXIYCCABKAVSBm51bWJl'
-    'chIWCgZyYXRpbmcYCSABKAVSBnJhdGluZxISCgR0YWdzGAogAygJUgR0YWdzEjAKBXN0YXJ0GA'
-    'sgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIFc3RhcnQSGgoIZHVyYXRpb24YDCAB'
-    'KAVSCGR1cmF0aW9uEhsKCW1heF9kZXB0aBgNIAEoAVIIbWF4RGVwdGgSHQoKbWVhbl9kZXB0aB'
-    'gOIAEoAVIJbWVhbkRlcHRoEhkKCG1pbl90ZW1wGBsgASgBUgdtaW5UZW1wEhkKCG1heF90ZW1w'
-    'GBwgASgBUgdtYXhUZW1wEhAKA3NhYxgPIAEoAVIDc2FjEhAKA290dRgQIAEoBVIDb3R1EhAKA2'
-    'NucxgRIAEoBVIDY25zEhcKB3NpdGVfaWQYEiABKAlSBnNpdGVJZBIeCgppbnN0cnVjdG9yGBMg'
-    'ASgJUgppbnN0cnVjdG9yEh4KCmRpdmVtYXN0ZXIYFCABKAlSCmRpdmVtYXN0ZXISGAoHYnVkZG'
-    'llcxgVIAMoCVIHYnVkZGllcxIUCgVub3RlcxgWIAEoCVIFbm90ZXMSNQoJY3lsaW5kZXJzGBcg'
-    'AygLMhcuZGl2ZXN0b3JlLkRpdmVDeWxpbmRlclIJY3lsaW5kZXJzEj0KDXdlaWdodHN5c3RlbX'
-    'MYGCADKAsyFy5kaXZlc3RvcmUuV2VpZ2h0c3lzdGVtUg13ZWlnaHRzeXN0ZW1zEiIKBGxvZ3MY'
-    'GSADKAsyDi5kaXZlc3RvcmUuTG9nUgRsb2dzEi4KBmV2ZW50cxgaIAMoCzIWLmRpdmVzdG9yZS'
-    '5TYW1wbGVFdmVudFIGZXZlbnRz');
+    'dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSCWRlbGV0ZWRBdBIfCgtzeW5jZWRfZXRhZxgFIAEoCVIK'
+    'c3luY2VkRXRhZxIWCgZudW1iZXIYCCABKAVSBm51bWJlchIWCgZyYXRpbmcYCSABKAVSBnJhdG'
+    'luZxISCgR0YWdzGAogAygJUgR0YWdzEjAKBXN0YXJ0GAsgASgLMhouZ29vZ2xlLnByb3RvYnVm'
+    'LlRpbWVzdGFtcFIFc3RhcnQSGgoIZHVyYXRpb24YDCABKAVSCGR1cmF0aW9uEhsKCW1heF9kZX'
+    'B0aBgNIAEoAVIIbWF4RGVwdGgSHQoKbWVhbl9kZXB0aBgOIAEoAVIJbWVhbkRlcHRoEhkKCG1p'
+    'bl90ZW1wGBsgASgBUgdtaW5UZW1wEhkKCG1heF90ZW1wGBwgASgBUgdtYXhUZW1wEhAKA3NhYx'
+    'gPIAEoAVIDc2FjEhAKA290dRgQIAEoBVIDb3R1EhAKA2NucxgRIAEoBVIDY25zEhcKB3NpdGVf'
+    'aWQYEiABKAlSBnNpdGVJZBIeCgppbnN0cnVjdG9yGBMgASgJUgppbnN0cnVjdG9yEh4KCmRpdm'
+    'VtYXN0ZXIYFCABKAlSCmRpdmVtYXN0ZXISGAoHYnVkZGllcxgVIAMoCVIHYnVkZGllcxIUCgVu'
+    'b3RlcxgWIAEoCVIFbm90ZXMSNQoJY3lsaW5kZXJzGBcgAygLMhcuZGl2ZXN0b3JlLkRpdmVDeW'
+    'xpbmRlclIJY3lsaW5kZXJzEj0KDXdlaWdodHN5c3RlbXMYGCADKAsyFy5kaXZlc3RvcmUuV2Vp'
+    'Z2h0c3lzdGVtUg13ZWlnaHRzeXN0ZW1zEiIKBGxvZ3MYGSADKAsyDi5kaXZlc3RvcmUuTG9nUg'
+    'Rsb2dzEi4KBmV2ZW50cxgaIAMoCzIWLmRpdmVzdG9yZS5TYW1wbGVFdmVudFIGZXZlbnRz');
 
 @$core.Deprecated('Use diveCylinderDescriptor instead')
 const DiveCylinder$json = {

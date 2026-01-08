@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,7 +21,7 @@ class SyncingScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             children: [
               _SyncProviderTile(prefs: prefs),
-              if (prefs.syncProvider == SyncProvider.s3) _S3ConfigSection(prefs: prefs),
+              if (prefs.syncProvider == SyncProviderKind.s3) _S3ConfigSection(prefs: prefs),
               const SizedBox(height: 24),
               BlocBuilder<SyncBloc, SyncState>(
                 builder: (context, syncState) {
@@ -33,7 +31,7 @@ class SyncingScreen extends StatelessWidget {
                       SyncStatusTile(state: syncState),
                       const SizedBox(height: 16),
                       FilledButton.icon(
-                        onPressed: syncState.syncing || prefs.syncProvider == SyncProvider.none
+                        onPressed: syncState.syncing || prefs.syncProvider == SyncProviderKind.none
                             ? null
                             : () => context.read<SyncBloc>().add(const StartSyncing()),
                         icon: syncState.syncing
@@ -60,12 +58,11 @@ class _SyncProviderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Filter available providers based on platform
-    final availableProviders = <SyncProvider>[SyncProvider.none, if (Platform.isIOS || Platform.isMacOS) SyncProvider.icloud, SyncProvider.s3];
+    final availableProviders = <SyncProviderKind>[SyncProviderKind.none, SyncProviderKind.s3];
 
     return PreferencesTile(
       title: 'Sync Provider',
-      trailing: SegmentedButton<SyncProvider>(
+      trailing: SegmentedButton<SyncProviderKind>(
         segments: [
           for (final provider in availableProviders) ButtonSegment(value: provider, label: Text(_syncProviderLabel(provider)), icon: const Icon(null)),
         ],
@@ -77,11 +74,10 @@ class _SyncProviderTile extends StatelessWidget {
     );
   }
 
-  String _syncProviderLabel(SyncProvider provider) {
+  String _syncProviderLabel(SyncProviderKind provider) {
     return switch (provider) {
-      SyncProvider.none => 'Off',
-      SyncProvider.icloud => 'iCloud',
-      SyncProvider.s3 => 'S3',
+      SyncProviderKind.none => 'Off',
+      SyncProviderKind.s3 => 'S3',
     };
   }
 }

@@ -10,8 +10,7 @@ import 'package:logging/logging.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 
-import '../dc_convert.dart';
-import '../gen/gen.dart';
+import '../divestore.dart';
 import '../gen/internal.pb.dart';
 import 'fileio.dart';
 
@@ -61,6 +60,7 @@ class Dives {
     for (var dive in dives) {
       if (!dive.isFrozen) dive.freeze();
       dive = dive.rebuild((dive) {
+        dive.clearSyncedEtag();
         if (!dive.hasId()) {
           dive.id = Uuid().v4().toString();
         }
@@ -94,6 +94,7 @@ class Dives {
     if (readonly) throw Exception('readonly');
     if (!dive.isFrozen) dive.freeze();
     dive = dive.rebuild((dive) {
+      dive.clearSyncedEtag();
       dive.updatedAt = Timestamp.fromDateTime(DateTime.now());
       for (final (idx, cyl) in dive.cylinders.indexed) {
         dive.cylinders[idx] = cyl.rebuild((cyl) {
@@ -101,15 +102,6 @@ class Dives {
         });
       }
     });
-    _dives[dive.id] = dive;
-    _tags.addAll(dive.tags);
-    _buddies.addAll(dive.buddies);
-    _scheduleSave(dive.id);
-  }
-
-  Future<void> _import(Dive dive) async {
-    if (readonly) throw Exception('readonly');
-    if (!dive.isFrozen) dive.freeze();
     _dives[dive.id] = dive;
     _tags.addAll(dive.tags);
     _buddies.addAll(dive.buddies);
@@ -159,9 +151,18 @@ class Dives {
       try {
         final dive = await _loadMeta(match.path);
         _dives[dive.id] = dive;
-        _tags.addAll(dive.tags);
-        _buddies.addAll(dive.buddies);
       } catch (_) {}
+    }
+    _rebuildTags();
+  }
+
+  void _rebuildTags() {
+    _buddies.clear();
+    _tags.clear();
+    for (final dive in _dives.values) {
+      if (dive.hasDeletedAt()) continue;
+      _buddies.addAll(dive.buddies);
+      _tags.addAll(dive.tags);
     }
   }
 
@@ -220,20 +221,60 @@ class Dives {
     return dl.writeToBuffer();
   }
 
-  Future<void> importFrom(Dives other) async {
-    for (final dive in await other.getAll(withDeleted: true)) {
-      final cur = _dives[dive.id];
-      if (dive.hasDeletedAt()) {
-        if (cur != null) {
-          print('delete dive ${dive.id}');
-          await delete(dive.id);
-        }
-      } else if (cur == null || dive.updatedAt.toDateTime().isAfter(cur.updatedAt.toDateTime())) {
-        final rdive = await other.getById(dive.id);
-        print('import dive ${rdive!.id}');
-        await _import(rdive);
+  Future<void> syncWith(SyncProvider provider) async {
+    final seenEtags = <String, String>{}; // dive ID -> eTag
+    await for (final obj in provider.listObjects()) {
+      if (!obj.key.startsWith('dive-')) {
+        // Not a dive
+        continue;
+      }
+
+      final id = obj.key.replaceFirst('dive-', '');
+      seenEtags[id] = obj.eTag;
+
+      final cur = _dives[id];
+      if (cur != null && cur.syncedEtag == obj.eTag) {
+        // Identical, no change required
+        continue;
+      } else {
+        _log.fine('loading $id because their ${obj.eTag} is different from our ${cur?.syncedEtag}');
+      }
+
+      // Load the dive
+      final data = await provider.getObject(obj.key);
+      final dive = Dive.fromBuffer(data);
+      if (dive.id != id) {
+        _log.warning('bug: object with id $id contained unexpected dive ${dive.id}');
+        continue;
+      }
+      dive.syncedEtag = obj.eTag;
+      dive.freeze();
+
+      // If it's newer, replace our dive.
+      if (cur == null || dive.updatedAt.toDateTime().isAfter(cur.updatedAt.toDateTime()) || dive.deletedAt.toDateTime().isAfter(cur.deletedAt.toDateTime())) {
+        _log.fine('import dive ${id}');
+        _dives[id] = dive;
+        _scheduleSave(id);
       }
     }
+
+    // Upload all dives with mismatched eTags. This will include the dives
+    // we didn't import above because they were older than what we had.
+    for (final dive in _dives.values) {
+      if (seenEtags[dive.id] == dive.syncedEtag) continue;
+      final fullDive = await getById(dive.id);
+      final data = fullDive!.rebuild((dive) {
+        dive.clearSyncedEtag();
+      }).writeToBuffer();
+      final etag = await provider.putObject('dive-${dive.id}', data);
+      _log.fine('put ${dive.id} and got $etag');
+      _dives[dive.id] = dive.rebuild((dive) {
+        dive.syncedEtag = etag;
+      });
+      _scheduleSave(dive.id);
+    }
+
+    _rebuildTags();
   }
 
   String diveDir(Dive dive) => "$pathPrefix/${DateFormat('yyyy-MM').format(dive.createdAt.toDateTime())}";

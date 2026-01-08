@@ -64,7 +64,7 @@ enum TimeFormatPref {
   final String format;
 }
 
-enum SyncProvider { none, icloud, s3 }
+enum SyncProviderKind { none, s3 }
 
 class S3Config {
   final String endpoint;
@@ -111,7 +111,7 @@ class Preferences {
   final DateFormatPref dateFormat;
   final TimeFormatPref timeFormat;
   final ThemeMode themeMode;
-  final SyncProvider syncProvider;
+  final SyncProviderKind syncProvider;
   final S3Config s3Config;
 
   String get dateTimeFormat => '${dateFormat.format} ${timeFormat.format}';
@@ -125,7 +125,7 @@ class Preferences {
     this.dateFormat = DateFormatPref.iso,
     this.timeFormat = TimeFormatPref.h24,
     this.themeMode = ThemeMode.system,
-    this.syncProvider = SyncProvider.none,
+    this.syncProvider = SyncProviderKind.none,
     this.s3Config = const S3Config(),
   });
 
@@ -138,7 +138,7 @@ class Preferences {
     DateFormatPref? dateFormat,
     TimeFormatPref? timeFormat,
     ThemeMode? themeMode,
-    SyncProvider? syncProvider,
+    SyncProviderKind? syncProvider,
     S3Config? s3Config,
   }) {
     return Preferences(

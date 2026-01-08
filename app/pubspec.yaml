@@ -30,6 +30,7 @@ environment:
 dependencies:
   bloc_concurrency: ^0.3.0
   chips_input_autocomplete: ^1.2.2
+  chunked_stream: ^1.4.2
   copy_with_extension: ^11.0.0
   crypto: ^3.0.7
   device_info_plus: ^12.3.0
