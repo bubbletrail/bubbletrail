@@ -97,6 +97,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     final store = Store(dir);
     await store.init();
     _storeCompleter.complete(store);
+    add(StartSyncing());
   }
 
   Future<void> _onStartSyncing(StartSyncing event, Emitter<SyncState> emit) async {
