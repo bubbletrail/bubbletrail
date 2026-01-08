@@ -63,13 +63,12 @@ class _SyncProviderTile extends StatelessWidget {
 
     return PreferencesTile(
       title: 'Sync provider',
-      trailing: SegmentedButton<SyncProviderKind>(
-        segments: [
-          for (final provider in availableProviders) ButtonSegment(value: provider, label: Text(_syncProviderLabel(provider)), icon: const Icon(null)),
-        ],
-        selected: {prefs.syncProvider},
-        onSelectionChanged: (value) {
-          context.read<PreferencesBloc>().add(UpdateSyncProvider(value.first));
+      trailing: DropdownButton<SyncProviderKind>(
+        dropdownColor: Theme.of(context).colorScheme.primaryContainer,
+        value: prefs.syncProvider,
+        items: [for (final provider in availableProviders) DropdownMenuItem<SyncProviderKind>(value: provider, child: Text(_syncProviderLabel(provider)))],
+        onChanged: (value) {
+          context.read<PreferencesBloc>().add(UpdateSyncProvider(value!));
         },
       ),
     );
