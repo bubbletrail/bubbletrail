@@ -2,9 +2,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_sparkle/flutter_sparkle.dart';
 
-import '../app_metadata.dart';
 import '../preferences/preferences.dart';
 import '../preferences/preferences_storage.dart';
 
@@ -118,15 +116,6 @@ class UpdateS3Config extends PreferencesEvent {
   List<Object?> get props => [s3Config];
 }
 
-class UpdateCheckForUpdates extends PreferencesEvent {
-  final bool checkForUpdates;
-
-  const UpdateCheckForUpdates(this.checkForUpdates);
-
-  @override
-  List<Object?> get props => [checkForUpdates];
-}
-
 class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
   final PreferencesStorage _storage = PreferencesStorage();
 
@@ -154,8 +143,6 @@ class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
         await _onUpdateSyncProvider(event, emit);
       } else if (event is UpdateS3Config) {
         await _onUpdateS3Config(event, emit);
-      } else if (event is UpdateCheckForUpdates) {
-        await _onUpdateCheckForUpdates(event, emit);
       }
     }, transformer: sequential());
 
@@ -165,15 +152,6 @@ class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
   Future<void> _onLoad(LoadPreferences event, Emitter<PreferencesState> emit) async {
     final preferences = await _storage.load();
     emit(PreferencesState(preferences));
-    if (preferences.checkForUpdates) FlutterSparkle.checkMacUpdate(updateCheckURL);
-  }
-
-  Future<void> _onUpdateCheckForUpdates(UpdateCheckForUpdates event, Emitter<PreferencesState> emit) async {
-    final current = state.preferences;
-    final updated = current.copyWith(checkForUpdates: event.checkForUpdates);
-    await _storage.save(updated);
-    emit(PreferencesState(updated));
-    if (event.checkForUpdates) FlutterSparkle.checkMacUpdate(updateCheckURL);
   }
 
   Future<void> _onUpdateDepthUnit(UpdateDepthUnit event, Emitter<PreferencesState> emit) async {

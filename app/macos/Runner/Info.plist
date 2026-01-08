@@ -30,6 +30,8 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Accessing dive computers</string>
 	<key>SUFeedURL</key>
 	<string>https://sync.bubbletrail.net/updates/appcast.xml</string>
 	<key>SUPublicEDKey</key>

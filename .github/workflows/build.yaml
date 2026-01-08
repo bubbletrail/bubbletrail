@@ -38,7 +38,7 @@ jobs:
 
 
   build-macos:
-    name: Build for macOS
+    name: Build for macOS (direct)
     runs-on: macos-26
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/release' || github.ref == 'refs/heads/beta')
     environment: release
@@ -75,8 +75,50 @@ jobs:
         with:
           path: app/bubbletrail*.zip
 
+      ## Now create and publish the appcast
+
+      - name: install rclone
+        run: |
+          curl https://rclone.org/install.sh | sudo bash
+
+      - name: rclone download
+        run: |
+          rclone sync minio:updates updates
+        env:
+          RCLONE_CONFIG_MINIO_TYPE: ${{ secrets.RCLONE_CONFIG_MINIO_TYPE }}
+          RCLONE_CONFIG_MINIO_PROVIDER: ${{ secrets.RCLONE_CONFIG_MINIO_PROVIDER }}
+          RCLONE_CONFIG_MINIO_ACCESS_KEY_ID: ${{ secrets.RCLONE_CONFIG_MINIO_ACCESS_KEY_ID }}
+          RCLONE_CONFIG_MINIO_SECRET_ACCESS_KEY: ${{ secrets.RCLONE_CONFIG_MINIO_SECRET_ACCESS_KEY }}
+          RCLONE_CONFIG_MINIO_REGION: ${{ secrets.RCLONE_CONFIG_MINIO_REGION }}
+          RCLONE_CONFIG_MINIO_ENDPOINT: ${{ secrets.RCLONE_CONFIG_MINIO_ENDPOINT }}
+          RCLONE_CONFIG_MINIO_ACL: ${{ secrets.RCLONE_CONFIG_MINIO_ACL }}
+
+      - name: Copy new package
+        run: |
+          cp app/bubbletrail*zip updates
+
+      - name: Generate appcast
+        run: |
+          echo "$SPARKLE_PRIVATE_KEY" | \
+            ./app/macos/Pods/Sparkle/bin/generate_appcast \
+            --ed-key-file - updates
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+
+      - name: rclone upload
+        run: |
+          rclone sync  -v --no-update-modtime updates minio:updates
+        env:
+          RCLONE_CONFIG_MINIO_TYPE: ${{ secrets.RCLONE_CONFIG_MINIO_TYPE }}
+          RCLONE_CONFIG_MINIO_PROVIDER: ${{ secrets.RCLONE_CONFIG_MINIO_PROVIDER }}
+          RCLONE_CONFIG_MINIO_ACCESS_KEY_ID: ${{ secrets.RCLONE_CONFIG_MINIO_ACCESS_KEY_ID }}
+          RCLONE_CONFIG_MINIO_SECRET_ACCESS_KEY: ${{ secrets.RCLONE_CONFIG_MINIO_SECRET_ACCESS_KEY }}
+          RCLONE_CONFIG_MINIO_REGION: ${{ secrets.RCLONE_CONFIG_MINIO_REGION }}
+          RCLONE_CONFIG_MINIO_ENDPOINT: ${{ secrets.RCLONE_CONFIG_MINIO_ENDPOINT }}
+          RCLONE_CONFIG_MINIO_ACL: ${{ secrets.RCLONE_CONFIG_MINIO_ACL }}
+
   build-ios:
-    name: Build for iOS
+    name: Build for iOS (Appstore)
     runs-on: macos-26
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/release' || github.ref == 'refs/heads/beta')
     environment: release
@@ -128,7 +170,7 @@ jobs:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
 
   publish-release:
-    name: Publish release
+    name: Publish GitHub release
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/release'
     permissions:
       contents: write

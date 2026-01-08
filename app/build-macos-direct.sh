@@ -31,12 +31,38 @@ flutter build macos \
     --dart-define=GITSHA="${GIT_SHA:-g000000}" \
     --dart-define=MARKETINGVERSION="${MARKET_VERSION:-0.0.1}"
 
-APP_NAME=$(find build/macos -name "*.app")
-ZIP_NAME=bubbletrail-macos-${MARKET_VERSION}.zip
-spctl -vvv --assess --type exec "$APP_NAME"
+APP_NAME=build/macos/Build/Products/Release/Bubbletrail.app
+
+# Sign XPC services first
+codesign -f -s "Developer ID Application" -o runtime --timestamp \
+    "$APP_NAME/Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Installer.xpc"
+
+# Preserve entitlements for Downloader.xpc (Sparkle 2.6+)
+codesign -f -s "Developer ID Application" -o runtime --timestamp --preserve-metadata=entitlements \
+    "$APP_NAME/Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Downloader.xpc"
+
+# The updater app
+codesign -f -s "Developer ID Application" -o runtime --timestamp \
+    "$APP_NAME/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app"
+
+# Sign other Sparkle components
+codesign -f -s "Developer ID Application" -o runtime --timestamp \
+    "$APP_NAME/Contents/Frameworks/Sparkle.framework/Versions/B/Autoupdate"
+
+# Then sign the framework
+codesign -f -s "Developer ID Application" -o runtime --timestamp \
+    "$APP_NAME/Contents/Frameworks/Sparkle.framework"
+
+# Finally, sign the app WITHOUT --deep
+codesign -f -s "Developer ID Application" -o runtime --timestamp \
+    --entitlements ./macos/Runner/Release.entitlements \
+    "$APP_NAME"
 
 mv "$APP_NAME" .
-zip -r --symlinks "$ZIP_NAME" $(basename "$APP_NAME")
+spctl -vvv --assess --type exec Bubbletrail.app || true
+
+ZIP_NAME=bubbletrail-macos-${MARKET_VERSION}.zip
+zip -r --symlinks "$ZIP_NAME" Bubbletrail.app
 
 # Notarize it
 
