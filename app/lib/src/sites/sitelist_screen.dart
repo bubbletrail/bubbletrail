@@ -64,7 +64,7 @@ class SiteListScreen extends StatelessWidget {
       TrinaColumn(title: 'Name', field: 'name', type: TrinaColumnType.text(), width: 200, readOnly: true),
       TrinaColumn(title: 'Country', field: 'country', type: TrinaColumnType.text(), width: 120, readOnly: true),
       TrinaColumn(title: 'Location', field: 'location', type: TrinaColumnType.text(), width: 150, readOnly: true),
-      TrinaColumn(title: 'Body of Water', field: 'bodyOfWater', type: TrinaColumnType.text(), width: 150, readOnly: true),
+      TrinaColumn(title: 'Body of water', field: 'bodyOfWater', type: TrinaColumnType.text(), width: 150, readOnly: true),
       TrinaColumn(title: 'Difficulty', field: 'difficulty', type: TrinaColumnType.text(), width: 100, readOnly: true),
       TrinaColumn(title: '# Dives', field: 'diveCount', type: TrinaColumnType.number(), width: 80, readOnly: true),
     ];

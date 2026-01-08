@@ -194,7 +194,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
 
     final result = await showSelectionDialog<Site>(
       context: context,
-      title: 'Select Dive Site',
+      title: 'Select dive site',
       items: sites,
       selectedItem: currentSite,
       noneOption: 'No site',
@@ -223,7 +223,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
 
     final result = await showSelectionDialog<Cylinder>(
       context: context,
-      title: 'Select Cylinder',
+      title: 'Select cylinder',
       items: cylinders,
       itemBuilder: (cyl) {
         return ListTile(leading: const Icon(Icons.scuba_diving), title: Text(cyl.description.isNotEmpty ? cyl.description : 'Cylinder ${cyl.id}'));
@@ -242,7 +242,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     if (hasGasChanges) {
       final confirmed = await showConfirmationDialog(
         context: context,
-        title: 'Remove Cylinder',
+        title: 'Remove cylinder',
         message: 'This cylinder has gas change events. Removing it will also remove those events.',
         confirmText: 'Remove',
         isDestructive: true,
@@ -293,7 +293,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                 if (availableCylinders.isNotEmpty) ...[
                   DropdownButtonFormField<String>(
                     initialValue: selectedCylinder?.id,
-                    decoration: const InputDecoration(labelText: 'Cylinder Type', border: OutlineInputBorder()),
+                    decoration: const InputDecoration(labelText: 'Cylinder type', border: OutlineInputBorder()),
                     items: availableCylinders.map((c) {
                       return DropdownMenuItem(value: c.id, child: Text(c.description.isNotEmpty ? c.description : 'Cylinder ${c.id}'));
                     }).toList(),
@@ -327,9 +327,9 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                PressureEditor(label: 'Start Pressure', initialValue: startPressure, onChanged: (value) => startPressure = value),
+                PressureEditor(label: 'Start pressure', initialValue: startPressure, onChanged: (value) => startPressure = value),
                 const SizedBox(height: 16),
-                PressureEditor(label: 'End Pressure', initialValue: endPressure, onChanged: (value) => endPressure = value),
+                PressureEditor(label: 'End pressure', initialValue: endPressure, onChanged: (value) => endPressure = value),
               ],
             ),
           ),
@@ -361,7 +361,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   Future<void> _addGasChange(int cylinderIndex) async {
     final result = await showDialog<int>(
       context: context,
-      builder: (dialogContext) => DurationPickerDialog(initialSeconds: 0, maxSeconds: _durationSeconds, title: 'Gas Change Time'),
+      builder: (dialogContext) => DurationPickerDialog(initialSeconds: 0, maxSeconds: _durationSeconds, title: 'Gas change time'),
     );
 
     if (result != null) {
@@ -404,7 +404,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(ws.description.isNotEmpty ? 'Edit ${ws.description}' : 'Add Weight'),
+        title: Text(ws.description.isNotEmpty ? 'Edit ${ws.description}' : 'Add weight'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -565,7 +565,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                   return InkWell(
                     onTap: _selectSite,
                     child: InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Dive Site', border: OutlineInputBorder(), suffixIcon: Icon(Icons.location_on)),
+                      decoration: const InputDecoration(labelText: 'Dive site', border: OutlineInputBorder(), suffixIcon: Icon(Icons.location_on)),
                       child: Text(selectedSite?.name ?? 'No site selected', style: selectedSite == null ? TextStyle(color: Theme.of(context).hintColor) : null),
                     ),
                   );
@@ -637,7 +637,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                               TextButton.icon(
                                 onPressed: () => _addGasChange(index),
                                 icon: const Icon(Icons.add, size: 16),
-                                label: const Text('Add Gas Change'),
+                                label: const Text('Add gas change'),
                                 style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 32)),
                               ),
                             ],

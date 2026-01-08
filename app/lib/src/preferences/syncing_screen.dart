@@ -61,7 +61,7 @@ class _SyncProviderTile extends StatelessWidget {
     final availableProviders = <SyncProviderKind>[SyncProviderKind.none, SyncProviderKind.s3];
 
     return PreferencesTile(
-      title: 'Sync Provider',
+      title: 'Sync provider',
       trailing: SegmentedButton<SyncProviderKind>(
         segments: [
           for (final provider in availableProviders) ButtonSegment(value: provider, label: Text(_syncProviderLabel(provider)), icon: const Icon(null)),

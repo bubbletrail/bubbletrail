@@ -129,7 +129,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
         }
       },
       child: ScreenScaffold(
-        title: Text(_isNew ? 'New Dive Site' : 'Edit ${_originalSite.name}'),
+        title: Text(_isNew ? 'New dive site' : 'Edit ${_originalSite.name}'),
         actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes')],
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -154,7 +154,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
               ),
               TextField(
                 controller: _bodyOfWaterController,
-                decoration: const InputDecoration(labelText: 'Body of Water', border: OutlineInputBorder()),
+                decoration: const InputDecoration(labelText: 'Body of water', border: OutlineInputBorder()),
                 textCapitalization: TextCapitalization.words,
               ),
               TextField(

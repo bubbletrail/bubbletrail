@@ -90,7 +90,7 @@ class _DiveDetails extends StatelessWidget {
             } else if (value == 'delete') {
               final confirmed = await showConfirmationDialog(
                 context: context,
-                title: 'Delete Dive',
+                title: 'Delete dive',
                 message: 'Are you sure you want to delete dive #${dive.number}? This cannot be undone.',
                 confirmText: 'Delete',
                 isDestructive: true,
@@ -102,8 +102,8 @@ class _DiveDetails extends StatelessWidget {
             }
           },
           itemBuilder: (context) => [
-            const PopupMenuItem(value: 'debug', child: Text('View Raw Data')),
-            const PopupMenuItem(value: 'delete', child: Text('Delete Dive')),
+            const PopupMenuItem(value: 'debug', child: Text('View raw data')),
+            const PopupMenuItem(value: 'delete', child: Text('Delete dive')),
           ],
         ),
       ],

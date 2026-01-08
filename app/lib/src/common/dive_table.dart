@@ -67,7 +67,7 @@ class DiveTableWidget extends StatelessWidget {
             width: 120,
             readOnly: true,
           ),
-          TrinaColumn(title: 'Max Depth', field: 'maxDepth', type: TrinaColumnType.number(), width: 80, readOnly: true),
+          TrinaColumn(title: 'Max depth', field: 'maxDepth', type: TrinaColumnType.number(), width: 80, readOnly: true),
           TrinaColumn(title: 'Duration', field: 'duration', type: TrinaColumnType.number(), width: 80, readOnly: true),
           if (showSiteColumn) TrinaColumn(title: 'Country', field: 'country', type: TrinaColumnType.text(), width: 120, readOnly: true),
           if (showSiteColumn) TrinaColumn(title: 'Location', field: 'location', type: TrinaColumnType.text(), width: 120, readOnly: true),

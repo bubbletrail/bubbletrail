@@ -18,7 +18,7 @@ class BleScanScreen extends StatelessWidget {
       },
       builder: (context, state) {
         return ScreenScaffold(
-          title: const Text('Connect Dive Computer'),
+          title: const Text('Connect dive computer'),
           actions: [
             if (state.connectedDevice != null)
               IconButton(
@@ -58,7 +58,7 @@ class BleScanScreen extends StatelessWidget {
             const SizedBox(height: 8),
             const Text('Please enable Bluetooth to scan for dive computers'),
             const SizedBox(height: 24),
-            ElevatedButton(onPressed: () => context.read<BleBloc>().add(const BleTurnOn()), child: const Text('Turn On Bluetooth')),
+            ElevatedButton(onPressed: () => context.read<BleBloc>().add(const BleTurnOn()), child: const Text('Turn on Bluetooth')),
           ],
         ),
       );
@@ -162,7 +162,7 @@ class BleScanScreen extends StatelessWidget {
           FilledButton.icon(
             onPressed: state.supportedComputers.isEmpty ? null : () => _showComputerSelectionDialog(context, state),
             icon: const Icon(Icons.download),
-            label: const Text('Download Dives'),
+            label: const Text('Download dives'),
           ),
           if (state.supportedComputers.isEmpty)
             Padding(
@@ -183,7 +183,7 @@ class BleScanScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Select Dive Computer'),
+        title: const Text('Select dive computer'),
         content: SizedBox(
           width: double.maxFinite,
           child: Column(
@@ -233,7 +233,7 @@ class BleScanScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('All BLE Dive Computers'),
+        title: const Text('All BLE dive computers'),
         content: SizedBox(
           width: double.maxFinite,
           height: 400,
