@@ -97,6 +97,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
   late TextEditingController _accessKeyController;
   late TextEditingController _secretKeyController;
   late TextEditingController _regionController;
+  late TextEditingController _syncKeyController;
 
   @override
   void initState() {
@@ -106,6 +107,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
     _accessKeyController = TextEditingController(text: widget.prefs.s3Config.accessKey);
     _secretKeyController = TextEditingController(text: widget.prefs.s3Config.secretKey);
     _regionController = TextEditingController(text: widget.prefs.s3Config.region);
+    _syncKeyController = TextEditingController(text: widget.prefs.s3Config.syncKey);
   }
 
   @override
@@ -115,6 +117,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
     _accessKeyController.dispose();
     _secretKeyController.dispose();
     _regionController.dispose();
+    _syncKeyController.dispose();
     super.dispose();
   }
 
@@ -125,6 +128,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
       accessKey: _accessKeyController.text.trim(),
       secretKey: _secretKeyController.text.trim(),
       region: _regionController.text.trim(),
+      syncKey: _regionController.text.trim(),
     );
     context.read<PreferencesBloc>().add(UpdateS3Config(config));
   }
@@ -164,6 +168,13 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
         TextField(
           controller: _secretKeyController,
           decoration: const InputDecoration(labelText: 'Secret Key', border: OutlineInputBorder()),
+          obscureText: true,
+          autocorrect: false,
+          onChanged: (_) => _saveConfig(),
+        ),
+        TextField(
+          controller: _syncKeyController,
+          decoration: const InputDecoration(labelText: 'Sync Key', border: OutlineInputBorder()),
           obscureText: true,
           autocorrect: false,
           onChanged: (_) => _saveConfig(),

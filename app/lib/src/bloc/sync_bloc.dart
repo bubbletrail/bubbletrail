@@ -124,10 +124,12 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       final provider = S3SyncProvider(
         endpoint: _s3Config.endpoint,
         bucket: _s3Config.bucket,
-        rootPath: '012345',
+        rootPath: 'bubbletrail',
         accessKey: _s3Config.accessKey,
         secretKey: _s3Config.secretKey,
+        syncKey: _s3Config.syncKey,
       );
+      await provider.init();
 
       final s = await store;
       await s.syncWith(provider);
