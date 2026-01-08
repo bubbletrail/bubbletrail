@@ -15,9 +15,9 @@ class CylinderTile extends StatelessWidget {
   final double workingPressurePsi;
   final double volumeCuft;
 
-  final Widget? leading;
   final Widget? trailing;
   final void Function()? onTap;
+  final EdgeInsets? contentPadding;
 
   const CylinderTile({
     required this.index,
@@ -31,9 +31,9 @@ class CylinderTile extends StatelessWidget {
     this.sac = 0,
     this.workingPressurePsi = 0,
     this.volumeCuft = 0,
-    this.leading,
     this.trailing,
     this.onTap,
+    this.contentPadding,
     super.key,
   });
 
@@ -49,7 +49,7 @@ class CylinderTile extends StatelessWidget {
       if (volumeL > 0) details.add(LabeledChip(label: 'Volume', child: Text('${formatDisplayValue(volumeL)} L')));
       if (workingPressureBar > 0) details.add(LabeledChip(label: 'WP', child: Text('${formatDisplayValue(workingPressureBar)} bar')));
     }
-    details.add(LabeledChip(label: 'Mix', child: Text(formatGasPercentage(oxygenPct, heliumPct))));
+    if (oxygenPct > 0) details.add(LabeledChip(label: 'Mix', child: Text(formatGasPercentage(oxygenPct, heliumPct))));
     if (beginPressure > 0) details.add(LabeledChip(label: 'Start', child: PressureText(beginPressure)));
     if (endPressure > 0) details.add(LabeledChip(label: 'End', child: PressureText(endPressure)));
     if (sac > 0) {
@@ -62,10 +62,9 @@ class CylinderTile extends StatelessWidget {
     }
 
     return ListTile(
-      contentPadding: EdgeInsets.zero,
+      contentPadding: contentPadding,
       title: Padding(padding: const EdgeInsets.only(left: 8.0, bottom: 8.0), child: Text(desc)),
       subtitle: Wrap(spacing: 8, runSpacing: 8, children: details),
-      leading: leading,
       trailing: trailing,
       onTap: onTap,
     );

@@ -613,6 +613,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                                     IconButton(icon: const Icon(Icons.delete, size: 20), onPressed: () => _removeCylinder(index), tooltip: 'Remove cylinder'),
                                   ],
                                 ),
+                                contentPadding: EdgeInsets.zero,
                               ),
                               const SizedBox(height: 8),
                               Text('Gas changes:', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
