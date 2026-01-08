@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
@@ -259,20 +260,23 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   }
 
   Future<void> _onImportDives(ImportDives event, Emitter<DiveListState> emit) async {
-    // Read the import file
-    final xmlData = await File(event.filePath).readAsString();
-    final doc = XmlDocument.parse(xmlData);
-    final importedSsrf = importXml(doc);
-
     final currentState = state as DiveListLoaded;
+    emit(DiveListLoading());
+
+    // Read the import file
+    final importedDoc = await compute((path) async {
+      final xmlData = await File(path).readAsString();
+      final doc = XmlDocument.parse(xmlData);
+      return importXml(doc);
+    }, event.filePath);
 
     // Merge dive sites: only add new ones (check by uuid)
     final existingSiteUuids = currentState.sites.map((s) => s.id).toSet();
-    final newSites = importedSsrf.sites.where((s) => !existingSiteUuids.contains(s.id)).toList();
+    final newSites = importedDoc.sites.where((s) => !existingSiteUuids.contains(s.id)).toList();
     await _store.sites.insertAll(newSites);
 
     // Process cylinders
-    for (final dive in importedSsrf.dives) {
+    for (final dive in importedDoc.dives) {
       for (final cyl in dive.cylinders) {
         if (cyl.hasCylinder()) {
           final c = cyl.cylinder;
@@ -288,7 +292,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     }
 
     // Insert all imported dives
-    await _store.dives.insertAll(importedSsrf.dives);
+    await _store.dives.insertAll(importedDoc.dives);
 
     // Reload overview list after update
     add(LoadDives());
