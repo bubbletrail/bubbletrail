@@ -20,7 +20,6 @@ class S3SyncProvider extends SyncProvider {
     required String vaultKey,
     required String endpoint,
     required String bucket,
-    required String rootPath,
     required String accessKey,
     required String secretKey,
     String region = 'us-east-1',

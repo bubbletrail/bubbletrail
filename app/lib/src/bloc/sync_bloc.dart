@@ -107,6 +107,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       case SyncProviderKind.none:
         _log.info('sync disabled');
         return;
+      case SyncProviderKind.bubbletrail:
       case SyncProviderKind.s3:
         await _syncWithS3(emit);
     }
@@ -125,7 +126,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       final provider = S3SyncProvider(
         endpoint: _s3Config.endpoint,
         bucket: _s3Config.bucket,
-        rootPath: 'bubbletrail',
         accessKey: _s3Config.accessKey,
         secretKey: _s3Config.secretKey,
         vaultKey: _s3Config.vaultKey,

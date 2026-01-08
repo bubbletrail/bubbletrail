@@ -64,7 +64,7 @@ enum TimeFormatPref {
   final String format;
 }
 
-enum SyncProviderKind { none, s3 }
+enum SyncProviderKind { none, bubbletrail, s3 }
 
 class S3Config {
   final String endpoint;
