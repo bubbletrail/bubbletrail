@@ -97,7 +97,10 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
   late TextEditingController _accessKeyController;
   late TextEditingController _secretKeyController;
   late TextEditingController _regionController;
-  late TextEditingController _syncKeyController;
+  late TextEditingController _vaultKeyController;
+
+  bool _obscureSecretKey = true;
+  bool _obscureVaultKey = true;
 
   @override
   void initState() {
@@ -107,7 +110,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
     _accessKeyController = TextEditingController(text: widget.prefs.s3Config.accessKey);
     _secretKeyController = TextEditingController(text: widget.prefs.s3Config.secretKey);
     _regionController = TextEditingController(text: widget.prefs.s3Config.region);
-    _syncKeyController = TextEditingController(text: widget.prefs.s3Config.syncKey);
+    _vaultKeyController = TextEditingController(text: widget.prefs.s3Config.vaultKey);
   }
 
   @override
@@ -117,7 +120,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
     _accessKeyController.dispose();
     _secretKeyController.dispose();
     _regionController.dispose();
-    _syncKeyController.dispose();
+    _vaultKeyController.dispose();
     super.dispose();
   }
 
@@ -128,7 +131,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
       accessKey: _accessKeyController.text.trim(),
       secretKey: _secretKeyController.text.trim(),
       region: _regionController.text.trim(),
-      syncKey: _regionController.text.trim(),
+      vaultKey: _vaultKeyController.text.trim(),
     );
     context.read<PreferencesBloc>().add(UpdateS3Config(config));
   }
@@ -161,22 +164,38 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
         ),
         TextField(
           controller: _accessKeyController,
-          decoration: const InputDecoration(labelText: 'Access Key', border: OutlineInputBorder()),
+          decoration: const InputDecoration(labelText: 'Access key', border: OutlineInputBorder()),
           onChanged: (_) => _saveConfig(),
           autocorrect: false,
         ),
         TextField(
           controller: _secretKeyController,
-          decoration: const InputDecoration(labelText: 'Secret Key', border: OutlineInputBorder()),
-          obscureText: true,
+          decoration: InputDecoration(
+            labelText: 'Secret key',
+            border: const OutlineInputBorder(),
+            suffixIcon: IconButton(
+              icon: Icon(_obscureSecretKey ? Icons.visibility : Icons.visibility_off),
+              onPressed: () => setState(() => _obscureSecretKey = !_obscureSecretKey),
+            ),
+          ),
+          obscureText: _obscureSecretKey,
           autocorrect: false,
+          selectAllOnFocus: true,
           onChanged: (_) => _saveConfig(),
         ),
         TextField(
-          controller: _syncKeyController,
-          decoration: const InputDecoration(labelText: 'Sync Key', border: OutlineInputBorder()),
-          obscureText: true,
+          controller: _vaultKeyController,
+          decoration: InputDecoration(
+            labelText: 'Vault key',
+            border: const OutlineInputBorder(),
+            suffixIcon: IconButton(
+              icon: Icon(_obscureVaultKey ? Icons.visibility : Icons.visibility_off),
+              onPressed: () => setState(() => _obscureVaultKey = !_obscureVaultKey),
+            ),
+          ),
+          obscureText: _obscureVaultKey,
           autocorrect: false,
+          selectAllOnFocus: true,
           onChanged: (_) => _saveConfig(),
         ),
       ],

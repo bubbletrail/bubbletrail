@@ -127,7 +127,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         rootPath: 'bubbletrail',
         accessKey: _s3Config.accessKey,
         secretKey: _s3Config.secretKey,
-        syncKey: _s3Config.syncKey,
+        vaultKey: _s3Config.vaultKey,
       );
       await provider.init();
 

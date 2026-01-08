@@ -72,20 +72,20 @@ class S3Config {
   final String accessKey;
   final String secretKey;
   final String region;
-  final String syncKey;
+  final String vaultKey;
 
-  const S3Config({this.endpoint = '', this.bucket = '', this.accessKey = '', this.secretKey = '', this.region = 'us-east-1', this.syncKey = ''});
+  const S3Config({this.endpoint = '', this.bucket = '', this.accessKey = '', this.secretKey = '', this.region = 'us-east-1', this.vaultKey = ''});
 
-  bool get isConfigured => endpoint.isNotEmpty && bucket.isNotEmpty && accessKey.isNotEmpty && secretKey.isNotEmpty && syncKey.isNotEmpty;
+  bool get isConfigured => endpoint.isNotEmpty && bucket.isNotEmpty && accessKey.isNotEmpty && secretKey.isNotEmpty && vaultKey.isNotEmpty;
 
-  S3Config copyWith({String? endpoint, String? bucket, String? accessKey, String? secretKey, String? region, String? syncKey}) {
+  S3Config copyWith({String? endpoint, String? bucket, String? accessKey, String? secretKey, String? region, String? vaultKey}) {
     return S3Config(
       endpoint: endpoint ?? this.endpoint,
       bucket: bucket ?? this.bucket,
       accessKey: accessKey ?? this.accessKey,
       secretKey: secretKey ?? this.secretKey,
       region: region ?? this.region,
-      syncKey: syncKey ?? this.syncKey,
+      vaultKey: vaultKey ?? this.vaultKey,
     );
   }
 
@@ -98,11 +98,11 @@ class S3Config {
         other.accessKey == accessKey &&
         other.secretKey == secretKey &&
         other.region == region &&
-        other.syncKey == syncKey;
+        other.vaultKey == vaultKey;
   }
 
   @override
-  int get hashCode => Object.hash(endpoint, bucket, accessKey, secretKey, region, syncKey);
+  int get hashCode => Object.hash(endpoint, bucket, accessKey, secretKey, region, vaultKey);
 }
 
 class Preferences {

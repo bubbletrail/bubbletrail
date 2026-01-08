@@ -12,12 +12,12 @@ import 'package:pinenacl/x25519.dart';
 class S3SyncProvider extends SyncProvider {
   final Minio _minio;
   final String _bucket;
-  late final String _syncKey;
+  late final String _vaultKey;
   late final String _syncPrefix;
   late final SecretBox _box;
 
   S3SyncProvider({
-    required String syncKey,
+    required String vaultKey,
     required String endpoint,
     required String bucket,
     required String rootPath,
@@ -25,14 +25,14 @@ class S3SyncProvider extends SyncProvider {
     required String secretKey,
     String region = 'us-east-1',
     bool useSSL = true,
-  }) : _syncKey = syncKey,
+  }) : _vaultKey = vaultKey,
        _bucket = bucket,
        _minio = Minio(endPoint: endpoint, accessKey: accessKey, secretKey: secretKey, region: region, useSSL: useSSL);
 
   Future<void> init() async {
     final (boxKey, prefKey) = await compute((_) {
-      final boxKey = PBKDF2.hmac_sha256(utf8.encode(_syncKey), utf8.encode('bubbletrail-encryption'), 500 << 10, 32);
-      final prefKey = PBKDF2.hmac_sha256(utf8.encode(_syncKey), utf8.encode('bubbletrail-prefix5'), 1 << 10, 8);
+      final boxKey = PBKDF2.hmac_sha256(utf8.encode(_vaultKey), utf8.encode('bubbletrail-encryption'), 500 << 10, 32);
+      final prefKey = PBKDF2.hmac_sha256(utf8.encode(_vaultKey), utf8.encode('bubbletrail-vault-prefix'), 1 << 10, 8);
       return (boxKey, prefKey);
     }, null);
     _syncPrefix = 'bubbletrail-${hex.encode(prefKey)}';
