@@ -110,13 +110,29 @@ class _DiveDetails extends StatelessWidget {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, spacing: 8, children: _buildAllSections(context)),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, spacing: 8, children: _buildAllSections(context)),
         ),
       ),
     );
   }
 
   List<Widget> _buildAllSections(BuildContext context) {
+    final datacolumns =
+        (<Widget>[_depthsTable(), _physioTable()] + _cylindersTables() + [if (dive.weightsystems.isNotEmpty) _weightsTable()])
+            .map<Widget>(
+              (t) => Card(
+                child: Padding(padding: const EdgeInsets.all(16.0), child: t),
+              ),
+            )
+            .toList() +
+        [
+          if (site != null)
+            ConstrainedBox(
+              constraints: BoxConstraints.loose(Size.fromWidth(600)),
+              child: _SiteCard(site: site!),
+            ),
+        ];
+
     return [
       _MaybeCard(
         child: Column(
@@ -127,30 +143,14 @@ class _DiveDetails extends StatelessWidget {
           ],
         ),
       ),
-      Wrap(
-        crossAxisAlignment: WrapCrossAlignment.start,
-        spacing: 8,
-        runSpacing: 8,
-        children:
-            (<Widget>[_depthsTable(), _physioTable()] + _cylindersTables() + [if (dive.weightsystems.isNotEmpty) _weightsTable()])
-                .map<Widget>(
-                  (t) => Card(
-                    child: Padding(padding: const EdgeInsets.all(16.0), child: t),
-                  ),
-                )
-                .toList() +
-            [
-              if (site != null)
-                ConstrainedBox(
-                  constraints: BoxConstraints.loose(Size.fromWidth(600)),
-                  child: _SiteCard(site: site!),
-                ),
-            ],
-      ),
       if (dive.notes.isNotEmpty)
         Card(
           child: Padding(padding: const EdgeInsets.all(16.0), child: Text(dive.notes)),
         ),
+      _WidthResponsive(
+        narrow: Column(crossAxisAlignment: CrossAxisAlignment.stretch, spacing: 8, children: datacolumns),
+        wide: Wrap(alignment: WrapAlignment.start, crossAxisAlignment: WrapCrossAlignment.start, spacing: 8, runSpacing: 8, children: datacolumns),
+      ),
     ];
   }
 
@@ -482,15 +482,11 @@ class _MaybeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth < 800) {
-          return child;
-        }
-        return Card(
-          child: Padding(padding: EdgeInsetsGeometry.all(16), child: child),
-        );
-      },
+    return _WidthResponsive(
+      narrow: child,
+      wide: Card(
+        child: Padding(padding: EdgeInsetsGeometry.all(16), child: child),
+      ),
     );
   }
 }
@@ -511,6 +507,23 @@ class _AspectMaxHeight extends StatelessWidget {
           return ConstrainedBox(constraints: BoxConstraints.loose(Size.fromHeight(maxHeight)), child: child);
         }
         return AspectRatio(aspectRatio: aspectRatio, child: child);
+      },
+    );
+  }
+}
+
+class _WidthResponsive extends StatelessWidget {
+  const _WidthResponsive({required this.narrow, required this.wide});
+
+  final Widget narrow;
+  final Widget wide;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, layout) {
+        if (layout.maxWidth < 600) return narrow;
+        return wide;
       },
     );
   }
