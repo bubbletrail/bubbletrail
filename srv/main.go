@@ -13,14 +13,14 @@ import (
 )
 
 var cli struct {
-	Endpoint        string `help:"MinIO endpoint" env:"MINIO_ENDPOINT" required:""`
-	AccessKey       string `help:"MinIO admin access key" env:"MINIO_ACCESS_KEY" required:""`
-	SecretKey       string `help:"MinIO admin secret key" env:"MINIO_SECRET_KEY" required:""`
-	UseSSL          bool   `help:"Use SSL for MinIO connection" env:"MINIO_USE_SSL" default:"true"`
-	AdminToken      string `help:"Bearer token for admin API endpoints" env:"ADMIN_TOKEN" required:""`
-	MailgunDomain   string `help:"Mailgun domain" env:"MAILGUN_DOMAIN" required:""`
-	MailgunAPIKey   string `help:"Mailgun API key" env:"MAILGUN_API_KEY" required:""`
-	MailgunFrom     string `help:"Email from address" env:"MAILGUN_FROM" required:""`
+	Endpoint      string `help:"MinIO endpoint" env:"MINIO_ENDPOINT" required:""`
+	AccessKey     string `help:"MinIO admin access key" env:"MINIO_ACCESS_KEY" required:""`
+	SecretKey     string `help:"MinIO admin secret key" env:"MINIO_SECRET_KEY" required:""`
+	UseSSL        bool   `help:"Use SSL for MinIO connection" env:"MINIO_USE_SSL" default:"true"`
+	AdminToken    string `help:"Bearer token for admin API endpoints" env:"ADMIN_TOKEN" required:""`
+	MailgunDomain string `help:"Mailgun domain" env:"MAILGUN_DOMAIN" required:""`
+	MailgunAPIKey string `help:"Mailgun API key" env:"MAILGUN_API_KEY" required:""`
+	MailgunFrom   string `help:"Email from address" env:"MAILGUN_FROM" required:""`
 }
 
 type newUserRequest struct {
@@ -37,7 +37,7 @@ func main() {
 
 	emailClient := email.NewClient(cli.MailgunDomain, cli.MailgunAPIKey, cli.MailgunFrom)
 
-	http.HandleFunc("POST /new", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("POST /account/new", func(w http.ResponseWriter, r *http.Request) {
 		var req newUserRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "invalid request body", http.StatusBadRequest)
@@ -69,7 +69,7 @@ func main() {
 		json.NewEncoder(w).Encode(result)
 	})
 
-	http.HandleFunc("DELETE /{email}", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("DELETE /account/{email}", func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if !strings.HasPrefix(authHeader, "Bearer ") || authHeader[7:] != cli.AdminToken {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
