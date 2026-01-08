@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
-import 'package:minio/minio.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 
@@ -146,7 +145,7 @@ class Sites {
           _sites[site.id] = site;
         }
       }
-    } on MinioError catch (e) {
+    } catch (e) {
       print('failed to load: $e');
     }
 

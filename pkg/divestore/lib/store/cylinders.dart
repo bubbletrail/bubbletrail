@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
-import 'package:minio/minio.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 
@@ -143,7 +142,7 @@ class Cylinders {
           _cylinders[cyl.id] = cyl;
         }
       }
-    } on MinioError catch (e) {
+    } catch (e) {
       print('failed to load: $e');
     }
 
