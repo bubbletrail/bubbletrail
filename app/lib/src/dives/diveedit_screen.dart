@@ -730,6 +730,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
               TextField(
                 controller: _divemasterController,
                 decoration: const InputDecoration(labelText: 'Divemaster', border: OutlineInputBorder()),
+                textCapitalization: TextCapitalization.words,
               ),
               Builder(
                 builder: (context) {
@@ -745,6 +746,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                     placeChipsSectionAbove: false,
                     paddingInsideWidgetContainer: EdgeInsets.zero,
                     secondaryTheme: true,
+                    createCharacters: [','],
                   );
                 },
               ),
@@ -752,6 +754,8 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                 controller: _notesController,
                 decoration: const InputDecoration(labelText: 'Notes', border: OutlineInputBorder()),
                 maxLines: 6,
+                autocorrect: true,
+                textCapitalization: TextCapitalization.sentences,
               ),
             ],
           ),
