@@ -1,6 +1,5 @@
 import '../gen/dive.pb.dart';
 import '../gen/dive_ext.dart';
-import '../gen/types.pb.dart';
 import '../sync/syncprovider.dart';
 import 'cylinders.dart';
 import 'dives.dart';
