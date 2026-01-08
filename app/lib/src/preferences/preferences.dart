@@ -116,6 +116,7 @@ class Preferences {
   final ThemeMode themeMode;
   final SyncProviderKind syncProvider;
   final S3Config s3Config;
+  final bool checkForUpdates;
 
   String get dateTimeFormat => '${dateFormat.format} ${timeFormat.format}';
 
@@ -130,6 +131,7 @@ class Preferences {
     this.themeMode = ThemeMode.system,
     this.syncProvider = SyncProviderKind.none,
     this.s3Config = const S3Config(),
+    this.checkForUpdates = true,
   });
 
   Preferences copyWith({
@@ -143,6 +145,7 @@ class Preferences {
     ThemeMode? themeMode,
     SyncProviderKind? syncProvider,
     S3Config? s3Config,
+    bool? checkForUpdates,
   }) {
     return Preferences(
       depthUnit: depthUnit ?? this.depthUnit,
@@ -155,6 +158,7 @@ class Preferences {
       themeMode: themeMode ?? this.themeMode,
       syncProvider: syncProvider ?? this.syncProvider,
       s3Config: s3Config ?? this.s3Config,
+      checkForUpdates: checkForUpdates ?? this.checkForUpdates,
     );
   }
 
@@ -171,9 +175,11 @@ class Preferences {
         other.timeFormat == timeFormat &&
         other.themeMode == themeMode &&
         other.syncProvider == syncProvider &&
-        other.s3Config == s3Config;
+        other.s3Config == s3Config &&
+        other.checkForUpdates == checkForUpdates;
   }
 
   @override
-  int get hashCode => Object.hash(depthUnit, pressureUnit, temperatureUnit, volumeUnit, weightUnit, dateFormat, timeFormat, themeMode, syncProvider, s3Config);
+  int get hashCode =>
+      Object.hash(depthUnit, pressureUnit, temperatureUnit, volumeUnit, weightUnit, dateFormat, timeFormat, themeMode, syncProvider, s3Config, checkForUpdates);
 }
