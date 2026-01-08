@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,6 +21,7 @@ class PreferencesStorage {
   static const _s3SecretKeyKey = 's3_secret_key';
   static const _s3RegionKey = 's3_region';
   static const _s3VaultKey = 's3_vault_key';
+  static const _updateChecksKey = 'update_checks';
 
   Future<Preferences> load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -41,6 +44,7 @@ class PreferencesStorage {
         region: prefs.getString(_s3RegionKey) ?? 'us-east-1',
         vaultKey: prefs.getString(_s3VaultKey) ?? '',
       ),
+      checkForUpdates: prefs.getBool(_updateChecksKey) ?? Platform.isMacOS,
     );
   }
 
@@ -62,5 +66,6 @@ class PreferencesStorage {
     await prefs.setString(_s3SecretKeyKey, preferences.s3Config.secretKey);
     await prefs.setString(_s3RegionKey, preferences.s3Config.region);
     await prefs.setString(_s3VaultKey, preferences.s3Config.vaultKey);
+    await prefs.setBool(_updateChecksKey, preferences.checkForUpdates);
   }
 }

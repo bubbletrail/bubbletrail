@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -52,6 +54,16 @@ class PreferencesScreen extends StatelessWidget {
                           },
                         ),
                       ),
+                      if (Platform.isMacOS)
+                        PreferencesTile(
+                          title: 'Check for updates',
+                          trailing: Switch(
+                            value: prefs.checkForUpdates,
+                            onChanged: (v) {
+                              context.read<PreferencesBloc>().add(UpdateCheckForUpdates(v));
+                            },
+                          ),
+                        ),
                       const SizedBox(height: 100),
                     ],
                   ),
