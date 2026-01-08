@@ -112,7 +112,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
             final cs = Theme.of(context).colorScheme;
             final decoration = BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topLeft,
+                begin: Alignment.centerLeft,
                 end: Alignment.bottomRight,
                 colors: [cs.tertiaryContainer, cs.onTertiaryFixedVariant],
                 tileMode: TileMode.mirror,

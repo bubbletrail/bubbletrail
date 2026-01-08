@@ -8,15 +8,19 @@ import 'common/common.dart';
 class AppTheme {
   AppTheme._();
 
+  // Dark theme is murky green Scandinavian water
+
   static const Color _d1 = Color(0xFF011A1A); // gradient
   static const Color _d2 = Color(0xFF01403A); // gradient
   static const Color _d3 = Color(0xFF04BFAD); // primary
   static const Color _d4 = Color(0xFF9AEBA3); // secondary
 
-  static const Color _l1 = Color(0xFFC2EDF2); // gradient
-  static const Color _l2 = Color(0xFF7AB8BF); // gradient
-  static const Color _l3 = Color(0xFF3E848C); // primary
-  static const Color _l4 = Color(0xFF025159); // secondary
+  // Light theme is bright turquoise tropical beach
+
+  static const Color _l1 = Color(0xFFC4E9F4); // gradient
+  static final Color _l2 = lighten(_l3); // gradient
+  static const Color _l3 = Color(0xFF339CCC); // primary
+  static const Color _l4 = Color(0xFF096688); // secondary
 
   static final density = Platform.isAndroid || Platform.isIOS ? VisualDensity.standard : VisualDensity.compact;
 
