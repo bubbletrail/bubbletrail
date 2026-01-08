@@ -23,7 +23,7 @@ class PreferencesScreen extends StatelessWidget {
             return ScreenScaffold(
               title: const Text('Preferences'),
               floatingActionButton: FloatingActionButton.extended(
-                onPressed: syncState.syncing || prefs.syncProvider == SyncProvider.none ? null : () => context.read<SyncBloc>().add(const StartSyncing()),
+                onPressed: syncState.syncing || prefs.syncProvider == SyncProviderKind.none ? null : () => context.read<SyncBloc>().add(const StartSyncing()),
                 label: Text(syncState.syncing ? 'Syncing...' : 'Sync'),
                 icon: syncState.syncing ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.sync),
               ),

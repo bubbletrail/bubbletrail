@@ -27,6 +27,7 @@ class Dive extends $pb.GeneratedMessage {
     $0.Timestamp? createdAt,
     $0.Timestamp? updatedAt,
     $0.Timestamp? deletedAt,
+    $core.String? syncedEtag,
     $core.int? number,
     $core.int? rating,
     $core.Iterable<$core.String>? tags,
@@ -54,6 +55,7 @@ class Dive extends $pb.GeneratedMessage {
     if (createdAt != null) result.createdAt = createdAt;
     if (updatedAt != null) result.updatedAt = updatedAt;
     if (deletedAt != null) result.deletedAt = deletedAt;
+    if (syncedEtag != null) result.syncedEtag = syncedEtag;
     if (number != null) result.number = number;
     if (rating != null) result.rating = rating;
     if (tags != null) result.tags.addAll(tags);
@@ -90,6 +92,7 @@ class Dive extends $pb.GeneratedMessage {
         ..aOM<$0.Timestamp>(2, _omitFieldNames ? '' : 'createdAt', subBuilder: $0.Timestamp.create)
         ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'updatedAt', subBuilder: $0.Timestamp.create)
         ..aOM<$0.Timestamp>(4, _omitFieldNames ? '' : 'deletedAt', subBuilder: $0.Timestamp.create)
+        ..aOS(5, _omitFieldNames ? '' : 'syncedEtag')
         ..aI(8, _omitFieldNames ? '' : 'number')
         ..aI(9, _omitFieldNames ? '' : 'rating')
         ..pPS(10, _omitFieldNames ? '' : 'tags')
@@ -171,165 +174,174 @@ class Dive extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $0.Timestamp ensureDeletedAt() => $_ensure(3);
 
+  @$pb.TagNumber(5)
+  $core.String get syncedEtag => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set syncedEtag($core.String value) => $_setString(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasSyncedEtag() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearSyncedEtag() => $_clearField(5);
+
   @$pb.TagNumber(8)
-  $core.int get number => $_getIZ(4);
+  $core.int get number => $_getIZ(5);
   @$pb.TagNumber(8)
-  set number($core.int value) => $_setSignedInt32(4, value);
+  set number($core.int value) => $_setSignedInt32(5, value);
   @$pb.TagNumber(8)
-  $core.bool hasNumber() => $_has(4);
+  $core.bool hasNumber() => $_has(5);
   @$pb.TagNumber(8)
   void clearNumber() => $_clearField(8);
 
   @$pb.TagNumber(9)
-  $core.int get rating => $_getIZ(5);
+  $core.int get rating => $_getIZ(6);
   @$pb.TagNumber(9)
-  set rating($core.int value) => $_setSignedInt32(5, value);
+  set rating($core.int value) => $_setSignedInt32(6, value);
   @$pb.TagNumber(9)
-  $core.bool hasRating() => $_has(5);
+  $core.bool hasRating() => $_has(6);
   @$pb.TagNumber(9)
   void clearRating() => $_clearField(9);
 
   @$pb.TagNumber(10)
-  $pb.PbList<$core.String> get tags => $_getList(6);
+  $pb.PbList<$core.String> get tags => $_getList(7);
 
   @$pb.TagNumber(11)
-  $0.Timestamp get start => $_getN(7);
+  $0.Timestamp get start => $_getN(8);
   @$pb.TagNumber(11)
   set start($0.Timestamp value) => $_setField(11, value);
   @$pb.TagNumber(11)
-  $core.bool hasStart() => $_has(7);
+  $core.bool hasStart() => $_has(8);
   @$pb.TagNumber(11)
   void clearStart() => $_clearField(11);
   @$pb.TagNumber(11)
-  $0.Timestamp ensureStart() => $_ensure(7);
+  $0.Timestamp ensureStart() => $_ensure(8);
 
   /// Summary data (populated from dive computer data, but editable by the user)
   @$pb.TagNumber(12)
-  $core.int get duration => $_getIZ(8);
+  $core.int get duration => $_getIZ(9);
   @$pb.TagNumber(12)
-  set duration($core.int value) => $_setSignedInt32(8, value);
+  set duration($core.int value) => $_setSignedInt32(9, value);
   @$pb.TagNumber(12)
-  $core.bool hasDuration() => $_has(8);
+  $core.bool hasDuration() => $_has(9);
   @$pb.TagNumber(12)
   void clearDuration() => $_clearField(12);
 
   @$pb.TagNumber(13)
-  $core.double get maxDepth => $_getN(9);
+  $core.double get maxDepth => $_getN(10);
   @$pb.TagNumber(13)
-  set maxDepth($core.double value) => $_setDouble(9, value);
+  set maxDepth($core.double value) => $_setDouble(10, value);
   @$pb.TagNumber(13)
-  $core.bool hasMaxDepth() => $_has(9);
+  $core.bool hasMaxDepth() => $_has(10);
   @$pb.TagNumber(13)
   void clearMaxDepth() => $_clearField(13);
 
   @$pb.TagNumber(14)
-  $core.double get meanDepth => $_getN(10);
+  $core.double get meanDepth => $_getN(11);
   @$pb.TagNumber(14)
-  set meanDepth($core.double value) => $_setDouble(10, value);
+  set meanDepth($core.double value) => $_setDouble(11, value);
   @$pb.TagNumber(14)
-  $core.bool hasMeanDepth() => $_has(10);
+  $core.bool hasMeanDepth() => $_has(11);
   @$pb.TagNumber(14)
   void clearMeanDepth() => $_clearField(14);
 
   /// Additional attributes
   @$pb.TagNumber(15)
-  $core.double get sac => $_getN(11);
+  $core.double get sac => $_getN(12);
   @$pb.TagNumber(15)
-  set sac($core.double value) => $_setDouble(11, value);
+  set sac($core.double value) => $_setDouble(12, value);
   @$pb.TagNumber(15)
-  $core.bool hasSac() => $_has(11);
+  $core.bool hasSac() => $_has(12);
   @$pb.TagNumber(15)
   void clearSac() => $_clearField(15);
 
   @$pb.TagNumber(16)
-  $core.int get otu => $_getIZ(12);
+  $core.int get otu => $_getIZ(13);
   @$pb.TagNumber(16)
-  set otu($core.int value) => $_setSignedInt32(12, value);
+  set otu($core.int value) => $_setSignedInt32(13, value);
   @$pb.TagNumber(16)
-  $core.bool hasOtu() => $_has(12);
+  $core.bool hasOtu() => $_has(13);
   @$pb.TagNumber(16)
   void clearOtu() => $_clearField(16);
 
   @$pb.TagNumber(17)
-  $core.int get cns => $_getIZ(13);
+  $core.int get cns => $_getIZ(14);
   @$pb.TagNumber(17)
-  set cns($core.int value) => $_setSignedInt32(13, value);
+  set cns($core.int value) => $_setSignedInt32(14, value);
   @$pb.TagNumber(17)
-  $core.bool hasCns() => $_has(13);
+  $core.bool hasCns() => $_has(14);
   @$pb.TagNumber(17)
   void clearCns() => $_clearField(17);
 
   /// Link to dive site
   @$pb.TagNumber(18)
-  $core.String get siteId => $_getSZ(14);
+  $core.String get siteId => $_getSZ(15);
   @$pb.TagNumber(18)
-  set siteId($core.String value) => $_setString(14, value);
+  set siteId($core.String value) => $_setString(15, value);
   @$pb.TagNumber(18)
-  $core.bool hasSiteId() => $_has(14);
+  $core.bool hasSiteId() => $_has(15);
   @$pb.TagNumber(18)
   void clearSiteId() => $_clearField(18);
 
   /// Child elements
   @$pb.TagNumber(19)
-  $core.String get instructor => $_getSZ(15);
+  $core.String get instructor => $_getSZ(16);
   @$pb.TagNumber(19)
-  set instructor($core.String value) => $_setString(15, value);
+  set instructor($core.String value) => $_setString(16, value);
   @$pb.TagNumber(19)
-  $core.bool hasInstructor() => $_has(15);
+  $core.bool hasInstructor() => $_has(16);
   @$pb.TagNumber(19)
   void clearInstructor() => $_clearField(19);
 
   @$pb.TagNumber(20)
-  $core.String get divemaster => $_getSZ(16);
+  $core.String get divemaster => $_getSZ(17);
   @$pb.TagNumber(20)
-  set divemaster($core.String value) => $_setString(16, value);
+  set divemaster($core.String value) => $_setString(17, value);
   @$pb.TagNumber(20)
-  $core.bool hasDivemaster() => $_has(16);
+  $core.bool hasDivemaster() => $_has(17);
   @$pb.TagNumber(20)
   void clearDivemaster() => $_clearField(20);
 
   @$pb.TagNumber(21)
-  $pb.PbList<$core.String> get buddies => $_getList(17);
+  $pb.PbList<$core.String> get buddies => $_getList(18);
 
   @$pb.TagNumber(22)
-  $core.String get notes => $_getSZ(18);
+  $core.String get notes => $_getSZ(19);
   @$pb.TagNumber(22)
-  set notes($core.String value) => $_setString(18, value);
+  set notes($core.String value) => $_setString(19, value);
   @$pb.TagNumber(22)
-  $core.bool hasNotes() => $_has(18);
+  $core.bool hasNotes() => $_has(19);
   @$pb.TagNumber(22)
   void clearNotes() => $_clearField(22);
 
   @$pb.TagNumber(23)
-  $pb.PbList<DiveCylinder> get cylinders => $_getList(19);
+  $pb.PbList<DiveCylinder> get cylinders => $_getList(20);
 
   @$pb.TagNumber(24)
-  $pb.PbList<Weightsystem> get weightsystems => $_getList(20);
+  $pb.PbList<Weightsystem> get weightsystems => $_getList(21);
 
   /// Raw dive computer data
   @$pb.TagNumber(25)
-  $pb.PbList<$1.Log> get logs => $_getList(21);
+  $pb.PbList<$1.Log> get logs => $_getList(22);
 
   /// Events like gas changed, initially extracted from dive computer data
   /// but editable.
   @$pb.TagNumber(26)
-  $pb.PbList<$1.SampleEvent> get events => $_getList(22);
+  $pb.PbList<$1.SampleEvent> get events => $_getList(23);
 
   @$pb.TagNumber(27)
-  $core.double get minTemp => $_getN(23);
+  $core.double get minTemp => $_getN(24);
   @$pb.TagNumber(27)
-  set minTemp($core.double value) => $_setDouble(23, value);
+  set minTemp($core.double value) => $_setDouble(24, value);
   @$pb.TagNumber(27)
-  $core.bool hasMinTemp() => $_has(23);
+  $core.bool hasMinTemp() => $_has(24);
   @$pb.TagNumber(27)
   void clearMinTemp() => $_clearField(27);
 
   @$pb.TagNumber(28)
-  $core.double get maxTemp => $_getN(24);
+  $core.double get maxTemp => $_getN(25);
   @$pb.TagNumber(28)
-  set maxTemp($core.double value) => $_setDouble(24, value);
+  set maxTemp($core.double value) => $_setDouble(25, value);
   @$pb.TagNumber(28)
-  $core.bool hasMaxTemp() => $_has(24);
+  $core.bool hasMaxTemp() => $_has(25);
   @$pb.TagNumber(28)
   void clearMaxTemp() => $_clearField(28);
 }

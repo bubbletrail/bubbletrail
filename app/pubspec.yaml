@@ -30,6 +30,8 @@ environment:
 dependencies:
   bloc_concurrency: ^0.3.0
   chips_input_autocomplete: ^1.2.2
+  chunked_stream: ^1.4.2
+  convert: ^3.1.2
   copy_with_extension: ^11.0.0
   crypto: ^3.0.7
   device_info_plus: ^12.3.0
@@ -45,13 +47,13 @@ dependencies:
   flutter_map: ^8.2.2
   glob: ^2.1.3
   go_router: ^17.0.0
-  icloud_storage_sync: ^0.0.2
   intl: ^0.20.2
   latlong2: ^0.9.1
   libdivecomputer: {path: ../pkg/libdivecomputer}
   logging: ^1.3.0
   minio: ^3.5.0
   path_provider: ^2.1.5
+  pinenacl: ^0.6.0
   protobuf: ^6.0.0
   shared_preferences: ^2.3.4
   trina_grid: ^2.1.1

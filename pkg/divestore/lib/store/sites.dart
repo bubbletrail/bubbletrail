@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 
 import '../gen/gen.dart';
 import '../gen/internal.pb.dart';
+import '../sync/syncprovider.dart';
 import 'fileio.dart';
 
 final _log = Logger('store/sites');
@@ -67,13 +68,6 @@ class Sites {
     _scheduleSave();
   }
 
-  Future<void> _import(Site site) async {
-    if (readonly) throw Exception('readonly');
-    _sites[site.id] = site;
-    _tags.addAll(site.tags);
-    _scheduleSave();
-  }
-
   Future<void> delete(String id) async {
     if (readonly) throw Exception('readonly');
     if (_sites.containsKey(id)) {
@@ -125,18 +119,43 @@ class Sites {
     }
   }
 
-  Future<void> importFrom(Sites other) async {
-    for (final site in await other.getAll(withDeleted: true)) {
-      final cur = _sites[site.id];
-      if (site.hasDeletedAt()) {
-        if (cur != null) {
-          print('delete site ${site.id}');
-          await delete(site.id);
-        }
-      } else if (cur == null || site.updatedAt.toDateTime().isAfter(cur.updatedAt.toDateTime())) {
-        print('import site ${site.id}');
-        await _import(site);
-      }
+  void _rebuildTags() {
+    _tags.clear();
+    for (final site in _sites.values) {
+      if (site.hasDeletedAt()) continue;
+      _tags.addAll(site.tags);
     }
+  }
+
+  Future<void> syncWith(SyncProvider provider) async {
+    // Get all sites, merge with the list.
+    try {
+      final obj = await provider.getObject('sites');
+      final sl = InternalSiteList.fromBuffer(obj);
+      sl.freeze();
+      for (final site in sl.sites) {
+        final cur = _sites[site.id];
+        if (site.hasDeletedAt()) {
+          if (cur != null) {
+            print('delete site ${site.id}');
+            await delete(site.id);
+          }
+        } else if (cur == null || site.updatedAt.toDateTime().isAfter(cur.updatedAt.toDateTime())) {
+          print('import site ${site.id}');
+          _sites[site.id] = site;
+        }
+      }
+    } catch (e) {
+      print('failed to load: $e');
+    }
+
+    // Upload the new merged set.
+    final vals = _sites.values.toList();
+    final cl = InternalSiteList(sites: vals);
+    final bs = cl.writeToBuffer();
+    await provider.putObject('sites', bs);
+
+    _rebuildTags();
+    _scheduleSave();
   }
 }

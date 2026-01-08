@@ -64,7 +64,7 @@ enum TimeFormatPref {
   final String format;
 }
 
-enum SyncProvider { none, icloud, s3 }
+enum SyncProviderKind { none, s3 }
 
 class S3Config {
   final String endpoint;
@@ -72,18 +72,20 @@ class S3Config {
   final String accessKey;
   final String secretKey;
   final String region;
+  final String syncKey;
 
-  const S3Config({this.endpoint = '', this.bucket = '', this.accessKey = '', this.secretKey = '', this.region = 'us-east-1'});
+  const S3Config({this.endpoint = '', this.bucket = '', this.accessKey = '', this.secretKey = '', this.region = 'us-east-1', this.syncKey = ''});
 
-  bool get isConfigured => endpoint.isNotEmpty && bucket.isNotEmpty && accessKey.isNotEmpty && secretKey.isNotEmpty;
+  bool get isConfigured => endpoint.isNotEmpty && bucket.isNotEmpty && accessKey.isNotEmpty && secretKey.isNotEmpty && syncKey.isNotEmpty;
 
-  S3Config copyWith({String? endpoint, String? bucket, String? accessKey, String? secretKey, String? region, bool? useSSL}) {
+  S3Config copyWith({String? endpoint, String? bucket, String? accessKey, String? secretKey, String? region, String? syncKey}) {
     return S3Config(
       endpoint: endpoint ?? this.endpoint,
       bucket: bucket ?? this.bucket,
       accessKey: accessKey ?? this.accessKey,
       secretKey: secretKey ?? this.secretKey,
       region: region ?? this.region,
+      syncKey: syncKey ?? this.syncKey,
     );
   }
 
@@ -95,11 +97,12 @@ class S3Config {
         other.bucket == bucket &&
         other.accessKey == accessKey &&
         other.secretKey == secretKey &&
-        other.region == region;
+        other.region == region &&
+        other.syncKey == syncKey;
   }
 
   @override
-  int get hashCode => Object.hash(endpoint, bucket, accessKey, secretKey, region);
+  int get hashCode => Object.hash(endpoint, bucket, accessKey, secretKey, region, syncKey);
 }
 
 class Preferences {
@@ -111,7 +114,7 @@ class Preferences {
   final DateFormatPref dateFormat;
   final TimeFormatPref timeFormat;
   final ThemeMode themeMode;
-  final SyncProvider syncProvider;
+  final SyncProviderKind syncProvider;
   final S3Config s3Config;
 
   String get dateTimeFormat => '${dateFormat.format} ${timeFormat.format}';
@@ -125,7 +128,7 @@ class Preferences {
     this.dateFormat = DateFormatPref.iso,
     this.timeFormat = TimeFormatPref.h24,
     this.themeMode = ThemeMode.system,
-    this.syncProvider = SyncProvider.none,
+    this.syncProvider = SyncProviderKind.none,
     this.s3Config = const S3Config(),
   });
 
@@ -138,7 +141,7 @@ class Preferences {
     DateFormatPref? dateFormat,
     TimeFormatPref? timeFormat,
     ThemeMode? themeMode,
-    SyncProvider? syncProvider,
+    SyncProviderKind? syncProvider,
     S3Config? s3Config,
   }) {
     return Preferences(

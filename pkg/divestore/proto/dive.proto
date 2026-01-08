@@ -13,6 +13,7 @@ message Dive {
   google.protobuf.Timestamp created_at = 2;
   google.protobuf.Timestamp updated_at = 3;
   google.protobuf.Timestamp deleted_at = 4;
+  string synced_etag = 5;
 
   int32 number = 8; // Dive number, human readable/assigned
   int32 rating = 9; // 0-5 stars
