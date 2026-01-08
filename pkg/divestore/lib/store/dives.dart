@@ -197,7 +197,9 @@ class Dives {
         final dir = diveDir(dive);
         await Directory(dir).create(recursive: true);
 
-        await atomicWriteProto(dlName(dir, dive), InternalLogList(logs: dive.logs));
+        if (dive.logs.isNotEmpty) {
+          await atomicWriteProto(dlName(dir, dive), InternalLogList(logs: dive.logs));
+        }
 
         final metaOnly = dive.rebuild((dive) {
           dive.logs.clear();
