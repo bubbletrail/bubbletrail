@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_routes.dart';
@@ -24,7 +25,7 @@ class SiteDetailScreen extends StatelessWidget {
       title: Text(site.name),
       actions: [
         IconButton(
-          icon: const Icon(Icons.edit),
+          icon: const FaIcon(FontAwesomeIcons.penToSquare),
           tooltip: 'Edit',
           onPressed: () => context.goNamed(AppRouteName.sitesDetailsEdit, pathParameters: {'siteID': site.id}),
         ),

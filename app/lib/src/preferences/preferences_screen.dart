@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 
@@ -28,9 +29,9 @@ class PreferencesScreen extends StatelessWidget {
               body: ListView(
                 padding: const .all(16),
                 children: [
-                  PreferencesCategoryCard(icon: Icons.scuba_diving, title: 'Cylinders', onTap: () => context.goNamed(AppRouteName.cylinders)),
-                  PreferencesCategoryCard(icon: Icons.straighten, title: 'Units', onTap: () => context.goNamed(AppRouteName.units)),
-                  PreferencesCategoryCard(icon: Icons.cloud_sync, title: 'Syncing', onTap: () => context.goNamed(AppRouteName.syncing)),
+                  PreferencesCategoryCard(icon: FontAwesomeIcons.bottleWater, title: 'Cylinders', onTap: () => context.goNamed(AppRouteName.cylinders)),
+                  PreferencesCategoryCard(icon: FontAwesomeIcons.ruler, title: 'Units', onTap: () => context.goNamed(AppRouteName.units)),
+                  PreferencesCategoryCard(icon: FontAwesomeIcons.cloudArrowUp, title: 'Syncing', onTap: () => context.goNamed(AppRouteName.syncing)),
                   const SizedBox(height: 24),
                   const PreferencesSectionHeader(title: 'Appearance'),
                   PreferencesTile(
@@ -57,7 +58,7 @@ class PreferencesScreen extends StatelessWidget {
                       children: [
                         FilledButton.icon(
                           onPressed: syncState.syncing ? null : () => context.read<SyncBloc>().add(const StartSyncing()),
-                          icon: const Icon(Icons.sync),
+                          icon: const FaIcon(FontAwesomeIcons.arrowsRotate, size: 16),
                           label: Text('Sync now'),
                         ),
                         SyncStatusTile(state: syncState),
@@ -134,7 +135,7 @@ class _LogPreviewState extends State<_LogPreview> {
               children: [
                 Text('Logs', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 const Spacer(),
-                Icon(Icons.chevron_right, size: 14, color: theme.colorScheme.onSurfaceVariant),
+                FaIcon(FontAwesomeIcons.chevronRight, size: 12, color: theme.colorScheme.onSurfaceVariant),
               ],
             ),
             const SizedBox(height: 4),

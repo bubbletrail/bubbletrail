@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../app_metadata.dart';
@@ -55,7 +56,7 @@ class _SiteMapState extends State<SiteMap> {
               width: 32,
               height: 32,
               alignment: .topCenter, // point is at bottom center
-              child: Icon(Icons.location_pin, size: 32, color: Colors.redAccent),
+              child: FaIcon(FontAwesomeIcons.locationDot, size: 28, color: Colors.redAccent),
             ),
           ],
         ),

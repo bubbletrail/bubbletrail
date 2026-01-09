@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 /// Result of a selection dialog - distinguishes between cancelled and selected value
 class SelectionResult<T> {
@@ -37,7 +38,7 @@ Future<SelectionResult<T>> showSelectionDialog<T>({
           itemBuilder: (context, index) {
             if (noneOption != null && index == 0) {
               return ListTile(
-                leading: const Icon(Icons.clear),
+                leading: const FaIcon(FontAwesomeIcons.xmark),
                 title: Text(noneOption),
                 selected: selectedItem == null,
                 onTap: () => Navigator.of(dialogContext).pop(null),

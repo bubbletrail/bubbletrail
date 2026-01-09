@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_routes.dart';
@@ -18,7 +19,7 @@ class DiveListScreen extends StatelessWidget {
   List<Widget> _actions(BuildContext context) {
     return [
       IconButton(
-        icon: const Icon(Icons.file_upload),
+        icon: const FaIcon(FontAwesomeIcons.fileImport),
         tooltip: 'Import SSRF file',
         onPressed: () async {
           final result = await FilePicker.platform.pickFiles(type: .custom, allowedExtensions: ['ssrf', 'xml']);
@@ -30,7 +31,7 @@ class DiveListScreen extends StatelessWidget {
         },
       ),
       IconButton(
-        icon: const Icon(Icons.add),
+        icon: const FaIcon(FontAwesomeIcons.plus),
         tooltip: 'Add new dive',
         onPressed: () {
           context.goNamed(AppRouteName.divesNew);
@@ -50,7 +51,7 @@ class DiveListScreen extends StatelessWidget {
           final dives = state.dives;
 
           if (dives.isEmpty) {
-            return const EmptyStateWidget(message: 'No dives yet. Add your first dive!', icon: Icons.scuba_diving);
+            return const EmptyStateWidget(message: 'No dives yet. Add your first dive!', icon: FontAwesomeIcons.personSwimming);
           }
 
           return DiveTableWidget(dives: dives, sitesByUuid: state.sitesByUuid, showSiteColumn: true);

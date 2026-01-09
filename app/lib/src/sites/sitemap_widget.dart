@@ -1,5 +1,6 @@
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -35,7 +36,7 @@ class SiteMapWidget extends StatelessWidget {
                 top: 8,
                 right: 8,
                 child: IconButton.filled(
-                  icon: const Icon(Icons.fullscreen),
+                  icon: const FaIcon(FontAwesomeIcons.expand),
                   onPressed: () {
                     context.pushNamed(AppRouteName.sitesDetailsMap, pathParameters: {'siteID': site.id});
                   },

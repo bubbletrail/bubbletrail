@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../bloc/preferences_bloc.dart';
 import '../bloc/sync_bloc.dart';
@@ -36,7 +37,7 @@ class SyncingScreen extends StatelessWidget {
                             : () => context.read<SyncBloc>().add(const StartSyncing()),
                         icon: syncState.syncing
                             ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                            : const Icon(Icons.sync),
+                            : const FaIcon(FontAwesomeIcons.arrowsRotate),
                         label: Text(syncState.syncing ? 'Syncing...' : 'Sync Now'),
                       ),
                     ],
@@ -177,7 +178,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
             labelText: 'Secret key',
             border: const OutlineInputBorder(),
             suffixIcon: IconButton(
-              icon: Icon(_obscureSecretKey ? Icons.visibility : Icons.visibility_off),
+              icon: FaIcon(_obscureSecretKey ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash),
               onPressed: () => setState(() => _obscureSecretKey = !_obscureSecretKey),
             ),
           ),
@@ -192,7 +193,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
             labelText: 'Vault key',
             border: const OutlineInputBorder(),
             suffixIcon: IconButton(
-              icon: Icon(_obscureVaultKey ? Icons.visibility : Icons.visibility_off),
+              icon: FaIcon(_obscureVaultKey ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash),
               onPressed: () => setState(() => _obscureVaultKey = !_obscureVaultKey),
             ),
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../bloc/ble_bloc.dart';
 import '../common/common.dart';
@@ -21,7 +22,7 @@ class BleScanScreen extends StatelessWidget {
           actions: [
             if (state.connectedDevice != null)
               IconButton(
-                icon: const Icon(Icons.bluetooth_disabled),
+                icon: const FaIcon(FontAwesomeIcons.bluetoothB),
                 tooltip: 'Disconnect',
                 onPressed: () => context.read<BleBloc>().add(const BleDisconnect()),
               ),
@@ -36,7 +37,7 @@ class BleScanScreen extends StatelessWidget {
                       context.read<BleBloc>().add(const BleStartScan());
                     }
                   },
-                  icon: Icon(state.isScanning ? Icons.stop : Icons.search),
+                  icon: FaIcon(state.isScanning ? FontAwesomeIcons.stop : FontAwesomeIcons.magnifyingGlass),
                   label: Text(state.isScanning ? 'Stop' : 'Scan'),
                 )
               : null,
@@ -51,7 +52,7 @@ class BleScanScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: .center,
           children: [
-            Icon(Icons.bluetooth_disabled, size: 64, color: Theme.of(context).colorScheme.error),
+            FaIcon(FontAwesomeIcons.bluetoothB, size: 64, color: Theme.of(context).colorScheme.error),
             const SizedBox(height: 16),
             Text('Bluetooth is ${state.adapterState.name}', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
@@ -103,7 +104,7 @@ class BleScanScreen extends StatelessWidget {
         crossAxisAlignment: .start,
         children: [
           ListTile(
-            leading: const Icon(Icons.bluetooth_connected),
+            leading: const FaIcon(FontAwesomeIcons.bluetoothB),
             title: Text(state.connectedDevice!.platformName),
             subtitle: Text('Status: ${state.connectionState.name}'),
             trailing: TextButton(onPressed: () => context.read<BleBloc>().add(const BleDisconnect()), child: const Text('Disconnect')),
@@ -160,7 +161,7 @@ class BleScanScreen extends StatelessWidget {
         children: [
           FilledButton.icon(
             onPressed: state.supportedComputers.isEmpty ? null : () => _showComputerSelectionDialog(context, state),
-            icon: const Icon(Icons.download),
+            icon: const FaIcon(FontAwesomeIcons.download),
             label: const Text('Download dives'),
           ),
           if (state.supportedComputers.isEmpty)
@@ -262,7 +263,7 @@ class BleScanScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: .center,
         children: [
-          Icon(Icons.bluetooth_searching, size: 64, color: Theme.of(context).colorScheme.secondary),
+          FaIcon(FontAwesomeIcons.bluetoothB, size: 64, color: Theme.of(context).colorScheme.secondary),
           const SizedBox(height: 16),
           Text(
             state.isScanning
@@ -295,11 +296,11 @@ class BleScanScreen extends StatelessWidget {
 
         return Card(
           child: ListTile(
-            leading: const Icon(Icons.bluetooth),
+            leading: const FaIcon(FontAwesomeIcons.bluetoothB),
             title: Text(device.platformName),
             subtitle: Row(
               children: [
-                Icon(_getSignalIcon(result.rssi), size: 16, color: Theme.of(context).colorScheme.secondary),
+                FaIcon(_getSignalIcon(result.rssi), size: 16, color: Theme.of(context).colorScheme.secondary),
                 const SizedBox(width: 4),
                 Text('${_getSignalStrengthLabel(result.rssi)} (${result.rssi} dBm)', style: Theme.of(context).textTheme.bodySmall),
               ],
@@ -319,9 +320,7 @@ class BleScanScreen extends StatelessWidget {
   }
 
   IconData _getSignalIcon(int rssi) {
-    if (rssi >= -50) return Icons.signal_cellular_4_bar;
-    if (rssi >= -60) return Icons.signal_cellular_alt;
-    if (rssi >= -70) return Icons.signal_cellular_alt_2_bar;
-    return Icons.signal_cellular_alt_1_bar;
+    // FontAwesome only has one signal icon, so we use it for all strengths
+    return FontAwesomeIcons.signal;
   }
 }

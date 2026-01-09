@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:logging/logging.dart';
 
 import '../bloc/preferences_bloc.dart';
@@ -50,7 +51,7 @@ class _LogsScreenState extends State<LogsScreen> {
       title: const Text('Logs'),
       actions: [
         PopupMenuButton<Level>(
-          icon: const Icon(Icons.filter_list),
+          icon: const FaIcon(FontAwesomeIcons.filter, size: 18),
           tooltip: 'Filter by level',
           onSelected: (level) {
             setState(() {
@@ -66,7 +67,7 @@ class _LogsScreenState extends State<LogsScreen> {
           ],
         ),
         IconButton(
-          icon: const Icon(Icons.copy),
+          icon: const FaIcon(FontAwesomeIcons.copy, size: 18),
           tooltip: 'Copy all logs',
           onPressed: _records.isEmpty
               ? null
@@ -79,7 +80,7 @@ class _LogsScreenState extends State<LogsScreen> {
                 },
         ),
         IconButton(
-          icon: const Icon(Icons.delete_outline),
+          icon: const FaIcon(FontAwesomeIcons.trashCan, size: 18),
           tooltip: 'Clear logs',
           onPressed: () {
             LogBuffer.instance.clear();
@@ -101,7 +102,7 @@ class _LogsScreenState extends State<LogsScreen> {
   PopupMenuItem<Level> _buildLevelMenuItem(Level level, String label) {
     return PopupMenuItem(
       value: level,
-      child: Row(children: [if (_minLevel == level) const Icon(Icons.check, size: 18) else const SizedBox(width: 18), const SizedBox(width: 8), Text(label)]),
+      child: Row(children: [if (_minLevel == level) const FaIcon(FontAwesomeIcons.check, size: 14) else const SizedBox(width: 18), const SizedBox(width: 8), Text(label)]),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../bloc/sync_bloc.dart';
 import '../common/common.dart';
@@ -51,17 +52,17 @@ class SyncStatusTile extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     if (state.syncing) {
-      return _buildTile(context, icon: Icons.sync, iconColor: colorScheme.primary, message: 'Syncing...', isAnimating: true);
+      return _buildTile(context, icon: FontAwesomeIcons.arrowsRotate, iconColor: colorScheme.primary, message: 'Syncing...', isAnimating: true);
     }
 
     if (state.lastSyncSuccess == false) {
-      return _buildTile(context, icon: Icons.error_outline, iconColor: colorScheme.error, message: 'Sync failed: ${state.error ?? "Unknown error"}');
+      return _buildTile(context, icon: FontAwesomeIcons.circleExclamation, iconColor: colorScheme.error, message: 'Sync failed: ${state.error ?? "Unknown error"}');
     }
 
     if (state.lastSynced != null) {
       return _buildTile(
         context,
-        icon: Icons.check_circle_outline,
+        icon: FontAwesomeIcons.circleCheck,
         iconColor: Theme.of(context).colorScheme.primary,
         message: 'Last synced',
         trailing: DateTimeText(state.lastSynced!, style: Theme.of(context).textTheme.bodySmall),
@@ -84,7 +85,7 @@ class SyncStatusTile extends StatelessWidget {
         if (isAnimating)
           SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: iconColor))
         else
-          Icon(icon, size: 16, color: iconColor),
+          FaIcon(icon, size: 14, color: iconColor),
         const SizedBox(width: 8),
         Text(message, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: iconColor)),
         if (trailing != null) ...[const SizedBox(width: 4), trailing],
@@ -104,9 +105,9 @@ class PreferencesCategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: Icon(icon, size: 32),
+        leading: FaIcon(icon, size: 28),
         title: Text(title, style: Theme.of(context).textTheme.titleMedium),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: const FaIcon(FontAwesomeIcons.chevronRight, size: 16),
         onTap: onTap,
       ),
     );

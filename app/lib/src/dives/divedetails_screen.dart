@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:protobuf/protobuf.dart';
@@ -56,14 +57,14 @@ class _DiveDetails extends StatelessWidget {
       title: Text('Dive #${dive.number}: ${site?.name ?? 'Unknown site'}'),
       actions: [
         IconButton(
-          icon: const Icon(Icons.edit),
+          icon: const FaIcon(FontAwesomeIcons.penToSquare),
           onPressed: () {
             context.goNamed(AppRouteName.divesDetailsEdit, pathParameters: {'diveID': dive.id});
           },
           tooltip: 'Edit dive',
         ),
         IconButton(
-          icon: const Icon(Icons.arrow_upward),
+          icon: const FaIcon(FontAwesomeIcons.arrowUp),
           onPressed: prevID != null
               ? () {
                   context.goNamed(AppRouteName.divesDetails, pathParameters: {'diveID': prevID!});
@@ -72,7 +73,7 @@ class _DiveDetails extends StatelessWidget {
           tooltip: 'Previous dive',
         ),
         IconButton(
-          icon: const Icon(Icons.arrow_downward),
+          icon: const FaIcon(FontAwesomeIcons.arrowDown),
           onPressed: nextID != null
               ? () {
                   context.goNamed(AppRouteName.divesDetails, pathParameters: {'diveID': nextID!});
@@ -273,7 +274,7 @@ class _ProfileCard extends StatelessWidget {
                 top: 8,
                 right: 8,
                 child: IconButton.filled(
-                  icon: const Icon(Icons.fullscreen),
+                  icon: const FaIcon(FontAwesomeIcons.expand),
                   onPressed: () {
                     context.pushNamed(AppRouteName.divesDetailsDepthProfile, pathParameters: {'diveID': dive.id});
                   },
@@ -339,7 +340,7 @@ class _SiteCard extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(child: Text(site.name, style: Theme.of(context).textTheme.titleMedium)),
-                  Icon(Icons.arrow_forward_ios, size: 16, color: Theme.of(context).colorScheme.primary),
+                  FaIcon(FontAwesomeIcons.chevronRight, size: 14, color: Theme.of(context).colorScheme.primary),
                 ],
               ),
             ),
@@ -355,7 +356,7 @@ class _SiteCard extends StatelessWidget {
                     top: 8,
                     right: 8,
                     child: IconButton.filled(
-                      icon: const Icon(Icons.fullscreen),
+                      icon: const FaIcon(FontAwesomeIcons.expand),
                       onPressed: () {
                         context.pushNamed(AppRouteName.sitesDetailsMap, pathParameters: {'siteID': site.id});
                       },

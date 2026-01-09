@@ -1,5 +1,6 @@
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_routes.dart';
@@ -39,7 +40,7 @@ class SiteListItemCard extends StatelessWidget {
               // Top row: Site name
               Row(
                 children: [
-                  Icon(Icons.location_on, size: 20, color: theme.colorScheme.primary),
+                  FaIcon(FontAwesomeIcons.locationDot, size: 18, color: theme.colorScheme.primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -68,13 +69,13 @@ class SiteListItemCard extends StatelessWidget {
                 padding: const .only(left: 28),
                 child: Row(
                   children: [
-                    if (site.bodyOfWater.isNotEmpty) ...[_InfoChip(icon: Icons.water, label: site.bodyOfWater, theme: theme), const SizedBox(width: 12)],
+                    if (site.bodyOfWater.isNotEmpty) ...[_InfoChip(icon: FontAwesomeIcons.water, label: site.bodyOfWater, theme: theme), const SizedBox(width: 12)],
                     if (site.difficulty.isNotEmpty) ...[
-                      _InfoChip(icon: Icons.signal_cellular_alt, label: site.difficulty, theme: theme),
+                      _InfoChip(icon: FontAwesomeIcons.signal, label: site.difficulty, theme: theme),
                       const SizedBox(width: 12),
                     ],
                     const Spacer(),
-                    _InfoChip(icon: Icons.scuba_diving, label: '$diveCount ${diveCount == 1 ? 'dive' : 'dives'}', theme: theme),
+                    _InfoChip(icon: FontAwesomeIcons.personSwimming, label: '$diveCount ${diveCount == 1 ? 'dive' : 'dives'}', theme: theme),
                   ],
                 ),
               ),
@@ -98,7 +99,7 @@ class _InfoChip extends StatelessWidget {
     return Row(
       mainAxisSize: .min,
       children: [
-        Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
+        FaIcon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
         const SizedBox(width: 4),
         Text(label, style: theme.textTheme.bodySmall),
       ],

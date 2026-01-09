@@ -1,5 +1,6 @@
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_routes.dart';
@@ -53,7 +54,7 @@ class DiveListItemCard extends StatelessWidget {
               if (showSite && siteName != null) ...[
                 Row(
                   children: [
-                    Icon(Icons.location_on, size: 16, color: theme.colorScheme.primary),
+                    FaIcon(FontAwesomeIcons.locationDot, size: 14, color: theme.colorScheme.primary),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(siteName, style: theme.textTheme.bodyMedium, overflow: .ellipsis),
@@ -65,13 +66,13 @@ class DiveListItemCard extends StatelessWidget {
               // Bottom row: Depth and duration
               Row(
                 children: [
-                  _InfoChip(icon: Icons.arrow_downward, label: DepthText(maxDepth), theme: theme),
+                  _InfoChip(icon: FontAwesomeIcons.arrowDown, label: DepthText(maxDepth), theme: theme),
                   const SizedBox(width: 12),
-                  _InfoChip(icon: Icons.timer, label: DurationText(dive.duration), theme: theme),
+                  _InfoChip(icon: FontAwesomeIcons.stopwatch, label: DurationText(dive.duration), theme: theme),
                   if (dive.sac > 0) ...[
                     const SizedBox(width: 12),
                     _InfoChip(
-                      icon: Icons.av_timer,
+                      icon: FontAwesomeIcons.gauge,
                       label: VolumeText(dive.sac, suffix: '/min'),
                       theme: theme,
                     ),
@@ -100,7 +101,7 @@ class _InfoChip extends StatelessWidget {
     return Row(
       mainAxisSize: .min,
       children: [
-        Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
+        FaIcon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
         const SizedBox(width: 4),
         label,
       ],

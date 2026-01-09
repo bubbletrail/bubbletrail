@@ -4,6 +4,7 @@ import 'package:chips_input_autocomplete/chips_input_autocomplete.dart';
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart' as proto;
 
@@ -132,7 +133,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       items: sites,
       selectedItem: currentSite,
       noneOption: 'No site',
-      itemBuilder: (site) => ListTile(leading: const Icon(Icons.location_on), title: Text(site.name)),
+      itemBuilder: (site) => ListTile(leading: const FaIcon(FontAwesomeIcons.locationDot), title: Text(site.name)),
     );
 
     if (!result.cancelled) {
@@ -160,7 +161,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       title: 'Select cylinder',
       items: cylinders,
       itemBuilder: (cyl) {
-        return ListTile(leading: const Icon(Icons.scuba_diving), title: Text(cyl.description.isNotEmpty ? cyl.description : 'Cylinder ${cyl.id}'));
+        return ListTile(leading: const FaIcon(FontAwesomeIcons.bottleWater), title: Text(cyl.description.isNotEmpty ? cyl.description : 'Cylinder ${cyl.id}'));
       },
     );
 
@@ -462,7 +463,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       },
       child: ScreenScaffold(
         title: Text('Edit Dive #${dive.number}'),
-        actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes')],
+        actions: [IconButton(icon: const FaIcon(FontAwesomeIcons.xmark), onPressed: _cancel, tooltip: 'Discard changes')],
         body: SingleChildScrollView(
           padding: const .all(16.0),
           child: Column(
@@ -476,7 +477,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                     child: InkWell(
                       onTap: _selectDate,
                       child: InputDecorator(
-                        decoration: const InputDecoration(labelText: 'Date', border: OutlineInputBorder(), suffixIcon: Icon(Icons.calendar_today)),
+                        decoration: const InputDecoration(labelText: 'Date', border: OutlineInputBorder(), suffixIcon: FaIcon(FontAwesomeIcons.calendar)),
                         child: DateText(_selectedDateTime),
                       ),
                     ),
@@ -485,7 +486,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                     child: InkWell(
                       onTap: _selectTime,
                       child: InputDecorator(
-                        decoration: const InputDecoration(labelText: 'Time', border: OutlineInputBorder(), suffixIcon: Icon(Icons.access_time)),
+                        decoration: const InputDecoration(labelText: 'Time', border: OutlineInputBorder(), suffixIcon: FaIcon(FontAwesomeIcons.clock)),
                         child: TimeText(_selectedDateTime),
                       ),
                     ),
@@ -500,7 +501,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                       child: InkWell(
                         onTap: _selectDuration,
                         child: InputDecorator(
-                          decoration: const InputDecoration(labelText: 'Duration', border: OutlineInputBorder(), suffixIcon: Icon(Icons.timer)),
+                          decoration: const InputDecoration(labelText: 'Duration', border: OutlineInputBorder(), suffixIcon: FaIcon(FontAwesomeIcons.stopwatch)),
                           child: Text(_durationFormatted),
                         ),
                       ),
@@ -528,7 +529,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                   return InkWell(
                     onTap: _selectSite,
                     child: InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Dive site', border: OutlineInputBorder(), suffixIcon: Icon(Icons.location_on)),
+                      decoration: const InputDecoration(labelText: 'Dive site', border: OutlineInputBorder(), suffixIcon: FaIcon(FontAwesomeIcons.locationDot)),
                       child: Text(selectedSite?.name ?? 'No site selected', style: selectedSite == null ? TextStyle(color: Theme.of(context).hintColor) : null),
                     ),
                   );
@@ -542,7 +543,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                     mainAxisAlignment: .spaceBetween,
                     children: [
                       Text('Cylinders', style: Theme.of(context).textTheme.titleMedium),
-                      IconButton(icon: const Icon(Icons.add), onPressed: _addCylinder, tooltip: 'Add cylinder'),
+                      IconButton(icon: const FaIcon(FontAwesomeIcons.plus), onPressed: _addCylinder, tooltip: 'Add cylinder'),
                     ],
                   ),
                   if (_cylinders.isEmpty)
@@ -572,8 +573,8 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                                 trailing: Row(
                                   mainAxisSize: .min,
                                   children: [
-                                    IconButton(icon: const Icon(Icons.edit, size: 20), onPressed: () => _editCylinderGas(index), tooltip: 'Edit gas mix'),
-                                    IconButton(icon: const Icon(Icons.delete, size: 20), onPressed: () => _removeCylinder(index), tooltip: 'Remove cylinder'),
+                                    IconButton(icon: const FaIcon(FontAwesomeIcons.penToSquare, size: 18), onPressed: () => _editCylinderGas(index), tooltip: 'Edit gas mix'),
+                                    IconButton(icon: const FaIcon(FontAwesomeIcons.trash, size: 18), onPressed: () => _removeCylinder(index), tooltip: 'Remove cylinder'),
                                   ],
                                 ),
                                 contentPadding: .zero,
@@ -592,7 +593,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                                           style: Theme.of(context).textTheme.bodySmall,
                                         ),
                                       ),
-                                      InkWell(onTap: () => _removeGasChange(gcIndex), child: const Icon(Icons.close, size: 16)),
+                                      InkWell(onTap: () => _removeGasChange(gcIndex), child: const FaIcon(FontAwesomeIcons.xmark, size: 14)),
                                     ],
                                   ),
                                 );
@@ -600,7 +601,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                               const SizedBox(height: 4),
                               TextButton.icon(
                                 onPressed: () => _addGasChange(index),
-                                icon: const Icon(Icons.add, size: 16),
+                                icon: const FaIcon(FontAwesomeIcons.plus, size: 14),
                                 label: const Text('Add gas change'),
                                 style: TextButton.styleFrom(padding: .zero, minimumSize: const Size(0, 32)),
                               ),
@@ -619,7 +620,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                     mainAxisAlignment: .spaceBetween,
                     children: [
                       Text('Weight Systems', style: Theme.of(context).textTheme.titleMedium),
-                      IconButton(icon: const Icon(Icons.add), onPressed: _addWeightsystem, tooltip: 'Add weight'),
+                      IconButton(icon: const FaIcon(FontAwesomeIcons.plus), onPressed: _addWeightsystem, tooltip: 'Add weight'),
                     ],
                   ),
                   if (_weightsystems.isEmpty)
@@ -645,8 +646,8 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                                   ],
                                 ),
                               ),
-                              IconButton(icon: const Icon(Icons.edit, size: 20), onPressed: () => _editWeightsystem(index), tooltip: 'Edit'),
-                              IconButton(icon: const Icon(Icons.delete, size: 20), onPressed: () => _removeWeightsystem(index), tooltip: 'Remove'),
+                              IconButton(icon: const FaIcon(FontAwesomeIcons.penToSquare, size: 18), onPressed: () => _editWeightsystem(index), tooltip: 'Edit'),
+                              IconButton(icon: const FaIcon(FontAwesomeIcons.trash, size: 18), onPressed: () => _removeWeightsystem(index), tooltip: 'Remove'),
                             ],
                           ),
                         ),
@@ -663,7 +664,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                     children: .generate(5, (index) {
                       final starValue = index + 1;
                       return IconButton(
-                        icon: Icon(_rating != null && starValue <= _rating! ? Icons.star : Icons.star_border, color: Colors.amber, size: 32),
+                        icon: FaIcon(_rating != null && starValue <= _rating! ? FontAwesomeIcons.solidStar : FontAwesomeIcons.star, color: Colors.amber, size: 28),
                         onPressed: () {
                           setState(() {
                             _rating = starValue == _rating ? null : starValue;

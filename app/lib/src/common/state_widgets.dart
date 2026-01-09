@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 /// A widget that displays an error state with an icon, title, and message.
 ///
@@ -19,14 +20,14 @@ class ErrorStateWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: .center,
           children: [
-            Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+            FaIcon(FontAwesomeIcons.circleExclamation, size: 48, color: Theme.of(context).colorScheme.error),
             const SizedBox(height: 16),
             Text(title, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(message, style: Theme.of(context).textTheme.bodyMedium, textAlign: .center),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
-              FilledButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh), label: const Text('Retry')),
+              FilledButton.icon(onPressed: onRetry, icon: const FaIcon(FontAwesomeIcons.arrowsRotate), label: const Text('Retry')),
             ],
           ],
         ),
@@ -54,7 +55,7 @@ class EmptyStateWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: .center,
           children: [
-            if (icon != null) ...[Icon(icon, size: 48, color: Theme.of(context).colorScheme.outline), const SizedBox(height: 16)],
+            if (icon != null) ...[FaIcon(icon, size: 48, color: Theme.of(context).colorScheme.outline), const SizedBox(height: 16)],
             Text(
               message,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.outline),

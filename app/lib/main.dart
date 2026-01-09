@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:window_manager/window_manager.dart';
@@ -109,10 +110,10 @@ class _MyAppState extends State<MyApp> with WindowListener {
           builder: (BuildContext context, GoRouterState state, StatefulNavigationShell shell) {
             final appBarTheme = Theme.of(context).appBarTheme;
             const destinations = [
-              (icon: Icons.waves, label: 'Dives'),
-              (icon: Icons.place, label: 'Sites'),
-              (icon: Icons.settings, label: 'Preferences'),
-              (icon: Icons.bluetooth, label: 'Connect'),
+              (icon: FontAwesomeIcons.water, label: 'Dives'),
+              (icon: FontAwesomeIcons.locationDot, label: 'Sites'),
+              (icon: FontAwesomeIcons.gear, label: 'Preferences'),
+              (icon: FontAwesomeIcons.bluetooth, label: 'Connect'),
             ];
 
             final cs = Theme.of(context).colorScheme;
@@ -136,7 +137,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       backgroundColor: Colors.transparent,
                       selectedIndex: shell.currentIndex,
                       onDestinationSelected: (n) => shell.goBranch(n),
-                      destinations: [for (final d in destinations) NavigationDestination(icon: Icon(d.icon), label: d.label)],
+                      destinations: [for (final d in destinations) NavigationDestination(icon: FaIcon(d.icon), label: d.label)],
                     ),
                   ),
                 ),
@@ -153,7 +154,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                     selectedIndex: shell.currentIndex,
                     onDestinationSelected: (n) => shell.goBranch(n),
                     leading: SizedBox(height: (appBarTheme.toolbarHeight ?? 48) - 8),
-                    destinations: [for (final d in destinations) NavigationRailDestination(icon: Icon(d.icon), label: Text(d.label))],
+                    destinations: [for (final d in destinations) NavigationRailDestination(icon: FaIcon(d.icon), label: Text(d.label))],
                   ),
                   Expanded(child: shell),
                 ],
