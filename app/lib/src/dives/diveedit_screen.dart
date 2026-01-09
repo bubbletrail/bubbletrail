@@ -452,7 +452,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
 
   @override
   Widget build(BuildContext context) {
-    bool canEditDepthDuration = dive.logs.isEmpty || dive.logs.first.isSynthetic;
+    final canEditDepthDuration = dive.logs.isEmpty || dive.logs.first.isSynthetic;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
