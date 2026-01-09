@@ -80,7 +80,6 @@ extension DiveExtensions on Dive {
         // For the relevant cylinder
         try {
           final cylIdx = spans.firstWhere((s) => s.end >= sample.time).idx;
-          if (cylIdx >= perCylinderDepth.length) continue;
           final cur = perCylinderDepth[cylIdx] ?? (duration: 0, totDepth: 0);
           perCylinderDepth[cylIdx] = (duration: cur.duration + sampleDuration, totDepth: cur.totDepth + sampleDepth * sampleDuration);
         } catch (StateError) {}
