@@ -1,7 +1,9 @@
 package main
 
 import (
+	"embed"
 	"encoding/json"
+	"io/fs"
 	"log"
 	"net/http"
 	"strings"
@@ -11,6 +13,9 @@ import (
 	"bubbletrail.net/srv/internal/email"
 	"bubbletrail.net/srv/internal/minio"
 )
+
+//go:embed static
+var staticFiles embed.FS
 
 var cli struct {
 	Endpoint      string `help:"MinIO endpoint" env:"MINIO_ENDPOINT" required:""`
@@ -37,60 +42,76 @@ func main() {
 
 	emailClient := email.NewClient(cli.MailgunDomain, cli.MailgunAPIKey, cli.MailgunFrom)
 
-	http.HandleFunc("POST /account/new", func(w http.ResponseWriter, r *http.Request) {
-		var req newUserRequest
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			http.Error(w, "invalid request body", http.StatusBadRequest)
-			return
-		}
+	srv := server{minio: minioClient, email: emailClient}
+	http.HandleFunc("POST /account/new", srv.newAccount)
+	http.HandleFunc("DELETE /account/{email}", srv.deleteAccount)
 
-		if req.Email == "" {
-			http.Error(w, "email is required", http.StatusBadRequest)
-			return
-		}
-
-		result, err := minioClient.CreateUser(r.Context(), req.Email)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		err = emailClient.SendCredentials(r.Context(), email.Credentials{
-			Email:     req.Email,
-			Bucket:    result.BucketName,
-			AccessKey: result.AccessKey,
-			SecretKey: result.SecretKey,
-		})
-		if err != nil {
-			log.Printf("failed to send credentials email: %v", err)
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(result)
-	})
-
-	http.HandleFunc("DELETE /account/{email}", func(w http.ResponseWriter, r *http.Request) {
-		authHeader := r.Header.Get("Authorization")
-		if !strings.HasPrefix(authHeader, "Bearer ") || authHeader[7:] != cli.AdminToken {
-			http.Error(w, "unauthorized", http.StatusUnauthorized)
-			return
-		}
-
-		email := r.PathValue("email")
-		if email == "" {
-			http.Error(w, "email is required", http.StatusBadRequest)
-			return
-		}
-
-		err := minioClient.DeleteUser(r.Context(), email)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		w.WriteHeader(http.StatusNoContent)
-	})
+	// Serve embedded static files
+	staticFS, err := fs.Sub(staticFiles, "static")
+	if err != nil {
+		log.Fatalf("failed to create static file system: %v", err)
+	}
+	http.Handle("/", http.FileServer(http.FS(staticFS)))
 
 	log.Println("Starting server on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+type server struct {
+	minio *minio.Client
+	email *email.Client
+}
+
+func (s *server) newAccount(w http.ResponseWriter, r *http.Request) {
+	var req newUserRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Email == "" {
+		http.Error(w, "email is required", http.StatusBadRequest)
+		return
+	}
+
+	result, err := s.minio.CreateUser(r.Context(), req.Email)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = s.email.SendCredentials(r.Context(), email.Credentials{
+		Email:     req.Email,
+		Bucket:    result.BucketName,
+		AccessKey: result.AccessKey,
+		SecretKey: result.SecretKey,
+	})
+	if err != nil {
+		log.Printf("failed to send credentials email: %v", err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
+func (s *server) deleteAccount(w http.ResponseWriter, r *http.Request) {
+	authHeader := r.Header.Get("Authorization")
+	if !strings.HasPrefix(authHeader, "Bearer ") || authHeader[7:] != cli.AdminToken {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	email := r.PathValue("email")
+	if email == "" {
+		http.Error(w, "email is required", http.StatusBadRequest)
+		return
+	}
+
+	err := s.minio.DeleteUser(r.Context(), email)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
