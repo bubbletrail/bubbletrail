@@ -13,4 +13,5 @@ abstract class SyncProvider {
   Stream<SyncObject> listObjects();
   Future<Uint8List> getObject(String key);
   Future<String> putObject(String key, Uint8List data);
+  Future<void> deleteObject(String key);
 }

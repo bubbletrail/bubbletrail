@@ -84,6 +84,12 @@ class S3SyncProvider extends SyncProvider {
     return await _minio.putObject(_bucket, _fullKey(key), Stream.value(enc.asTypedList));
   }
 
+  @override
+  Future<void> deleteObject(String key) async {
+    _log.fine('deleting object $_bucket/$key');
+    await _minio.removeObject(_bucket, _fullKey(key));
+  }
+
   /// Constructs the full S3 key by combining root path with the given key.
   String _fullKey(String key) {
     return '$_syncPrefix/$key';

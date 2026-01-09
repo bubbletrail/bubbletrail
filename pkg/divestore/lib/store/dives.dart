@@ -113,6 +113,7 @@ class Dives {
     if (_dives.containsKey(id)) {
       _dives[id] = _dives[id]!.rebuild((dive) {
         dive.deletedAt = Timestamp.fromDateTime(DateTime.now());
+        dive.clearSyncedEtag();
       });
     }
     _scheduleSave(id);
@@ -120,7 +121,10 @@ class Dives {
 
   Future<Dive?> getById(String id) async {
     var dive = _dives[id];
-    if (dive == null) return null;
+    if (dive == null) {
+      _log.fine('get of nonexistant dive $id');
+      return null;
+    }
     if (dive.logs.isEmpty) {
       final logs = await _loadLogs(dlName(diveDir(dive), dive));
       dive = dive.rebuild((dive) {
@@ -150,6 +154,11 @@ class Dives {
     await for (final match in Glob('$pathPrefix/*/*.meta.binpb').list()) {
       try {
         final dive = await _loadMeta(match.path);
+        if (dive.id == '') {
+          _log.warning('loaded invalid dive with missing ID, deleting ${match.basename}');
+          await match.delete();
+          continue;
+        }
         _dives[dive.id] = dive;
       } catch (_) {}
     }
@@ -237,6 +246,11 @@ class Dives {
       }
 
       final id = obj.key.replaceFirst('dive-', '');
+      if (id == '') {
+        _log.warning('bug: object ${obj.key} has blank ID; deleting');
+        await provider.deleteObject(obj.key);
+        continue;
+      }
       seenEtags[id] = obj.eTag;
 
       final cur = _dives[id];
@@ -249,7 +263,8 @@ class Dives {
       final data = await provider.getObject(obj.key);
       final dive = Dive.fromBuffer(data);
       if (dive.id != id) {
-        _log.warning('bug: object with id $id contained unexpected dive ${dive.id}');
+        _log.warning('bug: object ${obj.key} contained unexpected dive ${dive.id}; deleting');
+        await provider.deleteObject(obj.key);
         continue;
       }
       dive.syncedEtag = obj.eTag;
