@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:chips_input_autocomplete/chips_input_autocomplete.dart';
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
@@ -8,76 +10,6 @@ import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart' as 
 import '../bloc/cylinderlist_bloc.dart';
 import '../bloc/divelist_bloc.dart';
 import '../common/common.dart';
-
-/// Editable wrapper for a dive cylinder with mutable fields
-class _EditableDiveCylinder {
-  String cylinderId;
-  Cylinder? cylinder;
-  int oxygen;
-  int helium;
-  double? beginPressure;
-  double? endPressure;
-
-  _EditableDiveCylinder({required this.cylinderId, this.cylinder, required this.oxygen, required this.helium, this.beginPressure, this.endPressure});
-
-  factory _EditableDiveCylinder.fromDiveCylinder(DiveCylinder dc) {
-    return _EditableDiveCylinder(
-      cylinderId: dc.cylinderId,
-      cylinder: dc.hasCylinder() ? dc.cylinder : null,
-      oxygen: (dc.oxygen * 100).toInt(),
-      helium: (dc.helium * 100).toInt(),
-      beginPressure: dc.beginPressure,
-      endPressure: dc.endPressure,
-    );
-  }
-
-  DiveCylinder toDiveCylinder() {
-    return DiveCylinder(
-      cylinderId: cylinderId,
-      cylinder: cylinder,
-      oxygen: oxygen.toDouble() / 100,
-      helium: helium.toDouble() / 100,
-      beginPressure: beginPressure?.toDouble(),
-      endPressure: endPressure?.toDouble(),
-    );
-  }
-
-  String get gasDescription => formatGasPercentage(oxygen, helium);
-}
-
-/// Editable gas change event
-class _EditableGasChange {
-  int timeSeconds;
-  int cylinderIndex;
-
-  _EditableGasChange({required this.timeSeconds, required this.cylinderIndex});
-
-  String get timeFormatted {
-    final minutes = timeSeconds ~/ 60;
-    final seconds = timeSeconds % 60;
-    return '$minutes:${seconds.toString().padLeft(2, '0')}';
-  }
-
-  SampleEvent toSampleEvent() {
-    return SampleEvent(type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, time: timeSeconds, value: cylinderIndex);
-  }
-}
-
-/// Editable wrapper for a weight system
-class _EditableWeightsystem {
-  String description;
-  double? weight;
-
-  _EditableWeightsystem({required this.description, this.weight});
-
-  factory _EditableWeightsystem.fromWeightsystem(Weightsystem ws) {
-    return _EditableWeightsystem(description: ws.description, weight: ws.hasWeight() ? ws.weight : null);
-  }
-
-  Weightsystem toWeightsystem() {
-    return Weightsystem(description: description, weight: weight);
-  }
-}
 
 class DiveEditScreen extends StatefulWidget {
   const DiveEditScreen({super.key});
@@ -764,4 +696,97 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       ),
     );
   }
+}
+
+/// Editable wrapper for a dive cylinder with mutable fields
+class _EditableDiveCylinder {
+  String cylinderId;
+  Cylinder? cylinder;
+  int oxygen;
+  int helium;
+  double? beginPressure;
+  double? endPressure;
+
+  _EditableDiveCylinder({required this.cylinderId, this.cylinder, required this.oxygen, required this.helium, this.beginPressure, this.endPressure});
+
+  factory _EditableDiveCylinder.fromDiveCylinder(DiveCylinder dc) {
+    return _EditableDiveCylinder(
+      cylinderId: dc.cylinderId,
+      cylinder: dc.hasCylinder() ? dc.cylinder : null,
+      oxygen: (dc.oxygen * 100).toInt(),
+      helium: (dc.helium * 100).toInt(),
+      beginPressure: dc.beginPressure,
+      endPressure: dc.endPressure,
+    );
+  }
+
+  DiveCylinder toDiveCylinder() {
+    return DiveCylinder(
+      cylinderId: cylinderId,
+      cylinder: cylinder,
+      oxygen: oxygen.toDouble() / 100,
+      helium: helium.toDouble() / 100,
+      beginPressure: beginPressure?.toDouble(),
+      endPressure: endPressure?.toDouble(),
+    );
+  }
+
+  String get gasDescription => formatGasPercentage(oxygen, helium);
+}
+
+/// Editable gas change event
+class _EditableGasChange {
+  int timeSeconds;
+  int cylinderIndex;
+
+  _EditableGasChange({required this.timeSeconds, required this.cylinderIndex});
+
+  String get timeFormatted {
+    final minutes = timeSeconds ~/ 60;
+    final seconds = timeSeconds % 60;
+    return '$minutes:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  SampleEvent toSampleEvent() {
+    return SampleEvent(type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, time: timeSeconds, value: cylinderIndex);
+  }
+}
+
+/// Editable wrapper for a weight system
+class _EditableWeightsystem {
+  String description;
+  double? weight;
+
+  _EditableWeightsystem({required this.description, this.weight});
+
+  factory _EditableWeightsystem.fromWeightsystem(Weightsystem ws) {
+    return _EditableWeightsystem(description: ws.description, weight: ws.hasWeight() ? ws.weight : null);
+  }
+
+  Weightsystem toWeightsystem() {
+    return Weightsystem(description: description, weight: weight);
+  }
+}
+
+List<LogSample> _manualLog(int durationSeconds, double maxDepth) {
+  final samples = <LogSample>[];
+
+  // We descend at 18 m/min
+  final t0 = (maxDepth / 18 * 60).roundToDouble();
+  // We ascend to half depth at 9 m/min
+  final t2 = (maxDepth / 2 / 9 * 60).roundToDouble();
+  // We ascend from there to the surface at 3 m/min
+  final t3 = (maxDepth / 2 / 3 * 60).roundToDouble();
+  // The bottom time is what remains, but at least zero. If this was a very
+  // odd bounce dive we might overshoot the actual duration in the graph,
+  // but whatever.
+  final t1 = max(0.0, durationSeconds - t0 - t2 - t3);
+
+  samples.add(LogSample(time: 0, depth: 0));
+  samples.add(LogSample(time: t0, depth: maxDepth));
+  samples.add(LogSample(time: t1, depth: maxDepth));
+  samples.add(LogSample(time: t2, depth: maxDepth / 2));
+  samples.add(LogSample(time: t3, depth: 0));
+
+  return samples;
 }
