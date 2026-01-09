@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -11,7 +11,6 @@ import 'package:logging/logging.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
-import 'package:copy_with_extension/copy_with_extension.dart';
 
 import 'sync_bloc.dart';
 

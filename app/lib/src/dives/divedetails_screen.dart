@@ -118,7 +118,8 @@ class _DiveDetails extends StatelessWidget {
 
   List<Widget> _buildAllSections(BuildContext context) {
     final datacolumns =
-        (<Widget>[_depthsTable(), _physioTable()] + _cylindersTables() + [if (dive.weightsystems.isNotEmpty) _weightsTable()])
+        (<Widget?>[_depthsTable(), _physioTable()] + _cylindersTables() + [if (dive.weightsystems.isNotEmpty) _weightsTable()])
+            .where((w) => w != null)
             .map<Widget>(
               (t) => Card(
                 child: Padding(padding: const EdgeInsets.all(16.0), child: t),
@@ -201,23 +202,25 @@ class _DiveDetails extends StatelessWidget {
     );
   }
 
-  Widget _physioTable() {
+  Widget? _physioTable() {
     final worstDeco = dive.logs.isNotEmpty ? dive.logs.first.worstDecoStatus : null;
     final decoModel = dive.logs.isNotEmpty && dive.logs[0].hasDecoModel() ? dive.logs[0].decoModel : null;
-    return _DataColumn(
-      children: [
-        if (dive.hasMaxTemp() || dive.hasMinTemp()) _Temps(dive),
-        if (dive.hasSac())
-          _ColumnRow(
-            label: 'SAC',
-            child: VolumeText(dive.sac, suffix: '/min'),
-          ),
-        if (dive.hasOtu()) _ColumnRow(label: 'OTU', child: Text(dive.otu.toString())),
-        if (dive.hasCns()) _ColumnRow(label: 'CNS', child: Text('${dive.cns}%')),
-        if (worstDeco != null) _ColumnRow(label: 'Deco', child: DecoStatusText(worstDeco)),
-        if (decoModel != null) _ColumnRow(label: 'Model', child: DecoModelText(decoModel)),
-      ],
-    );
+    final childen = <Widget>[];
+    if (dive.hasMaxTemp() || dive.hasMinTemp()) childen.add(_Temps(dive));
+    if (dive.hasSac()) {
+      childen.add(
+        _ColumnRow(
+          label: 'SAC',
+          child: VolumeText(dive.sac, suffix: '/min'),
+        ),
+      );
+    }
+    if (dive.hasOtu()) childen.add(_ColumnRow(label: 'OTU', child: Text(dive.otu.toString())));
+    if (dive.hasCns()) childen.add(_ColumnRow(label: 'CNS', child: Text('${dive.cns}%')));
+    if (worstDeco != null) childen.add(_ColumnRow(label: 'Deco', child: DecoStatusText(worstDeco)));
+    if (decoModel != null) childen.add(_ColumnRow(label: 'Model', child: DecoModelText(decoModel)));
+    if (childen.isEmpty) return null;
+    return _DataColumn(children: childen);
   }
 
   Widget _depthsTable() {
