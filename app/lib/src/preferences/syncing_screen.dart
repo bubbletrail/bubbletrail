@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../bloc/preferences_bloc.dart';
-import '../bloc/sync_bloc.dart';
 import '../common/common.dart';
 import 'preferences_widgets.dart';
 
@@ -23,27 +22,6 @@ class SyncingScreen extends StatelessWidget {
               _SyncProviderTile(prefs: prefs),
               if (prefs.syncProvider == .bubbletrail || prefs.syncProvider == .s3)
                 _S3ConfigSection(prefs: prefs, isBubbletrail: prefs.syncProvider == .bubbletrail),
-              const SizedBox(height: 24),
-              BlocBuilder<SyncBloc, SyncState>(
-                builder: (context, syncState) {
-                  return Column(
-                    crossAxisAlignment: .start,
-                    children: [
-                      SyncStatusTile(state: syncState),
-                      const SizedBox(height: 16),
-                      FilledButton.icon(
-                        onPressed: syncState.syncing || prefs.syncProvider == .none
-                            ? null
-                            : () => context.read<SyncBloc>().add(const StartSyncing()),
-                        icon: syncState.syncing
-                            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                            : const FaIcon(FontAwesomeIcons.arrowsRotate),
-                        label: Text(syncState.syncing ? 'Syncing...' : 'Sync Now'),
-                      ),
-                    ],
-                  );
-                },
-              ),
             ],
           );
         },
@@ -142,7 +120,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: .start,
-      spacing: 16,
+      spacing: 24,
       children: [
         const SizedBox(height: 8),
         Text(widget.isBubbletrail ? 'Bubbletrail sync configuration' : 'S3 configuration', style: Theme.of(context).textTheme.titleSmall),
@@ -153,12 +131,6 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
             onChanged: (_) => _saveConfig(),
             keyboardType: .url,
           ),
-        TextField(
-          controller: _bucketController,
-          decoration: const InputDecoration(labelText: 'Bucket', hintText: 'my-bucket-name', border: OutlineInputBorder()),
-          onChanged: (_) => _saveConfig(),
-          autocorrect: false,
-        ),
         if (!widget.isBubbletrail)
           TextField(
             controller: _regionController,
@@ -166,41 +138,90 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
             onChanged: (_) => _saveConfig(),
             autocorrect: false,
           ),
-        TextField(
-          controller: _accessKeyController,
-          decoration: const InputDecoration(labelText: 'Access key', border: OutlineInputBorder()),
-          onChanged: (_) => _saveConfig(),
-          autocorrect: false,
-        ),
-        TextField(
-          controller: _secretKeyController,
-          decoration: InputDecoration(
-            labelText: 'Secret key',
-            border: const OutlineInputBorder(),
-            suffixIcon: IconButton(
-              icon: FaIcon(_obscureSecretKey ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash),
-              onPressed: () => setState(() => _obscureSecretKey = !_obscureSecretKey),
+        Column(
+          crossAxisAlignment: .start,
+          spacing: 8,
+          children: [
+            TextField(
+              controller: _bucketController,
+              decoration: const InputDecoration(labelText: 'Bucket', hintText: 'my-bucket-name', border: OutlineInputBorder()),
+              onChanged: (_) => _saveConfig(),
+              autocorrect: false,
             ),
-          ),
-          obscureText: _obscureSecretKey,
-          autocorrect: false,
-          selectAllOnFocus: true,
-          onChanged: (_) => _saveConfig(),
-        ),
-        TextField(
-          controller: _vaultKeyController,
-          decoration: InputDecoration(
-            labelText: 'Vault key',
-            border: const OutlineInputBorder(),
-            suffixIcon: IconButton(
-              icon: FaIcon(_obscureVaultKey ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash),
-              onPressed: () => setState(() => _obscureVaultKey = !_obscureVaultKey),
+            Opacity(
+              opacity: 0.7,
+              child: Text('The bucket is the identifier for where your cloud data is stored.', style: Theme.of(context).textTheme.labelMedium),
             ),
-          ),
-          obscureText: _obscureVaultKey,
-          autocorrect: false,
-          selectAllOnFocus: true,
-          onChanged: (_) => _saveConfig(),
+          ],
+        ),
+        Column(
+          crossAxisAlignment: .start,
+          spacing: 8,
+          children: [
+            TextField(
+              controller: _accessKeyController,
+              decoration: const InputDecoration(labelText: 'Access key', border: OutlineInputBorder()),
+              onChanged: (_) => _saveConfig(),
+              autocorrect: false,
+            ),
+            Opacity(
+              opacity: 0.7,
+              child: Text('The access key is your username for authenticating to the storage provider.', style: Theme.of(context).textTheme.labelMedium),
+            ),
+          ],
+        ),
+        Column(
+          crossAxisAlignment: .start,
+          spacing: 8,
+          children: [
+            TextField(
+              controller: _secretKeyController,
+              decoration: InputDecoration(
+                labelText: 'Secret key',
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: FaIcon(_obscureSecretKey ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash),
+                  onPressed: () => setState(() => _obscureSecretKey = !_obscureSecretKey),
+                ),
+              ),
+              obscureText: _obscureSecretKey,
+              autocorrect: false,
+              selectAllOnFocus: true,
+              onChanged: (_) => _saveConfig(),
+            ),
+            Opacity(
+              opacity: 0.7,
+              child: Text('The secret key is your password for authenticating to the storage provider.', style: Theme.of(context).textTheme.labelMedium),
+            ),
+          ],
+        ),
+        Column(
+          crossAxisAlignment: .start,
+          spacing: 8,
+          children: [
+            TextField(
+              controller: _vaultKeyController,
+              decoration: InputDecoration(
+                labelText: 'Vault key',
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: FaIcon(_obscureVaultKey ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash),
+                  onPressed: () => setState(() => _obscureVaultKey = !_obscureVaultKey),
+                ),
+              ),
+              obscureText: _obscureVaultKey,
+              autocorrect: false,
+              selectAllOnFocus: true,
+              onChanged: (_) => _saveConfig(),
+            ),
+            Opacity(
+              opacity: 0.7,
+              child: Text(
+                'The vault key is the encryption password for data uploaded to the cloud. It prevents the storage provider from being able to read your data.',
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+            ),
+          ],
         ),
       ],
     );
