@@ -35,7 +35,7 @@ extension DiveExtensions on Dive {
       }
     }
 
-    // At the end, consume the rest of the dive for the current cylinder.
+    // At the end, consume the rest of the dive for the current cylinder, if there is a cylinder.
     spans.add((start: t, end: this.duration, idx: idx));
 
     // We will need to track duration and depth for each span.
@@ -80,6 +80,7 @@ extension DiveExtensions on Dive {
         // For the relevant cylinder
         try {
           final cylIdx = spans.firstWhere((s) => s.end >= sample.time).idx;
+          if (cylIdx >= perCylinderDepth.length) continue;
           final cur = perCylinderDepth[cylIdx] ?? (duration: 0, totDepth: 0);
           perCylinderDepth[cylIdx] = (duration: cur.duration + sampleDuration, totDepth: cur.totDepth + sampleDepth * sampleDuration);
         } catch (StateError) {}
@@ -94,31 +95,35 @@ extension DiveExtensions on Dive {
 
       // Calculate total dive SAC based on the sum of all cylinders
       final totVolume = this.cylinders.fold(0.0, (tot, cyl) => tot + cyl.usedVolume);
-      if (totVolume > 0) {
+      if (totVolume > 0 && !dl.isSynthetic) {
         this.sac = totVolume / (1.0 + meanDepth / 10.0) / (duration / 60);
       } else {
         this.clearSac();
       }
 
-      // Calculate per cylinder SAC
-      for (final e in perCylinderDepth.entries) {
-        final avgDepth = e.value.totDepth / e.value.duration;
-        final avgATA = 1.0 + avgDepth / 10.0;
-        final durationMin = e.value.duration / 60.0;
-        var cyl = this.cylinders[e.key];
+      if (!dl.isSynthetic) {
+        // Calculate per cylinder SAC
+        for (final e in perCylinderDepth.entries) {
+          final avgDepth = e.value.totDepth / e.value.duration;
+          final avgATA = 1.0 + avgDepth / 10.0;
+          final durationMin = e.value.duration / 60.0;
+          var cyl = this.cylinders[e.key];
 
-        if (cyl.isFrozen) cyl = cyl.deepCopy();
-        cyl.usedVolume = cyl.cylinder.volumeL * (cyl.beginPressure - cyl.endPressure);
-        cyl.sac = cyl.usedVolume / avgATA / durationMin;
-        this.cylinders[e.key] = cyl;
-      }
+          if (cyl.isFrozen) cyl = cyl.deepCopy();
+          cyl.usedVolume = cyl.cylinder.volumeL * (cyl.beginPressure - cyl.endPressure);
+          cyl.sac = cyl.usedVolume / avgATA / durationMin;
+          this.cylinders[e.key] = cyl;
+        }
 
-      // Update CNS percentage
-      if (dl.samples.isNotEmpty && dl.samples.last.cns > 0) {
-        this.cns = (100 * dl.samples.last.cns).round();
-      } else {
-        this.clearCns();
+        // Update CNS percentage
+        if (dl.samples.isNotEmpty && dl.samples.last.cns > 0) {
+          this.cns = (100 * dl.samples.last.cns).round();
+        } else {
+          this.clearCns();
+        }
       }
+    } else {
+      this.clearCns();
     }
 
     this.duration = duration.round();

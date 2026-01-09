@@ -242,11 +242,8 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   Future<void> _onUpdateDive(UpdateDive event, Emitter<DiveListState> emit) async {
     if (state is! DiveListLoaded) return;
 
-    final currentState = state as DiveListLoaded;
-
     // Is it a new dive? If so, set the dive number and insert it.
-    if (event.dive.number <= 0) {
-      event.dive.number = currentState.dives.isEmpty ? 1 : currentState.dives.map((d) => d.number).reduce(max) + 1;
+    if (!event.dive.hasId()) {
       await _store.dives.insert(event.dive);
       _log.info('Inserted new dive #${event.dive.number}');
     } else {
@@ -339,7 +336,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     final currentState = state as DiveListLoaded;
 
     final diveNo = await _store.dives.nextDiveNo;
-    final dive = Dive(number: diveNo, start: Timestamp.fromDateTime(DateTime.now()), duration: 0);
+    final dive = Dive(number: diveNo, start: Timestamp.fromDateTime(DateTime.now()), duration: 0)..freeze();
 
     emit(currentState.copyWith(selectedDive: dive, isNewDive: true).copyWithNull(selectedDiveSite: true));
   }

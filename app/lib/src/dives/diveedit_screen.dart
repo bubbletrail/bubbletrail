@@ -21,6 +21,7 @@ class DiveEditScreen extends StatefulWidget {
 class _DiveEditScreenState extends State<DiveEditScreen> {
   late final Dive dive;
   late int _durationSeconds;
+  late double _maxDepth;
   late final TextEditingController _divemasterController;
   late final TextEditingController _notesController;
   late final ChipsAutocompleteController _tagsController;
@@ -38,6 +39,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     dive = (context.read<DiveListBloc>().state as DiveListLoaded).selectedDive!;
     _selectedDateTime = dive.start.toDateTime();
     _durationSeconds = dive.duration;
+    _maxDepth = dive.maxDepth;
     _divemasterController = TextEditingController(text: dive.divemaster);
     _notesController = TextEditingController(text: dive.notes);
     _tagsController = ChipsAutocompleteController();
@@ -395,12 +397,19 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     final upd = dive.rebuild((dive) {
       // Update dive properties
       dive.start = proto.Timestamp.fromDateTime(_selectedDateTime);
-      dive.duration = _durationSeconds;
+
+      if (dive.logs.isEmpty || dive.logs.first.isSynthetic) {
+        // Manual dive, we should (re)create a log
+        dive.logs.clear();
+        dive.logs.add(_manualLog(_selectedDateTime, _durationSeconds, _maxDepth));
+      }
+
       if (_rating != null) {
         dive.rating = _rating!;
       } else {
         dive.clearRating();
       }
+
       dive.siteId = _selectedSiteId ?? '';
       dive.divemaster = _divemasterController.text.trim();
       dive.notes = _notesController.text.trim();
@@ -488,6 +497,17 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                   decoration: const InputDecoration(labelText: 'Duration', border: OutlineInputBorder(), suffixIcon: Icon(Icons.timer)),
                   child: Text(_durationFormatted),
                 ),
+              ),
+              DepthEditor(
+                label: 'Max depth',
+                initialValue: _maxDepth,
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() {
+                      _maxDepth = val;
+                    });
+                  }
+                },
               ),
               Builder(
                 builder: (context) {
@@ -768,7 +788,7 @@ class _EditableWeightsystem {
   }
 }
 
-List<LogSample> _manualLog(int durationSeconds, double maxDepth) {
+Log _manualLog(DateTime start, int durationSeconds, double maxDepth) {
   final samples = <LogSample>[];
 
   // We descend at 18 m/min
@@ -783,10 +803,18 @@ List<LogSample> _manualLog(int durationSeconds, double maxDepth) {
   final t1 = max(0.0, durationSeconds - t0 - t2 - t3);
 
   samples.add(LogSample(time: 0, depth: 0));
+  samples.add(LogSample(time: 5, depth: 0.1));
   samples.add(LogSample(time: t0, depth: maxDepth));
-  samples.add(LogSample(time: t1, depth: maxDepth));
-  samples.add(LogSample(time: t2, depth: maxDepth / 2));
-  samples.add(LogSample(time: t3, depth: 0));
+  samples.add(LogSample(time: t0 + t1, depth: maxDepth));
+  samples.add(LogSample(time: t0 + t1 + t2, depth: maxDepth / 2));
+  samples.add(LogSample(time: t0 + t1 + t2 + t3, depth: 0.1));
+  samples.add(LogSample(time: t0 + t1 + t2 + t3 + 5, depth: 0));
 
-  return samples;
+  return Log(
+    model: 'Bubbletrail', //marks the log as synthetic
+    dateTime: proto.Timestamp.fromDateTime(start),
+    diveTime: durationSeconds,
+    maxDepth: maxDepth,
+    samples: samples,
+  );
 }

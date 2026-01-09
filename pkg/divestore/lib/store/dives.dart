@@ -174,13 +174,17 @@ class Dives {
   }
 
   Future<List<Log>> _loadLogs(String path) async {
-    final bs = await File(path).readAsBytes();
-    final ll = InternalLogList.fromBuffer(bs);
-    for (final l in ll.logs) {
-      l.setUniqueID(); // no-op when already set
+    try {
+      final bs = await File(path).readAsBytes();
+      final ll = InternalLogList.fromBuffer(bs);
+      for (final l in ll.logs) {
+        l.setUniqueID(); // no-op when already set
+      }
+      ll.freeze();
+      return ll.logs;
+    } catch (_) {
+      return [];
     }
-    ll.freeze();
-    return ll.logs;
   }
 
   void _scheduleSave(String? id) {
