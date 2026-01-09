@@ -10,6 +10,7 @@ import 'common.dart';
 const litersToCuft = 0.0353147;
 const kgToLbs = 2.20462;
 const barToPsi = 14.504;
+const metersToFeet = 3.28;
 
 // Date and time formatting
 
@@ -30,7 +31,7 @@ String formatDepth(DepthUnit unit, num depth) {
     case DepthUnit.meters:
       return '${depth.toStringAsFixed(1)} ${unit.label}';
     case DepthUnit.feet:
-      return '${(depth * 3.28).toStringAsFixed(0)} ${unit.label}';
+      return '${(depth * metersToFeet).toStringAsFixed(0)} ${unit.label}';
   }
 }
 

@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -11,7 +11,6 @@ import 'package:logging/logging.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
-import 'package:copy_with_extension/copy_with_extension.dart';
 
 import 'sync_bloc.dart';
 
@@ -242,11 +241,8 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   Future<void> _onUpdateDive(UpdateDive event, Emitter<DiveListState> emit) async {
     if (state is! DiveListLoaded) return;
 
-    final currentState = state as DiveListLoaded;
-
     // Is it a new dive? If so, set the dive number and insert it.
-    if (event.dive.number <= 0) {
-      event.dive.number = currentState.dives.isEmpty ? 1 : currentState.dives.map((d) => d.number).reduce(max) + 1;
+    if (!event.dive.hasId()) {
       await _store.dives.insert(event.dive);
       _log.info('Inserted new dive #${event.dive.number}');
     } else {
@@ -339,7 +335,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     final currentState = state as DiveListLoaded;
 
     final diveNo = await _store.dives.nextDiveNo;
-    final dive = Dive(number: diveNo, start: Timestamp.fromDateTime(DateTime.now()), duration: 0);
+    final dive = Dive(number: diveNo, start: Timestamp.fromDateTime(DateTime.now()), duration: 0)..freeze();
 
     emit(currentState.copyWith(selectedDive: dive, isNewDive: true).copyWithNull(selectedDiveSite: true));
   }

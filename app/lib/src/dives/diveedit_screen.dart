@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:chips_input_autocomplete/chips_input_autocomplete.dart';
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
@@ -9,76 +11,6 @@ import '../bloc/cylinderlist_bloc.dart';
 import '../bloc/divelist_bloc.dart';
 import '../common/common.dart';
 
-/// Editable wrapper for a dive cylinder with mutable fields
-class _EditableDiveCylinder {
-  String cylinderId;
-  Cylinder? cylinder;
-  int oxygen;
-  int helium;
-  double? beginPressure;
-  double? endPressure;
-
-  _EditableDiveCylinder({required this.cylinderId, this.cylinder, required this.oxygen, required this.helium, this.beginPressure, this.endPressure});
-
-  factory _EditableDiveCylinder.fromDiveCylinder(DiveCylinder dc) {
-    return _EditableDiveCylinder(
-      cylinderId: dc.cylinderId,
-      cylinder: dc.hasCylinder() ? dc.cylinder : null,
-      oxygen: (dc.oxygen * 100).toInt(),
-      helium: (dc.helium * 100).toInt(),
-      beginPressure: dc.beginPressure,
-      endPressure: dc.endPressure,
-    );
-  }
-
-  DiveCylinder toDiveCylinder() {
-    return DiveCylinder(
-      cylinderId: cylinderId,
-      cylinder: cylinder,
-      oxygen: oxygen.toDouble() / 100,
-      helium: helium.toDouble() / 100,
-      beginPressure: beginPressure?.toDouble(),
-      endPressure: endPressure?.toDouble(),
-    );
-  }
-
-  String get gasDescription => formatGasPercentage(oxygen, helium);
-}
-
-/// Editable gas change event
-class _EditableGasChange {
-  int timeSeconds;
-  int cylinderIndex;
-
-  _EditableGasChange({required this.timeSeconds, required this.cylinderIndex});
-
-  String get timeFormatted {
-    final minutes = timeSeconds ~/ 60;
-    final seconds = timeSeconds % 60;
-    return '$minutes:${seconds.toString().padLeft(2, '0')}';
-  }
-
-  SampleEvent toSampleEvent() {
-    return SampleEvent(type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, time: timeSeconds, value: cylinderIndex);
-  }
-}
-
-/// Editable wrapper for a weight system
-class _EditableWeightsystem {
-  String description;
-  double? weight;
-
-  _EditableWeightsystem({required this.description, this.weight});
-
-  factory _EditableWeightsystem.fromWeightsystem(Weightsystem ws) {
-    return _EditableWeightsystem(description: ws.description, weight: ws.hasWeight() ? ws.weight : null);
-  }
-
-  Weightsystem toWeightsystem() {
-    return Weightsystem(description: description, weight: weight);
-  }
-}
-
 class DiveEditScreen extends StatefulWidget {
   const DiveEditScreen({super.key});
 
@@ -89,6 +21,7 @@ class DiveEditScreen extends StatefulWidget {
 class _DiveEditScreenState extends State<DiveEditScreen> {
   late final Dive dive;
   late int _durationSeconds;
+  late double _maxDepth;
   late final TextEditingController _divemasterController;
   late final TextEditingController _notesController;
   late final ChipsAutocompleteController _tagsController;
@@ -106,6 +39,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     dive = (context.read<DiveListBloc>().state as DiveListLoaded).selectedDive!;
     _selectedDateTime = dive.start.toDateTime();
     _durationSeconds = dive.duration;
+    _maxDepth = dive.maxDepth;
     _divemasterController = TextEditingController(text: dive.divemaster);
     _notesController = TextEditingController(text: dive.notes);
     _tagsController = ChipsAutocompleteController();
@@ -463,12 +397,19 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     final upd = dive.rebuild((dive) {
       // Update dive properties
       dive.start = proto.Timestamp.fromDateTime(_selectedDateTime);
-      dive.duration = _durationSeconds;
+
+      if (dive.logs.isEmpty || dive.logs.first.isSynthetic) {
+        // Manual dive, we should (re)create a log
+        dive.logs.clear();
+        dive.logs.add(_manualLog(_selectedDateTime, _durationSeconds, _maxDepth));
+      }
+
       if (_rating != null) {
         dive.rating = _rating!;
       } else {
         dive.clearRating();
       }
+
       dive.siteId = _selectedSiteId ?? '';
       dive.divemaster = _divemasterController.text.trim();
       dive.notes = _notesController.text.trim();
@@ -511,6 +452,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final canEditDepthDuration = dive.logs.isEmpty || dive.logs.first.isSynthetic;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -550,13 +492,34 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                   ),
                 ],
               ),
-              InkWell(
-                onTap: _selectDuration,
-                child: InputDecorator(
-                  decoration: const InputDecoration(labelText: 'Duration', border: OutlineInputBorder(), suffixIcon: Icon(Icons.timer)),
-                  child: Text(_durationFormatted),
+              if (canEditDepthDuration)
+                Row(
+                  spacing: 16,
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: _selectDuration,
+                        child: InputDecorator(
+                          decoration: const InputDecoration(labelText: 'Duration', border: OutlineInputBorder(), suffixIcon: Icon(Icons.timer)),
+                          child: Text(_durationFormatted),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: DepthEditor(
+                        label: 'Max depth',
+                        initialValue: _maxDepth,
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() {
+                              _maxDepth = val;
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ),
               Builder(
                 builder: (context) {
                   final diveListState = context.watch<DiveListBloc>().state;
@@ -764,4 +727,105 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       ),
     );
   }
+}
+
+/// Editable wrapper for a dive cylinder with mutable fields
+class _EditableDiveCylinder {
+  String cylinderId;
+  Cylinder? cylinder;
+  int oxygen;
+  int helium;
+  double? beginPressure;
+  double? endPressure;
+
+  _EditableDiveCylinder({required this.cylinderId, this.cylinder, required this.oxygen, required this.helium, this.beginPressure, this.endPressure});
+
+  factory _EditableDiveCylinder.fromDiveCylinder(DiveCylinder dc) {
+    return _EditableDiveCylinder(
+      cylinderId: dc.cylinderId,
+      cylinder: dc.hasCylinder() ? dc.cylinder : null,
+      oxygen: (dc.oxygen * 100).toInt(),
+      helium: (dc.helium * 100).toInt(),
+      beginPressure: dc.beginPressure,
+      endPressure: dc.endPressure,
+    );
+  }
+
+  DiveCylinder toDiveCylinder() {
+    return DiveCylinder(
+      cylinderId: cylinderId,
+      cylinder: cylinder,
+      oxygen: oxygen.toDouble() / 100,
+      helium: helium.toDouble() / 100,
+      beginPressure: beginPressure?.toDouble(),
+      endPressure: endPressure?.toDouble(),
+    );
+  }
+
+  String get gasDescription => formatGasPercentage(oxygen, helium);
+}
+
+/// Editable gas change event
+class _EditableGasChange {
+  int timeSeconds;
+  int cylinderIndex;
+
+  _EditableGasChange({required this.timeSeconds, required this.cylinderIndex});
+
+  String get timeFormatted {
+    final minutes = timeSeconds ~/ 60;
+    final seconds = timeSeconds % 60;
+    return '$minutes:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  SampleEvent toSampleEvent() {
+    return SampleEvent(type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, time: timeSeconds, value: cylinderIndex);
+  }
+}
+
+/// Editable wrapper for a weight system
+class _EditableWeightsystem {
+  String description;
+  double? weight;
+
+  _EditableWeightsystem({required this.description, this.weight});
+
+  factory _EditableWeightsystem.fromWeightsystem(Weightsystem ws) {
+    return _EditableWeightsystem(description: ws.description, weight: ws.hasWeight() ? ws.weight : null);
+  }
+
+  Weightsystem toWeightsystem() {
+    return Weightsystem(description: description, weight: weight);
+  }
+}
+
+Log _manualLog(DateTime start, int durationSeconds, double maxDepth) {
+  final samples = <LogSample>[];
+
+  // We descend at 18 m/min
+  final t0 = (maxDepth / 18 * 60).roundToDouble();
+  // We ascend to half depth at 9 m/min
+  final t2 = (maxDepth / 2 / 9 * 60).roundToDouble();
+  // We ascend from there to the surface at 3 m/min
+  final t3 = (maxDepth / 2 / 3 * 60).roundToDouble();
+  // The bottom time is what remains, but at least zero. If this was a very
+  // odd bounce dive we might overshoot the actual duration in the graph,
+  // but whatever.
+  final t1 = max(0.0, durationSeconds - t0 - t2 - t3);
+
+  samples.add(LogSample(time: 0, depth: 0));
+  samples.add(LogSample(time: 5, depth: 0.1));
+  samples.add(LogSample(time: t0, depth: maxDepth));
+  samples.add(LogSample(time: t0 + t1, depth: maxDepth));
+  samples.add(LogSample(time: t0 + t1 + t2, depth: maxDepth / 2));
+  samples.add(LogSample(time: t0 + t1 + t2 + t3, depth: 0.1));
+  samples.add(LogSample(time: t0 + t1 + t2 + t3 + 5, depth: 0));
+
+  return Log(
+    model: 'Bubbletrail', //marks the log as synthetic
+    dateTime: proto.Timestamp.fromDateTime(start),
+    diveTime: durationSeconds,
+    maxDepth: maxDepth,
+    samples: samples,
+  );
 }

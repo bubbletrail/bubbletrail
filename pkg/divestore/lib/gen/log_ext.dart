@@ -7,6 +7,8 @@ import 'package:convert/convert.dart';
 import 'gen.dart';
 
 extension LogExtensions on Log {
+  bool get isSynthetic => model == 'Bubbletrail';
+
   void setUniqueID() {
     if (this.hasUniqueID()) return;
     // Calculate a unique yet repeatable dive ID, if we have all the

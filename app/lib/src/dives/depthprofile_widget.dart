@@ -200,7 +200,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
               children: [
                 Text(formatDuration(_displaySample!.time.toInt())),
                 DepthText(_displaySample!.depth),
-                TemperatureText(_displaySample!.temperature),
+                if (_displaySample!.hasTemperature()) TemperatureText(_displaySample!.temperature),
                 if (_displaySample!.pressures.isNotEmpty && _displaySample!.pressures.first.pressure > 0)
                   PressureText(_displaySample!.pressures.first.pressure),
                 if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0) DepthText(_displaySample!.deco.depth, prefix: 'Ceil: '),

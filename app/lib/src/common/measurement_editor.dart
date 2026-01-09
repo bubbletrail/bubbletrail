@@ -273,3 +273,41 @@ class WeightEditor extends StatelessWidget {
     );
   }
 }
+
+class DepthEditor extends StatelessWidget {
+  final String label;
+  final double? initialValue;
+  final ValueChanged<double?>? onChanged;
+  final String? hintText;
+
+  const DepthEditor({super.key, required this.label, this.initialValue, this.onChanged, this.hintText});
+
+  static double _fromMetric(double value, DepthUnit unit) {
+    return switch (unit) {
+      .meters => value,
+      .feet => value * metersToFeet,
+    };
+  }
+
+  static double _toMetric(double value, DepthUnit unit) {
+    return switch (unit) {
+      .meters => value,
+      .feet => value / metersToFeet,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MeasurementEditor<DepthUnit>(
+      label: label,
+      initialValue: initialValue,
+      units: DepthUnit.values,
+      unitLabel: (unit) => unit.label,
+      fromMetric: _fromMetric,
+      toMetric: _toMetric,
+      getPreferredUnit: (prefs) => prefs.depthUnit,
+      onChanged: onChanged,
+      hintText: hintText,
+    );
+  }
+}
