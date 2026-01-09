@@ -111,7 +111,7 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
         add(LoadCylinderDetails(event.cylinder.id));
       }
     } catch (e) {
-      _log.warning('failed to update cylinder: $e');
+      _log.warning('failed to update cylinder', e);
       emit(CylinderDetailsError('Failed to update cylinder: $e'));
     }
   }

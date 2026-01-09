@@ -33,17 +33,17 @@ class Store {
     try {
       await cylinders.syncWith(provider);
     } catch (e) {
-      _log.warning('failed to sync cylinders: $e');
+      _log.warning('failed to sync cylinders', e);
     }
     try {
       await sites.syncWith(provider);
     } catch (e) {
-      _log.warning('failed to sync sites: $e');
+      _log.warning('failed to sync sites', e);
     }
     try {
       await dives.syncWith(provider);
     } catch (e) {
-      _log.warning('failed to sync dives: $e');
+      _log.warning('failed to sync dives', e);
     }
   }
 
@@ -69,7 +69,7 @@ class Store {
         dive.recalculateMedata();
       });
     } catch (e) {
-      _log.warning('failed to load dive $diveID: $e');
+      _log.warning('failed to load dive $diveID', e);
       return null;
     }
   }

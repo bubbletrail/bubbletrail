@@ -282,7 +282,7 @@ void _downloadIsolateEntry(DownloadRequest request) {
 
           sendPort.send(DownloadDiveReceived(dive));
         } catch (e) {
-          _log.warning('exception while parsing dive: $e');
+          _log.warning('exception while parsing dive', e);
         } finally {
           bindings.dc_parser_destroy(parser.value);
         }

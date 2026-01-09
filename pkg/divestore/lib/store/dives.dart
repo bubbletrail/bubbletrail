@@ -214,7 +214,7 @@ class Dives {
       _log.info('saved ${_dirty.length} dives');
       _dirty.clear();
     } catch (e) {
-      _log.warning('failed to save dives: $e');
+      _log.warning('failed to save dives', e);
     }
   }
 

@@ -139,7 +139,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       _log.info('completed syncing');
       emit(state.copyWith(lastSynced: DateTime.now(), syncing: false, lastSyncSuccess: true));
     } catch (e) {
-      _log.severe('failed to sync: $e');
+      _log.severe('failed to sync', e);
       emit(state.copyWith(syncing: false, error: e.toString(), lastSyncSuccess: false));
     }
   }

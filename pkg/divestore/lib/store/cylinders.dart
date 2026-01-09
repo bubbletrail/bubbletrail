@@ -120,7 +120,7 @@ class Cylinders {
       _changes.add(vals);
       _log.info('saved ${_cylinders.length} cylinders');
     } catch (e) {
-      _log.warning('failed to save cylinders: $e');
+      _log.warning('failed to save cylinders', e);
     }
   }
 
@@ -145,7 +145,7 @@ class Cylinders {
         }
       }
     } catch (e) {
-      _log.warning('failed to load cylinders: $e');
+      _log.warning('failed to load cylinders', e);
     }
 
     // Upload the new merged set.

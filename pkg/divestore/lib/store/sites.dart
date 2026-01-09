@@ -115,7 +115,7 @@ class Sites {
       await atomicWriteProto(path, cl);
       _log.info('saved ${_sites.length} sites');
     } catch (e) {
-      _log.warning('failed to save sites: $e');
+      _log.warning('failed to save sites', e);
     }
   }
 
@@ -147,7 +147,7 @@ class Sites {
         }
       }
     } catch (e) {
-      _log.warning('failed to load sites: $e');
+      _log.warning('failed to load sites', e);
     }
 
     // Upload the new merged set.
