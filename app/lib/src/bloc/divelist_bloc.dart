@@ -16,7 +16,7 @@ import 'sync_bloc.dart';
 
 part 'divelist_bloc.g.dart';
 
-final _log = Logger('DiveListBloc');
+final _log = Logger('divelist_bloc.dart');
 
 abstract class DiveListState extends Equatable {
   const DiveListState();
@@ -244,11 +244,11 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     // Is it a new dive? If so, set the dive number and insert it.
     if (!event.dive.hasId()) {
       await _store.dives.insert(event.dive);
-      _log.info('Inserted new dive #${event.dive.number}');
+      _log.fine('inserted new dive #${event.dive.number}');
     } else {
       // Update existing dive
       await _store.dives.update(event.dive);
-      _log.fine('Updated dive #${event.dive.number}');
+      _log.fine('updated dive #${event.dive.number}');
     }
 
     // Reload overview list after update
@@ -318,7 +318,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
 
     final dive = await _store.diveById(event.diveId);
     if (dive == null) {
-      _log.warning('Dive ${event.diveId} not found');
+      _log.warning('dive ${event.diveId} not found');
       return;
     }
 
@@ -346,7 +346,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
 
     final site = await _store.sites.getById(event.siteId);
     if (site == null) {
-      _log.warning('Site ${event.siteId} not found');
+      _log.warning('site ${event.siteId} not found');
       return;
     }
 
@@ -368,10 +368,10 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
 
     if (currentState.isNewSite) {
       await _store.sites.insert(event.site);
-      _log.info('Inserted new site ${event.site.name}');
+      _log.fine('inserted new site ${event.site.name}');
     } else {
       await _store.sites.update(event.site);
-      _log.fine('Updated site ${event.site.name}');
+      _log.fine('updated site ${event.site.name}');
     }
 
     // Reload list after update
@@ -382,7 +382,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     if (state is! DiveListLoaded) return;
 
     await _store.dives.delete(event.diveId);
-    _log.info('Deleted dive ${event.diveId}');
+    _log.fine('deleted dive ${event.diveId}');
 
     // Reload list after delete
     add(LoadDives());

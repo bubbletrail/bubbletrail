@@ -156,7 +156,7 @@ Stream<DownloadEvent> startDownload({
             await toDeviceFifo?.writeFrom(packet);
           } catch (e) {
             if (running) {
-              _log.warning('Error writing BLE data to FIFO: $e');
+              _log.warning('failed to write BLE data to FIFO: $e');
             }
             break;
           }
@@ -176,7 +176,7 @@ Stream<DownloadEvent> startDownload({
             }
           } catch (e) {
             if (running) {
-              _log.warning('Error reading from FIFO: $e');
+              _log.warning('failed to read from FIFO: $e');
             }
             break;
           }

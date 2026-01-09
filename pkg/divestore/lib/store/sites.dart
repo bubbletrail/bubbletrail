@@ -10,7 +10,7 @@ import '../gen/internal.pb.dart';
 import '../sync/syncprovider.dart';
 import 'fileio.dart';
 
-final _log = Logger('store/sites');
+final _log = Logger('store/sites.dart');
 
 class Sites {
   final String path;
@@ -129,6 +129,7 @@ class Sites {
 
   Future<void> syncWith(SyncProvider provider) async {
     // Get all sites, merge with the list.
+    _log.fine('syncing sites');
     try {
       final obj = await provider.getObject('sites');
       final sl = InternalSiteList.fromBuffer(obj);
@@ -137,20 +138,21 @@ class Sites {
         final cur = _sites[site.id];
         if (site.hasDeletedAt()) {
           if (cur != null) {
-            print('delete site ${site.id}');
+            _log.fine('deleting site ${site.id}');
             await delete(site.id);
           }
         } else if (cur == null || site.updatedAt.toDateTime().isAfter(cur.updatedAt.toDateTime())) {
-          print('import site ${site.id}');
+          _log.fine('importing site ${site.id}');
           _sites[site.id] = site;
         }
       }
     } catch (e) {
-      print('failed to load: $e');
+      _log.warning('failed to load sites: $e');
     }
 
     // Upload the new merged set.
     final vals = _sites.values.toList();
+    _log.fine('updating ${vals.length} sites in sync provider');
     final cl = InternalSiteList(sites: vals);
     final bs = cl.writeToBuffer();
     await provider.putObject('sites', bs);

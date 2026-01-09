@@ -242,7 +242,7 @@ void _downloadIsolateEntry(DownloadRequest request) {
   final eventsStatus = bindings.dc_device_set_events(device.value, events, eventCallback.nativeFunction, ffi.nullptr);
 
   if (eventsStatus != bindings.dc_status_t.DC_STATUS_SUCCESS) {
-    _log.warning('Failed to set event callback: $eventsStatus');
+    _log.warning('failed to set event callback: $eventsStatus');
   }
 
   // Set up dive callback using NativeCallable.isolateLocal (supports non-void return)
@@ -282,12 +282,12 @@ void _downloadIsolateEntry(DownloadRequest request) {
 
           sendPort.send(DownloadDiveReceived(dive));
         } catch (e) {
-          _log.warning('Exception while parsing dive: $e');
+          _log.warning('exception while parsing dive: $e');
         } finally {
           bindings.dc_parser_destroy(parser.value);
         }
       } else {
-        _log.warning('Failed to parse dive: $parserStatus');
+        _log.warning('failed to parse dive: $parserStatus');
         // Send a minimal dive with just the number and raw data
         sendPort.send(DownloadDiveReceived(Log(ldcFingerprint: fpBytes)));
       }

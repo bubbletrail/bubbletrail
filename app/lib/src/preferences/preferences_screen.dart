@@ -1,13 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:logging/logging.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
 import '../bloc/preferences_bloc.dart';
 import '../bloc/sync_bloc.dart';
 import '../common/common.dart';
-import 'preferences.dart';
+import '../services/log_buffer.dart';
 import 'preferences_widgets.dart';
 
 class PreferencesScreen extends StatelessWidget {
@@ -22,58 +25,54 @@ class PreferencesScreen extends StatelessWidget {
             final prefs = prefsState.preferences;
             return ScreenScaffold(
               title: const Text('Preferences'),
-              floatingActionButton: FloatingActionButton.extended(
-                onPressed: syncState.syncing || prefs.syncProvider == SyncProviderKind.none ? null : () => context.read<SyncBloc>().add(const StartSyncing()),
-                label: Text(syncState.syncing ? 'Syncing...' : 'Sync'),
-                icon: syncState.syncing ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.sync),
-              ),
-              body: Stack(
+              body: ListView(
+                padding: const EdgeInsets.all(16),
                 children: [
-                  ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      PreferencesCategoryCard(icon: Icons.scuba_diving, title: 'Cylinders', onTap: () => context.goNamed(AppRouteName.cylinders)),
-                      PreferencesCategoryCard(icon: Icons.straighten, title: 'Units', onTap: () => context.goNamed(AppRouteName.units)),
-                      PreferencesCategoryCard(icon: Icons.cloud_sync, title: 'Syncing', onTap: () => context.goNamed(AppRouteName.syncing)),
-                      const SizedBox(height: 24),
-                      const PreferencesSectionHeader(title: 'Appearance'),
-                      PreferencesTile(
-                        title: 'Theme',
-                        trailing: SegmentedButton<ThemeMode>(
-                          showSelectedIcon: true,
-                          segments: const [
-                            ButtonSegment(value: ThemeMode.system, label: Text('System'), icon: Icon(null)),
-                            ButtonSegment(value: ThemeMode.light, label: Text('Light'), icon: Icon(null)),
-                            ButtonSegment(value: ThemeMode.dark, label: Text('Dark'), icon: Icon(null)),
-                          ],
-                          selected: {prefs.themeMode},
-                          onSelectionChanged: (value) {
-                            context.read<PreferencesBloc>().add(UpdateThemeMode(value.first));
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 100),
-                    ],
+                  PreferencesCategoryCard(icon: Icons.scuba_diving, title: 'Cylinders', onTap: () => context.goNamed(AppRouteName.cylinders)),
+                  PreferencesCategoryCard(icon: Icons.straighten, title: 'Units', onTap: () => context.goNamed(AppRouteName.units)),
+                  PreferencesCategoryCard(icon: Icons.cloud_sync, title: 'Syncing', onTap: () => context.goNamed(AppRouteName.syncing)),
+                  const SizedBox(height: 24),
+                  const PreferencesSectionHeader(title: 'Appearance'),
+                  PreferencesTile(
+                    title: 'Theme',
+                    trailing: SegmentedButton<ThemeMode>(
+                      showSelectedIcon: true,
+                      segments: const [
+                        ButtonSegment(value: ThemeMode.system, label: Text('System'), icon: Icon(null)),
+                        ButtonSegment(value: ThemeMode.light, label: Text('Light'), icon: Icon(null)),
+                        ButtonSegment(value: ThemeMode.dark, label: Text('Dark'), icon: Icon(null)),
+                      ],
+                      selected: {prefs.themeMode},
+                      onSelectionChanged: (value) {
+                        context.read<PreferencesBloc>().add(UpdateThemeMode(value.first));
+                      },
+                    ),
                   ),
-                  Positioned(
-                    left: 16,
-                    right: 16,
-                    bottom: 16,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 24),
+                  const SizedBox(height: 8),
+                  if (prefs.syncProvider != .none && prefs.s3Config.isConfigured)
+                    Wrap(
+                      spacing: 24,
+                      runSpacing: 8,
                       children: [
+                        FilledButton.icon(
+                          onPressed: syncState.syncing ? null : () => context.read<SyncBloc>().add(const StartSyncing()),
+                          icon: const Icon(Icons.sync),
+                          label: Text('Sync now'),
+                        ),
                         SyncStatusTile(state: syncState),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Bubbletrail $appVer ($gitVer)',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
-                        ),
-                        DateTimeText(
-                          buildTime,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
-                        ),
                       ],
                     ),
+                  const SizedBox(height: 24),
+                  _LogPreview(onTap: () => context.goNamed(AppRouteName.logs)),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Bubbletrail $appVer ($gitVer)',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
+                  ),
+                  DateTimeText(
+                    buildTime,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
                   ),
                 ],
               ),
@@ -81,6 +80,95 @@ class PreferencesScreen extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+class _LogPreview extends StatefulWidget {
+  final VoidCallback onTap;
+
+  const _LogPreview({required this.onTap});
+
+  @override
+  State<_LogPreview> createState() => _LogPreviewState();
+}
+
+class _LogPreviewState extends State<_LogPreview> {
+  static const int _maxLines = 10;
+  late List<LogRecord> _records;
+  StreamSubscription<List<LogRecord>>? _subscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _records = LogBuffer.instance.records;
+    _subscription = LogBuffer.instance.stream.listen((records) {
+      setState(() {
+        _records = records;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final prefs = context.watch<PreferencesBloc>().state.preferences;
+    final recentLogs = _records.length > _maxLines ? _records.sublist(_records.length - _maxLines) : _records;
+
+    return InkWell(
+      onTap: widget.onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(8)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text('Logs', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                const Spacer(),
+                Icon(Icons.chevron_right, size: 14, color: theme.colorScheme.onSurfaceVariant),
+              ],
+            ),
+            const SizedBox(height: 4),
+            if (recentLogs.isEmpty)
+              Text('No log entries', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant))
+            else
+              ...recentLogs.map((record) => _LogLine(record: record, timeFormat: prefs.timeFormat)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LogLine extends StatelessWidget {
+  final LogRecord record;
+  final TimeFormatPref timeFormat;
+
+  const _LogLine({required this.record, required this.timeFormat});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final levelColor = getLogLevelColor(record.level, theme);
+    final logLine = formatLogLine(timeFormat, record);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Text(
+        logLine,
+        style: theme.textTheme.bodySmall?.copyWith(fontFamily: 'courier', color: levelColor),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 }

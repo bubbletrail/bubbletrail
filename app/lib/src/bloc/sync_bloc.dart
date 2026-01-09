@@ -11,9 +11,9 @@ import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../preferences/preferences.dart';
-import 's3_sync_provider.dart';
+import 's3_provider.dart';
 
-final _log = Logger('SyncBloc');
+final _log = Logger('sync_bloc.dart');
 
 class SyncState extends Equatable {
   final DateTime? lastSynced;
@@ -92,7 +92,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   }
 
   Future<void> _onInitStore(_InitStore event, Emitter<SyncState> emit) async {
-    _log.info('init storage');
+    _log.fine('init storage');
     final dir = await storePath;
     final store = Store(dir);
     await store.init();
@@ -105,7 +105,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
 
     switch (_syncProvider) {
       case SyncProviderKind.none:
-        _log.info('sync disabled');
         return;
       case SyncProviderKind.bubbletrail:
       case SyncProviderKind.s3:
@@ -115,14 +114,15 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
 
   Future<void> _syncWithS3(Emitter<SyncState> emit) async {
     if (!_s3Config.isConfigured) {
-      _log.warning('S3 not configured, skipping sync');
-      emit(state.copyWith(error: 'S3 not configured', lastSyncSuccess: false));
+      _log.warning('syncing not configured, skipping sync');
+      emit(state.copyWith(error: 'Syncing not configured', lastSyncSuccess: false));
       return;
     }
 
     emit(state.copyWith(syncing: true, error: null, lastSyncSuccess: null));
 
     try {
+      _log.fine('initialize syncing provider ${_s3Config.endpoint}');
       final provider = S3SyncProvider(
         endpoint: _s3Config.endpoint,
         bucket: _s3Config.bucket,
@@ -132,12 +132,14 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       );
       await provider.init();
 
+      _log.info('start syncing');
       final s = await store;
       await s.syncWith(provider);
 
+      _log.info('completed syncing');
       emit(state.copyWith(lastSynced: DateTime.now(), syncing: false, lastSyncSuccess: true));
     } catch (e) {
-      _log.severe('S3 sync failed: $e');
+      _log.severe('failed to sync: $e');
       emit(state.copyWith(syncing: false, error: e.toString(), lastSyncSuccess: false));
     }
   }
