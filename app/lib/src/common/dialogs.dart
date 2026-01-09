@@ -30,7 +30,7 @@ Future<SelectionResult<T>> showSelectionDialog<T>({
     builder: (dialogContext) => AlertDialog(
       title: Text(title),
       content: SizedBox(
-        width: double.maxFinite,
+        width: .maxFinite,
         child: ListView.builder(
           shrinkWrap: true,
           itemCount: items.length + (noneOption != null ? 1 : 0),
@@ -61,7 +61,7 @@ Future<SelectionResult<T>> showSelectionDialog<T>({
   if (identical(result, cancelledSentinel)) {
     return const SelectionResult.cancelled();
   }
-  return SelectionResult.selected(result as T?);
+  return .selected(result as T?);
 }
 
 /// Shows a confirmation dialog with a title, message, and confirm/cancel buttons.

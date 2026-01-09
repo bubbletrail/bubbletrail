@@ -18,13 +18,13 @@ class SiteMapWidget extends StatelessWidget {
     if (!site.hasPosition()) {
       return Card(
         elevation: 2,
-        child: Container(height: height, alignment: Alignment.center, child: const Text('No location data available')),
+        child: Container(height: height, alignment: .center, child: const Text('No location data available')),
       );
     }
 
     return Card(
       elevation: 2,
-      clipBehavior: Clip.antiAlias,
+      clipBehavior: .antiAlias,
       child: SizedBox(
         height: height,
         child: Stack(

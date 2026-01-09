@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../bloc/ble_bloc.dart';
 import '../common/common.dart';
@@ -28,7 +27,7 @@ class BleScanScreen extends StatelessWidget {
               ),
           ],
           body: _buildBody(context, state),
-          floatingActionButton: state.adapterState == BluetoothAdapterState.on && state.connectedDevice == null
+          floatingActionButton: state.adapterState == .on && state.connectedDevice == null
               ? FloatingActionButton.extended(
                   onPressed: () {
                     if (state.isScanning) {
@@ -47,10 +46,10 @@ class BleScanScreen extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, BleState state) {
-    if (state.adapterState != BluetoothAdapterState.on) {
+    if (state.adapterState != .on) {
       return Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: [
             Icon(Icons.bluetooth_disabled, size: 64, color: Theme.of(context).colorScheme.error),
             const SizedBox(height: 16),
@@ -75,7 +74,7 @@ class BleScanScreen extends StatelessWidget {
       children: [
         if (state.isScanning) const LinearProgressIndicator() else const SizedBox(height: 4),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const .symmetric(horizontal: 16, vertical: 8),
           child: Row(
             children: [
               Expanded(
@@ -98,10 +97,10 @@ class BleScanScreen extends StatelessWidget {
 
   Widget _buildConnectedDeviceCard(BuildContext context, BleState state) {
     return Card(
-      margin: const EdgeInsets.all(8),
+      margin: const .all(8),
       color: Theme.of(context).colorScheme.primaryContainer,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           ListTile(
             leading: const Icon(Icons.bluetooth_connected),
@@ -111,7 +110,7 @@ class BleScanScreen extends StatelessWidget {
           ),
           if (state.isDiscoveringServices)
             const Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: .all(16.0),
               child: Row(
                 children: [
                   SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
@@ -122,9 +121,9 @@ class BleScanScreen extends StatelessWidget {
             )
           else if (state.isDownloading)
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const .all(16.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 children: [
                   Row(
                     children: [
@@ -155,9 +154,9 @@ class BleScanScreen extends StatelessWidget {
 
   Widget _buildDownloadSection(BuildContext context, BleState state) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const .all(16.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: .stretch,
         children: [
           FilledButton.icon(
             onPressed: state.supportedComputers.isEmpty ? null : () => _showComputerSelectionDialog(context, state),
@@ -166,8 +165,8 @@ class BleScanScreen extends StatelessWidget {
           ),
           if (state.supportedComputers.isEmpty)
             Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Text('Loading supported computers...', style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
+              padding: const .only(top: 8.0),
+              child: Text('Loading supported computers...', style: Theme.of(context).textTheme.bodySmall, textAlign: .center),
             ),
         ],
       ),
@@ -185,14 +184,14 @@ class BleScanScreen extends StatelessWidget {
       builder: (dialogContext) => AlertDialog(
         title: const Text('Select dive computer'),
         content: SizedBox(
-          width: double.maxFinite,
+          width: .maxFinite,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: .min,
+            crossAxisAlignment: .start,
             children: [
               if (matchedComputers.isNotEmpty)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
+                  padding: const .only(bottom: 8.0),
                   child: Text('Suggested for "$deviceName":', style: Theme.of(dialogContext).textTheme.bodySmall),
                 ),
               Flexible(
@@ -235,7 +234,7 @@ class BleScanScreen extends StatelessWidget {
       builder: (dialogContext) => AlertDialog(
         title: const Text('All BLE dive computers'),
         content: SizedBox(
-          width: double.maxFinite,
+          width: .maxFinite,
           height: 400,
           child: ListView.builder(
             itemCount: state.supportedComputers.length,
@@ -261,7 +260,7 @@ class BleScanScreen extends StatelessWidget {
 
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: [
           Icon(Icons.bluetooth_searching, size: 64, color: Theme.of(context).colorScheme.secondary),
           const SizedBox(height: 16),
@@ -278,7 +277,7 @@ class BleScanScreen extends StatelessWidget {
             hasUnfilteredResults
                 ? 'Found ${state.scanResults.length} other device(s).\nEnable "Show all" to see them.'
                 : 'Make sure your dive computer is in\nBluetooth pairing mode',
-            textAlign: TextAlign.center,
+            textAlign: .center,
           ),
         ],
       ),
@@ -288,7 +287,7 @@ class BleScanScreen extends StatelessWidget {
   Widget _buildDeviceList(BuildContext context, BleState state) {
     final results = state.filteredScanResults;
     return ListView.builder(
-      padding: const EdgeInsets.all(8),
+      padding: const .all(8),
       itemCount: results.length,
       itemBuilder: (context, index) {
         final result = results[index];

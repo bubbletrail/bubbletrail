@@ -132,30 +132,30 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
         title: Text(_isNew ? 'New dive site' : 'Edit ${_originalSite.name}'),
         actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes')],
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const .all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             spacing: 16,
             children: [
               TextField(
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: 'Name *', border: OutlineInputBorder()),
-                textCapitalization: TextCapitalization.words,
+                textCapitalization: .words,
               ),
               TextField(
                 controller: _countryController,
                 decoration: const InputDecoration(labelText: 'Country', border: OutlineInputBorder()),
-                textCapitalization: TextCapitalization.words,
+                textCapitalization: .words,
               ),
               TextField(
                 controller: _locationController,
                 decoration: const InputDecoration(labelText: 'Location', border: OutlineInputBorder()),
-                textCapitalization: TextCapitalization.words,
+                textCapitalization: .words,
               ),
               TextField(
                 controller: _bodyOfWaterController,
                 decoration: const InputDecoration(labelText: 'Body of water', border: OutlineInputBorder()),
-                textCapitalization: TextCapitalization.words,
+                textCapitalization: .words,
               ),
               TextField(
                 controller: _difficultyController,
@@ -173,7 +173,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
                     decorationTextField: const InputDecoration(labelText: 'Tags', border: OutlineInputBorder()),
                     addChipOnSelection: true,
                     placeChipsSectionAbove: false,
-                    paddingInsideWidgetContainer: EdgeInsets.zero,
+                    paddingInsideWidgetContainer: .zero,
                     secondaryTheme: true,
                   );
                 },
@@ -182,7 +182,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
                 controller: _notesController,
                 decoration: const InputDecoration(labelText: 'Notes', border: OutlineInputBorder(), alignLabelWithHint: true),
                 maxLines: 4,
-                textCapitalization: TextCapitalization.sentences,
+                textCapitalization: .sentences,
               ),
               Row(
                 spacing: 16,
@@ -191,14 +191,14 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
                     child: TextField(
                       controller: _latController,
                       decoration: const InputDecoration(labelText: 'Latitude', border: OutlineInputBorder()),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                      keyboardType: const .numberWithOptions(decimal: true, signed: true),
                     ),
                   ),
                   Expanded(
                     child: TextField(
                       controller: _lonController,
                       decoration: const InputDecoration(labelText: 'Longitude', border: OutlineInputBorder()),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                      keyboardType: const .numberWithOptions(decimal: true, signed: true),
                     ),
                   ),
                 ],
@@ -206,7 +206,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
               AspectRatio(
                 aspectRatio: 2,
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: .circular(12),
                   child: SiteMap(position: _markerPosition ?? LatLng(0, 0), onTap: _onMapTap, alwaysCenterPosition: false),
                 ),
               ),

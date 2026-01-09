@@ -44,7 +44,7 @@ class DiveTableWidget extends StatelessWidget {
     return BlocBuilder<PreferencesBloc, PreferencesState>(
       builder: (context, state) {
         return ListView.builder(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const .symmetric(vertical: 8),
           itemCount: sortedDives.length,
           itemBuilder: (context, index) {
             final dive = sortedDives[index];
@@ -59,20 +59,20 @@ class DiveTableWidget extends StatelessWidget {
     return BlocBuilder<PreferencesBloc, PreferencesState>(
       builder: (context, state) {
         final columns = <TrinaColumn>[
-          TrinaColumn(title: 'Dive #', field: 'number', type: TrinaColumnType.number(), width: 80, readOnly: true, sort: TrinaColumnSort.descending),
+          TrinaColumn(title: 'Dive #', field: 'number', type: .number(), width: 80, readOnly: true, sort: .descending),
           TrinaColumn(
             title: 'Start',
             field: 'start',
-            type: TrinaColumnType.dateTime(format: state.preferences.dateTimeFormat),
+            type: .dateTime(format: state.preferences.dateTimeFormat),
             width: 120,
             readOnly: true,
           ),
-          TrinaColumn(title: 'Max depth', field: 'maxDepth', type: TrinaColumnType.number(), width: 80, readOnly: true),
-          TrinaColumn(title: 'Duration', field: 'duration', type: TrinaColumnType.number(), width: 80, readOnly: true),
-          if (showSiteColumn) TrinaColumn(title: 'Country', field: 'country', type: TrinaColumnType.text(), width: 120, readOnly: true),
-          if (showSiteColumn) TrinaColumn(title: 'Location', field: 'location', type: TrinaColumnType.text(), width: 120, readOnly: true),
-          if (showSiteColumn) TrinaColumn(title: 'Site', field: 'site', type: TrinaColumnType.text(), width: 120, readOnly: true),
-          TrinaColumn(title: 'SAC', field: 'sac', type: TrinaColumnType.number(), width: 80, readOnly: true),
+          TrinaColumn(title: 'Max depth', field: 'maxDepth', type: .number(), width: 80, readOnly: true),
+          TrinaColumn(title: 'Duration', field: 'duration', type: .number(), width: 80, readOnly: true),
+          if (showSiteColumn) TrinaColumn(title: 'Country', field: 'country', type: .text(), width: 120, readOnly: true),
+          if (showSiteColumn) TrinaColumn(title: 'Location', field: 'location', type: .text(), width: 120, readOnly: true),
+          if (showSiteColumn) TrinaColumn(title: 'Site', field: 'site', type: .text(), width: 120, readOnly: true),
+          TrinaColumn(title: 'SAC', field: 'sac', type: .number(), width: 80, readOnly: true),
         ];
         final rows = dives.map((dive) {
           final site = _getSite(dive);
@@ -97,7 +97,7 @@ class DiveTableWidget extends StatelessWidget {
           key: ValueKey((state.preferences, dives)), // ensure recreation when preferences change... do we need to be more specific?
           columns: columns,
           rows: rows,
-          mode: TrinaGridMode.selectWithOneTap,
+          mode: .selectWithOneTap,
           onRowDoubleTap: (event) {
             final diveId = event.row.cells['_id']?.value as String?;
             if (diveId != null) {

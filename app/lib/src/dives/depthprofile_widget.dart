@@ -40,7 +40,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
     }
 
     final depthUnit = widget.preferences.depthUnit;
-    final depthMult = depthUnit == DepthUnit.feet ? 3.28 : 1.0;
+    final depthMult = depthUnit == .feet ? 3.28 : 1.0;
 
     // Depth data
     final maxDepth = depthMult * -samplesWithDepth.map((s) => s.depth).reduce((a, b) => a > b ? a : b);
@@ -67,7 +67,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
 
     // Deco ceiling
     for (final sample in samplesWithDepth) {
-      final hasCeiling = sample.deco.type == DecoStopType.DECO_STOP_TYPE_DECO_STOP && sample.deco.depth > 0;
+      final hasCeiling = sample.deco.type == .DECO_STOP_TYPE_DECO_STOP && sample.deco.depth > 0;
       final ceilingDepth = hasCeiling ? sample.deco.depth : -1.0;
       _ceilingSpots.add(FlSpot(sample.time / 60, depthMult * -ceilingDepth));
     }
@@ -109,7 +109,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
     if (widget.cylinders.length > 1) {
       // Find gas switches
       for (final event in widget.events) {
-        if (event.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE) {
+        if (event.type == .SAMPLE_EVENT_TYPE_GAS_CHANGE) {
           if (event.value >= widget.cylinders.length) continue;
           if (event.time > samplesWithDepth.first.time && event.value != 0 && _gasSwitches.isEmpty) {
             // We're switching to a non-default gas, without having switched
@@ -129,7 +129,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
   Widget build(BuildContext context) {
     if (samplesWithDepth.isEmpty) {
       return const Center(
-        child: Padding(padding: EdgeInsets.all(16.0), child: Text('No depth profile data available')),
+        child: Padding(padding: .all(16.0), child: Text('No depth profile data available')),
       );
     }
 
@@ -193,7 +193,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
         // Top info line
         if (_displaySample != null)
           Padding(
-            padding: const EdgeInsets.only(top: 8, left: 48),
+            padding: const .only(top: 8, left: 48),
             child: Row(
               spacing: 16,
               children: [
@@ -220,8 +220,8 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
                   reservedSize: 24,
                   getTitlesWidget: (value, meta) {
                     return Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: Text(value.toStringAsFixed(0).replaceFirst('-', ''), style: const TextStyle(fontSize: 10), textAlign: TextAlign.right),
+                      padding: const .only(right: 8.0),
+                      child: Text(value.toStringAsFixed(0).replaceFirst('-', ''), style: const TextStyle(fontSize: 10), textAlign: .right),
                     );
                   },
                 ),
@@ -256,7 +256,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
                     dashArray: [2, 2],
                     label: VerticalLineLabel(
                       show: true,
-                      alignment: Alignment.bottomRight,
+                      alignment: .bottomRight,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(color: colorScheme.tertiary),
                       labelResolver: (line) => gs.gasName,
                     ),
@@ -300,7 +300,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
               getTouchLineStart: (barData, spotIndex) => 0,
               getTouchLineEnd: (barData, spotIndex) => _chartMaxDepth,
             ),
-            clipData: FlClipData.vertical(),
+            clipData: .vertical(),
           ),
         ),
       ],

@@ -8,7 +8,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
-import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
@@ -335,7 +334,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     final currentState = state as DiveListLoaded;
 
     final diveNo = await _store.dives.nextDiveNo;
-    final dive = Dive(number: diveNo, start: Timestamp.fromDateTime(DateTime.now()), duration: 0)..freeze();
+    final dive = Dive(number: diveNo, start: .fromDateTime(.now()), duration: 0)..freeze();
 
     emit(currentState.copyWith(selectedDive: dive, isNewDive: true).copyWithNull(selectedDiveSite: true));
   }

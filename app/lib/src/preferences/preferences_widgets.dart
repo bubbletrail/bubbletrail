@@ -11,7 +11,7 @@ class PreferencesSectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const .only(bottom: 8),
       child: Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.primary)),
     );
   }
@@ -26,11 +26,11 @@ class PreferencesTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const .symmetric(vertical: 8),
       child: Wrap(
-        alignment: WrapAlignment.spaceBetween,
+        alignment: .spaceBetween,
         spacing: 8,
-        crossAxisAlignment: WrapCrossAlignment.center,
+        crossAxisAlignment: .center,
         runSpacing: 4,
         children: [
           Text(title, style: Theme.of(context).textTheme.bodyLarge),

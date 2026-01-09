@@ -42,13 +42,13 @@ void main() async {
   _initLogging();
   await WindowPreferences.initialize();
   if (Platform.isIOS || Platform.isAndroid) {
-    unawaited(SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]));
+    unawaited(SystemChrome.setPreferredOrientations([.portraitUp]));
   }
   runApp(const MyApp());
 }
 
 void _initLogging() {
-  Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
+  Logger.root.level = kDebugMode ? .ALL : .INFO;
 
   // Initialize log buffer for in-app log viewing
   LogBuffer.instance.initialize();
@@ -121,7 +121,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                 begin: Alignment.centerLeft,
                 end: Alignment.bottomRight,
                 colors: [cs.tertiaryContainer, cs.onTertiaryFixedVariant],
-                tileMode: TileMode.mirror,
+                tileMode: .mirror,
               ),
             );
 
@@ -149,7 +149,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                 children: [
                   NavigationRail(
                     backgroundColor: Colors.transparent,
-                    labelType: NavigationRailLabelType.all,
+                    labelType: .all,
                     selectedIndex: shell.currentIndex,
                     onDestinationSelected: (n) => shell.goBranch(n),
                     leading: SizedBox(height: (appBarTheme.toolbarHeight ?? 48) - 8),

@@ -49,7 +49,7 @@ class SiteListScreen extends StatelessWidget {
 
   Widget _buildCardList(BuildContext context, List<Site> sites, Map<String, int> diveCountBySiteId) {
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const .symmetric(vertical: 8),
       itemCount: sites.length,
       itemBuilder: (context, index) {
         final site = sites[index];
@@ -61,12 +61,12 @@ class SiteListScreen extends StatelessWidget {
 
   Widget _buildTrinaGrid(BuildContext context, List<Site> sites, Map<String, int> diveCountBySiteId) {
     final columns = <TrinaColumn>[
-      TrinaColumn(title: 'Name', field: 'name', type: TrinaColumnType.text(), width: 200, readOnly: true),
-      TrinaColumn(title: 'Country', field: 'country', type: TrinaColumnType.text(), width: 120, readOnly: true),
-      TrinaColumn(title: 'Location', field: 'location', type: TrinaColumnType.text(), width: 150, readOnly: true),
-      TrinaColumn(title: 'Body of water', field: 'bodyOfWater', type: TrinaColumnType.text(), width: 150, readOnly: true),
-      TrinaColumn(title: 'Difficulty', field: 'difficulty', type: TrinaColumnType.text(), width: 100, readOnly: true),
-      TrinaColumn(title: '# Dives', field: 'diveCount', type: TrinaColumnType.number(), width: 80, readOnly: true),
+      TrinaColumn(title: 'Name', field: 'name', type: .text(), width: 200, readOnly: true),
+      TrinaColumn(title: 'Country', field: 'country', type: .text(), width: 120, readOnly: true),
+      TrinaColumn(title: 'Location', field: 'location', type: .text(), width: 150, readOnly: true),
+      TrinaColumn(title: 'Body of water', field: 'bodyOfWater', type: .text(), width: 150, readOnly: true),
+      TrinaColumn(title: 'Difficulty', field: 'difficulty', type: .text(), width: 100, readOnly: true),
+      TrinaColumn(title: '# Dives', field: 'diveCount', type: .number(), width: 80, readOnly: true),
     ];
 
     final rows = sites.map((site) {
@@ -88,7 +88,7 @@ class SiteListScreen extends StatelessWidget {
       key: ValueKey(sites),
       columns: columns,
       rows: rows,
-      mode: TrinaGridMode.selectWithOneTap,
+      mode: .selectWithOneTap,
       onRowDoubleTap: (event) {
         final siteId = event.row.cells['_uuid']?.value as String?;
         if (siteId != null) {

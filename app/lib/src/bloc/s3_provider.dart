@@ -79,7 +79,7 @@ class S3SyncProvider extends SyncProvider {
   Future<String> putObject(String key, Uint8List data) async {
     _log.fine('storing object $_bucket/$key');
     final nonce = sha256.convert(data).bytes;
-    final enc = _box.encrypt(data, nonce: Uint8List.fromList(nonce));
+    final enc = _box.encrypt(data, nonce: .fromList(nonce));
     // enc includes the prepended nonce
     return await _minio.putObject(_bucket, _fullKey(key), Stream.value(enc.asTypedList));
   }

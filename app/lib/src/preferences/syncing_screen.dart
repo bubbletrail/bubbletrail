@@ -17,21 +17,21 @@ class SyncingScreen extends StatelessWidget {
         builder: (context, state) {
           final prefs = state.preferences;
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const .all(16),
             children: [
               _SyncProviderTile(prefs: prefs),
-              if (prefs.syncProvider == SyncProviderKind.bubbletrail || prefs.syncProvider == SyncProviderKind.s3)
-                _S3ConfigSection(prefs: prefs, isBubbletrail: prefs.syncProvider == SyncProviderKind.bubbletrail),
+              if (prefs.syncProvider == .bubbletrail || prefs.syncProvider == .s3)
+                _S3ConfigSection(prefs: prefs, isBubbletrail: prefs.syncProvider == .bubbletrail),
               const SizedBox(height: 24),
               BlocBuilder<SyncBloc, SyncState>(
                 builder: (context, syncState) {
                   return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: .start,
                     children: [
                       SyncStatusTile(state: syncState),
                       const SizedBox(height: 16),
                       FilledButton.icon(
-                        onPressed: syncState.syncing || prefs.syncProvider == SyncProviderKind.none
+                        onPressed: syncState.syncing || prefs.syncProvider == .none
                             ? null
                             : () => context.read<SyncBloc>().add(const StartSyncing()),
                         icon: syncState.syncing
@@ -58,7 +58,7 @@ class _SyncProviderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final availableProviders = <SyncProviderKind>[SyncProviderKind.none, SyncProviderKind.bubbletrail, SyncProviderKind.s3];
+    final availableProviders = <SyncProviderKind>[.none, .bubbletrail, .s3];
 
     return PreferencesTile(
       title: 'Sync provider',
@@ -75,9 +75,9 @@ class _SyncProviderTile extends StatelessWidget {
 
   String _syncProviderLabel(SyncProviderKind provider) {
     return switch (provider) {
-      SyncProviderKind.none => 'Off',
-      SyncProviderKind.bubbletrail => 'Bubbletrail',
-      SyncProviderKind.s3 => 'S3',
+      .none => 'Off',
+      .bubbletrail => 'Bubbletrail',
+      .s3 => 'S3',
     };
   }
 }
@@ -140,7 +140,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: .start,
       spacing: 16,
       children: [
         const SizedBox(height: 8),
@@ -150,7 +150,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
             controller: _endpointController,
             decoration: const InputDecoration(labelText: 'Endpoint', hintText: 's3.amazonaws.com or minio.example.com', border: OutlineInputBorder()),
             onChanged: (_) => _saveConfig(),
-            keyboardType: TextInputType.url,
+            keyboardType: .url,
           ),
         TextField(
           controller: _bucketController,

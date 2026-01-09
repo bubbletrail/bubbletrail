@@ -29,7 +29,7 @@ String formatDateTime(Preferences pref, DateTime dateTime) {
 }
 
 String formatLogTimestamp(TimeFormatPref pref, DateTime time) {
-  final format = pref == TimeFormatPref.h24 ? 'HH:mm:ss.SSS' : 'h:mm:ss.SSS a';
+  final format = pref == .h24 ? 'HH:mm:ss.SSS' : 'h:mm:ss.SSS a';
   return DateFormat(format).format(time);
 }
 
@@ -40,18 +40,18 @@ String formatLogLine(TimeFormatPref timeFormat, LogRecord record) {
 }
 
 String formatLogLevel(Level level) {
-  if (level == Level.FINE || level == Level.FINER || level == Level.FINEST) {
+  if (level == .FINE || level == .FINER || level == .FINEST) {
     return 'DEBUG';
   }
   return level.name;
 }
 
 Color getLogLevelColor(Level level, ThemeData theme) {
-  if (level >= Level.SEVERE) {
+  if (level >= .SEVERE) {
     return theme.colorScheme.error;
-  } else if (level >= Level.WARNING) {
+  } else if (level >= .WARNING) {
     return Colors.orange;
-  } else if (level >= Level.INFO) {
+  } else if (level >= .INFO) {
     return theme.colorScheme.onSurface;
   } else {
     return theme.colorScheme.onSurfaceVariant;
@@ -60,45 +60,45 @@ Color getLogLevelColor(Level level, ThemeData theme) {
 
 String formatDepth(DepthUnit unit, num depth) {
   switch (unit) {
-    case DepthUnit.meters:
+    case .meters:
       return '${depth.toStringAsFixed(1)} ${unit.label}';
-    case DepthUnit.feet:
+    case .feet:
       return '${(depth * metersToFeet).toStringAsFixed(0)} ${unit.label}';
   }
 }
 
 int convertDepth(DepthUnit unit, num depth) {
   switch (unit) {
-    case DepthUnit.meters:
+    case .meters:
       return depth.round();
-    case DepthUnit.feet:
+    case .feet:
       return (depth * 3.28).round();
   }
 }
 
 String formatTemperature(TemperatureUnit unit, num temperature) {
   switch (unit) {
-    case TemperatureUnit.celsius:
+    case .celsius:
       return '${temperature.toStringAsFixed(1)} ${unit.label}';
-    case TemperatureUnit.fahrenheit:
+    case .fahrenheit:
       return '${(temperature * 1.8 + 32).toStringAsFixed(0)} ${unit.label}';
   }
 }
 
 String formatPressure(PressureUnit unit, num pressure) {
   switch (unit) {
-    case PressureUnit.bar:
+    case .bar:
       return '${pressure.toStringAsFixed(0)} ${unit.label}';
-    case PressureUnit.psi:
+    case .psi:
       return '${(pressure * 14.504).toStringAsFixed(0)} ${unit.label}';
   }
 }
 
 String formatVolume(VolumeUnit unit, num volume) {
   switch (unit) {
-    case VolumeUnit.liters:
+    case .liters:
       return '${formatDisplayValue(volume)} ${unit.label}';
-    case VolumeUnit.cuft:
+    case .cuft:
       final val = volume * 0.0353;
       return '${formatDisplayValue(val)} ${unit.label}';
   }
@@ -106,9 +106,9 @@ String formatVolume(VolumeUnit unit, num volume) {
 
 String formatWeight(WeightUnit unit, num weight) {
   switch (unit) {
-    case WeightUnit.kg:
+    case .kg:
       return '${weight.toStringAsFixed(1)} ${unit.label}';
-    case WeightUnit.lb:
+    case .lb:
       return '${(weight * 2.205).toStringAsFixed(1)} ${unit.label}';
   }
 }
@@ -268,21 +268,21 @@ class DecoModelText extends StatelessWidget {
 
   String format() {
     switch (model.type) {
-      case DecoModelType.DECO_MODEL_TYPE_UNSPECIFIED:
+      case .DECO_MODEL_TYPE_UNSPECIFIED:
         return 'Unspecified';
-      case DecoModelType.DECO_MODEL_TYPE_NONE:
+      case .DECO_MODEL_TYPE_NONE:
         return 'None';
-      case DecoModelType.DECO_MODEL_TYPE_BUHLMANN:
+      case .DECO_MODEL_TYPE_BUHLMANN:
         if (model.hasGfLow()) {
           return 'Bühlmann GF ${model.gfLow}/${model.gfHigh}';
         } else {
           return 'Bühlmann';
         }
-      case DecoModelType.DECO_MODEL_TYPE_VPM:
+      case .DECO_MODEL_TYPE_VPM:
         return 'VPM ${model.conservatism}';
-      case DecoModelType.DECO_MODEL_TYPE_RGBM:
+      case .DECO_MODEL_TYPE_RGBM:
         return 'RGBM ${model.conservatism}';
-      case DecoModelType.DECO_MODEL_TYPE_DCIEM:
+      case .DECO_MODEL_TYPE_DCIEM:
         return 'DCIEM ${model.conservatism}';
       default:
         return 'Unknown';
@@ -299,15 +299,15 @@ class DecoStatusText extends StatelessWidget {
   Widget build(BuildContext context) {
     final unit = context.watch<PreferencesBloc>().state.preferences.depthUnit;
     switch (status.type) {
-      case DecoStopType.DECO_STOP_TYPE_DECO_STOP:
+      case .DECO_STOP_TYPE_DECO_STOP:
         return Text('Deco ${formatMinutes(status.time)} @ ${formatDepth(unit, status.depth)}');
-      case DecoStopType.DECO_STOP_TYPE_DEEP_STOP:
+      case .DECO_STOP_TYPE_DEEP_STOP:
         return Text('Deep stop ${formatMinutes(status.time)} @ ${formatDepth(unit, status.depth)}');
-      case DecoStopType.DECO_STOP_TYPE_SAFETY_STOP:
+      case .DECO_STOP_TYPE_SAFETY_STOP:
         return Text('Safety stop ${formatMinutes(status.time)} @ ${formatDepth(unit, status.depth)}');
-      case DecoStopType.DECO_STOP_TYPE_NDL:
+      case .DECO_STOP_TYPE_NDL:
         return Text('${formatMinutes(status.time)} NDL');
-      case DecoStopType.DECO_STOP_TYPE_UNSPECIFIED:
+      case .DECO_STOP_TYPE_UNSPECIFIED:
         return Text('-');
       default:
         return Text('Unknown');

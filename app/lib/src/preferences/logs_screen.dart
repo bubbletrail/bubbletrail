@@ -19,7 +19,7 @@ class LogsScreen extends StatefulWidget {
 class _LogsScreenState extends State<LogsScreen> {
   late List<LogRecord> _records;
   StreamSubscription<List<LogRecord>>? _subscription;
-  Level _minLevel = Level.ALL;
+  Level _minLevel = .ALL;
 
   @override
   void initState() {
@@ -58,11 +58,11 @@ class _LogsScreenState extends State<LogsScreen> {
             });
           },
           itemBuilder: (context) => [
-            _buildLevelMenuItem(Level.ALL, 'All'),
-            _buildLevelMenuItem(Level.FINE, 'Debug+'),
-            _buildLevelMenuItem(Level.INFO, 'Info+'),
-            _buildLevelMenuItem(Level.WARNING, 'Warning+'),
-            _buildLevelMenuItem(Level.SEVERE, 'Severe'),
+            _buildLevelMenuItem(.ALL, 'All'),
+            _buildLevelMenuItem(.FINE, 'Debug+'),
+            _buildLevelMenuItem(.INFO, 'Info+'),
+            _buildLevelMenuItem(.WARNING, 'Warning+'),
+            _buildLevelMenuItem(.SEVERE, 'Severe'),
           ],
         ),
         IconButton(
@@ -120,9 +120,9 @@ class _LogEntryTile extends StatelessWidget {
 
     return InkWell(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const .symmetric(horizontal: 12),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: .start,
           children: [
             Text(
               logLine,

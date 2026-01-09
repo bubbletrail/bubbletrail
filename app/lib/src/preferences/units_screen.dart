@@ -17,14 +17,14 @@ class UnitsScreen extends StatelessWidget {
         builder: (context, state) {
           final prefs = state.preferences;
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const .all(16),
             children: [
               PreferencesTile(
                 title: 'Depth',
                 trailing: SegmentedButton<DepthUnit>(
                   segments: const [
-                    ButtonSegment(value: DepthUnit.meters, label: Text('m')),
-                    ButtonSegment(value: DepthUnit.feet, label: Text('ft')),
+                    ButtonSegment(value: .meters, label: Text('m')),
+                    ButtonSegment(value: .feet, label: Text('ft')),
                   ],
                   selected: {prefs.depthUnit},
                   onSelectionChanged: (value) {
@@ -36,8 +36,8 @@ class UnitsScreen extends StatelessWidget {
                 title: 'Pressure',
                 trailing: SegmentedButton<PressureUnit>(
                   segments: const [
-                    ButtonSegment(value: PressureUnit.bar, label: Text('bar')),
-                    ButtonSegment(value: PressureUnit.psi, label: Text('psi')),
+                    ButtonSegment(value: .bar, label: Text('bar')),
+                    ButtonSegment(value: .psi, label: Text('psi')),
                   ],
                   selected: {prefs.pressureUnit},
                   onSelectionChanged: (value) {
@@ -49,8 +49,8 @@ class UnitsScreen extends StatelessWidget {
                 title: 'Temperature',
                 trailing: SegmentedButton<TemperatureUnit>(
                   segments: const [
-                    ButtonSegment(value: TemperatureUnit.celsius, label: Text('°C')),
-                    ButtonSegment(value: TemperatureUnit.fahrenheit, label: Text('°F')),
+                    ButtonSegment(value: .celsius, label: Text('°C')),
+                    ButtonSegment(value: .fahrenheit, label: Text('°F')),
                   ],
                   selected: {prefs.temperatureUnit},
                   onSelectionChanged: (value) {
@@ -62,8 +62,8 @@ class UnitsScreen extends StatelessWidget {
                 title: 'Volume',
                 trailing: SegmentedButton<VolumeUnit>(
                   segments: const [
-                    ButtonSegment(value: VolumeUnit.liters, label: Text('L')),
-                    ButtonSegment(value: VolumeUnit.cuft, label: Text('cuft')),
+                    ButtonSegment(value: .liters, label: Text('L')),
+                    ButtonSegment(value: .cuft, label: Text('cuft')),
                   ],
                   selected: {prefs.volumeUnit},
                   onSelectionChanged: (value) {
@@ -75,8 +75,8 @@ class UnitsScreen extends StatelessWidget {
                 title: 'Weight',
                 trailing: SegmentedButton<WeightUnit>(
                   segments: const [
-                    ButtonSegment(value: WeightUnit.kg, label: Text('kg')),
-                    ButtonSegment(value: WeightUnit.lb, label: Text('lbs')),
+                    ButtonSegment(value: .kg, label: Text('kg')),
+                    ButtonSegment(value: .lb, label: Text('lbs')),
                   ],
                   selected: {prefs.weightUnit},
                   onSelectionChanged: (value) {

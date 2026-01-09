@@ -12,7 +12,7 @@ class LabeledChip extends StatelessWidget {
     final inner = (label == null)
         ? child
         : Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: .min,
             spacing: 8,
             children: [
               Opacity(opacity: 0.7, child: Text(label!, style: Theme.of(context).textTheme.labelSmall)),
@@ -21,10 +21,10 @@ class LabeledChip extends StatelessWidget {
           );
 
     return Chip(
-      visualDensity: VisualDensity.compact,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      padding: EdgeInsets.zero,
-      labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+      visualDensity: .compact,
+      materialTapTargetSize: .shrinkWrap,
+      padding: .zero,
+      labelPadding: const .symmetric(horizontal: 8),
       label: inner,
       backgroundColor: backgroundColor,
     );

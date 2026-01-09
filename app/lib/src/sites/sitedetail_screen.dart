@@ -31,9 +31,9 @@ class SiteDetailScreen extends StatelessWidget {
       ],
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const .all(8.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             spacing: 8,
             children: [
               infoCard(context, 'Location Information', [
@@ -52,7 +52,7 @@ class SiteDetailScreen extends StatelessWidget {
               if (site.notes.isNotEmpty) ...[
                 infoCard(context, 'Notes', [
                   Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
+                    padding: const .only(top: 8.0),
                     child: Text(site.notes, style: Theme.of(context).textTheme.bodyMedium),
                   ),
                 ]),
@@ -62,11 +62,11 @@ class SiteDetailScreen extends StatelessWidget {
                 Card(
                   elevation: 2,
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const .all(16.0),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: .start,
                       children: [
-                        Text('Dives at this site (${dives.length})', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                        Text('Dives at this site (${dives.length})', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: .bold)),
                         const Divider(),
                         AspectRatio(
                           aspectRatio: 2,
@@ -80,7 +80,7 @@ class SiteDetailScreen extends StatelessWidget {
                 Card(
                   elevation: 2,
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const .all(16.0),
                     child: Text('No dives recorded at this site', style: Theme.of(context).textTheme.bodyMedium),
                   ),
                 ),

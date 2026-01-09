@@ -30,11 +30,11 @@ class SiteListItemCard extends StatelessWidget {
         onTap: () {
           context.goNamed(AppRouteName.sitesDetails, pathParameters: {'siteID': site.id});
         },
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: .circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const .all(12),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             children: [
               // Top row: Site name
               Row(
@@ -44,8 +44,8 @@ class SiteListItemCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       site.name,
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: .bold),
+                      overflow: .ellipsis,
                     ),
                   ),
                 ],
@@ -54,18 +54,18 @@ class SiteListItemCard extends StatelessWidget {
               if (locationText != null) ...[
                 const SizedBox(height: 4),
                 Padding(
-                  padding: const EdgeInsets.only(left: 28),
+                  padding: const .only(left: 28),
                   child: Text(
                     locationText,
                     style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                    overflow: TextOverflow.ellipsis,
+                    overflow: .ellipsis,
                   ),
                 ),
               ],
               const SizedBox(height: 8),
               // Bottom row: Body of water, difficulty, dive count
               Padding(
-                padding: const EdgeInsets.only(left: 28),
+                padding: const .only(left: 28),
                 child: Row(
                   children: [
                     if (site.bodyOfWater.isNotEmpty) ...[_InfoChip(icon: Icons.water, label: site.bodyOfWater, theme: theme), const SizedBox(width: 12)],
@@ -96,7 +96,7 @@ class _InfoChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: .min,
       children: [
         Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
         const SizedBox(width: 4),

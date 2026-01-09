@@ -53,7 +53,7 @@ class UpdateSyncConfig extends SyncEvent {
 class SyncBloc extends Bloc<SyncEvent, SyncState> {
   final Completer<Store> _storeCompleter = Completer();
 
-  SyncProviderKind _syncProvider = SyncProviderKind.none;
+  SyncProviderKind _syncProvider = .none;
   S3Config _s3Config = const S3Config();
 
   Future<Store> get store => _storeCompleter.future;
@@ -104,10 +104,10 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     _log.info('start sync with provider: $_syncProvider');
 
     switch (_syncProvider) {
-      case SyncProviderKind.none:
+      case .none:
         return;
-      case SyncProviderKind.bubbletrail:
-      case SyncProviderKind.s3:
+      case .bubbletrail:
+      case .s3:
         await _syncWithS3(emit);
     }
   }
@@ -137,7 +137,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       await s.syncWith(provider);
 
       _log.info('completed syncing');
-      emit(state.copyWith(lastSynced: DateTime.now(), syncing: false, lastSyncSuccess: true));
+      emit(state.copyWith(lastSynced: .now(), syncing: false, lastSyncSuccess: true));
     } catch (e) {
       _log.severe('failed to sync', e);
       emit(state.copyWith(syncing: false, error: e.toString(), lastSyncSuccess: false));

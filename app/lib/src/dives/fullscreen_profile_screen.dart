@@ -31,13 +31,13 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
 
   void _setLandscapeOrientation() {
     if (Platform.isIOS || Platform.isAndroid) {
-      SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+      SystemChrome.setPreferredOrientations([.landscapeLeft, .landscapeRight]);
     }
   }
 
   void _restoreOrientation() {
     if (Platform.isIOS || Platform.isAndroid) {
-      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+      SystemChrome.setPreferredOrientations([.portraitUp]);
     }
   }
 
@@ -49,7 +49,7 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [cs.tertiaryContainer, cs.onTertiaryFixedVariant],
-        tileMode: TileMode.mirror,
+        tileMode: .mirror,
       ),
     );
 
@@ -66,7 +66,7 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
                 return ScreenScaffold(
                   title: Text('Dive #${dive.number}: ${site?.name ?? 'Unknown site'}'),
                   body: Padding(
-                    padding: Platform.isIOS ? EdgeInsets.zero : const EdgeInsets.all(8.0),
+                    padding: Platform.isIOS ? EdgeInsets.zero : const .all(8.0),
                     child: DepthProfileWidget(
                       key: ValueKey((dive, prefsState.preferences)),
                       log: dive.logs.first,

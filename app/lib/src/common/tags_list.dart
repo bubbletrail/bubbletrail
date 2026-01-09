@@ -17,20 +17,20 @@ class TagsList extends StatelessWidget {
         ...tags.map(
           (tag) => Chip(
             label: prefixedTag(tag),
-            visualDensity: VisualDensity.compact,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            padding: EdgeInsets.zero,
-            labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+            visualDensity: .compact,
+            materialTapTargetSize: .shrinkWrap,
+            padding: .zero,
+            labelPadding: const .symmetric(horizontal: 8),
           ),
         ),
         if (secondaryTags != null)
           ...secondaryTags!.map(
             (tag) => Chip(
               label: prefixedTag(tag),
-              visualDensity: VisualDensity.compact,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              padding: EdgeInsets.zero,
-              labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+              visualDensity: .compact,
+              materialTapTargetSize: .shrinkWrap,
+              padding: .zero,
+              labelPadding: const .symmetric(horizontal: 8),
               backgroundColor: colorScheme.secondaryContainer,
               labelStyle: TextStyle(color: colorScheme.onSecondaryContainer),
             ),
@@ -42,7 +42,7 @@ class TagsList extends StatelessWidget {
   Widget prefixedTag(String tag) {
     if (prefix == null) return Text(tag);
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: .min,
       children: [
         Opacity(opacity: 0.5, child: Text(prefix!)),
         Text(tag),

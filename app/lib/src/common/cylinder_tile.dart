@@ -63,7 +63,7 @@ class CylinderTile extends StatelessWidget {
 
     return ListTile(
       contentPadding: contentPadding,
-      title: Padding(padding: const EdgeInsets.only(left: 8.0, bottom: 8.0), child: Text(desc)),
+      title: Padding(padding: const .only(left: 8.0, bottom: 8.0), child: Text(desc)),
       subtitle: Wrap(spacing: 8, runSpacing: 8, children: details),
       trailing: trailing,
       onTap: onTap,

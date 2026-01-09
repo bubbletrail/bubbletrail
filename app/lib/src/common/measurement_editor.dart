@@ -106,14 +106,14 @@ class _MeasurementEditorState<T extends Enum> extends State<MeasurementEditor<T>
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: .start,
       spacing: 16,
       children: [
         Expanded(
           child: TextField(
             controller: _controller,
             decoration: InputDecoration(labelText: widget.label, border: const OutlineInputBorder(), hintText: widget.hintText),
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const .numberWithOptions(decimal: true),
             onChanged: _onTextChanged,
           ),
         ),
@@ -121,7 +121,7 @@ class _MeasurementEditorState<T extends Enum> extends State<MeasurementEditor<T>
           width: 80,
           child: DropdownButtonFormField<T>(
             initialValue: _selectedUnit,
-            decoration: const InputDecoration(border: OutlineInputBorder(), contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16)),
+            decoration: const InputDecoration(border: OutlineInputBorder(), contentPadding: .symmetric(horizontal: 12, vertical: 16)),
             items: widget.units.map((unit) {
               return DropdownMenuItem<T>(value: unit, child: Text(widget.unitLabel(unit)));
             }).toList(),
@@ -148,22 +148,22 @@ class PressureEditor extends StatelessWidget {
 
   static double _fromMetric(double value, PressureUnit unit) {
     return switch (unit) {
-      PressureUnit.bar => value,
-      PressureUnit.psi => value * barToPsi,
+      .bar => value,
+      .psi => value * barToPsi,
     };
   }
 
   static double _toMetric(double value, PressureUnit unit) {
     return switch (unit) {
-      PressureUnit.bar => value,
-      PressureUnit.psi => value / barToPsi,
+      .bar => value,
+      .psi => value / barToPsi,
     };
   }
 
   static String _unitLabel(PressureUnit unit) {
     return switch (unit) {
-      PressureUnit.bar => 'bar',
-      PressureUnit.psi => 'psi',
+      .bar => 'bar',
+      .psi => 'psi',
     };
   }
 
@@ -193,22 +193,22 @@ class VolumeEditor extends StatelessWidget {
 
   static double _fromMetric(double value, VolumeUnit unit) {
     return switch (unit) {
-      VolumeUnit.liters => value,
-      VolumeUnit.cuft => value * litersToCuft,
+      .liters => value,
+      .cuft => value * litersToCuft,
     };
   }
 
   static double _toMetric(double value, VolumeUnit unit) {
     return switch (unit) {
-      VolumeUnit.liters => value,
-      VolumeUnit.cuft => value / litersToCuft,
+      .liters => value,
+      .cuft => value / litersToCuft,
     };
   }
 
   static String _unitLabel(VolumeUnit unit) {
     return switch (unit) {
-      VolumeUnit.liters => 'L',
-      VolumeUnit.cuft => 'cuft',
+      .liters => 'L',
+      .cuft => 'cuft',
     };
   }
 
@@ -238,22 +238,22 @@ class WeightEditor extends StatelessWidget {
 
   static double _fromMetric(double value, WeightUnit unit) {
     return switch (unit) {
-      WeightUnit.kg => value,
-      WeightUnit.lb => value * kgToLbs,
+      .kg => value,
+      .lb => value * kgToLbs,
     };
   }
 
   static double _toMetric(double value, WeightUnit unit) {
     return switch (unit) {
-      WeightUnit.kg => value,
-      WeightUnit.lb => value / kgToLbs,
+      .kg => value,
+      .lb => value / kgToLbs,
     };
   }
 
   static String _unitLabel(WeightUnit unit) {
     return switch (unit) {
-      WeightUnit.kg => 'kg',
-      WeightUnit.lb => 'lbs',
+      .kg => 'kg',
+      .lb => 'lbs',
     };
   }
 

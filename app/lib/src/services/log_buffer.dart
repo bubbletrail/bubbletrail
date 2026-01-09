@@ -5,7 +5,7 @@ import 'package:logging/logging.dart';
 
 /// A singleton service that captures and buffers log records for viewing.
 class LogBuffer {
-  static final LogBuffer _instance = LogBuffer._internal();
+  static final LogBuffer _instance = ._internal();
   static LogBuffer get instance => _instance;
 
   LogBuffer._internal();

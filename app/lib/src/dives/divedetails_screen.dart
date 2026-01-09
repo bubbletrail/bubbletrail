@@ -109,8 +109,8 @@ class _DiveDetails extends StatelessWidget {
       ],
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, spacing: 8, children: _buildAllSections(context)),
+          padding: const .all(8.0),
+          child: Column(crossAxisAlignment: .stretch, spacing: 8, children: _buildAllSections(context)),
         ),
       ),
     );
@@ -122,14 +122,14 @@ class _DiveDetails extends StatelessWidget {
             .where((w) => w != null)
             .map<Widget>(
               (t) => Card(
-                child: Padding(padding: const EdgeInsets.all(16.0), child: t),
+                child: Padding(padding: const .all(16.0), child: t),
               ),
             )
             .toList() +
         [
           if (site != null)
             ConstrainedBox(
-              constraints: BoxConstraints.loose(Size.fromWidth(600)),
+              constraints: .loose(.fromWidth(600)),
               child: _SiteCard(site: site!),
             ),
         ];
@@ -137,7 +137,7 @@ class _DiveDetails extends StatelessWidget {
     return [
       _MaybeCard(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: .start,
           children: [
             if (dive.logs.isNotEmpty && dive.logs[0].samples.isNotEmpty) _ProfileCard(dive: dive, site: site),
             _buddiesTagsEtc(),
@@ -146,18 +146,18 @@ class _DiveDetails extends StatelessWidget {
       ),
       if (dive.notes.isNotEmpty)
         Card(
-          child: Padding(padding: const EdgeInsets.all(16.0), child: Text(dive.notes)),
+          child: Padding(padding: const .all(16.0), child: Text(dive.notes)),
         ),
       _WidthResponsive(
-        narrow: Column(crossAxisAlignment: CrossAxisAlignment.stretch, spacing: 8, children: datacolumns),
-        wide: Wrap(alignment: WrapAlignment.start, crossAxisAlignment: WrapCrossAlignment.start, spacing: 8, runSpacing: 8, children: datacolumns),
+        narrow: Column(crossAxisAlignment: .stretch, spacing: 8, children: datacolumns),
+        wide: Wrap(alignment: .start, crossAxisAlignment: .start, spacing: 8, runSpacing: 8, children: datacolumns),
       ),
     ];
   }
 
   Wrap _buddiesTagsEtc() {
     return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
+      crossAxisAlignment: .center,
       runSpacing: 8,
       spacing: 24,
       children: [
@@ -244,9 +244,9 @@ class _ProfileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const .all(8.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: .stretch,
         spacing: 8,
         children: [
           Stack(
@@ -326,16 +326,16 @@ class _SiteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      clipBehavior: Clip.antiAlias,
+      clipBehavior: .antiAlias,
       child: InkWell(
         onTap: () {
           context.goNamed(AppRouteName.sitesDetails, pathParameters: {'siteID': site.id});
         },
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: .start,
           children: [
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const .all(16.0),
               child: Row(
                 children: [
                   Expanded(child: Text(site.name, style: Theme.of(context).textTheme.titleMedium)),
@@ -366,11 +366,11 @@ class _SiteCard extends StatelessWidget {
               ),
             // Site information
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const .all(16.0),
               child: Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                crossAxisAlignment: WrapCrossAlignment.center,
+                crossAxisAlignment: .center,
                 children: [
                   if (site.hasCountry()) LabeledChip(label: 'Country', child: Text(site.country)),
                   if (site.hasCountry()) LabeledChip(label: 'Location', child: Text(site.location)),
@@ -396,7 +396,7 @@ class _RawDiveDataScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const .all(16),
         child: SelectableText(dive.toTextFormat(), style: Theme.of(context).textTheme.bodyMedium?.apply(fontFamily: 'Courier')),
       ),
     );
@@ -423,8 +423,8 @@ class _ColumnRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: .center,
+      mainAxisAlignment: .spaceBetween,
       children: [
         Opacity(opacity: 0.5, child: Text(label ?? '', style: Theme.of(context).textTheme.labelSmall)),
         SizedBox(width: 16),
@@ -488,7 +488,7 @@ class _MaybeCard extends StatelessWidget {
     return _WidthResponsive(
       narrow: child,
       wide: Card(
-        child: Padding(padding: EdgeInsetsGeometry.all(16), child: child),
+        child: Padding(padding: .all(16), child: child),
       ),
     );
   }
@@ -507,7 +507,7 @@ class _AspectMaxHeight extends StatelessWidget {
       builder: (context, constraints) {
         final height = constraints.maxWidth / aspectRatio;
         if (height > maxHeight) {
-          return ConstrainedBox(constraints: BoxConstraints.loose(Size.fromHeight(maxHeight)), child: child);
+          return ConstrainedBox(constraints: .loose(.fromHeight(maxHeight)), child: child);
         }
         return AspectRatio(aspectRatio: aspectRatio, child: child);
       },

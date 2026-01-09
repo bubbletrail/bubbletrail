@@ -34,17 +34,17 @@ class DiveListItemCard extends StatelessWidget {
         onTap: () {
           context.goNamed(AppRouteName.divesDetails, pathParameters: {'diveID': dive.id});
         },
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: .circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const .all(12),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             children: [
               // Top row: Dive number and date
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: .spaceBetween,
                 children: [
-                  Text('Dive #${dive.number}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  Text('Dive #${dive.number}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: .bold)),
                   DateTimeText(_startDateTime, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],
               ),
@@ -56,7 +56,7 @@ class DiveListItemCard extends StatelessWidget {
                     Icon(Icons.location_on, size: 16, color: theme.colorScheme.primary),
                     const SizedBox(width: 4),
                     Expanded(
-                      child: Text(siteName, style: theme.textTheme.bodyMedium, overflow: TextOverflow.ellipsis),
+                      child: Text(siteName, style: theme.textTheme.bodyMedium, overflow: .ellipsis),
                     ),
                   ],
                 ),
@@ -98,7 +98,7 @@ class _InfoChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: .min,
       children: [
         Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
         const SizedBox(width: 4),

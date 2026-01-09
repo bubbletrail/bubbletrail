@@ -16,7 +16,7 @@ class FullscreenMapScreen extends StatelessWidget {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [cs.tertiaryContainer, cs.onTertiaryFixedVariant],
-        tileMode: TileMode.mirror,
+        tileMode: .mirror,
       ),
     );
 

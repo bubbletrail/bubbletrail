@@ -24,23 +24,23 @@ class ScreenScaffold extends StatelessWidget {
                 )
         : DecoratedBox(
             decoration: BoxDecoration(
-              border: BoxBorder.all(color: t.colorScheme.onTertiaryContainer),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(8),
-                topRight: Radius.circular(8),
-                bottomLeft: Radius.circular(8),
-                bottomRight: Radius.circular(8),
+              border: .all(color: t.colorScheme.onTertiaryContainer),
+              borderRadius: .only(
+                topLeft: .circular(8),
+                topRight: .circular(8),
+                bottomLeft: .circular(8),
+                bottomRight: .circular(8),
               ),
               color: t.canvasColor,
             ),
             child: Padding(
-              padding: const EdgeInsets.all(1.0), // the border
+              padding: const .all(1.0), // the border
               child: ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(8),
-                  topRight: Radius.circular(8),
-                  bottomLeft: Radius.circular(8),
-                  bottomRight: Radius.circular(8),
+                borderRadius: .only(
+                  topLeft: .circular(8),
+                  topRight: .circular(8),
+                  bottomLeft: .circular(8),
+                  bottomRight: .circular(8),
                 ),
                 child: body,
               ),
@@ -51,11 +51,11 @@ class ScreenScaffold extends StatelessWidget {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(title: title, backgroundColor: Colors.transparent, actions: actions, actionsPadding: EdgeInsets.only(right: 16)),
+        appBar: AppBar(title: title, backgroundColor: Colors.transparent, actions: actions, actionsPadding: .only(right: 16)),
         body: Padding(
-          padding: io.Platform.isIOS ? const EdgeInsets.all(0) : const EdgeInsets.only(right: 4.0, bottom: 4.0),
+          padding: io.Platform.isIOS ? const .all(0) : const .only(right: 4.0, bottom: 4.0),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: .stretch,
             children: [Expanded(child: inner)],
           ),
         ),

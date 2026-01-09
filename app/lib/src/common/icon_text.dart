@@ -9,6 +9,6 @@ class IconText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (icon == null) return Text(label);
-    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 4.0, children: [Icon(icon), Text(label)]);
+    return Row(mainAxisSize: .min, crossAxisAlignment: .center, spacing: 4.0, children: [Icon(icon), Text(label)]);
   }
 }

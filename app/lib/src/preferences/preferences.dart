@@ -120,15 +120,15 @@ class Preferences {
   String get dateTimeFormat => '${dateFormat.format} ${timeFormat.format}';
 
   const Preferences({
-    this.depthUnit = DepthUnit.meters,
-    this.pressureUnit = PressureUnit.bar,
-    this.temperatureUnit = TemperatureUnit.celsius,
-    this.volumeUnit = VolumeUnit.liters,
-    this.weightUnit = WeightUnit.kg,
+    this.depthUnit = .meters,
+    this.pressureUnit = .bar,
+    this.temperatureUnit = .celsius,
+    this.volumeUnit = .liters,
+    this.weightUnit = .kg,
     this.dateFormat = DateFormatPref.iso,
     this.timeFormat = TimeFormatPref.h24,
     this.themeMode = ThemeMode.system,
-    this.syncProvider = SyncProviderKind.none,
+    this.syncProvider = .none,
     this.s3Config = const S3Config(),
   });
 

@@ -175,7 +175,7 @@ class BleState extends Equatable {
     this.isScanning = false,
     this.showAllDevices = false,
     this.connectedDevice,
-    this.connectionState = BluetoothConnectionState.disconnected,
+    this.connectionState = .disconnected,
     this.discoveredServices = const [],
     this.isDiscoveringServices = false,
     this.isDownloading = false,
@@ -317,7 +317,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     _adapterStateSubscription = FlutterBluePlus.adapterState.listen((state) {
       add(_BleAdapterStateChanged(state));
     });
-    await FlutterBluePlus.setLogLevel(LogLevel.none);
+    await FlutterBluePlus.setLogLevel(.none);
   }
 
   Future<void> _onStartScan(Emitter<BleState> emit) async {
@@ -368,7 +368,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     });
 
     try {
-      await device.connect(license: License.free, timeout: const Duration(seconds: 15));
+      await device.connect(license: .free, timeout: const Duration(seconds: 15));
       emit(state.copyWith(connectedDevice: device, isDiscoveringServices: true));
       final services = await device.discoverServices();
       add(_BleServicesDiscovered(services));
@@ -378,7 +378,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
   }
 
   void _onConnectionStateChanged(BluetoothConnectionState connectionState, Emitter<BleState> emit) {
-    if (connectionState == BluetoothConnectionState.disconnected && state.connectionState == BluetoothConnectionState.connected) {
+    if (connectionState == .disconnected && state.connectionState == .connected) {
       emit(state.copyWith(connectionState: connectionState, clearConnectedDevice: true, discoveredServices: [], isDiscoveringServices: false));
     } else {
       emit(state.copyWith(connectionState: connectionState));
@@ -450,7 +450,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
   Future<void> _onDisconnect(Emitter<BleState> emit) async {
     if (state.connectedDevice != null) {
       await state.connectedDevice!.disconnect();
-      emit(state.copyWith(clearConnectedDevice: true, connectionState: BluetoothConnectionState.disconnected, discoveredServices: []));
+      emit(state.copyWith(clearConnectedDevice: true, connectionState: .disconnected, discoveredServices: []));
     }
   }
 

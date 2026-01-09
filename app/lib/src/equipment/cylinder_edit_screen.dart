@@ -108,7 +108,7 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
         title: Text(_isNew ? 'New cylinder' : 'Edit cylinder'),
         actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes')],
         body: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const .all(16.0),
           child: Column(spacing: 16, children: [_descriptionCard(), Platform.isIOS ? _verticalCards(context) : _horisontalCards(context)]),
         ),
       ),
@@ -138,20 +138,20 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
 
   Card _metricCard(BuildContext context) {
     return Card(
-      margin: EdgeInsets.zero,
+      margin: .zero,
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const .all(8.0),
         child: Opacity(
           opacity: _isImperialMode ? 0.5 : 1.0,
           child: Column(
             spacing: 16,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             children: [
               Text('Metric', style: Theme.of(context).textTheme.titleMedium),
               TextField(
                 controller: _volumeLController,
                 decoration: InputDecoration(labelText: 'Water volume (L)', border: const OutlineInputBorder(), hintText: 'e.g. 12'),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const .numberWithOptions(decimal: true),
                 onChanged: _didSetVolumeL,
                 onTap: () => setState(() {
                   _isImperialMode = false;
@@ -160,7 +160,7 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
               TextField(
                 controller: _pressureBarController,
                 decoration: InputDecoration(labelText: 'Working pressure (bar)', border: const OutlineInputBorder(), hintText: 'e.g. 232'),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const .numberWithOptions(decimal: true),
                 onChanged: _didSetPressureBar,
                 onTap: () => setState(() {
                   _isImperialMode = false;
@@ -175,20 +175,20 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
 
   Card _imperialCard(BuildContext context) {
     return Card(
-      margin: EdgeInsets.zero,
+      margin: .zero,
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const .all(8.0),
         child: Opacity(
           opacity: _isImperialMode ? 1.0 : 0.5,
           child: Column(
             spacing: 16,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             children: [
               Text('Imperial', style: Theme.of(context).textTheme.titleMedium),
               TextField(
                 controller: _volumeCuftController,
                 decoration: InputDecoration(labelText: 'Size (cuft)', border: const OutlineInputBorder(), hintText: 'e.g. 80'),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const .numberWithOptions(decimal: true),
                 onChanged: _didSetVolumeCuft,
                 onTap: () => setState(() {
                   _isImperialMode = true;
@@ -197,7 +197,7 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
               TextField(
                 controller: _pressurePsiController,
                 decoration: InputDecoration(labelText: 'Working pressure (psi)', border: const OutlineInputBorder(), hintText: 'e.g. 3000'),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const .numberWithOptions(decimal: true),
                 onChanged: _didSetPressurePsi,
                 onTap: () => setState(() {
                   _isImperialMode = true;

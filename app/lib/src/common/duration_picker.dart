@@ -68,7 +68,7 @@ class _DurationPickerDialogState extends State<DurationPickerDialog> {
     return AlertDialog(
       title: Text(widget.title),
       content: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         children: [
           Row(
             children: [
@@ -76,16 +76,16 @@ class _DurationPickerDialogState extends State<DurationPickerDialog> {
                 child: TextField(
                   controller: _minutesController,
                   decoration: const InputDecoration(labelText: 'Minutes', border: OutlineInputBorder()),
-                  keyboardType: TextInputType.number,
+                  keyboardType: .number,
                   onChanged: (_) => _updateFromTextFields(),
                 ),
               ),
-              const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text(':')),
+              const Padding(padding: .symmetric(horizontal: 8), child: Text(':')),
               Expanded(
                 child: TextField(
                   controller: _secondsController,
                   decoration: const InputDecoration(labelText: 'Seconds', border: OutlineInputBorder()),
-                  keyboardType: TextInputType.number,
+                  keyboardType: .number,
                   onChanged: (_) => _updateFromTextFields(),
                 ),
               ),

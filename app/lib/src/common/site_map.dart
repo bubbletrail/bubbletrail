@@ -54,7 +54,7 @@ class _SiteMapState extends State<SiteMap> {
               point: widget.position,
               width: 32,
               height: 32,
-              alignment: Alignment.topCenter, // point is at bottom center
+              alignment: .topCenter, // point is at bottom center
               child: Icon(Icons.location_pin, size: 32, color: Colors.redAccent),
             ),
           ],

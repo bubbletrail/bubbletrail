@@ -26,7 +26,7 @@ class PreferencesScreen extends StatelessWidget {
             return ScreenScaffold(
               title: const Text('Preferences'),
               body: ListView(
-                padding: const EdgeInsets.all(16),
+                padding: const .all(16),
                 children: [
                   PreferencesCategoryCard(icon: Icons.scuba_diving, title: 'Cylinders', onTap: () => context.goNamed(AppRouteName.cylinders)),
                   PreferencesCategoryCard(icon: Icons.straighten, title: 'Units', onTap: () => context.goNamed(AppRouteName.units)),
@@ -38,9 +38,9 @@ class PreferencesScreen extends StatelessWidget {
                     trailing: SegmentedButton<ThemeMode>(
                       showSelectedIcon: true,
                       segments: const [
-                        ButtonSegment(value: ThemeMode.system, label: Text('System'), icon: Icon(null)),
-                        ButtonSegment(value: ThemeMode.light, label: Text('Light'), icon: Icon(null)),
-                        ButtonSegment(value: ThemeMode.dark, label: Text('Dark'), icon: Icon(null)),
+                        ButtonSegment(value: .system, label: Text('System'), icon: Icon(null)),
+                        ButtonSegment(value: .light, label: Text('Light'), icon: Icon(null)),
+                        ButtonSegment(value: .dark, label: Text('Dark'), icon: Icon(null)),
                       ],
                       selected: {prefs.themeMode},
                       onSelectionChanged: (value) {
@@ -123,12 +123,12 @@ class _LogPreviewState extends State<_LogPreview> {
 
     return InkWell(
       onTap: widget.onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: .circular(8),
       child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(8)),
+        padding: const .all(8),
+        decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5), borderRadius: .circular(8)),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: .start,
           children: [
             Row(
               children: [
@@ -162,12 +162,12 @@ class _LogLine extends StatelessWidget {
     final logLine = formatLogLine(timeFormat, record);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const .symmetric(vertical: 2),
       child: Text(
         logLine,
         style: theme.textTheme.bodySmall?.copyWith(fontFamily: 'courier', color: levelColor),
         maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+        overflow: .ellipsis,
       ),
     );
   }

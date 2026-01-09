@@ -26,11 +26,11 @@ class AppTheme {
 
   static const transitions = PageTransitionsTheme(
     builders: <TargetPlatform, PageTransitionsBuilder>{
-      TargetPlatform.android: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
-      TargetPlatform.iOS: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
-      TargetPlatform.linux: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
-      TargetPlatform.macOS: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
-      TargetPlatform.windows: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
+      .android: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
+      .iOS: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
+      .linux: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
+      .macOS: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
+      .windows: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
     },
   );
 
@@ -38,7 +38,7 @@ class AppTheme {
     useMaterial3: true,
     visualDensity: density,
     colorScheme: ColorScheme.fromSeed(
-      brightness: Brightness.dark,
+      brightness: .dark,
       seedColor: _d3,
       primary: _d3,
       secondary: _d4,
@@ -57,7 +57,7 @@ class AppTheme {
     useMaterial3: true,
     visualDensity: density,
     colorScheme: ColorScheme.fromSeed(
-      brightness: Brightness.light,
+      brightness: .light,
       seedColor: _l3,
       primary: _l3,
       secondary: _l4,
@@ -86,9 +86,9 @@ class AppTheme {
       gridBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
       rowColor: Theme.of(context).scaffoldBackgroundColor,
       cellTextStyle: Theme.of(context).textTheme.bodyMedium ?? const TextStyle(),
-      columnTextStyle: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold) ?? const TextStyle(),
+      columnTextStyle: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: .bold) ?? const TextStyle(),
     ),
-    columnSize: TrinaGridColumnSizeConfig(autoSizeMode: TrinaAutoSizeMode.scale),
+    columnSize: TrinaGridColumnSizeConfig(autoSizeMode: .scale),
     scrollbar: TrinaGridScrollbarConfig(isAlwaysShown: false),
   );
 }

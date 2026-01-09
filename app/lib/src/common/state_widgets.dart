@@ -15,15 +15,15 @@ class ErrorStateWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const .all(16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: [
             Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
             const SizedBox(height: 16),
             Text(title, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            Text(message, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
+            Text(message, style: Theme.of(context).textTheme.bodyMedium, textAlign: .center),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
               FilledButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh), label: const Text('Retry')),
@@ -50,15 +50,15 @@ class EmptyStateWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const .all(16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: [
             if (icon != null) ...[Icon(icon, size: 48, color: Theme.of(context).colorScheme.outline), const SizedBox(height: 16)],
             Text(
               message,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.outline),
-              textAlign: TextAlign.center,
+              textAlign: .center,
             ),
             if (actionLabel != null && onAction != null) ...[const SizedBox(height: 16), FilledButton(onPressed: onAction, child: Text(actionLabel!))],
           ],

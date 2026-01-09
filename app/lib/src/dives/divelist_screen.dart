@@ -21,7 +21,7 @@ class DiveListScreen extends StatelessWidget {
         icon: const Icon(Icons.file_upload),
         tooltip: 'Import SSRF file',
         onPressed: () async {
-          final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['ssrf', 'xml']);
+          final result = await FilePicker.platform.pickFiles(type: .custom, allowedExtensions: ['ssrf', 'xml']);
           if (result != null && result.files.single.path != null) {
             if (context.mounted) {
               context.read<DiveListBloc>().add(ImportDives(result.files.single.path!));

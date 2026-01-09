@@ -56,7 +56,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     // Extract gas change events
     _gasChanges = [];
     for (final event in dive.events) {
-      if (event.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE) {
+      if (event.type == .SAMPLE_EVENT_TYPE_GAS_CHANGE) {
         // The value field stores the cylinder index
         _gasChanges.add(_EditableGasChange(timeSeconds: event.time, cylinderIndex: event.value));
       }
@@ -84,7 +84,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   }
 
   Future<void> _selectTime() async {
-    final TimeOfDay? picked = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(_selectedDateTime));
+    final TimeOfDay? picked = await showTimePicker(context: context, initialTime: .fromDateTime(_selectedDateTime));
     if (picked != null) {
       setState(() {
         _selectedDateTime = DateTime(_selectedDateTime.year, _selectedDateTime.month, _selectedDateTime.day, picked.hour, picked.minute, 0);
@@ -222,7 +222,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
           title: Text('Edit ${selectedCylinder?.description ?? 'Cylinder ${index + 1}'}'),
           content: SingleChildScrollView(
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: .min,
               children: [
                 if (availableCylinders.isNotEmpty) ...[
                   DropdownButtonFormField<String>(
@@ -247,7 +247,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                       child: TextField(
                         controller: o2Controller,
                         decoration: const InputDecoration(labelText: 'Oxygen %', border: OutlineInputBorder()),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const .numberWithOptions(decimal: true),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -255,7 +255,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                       child: TextField(
                         controller: heController,
                         decoration: const InputDecoration(labelText: 'Helium %', border: OutlineInputBorder()),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const .numberWithOptions(decimal: true),
                       ),
                     ),
                   ],
@@ -340,7 +340,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       builder: (dialogContext) => AlertDialog(
         title: Text(ws.description.isNotEmpty ? 'Edit ${ws.description}' : 'Add weight'),
         content: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: [
             Autocomplete<String>(
               initialValue: TextEditingValue(text: ws.description),
@@ -363,7 +363,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                   controller: controller,
                   focusNode: focusNode,
                   decoration: const InputDecoration(labelText: 'Type', border: OutlineInputBorder()),
-                  textCapitalization: TextCapitalization.words,
+                  textCapitalization: .words,
                 );
               },
             ),
@@ -464,9 +464,9 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
         title: Text('Edit Dive #${dive.number}'),
         actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes')],
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const .all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             spacing: 16,
             children: [
               Row(
@@ -536,10 +536,10 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
               ),
               // Cylinders section
               Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: .spaceBetween,
                     children: [
                       Text('Cylinders', style: Theme.of(context).textTheme.titleMedium),
                       IconButton(icon: const Icon(Icons.add), onPressed: _addCylinder, tooltip: 'Add cylinder'),
@@ -547,7 +547,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                   ),
                   if (_cylinders.isEmpty)
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const .symmetric(vertical: 8),
                       child: Text('No cylinders. Tap + to add one.', style: TextStyle(color: Theme.of(context).hintColor)),
                     )
                   else
@@ -556,11 +556,11 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                       final gasChangesForCyl = _gasChanges.where((gc) => gc.cylinderIndex == index).toList();
 
                       return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
+                        margin: const .only(bottom: 8),
                         child: Padding(
-                          padding: const EdgeInsets.all(12),
+                          padding: const .all(12),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: .start,
                             children: [
                               CylinderTile(
                                 index: index,
@@ -570,20 +570,20 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                                 beginPressure: cyl.beginPressure ?? 0,
                                 endPressure: cyl.endPressure ?? 0,
                                 trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisSize: .min,
                                   children: [
                                     IconButton(icon: const Icon(Icons.edit, size: 20), onPressed: () => _editCylinderGas(index), tooltip: 'Edit gas mix'),
                                     IconButton(icon: const Icon(Icons.delete, size: 20), onPressed: () => _removeCylinder(index), tooltip: 'Remove cylinder'),
                                   ],
                                 ),
-                                contentPadding: EdgeInsets.zero,
+                                contentPadding: .zero,
                               ),
                               const SizedBox(height: 8),
-                              Text('Gas changes:', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+                              Text('Gas changes:', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: .bold)),
                               ...gasChangesForCyl.map((gc) {
                                 final gcIndex = _gasChanges.indexOf(gc);
                                 return Padding(
-                                  padding: const EdgeInsets.only(left: 8, top: 4),
+                                  padding: const .only(left: 8, top: 4),
                                   child: Row(
                                     children: [
                                       Expanded(
@@ -602,7 +602,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                                 onPressed: () => _addGasChange(index),
                                 icon: const Icon(Icons.add, size: 16),
                                 label: const Text('Add gas change'),
-                                style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 32)),
+                                style: TextButton.styleFrom(padding: .zero, minimumSize: const Size(0, 32)),
                               ),
                             ],
                           ),
@@ -613,10 +613,10 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
               ),
               // Weight systems section
               Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: .spaceBetween,
                     children: [
                       Text('Weight Systems', style: Theme.of(context).textTheme.titleMedium),
                       IconButton(icon: const Icon(Icons.add), onPressed: _addWeightsystem, tooltip: 'Add weight'),
@@ -624,21 +624,21 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                   ),
                   if (_weightsystems.isEmpty)
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const .symmetric(vertical: 8),
                       child: Text('No weight systems. Tap + to add one.', style: TextStyle(color: Theme.of(context).hintColor)),
                     )
                   else
                     ...List.generate(_weightsystems.length, (index) {
                       final ws = _weightsystems[index];
                       return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
+                        margin: const .only(bottom: 8),
                         child: Padding(
-                          padding: const EdgeInsets.all(12),
+                          padding: const .all(12),
                           child: Row(
                             children: [
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment: .start,
                                   children: [
                                     Text(ws.description.isNotEmpty ? ws.description : 'Weight ${index + 1}', style: Theme.of(context).textTheme.titleSmall),
                                     if (ws.weight != null) WeightText(ws.weight!, style: Theme.of(context).textTheme.bodySmall),
@@ -655,12 +655,12 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                 ],
               ),
               Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 children: [
                   Text('Rating', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
                   Row(
-                    children: List.generate(5, (index) {
+                    children: .generate(5, (index) {
                       final starValue = index + 1;
                       return IconButton(
                         icon: Icon(_rating != null && starValue <= _rating! ? Icons.star : Icons.star_border, color: Colors.amber, size: 32),
@@ -686,7 +686,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                     decorationTextField: const InputDecoration(labelText: 'Tags', border: OutlineInputBorder()),
                     addChipOnSelection: true,
                     placeChipsSectionAbove: false,
-                    paddingInsideWidgetContainer: EdgeInsets.zero,
+                    paddingInsideWidgetContainer: .zero,
                     secondaryTheme: true,
                   );
                 },
@@ -694,7 +694,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
               TextField(
                 controller: _divemasterController,
                 decoration: const InputDecoration(labelText: 'Divemaster', border: OutlineInputBorder()),
-                textCapitalization: TextCapitalization.words,
+                textCapitalization: .words,
               ),
               Builder(
                 builder: (context) {
@@ -708,7 +708,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                     decorationTextField: const InputDecoration(labelText: 'Buddies', border: OutlineInputBorder()),
                     addChipOnSelection: true,
                     placeChipsSectionAbove: false,
-                    paddingInsideWidgetContainer: EdgeInsets.zero,
+                    paddingInsideWidgetContainer: .zero,
                     secondaryTheme: true,
                     createCharacters: [','],
                   );
@@ -719,7 +719,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                 decoration: const InputDecoration(labelText: 'Notes', border: OutlineInputBorder()),
                 maxLines: 6,
                 autocorrect: true,
-                textCapitalization: TextCapitalization.sentences,
+                textCapitalization: .sentences,
               ),
             ],
           ),
@@ -779,7 +779,7 @@ class _EditableGasChange {
   }
 
   SampleEvent toSampleEvent() {
-    return SampleEvent(type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, time: timeSeconds, value: cylinderIndex);
+    return SampleEvent(type: .SAMPLE_EVENT_TYPE_GAS_CHANGE, time: timeSeconds, value: cylinderIndex);
   }
 }
 
