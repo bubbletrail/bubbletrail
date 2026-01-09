@@ -38,5 +38,5 @@ linter:
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
 
-plugins:
-  prefer_shorthands: ^0.4.7
+# plugins:
+#   prefer_shorthands: ^0.4.7
