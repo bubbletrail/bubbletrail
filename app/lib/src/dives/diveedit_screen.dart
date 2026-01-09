@@ -452,6 +452,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool canEditDepthDuration = dive.logs.isEmpty || dive.logs.first.isSynthetic;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -491,24 +492,34 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                   ),
                 ],
               ),
-              InkWell(
-                onTap: _selectDuration,
-                child: InputDecorator(
-                  decoration: const InputDecoration(labelText: 'Duration', border: OutlineInputBorder(), suffixIcon: Icon(Icons.timer)),
-                  child: Text(_durationFormatted),
+              if (canEditDepthDuration)
+                Row(
+                  spacing: 16,
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: _selectDuration,
+                        child: InputDecorator(
+                          decoration: const InputDecoration(labelText: 'Duration', border: OutlineInputBorder(), suffixIcon: Icon(Icons.timer)),
+                          child: Text(_durationFormatted),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: DepthEditor(
+                        label: 'Max depth',
+                        initialValue: _maxDepth,
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() {
+                              _maxDepth = val;
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              DepthEditor(
-                label: 'Max depth',
-                initialValue: _maxDepth,
-                onChanged: (val) {
-                  if (val != null) {
-                    setState(() {
-                      _maxDepth = val;
-                    });
-                  }
-                },
-              ),
               Builder(
                 builder: (context) {
                   final diveListState = context.watch<DiveListBloc>().state;
