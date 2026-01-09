@@ -20,7 +20,6 @@ class _LogsScreenState extends State<LogsScreen> {
   late List<LogRecord> _records;
   StreamSubscription<List<LogRecord>>? _subscription;
   Level _minLevel = Level.ALL;
-  final _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -36,7 +35,6 @@ class _LogsScreenState extends State<LogsScreen> {
   @override
   void dispose() {
     _subscription?.cancel();
-    _scrollController.dispose();
     super.dispose();
   }
 
@@ -91,7 +89,6 @@ class _LogsScreenState extends State<LogsScreen> {
       body: filtered.isEmpty
           ? const Center(child: Text('No log entries'))
           : ListView.builder(
-              controller: _scrollController,
               itemCount: filtered.length,
               itemBuilder: (context, index) {
                 final record = filtered[index];
