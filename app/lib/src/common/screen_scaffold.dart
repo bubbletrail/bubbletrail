@@ -25,23 +25,13 @@ class ScreenScaffold extends StatelessWidget {
         : DecoratedBox(
             decoration: BoxDecoration(
               border: .all(color: t.colorScheme.onTertiaryContainer),
-              borderRadius: .only(
-                topLeft: .circular(8),
-                topRight: .circular(8),
-                bottomLeft: .circular(8),
-                bottomRight: .circular(8),
-              ),
+              borderRadius: .only(topLeft: .circular(8), topRight: .circular(8), bottomLeft: .circular(8), bottomRight: .circular(8)),
               color: t.canvasColor,
             ),
             child: Padding(
               padding: const .all(1.0), // the border
               child: ClipRRect(
-                borderRadius: .only(
-                  topLeft: .circular(8),
-                  topRight: .circular(8),
-                  bottomLeft: .circular(8),
-                  bottomRight: .circular(8),
-                ),
+                borderRadius: .only(topLeft: .circular(8), topRight: .circular(8), bottomLeft: .circular(8), bottomRight: .circular(8)),
                 child: body,
               ),
             ),

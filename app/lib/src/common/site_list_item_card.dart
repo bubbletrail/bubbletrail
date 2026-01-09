@@ -69,7 +69,10 @@ class SiteListItemCard extends StatelessWidget {
                 padding: const .only(left: 28),
                 child: Row(
                   children: [
-                    if (site.bodyOfWater.isNotEmpty) ...[_InfoChip(icon: FontAwesomeIcons.water, label: site.bodyOfWater, theme: theme), const SizedBox(width: 12)],
+                    if (site.bodyOfWater.isNotEmpty) ...[
+                      _InfoChip(icon: FontAwesomeIcons.water, label: site.bodyOfWater, theme: theme),
+                      const SizedBox(width: 12),
+                    ],
                     if (site.difficulty.isNotEmpty) ...[
                       _InfoChip(icon: FontAwesomeIcons.signal, label: site.difficulty, theme: theme),
                       const SizedBox(width: 12),

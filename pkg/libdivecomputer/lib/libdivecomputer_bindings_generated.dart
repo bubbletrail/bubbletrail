@@ -35,14 +35,9 @@ external int sum_long_running(int a, int b);
 /// @param[out]  write_path A location to store the allocated write FIFO path.
 /// @returns #DC_STATUS_SUCCESS on success, or another #dc_status_t code
 /// on failure.
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<dc_context_t>,
-    ffi.Pointer<ffi.Char>,
-    ffi.Pointer<ffi.Pointer<ffi.Char>>,
-    ffi.Pointer<ffi.Pointer<ffi.Char>>,
-  )
->(symbol: "dc_fifos_create")
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_context_t>, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Pointer<ffi.Char>>, ffi.Pointer<ffi.Pointer<ffi.Char>>)>(
+  symbol: "dc_fifos_create",
+)
 external int _dc_fifos_create(
   ffi.Pointer<dc_context_t> context,
   ffi.Pointer<ffi.Char> directory,
@@ -55,9 +50,7 @@ dc_status_t dc_fifos_create(
   ffi.Pointer<ffi.Char> directory,
   ffi.Pointer<ffi.Pointer<ffi.Char>> read_path,
   ffi.Pointer<ffi.Pointer<ffi.Char>> write_path,
-) => dc_status_t.fromValue(
-  _dc_fifos_create(context, directory, read_path, write_path),
-);
+) => dc_status_t.fromValue(_dc_fifos_create(context, directory, read_path, write_path));
 
 /// Open a FIFO-based connection using a pair of named pipes.
 ///
@@ -67,14 +60,9 @@ dc_status_t dc_fifos_create(
 /// @param[in]   write_path The path to the FIFO to write to.
 /// @returns #DC_STATUS_SUCCESS on success, or another #dc_status_t code
 /// on failure.
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<ffi.Pointer<dc_iostream_t>>,
-    ffi.Pointer<dc_context_t>,
-    ffi.Pointer<ffi.Char>,
-    ffi.Pointer<ffi.Char>,
-  )
->(symbol: "dc_fifos_open")
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Pointer<dc_iostream_t>>, ffi.Pointer<dc_context_t>, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>(
+  symbol: "dc_fifos_open",
+)
 external int _dc_fifos_open(
   ffi.Pointer<ffi.Pointer<dc_iostream_t>> iostream,
   ffi.Pointer<dc_context_t> context,
@@ -87,81 +75,42 @@ dc_status_t dc_fifos_open(
   ffi.Pointer<dc_context_t> context,
   ffi.Pointer<ffi.Char> read_path,
   ffi.Pointer<ffi.Char> write_path,
-) => dc_status_t.fromValue(
-  _dc_fifos_open(iostream, context, read_path, write_path),
-);
+) => dc_status_t.fromValue(_dc_fifos_open(iostream, context, read_path, write_path));
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Pointer<dc_context_t>>)>(
-  symbol: "dc_context_new",
-)
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Pointer<dc_context_t>>)>(symbol: "dc_context_new")
 external int _dc_context_new(ffi.Pointer<ffi.Pointer<dc_context_t>> context);
 
-dc_status_t dc_context_new(ffi.Pointer<ffi.Pointer<dc_context_t>> context) =>
-    dc_status_t.fromValue(_dc_context_new(context));
+dc_status_t dc_context_new(ffi.Pointer<ffi.Pointer<dc_context_t>> context) => dc_status_t.fromValue(_dc_context_new(context));
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<dc_context_t>)>(
-  symbol: "dc_context_free",
-)
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_context_t>)>(symbol: "dc_context_free")
 external int _dc_context_free(ffi.Pointer<dc_context_t> context);
 
-dc_status_t dc_context_free(ffi.Pointer<dc_context_t> context) =>
-    dc_status_t.fromValue(_dc_context_free(context));
+dc_status_t dc_context_free(ffi.Pointer<dc_context_t> context) => dc_status_t.fromValue(_dc_context_free(context));
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<dc_context_t>, ffi.UnsignedInt)>(
-  symbol: "dc_context_set_loglevel",
-)
-external int _dc_context_set_loglevel(
-  ffi.Pointer<dc_context_t> context,
-  int loglevel,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_context_t>, ffi.UnsignedInt)>(symbol: "dc_context_set_loglevel")
+external int _dc_context_set_loglevel(ffi.Pointer<dc_context_t> context, int loglevel);
 
-dc_status_t dc_context_set_loglevel(
-  ffi.Pointer<dc_context_t> context,
-  dc_loglevel_t loglevel,
-) => dc_status_t.fromValue(_dc_context_set_loglevel(context, loglevel.value));
+dc_status_t dc_context_set_loglevel(ffi.Pointer<dc_context_t> context, dc_loglevel_t loglevel) =>
+    dc_status_t.fromValue(_dc_context_set_loglevel(context, loglevel.value));
 
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<dc_context_t>,
-    dc_logfunc_t,
-    ffi.Pointer<ffi.Void>,
-  )
->(symbol: "dc_context_set_logfunc")
-external int _dc_context_set_logfunc(
-  ffi.Pointer<dc_context_t> context,
-  dc_logfunc_t logfunc,
-  ffi.Pointer<ffi.Void> userdata,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_context_t>, dc_logfunc_t, ffi.Pointer<ffi.Void>)>(symbol: "dc_context_set_logfunc")
+external int _dc_context_set_logfunc(ffi.Pointer<dc_context_t> context, dc_logfunc_t logfunc, ffi.Pointer<ffi.Void> userdata);
 
-dc_status_t dc_context_set_logfunc(
-  ffi.Pointer<dc_context_t> context,
-  dc_logfunc_t logfunc,
-  ffi.Pointer<ffi.Void> userdata,
-) => dc_status_t.fromValue(_dc_context_set_logfunc(context, logfunc, userdata));
+dc_status_t dc_context_set_logfunc(ffi.Pointer<dc_context_t> context, dc_logfunc_t logfunc, ffi.Pointer<ffi.Void> userdata) =>
+    dc_status_t.fromValue(_dc_context_set_logfunc(context, logfunc, userdata));
 
 @ffi.Native<ffi.UnsignedInt Function(ffi.Pointer<dc_context_t>)>()
 external int dc_context_get_transports(ffi.Pointer<dc_context_t> context);
 
-@ffi.Native<
-  ffi.Int Function(ffi.Pointer<dc_iterator_t>, ffi.Pointer<ffi.Void>)
->(symbol: "dc_iterator_next")
-external int _dc_iterator_next(
-  ffi.Pointer<dc_iterator_t> iterator,
-  ffi.Pointer<ffi.Void> item,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iterator_t>, ffi.Pointer<ffi.Void>)>(symbol: "dc_iterator_next")
+external int _dc_iterator_next(ffi.Pointer<dc_iterator_t> iterator, ffi.Pointer<ffi.Void> item);
 
-dc_status_t dc_iterator_next(
-  ffi.Pointer<dc_iterator_t> iterator,
-  ffi.Pointer<ffi.Void> item,
-) => dc_status_t.fromValue(_dc_iterator_next(iterator, item));
+dc_status_t dc_iterator_next(ffi.Pointer<dc_iterator_t> iterator, ffi.Pointer<ffi.Void> item) => dc_status_t.fromValue(_dc_iterator_next(iterator, item));
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iterator_t>)>(
-  symbol: "dc_iterator_free",
-)
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iterator_t>)>(symbol: "dc_iterator_free")
 external int _dc_iterator_free(ffi.Pointer<dc_iterator_t> iterator);
 
-dc_status_t dc_iterator_free(ffi.Pointer<dc_iterator_t> iterator) =>
-    dc_status_t.fromValue(_dc_iterator_free(iterator));
+dc_status_t dc_iterator_free(ffi.Pointer<dc_iterator_t> iterator) => dc_status_t.fromValue(_dc_iterator_free(iterator));
 
 /// Create an iterator to enumerate the supported dive computers.
 ///
@@ -169,21 +118,11 @@ dc_status_t dc_iterator_free(ffi.Pointer<dc_iterator_t> iterator) =>
 /// @param[in]  context   A valid device descriptor.
 /// @returns #DC_STATUS_SUCCESS on success, or another #dc_status_t code
 /// on failure.
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<ffi.Pointer<dc_iterator_t>>,
-    ffi.Pointer<dc_context_t>,
-  )
->(symbol: "dc_descriptor_iterator_new")
-external int _dc_descriptor_iterator_new(
-  ffi.Pointer<ffi.Pointer<dc_iterator_t>> iterator,
-  ffi.Pointer<dc_context_t> context,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Pointer<dc_iterator_t>>, ffi.Pointer<dc_context_t>)>(symbol: "dc_descriptor_iterator_new")
+external int _dc_descriptor_iterator_new(ffi.Pointer<ffi.Pointer<dc_iterator_t>> iterator, ffi.Pointer<dc_context_t> context);
 
-dc_status_t dc_descriptor_iterator_new(
-  ffi.Pointer<ffi.Pointer<dc_iterator_t>> iterator,
-  ffi.Pointer<dc_context_t> context,
-) => dc_status_t.fromValue(_dc_descriptor_iterator_new(iterator, context));
+dc_status_t dc_descriptor_iterator_new(ffi.Pointer<ffi.Pointer<dc_iterator_t>> iterator, ffi.Pointer<dc_context_t> context) =>
+    dc_status_t.fromValue(_dc_descriptor_iterator_new(iterator, context));
 
 /// Free the device descriptor.
 ///
@@ -196,9 +135,7 @@ external void dc_descriptor_free(ffi.Pointer<dc_descriptor_t> descriptor);
 /// @param[in]  descriptor  A valid device descriptor.
 /// @returns The vendor name of the dive computer on success, or NULL on failure.
 @ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<dc_descriptor_t>)>()
-external ffi.Pointer<ffi.Char> dc_descriptor_get_vendor(
-  ffi.Pointer<dc_descriptor_t> descriptor,
-);
+external ffi.Pointer<ffi.Char> dc_descriptor_get_vendor(ffi.Pointer<dc_descriptor_t> descriptor);
 
 /// Get the product name of the dive computer.
 ///
@@ -206,22 +143,17 @@ external ffi.Pointer<ffi.Char> dc_descriptor_get_vendor(
 /// @returns The product name of the dive computer on success, or NULL on
 /// failure.
 @ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<dc_descriptor_t>)>()
-external ffi.Pointer<ffi.Char> dc_descriptor_get_product(
-  ffi.Pointer<dc_descriptor_t> descriptor,
-);
+external ffi.Pointer<ffi.Char> dc_descriptor_get_product(ffi.Pointer<dc_descriptor_t> descriptor);
 
 /// Get the family type of the dive computer.
 ///
 /// @param[in]  descriptor  A valid device descriptor.
 /// @returns The family type of the dive computer on success, or DC_FAMILY_NULL
 /// on failure.
-@ffi.Native<ffi.UnsignedInt Function(ffi.Pointer<dc_descriptor_t>)>(
-  symbol: "dc_descriptor_get_type",
-)
+@ffi.Native<ffi.UnsignedInt Function(ffi.Pointer<dc_descriptor_t>)>(symbol: "dc_descriptor_get_type")
 external int _dc_descriptor_get_type(ffi.Pointer<dc_descriptor_t> descriptor);
 
-dc_family_t dc_descriptor_get_type(ffi.Pointer<dc_descriptor_t> descriptor) =>
-    dc_family_t.fromValue(_dc_descriptor_get_type(descriptor));
+dc_family_t dc_descriptor_get_type(ffi.Pointer<dc_descriptor_t> descriptor) => dc_family_t.fromValue(_dc_descriptor_get_type(descriptor));
 
 /// Get the model number of the dive computer.
 ///
@@ -237,9 +169,7 @@ external int dc_descriptor_get_model(ffi.Pointer<dc_descriptor_t> descriptor);
 /// @returns A bitmask with all the transports supported by the dive computer on
 /// success, or DC_TRANSPORT_NONE on failure.
 @ffi.Native<ffi.UnsignedInt Function(ffi.Pointer<dc_descriptor_t>)>()
-external int dc_descriptor_get_transports(
-  ffi.Pointer<dc_descriptor_t> descriptor,
-);
+external int dc_descriptor_get_transports(ffi.Pointer<dc_descriptor_t> descriptor);
 
 /// Check if a low-level I/O device matches a supported dive computer.
 ///
@@ -254,36 +184,20 @@ external int dc_descriptor_get_transports(
 /// - DC_TRANSPORT_BLE:       Bluetooth device name (string)
 /// @returns Non-zero if the device matches a supported dive computer, or zero if
 /// there is no match.
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<dc_descriptor_t>,
-    ffi.UnsignedInt,
-    ffi.Pointer<ffi.Void>,
-  )
->(symbol: "dc_descriptor_filter")
-external int _dc_descriptor_filter(
-  ffi.Pointer<dc_descriptor_t> descriptor,
-  int transport,
-  ffi.Pointer<ffi.Void> userdata,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_descriptor_t>, ffi.UnsignedInt, ffi.Pointer<ffi.Void>)>(symbol: "dc_descriptor_filter")
+external int _dc_descriptor_filter(ffi.Pointer<dc_descriptor_t> descriptor, int transport, ffi.Pointer<ffi.Void> userdata);
 
-int dc_descriptor_filter(
-  ffi.Pointer<dc_descriptor_t> descriptor,
-  dc_transport_t transport,
-  ffi.Pointer<ffi.Void> userdata,
-) => _dc_descriptor_filter(descriptor, transport.value, userdata);
+int dc_descriptor_filter(ffi.Pointer<dc_descriptor_t> descriptor, dc_transport_t transport, ffi.Pointer<ffi.Void> userdata) =>
+    _dc_descriptor_filter(descriptor, transport.value, userdata);
 
 /// Get the transport type.
 ///
 /// @param[in]  iostream  A valid I/O stream.
 /// @returns The transport type of the I/O stream.
-@ffi.Native<ffi.UnsignedInt Function(ffi.Pointer<dc_iostream_t>)>(
-  symbol: "dc_iostream_get_transport",
-)
+@ffi.Native<ffi.UnsignedInt Function(ffi.Pointer<dc_iostream_t>)>(symbol: "dc_iostream_get_transport")
 external int _dc_iostream_get_transport(ffi.Pointer<dc_iostream_t> iostream);
 
-dc_transport_t dc_iostream_get_transport(ffi.Pointer<dc_iostream_t> iostream) =>
-    dc_transport_t.fromValue(_dc_iostream_get_transport(iostream));
+dc_transport_t dc_iostream_get_transport(ffi.Pointer<dc_iostream_t> iostream) => dc_transport_t.fromValue(_dc_iostream_get_transport(iostream));
 
 /// Set the read timeout.
 ///
@@ -311,18 +225,10 @@ dc_transport_t dc_iostream_get_transport(ffi.Pointer<dc_iostream_t> iostream) =>
 /// @param[in]  timeout   The timeout in milliseconds.
 /// @returns #DC_STATUS_SUCCESS on success, or another #dc_status_t code
 /// on failure.
-@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.Int)>(
-  symbol: "dc_iostream_set_timeout",
-)
-external int _dc_iostream_set_timeout(
-  ffi.Pointer<dc_iostream_t> iostream,
-  int timeout,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.Int)>(symbol: "dc_iostream_set_timeout")
+external int _dc_iostream_set_timeout(ffi.Pointer<dc_iostream_t> iostream, int timeout);
 
-dc_status_t dc_iostream_set_timeout(
-  ffi.Pointer<dc_iostream_t> iostream,
-  int timeout,
-) => dc_status_t.fromValue(_dc_iostream_set_timeout(iostream, timeout));
+dc_status_t dc_iostream_set_timeout(ffi.Pointer<dc_iostream_t> iostream, int timeout) => dc_status_t.fromValue(_dc_iostream_set_timeout(iostream, timeout));
 
 /// Set the state of the break condition.
 ///
@@ -330,18 +236,10 @@ dc_status_t dc_iostream_set_timeout(
 /// @param[in]  value     The break condition state.
 /// @returns #DC_STATUS_SUCCESS on success, or another #dc_status_t code
 /// on failure.
-@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.UnsignedInt)>(
-  symbol: "dc_iostream_set_break",
-)
-external int _dc_iostream_set_break(
-  ffi.Pointer<dc_iostream_t> iostream,
-  int value,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.UnsignedInt)>(symbol: "dc_iostream_set_break")
+external int _dc_iostream_set_break(ffi.Pointer<dc_iostream_t> iostream, int value);
 
-dc_status_t dc_iostream_set_break(
-  ffi.Pointer<dc_iostream_t> iostream,
-  int value,
-) => dc_status_t.fromValue(_dc_iostream_set_break(iostream, value));
+dc_status_t dc_iostream_set_break(ffi.Pointer<dc_iostream_t> iostream, int value) => dc_status_t.fromValue(_dc_iostream_set_break(iostream, value));
 
 /// Set the state of the DTR line.
 ///
@@ -349,18 +247,10 @@ dc_status_t dc_iostream_set_break(
 /// @param[in]  value     The DTR line state.
 /// @returns #DC_STATUS_SUCCESS on success, or another #dc_status_t code
 /// on failure.
-@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.UnsignedInt)>(
-  symbol: "dc_iostream_set_dtr",
-)
-external int _dc_iostream_set_dtr(
-  ffi.Pointer<dc_iostream_t> iostream,
-  int value,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.UnsignedInt)>(symbol: "dc_iostream_set_dtr")
+external int _dc_iostream_set_dtr(ffi.Pointer<dc_iostream_t> iostream, int value);
 
-dc_status_t dc_iostream_set_dtr(
-  ffi.Pointer<dc_iostream_t> iostream,
-  int value,
-) => dc_status_t.fromValue(_dc_iostream_set_dtr(iostream, value));
+dc_status_t dc_iostream_set_dtr(ffi.Pointer<dc_iostream_t> iostream, int value) => dc_status_t.fromValue(_dc_iostream_set_dtr(iostream, value));
 
 /// Set the state of the RTS line.
 ///
@@ -368,18 +258,10 @@ dc_status_t dc_iostream_set_dtr(
 /// @param[in]  value     The RTS line state.
 /// @returns #DC_STATUS_SUCCESS on success, or another #dc_status_t code
 /// on failure.
-@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.UnsignedInt)>(
-  symbol: "dc_iostream_set_rts",
-)
-external int _dc_iostream_set_rts(
-  ffi.Pointer<dc_iostream_t> iostream,
-  int value,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.UnsignedInt)>(symbol: "dc_iostream_set_rts")
+external int _dc_iostream_set_rts(ffi.Pointer<dc_iostream_t> iostream, int value);
 
-dc_status_t dc_iostream_set_rts(
-  ffi.Pointer<dc_iostream_t> iostream,
-  int value,
-) => dc_status_t.fromValue(_dc_iostream_set_rts(iostream, value));
+dc_status_t dc_iostream_set_rts(ffi.Pointer<dc_iostream_t> iostream, int value) => dc_status_t.fromValue(_dc_iostream_set_rts(iostream, value));
 
 /// Query the state of the line signals.
 ///
@@ -388,18 +270,11 @@ dc_status_t dc_iostream_set_rts(
 /// of the line signals.
 /// @returns #DC_STATUS_SUCCESS on success, or another #dc_status_t code
 /// on failure.
-@ffi.Native<
-  ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.Pointer<ffi.UnsignedInt>)
->(symbol: "dc_iostream_get_lines")
-external int _dc_iostream_get_lines(
-  ffi.Pointer<dc_iostream_t> iostream,
-  ffi.Pointer<ffi.UnsignedInt> value,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.Pointer<ffi.UnsignedInt>)>(symbol: "dc_iostream_get_lines")
+external int _dc_iostream_get_lines(ffi.Pointer<dc_iostream_t> iostream, ffi.Pointer<ffi.UnsignedInt> value);
 
-dc_status_t dc_iostream_get_lines(
-  ffi.Pointer<dc_iostream_t> iostream,
-  ffi.Pointer<ffi.UnsignedInt> value,
-) => dc_status_t.fromValue(_dc_iostream_get_lines(iostream, value));
+dc_status_t dc_iostream_get_lines(ffi.Pointer<dc_iostream_t> iostream, ffi.Pointer<ffi.UnsignedInt> value) =>
+    dc_status_t.fromValue(_dc_iostream_get_lines(iostream, value));
 
 /// Query the number of available bytes in the input buffer.
 ///
@@ -408,18 +283,11 @@ dc_status_t dc_iostream_get_lines(
 /// input buffer.
 /// @returns #DC_STATUS_SUCCESS on success, or another #dc_status_t code
 /// on failure.
-@ffi.Native<
-  ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.Pointer<ffi.Size>)
->(symbol: "dc_iostream_get_available")
-external int _dc_iostream_get_available(
-  ffi.Pointer<dc_iostream_t> iostream,
-  ffi.Pointer<ffi.Size> value,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.Pointer<ffi.Size>)>(symbol: "dc_iostream_get_available")
+external int _dc_iostream_get_available(ffi.Pointer<dc_iostream_t> iostream, ffi.Pointer<ffi.Size> value);
 
-dc_status_t dc_iostream_get_available(
-  ffi.Pointer<dc_iostream_t> iostream,
-  ffi.Pointer<ffi.Size> value,
-) => dc_status_t.fromValue(_dc_iostream_get_available(iostream, value));
+dc_status_t dc_iostream_get_available(ffi.Pointer<dc_iostream_t> iostream, ffi.Pointer<ffi.Size> value) =>
+    dc_status_t.fromValue(_dc_iostream_get_available(iostream, value));
 
 /// Configure the line settings.
 ///
@@ -431,24 +299,10 @@ dc_status_t dc_iostream_get_available(
 /// @param[in]  flowcontrol  The flow control setting.
 /// @returns #DC_STATUS_SUCCESS on success, or another #dc_status_t code
 /// on failure.
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<dc_iostream_t>,
-    ffi.UnsignedInt,
-    ffi.UnsignedInt,
-    ffi.UnsignedInt,
-    ffi.UnsignedInt,
-    ffi.UnsignedInt,
-  )
->(symbol: "dc_iostream_configure")
-external int _dc_iostream_configure(
-  ffi.Pointer<dc_iostream_t> iostream,
-  int baudrate,
-  int databits,
-  int parity,
-  int stopbits,
-  int flowcontrol,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.UnsignedInt, ffi.UnsignedInt, ffi.UnsignedInt, ffi.UnsignedInt, ffi.UnsignedInt)>(
+  symbol: "dc_iostream_configure",
+)
+external int _dc_iostream_configure(ffi.Pointer<dc_iostream_t> iostream, int baudrate, int databits, int parity, int stopbits, int flowcontrol);
 
 dc_status_t dc_iostream_configure(
   ffi.Pointer<dc_iostream_t> iostream,
@@ -457,16 +311,7 @@ dc_status_t dc_iostream_configure(
   dc_parity_t parity,
   dc_stopbits_t stopbits,
   dc_flowcontrol_t flowcontrol,
-) => dc_status_t.fromValue(
-  _dc_iostream_configure(
-    iostream,
-    baudrate,
-    databits,
-    parity.value,
-    stopbits.value,
-    flowcontrol.value,
-  ),
-);
+) => dc_status_t.fromValue(_dc_iostream_configure(iostream, baudrate, databits, parity.value, stopbits.value, flowcontrol.value));
 
 /// Poll the I/O stream for available data.
 ///
@@ -493,18 +338,10 @@ dc_status_t dc_iostream_configure(
 /// @param[in]  timeout   The timeout in milliseconds.
 /// @returns #DC_STATUS_SUCCESS on success, #DC_STATUS_TIMEOUT on
 /// timeout, or another #dc_status_t code on failure.
-@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.Int)>(
-  symbol: "dc_iostream_poll",
-)
-external int _dc_iostream_poll(
-  ffi.Pointer<dc_iostream_t> iostream,
-  int timeout,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.Int)>(symbol: "dc_iostream_poll")
+external int _dc_iostream_poll(ffi.Pointer<dc_iostream_t> iostream, int timeout);
 
-dc_status_t dc_iostream_poll(
-  ffi.Pointer<dc_iostream_t> iostream,
-  int timeout,
-) => dc_status_t.fromValue(_dc_iostream_poll(iostream, timeout));
+dc_status_t dc_iostream_poll(ffi.Pointer<dc_iostream_t> iostream, int timeout) => dc_status_t.fromValue(_dc_iostream_poll(iostream, timeout));
 
 /// Read data from the I/O stream.
 ///
@@ -515,27 +352,11 @@ dc_status_t dc_iostream_poll(
 /// number of bytes transferred.
 /// @returns #DC_STATUS_SUCCESS on success, or another #dc_status_t code
 /// on failure.
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<dc_iostream_t>,
-    ffi.Pointer<ffi.Void>,
-    ffi.Size,
-    ffi.Pointer<ffi.Size>,
-  )
->(symbol: "dc_iostream_read")
-external int _dc_iostream_read(
-  ffi.Pointer<dc_iostream_t> iostream,
-  ffi.Pointer<ffi.Void> data,
-  int size,
-  ffi.Pointer<ffi.Size> actual,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.Pointer<ffi.Void>, ffi.Size, ffi.Pointer<ffi.Size>)>(symbol: "dc_iostream_read")
+external int _dc_iostream_read(ffi.Pointer<dc_iostream_t> iostream, ffi.Pointer<ffi.Void> data, int size, ffi.Pointer<ffi.Size> actual);
 
-dc_status_t dc_iostream_read(
-  ffi.Pointer<dc_iostream_t> iostream,
-  ffi.Pointer<ffi.Void> data,
-  int size,
-  ffi.Pointer<ffi.Size> actual,
-) => dc_status_t.fromValue(_dc_iostream_read(iostream, data, size, actual));
+dc_status_t dc_iostream_read(ffi.Pointer<dc_iostream_t> iostream, ffi.Pointer<ffi.Void> data, int size, ffi.Pointer<ffi.Size> actual) =>
+    dc_status_t.fromValue(_dc_iostream_read(iostream, data, size, actual));
 
 /// Write data to the I/O stream.
 ///
@@ -546,27 +367,11 @@ dc_status_t dc_iostream_read(
 /// number of bytes transferred.
 /// @returns #DC_STATUS_SUCCESS on success, or another #dc_status_t code
 /// on failure.
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<dc_iostream_t>,
-    ffi.Pointer<ffi.Void>,
-    ffi.Size,
-    ffi.Pointer<ffi.Size>,
-  )
->(symbol: "dc_iostream_write")
-external int _dc_iostream_write(
-  ffi.Pointer<dc_iostream_t> iostream,
-  ffi.Pointer<ffi.Void> data,
-  int size,
-  ffi.Pointer<ffi.Size> actual,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.Pointer<ffi.Void>, ffi.Size, ffi.Pointer<ffi.Size>)>(symbol: "dc_iostream_write")
+external int _dc_iostream_write(ffi.Pointer<dc_iostream_t> iostream, ffi.Pointer<ffi.Void> data, int size, ffi.Pointer<ffi.Size> actual);
 
-dc_status_t dc_iostream_write(
-  ffi.Pointer<dc_iostream_t> iostream,
-  ffi.Pointer<ffi.Void> data,
-  int size,
-  ffi.Pointer<ffi.Size> actual,
-) => dc_status_t.fromValue(_dc_iostream_write(iostream, data, size, actual));
+dc_status_t dc_iostream_write(ffi.Pointer<dc_iostream_t> iostream, ffi.Pointer<ffi.Void> data, int size, ffi.Pointer<ffi.Size> actual) =>
+    dc_status_t.fromValue(_dc_iostream_write(iostream, data, size, actual));
 
 /// Perform an I/O stream specific request.
 ///
@@ -576,27 +381,11 @@ dc_status_t dc_iostream_write(
 /// @param[in]  size      The size of the request specific data.
 /// @returns #DC_STATUS_SUCCESS on success, or another #dc_status_t code
 /// on failure.
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<dc_iostream_t>,
-    ffi.UnsignedInt,
-    ffi.Pointer<ffi.Void>,
-    ffi.Size,
-  )
->(symbol: "dc_iostream_ioctl")
-external int _dc_iostream_ioctl(
-  ffi.Pointer<dc_iostream_t> iostream,
-  int request,
-  ffi.Pointer<ffi.Void> data,
-  int size,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.UnsignedInt, ffi.Pointer<ffi.Void>, ffi.Size)>(symbol: "dc_iostream_ioctl")
+external int _dc_iostream_ioctl(ffi.Pointer<dc_iostream_t> iostream, int request, ffi.Pointer<ffi.Void> data, int size);
 
-dc_status_t dc_iostream_ioctl(
-  ffi.Pointer<dc_iostream_t> iostream,
-  int request,
-  ffi.Pointer<ffi.Void> data,
-  int size,
-) => dc_status_t.fromValue(_dc_iostream_ioctl(iostream, request, data, size));
+dc_status_t dc_iostream_ioctl(ffi.Pointer<dc_iostream_t> iostream, int request, ffi.Pointer<ffi.Void> data, int size) =>
+    dc_status_t.fromValue(_dc_iostream_ioctl(iostream, request, data, size));
 
 /// Flush the internal output buffer and wait until the data has been
 /// transmitted.
@@ -604,13 +393,10 @@ dc_status_t dc_iostream_ioctl(
 /// @param[in]  iostream  A valid I/O stream.
 /// @returns #DC_STATUS_SUCCESS on success, or another #dc_status_t code
 /// on failure.
-@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>)>(
-  symbol: "dc_iostream_flush",
-)
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>)>(symbol: "dc_iostream_flush")
 external int _dc_iostream_flush(ffi.Pointer<dc_iostream_t> iostream);
 
-dc_status_t dc_iostream_flush(ffi.Pointer<dc_iostream_t> iostream) =>
-    dc_status_t.fromValue(_dc_iostream_flush(iostream));
+dc_status_t dc_iostream_flush(ffi.Pointer<dc_iostream_t> iostream) => dc_status_t.fromValue(_dc_iostream_flush(iostream));
 
 /// Discards all data from the internal buffers.
 ///
@@ -618,18 +404,11 @@ dc_status_t dc_iostream_flush(ffi.Pointer<dc_iostream_t> iostream) =>
 /// @param[in]  direction  The direction of the buffer(s).
 /// @returns #DC_STATUS_SUCCESS on success, or another #dc_status_t code
 /// on failure.
-@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.UnsignedInt)>(
-  symbol: "dc_iostream_purge",
-)
-external int _dc_iostream_purge(
-  ffi.Pointer<dc_iostream_t> iostream,
-  int direction,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.UnsignedInt)>(symbol: "dc_iostream_purge")
+external int _dc_iostream_purge(ffi.Pointer<dc_iostream_t> iostream, int direction);
 
-dc_status_t dc_iostream_purge(
-  ffi.Pointer<dc_iostream_t> iostream,
-  dc_direction_t direction,
-) => dc_status_t.fromValue(_dc_iostream_purge(iostream, direction.value));
+dc_status_t dc_iostream_purge(ffi.Pointer<dc_iostream_t> iostream, dc_direction_t direction) =>
+    dc_status_t.fromValue(_dc_iostream_purge(iostream, direction.value));
 
 /// Suspend execution of the current thread for the specified amount of
 /// time.
@@ -638,40 +417,24 @@ dc_status_t dc_iostream_purge(
 /// @param[in]  milliseconds  The number of milliseconds to sleep.
 /// @returns #DC_STATUS_SUCCESS on success, or another #dc_status_t code
 /// on failure.
-@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.UnsignedInt)>(
-  symbol: "dc_iostream_sleep",
-)
-external int _dc_iostream_sleep(
-  ffi.Pointer<dc_iostream_t> iostream,
-  int milliseconds,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>, ffi.UnsignedInt)>(symbol: "dc_iostream_sleep")
+external int _dc_iostream_sleep(ffi.Pointer<dc_iostream_t> iostream, int milliseconds);
 
-dc_status_t dc_iostream_sleep(
-  ffi.Pointer<dc_iostream_t> iostream,
-  int milliseconds,
-) => dc_status_t.fromValue(_dc_iostream_sleep(iostream, milliseconds));
+dc_status_t dc_iostream_sleep(ffi.Pointer<dc_iostream_t> iostream, int milliseconds) => dc_status_t.fromValue(_dc_iostream_sleep(iostream, milliseconds));
 
 /// Close the I/O stream and free all resources.
 ///
 /// @param[in]  iostream  A valid I/O stream.
 /// @returns #DC_STATUS_SUCCESS on success, or another #dc_status_t code
 /// on failure.
-@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>)>(
-  symbol: "dc_iostream_close",
-)
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_iostream_t>)>(symbol: "dc_iostream_close")
 external int _dc_iostream_close(ffi.Pointer<dc_iostream_t> iostream);
 
-dc_status_t dc_iostream_close(ffi.Pointer<dc_iostream_t> iostream) =>
-    dc_status_t.fromValue(_dc_iostream_close(iostream));
+dc_status_t dc_iostream_close(ffi.Pointer<dc_iostream_t> iostream) => dc_status_t.fromValue(_dc_iostream_close(iostream));
 
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<ffi.Pointer<dc_device_t>>,
-    ffi.Pointer<dc_context_t>,
-    ffi.Pointer<dc_descriptor_t>,
-    ffi.Pointer<dc_iostream_t>,
-  )
->(symbol: "dc_device_open")
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Pointer<dc_device_t>>, ffi.Pointer<dc_context_t>, ffi.Pointer<dc_descriptor_t>, ffi.Pointer<dc_iostream_t>)>(
+  symbol: "dc_device_open",
+)
 external int _dc_device_open(
   ffi.Pointer<ffi.Pointer<dc_device_t>> out,
   ffi.Pointer<dc_context_t> context,
@@ -686,203 +449,71 @@ dc_status_t dc_device_open(
   ffi.Pointer<dc_iostream_t> iostream,
 ) => dc_status_t.fromValue(_dc_device_open(out, context, descriptor, iostream));
 
-@ffi.Native<ffi.UnsignedInt Function(ffi.Pointer<dc_device_t>)>(
-  symbol: "dc_device_get_type",
-)
+@ffi.Native<ffi.UnsignedInt Function(ffi.Pointer<dc_device_t>)>(symbol: "dc_device_get_type")
 external int _dc_device_get_type(ffi.Pointer<dc_device_t> device);
 
-dc_family_t dc_device_get_type(ffi.Pointer<dc_device_t> device) =>
-    dc_family_t.fromValue(_dc_device_get_type(device));
+dc_family_t dc_device_get_type(ffi.Pointer<dc_device_t> device) => dc_family_t.fromValue(_dc_device_get_type(device));
 
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<dc_device_t>,
-    dc_cancel_callback_t,
-    ffi.Pointer<ffi.Void>,
-  )
->(symbol: "dc_device_set_cancel")
-external int _dc_device_set_cancel(
-  ffi.Pointer<dc_device_t> device,
-  dc_cancel_callback_t callback,
-  ffi.Pointer<ffi.Void> userdata,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_device_t>, dc_cancel_callback_t, ffi.Pointer<ffi.Void>)>(symbol: "dc_device_set_cancel")
+external int _dc_device_set_cancel(ffi.Pointer<dc_device_t> device, dc_cancel_callback_t callback, ffi.Pointer<ffi.Void> userdata);
 
-dc_status_t dc_device_set_cancel(
-  ffi.Pointer<dc_device_t> device,
-  dc_cancel_callback_t callback,
-  ffi.Pointer<ffi.Void> userdata,
-) => dc_status_t.fromValue(_dc_device_set_cancel(device, callback, userdata));
+dc_status_t dc_device_set_cancel(ffi.Pointer<dc_device_t> device, dc_cancel_callback_t callback, ffi.Pointer<ffi.Void> userdata) =>
+    dc_status_t.fromValue(_dc_device_set_cancel(device, callback, userdata));
 
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<dc_device_t>,
-    ffi.UnsignedInt,
-    dc_event_callback_t,
-    ffi.Pointer<ffi.Void>,
-  )
->(symbol: "dc_device_set_events")
-external int _dc_device_set_events(
-  ffi.Pointer<dc_device_t> device,
-  int events,
-  dc_event_callback_t callback,
-  ffi.Pointer<ffi.Void> userdata,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_device_t>, ffi.UnsignedInt, dc_event_callback_t, ffi.Pointer<ffi.Void>)>(symbol: "dc_device_set_events")
+external int _dc_device_set_events(ffi.Pointer<dc_device_t> device, int events, dc_event_callback_t callback, ffi.Pointer<ffi.Void> userdata);
 
-dc_status_t dc_device_set_events(
-  ffi.Pointer<dc_device_t> device,
-  int events,
-  dc_event_callback_t callback,
-  ffi.Pointer<ffi.Void> userdata,
-) => dc_status_t.fromValue(
-  _dc_device_set_events(device, events, callback, userdata),
-);
+dc_status_t dc_device_set_events(ffi.Pointer<dc_device_t> device, int events, dc_event_callback_t callback, ffi.Pointer<ffi.Void> userdata) =>
+    dc_status_t.fromValue(_dc_device_set_events(device, events, callback, userdata));
 
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<dc_device_t>,
-    ffi.Pointer<ffi.UnsignedChar>,
-    ffi.UnsignedInt,
-  )
->(symbol: "dc_device_set_fingerprint")
-external int _dc_device_set_fingerprint(
-  ffi.Pointer<dc_device_t> device,
-  ffi.Pointer<ffi.UnsignedChar> data,
-  int size,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_device_t>, ffi.Pointer<ffi.UnsignedChar>, ffi.UnsignedInt)>(symbol: "dc_device_set_fingerprint")
+external int _dc_device_set_fingerprint(ffi.Pointer<dc_device_t> device, ffi.Pointer<ffi.UnsignedChar> data, int size);
 
-dc_status_t dc_device_set_fingerprint(
-  ffi.Pointer<dc_device_t> device,
-  ffi.Pointer<ffi.UnsignedChar> data,
-  int size,
-) => dc_status_t.fromValue(_dc_device_set_fingerprint(device, data, size));
+dc_status_t dc_device_set_fingerprint(ffi.Pointer<dc_device_t> device, ffi.Pointer<ffi.UnsignedChar> data, int size) =>
+    dc_status_t.fromValue(_dc_device_set_fingerprint(device, data, size));
 
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<dc_device_t>,
-    ffi.UnsignedInt,
-    ffi.Pointer<ffi.UnsignedChar>,
-    ffi.UnsignedInt,
-  )
->(symbol: "dc_device_read")
-external int _dc_device_read(
-  ffi.Pointer<dc_device_t> device,
-  int address,
-  ffi.Pointer<ffi.UnsignedChar> data,
-  int size,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_device_t>, ffi.UnsignedInt, ffi.Pointer<ffi.UnsignedChar>, ffi.UnsignedInt)>(symbol: "dc_device_read")
+external int _dc_device_read(ffi.Pointer<dc_device_t> device, int address, ffi.Pointer<ffi.UnsignedChar> data, int size);
 
-dc_status_t dc_device_read(
-  ffi.Pointer<dc_device_t> device,
-  int address,
-  ffi.Pointer<ffi.UnsignedChar> data,
-  int size,
-) => dc_status_t.fromValue(_dc_device_read(device, address, data, size));
+dc_status_t dc_device_read(ffi.Pointer<dc_device_t> device, int address, ffi.Pointer<ffi.UnsignedChar> data, int size) =>
+    dc_status_t.fromValue(_dc_device_read(device, address, data, size));
 
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<dc_device_t>,
-    ffi.UnsignedInt,
-    ffi.Pointer<ffi.UnsignedChar>,
-    ffi.UnsignedInt,
-  )
->(symbol: "dc_device_write")
-external int _dc_device_write(
-  ffi.Pointer<dc_device_t> device,
-  int address,
-  ffi.Pointer<ffi.UnsignedChar> data,
-  int size,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_device_t>, ffi.UnsignedInt, ffi.Pointer<ffi.UnsignedChar>, ffi.UnsignedInt)>(symbol: "dc_device_write")
+external int _dc_device_write(ffi.Pointer<dc_device_t> device, int address, ffi.Pointer<ffi.UnsignedChar> data, int size);
 
-dc_status_t dc_device_write(
-  ffi.Pointer<dc_device_t> device,
-  int address,
-  ffi.Pointer<ffi.UnsignedChar> data,
-  int size,
-) => dc_status_t.fromValue(_dc_device_write(device, address, data, size));
+dc_status_t dc_device_write(ffi.Pointer<dc_device_t> device, int address, ffi.Pointer<ffi.UnsignedChar> data, int size) =>
+    dc_status_t.fromValue(_dc_device_write(device, address, data, size));
 
-@ffi.Native<
-  ffi.Int Function(ffi.Pointer<dc_device_t>, ffi.Pointer<dc_buffer_t>)
->(symbol: "dc_device_dump")
-external int _dc_device_dump(
-  ffi.Pointer<dc_device_t> device,
-  ffi.Pointer<dc_buffer_t> buffer,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_device_t>, ffi.Pointer<dc_buffer_t>)>(symbol: "dc_device_dump")
+external int _dc_device_dump(ffi.Pointer<dc_device_t> device, ffi.Pointer<dc_buffer_t> buffer);
 
-dc_status_t dc_device_dump(
-  ffi.Pointer<dc_device_t> device,
-  ffi.Pointer<dc_buffer_t> buffer,
-) => dc_status_t.fromValue(_dc_device_dump(device, buffer));
+dc_status_t dc_device_dump(ffi.Pointer<dc_device_t> device, ffi.Pointer<dc_buffer_t> buffer) => dc_status_t.fromValue(_dc_device_dump(device, buffer));
 
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<dc_device_t>,
-    dc_dive_callback_t,
-    ffi.Pointer<ffi.Void>,
-  )
->(symbol: "dc_device_foreach")
-external int _dc_device_foreach(
-  ffi.Pointer<dc_device_t> device,
-  dc_dive_callback_t callback,
-  ffi.Pointer<ffi.Void> userdata,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_device_t>, dc_dive_callback_t, ffi.Pointer<ffi.Void>)>(symbol: "dc_device_foreach")
+external int _dc_device_foreach(ffi.Pointer<dc_device_t> device, dc_dive_callback_t callback, ffi.Pointer<ffi.Void> userdata);
 
-dc_status_t dc_device_foreach(
-  ffi.Pointer<dc_device_t> device,
-  dc_dive_callback_t callback,
-  ffi.Pointer<ffi.Void> userdata,
-) => dc_status_t.fromValue(_dc_device_foreach(device, callback, userdata));
+dc_status_t dc_device_foreach(ffi.Pointer<dc_device_t> device, dc_dive_callback_t callback, ffi.Pointer<ffi.Void> userdata) =>
+    dc_status_t.fromValue(_dc_device_foreach(device, callback, userdata));
 
-@ffi.Native<
-  ffi.Int Function(ffi.Pointer<dc_device_t>, ffi.Pointer<dc_datetime_t>)
->(symbol: "dc_device_timesync")
-external int _dc_device_timesync(
-  ffi.Pointer<dc_device_t> device,
-  ffi.Pointer<dc_datetime_t> datetime,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_device_t>, ffi.Pointer<dc_datetime_t>)>(symbol: "dc_device_timesync")
+external int _dc_device_timesync(ffi.Pointer<dc_device_t> device, ffi.Pointer<dc_datetime_t> datetime);
 
-dc_status_t dc_device_timesync(
-  ffi.Pointer<dc_device_t> device,
-  ffi.Pointer<dc_datetime_t> datetime,
-) => dc_status_t.fromValue(_dc_device_timesync(device, datetime));
+dc_status_t dc_device_timesync(ffi.Pointer<dc_device_t> device, ffi.Pointer<dc_datetime_t> datetime) =>
+    dc_status_t.fromValue(_dc_device_timesync(device, datetime));
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<dc_device_t>)>(
-  symbol: "dc_device_close",
-)
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_device_t>)>(symbol: "dc_device_close")
 external int _dc_device_close(ffi.Pointer<dc_device_t> device);
 
-dc_status_t dc_device_close(ffi.Pointer<dc_device_t> device) =>
-    dc_status_t.fromValue(_dc_device_close(device));
+dc_status_t dc_device_close(ffi.Pointer<dc_device_t> device) => dc_status_t.fromValue(_dc_device_close(device));
+
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Pointer<dc_parser_t>>, ffi.Pointer<dc_device_t>, ffi.Pointer<ffi.UnsignedChar>, ffi.Size)>(symbol: "dc_parser_new")
+external int _dc_parser_new(ffi.Pointer<ffi.Pointer<dc_parser_t>> parser, ffi.Pointer<dc_device_t> device, ffi.Pointer<ffi.UnsignedChar> data, int size);
+
+dc_status_t dc_parser_new(ffi.Pointer<ffi.Pointer<dc_parser_t>> parser, ffi.Pointer<dc_device_t> device, ffi.Pointer<ffi.UnsignedChar> data, int size) =>
+    dc_status_t.fromValue(_dc_parser_new(parser, device, data, size));
 
 @ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<ffi.Pointer<dc_parser_t>>,
-    ffi.Pointer<dc_device_t>,
-    ffi.Pointer<ffi.UnsignedChar>,
-    ffi.Size,
-  )
->(symbol: "dc_parser_new")
-external int _dc_parser_new(
-  ffi.Pointer<ffi.Pointer<dc_parser_t>> parser,
-  ffi.Pointer<dc_device_t> device,
-  ffi.Pointer<ffi.UnsignedChar> data,
-  int size,
-);
-
-dc_status_t dc_parser_new(
-  ffi.Pointer<ffi.Pointer<dc_parser_t>> parser,
-  ffi.Pointer<dc_device_t> device,
-  ffi.Pointer<ffi.UnsignedChar> data,
-  int size,
-) => dc_status_t.fromValue(_dc_parser_new(parser, device, data, size));
-
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<ffi.Pointer<dc_parser_t>>,
-    ffi.Pointer<dc_context_t>,
-    ffi.Pointer<dc_descriptor_t>,
-    ffi.Pointer<ffi.UnsignedChar>,
-    ffi.Size,
-  )
+  ffi.Int Function(ffi.Pointer<ffi.Pointer<dc_parser_t>>, ffi.Pointer<dc_context_t>, ffi.Pointer<dc_descriptor_t>, ffi.Pointer<ffi.UnsignedChar>, ffi.Size)
 >(symbol: "dc_parser_new2")
 external int _dc_parser_new2(
   ffi.Pointer<ffi.Pointer<dc_parser_t>> parser,
@@ -898,124 +529,52 @@ dc_status_t dc_parser_new2(
   ffi.Pointer<dc_descriptor_t> descriptor,
   ffi.Pointer<ffi.UnsignedChar> data,
   int size,
-) => dc_status_t.fromValue(
-  _dc_parser_new2(parser, context, descriptor, data, size),
-);
+) => dc_status_t.fromValue(_dc_parser_new2(parser, context, descriptor, data, size));
 
-@ffi.Native<ffi.UnsignedInt Function(ffi.Pointer<dc_parser_t>)>(
-  symbol: "dc_parser_get_type",
-)
+@ffi.Native<ffi.UnsignedInt Function(ffi.Pointer<dc_parser_t>)>(symbol: "dc_parser_get_type")
 external int _dc_parser_get_type(ffi.Pointer<dc_parser_t> parser);
 
-dc_family_t dc_parser_get_type(ffi.Pointer<dc_parser_t> parser) =>
-    dc_family_t.fromValue(_dc_parser_get_type(parser));
+dc_family_t dc_parser_get_type(ffi.Pointer<dc_parser_t> parser) => dc_family_t.fromValue(_dc_parser_get_type(parser));
 
-@ffi.Native<
-  ffi.Int Function(ffi.Pointer<dc_parser_t>, ffi.UnsignedInt, dc_ticks_t)
->(symbol: "dc_parser_set_clock")
-external int _dc_parser_set_clock(
-  ffi.Pointer<dc_parser_t> parser,
-  int devtime,
-  int systime,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_parser_t>, ffi.UnsignedInt, dc_ticks_t)>(symbol: "dc_parser_set_clock")
+external int _dc_parser_set_clock(ffi.Pointer<dc_parser_t> parser, int devtime, int systime);
 
-dc_status_t dc_parser_set_clock(
-  ffi.Pointer<dc_parser_t> parser,
-  int devtime,
-  Dartdc_ticks_t systime,
-) => dc_status_t.fromValue(_dc_parser_set_clock(parser, devtime, systime));
+dc_status_t dc_parser_set_clock(ffi.Pointer<dc_parser_t> parser, int devtime, Dartdc_ticks_t systime) =>
+    dc_status_t.fromValue(_dc_parser_set_clock(parser, devtime, systime));
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<dc_parser_t>, ffi.Double)>(
-  symbol: "dc_parser_set_atmospheric",
-)
-external int _dc_parser_set_atmospheric(
-  ffi.Pointer<dc_parser_t> parser,
-  double atmospheric,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_parser_t>, ffi.Double)>(symbol: "dc_parser_set_atmospheric")
+external int _dc_parser_set_atmospheric(ffi.Pointer<dc_parser_t> parser, double atmospheric);
 
-dc_status_t dc_parser_set_atmospheric(
-  ffi.Pointer<dc_parser_t> parser,
-  double atmospheric,
-) => dc_status_t.fromValue(_dc_parser_set_atmospheric(parser, atmospheric));
+dc_status_t dc_parser_set_atmospheric(ffi.Pointer<dc_parser_t> parser, double atmospheric) =>
+    dc_status_t.fromValue(_dc_parser_set_atmospheric(parser, atmospheric));
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<dc_parser_t>, ffi.Double)>(
-  symbol: "dc_parser_set_density",
-)
-external int _dc_parser_set_density(
-  ffi.Pointer<dc_parser_t> parser,
-  double density,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_parser_t>, ffi.Double)>(symbol: "dc_parser_set_density")
+external int _dc_parser_set_density(ffi.Pointer<dc_parser_t> parser, double density);
 
-dc_status_t dc_parser_set_density(
-  ffi.Pointer<dc_parser_t> parser,
-  double density,
-) => dc_status_t.fromValue(_dc_parser_set_density(parser, density));
+dc_status_t dc_parser_set_density(ffi.Pointer<dc_parser_t> parser, double density) => dc_status_t.fromValue(_dc_parser_set_density(parser, density));
 
-@ffi.Native<
-  ffi.Int Function(ffi.Pointer<dc_parser_t>, ffi.Pointer<dc_datetime_t>)
->(symbol: "dc_parser_get_datetime")
-external int _dc_parser_get_datetime(
-  ffi.Pointer<dc_parser_t> parser,
-  ffi.Pointer<dc_datetime_t> datetime,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_parser_t>, ffi.Pointer<dc_datetime_t>)>(symbol: "dc_parser_get_datetime")
+external int _dc_parser_get_datetime(ffi.Pointer<dc_parser_t> parser, ffi.Pointer<dc_datetime_t> datetime);
 
-dc_status_t dc_parser_get_datetime(
-  ffi.Pointer<dc_parser_t> parser,
-  ffi.Pointer<dc_datetime_t> datetime,
-) => dc_status_t.fromValue(_dc_parser_get_datetime(parser, datetime));
+dc_status_t dc_parser_get_datetime(ffi.Pointer<dc_parser_t> parser, ffi.Pointer<dc_datetime_t> datetime) =>
+    dc_status_t.fromValue(_dc_parser_get_datetime(parser, datetime));
 
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<dc_parser_t>,
-    ffi.UnsignedInt,
-    ffi.UnsignedInt,
-    ffi.Pointer<ffi.Void>,
-  )
->(symbol: "dc_parser_get_field")
-external int _dc_parser_get_field(
-  ffi.Pointer<dc_parser_t> parser,
-  int type,
-  int flags,
-  ffi.Pointer<ffi.Void> value,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_parser_t>, ffi.UnsignedInt, ffi.UnsignedInt, ffi.Pointer<ffi.Void>)>(symbol: "dc_parser_get_field")
+external int _dc_parser_get_field(ffi.Pointer<dc_parser_t> parser, int type, int flags, ffi.Pointer<ffi.Void> value);
 
-dc_status_t dc_parser_get_field(
-  ffi.Pointer<dc_parser_t> parser,
-  dc_field_type_t type,
-  int flags,
-  ffi.Pointer<ffi.Void> value,
-) => dc_status_t.fromValue(
-  _dc_parser_get_field(parser, type.value, flags, value),
-);
+dc_status_t dc_parser_get_field(ffi.Pointer<dc_parser_t> parser, dc_field_type_t type, int flags, ffi.Pointer<ffi.Void> value) =>
+    dc_status_t.fromValue(_dc_parser_get_field(parser, type.value, flags, value));
 
-@ffi.Native<
-  ffi.Int Function(
-    ffi.Pointer<dc_parser_t>,
-    dc_sample_callback_t,
-    ffi.Pointer<ffi.Void>,
-  )
->(symbol: "dc_parser_samples_foreach")
-external int _dc_parser_samples_foreach(
-  ffi.Pointer<dc_parser_t> parser,
-  dc_sample_callback_t callback,
-  ffi.Pointer<ffi.Void> userdata,
-);
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_parser_t>, dc_sample_callback_t, ffi.Pointer<ffi.Void>)>(symbol: "dc_parser_samples_foreach")
+external int _dc_parser_samples_foreach(ffi.Pointer<dc_parser_t> parser, dc_sample_callback_t callback, ffi.Pointer<ffi.Void> userdata);
 
-dc_status_t dc_parser_samples_foreach(
-  ffi.Pointer<dc_parser_t> parser,
-  dc_sample_callback_t callback,
-  ffi.Pointer<ffi.Void> userdata,
-) => dc_status_t.fromValue(
-  _dc_parser_samples_foreach(parser, callback, userdata),
-);
+dc_status_t dc_parser_samples_foreach(ffi.Pointer<dc_parser_t> parser, dc_sample_callback_t callback, ffi.Pointer<ffi.Void> userdata) =>
+    dc_status_t.fromValue(_dc_parser_samples_foreach(parser, callback, userdata));
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<dc_parser_t>)>(
-  symbol: "dc_parser_destroy",
-)
+@ffi.Native<ffi.Int Function(ffi.Pointer<dc_parser_t>)>(symbol: "dc_parser_destroy")
 external int _dc_parser_destroy(ffi.Pointer<dc_parser_t> parser);
 
-dc_status_t dc_parser_destroy(ffi.Pointer<dc_parser_t> parser) =>
-    dc_status_t.fromValue(_dc_parser_destroy(parser));
+dc_status_t dc_parser_destroy(ffi.Pointer<dc_parser_t> parser) => dc_status_t.fromValue(_dc_parser_destroy(parser));
 
 enum dc_status_t {
   DC_STATUS_SUCCESS(0),
@@ -1464,33 +1023,18 @@ final class dc_event_vendor_t extends ffi.Struct {
   external int size;
 }
 
-typedef dc_cancel_callback_t =
-    ffi.Pointer<ffi.NativeFunction<dc_cancel_callback_tFunction>>;
-typedef dc_cancel_callback_tFunction =
-    ffi.Int Function(ffi.Pointer<ffi.Void> userdata);
-typedef Dartdc_cancel_callback_tFunction =
-    int Function(ffi.Pointer<ffi.Void> userdata);
-typedef dc_event_callback_t =
-    ffi.Pointer<ffi.NativeFunction<dc_event_callback_tFunction>>;
+typedef dc_cancel_callback_t = ffi.Pointer<ffi.NativeFunction<dc_cancel_callback_tFunction>>;
+typedef dc_cancel_callback_tFunction = ffi.Int Function(ffi.Pointer<ffi.Void> userdata);
+typedef Dartdc_cancel_callback_tFunction = int Function(ffi.Pointer<ffi.Void> userdata);
+typedef dc_event_callback_t = ffi.Pointer<ffi.NativeFunction<dc_event_callback_tFunction>>;
 typedef dc_event_callback_tFunction =
-    ffi.Void Function(
-      ffi.Pointer<dc_device_t> device,
-      ffi.UnsignedInt event,
-      ffi.Pointer<ffi.Void> data,
-      ffi.Pointer<ffi.Void> userdata,
-    );
+    ffi.Void Function(ffi.Pointer<dc_device_t> device, ffi.UnsignedInt event, ffi.Pointer<ffi.Void> data, ffi.Pointer<ffi.Void> userdata);
 typedef Dartdc_event_callback_tFunction =
-    void Function(
-      ffi.Pointer<dc_device_t> device,
-      dc_event_type_t event,
-      ffi.Pointer<ffi.Void> data,
-      ffi.Pointer<ffi.Void> userdata,
-    );
+    void Function(ffi.Pointer<dc_device_t> device, dc_event_type_t event, ffi.Pointer<ffi.Void> data, ffi.Pointer<ffi.Void> userdata);
 
 final class dc_buffer_t extends ffi.Opaque {}
 
-typedef dc_dive_callback_t =
-    ffi.Pointer<ffi.NativeFunction<dc_dive_callback_tFunction>>;
+typedef dc_dive_callback_t = ffi.Pointer<ffi.NativeFunction<dc_dive_callback_tFunction>>;
 typedef dc_dive_callback_tFunction =
     ffi.Int Function(
       ffi.Pointer<ffi.UnsignedChar> data,
@@ -1500,13 +1044,7 @@ typedef dc_dive_callback_tFunction =
       ffi.Pointer<ffi.Void> userdata,
     );
 typedef Dartdc_dive_callback_tFunction =
-    int Function(
-      ffi.Pointer<ffi.UnsignedChar> data,
-      int size,
-      ffi.Pointer<ffi.UnsignedChar> fingerprint,
-      int fsize,
-      ffi.Pointer<ffi.Void> userdata,
-    );
+    int Function(ffi.Pointer<ffi.UnsignedChar> data, int size, ffi.Pointer<ffi.UnsignedChar> fingerprint, int fsize, ffi.Pointer<ffi.Void> userdata);
 
 final class dc_datetime_t extends ffi.Struct {
   @ffi.Int()
@@ -1709,9 +1247,7 @@ enum parser_sample_vendor_t {
     3 => SAMPLE_VENDOR_OCEANIC_VTPRO,
     4 => SAMPLE_VENDOR_OCEANIC_VEO250,
     5 => SAMPLE_VENDOR_OCEANIC_ATOM2,
-    _ => throw ArgumentError(
-      "Unknown value for parser_sample_vendor_t: $value",
-    ),
+    _ => throw ArgumentError("Unknown value for parser_sample_vendor_t: $value"),
   };
 }
 
@@ -2048,20 +1584,9 @@ final class UnnamedStruct6 extends ffi.Struct {
 
 final class dc_parser_t extends ffi.Opaque {}
 
-typedef dc_sample_callback_t =
-    ffi.Pointer<ffi.NativeFunction<dc_sample_callback_tFunction>>;
-typedef dc_sample_callback_tFunction =
-    ffi.Void Function(
-      ffi.UnsignedInt type,
-      ffi.Pointer<dc_sample_value_t> value,
-      ffi.Pointer<ffi.Void> userdata,
-    );
-typedef Dartdc_sample_callback_tFunction =
-    void Function(
-      dc_sample_type_t type,
-      ffi.Pointer<dc_sample_value_t> value,
-      ffi.Pointer<ffi.Void> userdata,
-    );
+typedef dc_sample_callback_t = ffi.Pointer<ffi.NativeFunction<dc_sample_callback_tFunction>>;
+typedef dc_sample_callback_tFunction = ffi.Void Function(ffi.UnsignedInt type, ffi.Pointer<dc_sample_value_t> value, ffi.Pointer<ffi.Void> userdata);
+typedef Dartdc_sample_callback_tFunction = void Function(dc_sample_type_t type, ffi.Pointer<dc_sample_value_t> value, ffi.Pointer<ffi.Void> userdata);
 
 const int SAMPLE_EVENT_UNKNOWN = 16;
 

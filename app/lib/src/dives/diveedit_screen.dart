@@ -501,7 +501,11 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                       child: InkWell(
                         onTap: _selectDuration,
                         child: InputDecorator(
-                          decoration: const InputDecoration(labelText: 'Duration', border: OutlineInputBorder(), suffixIcon: FaIcon(FontAwesomeIcons.stopwatch)),
+                          decoration: const InputDecoration(
+                            labelText: 'Duration',
+                            border: OutlineInputBorder(),
+                            suffixIcon: FaIcon(FontAwesomeIcons.stopwatch),
+                          ),
                           child: Text(_durationFormatted),
                         ),
                       ),
@@ -573,8 +577,16 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                                 trailing: Row(
                                   mainAxisSize: .min,
                                   children: [
-                                    IconButton(icon: const FaIcon(FontAwesomeIcons.penToSquare, size: 18), onPressed: () => _editCylinderGas(index), tooltip: 'Edit gas mix'),
-                                    IconButton(icon: const FaIcon(FontAwesomeIcons.trash, size: 18), onPressed: () => _removeCylinder(index), tooltip: 'Remove cylinder'),
+                                    IconButton(
+                                      icon: const FaIcon(FontAwesomeIcons.penToSquare, size: 18),
+                                      onPressed: () => _editCylinderGas(index),
+                                      tooltip: 'Edit gas mix',
+                                    ),
+                                    IconButton(
+                                      icon: const FaIcon(FontAwesomeIcons.trash, size: 18),
+                                      onPressed: () => _removeCylinder(index),
+                                      tooltip: 'Remove cylinder',
+                                    ),
                                   ],
                                 ),
                                 contentPadding: .zero,
@@ -646,7 +658,11 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                                   ],
                                 ),
                               ),
-                              IconButton(icon: const FaIcon(FontAwesomeIcons.penToSquare, size: 18), onPressed: () => _editWeightsystem(index), tooltip: 'Edit'),
+                              IconButton(
+                                icon: const FaIcon(FontAwesomeIcons.penToSquare, size: 18),
+                                onPressed: () => _editWeightsystem(index),
+                                tooltip: 'Edit',
+                              ),
                               IconButton(icon: const FaIcon(FontAwesomeIcons.trash, size: 18), onPressed: () => _removeWeightsystem(index), tooltip: 'Remove'),
                             ],
                           ),
@@ -664,7 +680,11 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                     children: .generate(5, (index) {
                       final starValue = index + 1;
                       return IconButton(
-                        icon: FaIcon(_rating != null && starValue <= _rating! ? FontAwesomeIcons.solidStar : FontAwesomeIcons.star, color: Colors.amber, size: 28),
+                        icon: FaIcon(
+                          _rating != null && starValue <= _rating! ? FontAwesomeIcons.solidStar : FontAwesomeIcons.star,
+                          color: Colors.amber,
+                          size: 28,
+                        ),
                         onPressed: () {
                           setState(() {
                             _rating = starValue == _rating ? null : starValue;

@@ -102,7 +102,13 @@ class _LogsScreenState extends State<LogsScreen> {
   PopupMenuItem<Level> _buildLevelMenuItem(Level level, String label) {
     return PopupMenuItem(
       value: level,
-      child: Row(children: [if (_minLevel == level) const FaIcon(FontAwesomeIcons.check, size: 14) else const SizedBox(width: 18), const SizedBox(width: 8), Text(label)]),
+      child: Row(
+        children: [
+          if (_minLevel == level) const FaIcon(FontAwesomeIcons.check, size: 14) else const SizedBox(width: 18),
+          const SizedBox(width: 8),
+          Text(label),
+        ],
+      ),
     );
   }
 }
