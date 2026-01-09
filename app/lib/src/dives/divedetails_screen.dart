@@ -205,22 +205,22 @@ class _DiveDetails extends StatelessWidget {
   Widget? _physioTable() {
     final worstDeco = dive.logs.isNotEmpty ? dive.logs.first.worstDecoStatus : null;
     final decoModel = dive.logs.isNotEmpty && dive.logs[0].hasDecoModel() ? dive.logs[0].decoModel : null;
-    final childen = <Widget>[];
-    if (dive.hasMaxTemp() || dive.hasMinTemp()) childen.add(_Temps(dive));
+    final children = <Widget>[];
+    if (dive.hasMaxTemp() || dive.hasMinTemp()) children.add(_Temps(dive));
     if (dive.hasSac()) {
-      childen.add(
+      children.add(
         _ColumnRow(
           label: 'SAC',
           child: VolumeText(dive.sac, suffix: '/min'),
         ),
       );
     }
-    if (dive.hasOtu()) childen.add(_ColumnRow(label: 'OTU', child: Text(dive.otu.toString())));
-    if (dive.hasCns()) childen.add(_ColumnRow(label: 'CNS', child: Text('${dive.cns}%')));
-    if (worstDeco != null) childen.add(_ColumnRow(label: 'Deco', child: DecoStatusText(worstDeco)));
-    if (decoModel != null) childen.add(_ColumnRow(label: 'Model', child: DecoModelText(decoModel)));
-    if (childen.isEmpty) return null;
-    return _DataColumn(children: childen);
+    if (dive.hasOtu()) children.add(_ColumnRow(label: 'OTU', child: Text(dive.otu.toString())));
+    if (dive.hasCns()) children.add(_ColumnRow(label: 'CNS', child: Text('${dive.cns}%')));
+    if (worstDeco != null) children.add(_ColumnRow(label: 'Deco', child: DecoStatusText(worstDeco)));
+    if (decoModel != null) children.add(_ColumnRow(label: 'Model', child: DecoModelText(decoModel)));
+    if (children.isEmpty) return null;
+    return _DataColumn(children: children);
   }
 
   Widget _depthsTable() {
