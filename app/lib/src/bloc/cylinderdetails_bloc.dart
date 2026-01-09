@@ -6,7 +6,7 @@ import 'package:logging/logging.dart';
 import 'details_state.dart';
 import 'sync_bloc.dart';
 
-final _log = Logger('CylinderDetailsBloc');
+final _log = Logger('cylinderdetails_bloc.dart');
 
 abstract class CylinderDetailsState extends Equatable with DetailsStateMixin {
   const CylinderDetailsState();

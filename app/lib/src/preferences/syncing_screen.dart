@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/preferences_bloc.dart';
 import '../bloc/sync_bloc.dart';
 import '../common/common.dart';
-import 'preferences.dart';
 import 'preferences_widgets.dart';
 
 class SyncingScreen extends StatelessWidget {

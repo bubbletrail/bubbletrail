@@ -26,10 +26,12 @@ import 'src/dives/divelist_screen.dart';
 import 'src/dives/fullscreen_profile_screen.dart';
 import 'src/equipment/cylinder_edit_screen.dart';
 import 'src/equipment/cylinder_list_screen.dart';
+import 'src/preferences/logs_screen.dart';
 import 'src/preferences/preferences_screen.dart';
 import 'src/preferences/syncing_screen.dart';
 import 'src/preferences/units_screen.dart';
 import 'src/preferences/window_preferences.dart';
+import 'src/services/log_buffer.dart';
 import 'src/sites/fullscreen_map_screen.dart';
 import 'src/sites/sitedetail_screen.dart';
 import 'src/sites/siteedit_screen.dart';
@@ -47,6 +49,10 @@ void main() async {
 
 void _initLogging() {
   Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
+
+  // Initialize log buffer for in-app log viewing
+  LogBuffer.instance.initialize();
+
   Logger.root.onRecord.listen((record) {
     debugPrint('${record.level.name}: ${record.loggerName}: ${record.message}');
     if (record.error != null) {
@@ -270,6 +276,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                     ),
                     GoRoute(path: AppRoutePath.units, name: AppRouteName.units, builder: (context, state) => const UnitsScreen()),
                     GoRoute(path: AppRoutePath.syncing, name: AppRouteName.syncing, builder: (context, state) => const SyncingScreen()),
+                    GoRoute(path: AppRoutePath.logs, name: AppRouteName.logs, builder: (context, state) => const LogsScreen()),
                   ],
                 ),
               ],

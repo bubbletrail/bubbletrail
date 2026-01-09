@@ -14,7 +14,7 @@ import '../divestore.dart';
 import '../gen/internal.pb.dart';
 import 'fileio.dart';
 
-final _log = Logger('store/dives');
+final _log = Logger('store/dives.dart');
 
 class Dives {
   final String pathPrefix;
@@ -228,6 +228,7 @@ class Dives {
   }
 
   Future<void> syncWith(SyncProvider provider) async {
+    _log.fine('syncing dives');
     final seenEtags = <String, String>{}; // dive ID -> eTag
     await for (final obj in provider.listObjects()) {
       if (!obj.key.startsWith('dive-')) {
@@ -242,8 +243,6 @@ class Dives {
       if (cur != null && cur.syncedEtag == obj.eTag) {
         // Identical, no change required
         continue;
-      } else {
-        _log.fine('loading $id because their ${obj.eTag} is different from our ${cur?.syncedEtag}');
       }
 
       // Load the dive
@@ -258,7 +257,7 @@ class Dives {
 
       // If it's newer, replace our dive.
       if (cur == null || dive.updatedAt.toDateTime().isAfter(cur.updatedAt.toDateTime()) || dive.deletedAt.toDateTime().isAfter(cur.deletedAt.toDateTime())) {
-        _log.fine('import dive ${id}');
+        _log.fine('updating dive ${id} from provider');
         _dives[id] = dive;
         _scheduleSave(id);
       }
@@ -268,12 +267,12 @@ class Dives {
     // we didn't import above because they were older than what we had.
     for (final dive in _dives.values) {
       if (seenEtags[dive.id] == dive.syncedEtag) continue;
+      _log.fine('updating dive ${dive.id} in sync provider');
       final fullDive = await getById(dive.id);
       final data = fullDive!.rebuild((dive) {
         dive.clearSyncedEtag();
       }).writeToBuffer();
       final etag = await provider.putObject('dive-${dive.id}', data);
-      _log.fine('put ${dive.id} and got $etag');
       _dives[dive.id] = dive.rebuild((dive) {
         dive.syncedEtag = etag;
       });

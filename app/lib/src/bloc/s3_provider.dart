@@ -5,9 +5,12 @@ import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:divestore/divestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:minio/minio.dart';
 import 'package:pinenacl/key_derivation.dart';
 import 'package:pinenacl/x25519.dart';
+
+final _log = Logger('s3_provider.dart');
 
 class S3SyncProvider extends SyncProvider {
   final Minio _minio;
@@ -41,8 +44,9 @@ class S3SyncProvider extends SyncProvider {
   @override
   Stream<SyncObject> listObjects() async* {
     final prefix = '$_syncPrefix/';
-
+    _log.fine('listing bucket $_bucket');
     await for (final result in _minio.listObjects(_bucket, prefix: prefix)) {
+      _log.fine('listing got chuck of ${result.objects.length} objects');
       for (final obj in result.objects) {
         final key = obj.key;
         if (key == null) continue;
@@ -57,10 +61,12 @@ class S3SyncProvider extends SyncProvider {
         yield SyncObject(_relativeKey(key), lastModified, eTag);
       }
     }
+    _log.fine('listing complete');
   }
 
   @override
   Future<Uint8List> getObject(String key) async {
+    _log.fine('loading object $_bucket/$key');
     final stream = await _minio.getObject(_bucket, _fullKey(key));
     final enc = await readByteStream(stream);
     final encui8l = enc.toUint8List();
@@ -71,6 +77,7 @@ class S3SyncProvider extends SyncProvider {
 
   @override
   Future<String> putObject(String key, Uint8List data) async {
+    _log.fine('storing object $_bucket/$key');
     final nonce = sha256.convert(data).bytes;
     final enc = _box.encrypt(data, nonce: Uint8List.fromList(nonce));
     // enc includes the prepended nonce

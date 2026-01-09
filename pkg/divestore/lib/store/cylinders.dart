@@ -10,7 +10,7 @@ import '../divestore.dart';
 import '../gen/internal.pb.dart';
 import 'fileio.dart';
 
-final _log = Logger('store/cylinders');
+final _log = Logger('store/cylinders.dart');
 
 class Cylinders {
   final String path;
@@ -126,28 +126,31 @@ class Cylinders {
 
   Future<void> syncWith(SyncProvider provider) async {
     // Get all cylinders, merge with the list.
+    _log.fine('syncing cylinders');
     try {
       final obj = await provider.getObject('cylinders');
       final cls = InternalCylinderList.fromBuffer(obj);
       cls.freeze();
+      _log.fine('got ${cls.cylinders.length} cylinders from provider');
       for (final cyl in cls.cylinders) {
         final cur = _cylinders[cyl.id];
         if (cyl.hasDeletedAt()) {
           if (cur != null) {
-            print('delete cylinder ${cyl.id}');
+            _log.fine('deleting cylinder ${cyl.id}');
             await delete(cyl.id);
           }
         } else if (cur == null || cyl.updatedAt.toDateTime().isAfter(cur.updatedAt.toDateTime())) {
-          print('import cylinder ${cyl.id}');
+          _log.fine('importing cylinder ${cyl.id}');
           _cylinders[cyl.id] = cyl;
         }
       }
     } catch (e) {
-      print('failed to load: $e');
+      _log.warning('failed to load cylinders: $e');
     }
 
     // Upload the new merged set.
     final vals = _cylinders.values.toList();
+    _log.fine('updating ${vals.length} cylinders in sync provider');
     final cl = InternalCylinderList(cylinders: vals);
     final bs = cl.writeToBuffer();
     await provider.putObject('cylinders', bs);

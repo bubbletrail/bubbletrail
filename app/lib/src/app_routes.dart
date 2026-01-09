@@ -19,6 +19,7 @@ abstract class AppRouteName {
   static const cylindersNew = 'new-cylinder';
   static const units = 'units';
   static const syncing = 'syncing';
+  static const logs = 'logs';
 
   static const connect = 'connect';
 }
@@ -45,6 +46,7 @@ abstract class AppRoutePath {
   static const cylindersNew = 'new';
   static const units = 'units';
   static const syncing = 'syncing';
+  static const logs = 'logs';
 
   static const connect = '/connect';
 }

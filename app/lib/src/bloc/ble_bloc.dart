@@ -12,7 +12,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'divelist_bloc.dart';
 
-final _log = Logger('BleBloc');
+final _log = Logger('ble_bloc.dart');
 
 // Events
 abstract class BleEvent extends Equatable {
@@ -415,26 +415,26 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     final sub = dc.startDownload(ble: ble, computer: computer, fifoDirectory: dir.path, lastDiveLog: _lastDiveLog).listen((event) {
       switch (event) {
         case dc.DownloadStarted():
-          _log.info('Download started');
+          _log.info('download started');
           WakelockPlus.enable();
         case dc.DownloadProgressEvent(:final progress):
           add(_BleDownloadProgress(progress));
         case dc.DownloadDeviceInfo(:final info):
-          _log.info('Device info: $info');
+          _log.fine('device info: $info');
         case dc.DownloadDiveReceived(:final dive):
-          _log.fine('Received dive ${dive.dateTime.toDateTime()}');
+          _log.fine('received dive ${dive.dateTime.toDateTime()}');
           final cdive = convertDcDive(dive);
           add(_BleDownloadedDive(cdive));
         case dc.DownloadCompleted():
-          _log.info('Download completed');
+          _log.info('download completed');
           add(_BleDownloadCompleted());
           WakelockPlus.disable();
         case dc.DownloadError(:final message):
-          _log.warning('Download error: $message');
+          _log.warning('download error: $message');
           add(_BleDownloadFailed(message));
           WakelockPlus.disable();
         case dc.DownloadWaiting():
-          _log.info('Waiting for user action on device');
+          _log.info('waiting for user action on device');
       }
     });
     sub.onError((e) {

@@ -2,10 +2,12 @@ import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:logging/logging.dart';
 
 import '../bloc/preferences_bloc.dart';
-import '../preferences/preferences.dart';
 import 'common.dart';
+
+export '../preferences/preferences.dart';
 
 const litersToCuft = 0.0353147;
 const kgToLbs = 2.20462;
@@ -24,6 +26,36 @@ String formatTime(TimeFormatPref pref, DateTime time) {
 
 String formatDateTime(Preferences pref, DateTime dateTime) {
   return '${formatDate(pref.dateFormat, dateTime)} ${formatTime(pref.timeFormat, dateTime)}';
+}
+
+String formatLogTimestamp(TimeFormatPref pref, DateTime time) {
+  final format = pref == TimeFormatPref.h24 ? 'HH:mm:ss.SSS' : 'h:mm:ss.SSS a';
+  return DateFormat(format).format(time);
+}
+
+String formatLogLine(TimeFormatPref timeFormat, LogRecord record) {
+  final time = formatLogTimestamp(timeFormat, record.time);
+  final level = formatLogLevel(record.level);
+  return '$time $level ${record.loggerName}: ${record.message}';
+}
+
+String formatLogLevel(Level level) {
+  if (level == Level.FINE || level == Level.FINER || level == Level.FINEST) {
+    return 'DEBUG';
+  }
+  return level.name;
+}
+
+Color getLogLevelColor(Level level, ThemeData theme) {
+  if (level >= Level.SEVERE) {
+    return theme.colorScheme.error;
+  } else if (level >= Level.WARNING) {
+    return Colors.orange;
+  } else if (level >= Level.INFO) {
+    return theme.colorScheme.onSurface;
+  } else {
+    return theme.colorScheme.onSurfaceVariant;
+  }
 }
 
 String formatDepth(DepthUnit unit, num depth) {

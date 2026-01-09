@@ -3,7 +3,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../common/common.dart';
-import '../preferences/preferences.dart';
 
 class DepthProfileWidget extends StatefulWidget {
   final Log log;
