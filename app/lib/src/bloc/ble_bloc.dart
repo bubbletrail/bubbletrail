@@ -23,8 +23,8 @@ abstract class BleEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class BleStarted extends BleEvent {
-  const BleStarted();
+class _BleStarted extends BleEvent {
+  const _BleStarted();
 }
 
 class BleStartScan extends BleEvent {
@@ -299,12 +299,12 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       add(_BleLoadedRememberedComputers(computers));
     });
 
-    add(BleStarted());
+    add(const _BleStarted());
   }
 
   Future<void> _onEvent(BleEvent event, Emitter<BleState> emit) async {
     switch (event) {
-      case BleStarted():
+      case _BleStarted():
         await _onStarted(emit);
       case _BleAdapterStateChanged(:final adapterState):
         emit(state.copyWith(adapterState: adapterState));
