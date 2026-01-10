@@ -448,17 +448,16 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       return;
     }
 
+    _log.info('starting download from ${device.remoteId.str} (${device.platformName})');
     emit(state.copyWith(isDownloading: true, clearDownloadProgress: true, downloadedDives: [], clearError: true));
 
     // If we have a remembered computer already, grab the fingerprint from there
-    List<int>? ldcFingerprint;
-    try {
-      final r = state.rememberedComputers.firstWhere((r) => r.remoteId == device.remoteId.str);
-      ldcFingerprint = r.ldcFingerprint;
-    } on StateError catch (_) {}
+    final remembered = await _store.computers.getByRemoteId(device.remoteId.str);
+    final ldcFingerprint = remembered?.ldcFingerprint;
+    _log.fine('current fingerprint is $ldcFingerprint');
 
     // Remember this computer for future downloads
-    await _rememberComputer(device.remoteId.str, device.platformName, computer, ldcFingerprint);
+    await _store.computers.update(remoteId: device.remoteId.str, advertisedName: device.platformName);
 
     // Set up BLE notifications on the RX characteristic
     try {
@@ -549,16 +548,6 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     await _store.computers.delete(computer.remoteId);
     final computers = await _store.computers.getAll();
     emit(state.copyWith(rememberedComputers: computers));
-  }
-
-  Future<void> _rememberComputer(String remoteId, String advertisedName, dc.ComputerDescriptor descriptor, List<int>? ldcFingerprint) async {
-    await _store.computers.update(
-      remoteId: remoteId,
-      advertisedName: advertisedName,
-      vendor: descriptor.vendor,
-      product: descriptor.model,
-      ldcFingerprint: ldcFingerprint,
-    );
   }
 
   Future<void> _onDisconnect(Emitter<BleState> emit) async {

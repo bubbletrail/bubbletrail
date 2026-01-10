@@ -25,8 +25,9 @@ class Computers {
     if (computer == null) {
       computer = Computer(remoteId: remoteId, createdAt: .fromDateTime(.now()))..freeze();
     }
-    _computers[computer.remoteId] = computer.rebuild((computer) {
+    computer = computer.rebuild((computer) {
       computer.updatedAt = .fromDateTime(.now());
+      computer.clearDeletedAt();
       if (advertisedName != null) {
         computer.advertisedName = advertisedName;
       }
@@ -43,6 +44,7 @@ class Computers {
         computer.serial = serial;
       }
     });
+    _computers[computer.remoteId] = computer;
     _scheduleSave();
   }
 
