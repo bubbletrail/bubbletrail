@@ -1,9 +1,11 @@
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import '../bloc/ble_bloc.dart';
+import '../bloc/ble_download_bloc.dart';
+import '../bloc/ble_scan_bloc.dart';
 import '../common/common.dart';
 
 class BleScanScreen extends StatelessWidget {
@@ -11,108 +13,125 @@ class BleScanScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<BleBloc, BleState>(
-      listener: (context, state) {
-        if (state.error != null) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error!), backgroundColor: Colors.red));
-        }
-      },
-      builder: (context, state) {
-        return ScreenScaffold(
-          title: const Text('Connect dive computer'),
-          actions: [
-            if (state.connectedDevice != null)
-              IconButton(
-                icon: const FaIcon(FontAwesomeIcons.bluetoothB),
-                tooltip: 'Disconnect',
-                onPressed: () => context.read<BleBloc>().add(const BleDisconnect()),
-              ),
-          ],
-          body: _buildBody(context, state),
-          floatingActionButton: state.adapterState == .on && state.connectedDevice == null
-              ? FloatingActionButton.extended(
-                  onPressed: () {
-                    if (state.isScanning) {
-                      context.read<BleBloc>().add(const BleStopScan());
-                    } else {
-                      context.read<BleBloc>().add(const BleStartScan());
-                    }
-                  },
-                  icon: FaIcon(state.isScanning ? FontAwesomeIcons.stop : FontAwesomeIcons.magnifyingGlass),
-                  label: Text(state.isScanning ? 'Stop' : 'Scan'),
-                )
-              : null,
-        );
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<BleScanBloc, BleScanState>(
+          listener: (context, state) {
+            if (state.error != null) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error!), backgroundColor: Colors.red));
+            }
+          },
+        ),
+        BlocListener<BleDownloadBloc, BleDownloadState>(
+          listener: (context, state) {
+            if (state.error != null) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error!), backgroundColor: Colors.red));
+            }
+          },
+        ),
+      ],
+      child: BlocBuilder<BleScanBloc, BleScanState>(
+        builder: (context, scanState) {
+          return BlocBuilder<BleDownloadBloc, BleDownloadState>(
+            builder: (context, downloadState) {
+              return ScreenScaffold(
+                title: const Text('Connect dive computer'),
+                actions: [
+                  if (downloadState.connectedDevice != null)
+                    IconButton(
+                      icon: const FaIcon(FontAwesomeIcons.bluetoothB),
+                      tooltip: 'Disconnect',
+                      onPressed: () => context.read<BleDownloadBloc>().add(.disconnect()),
+                    ),
+                ],
+                body: _buildBody(context, scanState, downloadState),
+                floatingActionButton: scanState.adapterState == BluetoothAdapterState.on && downloadState.connectedDevice == null
+                    ? FloatingActionButton.extended(
+                        onPressed: () {
+                          if (scanState.isScanning) {
+                            context.read<BleScanBloc>().add(.stop());
+                          } else {
+                            context.read<BleScanBloc>().add(.start());
+                          }
+                        },
+                        icon: FaIcon(scanState.isScanning ? FontAwesomeIcons.stop : FontAwesomeIcons.magnifyingGlass),
+                        label: Text(scanState.isScanning ? 'Stop' : 'Scan'),
+                      )
+                    : null,
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildBody(BuildContext context, BleState state) {
-    if (state.adapterState != .on) {
+  Widget _buildBody(BuildContext context, BleScanState scanState, BleDownloadState downloadState) {
+    if (scanState.adapterState != BluetoothAdapterState.on) {
       return Center(
         child: Column(
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             FaIcon(FontAwesomeIcons.bluetoothB, size: 64, color: Theme.of(context).colorScheme.error),
             const SizedBox(height: 16),
-            Text('Bluetooth is ${state.adapterState.name}', style: Theme.of(context).textTheme.titleLarge),
+            Text('Bluetooth is ${scanState.adapterState.name}', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             const Text('Please enable Bluetooth to scan for dive computers'),
             const SizedBox(height: 24),
-            ElevatedButton(onPressed: () => context.read<BleBloc>().add(const BleTurnOn()), child: const Text('Turn on Bluetooth')),
+            ElevatedButton(onPressed: () => context.read<BleScanBloc>().add(.turnOnBluetooth()), child: const Text('Turn on Bluetooth')),
           ],
         ),
       );
     }
 
-    if (state.connectedDevice != null) {
-      return SingleChildScrollView(child: _buildConnectedDeviceCard(context, state));
+    if (downloadState.connectedDevice != null) {
+      return SingleChildScrollView(child: _buildConnectedDeviceCard(context, scanState, downloadState));
     }
 
-    final filteredResults = state.filteredScanResults;
-    final hasHiddenDevices = state.scanResults.length > filteredResults.length;
-    final hasRememberedComputers = state.rememberedComputers.isNotEmpty;
-    final hasScannedDevices = state.scanResults.isNotEmpty;
+    final filteredResults = scanState.filteredScanResults;
+    final hasHiddenDevices = scanState.scanResults.length > filteredResults.length;
+    final hasRememberedComputers = scanState.rememberedComputers.isNotEmpty;
+    final hasScannedDevices = scanState.scanResults.isNotEmpty;
 
     return Column(
       children: [
-        if (state.isScanning) const LinearProgressIndicator() else const SizedBox(height: 4),
+        if (scanState.isScanning) const LinearProgressIndicator() else const SizedBox(height: 4),
         Expanded(
           child: ListView(
-            padding: const .all(8),
+            padding: const EdgeInsets.all(8),
             children: [
               // Remembered computers section
               if (hasRememberedComputers) ...[
                 Padding(
-                  padding: const .symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Text('Saved computers', style: Theme.of(context).textTheme.titleSmall),
                 ),
-                ..._buildRememberedComputersList(context, state),
+                ..._buildRememberedComputersList(context, scanState),
                 const SizedBox(height: 16),
               ],
               // Scan results section
-              if (hasScannedDevices || state.isScanning) ...[
+              if (hasScannedDevices || scanState.isScanning) ...[
                 Padding(
-                  padding: const .symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Row(
                     children: [
                       Expanded(
                         child: Text(
-                          hasHiddenDevices && !state.showAllDevices
+                          hasHiddenDevices && !scanState.showAllDevices
                               ? '${filteredResults.length} dive computer(s) found'
-                              : '${state.scanResults.length} device(s) found',
+                              : '${scanState.scanResults.length} device(s) found',
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                       ),
                       const Text('Show all'),
-                      Switch(value: state.showAllDevices, onChanged: (_) => context.read<BleBloc>().add(const BleToggleShowAllDevices())),
+                      Switch(value: scanState.showAllDevices, onChanged: (_) => context.read<BleScanBloc>().add(.toggleShowAll())),
                     ],
                   ),
                 ),
-                ..._buildScannedDevicesList(context, state),
+                ..._buildScannedDevicesList(context, scanState),
               ],
               // Empty state when no remembered computers and no scan results
-              if (!hasRememberedComputers && !hasScannedDevices && !state.isScanning) _buildEmptyState(context, state),
+              if (!hasRememberedComputers && !hasScannedDevices && !scanState.isScanning) _buildEmptyState(context, scanState),
             ],
           ),
         ),
@@ -120,11 +139,11 @@ class BleScanScreen extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildRememberedComputersList(BuildContext context, BleState state) {
-    return state.rememberedComputers.map((computer) => _buildRememberedComputerCard(context, computer)).toList();
+  List<Widget> _buildRememberedComputersList(BuildContext context, BleScanState scanState) {
+    return scanState.rememberedComputers.map((computer) => _buildRememberedComputerCard(context, scanState, computer)).toList();
   }
 
-  Widget _buildRememberedComputerCard(BuildContext context, Computer computer) {
+  Widget _buildRememberedComputerCard(BuildContext context, BleScanState scanState, Computer computer) {
     return Card(
       child: ListTile(
         leading: const FaIcon(FontAwesomeIcons.bluetoothB),
@@ -132,18 +151,27 @@ class BleScanScreen extends StatelessWidget {
         subtitle: Row(
           spacing: 4,
           children: [
-            FaIcon(FontAwesomeIcons.idBadge, size: 16),
+            const FaIcon(FontAwesomeIcons.idBadge, size: 16),
             Text(computer.hasSerial() ? computer.serial : computer.remoteId, style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
         trailing: Row(
-          mainAxisSize: .min,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            FilledButton(onPressed: () => context.read<BleBloc>().add(BleConnectToRememberedComputer(computer)), child: const Text('Download')),
+            FilledButton(
+              onPressed: () {
+                // Find the descriptor for this computer
+                final descriptor = scanState.supportedComputers.where((d) => d.vendor == computer.vendor && d.model == computer.product).firstOrNull;
+                if (descriptor != null) {
+                  context.read<BleDownloadBloc>().add(.connectToRemembered(computer, descriptor));
+                }
+              },
+              child: const Text('Download'),
+            ),
             PopupMenuButton<String>(
               onSelected: (value) {
                 if (value == 'forget') {
-                  context.read<BleBloc>().add(BleForgetComputer(computer));
+                  context.read<BleScanBloc>().add(.forgetComputer(computer));
                 }
               },
               itemBuilder: (context) => [const PopupMenuItem(value: 'forget', child: Text('Forget'))],
@@ -154,8 +182,8 @@ class BleScanScreen extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildScannedDevicesList(BuildContext context, BleState state) {
-    final results = state.filteredScanResults;
+  List<Widget> _buildScannedDevicesList(BuildContext context, BleScanState scanState) {
+    final results = scanState.filteredScanResults;
     return results.map((result) {
       final device = result.device;
       return Card(
@@ -170,42 +198,45 @@ class BleScanScreen extends StatelessWidget {
                 Row(
                   spacing: 4,
                   children: [
-                    FaIcon(FontAwesomeIcons.signal, size: 16),
+                    const FaIcon(FontAwesomeIcons.signal, size: 16),
                     Text('${_getSignalStrengthLabel(result.rssi)} (${result.rssi} dBm)', style: Theme.of(context).textTheme.bodySmall),
                   ],
                 ),
                 Row(
                   spacing: 4,
                   children: [
-                    FaIcon(FontAwesomeIcons.idBadge, size: 16),
+                    const FaIcon(FontAwesomeIcons.idBadge, size: 16),
                     Text(result.device.remoteId.str, style: Theme.of(context).textTheme.bodySmall),
                   ],
                 ),
               ],
             ),
           ),
-          trailing: ElevatedButton(onPressed: () => context.read<BleBloc>().add(BleConnectToDevice(device)), child: const Text('Connect')),
+          trailing: ElevatedButton(
+            onPressed: () => context.read<BleDownloadBloc>().add(.connectToDevice(device)),
+            child: const Text('Connect'),
+          ),
         ),
       );
     }).toList();
   }
 
-  Widget _buildConnectedDeviceCard(BuildContext context, BleState state) {
+  Widget _buildConnectedDeviceCard(BuildContext context, BleScanState scanState, BleDownloadState downloadState) {
     return Card(
-      margin: const .all(8),
+      margin: const EdgeInsets.all(8),
       color: Theme.of(context).colorScheme.primaryContainer,
       child: Column(
-        crossAxisAlignment: .start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
             leading: const FaIcon(FontAwesomeIcons.bluetoothB),
-            title: Text(state.connectedDevice!.platformName),
-            subtitle: Text('Status: ${state.connectionState.name}'),
-            trailing: TextButton(onPressed: () => context.read<BleBloc>().add(const BleDisconnect()), child: const Text('Disconnect')),
+            title: Text(downloadState.connectedDevice!.platformName),
+            subtitle: Text('Status: ${downloadState.connectionState.name}'),
+            trailing: TextButton(onPressed: () => context.read<BleDownloadBloc>().add(.disconnect()), child: const Text('Disconnect')),
           ),
-          if (state.isDiscoveringServices)
+          if (downloadState.isDiscoveringServices)
             const Padding(
-              padding: .all(16.0),
+              padding: EdgeInsets.all(16.0),
               child: Row(
                 children: [
                   SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
@@ -214,64 +245,64 @@ class BleScanScreen extends StatelessWidget {
                 ],
               ),
             )
-          else if (state.isDownloading)
+          else if (downloadState.isDownloading)
             Padding(
-              padding: const .all(16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
-                crossAxisAlignment: .start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
                       const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
                       const SizedBox(width: 12),
                       Text(
-                        state.downloadProgress != null
-                            ? 'Downloading... ${state.downloadProgress!.current} / ${state.downloadProgress!.maximum}'
+                        downloadState.downloadProgress != null
+                            ? 'Downloading... ${downloadState.downloadProgress!.current} / ${downloadState.downloadProgress!.maximum}'
                             : 'Downloading dives...',
                       ),
                     ],
                   ),
-                  if (state.downloadProgress != null) ...[
+                  if (downloadState.downloadProgress != null) ...[
                     const SizedBox(height: 12),
-                    LinearProgressIndicator(value: state.downloadProgress!.fraction),
+                    LinearProgressIndicator(value: downloadState.downloadProgress!.fraction),
                     const SizedBox(height: 4),
-                    Text('${(state.downloadProgress!.fraction * 100).toStringAsFixed(0)}%', style: Theme.of(context).textTheme.bodySmall),
+                    Text('${(downloadState.downloadProgress!.fraction * 100).toStringAsFixed(0)}%', style: Theme.of(context).textTheme.bodySmall),
                   ],
                 ],
               ),
             )
-          else if (state.discoveredServices.isNotEmpty)
-            _buildDownloadSection(context, state),
+          else if (downloadState.discoveredServices.isNotEmpty)
+            _buildDownloadSection(context, scanState, downloadState),
         ],
       ),
     );
   }
 
-  Widget _buildDownloadSection(BuildContext context, BleState state) {
+  Widget _buildDownloadSection(BuildContext context, BleScanState scanState, BleDownloadState downloadState) {
     return Padding(
-      padding: const .all(16.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
-        crossAxisAlignment: .stretch,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FilledButton.icon(
-            onPressed: state.supportedComputers.isEmpty ? null : () => _showComputerSelectionDialog(context, state),
+            onPressed: scanState.supportedComputers.isEmpty ? null : () => _showComputerSelectionDialog(context, scanState, downloadState),
             icon: const FaIcon(FontAwesomeIcons.download),
             label: const Text('Download dives'),
           ),
-          if (state.supportedComputers.isEmpty)
+          if (scanState.supportedComputers.isEmpty)
             Padding(
-              padding: const .only(top: 8.0),
-              child: Text('Loading supported computers...', style: Theme.of(context).textTheme.bodySmall, textAlign: .center),
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text('Loading supported computers...', style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
             ),
         ],
       ),
     );
   }
 
-  void _showComputerSelectionDialog(BuildContext context, BleState state) {
-    final dev = state.connectedDevice!;
+  void _showComputerSelectionDialog(BuildContext context, BleScanState scanState, BleDownloadState downloadState) {
+    final dev = downloadState.connectedDevice!;
     final deviceName = dev.platformName;
-    final matchedComputers = state.scanResults.firstWhere((r) => r.$1.device.remoteId == dev.remoteId).$2;
+    final matchedComputers = scanState.descriptorsForDevice(dev).toList();
     matchedComputers.sort((a, b) => '${a.vendor} ${a.model}'.compareTo('${b.vendor} ${b.model}'));
 
     showDialog(
@@ -279,14 +310,14 @@ class BleScanScreen extends StatelessWidget {
       builder: (dialogContext) => AlertDialog(
         title: const Text('Select dive computer'),
         content: SizedBox(
-          width: .maxFinite,
+          width: double.maxFinite,
           child: Column(
-            mainAxisSize: .min,
-            crossAxisAlignment: .start,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (matchedComputers.isNotEmpty)
                 Padding(
-                  padding: const .only(bottom: 8.0),
+                  padding: const EdgeInsets.only(bottom: 8.0),
                   child: Text('Suggested for "$deviceName":', style: Theme.of(dialogContext).textTheme.bodySmall),
                 ),
               Flexible(
@@ -299,18 +330,18 @@ class BleScanScreen extends StatelessWidget {
                       title: Text('${computer.vendor} ${computer.model}'),
                       onTap: () {
                         Navigator.of(dialogContext).pop();
-                        context.read<BleBloc>().add(BleStartDownload(computer));
+                        context.read<BleDownloadBloc>().add(.start(computer));
                       },
                     );
                   },
                 ),
               ),
-              if (state.supportedComputers.isNotEmpty) ...[
+              if (scanState.supportedComputers.isNotEmpty) ...[
                 const Divider(),
                 TextButton(
                   onPressed: () {
                     Navigator.of(dialogContext).pop();
-                    _showAllComputersDialog(context, state);
+                    _showAllComputersDialog(context, scanState);
                   },
                   child: const Text('Show all computers...'),
                 ),
@@ -323,23 +354,23 @@ class BleScanScreen extends StatelessWidget {
     );
   }
 
-  void _showAllComputersDialog(BuildContext context, BleState state) {
+  void _showAllComputersDialog(BuildContext context, BleScanState scanState) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('All BLE dive computers'),
         content: SizedBox(
-          width: .maxFinite,
+          width: double.maxFinite,
           height: 400,
           child: ListView.builder(
-            itemCount: state.supportedComputers.length,
+            itemCount: scanState.supportedComputers.length,
             itemBuilder: (context, index) {
-              final computer = state.supportedComputers[index];
+              final computer = scanState.supportedComputers[index];
               return ListTile(
                 title: Text('${computer.vendor} ${computer.model}'),
                 onTap: () {
                   Navigator.of(dialogContext).pop();
-                  context.read<BleBloc>().add(BleStartDownload(computer));
+                  context.read<BleDownloadBloc>().add(.start(computer));
                 },
               );
             },
@@ -350,29 +381,27 @@ class BleScanScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, BleState state) {
-    final hasUnfilteredResults = state.scanResults.isNotEmpty && state.filteredScanResults.isEmpty;
+  Widget _buildEmptyState(BuildContext context, BleScanState scanState) {
+    final hasUnfilteredResults = scanState.scanResults.isNotEmpty && scanState.filteredScanResults.isEmpty;
 
     return Center(
       child: Column(
-        mainAxisAlignment: .center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           FaIcon(FontAwesomeIcons.bluetoothB, size: 64, color: Theme.of(context).colorScheme.secondary),
           const SizedBox(height: 16),
           Text(
-            state.isScanning
+            scanState.isScanning
                 ? 'Scanning...'
                 : hasUnfilteredResults
-                ? 'No dive computers found'
-                : 'No devices found',
+                    ? 'No dive computers found'
+                    : 'No devices found',
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
           Text(
-            hasUnfilteredResults
-                ? 'Found ${state.scanResults.length} other device(s).\nEnable "Show all" to see them.'
-                : 'Make sure your dive computer is in\nBluetooth pairing mode',
-            textAlign: .center,
+            hasUnfilteredResults ? 'Found ${scanState.scanResults.length} other device(s).\nEnable "Show all" to see them.' : 'Make sure your dive computer is in\nBluetooth pairing mode',
+            textAlign: TextAlign.center,
           ),
         ],
       ),
