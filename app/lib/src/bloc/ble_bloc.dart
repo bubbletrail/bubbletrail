@@ -282,7 +282,6 @@ class BleBloc extends Bloc<BleEvent, BleState> {
   final DiveListBloc _diveListBloc;
   final SyncBloc _syncBloc;
   late final Store _store;
-  Log? _lastDiveLog;
   StreamSubscription? _diveListBlocSubscription;
   StreamSubscription<BluetoothAdapterState>? _adapterStateSubscription;
   StreamSubscription<List<ScanResult>>? _scanSubscription;
@@ -298,16 +297,6 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       _store = store;
       final computers = await _store.computers.getAll();
       add(_BleLoadedRememberedComputers(computers));
-    });
-
-    final curState = _diveListBloc.state;
-    if (curState is DiveListLoaded) {
-      _lastDiveLog = curState.lastLog;
-    }
-    _diveListBlocSubscription = _diveListBloc.stream.listen((state) {
-      if (state is DiveListLoaded) {
-        _lastDiveLog = state.lastLog;
-      }
     });
 
     add(BleStarted());
@@ -435,6 +424,9 @@ class BleBloc extends Bloc<BleEvent, BleState> {
   }
 
   Future<void> _onStartDownload(dc.ComputerDescriptor computer, Emitter<BleState> emit) async {
+    final device = state.connectedDevice;
+    if (device == null) return;
+
     if (state.discoveredServices.isEmpty) {
       emit(state.copyWith(error: 'No services discovered'));
       return;
@@ -446,13 +438,17 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       return;
     }
 
-    // Remember this computer for future downloads
-    final device = state.connectedDevice;
-    if (device != null) {
-      await _rememberComputer(device.remoteId.str, device.platformName, computer, emit);
-    }
-
     emit(state.copyWith(isDownloading: true, clearDownloadProgress: true, downloadedDives: [], clearError: true));
+
+    // If we have a remembered computer already, grab the fingerprint from there
+    List<int>? ldcFingerprint;
+    try {
+      final r = state.rememberedComputers.firstWhere((r) => r.remoteId == device.remoteId.str);
+      ldcFingerprint = r.ldcFingerprint;
+    } on StateError catch (_) {}
+
+    // Remember this computer for future downloads
+    await _rememberComputer(device.remoteId.str, device.platformName, computer, ldcFingerprint);
 
     // Set up BLE notifications on the RX characteristic
     try {
@@ -467,27 +463,33 @@ class BleBloc extends Bloc<BleEvent, BleState> {
 
     // Start the download and process events
     final dir = await getApplicationSupportDirectory();
-    final sub = dc.startDownload(ble: ble, computer: computer, fifoDirectory: dir.path, lastDiveLog: _lastDiveLog).listen((event) {
+    final sub = dc.startDownload(ble: ble, computer: computer, fifoDirectory: dir.path, ldcFingerprint: ldcFingerprint).listen((event) {
       switch (event) {
         case dc.DownloadStarted():
           _log.info('download started');
           WakelockPlus.enable();
+
         case dc.DownloadProgressEvent(:final progress):
           add(_BleDownloadProgress(progress));
+
         case dc.DownloadDeviceInfo(:final info):
           _log.fine('device info: $info');
+
         case dc.DownloadDiveReceived(:final dive):
           _log.fine('received dive ${dive.dateTime.toDateTime()}');
           final cdive = convertDcDive(dive);
           add(_BleDownloadedDive(cdive));
+
         case dc.DownloadCompleted():
           _log.info('download completed');
           add(_BleDownloadCompleted());
           WakelockPlus.disable();
+
         case dc.DownloadError(:final message):
           _log.warning('download error: $message');
           add(_BleDownloadFailed(message));
           WakelockPlus.disable();
+
         case dc.DownloadWaiting():
           _log.info('waiting for user action on device');
       }
@@ -525,8 +527,6 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       emit(state.copyWith(connectedDevice: device, isDiscoveringServices: true));
       final services = await device.discoverServices();
       add(_BleServicesDiscovered(services));
-
-      // Auto-start download with the stored descriptor
       add(BleStartDownload(descriptor.first));
     } catch (e) {
       emit(state.copyWith(error: 'Failed to connect: $e'));
@@ -539,19 +539,14 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     emit(state.copyWith(rememberedComputers: computers));
   }
 
-  Future<void> _rememberComputer(String remoteId, String advertisedName, dc.ComputerDescriptor descriptor, Emitter<BleState> emit) async {
-    // Check if this computer is already remembered
-    final existing = await _store.computers.getByRemoteId(remoteId);
-    if (existing != null) return;
-
-    // Save the new computer
-    final computer = Computer(remoteId: remoteId, advertisedName: advertisedName, vendor: descriptor.vendor, product: descriptor.model);
-    await _store.computers.insert(computer);
-    _log.info('saved remembered computer: ${computer.vendor} ${computer.product}');
-
-    // Update the state with the new list
-    final computers = await _store.computers.getAll();
-    emit(state.copyWith(rememberedComputers: computers));
+  Future<void> _rememberComputer(String remoteId, String advertisedName, dc.ComputerDescriptor descriptor, List<int>? ldcFingerprint) async {
+    await _store.computers.update(
+      remoteId: remoteId,
+      advertisedName: advertisedName,
+      vendor: descriptor.vendor,
+      product: descriptor.model,
+      ldcFingerprint: ldcFingerprint,
+    );
   }
 
   Future<void> _onDisconnect(Emitter<BleState> emit) async {

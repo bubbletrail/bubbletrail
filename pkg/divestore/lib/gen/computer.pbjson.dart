@@ -26,7 +26,7 @@ const Computer$json = {
     {'1': 'advertised_name', '3': 5, '4': 1, '5': 9, '10': 'advertisedName'},
     {'1': 'vendor', '3': 6, '4': 1, '5': 9, '10': 'vendor'},
     {'1': 'product', '3': 7, '4': 1, '5': 9, '10': 'product'},
-    {'1': 'ldc_fingerprint', '3': 8, '4': 1, '5': 9, '10': 'ldcFingerprint'},
+    {'1': 'ldc_fingerprint', '3': 8, '4': 1, '5': 12, '10': 'ldcFingerprint'},
   ],
 };
 
@@ -36,5 +36,5 @@ final $typed_data.Uint8List computerDescriptor = $convert.base64Decode('CghDb21w
     'dBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSCXVwZGF0ZWRBdBI5CgpkZWxldG'
     'VkX2F0GAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJZGVsZXRlZEF0EicKD2Fk'
     'dmVydGlzZWRfbmFtZRgFIAEoCVIOYWR2ZXJ0aXNlZE5hbWUSFgoGdmVuZG9yGAYgASgJUgZ2ZW'
-    '5kb3ISGAoHcHJvZHVjdBgHIAEoCVIHcHJvZHVjdBInCg9sZGNfZmluZ2VycHJpbnQYCCABKAlS'
+    '5kb3ISGAoHcHJvZHVjdBgHIAEoCVIHcHJvZHVjdBInCg9sZGNfZmluZ2VycHJpbnQYCCABKAxS'
     'DmxkY0ZpbmdlcnByaW50');

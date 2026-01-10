@@ -19,43 +19,35 @@ class Computers {
 
   Computers(this.path, {this.readonly = false});
 
-  Future<Computer> insert(Computer computer) async {
+  Future<void> update({required String remoteId, String? advertisedName, String? vendor, String? product, List<int>? ldcFingerprint}) async {
     if (readonly) throw Exception('readonly');
-    computer = _insert(computer);
-    _scheduleSave();
-    return computer;
-  }
-
-  Future<void> insertAll(Iterable<Computer> computers) async {
-    if (readonly) throw Exception('readonly');
-    for (final computer in computers) {
-      _insert(computer);
+    var computer = _computers[remoteId];
+    if (computer == null) {
+      computer = Computer(remoteId: remoteId, createdAt: .fromDateTime(.now()))..freeze();
     }
-    _scheduleSave();
-  }
-
-  Computer _insert(Computer computer) {
-    if (!computer.isFrozen) computer.freeze();
-    computer = computer.rebuild((computer) {
-      computer.updatedAt = Timestamp.fromDateTime(DateTime.now());
-      if (!computer.hasCreatedAt()) {
-        computer.createdAt = computer.updatedAt;
+    _computers[computer.remoteId] = computer.rebuild((computer) {
+      computer.updatedAt = .fromDateTime(.now());
+      if (advertisedName != null) {
+        computer.advertisedName = advertisedName;
+      } else {
+        computer.clearAdvertisedName();
+      }
+      if (vendor != null) {
+        computer.vendor = vendor;
+      } else {
+        computer.clearVendor();
+      }
+      if (product != null) {
+        computer.product = product;
+      } else {
+        computer.clearProduct();
+      }
+      if (ldcFingerprint != null) {
+        computer.ldcFingerprint = ldcFingerprint;
+      } else {
+        computer.clearLdcFingerprint();
       }
     });
-    _computers[computer.remoteId] = computer;
-    return computer;
-  }
-
-  Future<void> update(Computer computer) async {
-    if (readonly) throw Exception('readonly');
-    if (!computer.isFrozen) computer.freeze();
-    computer = computer.rebuild((computer) {
-      computer.updatedAt = Timestamp.fromDateTime(DateTime.now());
-      if (!computer.hasCreatedAt()) {
-        computer.createdAt = computer.updatedAt;
-      }
-    });
-    _computers[computer.remoteId] = computer;
     _scheduleSave();
   }
 

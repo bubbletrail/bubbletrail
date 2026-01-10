@@ -11,8 +11,6 @@ abstract class _$DiveListLoadedCWProxy {
 
   DiveListLoaded sites(List<Site> sites);
 
-  DiveListLoaded lastLog(Log? lastLog);
-
   DiveListLoaded tags(Set<String> tags);
 
   DiveListLoaded buddies(Set<String> buddies);
@@ -37,7 +35,6 @@ abstract class _$DiveListLoadedCWProxy {
   DiveListLoaded call({
     List<Dive> dives,
     List<Site> sites,
-    Log? lastLog,
     Set<String> tags,
     Set<String> buddies,
     Dive? selectedDive,
@@ -62,25 +59,25 @@ class _$DiveListLoadedCWProxyImpl implements _$DiveListLoadedCWProxy {
   DiveListLoaded sites(List<Site> sites) => call(sites: sites);
 
   @override
-  DiveListLoaded lastLog(Log? lastLog) => call(lastLog: lastLog);
-
-  @override
   DiveListLoaded tags(Set<String> tags) => call(tags: tags);
 
   @override
   DiveListLoaded buddies(Set<String> buddies) => call(buddies: buddies);
 
   @override
-  DiveListLoaded selectedDive(Dive? selectedDive) => call(selectedDive: selectedDive);
+  DiveListLoaded selectedDive(Dive? selectedDive) =>
+      call(selectedDive: selectedDive);
 
   @override
-  DiveListLoaded selectedDiveSite(Site? selectedDiveSite) => call(selectedDiveSite: selectedDiveSite);
+  DiveListLoaded selectedDiveSite(Site? selectedDiveSite) =>
+      call(selectedDiveSite: selectedDiveSite);
 
   @override
   DiveListLoaded isNewDive(bool isNewDive) => call(isNewDive: isNewDive);
 
   @override
-  DiveListLoaded selectedSite(Site? selectedSite) => call(selectedSite: selectedSite);
+  DiveListLoaded selectedSite(Site? selectedSite) =>
+      call(selectedSite: selectedSite);
 
   @override
   DiveListLoaded isNewSite(bool isNewSite) => call(isNewSite: isNewSite);
@@ -96,7 +93,6 @@ class _$DiveListLoadedCWProxyImpl implements _$DiveListLoadedCWProxy {
   DiveListLoaded call({
     Object? dives = const $CopyWithPlaceholder(),
     Object? sites = const $CopyWithPlaceholder(),
-    Object? lastLog = const $CopyWithPlaceholder(),
     Object? tags = const $CopyWithPlaceholder(),
     Object? buddies = const $CopyWithPlaceholder(),
     Object? selectedDive = const $CopyWithPlaceholder(),
@@ -114,10 +110,6 @@ class _$DiveListLoadedCWProxyImpl implements _$DiveListLoadedCWProxy {
           ? _value.sites
           // ignore: cast_nullable_to_non_nullable
           : sites as List<Site>,
-      lastLog == const $CopyWithPlaceholder()
-          ? _value.lastLog
-          // ignore: cast_nullable_to_non_nullable
-          : lastLog as Log?,
       tags == const $CopyWithPlaceholder() || tags == null
           ? _value.tags
           // ignore: cast_nullable_to_non_nullable
@@ -163,11 +155,14 @@ extension $DiveListLoadedCopyWith on DiveListLoaded {
   /// ```dart
   /// DiveListLoaded(...).copyWithNull(firstField: true, secondField: true)
   /// ```
-  DiveListLoaded copyWithNull({bool lastLog = false, bool selectedDive = false, bool selectedDiveSite = false, bool selectedSite = false}) {
+  DiveListLoaded copyWithNull({
+    bool selectedDive = false,
+    bool selectedDiveSite = false,
+    bool selectedSite = false,
+  }) {
     return DiveListLoaded(
       dives,
       sites,
-      lastLog == true ? null : this.lastLog,
       tags,
       buddies,
       selectedDive: selectedDive == true ? null : this.selectedDive,

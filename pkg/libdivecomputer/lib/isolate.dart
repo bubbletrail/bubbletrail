@@ -158,9 +158,9 @@ class DownloadRequest extends RequestBase {
   final String writeFifoPath;
   final int descriptorIndex;
   final SendPort sendPort;
-  final Log? lastDiveLog;
+  final List<int>? ldcFingerprint;
 
-  DownloadRequest({required this.readFifoPath, required this.writeFifoPath, required this.descriptorIndex, required this.sendPort, this.lastDiveLog});
+  DownloadRequest({required this.readFifoPath, required this.writeFifoPath, required this.descriptorIndex, required this.sendPort, this.ldcFingerprint});
 }
 
 /// Entry point for the download isolate.
@@ -266,16 +266,9 @@ void _downloadIsolateEntry(DownloadRequest request) {
         try {
           final dive = parseDiveFromParser(parser.value, fingerprint: fpBytes, model: deviceModel, serial: deviceSerial);
 
-          _log.info('comparing last dive fp ${request.lastDiveLog?.ldcFingerprint} to ${dive.ldcFingerprint}');
-          if (request.lastDiveLog != null && request.lastDiveLog!.ldcFingerprint == dive.ldcFingerprint) {
+          _log.info('comparing last dive fp ${request.ldcFingerprint} to ${dive.ldcFingerprint}');
+          if (request.ldcFingerprint != null && request.ldcFingerprint! == dive.ldcFingerprint) {
             // We've already seen this one.
-            // calloc.free(parser);
-            return 0;
-          }
-          _log.info('comparing last dive date ${request.lastDiveLog?.dateTime.seconds} to ${dive.dateTime.seconds}');
-          if (request.lastDiveLog != null && request.lastDiveLog!.dateTime.seconds.compareTo(dive.dateTime.seconds) >= 0) {
-            // XXX: This should definitely be optional
-            // The last dive is newer than what we're importing now
             // calloc.free(parser);
             return 0;
           }

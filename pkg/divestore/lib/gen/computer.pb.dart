@@ -27,7 +27,7 @@ class Computer extends $pb.GeneratedMessage {
     $core.String? advertisedName,
     $core.String? vendor,
     $core.String? product,
-    $core.String? ldcFingerprint,
+    $core.List<$core.int>? ldcFingerprint,
   }) {
     final result = create();
     if (remoteId != null) result.remoteId = remoteId;
@@ -56,7 +56,7 @@ class Computer extends $pb.GeneratedMessage {
         ..aOS(5, _omitFieldNames ? '' : 'advertisedName')
         ..aOS(6, _omitFieldNames ? '' : 'vendor')
         ..aOS(7, _omitFieldNames ? '' : 'product')
-        ..aOS(8, _omitFieldNames ? '' : 'ldcFingerprint')
+        ..a<$core.List<$core.int>>(8, _omitFieldNames ? '' : 'ldcFingerprint', $pb.PbFieldType.OY)
         ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -150,9 +150,9 @@ class Computer extends $pb.GeneratedMessage {
 
   /// libdivecomputer fingerprint from last download
   @$pb.TagNumber(8)
-  $core.String get ldcFingerprint => $_getSZ(7);
+  $core.List<$core.int> get ldcFingerprint => $_getN(7);
   @$pb.TagNumber(8)
-  set ldcFingerprint($core.String value) => $_setString(7, value);
+  set ldcFingerprint($core.List<$core.int> value) => $_setBytes(7, value);
   @$pb.TagNumber(8)
   $core.bool hasLdcFingerprint() => $_has(7);
   @$pb.TagNumber(8)

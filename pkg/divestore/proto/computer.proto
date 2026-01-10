@@ -23,5 +23,5 @@ message Computer {
   string product = 7;
 
   // libdivecomputer fingerprint from last download
-  string ldc_fingerprint = 8;
+  bytes ldc_fingerprint = 8;
 }
