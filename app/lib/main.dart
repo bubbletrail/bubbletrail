@@ -77,6 +77,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
   late final SyncBloc _syncBloc;
   late final DiveListBloc _diveListBloc;
   late final CylinderListBloc _cylinderListBloc;
+  late final BleBloc _bleBloc;
   late final GoRouter _router;
   final _preferencesBloc = PreferencesBloc();
 
@@ -86,6 +87,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
     _syncBloc = SyncBloc();
     _diveListBloc = DiveListBloc(_syncBloc);
     _cylinderListBloc = CylinderListBloc(_syncBloc);
+    _bleBloc = BleBloc(_diveListBloc, _syncBloc);
     _setupFileHandler();
     if (WindowPreferences.isSupported) {
       windowManager.addListener(this);
@@ -340,7 +342,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
         BlocProvider.value(value: _diveListBloc),
         BlocProvider.value(value: _cylinderListBloc),
         BlocProvider.value(value: _preferencesBloc),
-        BlocProvider(create: (context) => BleBloc(_diveListBloc)..add(const BleStarted())),
+        BlocProvider.value(value: _bleBloc),
       ],
       child: BlocListener<PreferencesBloc, PreferencesState>(
         listener: (context, state) {

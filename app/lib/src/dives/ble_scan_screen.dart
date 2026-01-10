@@ -1,3 +1,4 @@
+import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -70,30 +71,123 @@ class BleScanScreen extends StatelessWidget {
 
     final filteredResults = state.filteredScanResults;
     final hasHiddenDevices = state.scanResults.length > filteredResults.length;
+    final hasRememberedComputers = state.rememberedComputers.isNotEmpty;
+    final hasScannedDevices = state.scanResults.isNotEmpty;
 
     return Column(
       children: [
         if (state.isScanning) const LinearProgressIndicator() else const SizedBox(height: 4),
-        Padding(
-          padding: const .symmetric(horizontal: 16, vertical: 8),
-          child: Row(
+        Expanded(
+          child: ListView(
+            padding: const .all(8),
             children: [
-              Expanded(
-                child: Text(
-                  hasHiddenDevices && !state.showAllDevices
-                      ? '${filteredResults.length} dive computer(s) found'
-                      : '${state.scanResults.length} device(s) found',
-                  style: Theme.of(context).textTheme.bodySmall,
+              // Remembered computers section
+              if (hasRememberedComputers) ...[
+                Padding(
+                  padding: const .symmetric(horizontal: 8, vertical: 4),
+                  child: Text('Saved computers', style: Theme.of(context).textTheme.titleSmall),
                 ),
-              ),
-              const Text('Show all'),
-              Switch(value: state.showAllDevices, onChanged: (_) => context.read<BleBloc>().add(const BleToggleShowAllDevices())),
+                ..._buildRememberedComputersList(context, state),
+                const SizedBox(height: 16),
+              ],
+              // Scan results section
+              if (hasScannedDevices || state.isScanning) ...[
+                Padding(
+                  padding: const .symmetric(horizontal: 8, vertical: 4),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          hasHiddenDevices && !state.showAllDevices
+                              ? '${filteredResults.length} dive computer(s) found'
+                              : '${state.scanResults.length} device(s) found',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                      ),
+                      const Text('Show all'),
+                      Switch(value: state.showAllDevices, onChanged: (_) => context.read<BleBloc>().add(const BleToggleShowAllDevices())),
+                    ],
+                  ),
+                ),
+                ..._buildScannedDevicesList(context, state),
+              ],
+              // Empty state when no remembered computers and no scan results
+              if (!hasRememberedComputers && !hasScannedDevices && !state.isScanning) _buildEmptyState(context, state),
             ],
           ),
         ),
-        Expanded(child: filteredResults.isEmpty ? _buildEmptyState(context, state) : _buildDeviceList(context, state)),
       ],
     );
+  }
+
+  List<Widget> _buildRememberedComputersList(BuildContext context, BleState state) {
+    return state.rememberedComputers.map((computer) => _buildRememberedComputerCard(context, computer)).toList();
+  }
+
+  Widget _buildRememberedComputerCard(BuildContext context, Computer computer) {
+    return Card(
+      child: ListTile(
+        leading: const FaIcon(FontAwesomeIcons.bluetoothB),
+        title: Text('${computer.vendor} ${computer.product}'),
+        subtitle: Row(
+          spacing: 4,
+          children: [
+            FaIcon(FontAwesomeIcons.idBadge, size: 16),
+            Text(computer.remoteId, style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ),
+        trailing: Row(
+          mainAxisSize: .min,
+          children: [
+            FilledButton(onPressed: () => context.read<BleBloc>().add(BleConnectToRememberedComputer(computer)), child: const Text('Download')),
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'forget') {
+                  context.read<BleBloc>().add(BleForgetComputer(computer));
+                }
+              },
+              itemBuilder: (context) => [const PopupMenuItem(value: 'forget', child: Text('Forget'))],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildScannedDevicesList(BuildContext context, BleState state) {
+    final results = state.filteredScanResults;
+    return results.map((result) {
+      final device = result.device;
+      return Card(
+        child: ListTile(
+          leading: const FaIcon(FontAwesomeIcons.bluetoothB),
+          title: Text(device.platformName),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 4.0),
+            child: Column(
+              spacing: 4,
+              children: [
+                Row(
+                  spacing: 4,
+                  children: [
+                    FaIcon(FontAwesomeIcons.signal, size: 16),
+                    Text('${_getSignalStrengthLabel(result.rssi)} (${result.rssi} dBm)', style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                ),
+                Row(
+                  spacing: 4,
+                  children: [
+                    FaIcon(FontAwesomeIcons.idBadge, size: 16),
+                    Text(result.device.remoteId.str, style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          trailing: ElevatedButton(onPressed: () => context.read<BleBloc>().add(BleConnectToDevice(device)), child: const Text('Connect')),
+        ),
+      );
+    }).toList();
   }
 
   Widget _buildConnectedDeviceCard(BuildContext context, BleState state) {
@@ -285,42 +379,10 @@ class BleScanScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDeviceList(BuildContext context, BleState state) {
-    final results = state.filteredScanResults;
-    return ListView.builder(
-      padding: const .all(8),
-      itemCount: results.length,
-      itemBuilder: (context, index) {
-        final result = results[index];
-        final device = result.device;
-
-        return Card(
-          child: ListTile(
-            leading: const FaIcon(FontAwesomeIcons.bluetoothB),
-            title: Text(device.platformName),
-            subtitle: Row(
-              children: [
-                FaIcon(_getSignalIcon(result.rssi), size: 16, color: Theme.of(context).colorScheme.secondary),
-                const SizedBox(width: 4),
-                Text('${_getSignalStrengthLabel(result.rssi)} (${result.rssi} dBm)', style: Theme.of(context).textTheme.bodySmall),
-              ],
-            ),
-            trailing: ElevatedButton(onPressed: () => context.read<BleBloc>().add(BleConnectToDevice(device)), child: const Text('Connect')),
-          ),
-        );
-      },
-    );
-  }
-
   String _getSignalStrengthLabel(int rssi) {
     if (rssi >= -50) return 'Excellent';
     if (rssi >= -60) return 'Good';
     if (rssi >= -70) return 'Fair';
     return 'Weak';
-  }
-
-  IconData _getSignalIcon(int rssi) {
-    // FontAwesome only has one signal icon, so we use it for all strengths
-    return FontAwesomeIcons.signal;
   }
 }

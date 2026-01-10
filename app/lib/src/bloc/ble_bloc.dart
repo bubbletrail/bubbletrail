@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'divelist_bloc.dart';
+import 'sync_bloc.dart';
 
 final _log = Logger('ble_bloc.dart');
 
@@ -152,9 +153,37 @@ class _BleLoadedSupportedComputers extends BleEvent {
   List<Object?> get props => [computers];
 }
 
+class _BleLoadedRememberedComputers extends BleEvent {
+  final List<Computer> computers;
+
+  const _BleLoadedRememberedComputers(this.computers);
+
+  @override
+  List<Object?> get props => [computers];
+}
+
+class BleConnectToRememberedComputer extends BleEvent {
+  final Computer computer;
+
+  const BleConnectToRememberedComputer(this.computer);
+
+  @override
+  List<Object?> get props => [computer];
+}
+
+class BleForgetComputer extends BleEvent {
+  final Computer computer;
+
+  const BleForgetComputer(this.computer);
+
+  @override
+  List<Object?> get props => [computer];
+}
+
 // State
 class BleState extends Equatable {
   final List<dc.ComputerDescriptor> supportedComputers;
+  final List<Computer> rememberedComputers;
   final BluetoothAdapterState adapterState;
   final List<(ScanResult, List<dc.ComputerDescriptor>)> scanResults;
   final bool isScanning;
@@ -170,6 +199,7 @@ class BleState extends Equatable {
 
   const BleState({
     this.supportedComputers = const [],
+    this.rememberedComputers = const [],
     this.adapterState = BluetoothAdapterState.unknown,
     this.scanResults = const [],
     this.isScanning = false,
@@ -193,6 +223,7 @@ class BleState extends Equatable {
 
   BleState copyWith({
     List<dc.ComputerDescriptor>? supportedComputers,
+    List<Computer>? rememberedComputers,
     BluetoothAdapterState? adapterState,
     List<(ScanResult, List<dc.ComputerDescriptor>)>? scanResults,
     bool? isScanning,
@@ -211,6 +242,7 @@ class BleState extends Equatable {
   }) {
     return BleState(
       supportedComputers: supportedComputers ?? this.supportedComputers,
+      rememberedComputers: rememberedComputers ?? this.rememberedComputers,
       adapterState: adapterState ?? this.adapterState,
       scanResults: scanResults ?? this.scanResults,
       isScanning: isScanning ?? this.isScanning,
@@ -229,6 +261,7 @@ class BleState extends Equatable {
   @override
   List<Object?> get props => [
     supportedComputers,
+    rememberedComputers,
     adapterState,
     scanResults,
     isScanning,
@@ -247,6 +280,8 @@ class BleState extends Equatable {
 // Bloc
 class BleBloc extends Bloc<BleEvent, BleState> {
   final DiveListBloc _diveListBloc;
+  final SyncBloc _syncBloc;
+  late final Store _store;
   Log? _lastDiveLog;
   StreamSubscription? _diveListBlocSubscription;
   StreamSubscription<BluetoothAdapterState>? _adapterStateSubscription;
@@ -255,9 +290,15 @@ class BleBloc extends Bloc<BleEvent, BleState> {
   StreamSubscription<BluetoothConnectionState>? _connectionSubscription;
   final _matchedDevices = <String, List<dc.ComputerDescriptor>>{};
 
-  BleBloc(this._diveListBloc) : super(const BleState()) {
+  BleBloc(this._diveListBloc, this._syncBloc) : super(const BleState()) {
     on<BleEvent>(_onEvent, transformer: sequential());
     dc.dcDescriptorIterate().then((comps) => add(_BleLoadedSupportedComputers(comps)));
+
+    _syncBloc.store.then((store) async {
+      _store = store;
+      final computers = await _store.computers.getAll();
+      add(_BleLoadedRememberedComputers(computers));
+    });
 
     final curState = _diveListBloc.state;
     if (curState is DiveListLoaded) {
@@ -268,6 +309,8 @@ class BleBloc extends Bloc<BleEvent, BleState> {
         _lastDiveLog = state.lastLog;
       }
     });
+
+    add(BleStarted());
   }
 
   Future<void> _onEvent(BleEvent event, Emitter<BleState> emit) async {
@@ -278,6 +321,12 @@ class BleBloc extends Bloc<BleEvent, BleState> {
         emit(state.copyWith(adapterState: adapterState));
       case _BleLoadedSupportedComputers(:final computers):
         emit(state.copyWith(supportedComputers: computers));
+      case _BleLoadedRememberedComputers(:final computers):
+        emit(state.copyWith(rememberedComputers: computers));
+      case BleConnectToRememberedComputer(:final computer):
+        await _onConnectToRememberedComputer(computer, emit);
+      case BleForgetComputer(:final computer):
+        await _onForgetComputer(computer, emit);
       case BleStartScan():
         await _onStartScan(emit);
       case _BleScanResultsUpdated(:final results):
@@ -397,6 +446,12 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       return;
     }
 
+    // Remember this computer for future downloads
+    final device = state.connectedDevice;
+    if (device != null) {
+      await _rememberComputer(device.remoteId.str, device.platformName, computer, emit);
+    }
+
     emit(state.copyWith(isDownloading: true, clearDownloadProgress: true, downloadedDives: [], clearError: true));
 
     // Set up BLE notifications on the RX characteristic
@@ -445,6 +500,58 @@ class BleBloc extends Bloc<BleEvent, BleState> {
         await charPair.rx.setNotifyValue(false);
       } catch (_) {}
     });
+  }
+
+  Future<void> _onConnectToRememberedComputer(Computer computer, Emitter<BleState> emit) async {
+    emit(state.copyWith(clearError: true));
+
+    // Find the descriptor for this computer from the supported computers list
+    final descriptor = state.supportedComputers.where((d) => d.vendor == computer.vendor && d.model == computer.product).toList();
+    if (descriptor.isEmpty) {
+      emit(state.copyWith(error: 'Could not find descriptor for ${computer.vendor} ${computer.product}'));
+      return;
+    }
+
+    // Connect to the device using the remembered remote ID
+    final device = BluetoothDevice.fromId(computer.remoteId);
+
+    await _connectionSubscription?.cancel();
+    _connectionSubscription = device.connectionState.listen((connectionState) {
+      add(_BleConnectionStateChanged(connectionState));
+    });
+
+    try {
+      await device.connect(license: .free, timeout: const Duration(seconds: 15));
+      emit(state.copyWith(connectedDevice: device, isDiscoveringServices: true));
+      final services = await device.discoverServices();
+      add(_BleServicesDiscovered(services));
+
+      // Auto-start download with the stored descriptor
+      add(BleStartDownload(descriptor.first));
+    } catch (e) {
+      emit(state.copyWith(error: 'Failed to connect: $e'));
+    }
+  }
+
+  Future<void> _onForgetComputer(Computer computer, Emitter<BleState> emit) async {
+    await _store.computers.delete(computer.remoteId);
+    final computers = await _store.computers.getAll();
+    emit(state.copyWith(rememberedComputers: computers));
+  }
+
+  Future<void> _rememberComputer(String remoteId, String advertisedName, dc.ComputerDescriptor descriptor, Emitter<BleState> emit) async {
+    // Check if this computer is already remembered
+    final existing = await _store.computers.getByRemoteId(remoteId);
+    if (existing != null) return;
+
+    // Save the new computer
+    final computer = Computer(remoteId: remoteId, advertisedName: advertisedName, vendor: descriptor.vendor, product: descriptor.model);
+    await _store.computers.insert(computer);
+    _log.info('saved remembered computer: ${computer.vendor} ${computer.product}');
+
+    // Update the state with the new list
+    final computers = await _store.computers.getAll();
+    emit(state.copyWith(rememberedComputers: computers));
   }
 
   Future<void> _onDisconnect(Emitter<BleState> emit) async {
