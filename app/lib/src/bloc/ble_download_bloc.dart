@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:libdivecomputer/libdivecomputer.dart' as dc;
+import 'package:libdivecomputer/libdivecomputer.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -14,6 +15,8 @@ import 'ble_scan_bloc.dart';
 import 'divelist_bloc.dart';
 import 'sync_bloc.dart';
 
+part 'ble_download_bloc.g.dart';
+
 final _log = Logger('ble_download_bloc.dart');
 
 // Events
@@ -21,8 +24,8 @@ sealed class BleDownloadEvent extends Equatable {
   const BleDownloadEvent();
 
   const factory BleDownloadEvent.connectToDevice(BluetoothDevice device) = _ConnectToDevice;
-  const factory BleDownloadEvent.connectToRemembered(Computer computer, dc.ComputerDescriptor descriptor) = _ConnectToRemembered;
-  const factory BleDownloadEvent.start(dc.ComputerDescriptor computer) = _Start;
+  const factory BleDownloadEvent.connectToRemembered(Computer computer, ComputerDescriptor descriptor) = _ConnectToRemembered;
+  const factory BleDownloadEvent.start(ComputerDescriptor computer) = _Start;
   const factory BleDownloadEvent.disconnect() = _Disconnect;
 
   @override
@@ -40,7 +43,7 @@ class _ConnectToDevice extends BleDownloadEvent {
 
 class _ConnectToRemembered extends BleDownloadEvent {
   final Computer computer;
-  final dc.ComputerDescriptor descriptor;
+  final ComputerDescriptor descriptor;
 
   const _ConnectToRemembered(this.computer, this.descriptor);
 
@@ -49,7 +52,7 @@ class _ConnectToRemembered extends BleDownloadEvent {
 }
 
 class _Start extends BleDownloadEvent {
-  final dc.ComputerDescriptor computer;
+  final ComputerDescriptor computer;
 
   const _Start(this.computer);
 
@@ -80,7 +83,7 @@ class _ServicesDiscovered extends BleDownloadEvent {
 }
 
 class _Progress extends BleDownloadEvent {
-  final dc.DownloadProgress progress;
+  final DownloadProgress progress;
 
   const _Progress(this.progress);
 
@@ -110,19 +113,29 @@ class _Failed extends BleDownloadEvent {
   List<Object?> get props => [error];
 }
 
-// State
+class _NewLastLogDate extends BleDownloadEvent {
+  final DateTime lastLogDate;
+
+  const _NewLastLogDate(this.lastLogDate);
+
+  @override
+  List<Object?> get props => [lastLogDate];
+}
+
+@CopyWith(copyWithNull: true)
 class BleDownloadState extends Equatable {
   final BluetoothDevice? connectedDevice;
   final BluetoothConnectionState connectionState;
   final List<BluetoothService> discoveredServices;
   final bool isDiscoveringServices;
   final bool isDownloading;
-  final dc.DownloadProgress? downloadProgress;
+  final DownloadProgress? downloadProgress;
   final List<Dive> downloadedDives;
   final String? error;
+  final DateTime? lastLogDate;
 
   /// If connecting to a remembered computer, auto-start with this descriptor
-  final dc.ComputerDescriptor? autoStartDescriptor;
+  final ComputerDescriptor? autoStartDescriptor;
 
   const BleDownloadState({
     this.connectedDevice,
@@ -133,39 +146,12 @@ class BleDownloadState extends Equatable {
     this.downloadProgress,
     this.downloadedDives = const [],
     this.error,
+    this.lastLogDate,
     this.autoStartDescriptor,
   });
 
   bool get isConnected => connectionState == BluetoothConnectionState.connected;
   bool get isReadyToDownload => isConnected && discoveredServices.isNotEmpty && !isDownloading;
-
-  BleDownloadState copyWith({
-    BluetoothDevice? connectedDevice,
-    bool clearConnectedDevice = false,
-    BluetoothConnectionState? connectionState,
-    List<BluetoothService>? discoveredServices,
-    bool? isDiscoveringServices,
-    bool? isDownloading,
-    dc.DownloadProgress? downloadProgress,
-    bool clearDownloadProgress = false,
-    List<Dive>? downloadedDives,
-    String? error,
-    bool clearError = false,
-    dc.ComputerDescriptor? autoStartDescriptor,
-    bool clearAutoStartDescriptor = false,
-  }) {
-    return BleDownloadState(
-      connectedDevice: clearConnectedDevice ? null : (connectedDevice ?? this.connectedDevice),
-      connectionState: connectionState ?? this.connectionState,
-      discoveredServices: discoveredServices ?? this.discoveredServices,
-      isDiscoveringServices: isDiscoveringServices ?? this.isDiscoveringServices,
-      isDownloading: isDownloading ?? this.isDownloading,
-      downloadProgress: clearDownloadProgress ? null : (downloadProgress ?? this.downloadProgress),
-      downloadedDives: downloadedDives ?? this.downloadedDives,
-      error: clearError ? null : (error ?? this.error),
-      autoStartDescriptor: clearAutoStartDescriptor ? null : (autoStartDescriptor ?? this.autoStartDescriptor),
-    );
-  }
 
   @override
   List<Object?> get props => [
@@ -177,6 +163,7 @@ class BleDownloadState extends Equatable {
     downloadProgress,
     downloadedDives,
     error,
+    lastLogDate,
     autoStartDescriptor,
   ];
 }
@@ -188,6 +175,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
   final BleScanBloc _scanBloc;
   late final Store _store;
   StreamSubscription<BluetoothConnectionState>? _connectionSubscription;
+  StreamSubscription<DiveListState>? _diveListSubscription;
 
   BleDownloadBloc(this._diveListBloc, this._syncBloc, this._scanBloc) : super(const BleDownloadState()) {
     on<BleDownloadEvent>(_onEvent, transformer: sequential());
@@ -195,10 +183,26 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     _syncBloc.store.then((store) {
       _store = store;
     });
+
+    _processDiveListState(_diveListBloc.state);
+    _diveListSubscription = _diveListBloc.stream.listen(_processDiveListState);
+  }
+
+  void _processDiveListState(DiveListState state) {
+    if (state is! DiveListLoaded) return;
+    final lastLogTime = state.dives.fold(DateTime.fromMillisecondsSinceEpoch(0), (dt, dive) {
+      if (dive.logs.isEmpty) return dt;
+      final diveT = dive.logs.first.dateTime.toDateTime();
+      if (diveT.isAfter(dt)) return diveT;
+      return dt;
+    });
+    add(_NewLastLogDate(lastLogTime));
   }
 
   Future<void> _onEvent(BleDownloadEvent event, Emitter<BleDownloadState> emit) async {
     switch (event) {
+      case _NewLastLogDate(:final lastLogDate):
+        emit(state.copyWith(lastLogDate: lastLogDate));
       case _ConnectToDevice(:final device):
         await _onConnectToDevice(device, null, emit);
       case _ConnectToRemembered(:final computer, :final descriptor):
@@ -216,17 +220,17 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
       case _Completed():
         _onDownloadCompleted(emit);
       case _Failed(:final error):
-        emit(state.copyWith(isDownloading: false, clearDownloadProgress: true, error: error));
+        emit(state.copyWith(isDownloading: false, error: error).copyWithNull(downloadProgress: true));
       case _Disconnect():
         await _onDisconnect(emit);
     }
   }
 
-  Future<void> _onConnectToDevice(BluetoothDevice device, dc.ComputerDescriptor? autoStart, Emitter<BleDownloadState> emit) async {
+  Future<void> _onConnectToDevice(BluetoothDevice device, ComputerDescriptor? autoStart, Emitter<BleDownloadState> emit) async {
     // Stop scanning first
     await _scanBloc.stopScanningForDownload();
 
-    emit(state.copyWith(clearError: true, autoStartDescriptor: autoStart, clearAutoStartDescriptor: autoStart == null));
+    emit(state.copyWith(autoStartDescriptor: autoStart).copyWithNull(error: true, autoStartDescriptor: autoStart == null));
 
     await _connectionSubscription?.cancel();
     _connectionSubscription = device.connectionState.listen((connectionState) {
@@ -243,7 +247,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     }
   }
 
-  Future<void> _onConnectToRemembered(Computer computer, dc.ComputerDescriptor descriptor, Emitter<BleDownloadState> emit) async {
+  Future<void> _onConnectToRemembered(Computer computer, ComputerDescriptor descriptor, Emitter<BleDownloadState> emit) async {
     final device = BluetoothDevice.fromId(computer.remoteId);
     await _onConnectToDevice(device, descriptor, emit);
   }
@@ -251,13 +255,9 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
   void _onConnectionStateChanged(BluetoothConnectionState connectionState, Emitter<BleDownloadState> emit) {
     if (connectionState == BluetoothConnectionState.disconnected && state.connectionState == BluetoothConnectionState.connected) {
       emit(
-        state.copyWith(
-          connectionState: connectionState,
-          clearConnectedDevice: true,
-          discoveredServices: [],
-          isDiscoveringServices: false,
-          clearAutoStartDescriptor: true,
-        ),
+        state
+            .copyWith(connectionState: connectionState, discoveredServices: [], isDiscoveringServices: false)
+            .copyWithNull(connectedDevice: true, autoStartDescriptor: true),
       );
     } else {
       emit(state.copyWith(connectionState: connectionState));
@@ -274,7 +274,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     }
   }
 
-  Future<void> _onStartDownload(dc.ComputerDescriptor computer, Emitter<BleDownloadState> emit) async {
+  Future<void> _onStartDownload(ComputerDescriptor computer, Emitter<BleDownloadState> emit) async {
     final device = state.connectedDevice;
     if (device == null) return;
 
@@ -290,7 +290,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     }
 
     _log.info('starting download from ${device.remoteId.str} (${device.platformName})');
-    emit(state.copyWith(isDownloading: true, clearDownloadProgress: true, downloadedDives: [], clearError: true, clearAutoStartDescriptor: true));
+    emit(state.copyWith(isDownloading: true, downloadedDives: []).copyWithNull(downloadProgress: true, error: true, autoStartDescriptor: true));
 
     // If we have a remembered computer already, grab the fingerprint from there
     final remembered = await _store.computers.getByRemoteId(device.remoteId.str);
@@ -309,40 +309,42 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     }
 
     // Create BLE characteristics wrapper for the download
-    final ble = dc.BleCharacteristics(read: charPair.rx.onValueReceived, write: charPair.rx.write);
+    final ble = BleCharacteristics(read: charPair.rx.onValueReceived, write: charPair.rx.write);
 
     // Start the download and process events
     final dir = await getApplicationSupportDirectory();
-    final sub = dc.startDownload(ble: ble, computer: computer, fifoDirectory: dir.path, ldcFingerprint: ldcFingerprint).listen((event) {
+    final sub = startDownload(ble: ble, computer: computer, fifoDirectory: dir.path, ldcFingerprint: ldcFingerprint, lastLogDate: state.lastLogDate).listen((
+      event,
+    ) {
       switch (event) {
-        case dc.DownloadStarted():
+        case DownloadStarted():
           _log.info('download started');
           WakelockPlus.enable();
 
-        case dc.DownloadProgressEvent(:final progress):
+        case DownloadProgressEvent(:final progress):
           add(_Progress(progress));
 
-        case dc.DownloadDeviceInfo(:final info):
+        case DownloadDeviceInfo(:final info):
           _log.fine('device info: $info');
           // Remember the device serial
           _store.computers.update(remoteId: state.connectedDevice!.remoteId.str, serial: info.serial.toString());
 
-        case dc.DownloadDiveReceived(:final dive):
+        case DownloadDiveReceived(:final dive):
           _log.fine('received dive ${dive.dateTime.toDateTime()}');
           final cdive = convertDcDive(dive);
           add(_DiveReceived(cdive));
 
-        case dc.DownloadCompleted():
+        case DownloadCompleted():
           _log.info('download completed');
           add(const _Completed());
           WakelockPlus.disable();
 
-        case dc.DownloadError(:final message):
+        case DownloadError(:final message):
           _log.warning('download error: $message');
           add(_Failed(message));
           WakelockPlus.disable();
 
-        case dc.DownloadWaiting():
+        case DownloadWaiting():
           _log.info('waiting for user action on device');
       }
     });
@@ -367,19 +369,16 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     // Refresh the remembered computers list in scan bloc
     _scanBloc.add(BleScanEvent.refreshRemembered());
 
-    emit(state.copyWith(isDownloading: false, clearDownloadProgress: true));
+    emit(state.copyWith(isDownloading: false).copyWithNull(downloadProgress: true));
   }
 
   Future<void> _onDisconnect(Emitter<BleDownloadState> emit) async {
     if (state.connectedDevice != null) {
       await state.connectedDevice!.disconnect();
       emit(
-        state.copyWith(
-          clearConnectedDevice: true,
-          connectionState: BluetoothConnectionState.disconnected,
-          discoveredServices: [],
-          clearAutoStartDescriptor: true,
-        ),
+        state
+            .copyWith(connectionState: BluetoothConnectionState.disconnected, discoveredServices: [])
+            .copyWithNull(connectedDevice: true, autoStartDescriptor: true),
       );
     }
   }
@@ -387,6 +386,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
   @override
   Future<void> close() {
     _connectionSubscription?.cancel();
+    _diveListSubscription?.cancel();
     return super.close();
   }
 }

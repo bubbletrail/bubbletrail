@@ -1,13 +1,16 @@
 import 'dart:async';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:libdivecomputer/libdivecomputer.dart' as dc;
+import 'package:libdivecomputer/libdivecomputer.dart';
 
 import 'sync_bloc.dart';
+
+part 'ble_scan_bloc.g.dart';
 
 // Events
 sealed class BleScanEvent extends Equatable {
@@ -85,7 +88,7 @@ class _ScanStatusChanged extends BleScanEvent {
 }
 
 class _LoadedSupportedComputers extends BleScanEvent {
-  final List<dc.ComputerDescriptor> computers;
+  final List<ComputerDescriptor> computers;
 
   const _LoadedSupportedComputers(this.computers);
 
@@ -102,12 +105,12 @@ class _LoadedRememberedComputers extends BleScanEvent {
   List<Object?> get props => [computers];
 }
 
-// State
+@CopyWith(copyWithNull: true)
 class BleScanState extends Equatable {
   final BluetoothAdapterState adapterState;
-  final List<dc.ComputerDescriptor> supportedComputers;
+  final List<ComputerDescriptor> supportedComputers;
   final List<Computer> rememberedComputers;
-  final List<(ScanResult, List<dc.ComputerDescriptor>)> scanResults;
+  final List<(ScanResult, List<ComputerDescriptor>)> scanResults;
   final bool isScanning;
   final bool showAllDevices;
   final String? error;
@@ -127,30 +130,9 @@ class BleScanState extends Equatable {
     return scanResults.where((e) => e.$2.isNotEmpty).map((e) => e.$1).toList();
   }
 
-  List<dc.ComputerDescriptor> descriptorsForDevice(BluetoothDevice device) {
+  List<ComputerDescriptor> descriptorsForDevice(BluetoothDevice device) {
     final match = scanResults.where((r) => r.$1.device.remoteId == device.remoteId).firstOrNull;
     return match?.$2 ?? [];
-  }
-
-  BleScanState copyWith({
-    BluetoothAdapterState? adapterState,
-    List<dc.ComputerDescriptor>? supportedComputers,
-    List<Computer>? rememberedComputers,
-    List<(ScanResult, List<dc.ComputerDescriptor>)>? scanResults,
-    bool? isScanning,
-    bool? showAllDevices,
-    String? error,
-    bool clearError = false,
-  }) {
-    return BleScanState(
-      adapterState: adapterState ?? this.adapterState,
-      supportedComputers: supportedComputers ?? this.supportedComputers,
-      rememberedComputers: rememberedComputers ?? this.rememberedComputers,
-      scanResults: scanResults ?? this.scanResults,
-      isScanning: isScanning ?? this.isScanning,
-      showAllDevices: showAllDevices ?? this.showAllDevices,
-      error: clearError ? null : (error ?? this.error),
-    );
   }
 
   @override
@@ -164,12 +146,12 @@ class BleScanBloc extends Bloc<BleScanEvent, BleScanState> {
   StreamSubscription<BluetoothAdapterState>? _adapterStateSubscription;
   StreamSubscription<List<ScanResult>>? _scanSubscription;
   StreamSubscription<bool>? _scanStatusSubscription;
-  final _matchedDevices = <String, List<dc.ComputerDescriptor>>{};
+  final _matchedDevices = <String, List<ComputerDescriptor>>{};
 
   BleScanBloc(this._syncBloc) : super(const BleScanState()) {
     on<BleScanEvent>(_onEvent, transformer: sequential());
 
-    dc.dcDescriptorIterate().then((comps) => add(_LoadedSupportedComputers(comps)));
+    dcDescriptorIterate().then((comps) => add(_LoadedSupportedComputers(comps)));
 
     _syncBloc.store.then((store) async {
       _store = store;
@@ -219,7 +201,7 @@ class BleScanBloc extends Bloc<BleScanEvent, BleScanState> {
 
   Future<void> _onStartScan(Emitter<BleScanState> emit) async {
     if (state.isScanning) return;
-    emit(state.copyWith(scanResults: [], clearError: true));
+    emit(state.copyWith(scanResults: []).copyWithNull(error: true));
 
     await _scanSubscription?.cancel();
     _scanSubscription = FlutterBluePlus.scanResults.listen((results) {
@@ -246,7 +228,7 @@ class BleScanBloc extends Bloc<BleScanEvent, BleScanState> {
   Future<void> _onScanResultsUpdated(List<ScanResult> results, Emitter<BleScanState> emit) async {
     for (final res in results) {
       if (!_matchedDevices.containsKey(res.device.platformName)) {
-        _matchedDevices[res.device.platformName] = await dc.dcDescriptorIterate(filterForName: res.device.platformName);
+        _matchedDevices[res.device.platformName] = await dcDescriptorIterate(filterForName: res.device.platformName);
       }
     }
     final scanResults = results.map((e) => (e, _matchedDevices[e.device.platformName] ?? [])).toList();
