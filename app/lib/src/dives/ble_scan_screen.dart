@@ -133,7 +133,7 @@ class BleScanScreen extends StatelessWidget {
           spacing: 4,
           children: [
             FaIcon(FontAwesomeIcons.idBadge, size: 16),
-            Text(computer.remoteId, style: Theme.of(context).textTheme.bodySmall),
+            Text(computer.hasSerial() ? computer.serial : computer.remoteId, style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
         trailing: Row(

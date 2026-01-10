@@ -28,6 +28,7 @@ class Computer extends $pb.GeneratedMessage {
     $core.String? vendor,
     $core.String? product,
     $core.List<$core.int>? ldcFingerprint,
+    $core.String? serial,
   }) {
     final result = create();
     if (remoteId != null) result.remoteId = remoteId;
@@ -38,6 +39,7 @@ class Computer extends $pb.GeneratedMessage {
     if (vendor != null) result.vendor = vendor;
     if (product != null) result.product = product;
     if (ldcFingerprint != null) result.ldcFingerprint = ldcFingerprint;
+    if (serial != null) result.serial = serial;
     return result;
   }
 
@@ -57,6 +59,7 @@ class Computer extends $pb.GeneratedMessage {
         ..aOS(6, _omitFieldNames ? '' : 'vendor')
         ..aOS(7, _omitFieldNames ? '' : 'product')
         ..a<$core.List<$core.int>>(8, _omitFieldNames ? '' : 'ldcFingerprint', $pb.PbFieldType.OY)
+        ..aOS(9, _omitFieldNames ? '' : 'serial')
         ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -157,6 +160,16 @@ class Computer extends $pb.GeneratedMessage {
   $core.bool hasLdcFingerprint() => $_has(7);
   @$pb.TagNumber(8)
   void clearLdcFingerprint() => $_clearField(8);
+
+  /// Serial number as reported by device info
+  @$pb.TagNumber(9)
+  $core.String get serial => $_getSZ(8);
+  @$pb.TagNumber(9)
+  set serial($core.String value) => $_setString(8, value);
+  @$pb.TagNumber(9)
+  $core.bool hasSerial() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearSerial() => $_clearField(9);
 }
 
 const $core.bool _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');

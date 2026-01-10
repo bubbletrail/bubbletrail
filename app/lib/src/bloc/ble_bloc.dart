@@ -337,8 +337,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       case _BleDownloadedDive(:final dive):
         emit(state.copyWith(downloadedDives: state.downloadedDives + [dive]));
       case _BleDownloadCompleted():
-        _diveListBloc.add(DownloadedDives(state.downloadedDives));
-        emit(state.copyWith(isDownloading: false, clearDownloadProgress: true));
+        _onBleDownloadCompleted(emit);
       case _BleDownloadFailed(:final error):
         emit(state.copyWith(isDownloading: false, clearDownloadProgress: true, error: error));
       case _BleDownloadProgress(:final progress):
@@ -348,6 +347,17 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       case BleTurnOn():
         await FlutterBluePlus.turnOn();
     }
+  }
+
+  void _onBleDownloadCompleted(Emitter<BleState> emit) {
+    try {
+      // Remember the fingerprint on the downloading computer, if there is a
+      // dive and it has a log etc.
+      _store.computers.update(remoteId: state.connectedDevice!.remoteId.str, ldcFingerprint: state.downloadedDives.first.logs.first.ldcFingerprint);
+    } on StateError catch (_) {}
+
+    _diveListBloc.add(DownloadedDives(state.downloadedDives));
+    emit(state.copyWith(isDownloading: false, clearDownloadProgress: true));
   }
 
   Future<void> _onStarted(Emitter<BleState> emit) async {
@@ -474,6 +484,8 @@ class BleBloc extends Bloc<BleEvent, BleState> {
 
         case dc.DownloadDeviceInfo(:final info):
           _log.fine('device info: $info');
+          // Remember the device serial
+          _store.computers.update(remoteId: state.connectedDevice!.remoteId.str, serial: info.serial.toString());
 
         case dc.DownloadDiveReceived(:final dive):
           _log.fine('received dive ${dive.dateTime.toDateTime()}');
