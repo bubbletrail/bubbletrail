@@ -1,3 +1,6 @@
+export 'computer.pb.dart';
+export 'computer.pbenum.dart';
+export 'computer.pbjson.dart';
 export 'dive.pb.dart';
 export 'dive.pbenum.dart';
 export 'dive.pbjson.dart';

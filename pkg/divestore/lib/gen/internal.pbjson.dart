@@ -61,3 +61,15 @@ const InternalLogList$json = {
 
 /// Descriptor for `InternalLogList`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List internalLogListDescriptor = $convert.base64Decode('Cg9JbnRlcm5hbExvZ0xpc3QSIgoEbG9ncxgBIAMoCzIOLmRpdmVzdG9yZS5Mb2dSBGxvZ3M=');
+
+@$core.Deprecated('Use internalComputerListDescriptor instead')
+const InternalComputerList$json = {
+  '1': 'InternalComputerList',
+  '2': [
+    {'1': 'computers', '3': 1, '4': 3, '5': 11, '6': '.divestore.Computer', '10': 'computers'},
+  ],
+};
+
+/// Descriptor for `InternalComputerList`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List internalComputerListDescriptor = $convert.base64Decode('ChRJbnRlcm5hbENvbXB1dGVyTGlzdBIxCgljb21wdXRlcnMYASADKAsyEy5kaXZlc3RvcmUuQ2'
+    '9tcHV0ZXJSCWNvbXB1dGVycw==');

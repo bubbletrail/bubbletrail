@@ -14,6 +14,7 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
+import 'computer.pb.dart' as $4;
 import 'dive.pb.dart' as $2;
 import 'log.pb.dart' as $3;
 import 'site.pb.dart' as $1;
@@ -184,6 +185,48 @@ class InternalLogList extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(1)
   $pb.PbList<$3.Log> get logs => $_getList(0);
+}
+
+class InternalComputerList extends $pb.GeneratedMessage {
+  factory InternalComputerList({
+    $core.Iterable<$4.Computer>? computers,
+  }) {
+    final result = create();
+    if (computers != null) result.computers.addAll(computers);
+    return result;
+  }
+
+  InternalComputerList._();
+
+  factory InternalComputerList.fromBuffer($core.List<$core.int> data, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory InternalComputerList.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'InternalComputerList',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'), createEmptyInstance: create)
+    ..pPM<$4.Computer>(1, _omitFieldNames ? '' : 'computers', subBuilder: $4.Computer.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  InternalComputerList clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  InternalComputerList copyWith(void Function(InternalComputerList) updates) =>
+      super.copyWith((message) => updates(message as InternalComputerList)) as InternalComputerList;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static InternalComputerList create() => InternalComputerList._();
+  @$core.override
+  InternalComputerList createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static InternalComputerList getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<InternalComputerList>(create);
+  static InternalComputerList? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$4.Computer> get computers => $_getList(0);
 }
 
 const $core.bool _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
