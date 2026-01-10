@@ -154,15 +154,7 @@ class BleScanState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
-    adapterState,
-    supportedComputers,
-    rememberedComputers,
-    scanResults,
-    isScanning,
-    showAllDevices,
-    error,
-  ];
+  List<Object?> get props => [adapterState, supportedComputers, rememberedComputers, scanResults, isScanning, showAllDevices, error];
 }
 
 // Bloc

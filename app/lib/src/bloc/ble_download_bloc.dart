@@ -20,16 +20,9 @@ final _log = Logger('ble_download_bloc.dart');
 sealed class BleDownloadEvent extends Equatable {
   const BleDownloadEvent();
 
-  /// Connect to a scanned device. User will select descriptor afterwards.
   const factory BleDownloadEvent.connectToDevice(BluetoothDevice device) = _ConnectToDevice;
-
-  /// Connect to a remembered computer and auto-start download.
   const factory BleDownloadEvent.connectToRemembered(Computer computer, dc.ComputerDescriptor descriptor) = _ConnectToRemembered;
-
-  /// Start downloading with the selected computer descriptor.
   const factory BleDownloadEvent.start(dc.ComputerDescriptor computer) = _Start;
-
-  /// Disconnect from the current device.
   const factory BleDownloadEvent.disconnect() = _Disconnect;
 
   @override
@@ -257,13 +250,15 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
 
   void _onConnectionStateChanged(BluetoothConnectionState connectionState, Emitter<BleDownloadState> emit) {
     if (connectionState == BluetoothConnectionState.disconnected && state.connectionState == BluetoothConnectionState.connected) {
-      emit(state.copyWith(
-        connectionState: connectionState,
-        clearConnectedDevice: true,
-        discoveredServices: [],
-        isDiscoveringServices: false,
-        clearAutoStartDescriptor: true,
-      ));
+      emit(
+        state.copyWith(
+          connectionState: connectionState,
+          clearConnectedDevice: true,
+          discoveredServices: [],
+          isDiscoveringServices: false,
+          clearAutoStartDescriptor: true,
+        ),
+      );
     } else {
       emit(state.copyWith(connectionState: connectionState));
     }
@@ -295,13 +290,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     }
 
     _log.info('starting download from ${device.remoteId.str} (${device.platformName})');
-    emit(state.copyWith(
-      isDownloading: true,
-      clearDownloadProgress: true,
-      downloadedDives: [],
-      clearError: true,
-      clearAutoStartDescriptor: true,
-    ));
+    emit(state.copyWith(isDownloading: true, clearDownloadProgress: true, downloadedDives: [], clearError: true, clearAutoStartDescriptor: true));
 
     // If we have a remembered computer already, grab the fingerprint from there
     final remembered = await _store.computers.getByRemoteId(device.remoteId.str);
@@ -309,12 +298,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     _log.fine('current fingerprint is $ldcFingerprint');
 
     // Remember this computer for future downloads
-    await _store.computers.update(
-      remoteId: device.remoteId.str,
-      advertisedName: device.platformName,
-      vendor: computer.vendor,
-      product: computer.model,
-    );
+    await _store.computers.update(remoteId: device.remoteId.str, advertisedName: device.platformName, vendor: computer.vendor, product: computer.model);
 
     // Set up BLE notifications on the RX characteristic
     try {
@@ -375,10 +359,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
   void _onDownloadCompleted(Emitter<BleDownloadState> emit) {
     try {
       // Remember the fingerprint on the downloading computer
-      _store.computers.update(
-        remoteId: state.connectedDevice!.remoteId.str,
-        ldcFingerprint: state.downloadedDives.first.logs.first.ldcFingerprint,
-      );
+      _store.computers.update(remoteId: state.connectedDevice!.remoteId.str, ldcFingerprint: state.downloadedDives.first.logs.first.ldcFingerprint);
     } on StateError catch (_) {}
 
     _diveListBloc.add(DownloadedDives(state.downloadedDives));
@@ -392,12 +373,14 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
   Future<void> _onDisconnect(Emitter<BleDownloadState> emit) async {
     if (state.connectedDevice != null) {
       await state.connectedDevice!.disconnect();
-      emit(state.copyWith(
-        clearConnectedDevice: true,
-        connectionState: BluetoothConnectionState.disconnected,
-        discoveredServices: [],
-        clearAutoStartDescriptor: true,
-      ));
+      emit(
+        state.copyWith(
+          clearConnectedDevice: true,
+          connectionState: BluetoothConnectionState.disconnected,
+          discoveredServices: [],
+          clearAutoStartDescriptor: true,
+        ),
+      );
     }
   }
 
