@@ -3,12 +3,10 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
-import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 
 import '../divestore.dart';
 import '../gen/internal.pb.dart';
-import '../gen/types_ext.dart';
 import 'fileio.dart';
 
 final _log = Logger('store/cylinders.dart');

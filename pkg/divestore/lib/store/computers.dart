@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
-import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 
 import '../gen/gen.dart';
 import '../gen/internal.pb.dart';

@@ -6,7 +6,6 @@ import 'package:uuid/uuid.dart';
 
 import '../gen/gen.dart';
 import '../gen/internal.pb.dart';
-import '../gen/types_ext.dart';
 import '../sync/syncprovider.dart';
 import 'fileio.dart';
 
