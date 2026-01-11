@@ -167,12 +167,12 @@ func hashEmail(email string) string {
 	email = strings.ToLower(strings.TrimSpace(email))
 	h := sha256.Sum256([]byte(email))
 	prefix := regexp.MustCompile(`[^0-9a-z]`).ReplaceAllLiteralString(email, "")
-	return prefix + "-" + hex.EncodeToString(h[:8])
+	return prefix + "-" + hex.EncodeToString(h[:4])
 }
 
 // generateSecretKey generates a random 32-character secret key.
 func generateSecretKey() (string, error) {
-	bytes := make([]byte, 16)
+	bytes := make([]byte, 12)
 	if _, err := rand.Read(bytes); err != nil {
 		return "", err
 	}
