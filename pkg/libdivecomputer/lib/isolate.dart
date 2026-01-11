@@ -244,8 +244,8 @@ void _downloadIsolateEntry(DownloadRequest request) {
       sendPort.send(DownloadProgressEvent(DownloadProgress(progress.current, progress.maximum)));
     } else if (eventType == bindings.dc_event_type_t.DC_EVENT_DEVINFO.value) {
       final devinfo = data.cast<bindings.dc_event_devinfo_t>().ref;
-      deviceSerial = devinfo.serial.toString();
-      sendPort.send(DownloadDeviceInfo(DeviceInfo(model: devinfo.model, firmware: devinfo.firmware, serial: devinfo.serial)));
+      deviceSerial = devinfo.serial.toRadixString(16).toUpperCase();
+      sendPort.send(DownloadDeviceInfo(DeviceInfo(model: devinfo.model, firmware: devinfo.firmware, serial: deviceSerial)));
     }
   });
 

@@ -339,7 +339,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
         case DownloadDeviceInfo(:final info):
           _log.fine('device info: $info');
           // Remember the device serial
-          _store.computers.update(remoteId: state.connectedDevice!.remoteId.str, serial: info.serial.toString());
+          _store.computers.update(remoteId: state.connectedDevice!.remoteId.str, serial: info.serial);
 
         case DownloadDiveReceived(dive: final log):
           _log.fine('received dive ${log.dateTime.toDateTime()} with fingerprint ${log.ldcFingerprint}');

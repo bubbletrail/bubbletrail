@@ -38,7 +38,7 @@ class DownloadProgress {
 class DeviceInfo {
   final int model;
   final int firmware;
-  final int serial;
+  final String serial;
 
   const DeviceInfo({required this.model, required this.firmware, required this.serial});
 
