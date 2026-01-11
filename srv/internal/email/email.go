@@ -3,6 +3,7 @@ package email
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/mailgun/mailgun-go/v4"
 )
@@ -48,10 +49,14 @@ Bubbletrail automation
 
 	message := mailgun.NewMessage(c.fromAddress, subject, body, creds.Email)
 
+	log := slog.With("email", creds.Email)
 	_, _, err := c.mg.Send(ctx, message)
 	if err != nil {
-		return fmt.Errorf("failed to send email: %w", err)
+		log.Error("failed to send email", "error", err)
+		return err
 	}
+
+	log.Info("sent email")
 
 	return nil
 }
