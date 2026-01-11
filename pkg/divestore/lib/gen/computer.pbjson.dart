@@ -28,6 +28,7 @@ const Computer$json = {
     {'1': 'product', '3': 7, '4': 1, '5': 9, '10': 'product'},
     {'1': 'ldc_fingerprint', '3': 8, '4': 1, '5': 12, '10': 'ldcFingerprint'},
     {'1': 'serial', '3': 9, '4': 1, '5': 9, '10': 'serial'},
+    {'1': 'last_log_date', '3': 10, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'lastLogDate'},
   ],
 };
 
@@ -38,4 +39,5 @@ final $typed_data.Uint8List computerDescriptor = $convert.base64Decode('CghDb21w
     'VkX2F0GAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJZGVsZXRlZEF0EicKD2Fk'
     'dmVydGlzZWRfbmFtZRgFIAEoCVIOYWR2ZXJ0aXNlZE5hbWUSFgoGdmVuZG9yGAYgASgJUgZ2ZW'
     '5kb3ISGAoHcHJvZHVjdBgHIAEoCVIHcHJvZHVjdBInCg9sZGNfZmluZ2VycHJpbnQYCCABKAxS'
-    'DmxkY0ZpbmdlcnByaW50EhYKBnNlcmlhbBgJIAEoCVIGc2VyaWFs');
+    'DmxkY0ZpbmdlcnByaW50EhYKBnNlcmlhbBgJIAEoCVIGc2VyaWFsEj4KDWxhc3RfbG9nX2RhdG'
+    'UYCiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUgtsYXN0TG9nRGF0ZQ==');

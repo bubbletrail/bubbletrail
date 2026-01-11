@@ -25,4 +25,6 @@ message Computer {
   bytes ldc_fingerprint = 8;
   // Serial number as reported by device info
   string serial = 9;
+  // The latest log date we saw from this computer
+  google.protobuf.Timestamp last_log_date = 10;
 }

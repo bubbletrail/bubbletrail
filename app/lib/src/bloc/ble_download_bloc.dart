@@ -216,7 +216,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
       case _Progress(:final progress):
         emit(state.copyWith(downloadProgress: progress));
       case _DiveReceived(:final dive):
-        emit(state.copyWith(downloadedDives: state.downloadedDives + [dive]));
+        await _onDiveReceived(emit, dive);
       case _Completed():
         _onDownloadCompleted(emit);
       case _Failed(:final error):
@@ -224,6 +224,18 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
       case _Disconnect():
         await _onDisconnect(emit);
     }
+  }
+
+  Future<void> _onDiveReceived(Emitter<BleDownloadState> emit, Dive dive) async {
+    final remoteId = state.connectedDevice!.remoteId.str;
+    final comp = await _store.computers.getByRemoteId(remoteId) ?? Computer();
+    final lld = dive.logs.first.dateTime.toDateTime();
+    if (lld.isAfter(comp.lastLogDate.toDateTime())) {
+      // This is a newer dive than we've seen from this computer before, so
+      // update the last log date and the corresponding fingerprint.
+      await _store.computers.update(remoteId: state.connectedDevice!.remoteId.str, lastLogDate: lld);
+    }
+    emit(state.copyWith(downloadedDives: state.downloadedDives + [dive]));
   }
 
   Future<void> _onConnectToDevice(BluetoothDevice device, ComputerDescriptor? autoStart, Emitter<BleDownloadState> emit) async {

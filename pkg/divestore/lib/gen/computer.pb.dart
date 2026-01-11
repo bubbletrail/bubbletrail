@@ -29,6 +29,7 @@ class Computer extends $pb.GeneratedMessage {
     $core.String? product,
     $core.List<$core.int>? ldcFingerprint,
     $core.String? serial,
+    $0.Timestamp? lastLogDate,
   }) {
     final result = create();
     if (remoteId != null) result.remoteId = remoteId;
@@ -40,6 +41,7 @@ class Computer extends $pb.GeneratedMessage {
     if (product != null) result.product = product;
     if (ldcFingerprint != null) result.ldcFingerprint = ldcFingerprint;
     if (serial != null) result.serial = serial;
+    if (lastLogDate != null) result.lastLogDate = lastLogDate;
     return result;
   }
 
@@ -60,6 +62,7 @@ class Computer extends $pb.GeneratedMessage {
         ..aOS(7, _omitFieldNames ? '' : 'product')
         ..a<$core.List<$core.int>>(8, _omitFieldNames ? '' : 'ldcFingerprint', $pb.PbFieldType.OY)
         ..aOS(9, _omitFieldNames ? '' : 'serial')
+        ..aOM<$0.Timestamp>(10, _omitFieldNames ? '' : 'lastLogDate', subBuilder: $0.Timestamp.create)
         ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -170,6 +173,18 @@ class Computer extends $pb.GeneratedMessage {
   $core.bool hasSerial() => $_has(8);
   @$pb.TagNumber(9)
   void clearSerial() => $_clearField(9);
+
+  /// The latest log date we saw from this computer
+  @$pb.TagNumber(10)
+  $0.Timestamp get lastLogDate => $_getN(9);
+  @$pb.TagNumber(10)
+  set lastLogDate($0.Timestamp value) => $_setField(10, value);
+  @$pb.TagNumber(10)
+  $core.bool hasLastLogDate() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearLastLogDate() => $_clearField(10);
+  @$pb.TagNumber(10)
+  $0.Timestamp ensureLastLogDate() => $_ensure(9);
 }
 
 const $core.bool _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');

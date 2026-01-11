@@ -19,7 +19,15 @@ class Computers {
 
   Computers(this.path, {this.readonly = false});
 
-  Future<void> update({required String remoteId, String? advertisedName, String? vendor, String? product, List<int>? ldcFingerprint, String? serial}) async {
+  Future<void> update({
+    required String remoteId,
+    String? advertisedName,
+    String? vendor,
+    String? product,
+    List<int>? ldcFingerprint,
+    String? serial,
+    DateTime? lastLogDate,
+  }) async {
     if (readonly) throw Exception('readonly');
     var computer = _computers[remoteId];
     if (computer == null) {
@@ -42,6 +50,9 @@ class Computers {
       }
       if (serial != null) {
         computer.serial = serial;
+      }
+      if (lastLogDate != null) {
+        computer.lastLogDate = .fromDateTime(lastLogDate);
       }
     });
     _computers[computer.remoteId] = computer;
