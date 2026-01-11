@@ -230,9 +230,10 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     final remoteId = state.connectedDevice!.remoteId.str;
     final comp = await _store.computers.getByRemoteId(remoteId) ?? Computer();
     final lld = dive.logs.first.dateTime.toDateTime();
-    if (lld.isAfter(comp.lastLogDate.toDateTime())) {
-      // This is a newer dive than we've seen from this computer before, so
-      // update the last log date and the corresponding fingerprint.
+    if (!lld.isBefore(comp.lastLogDate.toDateTime())) {
+      // This is a newer dive than we've seen from this computer before (or
+      // the same time, but possibly with a newer fingerprint), so update
+      // the last log date and the corresponding fingerprint.
       await _store.computers.update(remoteId: state.connectedDevice!.remoteId.str, lastLogDate: lld);
     }
     emit(state.copyWith(downloadedDives: state.downloadedDives + [dive]));
@@ -307,7 +308,8 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     // If we have a remembered computer already, grab the fingerprint from there
     final remembered = await _store.computers.getByRemoteId(device.remoteId.str);
     final ldcFingerprint = remembered?.ldcFingerprint;
-    _log.fine('current fingerprint is $ldcFingerprint');
+    final lastLogDate = remembered?.lastLogDate.toDateTime() ?? DateTime.fromMillisecondsSinceEpoch(0);
+    _log.fine('current fingerprint is $ldcFingerprint and last log date $lastLogDate');
 
     // Remember this computer for future downloads
     await _store.computers.update(remoteId: device.remoteId.str, advertisedName: device.platformName, vendor: computer.vendor, product: computer.model);
@@ -325,9 +327,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
 
     // Start the download and process events
     final dir = await getApplicationSupportDirectory();
-    final sub = startDownload(ble: ble, computer: computer, fifoDirectory: dir.path, ldcFingerprint: ldcFingerprint, lastLogDate: state.lastLogDate).listen((
-      event,
-    ) {
+    final sub = startDownload(ble: ble, computer: computer, fifoDirectory: dir.path, ldcFingerprint: ldcFingerprint, lastLogDate: lastLogDate).listen((event) {
       switch (event) {
         case DownloadStarted():
           _log.info('download started');
@@ -341,9 +341,9 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
           // Remember the device serial
           _store.computers.update(remoteId: state.connectedDevice!.remoteId.str, serial: info.serial.toString());
 
-        case DownloadDiveReceived(:final dive):
-          _log.fine('received dive ${dive.dateTime.toDateTime()}');
-          final cdive = convertDcDive(dive);
+        case DownloadDiveReceived(dive: final log):
+          _log.fine('received dive ${log.dateTime.toDateTime()} with fingerprint ${log.ldcFingerprint}');
+          final cdive = convertDcDive(log);
           add(_DiveReceived(cdive));
 
         case DownloadCompleted():

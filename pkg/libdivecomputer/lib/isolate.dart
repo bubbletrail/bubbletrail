@@ -304,6 +304,16 @@ void _downloadIsolateEntry(DownloadRequest request) {
     exceptionalReturn: 0, // Return 0 (abort) if exception is thrown
   );
 
+  // If we have a fingerprint, set it to return early when indexing dives
+  // for download.
+  if (request.ldcFingerprint != null) {
+    final fpList = request.ldcFingerprint!;
+    final fpFfi = calloc<ffi.Uint8>(fpList.length);
+    final tl = fpFfi.asTypedList(fpList.length);
+    for (var i = 0; i < fpList.length; i++) tl[i] = fpList[i];
+    bindings.dc_device_set_fingerprint(device.value, fpFfi.cast<ffi.UnsignedChar>(), fpList.length);
+  }
+
   // Download dives
   final foreachStatus = bindings.dc_device_foreach(device.value, diveCallback.nativeFunction, ffi.nullptr);
 
