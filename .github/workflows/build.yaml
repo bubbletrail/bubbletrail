@@ -23,7 +23,7 @@ jobs:
           pushd pkg/divestore
           dart pub get
           dart analyze --fatal-infos
-          dart format --output=none --set-exit-if-changed $(find . -name \*.dart -not -name \*.g.dart)
+          dart format --output=none --set-exit-if-changed $(find . -name \*.dart -not -name \*.g.dart -not -name \*.pb\*.dart)
           dart test
 
       - name: Run tests (app)
@@ -31,7 +31,7 @@ jobs:
           pushd app
           dart pub get
           dart analyze --fatal-infos
-          dart format --output=none --set-exit-if-changed $(find . -name \*.dart -not -name \*.pb\*.dart)
+          dart format --output=none --set-exit-if-changed $(find . -name \*.dart -not -name \*.g.dart -not -name \*.pb\*.dart)
           # dart test
 
 
