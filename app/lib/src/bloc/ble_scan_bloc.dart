@@ -110,7 +110,8 @@ class BleScanState extends Equatable {
   final BluetoothAdapterState adapterState;
   final List<ComputerDescriptor> supportedComputers;
   final List<Computer> rememberedComputers;
-  final List<(ScanResult, List<ComputerDescriptor>)> scanResults;
+  final List<(ScanResult, List<ComputerDescriptor>)> scannedComputers;
+  final List<ScanResult> scannedOther;
   final bool isScanning;
   final bool showAllDevices;
   final String? error;
@@ -119,24 +120,20 @@ class BleScanState extends Equatable {
     this.adapterState = BluetoothAdapterState.unknown,
     this.supportedComputers = const [],
     this.rememberedComputers = const [],
-    this.scanResults = const [],
+    this.scannedComputers = const [],
+    this.scannedOther = const [],
     this.isScanning = false,
     this.showAllDevices = false,
     this.error,
   });
 
-  List<ScanResult> get filteredScanResults {
-    if (showAllDevices) return scanResults.map((e) => e.$1).toList();
-    return scanResults.where((e) => e.$2.isNotEmpty).map((e) => e.$1).toList();
-  }
-
   List<ComputerDescriptor> descriptorsForDevice(BluetoothDevice device) {
-    final match = scanResults.where((r) => r.$1.device.remoteId == device.remoteId).firstOrNull;
+    final match = scannedComputers.where((r) => r.$1.device.remoteId == device.remoteId).firstOrNull;
     return match?.$2 ?? [];
   }
 
   @override
-  List<Object?> get props => [adapterState, supportedComputers, rememberedComputers, scanResults, isScanning, showAllDevices, error];
+  List<Object?> get props => [adapterState, supportedComputers, rememberedComputers, scannedComputers, scannedOther, isScanning, showAllDevices, error];
 }
 
 // Bloc
@@ -201,7 +198,7 @@ class BleScanBloc extends Bloc<BleScanEvent, BleScanState> {
 
   Future<void> _onStartScan(Emitter<BleScanState> emit) async {
     if (state.isScanning) return;
-    emit(state.copyWith(scanResults: []).copyWithNull(error: true));
+    emit(state.copyWith(scannedComputers: [], scannedOther: []).copyWithNull(error: true));
 
     await _scanSubscription?.cancel();
     _scanSubscription = FlutterBluePlus.scanResults.listen((results) {
@@ -226,13 +223,24 @@ class BleScanBloc extends Bloc<BleScanEvent, BleScanState> {
   }
 
   Future<void> _onScanResultsUpdated(List<ScanResult> results, Emitter<BleScanState> emit) async {
+    final scannedComputers = <(ScanResult, List<ComputerDescriptor>)>[];
+    final scannedOther = <ScanResult>[];
+
+    // Partition results based on whether they match a known computer model
+    // or not.
     for (final res in results) {
       if (!_matchedDevices.containsKey(res.device.platformName)) {
         _matchedDevices[res.device.platformName] = await dcDescriptorIterate(filterForName: res.device.platformName);
       }
+      final matches = _matchedDevices[res.device.platformName];
+      if (matches?.isNotEmpty == true) {
+        scannedComputers.add((res, matches!));
+      } else {
+        scannedOther.add(res);
+      }
     }
-    final scanResults = results.map((e) => (e, _matchedDevices[e.device.platformName] ?? [])).toList();
-    emit(state.copyWith(scanResults: scanResults));
+
+    emit(state.copyWith(scannedComputers: scannedComputers, scannedOther: scannedOther));
   }
 
   Future<void> _onForgetComputer(Computer computer, Emitter<BleScanState> emit) async {

@@ -88,11 +88,6 @@ class BleScanScreen extends StatelessWidget {
       return SingleChildScrollView(child: _buildConnectedDeviceCard(context, scanState, downloadState));
     }
 
-    final filteredResults = scanState.filteredScanResults;
-    final hasHiddenDevices = scanState.scanResults.length > filteredResults.length;
-    final hasRememberedComputers = scanState.rememberedComputers.isNotEmpty;
-    final hasScannedDevices = scanState.scanResults.isNotEmpty;
-
     return Column(
       children: [
         if (scanState.isScanning) const LinearProgressIndicator() else const SizedBox(height: 4),
@@ -100,38 +95,44 @@ class BleScanScreen extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.all(8),
             children: [
-              // Remembered computers section
-              if (hasRememberedComputers) ...[
+              // Remembered computers
+              if (scanState.rememberedComputers.isNotEmpty) ...[
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: Text('Saved computers', style: Theme.of(context).textTheme.titleSmall),
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text('Known dive computers', style: Theme.of(context).textTheme.titleMedium),
                 ),
                 ..._buildRememberedComputersList(context, scanState),
-                const SizedBox(height: 16),
               ],
-              // Scan results section
-              if (hasScannedDevices || scanState.isScanning) ...[
+              // Scanned computers
+              if (scanState.scannedComputers.isNotEmpty || scanState.scannedOther.isNotEmpty || scanState.isScanning) ...[
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          hasHiddenDevices && !scanState.showAllDevices
-                              ? '${filteredResults.length} dive computer(s) found'
-                              : '${scanState.scanResults.length} device(s) found',
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                      ),
-                      const Text('Show all'),
-                      Switch(value: scanState.showAllDevices, onChanged: (_) => context.read<BleScanBloc>().add(.toggleShowAll())),
-                    ],
-                  ),
+                  padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                  child: Text('${scanState.scannedComputers.length} dive computer(s) found', style: Theme.of(context).textTheme.titleMedium),
                 ),
-                ..._buildScannedDevicesList(context, scanState),
+                ..._buildScannedDevicesList(context, scanState.scannedComputers.map((c) => c.$1)),
               ],
-              // Empty state when no remembered computers and no scan results
-              if (!hasRememberedComputers && !hasScannedDevices && !scanState.isScanning) _buildEmptyState(context, scanState),
+              if ((scanState.isScanning || scanState.scannedOther.isNotEmpty) & scanState.scannedComputers.isEmpty) ...[
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Opacity(opacity: 0.7, child: Text('Make sure your dive computer is in Bluetooth communication mode')),
+                ),
+              ],
+              // Scanned other devices
+              if (scanState.scannedOther.isNotEmpty || scanState.isScanning) ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                        child: Text('${scanState.scannedOther.length} non-dive-computer device(s) found', style: Theme.of(context).textTheme.titleSmall),
+                      ),
+                    ),
+                    const Text('Show all'),
+                    Switch(value: scanState.showAllDevices, onChanged: (_) => context.read<BleScanBloc>().add(.toggleShowAll())),
+                  ],
+                ),
+                if (scanState.showAllDevices) ..._buildScannedDevicesList(context, scanState.scannedOther),
+              ],
             ],
           ),
         ),
@@ -182,8 +183,7 @@ class BleScanScreen extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildScannedDevicesList(BuildContext context, BleScanState scanState) {
-    final results = scanState.filteredScanResults;
+  List<Widget> _buildScannedDevicesList(BuildContext context, Iterable<ScanResult> results) {
     return results.map((result) {
       final device = result.device;
       return Card(
@@ -374,35 +374,6 @@ class BleScanScreen extends StatelessWidget {
           ),
         ),
         actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Cancel'))],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context, BleScanState scanState) {
-    final hasUnfilteredResults = scanState.scanResults.isNotEmpty && scanState.filteredScanResults.isEmpty;
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          FaIcon(FontAwesomeIcons.bluetoothB, size: 64, color: Theme.of(context).colorScheme.secondary),
-          const SizedBox(height: 16),
-          Text(
-            scanState.isScanning
-                ? 'Scanning...'
-                : hasUnfilteredResults
-                ? 'No dive computers found'
-                : 'No devices found',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            hasUnfilteredResults
-                ? 'Found ${scanState.scanResults.length} other device(s).\nEnable "Show all" to see them.'
-                : 'Make sure your dive computer is in\nBluetooth pairing mode',
-            textAlign: TextAlign.center,
-          ),
-        ],
       ),
     );
   }

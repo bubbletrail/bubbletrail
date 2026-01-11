@@ -13,9 +13,11 @@ abstract class _$BleScanStateCWProxy {
 
   BleScanState rememberedComputers(List<Computer> rememberedComputers);
 
-  BleScanState scanResults(
-    List<(ScanResult, List<ComputerDescriptor>)> scanResults,
+  BleScanState scannedComputers(
+    List<(ScanResult, List<ComputerDescriptor>)> scannedComputers,
   );
+
+  BleScanState scannedOther(List<ScanResult> scannedOther);
 
   BleScanState isScanning(bool isScanning);
 
@@ -34,7 +36,8 @@ abstract class _$BleScanStateCWProxy {
     BluetoothAdapterState adapterState,
     List<ComputerDescriptor> supportedComputers,
     List<Computer> rememberedComputers,
-    List<(ScanResult, List<ComputerDescriptor>)> scanResults,
+    List<(ScanResult, List<ComputerDescriptor>)> scannedComputers,
+    List<ScanResult> scannedOther,
     bool isScanning,
     bool showAllDevices,
     String? error,
@@ -62,9 +65,13 @@ class _$BleScanStateCWProxyImpl implements _$BleScanStateCWProxy {
       call(rememberedComputers: rememberedComputers);
 
   @override
-  BleScanState scanResults(
-    List<(ScanResult, List<ComputerDescriptor>)> scanResults,
-  ) => call(scanResults: scanResults);
+  BleScanState scannedComputers(
+    List<(ScanResult, List<ComputerDescriptor>)> scannedComputers,
+  ) => call(scannedComputers: scannedComputers);
+
+  @override
+  BleScanState scannedOther(List<ScanResult> scannedOther) =>
+      call(scannedOther: scannedOther);
 
   @override
   BleScanState isScanning(bool isScanning) => call(isScanning: isScanning);
@@ -88,7 +95,8 @@ class _$BleScanStateCWProxyImpl implements _$BleScanStateCWProxy {
     Object? adapterState = const $CopyWithPlaceholder(),
     Object? supportedComputers = const $CopyWithPlaceholder(),
     Object? rememberedComputers = const $CopyWithPlaceholder(),
-    Object? scanResults = const $CopyWithPlaceholder(),
+    Object? scannedComputers = const $CopyWithPlaceholder(),
+    Object? scannedOther = const $CopyWithPlaceholder(),
     Object? isScanning = const $CopyWithPlaceholder(),
     Object? showAllDevices = const $CopyWithPlaceholder(),
     Object? error = const $CopyWithPlaceholder(),
@@ -111,11 +119,17 @@ class _$BleScanStateCWProxyImpl implements _$BleScanStateCWProxy {
           ? _value.rememberedComputers
           // ignore: cast_nullable_to_non_nullable
           : rememberedComputers as List<Computer>,
-      scanResults:
-          scanResults == const $CopyWithPlaceholder() || scanResults == null
-          ? _value.scanResults
+      scannedComputers:
+          scannedComputers == const $CopyWithPlaceholder() ||
+              scannedComputers == null
+          ? _value.scannedComputers
           // ignore: cast_nullable_to_non_nullable
-          : scanResults as List<(ScanResult, List<ComputerDescriptor>)>,
+          : scannedComputers as List<(ScanResult, List<ComputerDescriptor>)>,
+      scannedOther:
+          scannedOther == const $CopyWithPlaceholder() || scannedOther == null
+          ? _value.scannedOther
+          // ignore: cast_nullable_to_non_nullable
+          : scannedOther as List<ScanResult>,
       isScanning:
           isScanning == const $CopyWithPlaceholder() || isScanning == null
           ? _value.isScanning
@@ -153,7 +167,8 @@ extension $BleScanStateCopyWith on BleScanState {
       adapterState: adapterState,
       supportedComputers: supportedComputers,
       rememberedComputers: rememberedComputers,
-      scanResults: scanResults,
+      scannedComputers: scannedComputers,
+      scannedOther: scannedOther,
       isScanning: isScanning,
       showAllDevices: showAllDevices,
       error: error == true ? null : this.error,
