@@ -84,6 +84,20 @@ class BleScanScreen extends StatelessWidget {
       );
     }
 
+    // Not scanning, nothing remembered
+    if (!scanState.isScanning && scanState.rememberedComputers.isEmpty && scanState.scannedComputers.isEmpty && scanState.scannedOther.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FaIcon(FontAwesomeIcons.bluetooth, size: 64, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(height: 16),
+            const Text('Scan to find your dive computer'),
+          ],
+        ),
+      );
+    }
+
     if (downloadState.connectedDevice != null) {
       return SingleChildScrollView(child: _buildConnectedDeviceCard(context, scanState, downloadState));
     }
