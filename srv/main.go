@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"io/fs"
 	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/alecthomas/kong"
@@ -18,14 +20,15 @@ import (
 var staticFiles embed.FS
 
 var cli struct {
-	Endpoint      string `help:"MinIO endpoint" env:"MINIO_ENDPOINT" required:""`
-	AccessKey     string `help:"MinIO admin access key" env:"MINIO_ACCESS_KEY" required:""`
-	SecretKey     string `help:"MinIO admin secret key" env:"MINIO_SECRET_KEY" required:""`
-	UseSSL        bool   `help:"Use SSL for MinIO connection" env:"MINIO_USE_SSL" default:"true"`
-	AdminToken    string `help:"Bearer token for admin API endpoints" env:"ADMIN_TOKEN" required:""`
-	MailgunDomain string `help:"Mailgun domain" env:"MAILGUN_DOMAIN" required:""`
-	MailgunAPIKey string `help:"Mailgun API key" env:"MAILGUN_API_KEY" required:""`
-	MailgunFrom   string `help:"Email from address" env:"MAILGUN_FROM" required:""`
+	Endpoint       string `help:"MinIO endpoint" env:"MINIO_ENDPOINT" required:""`
+	AccessKey      string `help:"MinIO admin access key" env:"MINIO_ACCESS_KEY" required:""`
+	SecretKey      string `help:"MinIO admin secret key" env:"MINIO_SECRET_KEY" required:""`
+	UseSSL         bool   `help:"Use SSL for MinIO connection" env:"MINIO_USE_SSL" default:"true"`
+	BucketQuotaMiB int    `help:"Bucket quota in MiB (0 to disable)" env:"MINIO_BUCKET_QUOTA_MiB" default:"256"`
+	AdminToken     string `help:"Bearer token for admin API endpoints" env:"ADMIN_TOKEN" required:""`
+	MailgunDomain  string `help:"Mailgun domain" env:"MAILGUN_DOMAIN" required:""`
+	MailgunAPIKey  string `help:"Mailgun API key" env:"MAILGUN_API_KEY" required:""`
+	MailgunFrom    string `help:"Email from address" env:"MAILGUN_FROM" required:""`
 }
 
 type newUserRequest struct {
@@ -37,29 +40,32 @@ func main() {
 
 	minioClient, err := minio.NewClient(cli.Endpoint, cli.AccessKey, cli.SecretKey, cli.UseSSL)
 	if err != nil {
-		log.Fatalf("failed to create minio client: %v", err)
+		slog.Error("failed to create minio client", "error", err)
+		os.Exit(1)
 	}
 
 	emailClient := email.NewClient(cli.MailgunDomain, cli.MailgunAPIKey, cli.MailgunFrom)
 
-	srv := server{minio: minioClient, email: emailClient}
+	srv := server{minio: minioClient, email: emailClient, quotaMiB: cli.BucketQuotaMiB}
 	http.HandleFunc("POST /account/new", srv.newAccount)
 	http.HandleFunc("DELETE /account/{email}", srv.deleteAccount)
 
 	// Serve embedded static files
 	staticFS, err := fs.Sub(staticFiles, "static")
 	if err != nil {
-		log.Fatalf("failed to create static file system: %v", err)
+		slog.Error("failed to create static file system", "error", err)
+		os.Exit(1)
 	}
 	http.Handle("/", http.FileServer(http.FS(staticFS)))
 
-	log.Println("Starting server on :8080")
+	slog.Info("starting server", "address", ":8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 type server struct {
-	minio *minio.Client
-	email *email.Client
+	minio    *minio.Client
+	email    *email.Client
+	quotaMiB int
 }
 
 func (s *server) newAccount(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +80,7 @@ func (s *server) newAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := s.minio.CreateUser(r.Context(), req.Email)
+	result, err := s.minio.CreateUser(r.Context(), req.Email, s.quotaMiB<<20)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

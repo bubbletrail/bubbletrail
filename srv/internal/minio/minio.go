@@ -7,7 +7,9 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log/slog"
 	"regexp"
 	"strings"
 	"time"
@@ -49,19 +51,38 @@ func NewClient(endpoint, accessKey, secretKey string, useSSL bool) (*Client, err
 	}, nil
 }
 
-func (c *Client) CreateUser(ctx context.Context, email string) (MinioUserResult, error) {
+var errInternal = errors.New("internal error")
+
+func (c *Client) CreateUser(ctx context.Context, email string, quota int) (MinioUserResult, error) {
 	// Calculate new bucket name, accesskey, secret key.
 	bucketName := hashEmail(email)
+
+	log := slog.With("email", email, "bucket", bucketName)
+
 	accessKey := email
 	secretKey, err := generateSecretKey()
 	if err != nil {
-		return MinioUserResult{}, fmt.Errorf("failed to generate secret key: %w", err)
+		log.Error("failed to generate secret key", "error", err)
+		return MinioUserResult{}, errInternal
 	}
 
 	// Create the new, private, bucket in the minio instance.
 	err = c.minioClient.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
 	if err != nil {
-		return MinioUserResult{}, fmt.Errorf("failed to create bucket: %w", err)
+		log.Error("failed to create bucket", "error", err)
+		return MinioUserResult{}, errInternal
+	}
+
+	// Set bucket quota if configured.
+	if quota > 0 {
+		err = c.adminClient.SetBucketQuota(ctx, bucketName, &madmin.BucketQuota{
+			Quota: uint64(quota),
+			Type:  madmin.HardQuota,
+		})
+		if err != nil {
+			log.Error("failed to set bucket quota", "error", err)
+			// continue anyway
+		}
 	}
 
 	// Create an owner object with email and creation date.
@@ -71,19 +92,22 @@ func (c *Client) CreateUser(ctx context.Context, email string) (MinioUserResult,
 	}
 	ownerJSON, err := json.Marshal(ownerData)
 	if err != nil {
-		return MinioUserResult{}, fmt.Errorf("failed to marshal owner data: %w", err)
+		log.Error("failed to marshal owner data", "error", err)
+		return MinioUserResult{}, errInternal
 	}
 	_, err = c.minioClient.PutObject(ctx, bucketName, "owner.json", bytes.NewReader(ownerJSON), int64(len(ownerJSON)), minio.PutObjectOptions{
 		ContentType: "application/json",
 	})
 	if err != nil {
-		return MinioUserResult{}, fmt.Errorf("failed to create owner object: %w", err)
+		log.Error("failed to create owner object", "error", err)
+		return MinioUserResult{}, errInternal
 	}
 
 	// Create the accesskey/secretkey (user) in the minio instance.
 	err = c.adminClient.AddUser(ctx, accessKey, secretKey)
 	if err != nil {
-		return MinioUserResult{}, fmt.Errorf("failed to create user: %w", err)
+		log.Error("failed to create user", "error", err)
+		return MinioUserResult{}, errInternal
 	}
 
 	// Create and apply an access policy so the new user has readwrite on the specified bucket, and nothing else.
@@ -92,12 +116,14 @@ func (c *Client) CreateUser(ctx context.Context, email string) (MinioUserResult,
 
 	policyBytes, err := json.Marshal(policy)
 	if err != nil {
-		return MinioUserResult{}, fmt.Errorf("failed to marshal policy: %w", err)
+		log.Error("failed to marshal policy", "error", err)
+		return MinioUserResult{}, errInternal
 	}
 
 	err = c.adminClient.AddCannedPolicy(ctx, policyName, policyBytes)
 	if err != nil {
-		return MinioUserResult{}, fmt.Errorf("failed to create policy: %w", err)
+		log.Error("failed to create policy", "error", err)
+		return MinioUserResult{}, errInternal
 	}
 
 	_, err = c.adminClient.AttachPolicy(ctx, madmin.PolicyAssociationReq{
@@ -105,9 +131,11 @@ func (c *Client) CreateUser(ctx context.Context, email string) (MinioUserResult,
 		User:     accessKey,
 	})
 	if err != nil {
-		return MinioUserResult{}, fmt.Errorf("failed to attach policy to user: %w", err)
+		log.Error("failed to attach policy", "error", err)
+		return MinioUserResult{}, errInternal
 	}
 
+	log.Info("created new account")
 	return MinioUserResult{
 		BucketName: bucketName,
 		AccessKey:  accessKey,
@@ -119,23 +147,29 @@ func (c *Client) DeleteUser(ctx context.Context, email string) error {
 	bucketName := hashEmail(email)
 	accessKey := email
 	policyName := fmt.Sprintf("user-%s-policy", bucketName)
+	log := slog.With("email", email, "bucket", bucketName, "policy", policyName)
+	log.Info("deleting account")
+	success := true
 
 	// Delete all objects in the bucket.
 	objectsCh := c.minioClient.ListObjects(ctx, bucketName, minio.ListObjectsOptions{Recursive: true})
 	for obj := range objectsCh {
 		if obj.Err != nil {
-			return fmt.Errorf("failed to list objects: %w", obj.Err)
+			log.Error("failed to list objects", "error", obj.Err)
+			return errInternal
 		}
 		err := c.minioClient.RemoveObject(ctx, bucketName, obj.Key, minio.RemoveObjectOptions{})
 		if err != nil {
-			return fmt.Errorf("failed to delete object %s: %w", obj.Key, err)
+			log.Error("failed to delete object", "object", obj.Key, "error", obj.Err)
+			success = false
 		}
 	}
 
 	// Delete the bucket.
 	err := c.minioClient.RemoveBucket(ctx, bucketName)
 	if err != nil {
-		return fmt.Errorf("failed to delete bucket: %w", err)
+		log.Error("failed to delete bucket", "error", err)
+		success = false
 	}
 
 	// Detach the policy from the user.
@@ -144,19 +178,26 @@ func (c *Client) DeleteUser(ctx context.Context, email string) error {
 		User:     accessKey,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to detach policy: %w", err)
+		log.Error("failed to detach policy", "error", err)
+		success = false
 	}
 
 	// Delete the policy.
 	err = c.adminClient.RemoveCannedPolicy(ctx, policyName)
 	if err != nil {
-		return fmt.Errorf("failed to delete policy: %w", err)
+		log.Error("failed to delete policy", "error", err)
+		success = false
 	}
 
 	// Delete the user.
 	err = c.adminClient.RemoveUser(ctx, accessKey)
 	if err != nil {
-		return fmt.Errorf("failed to delete user: %w", err)
+		log.Error("failed to delete user", "error", err)
+		success = false
+	}
+
+	if !success {
+		return errInternal
 	}
 
 	return nil
