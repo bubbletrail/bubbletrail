@@ -28,8 +28,8 @@ class Computer extends $pb.GeneratedMessage {
     $core.String? advertisedName,
     $core.String? vendor,
     $core.String? product,
-    $core.List<$core.int>? ldcFingerprint,
     $core.String? serial,
+    $core.List<$core.int>? ldcFingerprint,
     $0.Timestamp? lastLogDate,
   }) {
     final result = create();
@@ -40,8 +40,8 @@ class Computer extends $pb.GeneratedMessage {
     if (advertisedName != null) result.advertisedName = advertisedName;
     if (vendor != null) result.vendor = vendor;
     if (product != null) result.product = product;
-    if (ldcFingerprint != null) result.ldcFingerprint = ldcFingerprint;
     if (serial != null) result.serial = serial;
+    if (ldcFingerprint != null) result.ldcFingerprint = ldcFingerprint;
     if (lastLogDate != null) result.lastLogDate = lastLogDate;
     return result;
   }
@@ -69,9 +69,9 @@ class Computer extends $pb.GeneratedMessage {
     ..aOS(5, _omitFieldNames ? '' : 'advertisedName')
     ..aOS(6, _omitFieldNames ? '' : 'vendor')
     ..aOS(7, _omitFieldNames ? '' : 'product')
+    ..aOS(8, _omitFieldNames ? '' : 'serial')
     ..a<$core.List<$core.int>>(
-        8, _omitFieldNames ? '' : 'ldcFingerprint', $pb.PbFieldType.OY)
-    ..aOS(9, _omitFieldNames ? '' : 'serial')
+        9, _omitFieldNames ? '' : 'ldcFingerprint', $pb.PbFieldType.OY)
     ..aOM<$0.Timestamp>(10, _omitFieldNames ? '' : 'lastLogDate',
         subBuilder: $0.Timestamp.create)
     ..hasRequiredFields = false;
@@ -167,25 +167,25 @@ class Computer extends $pb.GeneratedMessage {
   @$pb.TagNumber(7)
   void clearProduct() => $_clearField(7);
 
-  /// libdivecomputer fingerprint from last download
-  @$pb.TagNumber(8)
-  $core.List<$core.int> get ldcFingerprint => $_getN(7);
-  @$pb.TagNumber(8)
-  set ldcFingerprint($core.List<$core.int> value) => $_setBytes(7, value);
-  @$pb.TagNumber(8)
-  $core.bool hasLdcFingerprint() => $_has(7);
-  @$pb.TagNumber(8)
-  void clearLdcFingerprint() => $_clearField(8);
-
   /// Serial number as reported by device info
+  @$pb.TagNumber(8)
+  $core.String get serial => $_getSZ(7);
+  @$pb.TagNumber(8)
+  set serial($core.String value) => $_setString(7, value);
+  @$pb.TagNumber(8)
+  $core.bool hasSerial() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearSerial() => $_clearField(8);
+
+  /// libdivecomputer fingerprint from last download
   @$pb.TagNumber(9)
-  $core.String get serial => $_getSZ(8);
+  $core.List<$core.int> get ldcFingerprint => $_getN(8);
   @$pb.TagNumber(9)
-  set serial($core.String value) => $_setString(8, value);
+  set ldcFingerprint($core.List<$core.int> value) => $_setBytes(8, value);
   @$pb.TagNumber(9)
-  $core.bool hasSerial() => $_has(8);
+  $core.bool hasLdcFingerprint() => $_has(8);
   @$pb.TagNumber(9)
-  void clearSerial() => $_clearField(9);
+  void clearLdcFingerprint() => $_clearField(9);
 
   /// The latest log date we saw from this computer
   @$pb.TagNumber(10)

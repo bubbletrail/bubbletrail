@@ -21,10 +21,11 @@ message Computer {
   string vendor = 6;
   // Product as set on the selected libdivecomputer descriptor
   string product = 7;
-  // libdivecomputer fingerprint from last download
-  bytes ldc_fingerprint = 8;
   // Serial number as reported by device info
-  string serial = 9;
+  string serial = 8;
+
+  // libdivecomputer fingerprint from last download
+  bytes ldc_fingerprint = 9;
   // The latest log date we saw from this computer
   google.protobuf.Timestamp last_log_date = 10;
 }

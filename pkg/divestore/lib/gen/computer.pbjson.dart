@@ -47,8 +47,8 @@ const Computer$json = {
     {'1': 'advertised_name', '3': 5, '4': 1, '5': 9, '10': 'advertisedName'},
     {'1': 'vendor', '3': 6, '4': 1, '5': 9, '10': 'vendor'},
     {'1': 'product', '3': 7, '4': 1, '5': 9, '10': 'product'},
-    {'1': 'ldc_fingerprint', '3': 8, '4': 1, '5': 12, '10': 'ldcFingerprint'},
-    {'1': 'serial', '3': 9, '4': 1, '5': 9, '10': 'serial'},
+    {'1': 'serial', '3': 8, '4': 1, '5': 9, '10': 'serial'},
+    {'1': 'ldc_fingerprint', '3': 9, '4': 1, '5': 12, '10': 'ldcFingerprint'},
     {
       '1': 'last_log_date',
       '3': 10,
@@ -67,6 +67,6 @@ final $typed_data.Uint8List computerDescriptor = $convert.base64Decode(
     'dBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSCXVwZGF0ZWRBdBI5CgpkZWxldG'
     'VkX2F0GAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJZGVsZXRlZEF0EicKD2Fk'
     'dmVydGlzZWRfbmFtZRgFIAEoCVIOYWR2ZXJ0aXNlZE5hbWUSFgoGdmVuZG9yGAYgASgJUgZ2ZW'
-    '5kb3ISGAoHcHJvZHVjdBgHIAEoCVIHcHJvZHVjdBInCg9sZGNfZmluZ2VycHJpbnQYCCABKAxS'
-    'DmxkY0ZpbmdlcnByaW50EhYKBnNlcmlhbBgJIAEoCVIGc2VyaWFsEj4KDWxhc3RfbG9nX2RhdG'
+    '5kb3ISGAoHcHJvZHVjdBgHIAEoCVIHcHJvZHVjdBIWCgZzZXJpYWwYCCABKAlSBnNlcmlhbBIn'
+    'Cg9sZGNfZmluZ2VycHJpbnQYCSABKAxSDmxkY0ZpbmdlcnByaW50Ej4KDWxhc3RfbG9nX2RhdG'
     'UYCiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUgtsYXN0TG9nRGF0ZQ==');
