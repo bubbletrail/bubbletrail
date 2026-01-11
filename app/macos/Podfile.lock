@@ -1,4 +1,7 @@
 PODS:
+  - btsparkle (1.0.0):
+    - FlutterMacOS
+    - Sparkle
   - device_info_plus (0.0.1):
     - FlutterMacOS
   - file_picker (0.0.1):
@@ -9,9 +12,6 @@ PODS:
   - flutter_blue_plus_darwin (0.0.2):
     - Flutter
     - FlutterMacOS
-  - flutter_sparkle (0.0.2):
-    - FlutterMacOS
-    - Sparkle
   - FlutterMacOS (1.0.0)
   - package_info_plus (0.0.1):
     - FlutterMacOS
@@ -31,11 +31,11 @@ PODS:
   - ZIPFoundation (0.9.19)
 
 DEPENDENCIES:
+  - btsparkle (from `Flutter/ephemeral/.symlinks/plugins/btsparkle/macos`)
   - device_info_plus (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos`)
   - file_picker (from `Flutter/ephemeral/.symlinks/plugins/file_picker/macos`)
   - flutter_archive (from `Flutter/ephemeral/.symlinks/plugins/flutter_archive/macos`)
   - flutter_blue_plus_darwin (from `Flutter/ephemeral/.symlinks/plugins/flutter_blue_plus_darwin/darwin`)
-  - flutter_sparkle (from `Flutter/ephemeral/.symlinks/plugins/flutter_sparkle/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
@@ -50,6 +50,8 @@ SPEC REPOS:
     - ZIPFoundation
 
 EXTERNAL SOURCES:
+  btsparkle:
+    :path: Flutter/ephemeral/.symlinks/plugins/btsparkle/macos
   device_info_plus:
     :path: Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos
   file_picker:
@@ -58,8 +60,6 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_archive/macos
   flutter_blue_plus_darwin:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_blue_plus_darwin/darwin
-  flutter_sparkle:
-    :path: Flutter/ephemeral/.symlinks/plugins/flutter_sparkle/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
   package_info_plus:
@@ -76,11 +76,11 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/window_manager/macos
 
 SPEC CHECKSUMS:
+  btsparkle: 46dd48d377de5fc5d4ad2c1c69d417ac9ce1cccd
   device_info_plus: 4fb280989f669696856f8b129e4a5e3cd6c48f76
   file_picker: 7584aae6fa07a041af2b36a2655122d42f578c1a
   flutter_archive: 07888d9aeb79da005e0ad8b9d347d17cdea07f68
   flutter_blue_plus_darwin: 20a08bfeaa0f7804d524858d3d8744bcc1b6dbc3
-  flutter_sparkle: 550cfddada5e1f60e85406c27525f763872ec9b7
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
   package_info_plus: f0052d280d17aa382b932f399edf32507174e870
   path_provider_foundation: bb55f6dbba17d0dccd6737fe6f7f34fbd0376880

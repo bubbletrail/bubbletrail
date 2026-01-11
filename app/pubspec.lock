@@ -89,6 +89,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  btsparkle:
+    dependency: "direct main"
+    description:
+      path: "../pkg/btsparkle"
+      relative: true
+    source: path
+    version: "1.0.0"
   buffer:
     dependency: transitive
     description:
@@ -466,14 +473,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.33"
-  flutter_sparkle:
-    dependency: "direct main"
-    description:
-      name: flutter_sparkle
-      sha256: "9578a825366d5d003b9347afba870d1c7fe2996e66dde38ee09ac826cd399647"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.2"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
