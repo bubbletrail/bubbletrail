@@ -220,6 +220,8 @@ class _DiveDetails extends StatelessWidget {
     if (dive.hasCns()) children.add(_ColumnRow(label: 'CNS', child: Text('${dive.cns}%')));
     if (worstDeco != null) children.add(_ColumnRow(label: 'Deco', child: DecoStatusText(worstDeco)));
     if (decoModel != null) children.add(_ColumnRow(label: 'Model', child: DecoModelText(decoModel)));
+    if (dive.logs.isNotEmpty && dive.logs.first.hasModel()) children.add(_ColumnRow(label: 'Computer', child: Text(dive.logs.first.model)));
+    if (dive.logs.isNotEmpty && dive.logs.first.hasSerial()) children.add(_ColumnRow(label: 'Serial', child: Text(dive.logs.first.serial)));
     if (children.isEmpty) return null;
     return _DataColumn(children: children);
   }
