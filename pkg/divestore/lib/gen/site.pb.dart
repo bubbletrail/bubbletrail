@@ -13,7 +13,8 @@
 import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
-import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart' as $0;
+import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart'
+    as $0;
 
 import 'types.pb.dart' as $1;
 
@@ -53,30 +54,40 @@ class Site extends $pb.GeneratedMessage {
 
   Site._();
 
-  factory Site.fromBuffer($core.List<$core.int> data, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory Site.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory Site.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(json, registry);
+  factory Site.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i =
-      $pb.BuilderInfo(_omitMessageNames ? '' : 'Site', package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'), createEmptyInstance: create)
-        ..aOS(1, _omitFieldNames ? '' : 'id')
-        ..aOM<$0.Timestamp>(2, _omitFieldNames ? '' : 'createdAt', subBuilder: $0.Timestamp.create)
-        ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'updatedAt', subBuilder: $0.Timestamp.create)
-        ..aOM<$0.Timestamp>(4, _omitFieldNames ? '' : 'deletedAt', subBuilder: $0.Timestamp.create)
-        ..aOS(5, _omitFieldNames ? '' : 'name')
-        ..aOM<$1.Position>(6, _omitFieldNames ? '' : 'position', subBuilder: $1.Position.create)
-        ..aOS(7, _omitFieldNames ? '' : 'country')
-        ..aOS(8, _omitFieldNames ? '' : 'location')
-        ..aOS(9, _omitFieldNames ? '' : 'bodyOfWater')
-        ..aOS(10, _omitFieldNames ? '' : 'difficulty')
-        ..pPS(11, _omitFieldNames ? '' : 'tags')
-        ..aOS(12, _omitFieldNames ? '' : 'notes')
-        ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Site',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'id')
+    ..aOM<$0.Timestamp>(2, _omitFieldNames ? '' : 'createdAt',
+        subBuilder: $0.Timestamp.create)
+    ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'updatedAt',
+        subBuilder: $0.Timestamp.create)
+    ..aOM<$0.Timestamp>(4, _omitFieldNames ? '' : 'deletedAt',
+        subBuilder: $0.Timestamp.create)
+    ..aOS(5, _omitFieldNames ? '' : 'name')
+    ..aOM<$1.Position>(6, _omitFieldNames ? '' : 'position',
+        subBuilder: $1.Position.create)
+    ..aOS(7, _omitFieldNames ? '' : 'country')
+    ..aOS(8, _omitFieldNames ? '' : 'location')
+    ..aOS(9, _omitFieldNames ? '' : 'bodyOfWater')
+    ..aOS(10, _omitFieldNames ? '' : 'difficulty')
+    ..pPS(11, _omitFieldNames ? '' : 'tags')
+    ..aOS(12, _omitFieldNames ? '' : 'notes')
+    ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Site clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Site copyWith(void Function(Site) updates) => super.copyWith((message) => updates(message as Site)) as Site;
+  Site copyWith(void Function(Site) updates) =>
+      super.copyWith((message) => updates(message as Site)) as Site;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -86,7 +97,8 @@ class Site extends $pb.GeneratedMessage {
   @$core.override
   Site createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static Site getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Site>(create);
+  static Site getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Site>(create);
   static Site? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -200,5 +212,7 @@ class Site extends $pb.GeneratedMessage {
   void clearNotes() => $_clearField(12);
 }
 
-const $core.bool _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const $core.bool _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
+const $core.bool _omitFieldNames =
+    $core.bool.fromEnvironment('protobuf.omit_field_names');
+const $core.bool _omitMessageNames =
+    $core.bool.fromEnvironment('protobuf.omit_message_names');

@@ -13,7 +13,8 @@
 import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
-import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart' as $0;
+import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart'
+    as $0;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
@@ -47,28 +48,39 @@ class Computer extends $pb.GeneratedMessage {
 
   Computer._();
 
-  factory Computer.fromBuffer($core.List<$core.int> data, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory Computer.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory Computer.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(json, registry);
+  factory Computer.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i =
-      $pb.BuilderInfo(_omitMessageNames ? '' : 'Computer', package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'), createEmptyInstance: create)
-        ..aOS(1, _omitFieldNames ? '' : 'remoteId')
-        ..aOM<$0.Timestamp>(2, _omitFieldNames ? '' : 'createdAt', subBuilder: $0.Timestamp.create)
-        ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'updatedAt', subBuilder: $0.Timestamp.create)
-        ..aOM<$0.Timestamp>(4, _omitFieldNames ? '' : 'deletedAt', subBuilder: $0.Timestamp.create)
-        ..aOS(5, _omitFieldNames ? '' : 'advertisedName')
-        ..aOS(6, _omitFieldNames ? '' : 'vendor')
-        ..aOS(7, _omitFieldNames ? '' : 'product')
-        ..a<$core.List<$core.int>>(8, _omitFieldNames ? '' : 'ldcFingerprint', $pb.PbFieldType.OY)
-        ..aOS(9, _omitFieldNames ? '' : 'serial')
-        ..aOM<$0.Timestamp>(10, _omitFieldNames ? '' : 'lastLogDate', subBuilder: $0.Timestamp.create)
-        ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Computer',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'remoteId')
+    ..aOM<$0.Timestamp>(2, _omitFieldNames ? '' : 'createdAt',
+        subBuilder: $0.Timestamp.create)
+    ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'updatedAt',
+        subBuilder: $0.Timestamp.create)
+    ..aOM<$0.Timestamp>(4, _omitFieldNames ? '' : 'deletedAt',
+        subBuilder: $0.Timestamp.create)
+    ..aOS(5, _omitFieldNames ? '' : 'advertisedName')
+    ..aOS(6, _omitFieldNames ? '' : 'vendor')
+    ..aOS(7, _omitFieldNames ? '' : 'product')
+    ..a<$core.List<$core.int>>(
+        8, _omitFieldNames ? '' : 'ldcFingerprint', $pb.PbFieldType.OY)
+    ..aOS(9, _omitFieldNames ? '' : 'serial')
+    ..aOM<$0.Timestamp>(10, _omitFieldNames ? '' : 'lastLogDate',
+        subBuilder: $0.Timestamp.create)
+    ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Computer clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Computer copyWith(void Function(Computer) updates) => super.copyWith((message) => updates(message as Computer)) as Computer;
+  Computer copyWith(void Function(Computer) updates) =>
+      super.copyWith((message) => updates(message as Computer)) as Computer;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -78,7 +90,8 @@ class Computer extends $pb.GeneratedMessage {
   @$core.override
   Computer createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static Computer getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Computer>(create);
+  static Computer getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Computer>(create);
   static Computer? _defaultInstance;
 
   /// Bluetooth LE remote ID as seen in a scan
@@ -187,5 +200,7 @@ class Computer extends $pb.GeneratedMessage {
   $0.Timestamp ensureLastLogDate() => $_ensure(9);
 }
 
-const $core.bool _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const $core.bool _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
+const $core.bool _omitFieldNames =
+    $core.bool.fromEnvironment('protobuf.omit_field_names');
+const $core.bool _omitMessageNames =
+    $core.bool.fromEnvironment('protobuf.omit_message_names');

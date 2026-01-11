@@ -19,36 +19,60 @@ import 'dart:typed_data' as $typed_data;
 const InternalCylinderList$json = {
   '1': 'InternalCylinderList',
   '2': [
-    {'1': 'cylinders', '3': 1, '4': 3, '5': 11, '6': '.divestore.Cylinder', '10': 'cylinders'},
+    {
+      '1': 'cylinders',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.divestore.Cylinder',
+      '10': 'cylinders'
+    },
   ],
 };
 
 /// Descriptor for `InternalCylinderList`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List internalCylinderListDescriptor = $convert.base64Decode('ChRJbnRlcm5hbEN5bGluZGVyTGlzdBIxCgljeWxpbmRlcnMYASADKAsyEy5kaXZlc3RvcmUuQ3'
+final $typed_data.Uint8List internalCylinderListDescriptor = $convert.base64Decode(
+    'ChRJbnRlcm5hbEN5bGluZGVyTGlzdBIxCgljeWxpbmRlcnMYASADKAsyEy5kaXZlc3RvcmUuQ3'
     'lsaW5kZXJSCWN5bGluZGVycw==');
 
 @$core.Deprecated('Use internalSiteListDescriptor instead')
 const InternalSiteList$json = {
   '1': 'InternalSiteList',
   '2': [
-    {'1': 'sites', '3': 1, '4': 3, '5': 11, '6': '.divestore.Site', '10': 'sites'},
+    {
+      '1': 'sites',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.divestore.Site',
+      '10': 'sites'
+    },
   ],
 };
 
 /// Descriptor for `InternalSiteList`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List internalSiteListDescriptor = $convert.base64Decode('ChBJbnRlcm5hbFNpdGVMaXN0EiUKBXNpdGVzGAEgAygLMg8uZGl2ZXN0b3JlLlNpdGVSBXNpdG'
+final $typed_data.Uint8List internalSiteListDescriptor = $convert.base64Decode(
+    'ChBJbnRlcm5hbFNpdGVMaXN0EiUKBXNpdGVzGAEgAygLMg8uZGl2ZXN0b3JlLlNpdGVSBXNpdG'
     'Vz');
 
 @$core.Deprecated('Use internalDiveListDescriptor instead')
 const InternalDiveList$json = {
   '1': 'InternalDiveList',
   '2': [
-    {'1': 'dives', '3': 1, '4': 3, '5': 11, '6': '.divestore.Dive', '10': 'dives'},
+    {
+      '1': 'dives',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.divestore.Dive',
+      '10': 'dives'
+    },
   ],
 };
 
 /// Descriptor for `InternalDiveList`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List internalDiveListDescriptor = $convert.base64Decode('ChBJbnRlcm5hbERpdmVMaXN0EiUKBWRpdmVzGAEgAygLMg8uZGl2ZXN0b3JlLkRpdmVSBWRpdm'
+final $typed_data.Uint8List internalDiveListDescriptor = $convert.base64Decode(
+    'ChBJbnRlcm5hbERpdmVMaXN0EiUKBWRpdmVzGAEgAygLMg8uZGl2ZXN0b3JlLkRpdmVSBWRpdm'
     'Vz');
 
 @$core.Deprecated('Use internalLogListDescriptor instead')
@@ -60,16 +84,25 @@ const InternalLogList$json = {
 };
 
 /// Descriptor for `InternalLogList`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List internalLogListDescriptor = $convert.base64Decode('Cg9JbnRlcm5hbExvZ0xpc3QSIgoEbG9ncxgBIAMoCzIOLmRpdmVzdG9yZS5Mb2dSBGxvZ3M=');
+final $typed_data.Uint8List internalLogListDescriptor = $convert.base64Decode(
+    'Cg9JbnRlcm5hbExvZ0xpc3QSIgoEbG9ncxgBIAMoCzIOLmRpdmVzdG9yZS5Mb2dSBGxvZ3M=');
 
 @$core.Deprecated('Use internalComputerListDescriptor instead')
 const InternalComputerList$json = {
   '1': 'InternalComputerList',
   '2': [
-    {'1': 'computers', '3': 1, '4': 3, '5': 11, '6': '.divestore.Computer', '10': 'computers'},
+    {
+      '1': 'computers',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.divestore.Computer',
+      '10': 'computers'
+    },
   ],
 };
 
 /// Descriptor for `InternalComputerList`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List internalComputerListDescriptor = $convert.base64Decode('ChRJbnRlcm5hbENvbXB1dGVyTGlzdBIxCgljb21wdXRlcnMYASADKAsyEy5kaXZlc3RvcmUuQ2'
+final $typed_data.Uint8List internalComputerListDescriptor = $convert.base64Decode(
+    'ChRJbnRlcm5hbENvbXB1dGVyTGlzdBIxCgljb21wdXRlcnMYASADKAsyEy5kaXZlc3RvcmUuQ2'
     '9tcHV0ZXJSCWNvbXB1dGVycw==');
