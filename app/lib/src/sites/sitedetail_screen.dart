@@ -33,59 +33,48 @@ class SiteDetailScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Padding(
           padding: const .all(8.0),
-          child: Column(
+          child: Wrap(
+            alignment: .start,
             crossAxisAlignment: .start,
             spacing: 8,
+            runSpacing: 8,
             children: [
-              infoCard(context, 'Location Information', [
-                infoRow('Name', site.name),
-                if (site.country.isNotEmpty) infoRow('Country', site.country),
-                if (site.location.isNotEmpty) infoRow('Location', site.location),
-                if (site.bodyOfWater.isNotEmpty) infoRow('Body of Water', site.bodyOfWater),
-                if (site.hasPosition()) infoRow('Position', [formatLatitude(site.position.latitude), formatLongitude(site.position.longitude)].join(' ')),
-              ]),
-              if (site.difficulty.isNotEmpty || site.tags.isNotEmpty) ...[
-                infoCard(context, 'Dive Information', [
-                  if (site.difficulty.isNotEmpty) infoRow('Difficulty', site.difficulty),
-                  if (site.tags.isNotEmpty) tagsRow(context, site.tags.toList()),
-                ]),
-              ],
+              Column(
+                crossAxisAlignment: .start,
+                spacing: 8,
+                children: [
+                  SiteMapWidget(site: site, showFullscreenButton: true),
+                  TagsList(tags: site.tags, prefix: '#'),
+                ],
+              ),
+              Card(
+                child: Padding(
+                  padding: const .all(16.0),
+                  child: DataCardColumn(
+                    children: [
+                      if (site.country.isNotEmpty) ColumnRow(label: 'Country', child: Text(site.country)),
+                      if (site.location.isNotEmpty) ColumnRow(label: 'Location', child: Text(site.location)),
+                      if (site.bodyOfWater.isNotEmpty) ColumnRow(label: 'Body of Water', child: Text(site.bodyOfWater)),
+                      if (site.hasPosition())
+                        ColumnRow(label: 'Position', child: Text([formatLatitude(site.position.latitude), formatLongitude(site.position.longitude)].join(' '))),
+                      if (site.difficulty.isNotEmpty) ColumnRow(label: 'Difficulty', child: Text(site.difficulty)),
+                    ],
+                  ),
+                ),
+              ),
               if (site.notes.isNotEmpty) ...[
-                infoCard(context, 'Notes', [
-                  Padding(
-                    padding: const .only(top: 8.0),
+                Card(
+                  child: Padding(
+                    padding: const .all(8.0),
                     child: Text(site.notes, style: Theme.of(context).textTheme.bodyMedium),
                   ),
-                ]),
-              ],
-              SiteMapWidget(site: site, showFullscreenButton: true),
-              if (dives.isNotEmpty) ...[
-                Card(
-                  elevation: 2,
-                  child: Padding(
-                    padding: const .all(16.0),
-                    child: Column(
-                      crossAxisAlignment: .start,
-                      children: [
-                        Text('Dives at this site (${dives.length})', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: .bold)),
-                        const Divider(),
-                        AspectRatio(
-                          aspectRatio: 2,
-                          child: DiveTableWidget(dives: dives, sitesByUuid: state.sitesByUuid, showSiteColumn: false),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ] else ...[
-                Card(
-                  elevation: 2,
-                  child: Padding(
-                    padding: const .all(16.0),
-                    child: Text('No dives recorded at this site', style: Theme.of(context).textTheme.bodyMedium),
-                  ),
                 ),
               ],
+              if (dives.isNotEmpty)
+                AspectRatio(
+                  aspectRatio: 2,
+                  child: DiveTableWidget(dives: dives, sitesByUuid: state.sitesByUuid, showSiteColumn: false),
+                ),
             ],
           ),
         ),

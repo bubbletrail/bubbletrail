@@ -1,5 +1,6 @@
 export 'colors.dart';
 export 'cylinder_tile.dart';
+export 'datacardcolumn.dart';
 export 'details_available.dart';
 export 'dialogs.dart';
 export 'dive_list_item_card.dart';

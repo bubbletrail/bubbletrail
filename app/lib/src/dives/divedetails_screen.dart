@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:divestore/divestore.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide DataColumn;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
@@ -193,12 +193,12 @@ class _DiveDetails extends StatelessWidget {
   }
 
   Widget _weightsTable() {
-    return _DataColumn(
+    return DataCardColumn(
       children: dive.weightsystems.indexed.map((entry) {
         final idx = entry.$1;
         final ws = entry.$2;
         final desc = ws.description.isNotEmpty ? ws.description : 'Weight ${idx + 1}';
-        return _ColumnRow(label: desc, child: WeightText(ws.weight));
+        return ColumnRow(label: desc, child: WeightText(ws.weight));
       }).toList(),
     );
   }
@@ -210,29 +210,29 @@ class _DiveDetails extends StatelessWidget {
     if (dive.hasMaxTemp() || dive.hasMinTemp()) children.add(_Temps(dive));
     if (dive.hasSac()) {
       children.add(
-        _ColumnRow(
+        ColumnRow(
           label: 'SAC',
           child: VolumeText(dive.sac, suffix: '/min'),
         ),
       );
     }
-    if (dive.hasOtu()) children.add(_ColumnRow(label: 'OTU', child: Text(dive.otu.toString())));
-    if (dive.hasCns()) children.add(_ColumnRow(label: 'CNS', child: Text('${dive.cns}%')));
-    if (worstDeco != null) children.add(_ColumnRow(label: 'Deco', child: DecoStatusText(worstDeco)));
-    if (decoModel != null) children.add(_ColumnRow(label: 'Model', child: DecoModelText(decoModel)));
-    if (dive.logs.isNotEmpty && dive.logs.first.hasModel()) children.add(_ColumnRow(label: 'Computer', child: Text(dive.logs.first.model)));
-    if (dive.logs.isNotEmpty && dive.logs.first.hasSerial()) children.add(_ColumnRow(label: 'Serial', child: Text(dive.logs.first.serial)));
+    if (dive.hasOtu()) children.add(ColumnRow(label: 'OTU', child: Text(dive.otu.toString())));
+    if (dive.hasCns()) children.add(ColumnRow(label: 'CNS', child: Text('${dive.cns}%')));
+    if (worstDeco != null) children.add(ColumnRow(label: 'Deco', child: DecoStatusText(worstDeco)));
+    if (decoModel != null) children.add(ColumnRow(label: 'Model', child: DecoModelText(decoModel)));
+    if (dive.logs.isNotEmpty && dive.logs.first.hasModel()) children.add(ColumnRow(label: 'Computer', child: Text(dive.logs.first.model)));
+    if (dive.logs.isNotEmpty && dive.logs.first.hasSerial()) children.add(ColumnRow(label: 'Serial', child: Text(dive.logs.first.serial)));
     if (children.isEmpty) return null;
-    return _DataColumn(children: children);
+    return DataCardColumn(children: children);
   }
 
   Widget _depthsTable() {
-    return _DataColumn(
+    return DataCardColumn(
       children: [
-        _ColumnRow(label: 'Start', child: DateTimeText(dive.start.toDateTime())),
-        _ColumnRow(label: 'Duration', child: DurationText(dive.duration)),
-        _ColumnRow(label: 'Max depth', child: DepthText(dive.maxDepth)),
-        _ColumnRow(label: 'Mean depth', child: DepthText(dive.meanDepth)),
+        ColumnRow(label: 'Start', child: DateTimeText(dive.start.toDateTime())),
+        ColumnRow(label: 'Duration', child: DurationText(dive.duration)),
+        ColumnRow(label: 'Max depth', child: DepthText(dive.maxDepth)),
+        ColumnRow(label: 'Mean depth', child: DepthText(dive.meanDepth)),
       ],
     );
   }
@@ -299,7 +299,7 @@ class _Temps extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (dive.hasMinTemp() && dive.hasMaxDepth() && dive.minTemp != dive.maxTemp) {
-      return _ColumnRow(
+      return ColumnRow(
         label: 'Temp',
         child: Row(
           children: [
@@ -311,10 +311,10 @@ class _Temps extends StatelessWidget {
       );
     }
     if (dive.hasMaxTemp()) {
-      return _ColumnRow(label: 'Temp', child: TemperatureText(dive.maxTemp));
+      return ColumnRow(label: 'Temp', child: TemperatureText(dive.maxTemp));
     }
     if (dive.hasMinTemp()) {
-      return _ColumnRow(label: 'Temp', child: TemperatureText(dive.minTemp));
+      return ColumnRow(label: 'Temp', child: TemperatureText(dive.minTemp));
     }
     return const SizedBox();
   }
@@ -406,37 +406,6 @@ class _RawDiveDataScreen extends StatelessWidget {
   }
 }
 
-class _DataColumn extends StatelessWidget {
-  const _DataColumn({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return IntrinsicWidth(child: Column(children: children));
-  }
-}
-
-class _ColumnRow extends StatelessWidget {
-  const _ColumnRow({required this.label, required this.child});
-
-  final String? label;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: .center,
-      mainAxisAlignment: .spaceBetween,
-      children: [
-        Opacity(opacity: 0.5, child: Text(label ?? '', style: Theme.of(context).textTheme.labelSmall)),
-        SizedBox(width: 16),
-        child,
-      ],
-    );
-  }
-}
-
 class _CylinderColumn extends StatelessWidget {
   final int index;
   final String description;
@@ -461,23 +430,23 @@ class _CylinderColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final desc = description.isNotEmpty ? description : 'Cylinder ${index + 1}';
-    final details = <Widget>[_ColumnRow(label: 'Cylinder', child: Text(desc))];
-    details.add(_ColumnRow(label: 'Mix', child: Text(formatGasPercentage(oxygenPct, heliumPct))));
-    if (beginPressure > 0) details.add(_ColumnRow(label: 'Start', child: PressureText(beginPressure)));
-    if (endPressure > 0) details.add(_ColumnRow(label: 'End', child: PressureText(endPressure)));
+    final details = <Widget>[ColumnRow(label: 'Cylinder', child: Text(desc))];
+    details.add(ColumnRow(label: 'Mix', child: Text(formatGasPercentage(oxygenPct, heliumPct))));
+    if (beginPressure > 0) details.add(ColumnRow(label: 'Start', child: PressureText(beginPressure)));
+    if (endPressure > 0) details.add(ColumnRow(label: 'End', child: PressureText(endPressure)));
     if (beginPressure > 0 && endPressure > 0 && volumeL > 0) {
-      details.add(_ColumnRow(label: 'Volume used', child: VolumeText((beginPressure - endPressure) * volumeL)));
+      details.add(ColumnRow(label: 'Volume used', child: VolumeText((beginPressure - endPressure) * volumeL)));
     }
     if (sac > 0) {
       details.add(
-        _ColumnRow(
+        ColumnRow(
           label: 'SAC',
           child: VolumeText(sac, suffix: '/min'),
         ),
       );
     }
 
-    return _DataColumn(children: details);
+    return DataCardColumn(children: details);
   }
 }
 
