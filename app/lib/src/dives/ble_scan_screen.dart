@@ -212,10 +212,7 @@ class BleScanScreen extends StatelessWidget {
               ],
             ),
           ),
-          trailing: ElevatedButton(
-            onPressed: () => context.read<BleDownloadBloc>().add(.connectToDevice(device)),
-            child: const Text('Connect'),
-          ),
+          trailing: ElevatedButton(onPressed: () => context.read<BleDownloadBloc>().add(.connectToDevice(device)), child: const Text('Connect')),
         ),
       );
     }).toList();
@@ -394,13 +391,15 @@ class BleScanScreen extends StatelessWidget {
             scanState.isScanning
                 ? 'Scanning...'
                 : hasUnfilteredResults
-                    ? 'No dive computers found'
-                    : 'No devices found',
+                ? 'No dive computers found'
+                : 'No devices found',
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
           Text(
-            hasUnfilteredResults ? 'Found ${scanState.scanResults.length} other device(s).\nEnable "Show all" to see them.' : 'Make sure your dive computer is in\nBluetooth pairing mode',
+            hasUnfilteredResults
+                ? 'Found ${scanState.scanResults.length} other device(s).\nEnable "Show all" to see them.'
+                : 'Make sure your dive computer is in\nBluetooth pairing mode',
             textAlign: TextAlign.center,
           ),
         ],
