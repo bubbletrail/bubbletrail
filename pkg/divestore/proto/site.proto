@@ -8,17 +8,14 @@ import "types.proto";
 // Dive site information.
 message Site {
   string id = 1;
+  Metadata meta = 2;
 
-  google.protobuf.Timestamp created_at = 2;
-  google.protobuf.Timestamp updated_at = 3;
-  google.protobuf.Timestamp deleted_at = 4;
-
-  string name = 5;
-  Position position = 6;
-  string country = 7;
-  string location = 8;
-  string body_of_water = 9;
-  string difficulty = 10;
-  repeated string tags = 11;
-  string notes = 12;
+  string name = 3;
+  Position position = 4;
+  string country = 5;
+  string location = 6;
+  string body_of_water = 7;
+  string difficulty = 8;
+  repeated string tags = 9;
+  string notes = 10;
 }

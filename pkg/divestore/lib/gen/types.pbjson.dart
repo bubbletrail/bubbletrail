@@ -30,14 +30,13 @@ final $typed_data.Uint8List positionDescriptor = $convert.base64Decode(
     'CghQb3NpdGlvbhIaCghsYXRpdHVkZRgBIAEoAVIIbGF0aXR1ZGUSHAoJbG9uZ2l0dWRlGAIgAS'
     'gBUglsb25naXR1ZGUSGgoIYWx0aXR1ZGUYAyABKAFSCGFsdGl0dWRl');
 
-@$core.Deprecated('Use cylinderDescriptor instead')
-const Cylinder$json = {
-  '1': 'Cylinder',
+@$core.Deprecated('Use metadataDescriptor instead')
+const Metadata$json = {
+  '1': 'Metadata',
   '2': [
-    {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
     {
       '1': 'created_at',
-      '3': 2,
+      '3': 1,
       '4': 1,
       '5': 11,
       '6': '.google.protobuf.Timestamp',
@@ -45,7 +44,7 @@ const Cylinder$json = {
     },
     {
       '1': 'updated_at',
-      '3': 3,
+      '3': 2,
       '4': 1,
       '5': 11,
       '6': '.google.protobuf.Timestamp',
@@ -53,24 +52,47 @@ const Cylinder$json = {
     },
     {
       '1': 'deleted_at',
-      '3': 4,
+      '3': 3,
       '4': 1,
       '5': 11,
       '6': '.google.protobuf.Timestamp',
       '10': 'deletedAt'
     },
-    {'1': 'volume_l', '3': 5, '4': 1, '5': 1, '10': 'volumeL'},
+  ],
+};
+
+/// Descriptor for `Metadata`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List metadataDescriptor = $convert.base64Decode(
+    'CghNZXRhZGF0YRI5CgpjcmVhdGVkX2F0GAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdG'
+    'FtcFIJY3JlYXRlZEF0EjkKCnVwZGF0ZWRfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGlt'
+    'ZXN0YW1wUgl1cGRhdGVkQXQSOQoKZGVsZXRlZF9hdBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi'
+    '5UaW1lc3RhbXBSCWRlbGV0ZWRBdA==');
+
+@$core.Deprecated('Use cylinderDescriptor instead')
+const Cylinder$json = {
+  '1': 'Cylinder',
+  '2': [
+    {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
+    {
+      '1': 'meta',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.divestore.Metadata',
+      '10': 'meta'
+    },
+    {'1': 'volume_l', '3': 3, '4': 1, '5': 1, '10': 'volumeL'},
     {
       '1': 'working_pressure_bar',
-      '3': 6,
+      '3': 4,
       '4': 1,
       '5': 1,
       '10': 'workingPressureBar'
     },
-    {'1': 'description', '3': 7, '4': 1, '5': 9, '10': 'description'},
+    {'1': 'description', '3': 5, '4': 1, '5': 9, '10': 'description'},
     {
       '1': 'volume_cuft',
-      '3': 8,
+      '3': 6,
       '4': 1,
       '5': 1,
       '9': 0,
@@ -79,7 +101,7 @@ const Cylinder$json = {
     },
     {
       '1': 'working_pressure_psi',
-      '3': 9,
+      '3': 7,
       '4': 1,
       '5': 1,
       '9': 1,
@@ -95,12 +117,9 @@ const Cylinder$json = {
 
 /// Descriptor for `Cylinder`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List cylinderDescriptor = $convert.base64Decode(
-    'CghDeWxpbmRlchIOCgJpZBgBIAEoCVICaWQSOQoKY3JlYXRlZF9hdBgCIAEoCzIaLmdvb2dsZS'
-    '5wcm90b2J1Zi5UaW1lc3RhbXBSCWNyZWF0ZWRBdBI5Cgp1cGRhdGVkX2F0GAMgASgLMhouZ29v'
-    'Z2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJdXBkYXRlZEF0EjkKCmRlbGV0ZWRfYXQYBCABKAsyGi'
-    '5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUglkZWxldGVkQXQSGQoIdm9sdW1lX2wYBSABKAFS'
-    'B3ZvbHVtZUwSMAoUd29ya2luZ19wcmVzc3VyZV9iYXIYBiABKAFSEndvcmtpbmdQcmVzc3VyZU'
-    'JhchIgCgtkZXNjcmlwdGlvbhgHIAEoCVILZGVzY3JpcHRpb24SJAoLdm9sdW1lX2N1ZnQYCCAB'
-    'KAFIAFIKdm9sdW1lQ3VmdIgBARI1ChR3b3JraW5nX3ByZXNzdXJlX3BzaRgJIAEoAUgBUhJ3b3'
-    'JraW5nUHJlc3N1cmVQc2mIAQFCDgoMX3ZvbHVtZV9jdWZ0QhcKFV93b3JraW5nX3ByZXNzdXJl'
-    'X3BzaQ==');
+    'CghDeWxpbmRlchIOCgJpZBgBIAEoCVICaWQSJwoEbWV0YRgCIAEoCzITLmRpdmVzdG9yZS5NZX'
+    'RhZGF0YVIEbWV0YRIZCgh2b2x1bWVfbBgDIAEoAVIHdm9sdW1lTBIwChR3b3JraW5nX3ByZXNz'
+    'dXJlX2JhchgEIAEoAVISd29ya2luZ1ByZXNzdXJlQmFyEiAKC2Rlc2NyaXB0aW9uGAUgASgJUg'
+    'tkZXNjcmlwdGlvbhIkCgt2b2x1bWVfY3VmdBgGIAEoAUgAUgp2b2x1bWVDdWZ0iAEBEjUKFHdv'
+    'cmtpbmdfcHJlc3N1cmVfcHNpGAcgASgBSAFSEndvcmtpbmdQcmVzc3VyZVBzaYgBAUIOCgxfdm'
+    '9sdW1lX2N1ZnRCFwoVX3dvcmtpbmdfcHJlc3N1cmVfcHNp');

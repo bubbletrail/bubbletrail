@@ -11,22 +11,25 @@ message Position {
   double altitude = 3; // Meters above sea level
 }
 
+message Metadata {
+  google.protobuf.Timestamp created_at = 1;
+  google.protobuf.Timestamp updated_at = 2;
+  google.protobuf.Timestamp deleted_at = 3;
+}
+
 // Cylinder/tank definition.
 // Metric fields (size, workpressure) are always populated for calculations.
 // Imperial fields (size_cuft, workpressure_psi) are optionally stored when
 // the user enters values in imperial units, to avoid rounding errors on display.
 message Cylinder {
   string id = 1;
+  Metadata meta = 2;
 
-  google.protobuf.Timestamp created_at = 2;
-  google.protobuf.Timestamp updated_at = 3;
-  google.protobuf.Timestamp deleted_at = 4;
-
-  double volume_l = 5; // Water volume in liters
-  double working_pressure_bar = 6; // Working pressure in bar
-  string description = 7;
+  double volume_l = 3; // Water volume in liters
+  double working_pressure_bar = 4; // Working pressure in bar
+  string description = 5;
 
   // Imperial values (set when entered in imperial units for exact round-trip)
-  optional double volume_cuft = 8; // Gas capacity in cuft at working pressure
-  optional double working_pressure_psi = 9; // Working pressure in PSI
+  optional double volume_cuft = 6; // Gas capacity in cuft at working pressure
+  optional double working_pressure_psi = 7; // Working pressure in PSI
 }

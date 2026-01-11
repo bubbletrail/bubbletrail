@@ -9,46 +9,43 @@ import "types.proto";
 // A single dive log entry.
 message Dive {
   string id = 1;
+  Metadata meta = 2;
+  string synced_etag = 3;
 
-  google.protobuf.Timestamp created_at = 2;
-  google.protobuf.Timestamp updated_at = 3;
-  google.protobuf.Timestamp deleted_at = 4;
-  string synced_etag = 5;
-
-  int32 number = 8; // Dive number, human readable/assigned
-  int32 rating = 9; // 0-5 stars
-  repeated string tags = 10; // Free-form tag strings
-  google.protobuf.Timestamp start = 11; // Unix epoch timestamp (seconds)
+  int32 number = 4; // Dive number, human readable/assigned
+  int32 rating = 5; // 0-5 stars
+  repeated string tags = 6; // Free-form tag strings
+  google.protobuf.Timestamp start = 7; // Unix epoch timestamp (seconds)
 
   // Summary data (populated from dive computer data, but editable by the user)
-  int32 duration = 12; // Seconds
-  double max_depth = 13; // Meters
-  double mean_depth = 14; // Meters
-  double min_temp = 27; // Celsius
-  double max_temp = 28; // Celsius
+  int32 duration = 8; // Seconds
+  double max_depth = 9; // Meters
+  double mean_depth = 10; // Meters
+  double min_temp = 11; // Celsius
+  double max_temp = 12; // Celsius
 
   // Additional attributes
-  double sac = 15; // l/min
-  int32 otu = 16;
-  int32 cns = 17; // Percentage
+  double sac = 13; // l/min
+  int32 otu = 14;
+  int32 cns = 15; // Percentage
 
   // Link to dive site
-  string site_id = 18;
+  string site_id = 16;
 
   // Child elements
-  string instructor = 19;
-  string divemaster = 20;
-  repeated string buddies = 21;
-  string notes = 22;
-  repeated DiveCylinder cylinders = 23;
-  repeated Weightsystem weightsystems = 24;
+  string instructor = 17;
+  string divemaster = 18;
+  repeated string buddies = 19;
+  string notes = 20;
+  repeated DiveCylinder cylinders = 21;
+  repeated Weightsystem weightsystems = 22;
 
   // Raw dive computer data
-  repeated Log logs = 25;
+  repeated Log logs = 23;
 
   // Events like gas changed, initially extracted from dive computer data
   // but editable.
-  repeated SampleEvent events = 26;
+  repeated SampleEvent events = 24;
 }
 
 // Per-dive cylinder usage information.
@@ -58,12 +55,11 @@ message DiveCylinder {
   double end_pressure = 3; // Bar
   double oxygen = 4; // Fraction (0.0-1.0)
   double helium = 5; // Fraction (0.0-1.0)
-
-  double used_volume = 16; // liters, calculated
-  double sac = 17; // liters/min, calculated
+  double used_volume = 6; // liters, calculated
+  double sac = 7; // liters/min, calculated
 
   // Set when loaded, to full out volume etc.
-  Cylinder cylinder = 32;
+  Cylinder cylinder = 8;
 }
 
 // Weight system information.

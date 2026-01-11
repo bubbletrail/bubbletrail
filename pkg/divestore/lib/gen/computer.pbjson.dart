@@ -21,37 +21,21 @@ const Computer$json = {
   '2': [
     {'1': 'remote_id', '3': 1, '4': 1, '5': 9, '10': 'remoteId'},
     {
-      '1': 'created_at',
+      '1': 'meta',
       '3': 2,
       '4': 1,
       '5': 11,
-      '6': '.google.protobuf.Timestamp',
-      '10': 'createdAt'
+      '6': '.divestore.Metadata',
+      '10': 'meta'
     },
-    {
-      '1': 'updated_at',
-      '3': 3,
-      '4': 1,
-      '5': 11,
-      '6': '.google.protobuf.Timestamp',
-      '10': 'updatedAt'
-    },
-    {
-      '1': 'deleted_at',
-      '3': 4,
-      '4': 1,
-      '5': 11,
-      '6': '.google.protobuf.Timestamp',
-      '10': 'deletedAt'
-    },
-    {'1': 'advertised_name', '3': 5, '4': 1, '5': 9, '10': 'advertisedName'},
-    {'1': 'vendor', '3': 6, '4': 1, '5': 9, '10': 'vendor'},
-    {'1': 'product', '3': 7, '4': 1, '5': 9, '10': 'product'},
-    {'1': 'serial', '3': 8, '4': 1, '5': 9, '10': 'serial'},
-    {'1': 'ldc_fingerprint', '3': 9, '4': 1, '5': 12, '10': 'ldcFingerprint'},
+    {'1': 'advertised_name', '3': 3, '4': 1, '5': 9, '10': 'advertisedName'},
+    {'1': 'vendor', '3': 4, '4': 1, '5': 9, '10': 'vendor'},
+    {'1': 'product', '3': 5, '4': 1, '5': 9, '10': 'product'},
+    {'1': 'serial', '3': 6, '4': 1, '5': 9, '10': 'serial'},
+    {'1': 'ldc_fingerprint', '3': 7, '4': 1, '5': 12, '10': 'ldcFingerprint'},
     {
       '1': 'last_log_date',
-      '3': 10,
+      '3': 8,
       '4': 1,
       '5': 11,
       '6': '.google.protobuf.Timestamp',
@@ -62,11 +46,9 @@ const Computer$json = {
 
 /// Descriptor for `Computer`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List computerDescriptor = $convert.base64Decode(
-    'CghDb21wdXRlchIbCglyZW1vdGVfaWQYASABKAlSCHJlbW90ZUlkEjkKCmNyZWF0ZWRfYXQYAi'
-    'ABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUgljcmVhdGVkQXQSOQoKdXBkYXRlZF9h'
-    'dBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSCXVwZGF0ZWRBdBI5CgpkZWxldG'
-    'VkX2F0GAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJZGVsZXRlZEF0EicKD2Fk'
-    'dmVydGlzZWRfbmFtZRgFIAEoCVIOYWR2ZXJ0aXNlZE5hbWUSFgoGdmVuZG9yGAYgASgJUgZ2ZW'
-    '5kb3ISGAoHcHJvZHVjdBgHIAEoCVIHcHJvZHVjdBIWCgZzZXJpYWwYCCABKAlSBnNlcmlhbBIn'
-    'Cg9sZGNfZmluZ2VycHJpbnQYCSABKAxSDmxkY0ZpbmdlcnByaW50Ej4KDWxhc3RfbG9nX2RhdG'
-    'UYCiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUgtsYXN0TG9nRGF0ZQ==');
+    'CghDb21wdXRlchIbCglyZW1vdGVfaWQYASABKAlSCHJlbW90ZUlkEicKBG1ldGEYAiABKAsyEy'
+    '5kaXZlc3RvcmUuTWV0YWRhdGFSBG1ldGESJwoPYWR2ZXJ0aXNlZF9uYW1lGAMgASgJUg5hZHZl'
+    'cnRpc2VkTmFtZRIWCgZ2ZW5kb3IYBCABKAlSBnZlbmRvchIYCgdwcm9kdWN0GAUgASgJUgdwcm'
+    '9kdWN0EhYKBnNlcmlhbBgGIAEoCVIGc2VyaWFsEicKD2xkY19maW5nZXJwcmludBgHIAEoDFIO'
+    'bGRjRmluZ2VycHJpbnQSPgoNbGFzdF9sb2dfZGF0ZRgIIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi'
+    '5UaW1lc3RhbXBSC2xhc3RMb2dEYXRl');

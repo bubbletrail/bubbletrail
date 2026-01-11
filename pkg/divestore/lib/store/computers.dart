@@ -31,11 +31,10 @@ class Computers {
     if (readonly) throw Exception('readonly');
     var computer = _computers[remoteId];
     if (computer == null) {
-      computer = Computer(remoteId: remoteId, createdAt: .fromDateTime(.now()))..freeze();
+      computer = Computer(remoteId: remoteId, meta: newMetadata())..freeze();
     }
     computer = computer.rebuild((computer) {
-      computer.updatedAt = .fromDateTime(.now());
-      computer.clearDeletedAt();
+      computer.meta = computer.meta.rebuildUpdated();
       if (advertisedName != null) {
         computer.advertisedName = advertisedName;
       }
@@ -63,7 +62,7 @@ class Computers {
     if (readonly) throw Exception('readonly');
     if (_computers.containsKey(remoteId)) {
       _computers[remoteId] = _computers[remoteId]!.rebuild((computer) {
-        computer.deletedAt = Timestamp.fromDateTime(DateTime.now());
+        computer.meta = computer.meta.rebuildDeleted();
       });
     }
     _scheduleSave();
@@ -74,7 +73,7 @@ class Computers {
   }
 
   Future<List<Computer>> getAll({bool withDeleted = false}) async {
-    final computers = _computers.values.where((c) => withDeleted || !c.hasDeletedAt()).toList();
+    final computers = _computers.values.where((c) => withDeleted || !c.meta.isDeleted).toList();
     computers.sort((a, b) {
       final vendorCmp = a.vendor.compareTo(b.vendor);
       if (vendorCmp != 0) return vendorCmp;
@@ -117,12 +116,12 @@ class Computers {
       cl.freeze();
       for (final computer in cl.computers) {
         final cur = _computers[computer.remoteId];
-        if (computer.hasDeletedAt()) {
+        if (computer.meta.isDeleted) {
           if (cur != null) {
             _log.fine('deleting computer ${computer.remoteId}');
             await delete(computer.remoteId);
           }
-        } else if (cur == null || computer.updatedAt.toDateTime().isAfter(cur.updatedAt.toDateTime())) {
+        } else if (cur == null || computer.meta.isAfter(cur.meta)) {
           _log.fine('importing computer ${computer.remoteId}');
           _computers[computer.remoteId] = computer;
         }

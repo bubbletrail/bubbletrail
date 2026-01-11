@@ -21,54 +21,36 @@ const Site$json = {
   '2': [
     {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
     {
-      '1': 'created_at',
+      '1': 'meta',
       '3': 2,
       '4': 1,
       '5': 11,
-      '6': '.google.protobuf.Timestamp',
-      '10': 'createdAt'
+      '6': '.divestore.Metadata',
+      '10': 'meta'
     },
-    {
-      '1': 'updated_at',
-      '3': 3,
-      '4': 1,
-      '5': 11,
-      '6': '.google.protobuf.Timestamp',
-      '10': 'updatedAt'
-    },
-    {
-      '1': 'deleted_at',
-      '3': 4,
-      '4': 1,
-      '5': 11,
-      '6': '.google.protobuf.Timestamp',
-      '10': 'deletedAt'
-    },
-    {'1': 'name', '3': 5, '4': 1, '5': 9, '10': 'name'},
+    {'1': 'name', '3': 3, '4': 1, '5': 9, '10': 'name'},
     {
       '1': 'position',
-      '3': 6,
+      '3': 4,
       '4': 1,
       '5': 11,
       '6': '.divestore.Position',
       '10': 'position'
     },
-    {'1': 'country', '3': 7, '4': 1, '5': 9, '10': 'country'},
-    {'1': 'location', '3': 8, '4': 1, '5': 9, '10': 'location'},
-    {'1': 'body_of_water', '3': 9, '4': 1, '5': 9, '10': 'bodyOfWater'},
-    {'1': 'difficulty', '3': 10, '4': 1, '5': 9, '10': 'difficulty'},
-    {'1': 'tags', '3': 11, '4': 3, '5': 9, '10': 'tags'},
-    {'1': 'notes', '3': 12, '4': 1, '5': 9, '10': 'notes'},
+    {'1': 'country', '3': 5, '4': 1, '5': 9, '10': 'country'},
+    {'1': 'location', '3': 6, '4': 1, '5': 9, '10': 'location'},
+    {'1': 'body_of_water', '3': 7, '4': 1, '5': 9, '10': 'bodyOfWater'},
+    {'1': 'difficulty', '3': 8, '4': 1, '5': 9, '10': 'difficulty'},
+    {'1': 'tags', '3': 9, '4': 3, '5': 9, '10': 'tags'},
+    {'1': 'notes', '3': 10, '4': 1, '5': 9, '10': 'notes'},
   ],
 };
 
 /// Descriptor for `Site`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List siteDescriptor = $convert.base64Decode(
-    'CgRTaXRlEg4KAmlkGAEgASgJUgJpZBI5CgpjcmVhdGVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3'
-    'RvYnVmLlRpbWVzdGFtcFIJY3JlYXRlZEF0EjkKCnVwZGF0ZWRfYXQYAyABKAsyGi5nb29nbGUu'
-    'cHJvdG9idWYuVGltZXN0YW1wUgl1cGRhdGVkQXQSOQoKZGVsZXRlZF9hdBgEIAEoCzIaLmdvb2'
-    'dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSCWRlbGV0ZWRBdBISCgRuYW1lGAUgASgJUgRuYW1lEi8K'
-    'CHBvc2l0aW9uGAYgASgLMhMuZGl2ZXN0b3JlLlBvc2l0aW9uUghwb3NpdGlvbhIYCgdjb3VudH'
-    'J5GAcgASgJUgdjb3VudHJ5EhoKCGxvY2F0aW9uGAggASgJUghsb2NhdGlvbhIiCg1ib2R5X29m'
-    'X3dhdGVyGAkgASgJUgtib2R5T2ZXYXRlchIeCgpkaWZmaWN1bHR5GAogASgJUgpkaWZmaWN1bH'
-    'R5EhIKBHRhZ3MYCyADKAlSBHRhZ3MSFAoFbm90ZXMYDCABKAlSBW5vdGVz');
+    'CgRTaXRlEg4KAmlkGAEgASgJUgJpZBInCgRtZXRhGAIgASgLMhMuZGl2ZXN0b3JlLk1ldGFkYX'
+    'RhUgRtZXRhEhIKBG5hbWUYAyABKAlSBG5hbWUSLwoIcG9zaXRpb24YBCABKAsyEy5kaXZlc3Rv'
+    'cmUuUG9zaXRpb25SCHBvc2l0aW9uEhgKB2NvdW50cnkYBSABKAlSB2NvdW50cnkSGgoIbG9jYX'
+    'Rpb24YBiABKAlSCGxvY2F0aW9uEiIKDWJvZHlfb2Zfd2F0ZXIYByABKAlSC2JvZHlPZldhdGVy'
+    'Eh4KCmRpZmZpY3VsdHkYCCABKAlSCmRpZmZpY3VsdHkSEgoEdGFncxgJIAMoCVIEdGFncxIUCg'
+    'Vub3RlcxgKIAEoCVIFbm90ZXM=');

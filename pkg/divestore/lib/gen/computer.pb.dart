@@ -14,7 +14,9 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart'
-    as $0;
+    as $1;
+
+import 'types.pb.dart' as $0;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
@@ -22,21 +24,17 @@ export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 class Computer extends $pb.GeneratedMessage {
   factory Computer({
     $core.String? remoteId,
-    $0.Timestamp? createdAt,
-    $0.Timestamp? updatedAt,
-    $0.Timestamp? deletedAt,
+    $0.Metadata? meta,
     $core.String? advertisedName,
     $core.String? vendor,
     $core.String? product,
     $core.String? serial,
     $core.List<$core.int>? ldcFingerprint,
-    $0.Timestamp? lastLogDate,
+    $1.Timestamp? lastLogDate,
   }) {
     final result = create();
     if (remoteId != null) result.remoteId = remoteId;
-    if (createdAt != null) result.createdAt = createdAt;
-    if (updatedAt != null) result.updatedAt = updatedAt;
-    if (deletedAt != null) result.deletedAt = deletedAt;
+    if (meta != null) result.meta = meta;
     if (advertisedName != null) result.advertisedName = advertisedName;
     if (vendor != null) result.vendor = vendor;
     if (product != null) result.product = product;
@@ -60,20 +58,16 @@ class Computer extends $pb.GeneratedMessage {
       package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'remoteId')
-    ..aOM<$0.Timestamp>(2, _omitFieldNames ? '' : 'createdAt',
-        subBuilder: $0.Timestamp.create)
-    ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'updatedAt',
-        subBuilder: $0.Timestamp.create)
-    ..aOM<$0.Timestamp>(4, _omitFieldNames ? '' : 'deletedAt',
-        subBuilder: $0.Timestamp.create)
-    ..aOS(5, _omitFieldNames ? '' : 'advertisedName')
-    ..aOS(6, _omitFieldNames ? '' : 'vendor')
-    ..aOS(7, _omitFieldNames ? '' : 'product')
-    ..aOS(8, _omitFieldNames ? '' : 'serial')
+    ..aOM<$0.Metadata>(2, _omitFieldNames ? '' : 'meta',
+        subBuilder: $0.Metadata.create)
+    ..aOS(3, _omitFieldNames ? '' : 'advertisedName')
+    ..aOS(4, _omitFieldNames ? '' : 'vendor')
+    ..aOS(5, _omitFieldNames ? '' : 'product')
+    ..aOS(6, _omitFieldNames ? '' : 'serial')
     ..a<$core.List<$core.int>>(
-        9, _omitFieldNames ? '' : 'ldcFingerprint', $pb.PbFieldType.OY)
-    ..aOM<$0.Timestamp>(10, _omitFieldNames ? '' : 'lastLogDate',
-        subBuilder: $0.Timestamp.create)
+        7, _omitFieldNames ? '' : 'ldcFingerprint', $pb.PbFieldType.OY)
+    ..aOM<$1.Timestamp>(8, _omitFieldNames ? '' : 'lastLogDate',
+        subBuilder: $1.Timestamp.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -105,99 +99,77 @@ class Computer extends $pb.GeneratedMessage {
   void clearRemoteId() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $0.Timestamp get createdAt => $_getN(1);
+  $0.Metadata get meta => $_getN(1);
   @$pb.TagNumber(2)
-  set createdAt($0.Timestamp value) => $_setField(2, value);
+  set meta($0.Metadata value) => $_setField(2, value);
   @$pb.TagNumber(2)
-  $core.bool hasCreatedAt() => $_has(1);
+  $core.bool hasMeta() => $_has(1);
   @$pb.TagNumber(2)
-  void clearCreatedAt() => $_clearField(2);
+  void clearMeta() => $_clearField(2);
   @$pb.TagNumber(2)
-  $0.Timestamp ensureCreatedAt() => $_ensure(1);
-
-  @$pb.TagNumber(3)
-  $0.Timestamp get updatedAt => $_getN(2);
-  @$pb.TagNumber(3)
-  set updatedAt($0.Timestamp value) => $_setField(3, value);
-  @$pb.TagNumber(3)
-  $core.bool hasUpdatedAt() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearUpdatedAt() => $_clearField(3);
-  @$pb.TagNumber(3)
-  $0.Timestamp ensureUpdatedAt() => $_ensure(2);
-
-  @$pb.TagNumber(4)
-  $0.Timestamp get deletedAt => $_getN(3);
-  @$pb.TagNumber(4)
-  set deletedAt($0.Timestamp value) => $_setField(4, value);
-  @$pb.TagNumber(4)
-  $core.bool hasDeletedAt() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearDeletedAt() => $_clearField(4);
-  @$pb.TagNumber(4)
-  $0.Timestamp ensureDeletedAt() => $_ensure(3);
+  $0.Metadata ensureMeta() => $_ensure(1);
 
   /// Bluetooth LE advertised name as seen in a scan
-  @$pb.TagNumber(5)
-  $core.String get advertisedName => $_getSZ(4);
-  @$pb.TagNumber(5)
-  set advertisedName($core.String value) => $_setString(4, value);
-  @$pb.TagNumber(5)
-  $core.bool hasAdvertisedName() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearAdvertisedName() => $_clearField(5);
+  @$pb.TagNumber(3)
+  $core.String get advertisedName => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set advertisedName($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasAdvertisedName() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearAdvertisedName() => $_clearField(3);
 
   /// Vendor as set on the selected libdivecomputer descriptor
-  @$pb.TagNumber(6)
-  $core.String get vendor => $_getSZ(5);
-  @$pb.TagNumber(6)
-  set vendor($core.String value) => $_setString(5, value);
-  @$pb.TagNumber(6)
-  $core.bool hasVendor() => $_has(5);
-  @$pb.TagNumber(6)
-  void clearVendor() => $_clearField(6);
+  @$pb.TagNumber(4)
+  $core.String get vendor => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set vendor($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasVendor() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearVendor() => $_clearField(4);
 
   /// Product as set on the selected libdivecomputer descriptor
-  @$pb.TagNumber(7)
-  $core.String get product => $_getSZ(6);
-  @$pb.TagNumber(7)
-  set product($core.String value) => $_setString(6, value);
-  @$pb.TagNumber(7)
-  $core.bool hasProduct() => $_has(6);
-  @$pb.TagNumber(7)
-  void clearProduct() => $_clearField(7);
+  @$pb.TagNumber(5)
+  $core.String get product => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set product($core.String value) => $_setString(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasProduct() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearProduct() => $_clearField(5);
 
   /// Serial number as reported by device info
-  @$pb.TagNumber(8)
-  $core.String get serial => $_getSZ(7);
-  @$pb.TagNumber(8)
-  set serial($core.String value) => $_setString(7, value);
-  @$pb.TagNumber(8)
-  $core.bool hasSerial() => $_has(7);
-  @$pb.TagNumber(8)
-  void clearSerial() => $_clearField(8);
+  @$pb.TagNumber(6)
+  $core.String get serial => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set serial($core.String value) => $_setString(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasSerial() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearSerial() => $_clearField(6);
 
   /// libdivecomputer fingerprint from last download
-  @$pb.TagNumber(9)
-  $core.List<$core.int> get ldcFingerprint => $_getN(8);
-  @$pb.TagNumber(9)
-  set ldcFingerprint($core.List<$core.int> value) => $_setBytes(8, value);
-  @$pb.TagNumber(9)
-  $core.bool hasLdcFingerprint() => $_has(8);
-  @$pb.TagNumber(9)
-  void clearLdcFingerprint() => $_clearField(9);
+  @$pb.TagNumber(7)
+  $core.List<$core.int> get ldcFingerprint => $_getN(6);
+  @$pb.TagNumber(7)
+  set ldcFingerprint($core.List<$core.int> value) => $_setBytes(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasLdcFingerprint() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearLdcFingerprint() => $_clearField(7);
 
   /// The latest log date we saw from this computer
-  @$pb.TagNumber(10)
-  $0.Timestamp get lastLogDate => $_getN(9);
-  @$pb.TagNumber(10)
-  set lastLogDate($0.Timestamp value) => $_setField(10, value);
-  @$pb.TagNumber(10)
-  $core.bool hasLastLogDate() => $_has(9);
-  @$pb.TagNumber(10)
-  void clearLastLogDate() => $_clearField(10);
-  @$pb.TagNumber(10)
-  $0.Timestamp ensureLastLogDate() => $_ensure(9);
+  @$pb.TagNumber(8)
+  $1.Timestamp get lastLogDate => $_getN(7);
+  @$pb.TagNumber(8)
+  set lastLogDate($1.Timestamp value) => $_setField(8, value);
+  @$pb.TagNumber(8)
+  $core.bool hasLastLogDate() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearLastLogDate() => $_clearField(8);
+  @$pb.TagNumber(8)
+  $1.Timestamp ensureLastLogDate() => $_ensure(7);
 }
 
 const $core.bool _omitFieldNames =

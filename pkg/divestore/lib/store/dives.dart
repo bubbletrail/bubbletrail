@@ -37,16 +37,19 @@ class Dives {
       if (!dive.hasId()) {
         dive.id = Uuid().v4().toString();
       }
-      dive.updatedAt = Timestamp.fromDateTime(DateTime.now());
-      if (!dive.hasCreatedAt()) {
-        if (dive.hasStart()) {
-          dive.createdAt = dive.start;
-        } else if (dive.logs.isNotEmpty) {
-          dive.createdAt = dive.logs.first.dateTime;
-        } else {
-          dive.createdAt = dive.updatedAt;
+      dive.meta = dive.meta.rebuild((meta) {
+        meta.updatedAt = Timestamp.fromDateTime(DateTime.now());
+        if (!meta.hasCreatedAt()) {
+          if (dive.hasStart()) {
+            meta.createdAt = dive.start;
+          } else if (dive.logs.isNotEmpty) {
+            meta.createdAt = dive.logs.first.dateTime;
+          } else {
+            meta.createdAt = meta.updatedAt;
+          }
         }
-      }
+        meta.clearDeletedAt();
+      });
     });
     _dives[dive.id] = dive;
     _tags.addAll(dive.tags);
@@ -64,16 +67,19 @@ class Dives {
         if (!dive.hasId()) {
           dive.id = Uuid().v4().toString();
         }
-        dive.updatedAt = Timestamp.fromDateTime(DateTime.now());
-        if (!dive.hasCreatedAt()) {
-          if (dive.hasStart()) {
-            dive.createdAt = dive.start;
-          } else if (dive.logs.isNotEmpty) {
-            dive.createdAt = dive.logs.first.dateTime;
-          } else {
-            dive.createdAt = dive.updatedAt;
+        dive.meta = dive.meta.rebuild((meta) {
+          meta.updatedAt = Timestamp.fromDateTime(DateTime.now());
+          if (!meta.hasCreatedAt()) {
+            if (dive.hasStart()) {
+              meta.createdAt = dive.start;
+            } else if (dive.logs.isNotEmpty) {
+              meta.createdAt = dive.logs.first.dateTime;
+            } else {
+              meta.createdAt = meta.updatedAt;
+            }
           }
-        }
+          meta.clearDeletedAt();
+        });
         for (final (idx, cyl) in dive.cylinders.indexed) {
           dive.cylinders[idx] = cyl.rebuild((cyl) {
             cyl.clearCylinder();
@@ -94,8 +100,8 @@ class Dives {
     if (readonly) throw Exception('readonly');
     if (!dive.isFrozen) dive.freeze();
     dive = dive.rebuild((dive) {
+      dive.meta = dive.meta.rebuildUpdated();
       dive.clearSyncedEtag();
-      dive.updatedAt = Timestamp.fromDateTime(DateTime.now());
       for (final (idx, cyl) in dive.cylinders.indexed) {
         dive.cylinders[idx] = cyl.rebuild((cyl) {
           cyl.clearCylinder();
@@ -112,7 +118,7 @@ class Dives {
     if (readonly) throw Exception('readonly');
     if (_dives.containsKey(id)) {
       _dives[id] = _dives[id]!.rebuild((dive) {
-        dive.deletedAt = Timestamp.fromDateTime(DateTime.now());
+        dive.meta = dive.meta.rebuildDeleted();
         dive.clearSyncedEtag();
       });
     }
@@ -139,7 +145,7 @@ class Dives {
   }
 
   Future<List<Dive>> getAll({bool withDeleted = false}) async {
-    final dives = _dives.values.where((d) => withDeleted || !d.hasDeletedAt()).toList();
+    final dives = _dives.values.where((d) => withDeleted || !d.meta.isDeleted).toList();
     dives.sort((a, b) => -a.number.compareTo(b.number));
     return dives;
   }
@@ -169,7 +175,7 @@ class Dives {
     _buddies.clear();
     _tags.clear();
     for (final dive in _dives.values) {
-      if (dive.hasDeletedAt()) continue;
+      if (dive.meta.isDeleted) continue;
       _buddies.addAll(dive.buddies);
       _tags.addAll(dive.tags);
     }
@@ -271,7 +277,7 @@ class Dives {
       dive.freeze();
 
       // If it's newer, replace our dive.
-      if (cur == null || dive.updatedAt.toDateTime().isAfter(cur.updatedAt.toDateTime()) || dive.deletedAt.toDateTime().isAfter(cur.deletedAt.toDateTime())) {
+      if (cur == null || dive.meta.isAfter(cur.meta)) {
         _log.fine('updating dive ${id} from provider');
         _dives[id] = dive;
         _scheduleSave(id);
@@ -297,7 +303,7 @@ class Dives {
     _rebuildTags();
   }
 
-  String diveDir(Dive dive) => "$pathPrefix/${DateFormat('yyyy-MM').format(dive.createdAt.toDateTime())}";
-  String dlName(String dir, Dive dive) => "$dir/${DateFormat('yyyy-MM-dd').format(dive.createdAt.toDateTime())}.${dive.id}.logs.binpb";
-  String metaName(String dir, Dive dive) => "$dir/${DateFormat('yyyy-MM-dd').format(dive.createdAt.toDateTime())}.${dive.id}.meta.binpb";
+  String diveDir(Dive dive) => "$pathPrefix/${DateFormat('yyyy-MM').format(dive.meta.createdAt.toDateTime())}";
+  String dlName(String dir, Dive dive) => "$dir/${DateFormat('yyyy-MM-dd').format(dive.meta.createdAt.toDateTime())}.${dive.id}.logs.binpb";
+  String metaName(String dir, Dive dive) => "$dir/${DateFormat('yyyy-MM-dd').format(dive.meta.createdAt.toDateTime())}.${dive.id}.meta.binpb";
 }
