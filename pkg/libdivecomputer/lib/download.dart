@@ -85,7 +85,8 @@ Stream<DownloadEvent> startDownload({
   required BleCharacteristics ble,
   required ComputerDescriptor computer,
   required String fifoDirectory,
-  Log? lastDiveLog,
+  List<int>? ldcFingerprint,
+  DateTime? lastLogDate,
 }) async* {
   yield DownloadStarted();
 
@@ -138,7 +139,8 @@ Stream<DownloadEvent> startDownload({
       writeFifoPath: writePath,
       descriptorIndex: computer.handle,
       sendPort: receivePort.sendPort,
-      lastDiveLog: lastDiveLog,
+      ldcFingerprint: ldcFingerprint,
+      lastLogDate: lastLogDate,
     );
     await dcStartDownload(request);
 

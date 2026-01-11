@@ -13,7 +13,8 @@
 import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
-import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart' as $0;
+import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart'
+    as $0;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
@@ -33,21 +34,27 @@ class Position extends $pb.GeneratedMessage {
 
   Position._();
 
-  factory Position.fromBuffer($core.List<$core.int> data, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory Position.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory Position.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(json, registry);
+  factory Position.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i =
-      $pb.BuilderInfo(_omitMessageNames ? '' : 'Position', package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'), createEmptyInstance: create)
-        ..aD(1, _omitFieldNames ? '' : 'latitude')
-        ..aD(2, _omitFieldNames ? '' : 'longitude')
-        ..aD(3, _omitFieldNames ? '' : 'altitude')
-        ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Position',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
+      createEmptyInstance: create)
+    ..aD(1, _omitFieldNames ? '' : 'latitude')
+    ..aD(2, _omitFieldNames ? '' : 'longitude')
+    ..aD(3, _omitFieldNames ? '' : 'altitude')
+    ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Position clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Position copyWith(void Function(Position) updates) => super.copyWith((message) => updates(message as Position)) as Position;
+  Position copyWith(void Function(Position) updates) =>
+      super.copyWith((message) => updates(message as Position)) as Position;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -57,7 +64,8 @@ class Position extends $pb.GeneratedMessage {
   @$core.override
   Position createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static Position getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Position>(create);
+  static Position getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Position>(create);
   static Position? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -110,36 +118,47 @@ class Cylinder extends $pb.GeneratedMessage {
     if (updatedAt != null) result.updatedAt = updatedAt;
     if (deletedAt != null) result.deletedAt = deletedAt;
     if (volumeL != null) result.volumeL = volumeL;
-    if (workingPressureBar != null) result.workingPressureBar = workingPressureBar;
+    if (workingPressureBar != null)
+      result.workingPressureBar = workingPressureBar;
     if (description != null) result.description = description;
     if (volumeCuft != null) result.volumeCuft = volumeCuft;
-    if (workingPressurePsi != null) result.workingPressurePsi = workingPressurePsi;
+    if (workingPressurePsi != null)
+      result.workingPressurePsi = workingPressurePsi;
     return result;
   }
 
   Cylinder._();
 
-  factory Cylinder.fromBuffer($core.List<$core.int> data, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory Cylinder.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory Cylinder.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(json, registry);
+  factory Cylinder.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i =
-      $pb.BuilderInfo(_omitMessageNames ? '' : 'Cylinder', package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'), createEmptyInstance: create)
-        ..aOS(1, _omitFieldNames ? '' : 'id')
-        ..aOM<$0.Timestamp>(2, _omitFieldNames ? '' : 'createdAt', subBuilder: $0.Timestamp.create)
-        ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'updatedAt', subBuilder: $0.Timestamp.create)
-        ..aOM<$0.Timestamp>(4, _omitFieldNames ? '' : 'deletedAt', subBuilder: $0.Timestamp.create)
-        ..aD(5, _omitFieldNames ? '' : 'volumeL')
-        ..aD(6, _omitFieldNames ? '' : 'workingPressureBar')
-        ..aOS(7, _omitFieldNames ? '' : 'description')
-        ..aD(8, _omitFieldNames ? '' : 'volumeCuft')
-        ..aD(9, _omitFieldNames ? '' : 'workingPressurePsi')
-        ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Cylinder',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'id')
+    ..aOM<$0.Timestamp>(2, _omitFieldNames ? '' : 'createdAt',
+        subBuilder: $0.Timestamp.create)
+    ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'updatedAt',
+        subBuilder: $0.Timestamp.create)
+    ..aOM<$0.Timestamp>(4, _omitFieldNames ? '' : 'deletedAt',
+        subBuilder: $0.Timestamp.create)
+    ..aD(5, _omitFieldNames ? '' : 'volumeL')
+    ..aD(6, _omitFieldNames ? '' : 'workingPressureBar')
+    ..aOS(7, _omitFieldNames ? '' : 'description')
+    ..aD(8, _omitFieldNames ? '' : 'volumeCuft')
+    ..aD(9, _omitFieldNames ? '' : 'workingPressurePsi')
+    ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Cylinder clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Cylinder copyWith(void Function(Cylinder) updates) => super.copyWith((message) => updates(message as Cylinder)) as Cylinder;
+  Cylinder copyWith(void Function(Cylinder) updates) =>
+      super.copyWith((message) => updates(message as Cylinder)) as Cylinder;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -149,7 +168,8 @@ class Cylinder extends $pb.GeneratedMessage {
   @$core.override
   Cylinder createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static Cylinder getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Cylinder>(create);
+  static Cylinder getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Cylinder>(create);
   static Cylinder? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -241,5 +261,7 @@ class Cylinder extends $pb.GeneratedMessage {
   void clearWorkingPressurePsi() => $_clearField(9);
 }
 
-const $core.bool _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const $core.bool _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
+const $core.bool _omitFieldNames =
+    $core.bool.fromEnvironment('protobuf.omit_field_names');
+const $core.bool _omitMessageNames =
+    $core.bool.fromEnvironment('protobuf.omit_message_names');

@@ -13,7 +13,8 @@ import 'package:window_manager/window_manager.dart';
 
 import 'src/app_routes.dart';
 import 'src/app_theme.dart';
-import 'src/bloc/ble_bloc.dart';
+import 'src/bloc/ble_download_bloc.dart';
+import 'src/bloc/ble_scan_bloc.dart';
 import 'src/bloc/cylinderdetails_bloc.dart';
 import 'src/bloc/cylinderlist_bloc.dart';
 import 'src/bloc/divelist_bloc.dart';
@@ -77,6 +78,8 @@ class _MyAppState extends State<MyApp> with WindowListener {
   late final SyncBloc _syncBloc;
   late final DiveListBloc _diveListBloc;
   late final CylinderListBloc _cylinderListBloc;
+  late final BleScanBloc _bleScanBloc;
+  late final BleDownloadBloc _bleDownloadBloc;
   late final GoRouter _router;
   final _preferencesBloc = PreferencesBloc();
 
@@ -86,6 +89,8 @@ class _MyAppState extends State<MyApp> with WindowListener {
     _syncBloc = SyncBloc();
     _diveListBloc = DiveListBloc(_syncBloc);
     _cylinderListBloc = CylinderListBloc(_syncBloc);
+    _bleScanBloc = BleScanBloc(_syncBloc);
+    _bleDownloadBloc = BleDownloadBloc(_diveListBloc, _syncBloc, _bleScanBloc);
     _setupFileHandler();
     if (WindowPreferences.isSupported) {
       windowManager.addListener(this);
@@ -340,7 +345,8 @@ class _MyAppState extends State<MyApp> with WindowListener {
         BlocProvider.value(value: _diveListBloc),
         BlocProvider.value(value: _cylinderListBloc),
         BlocProvider.value(value: _preferencesBloc),
-        BlocProvider(create: (context) => BleBloc(_diveListBloc)..add(const BleStarted())),
+        BlocProvider.value(value: _bleScanBloc),
+        BlocProvider.value(value: _bleDownloadBloc),
       ],
       child: BlocListener<PreferencesBloc, PreferencesState>(
         listener: (context, state) {

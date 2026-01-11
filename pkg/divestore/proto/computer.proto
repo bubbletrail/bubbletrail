@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package divestore;
+
+import "google/protobuf/timestamp.proto";
+import "types.proto";
+
+// Remembered BLE computer
+message Computer {
+  // Bluetooth LE remote ID as seen in a scan
+  string remote_id = 1;
+
+  google.protobuf.Timestamp created_at = 2;
+  google.protobuf.Timestamp updated_at = 3;
+  google.protobuf.Timestamp deleted_at = 4;
+
+  // Bluetooth LE advertised name as seen in a scan
+  string advertised_name = 5;
+
+  // Vendor as set on the selected libdivecomputer descriptor
+  string vendor = 6;
+  // Product as set on the selected libdivecomputer descriptor
+  string product = 7;
+  // Serial number as reported by device info
+  string serial = 8;
+
+  // libdivecomputer fingerprint from last download
+  bytes ldc_fingerprint = 9;
+  // The latest log date we saw from this computer
+  google.protobuf.Timestamp last_log_date = 10;
+}

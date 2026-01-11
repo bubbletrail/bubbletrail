@@ -20,11 +20,39 @@ const Site$json = {
   '1': 'Site',
   '2': [
     {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
-    {'1': 'created_at', '3': 2, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'createdAt'},
-    {'1': 'updated_at', '3': 3, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'updatedAt'},
-    {'1': 'deleted_at', '3': 4, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'deletedAt'},
+    {
+      '1': 'created_at',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Timestamp',
+      '10': 'createdAt'
+    },
+    {
+      '1': 'updated_at',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Timestamp',
+      '10': 'updatedAt'
+    },
+    {
+      '1': 'deleted_at',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Timestamp',
+      '10': 'deletedAt'
+    },
     {'1': 'name', '3': 5, '4': 1, '5': 9, '10': 'name'},
-    {'1': 'position', '3': 6, '4': 1, '5': 11, '6': '.divestore.Position', '10': 'position'},
+    {
+      '1': 'position',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.divestore.Position',
+      '10': 'position'
+    },
     {'1': 'country', '3': 7, '4': 1, '5': 9, '10': 'country'},
     {'1': 'location', '3': 8, '4': 1, '5': 9, '10': 'location'},
     {'1': 'body_of_water', '3': 9, '4': 1, '5': 9, '10': 'bodyOfWater'},
@@ -35,7 +63,8 @@ const Site$json = {
 };
 
 /// Descriptor for `Site`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List siteDescriptor = $convert.base64Decode('CgRTaXRlEg4KAmlkGAEgASgJUgJpZBI5CgpjcmVhdGVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3'
+final $typed_data.Uint8List siteDescriptor = $convert.base64Decode(
+    'CgRTaXRlEg4KAmlkGAEgASgJUgJpZBI5CgpjcmVhdGVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3'
     'RvYnVmLlRpbWVzdGFtcFIJY3JlYXRlZEF0EjkKCnVwZGF0ZWRfYXQYAyABKAsyGi5nb29nbGUu'
     'cHJvdG9idWYuVGltZXN0YW1wUgl1cGRhdGVkQXQSOQoKZGVsZXRlZF9hdBgEIAEoCzIaLmdvb2'
     'dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSCWRlbGV0ZWRBdBISCgRuYW1lGAUgASgJUgRuYW1lEi8K'

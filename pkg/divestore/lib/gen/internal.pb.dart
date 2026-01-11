@@ -14,6 +14,7 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
+import 'computer.pb.dart' as $4;
 import 'dive.pb.dart' as $2;
 import 'log.pb.dart' as $3;
 import 'site.pb.dart' as $1;
@@ -32,21 +33,27 @@ class InternalCylinderList extends $pb.GeneratedMessage {
 
   InternalCylinderList._();
 
-  factory InternalCylinderList.fromBuffer($core.List<$core.int> data, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory InternalCylinderList.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory InternalCylinderList.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory InternalCylinderList.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'InternalCylinderList',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'), createEmptyInstance: create)
-    ..pPM<$0.Cylinder>(1, _omitFieldNames ? '' : 'cylinders', subBuilder: $0.Cylinder.create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'InternalCylinderList',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
+      createEmptyInstance: create)
+    ..pPM<$0.Cylinder>(1, _omitFieldNames ? '' : 'cylinders',
+        subBuilder: $0.Cylinder.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   InternalCylinderList clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   InternalCylinderList copyWith(void Function(InternalCylinderList) updates) =>
-      super.copyWith((message) => updates(message as InternalCylinderList)) as InternalCylinderList;
+      super.copyWith((message) => updates(message as InternalCylinderList))
+          as InternalCylinderList;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -56,7 +63,8 @@ class InternalCylinderList extends $pb.GeneratedMessage {
   @$core.override
   InternalCylinderList createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static InternalCylinderList getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<InternalCylinderList>(create);
+  static InternalCylinderList getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<InternalCylinderList>(create);
   static InternalCylinderList? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -74,20 +82,27 @@ class InternalSiteList extends $pb.GeneratedMessage {
 
   InternalSiteList._();
 
-  factory InternalSiteList.fromBuffer($core.List<$core.int> data, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory InternalSiteList.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory InternalSiteList.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory InternalSiteList.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'InternalSiteList',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'), createEmptyInstance: create)
-    ..pPM<$1.Site>(1, _omitFieldNames ? '' : 'sites', subBuilder: $1.Site.create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'InternalSiteList',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
+      createEmptyInstance: create)
+    ..pPM<$1.Site>(1, _omitFieldNames ? '' : 'sites',
+        subBuilder: $1.Site.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   InternalSiteList clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  InternalSiteList copyWith(void Function(InternalSiteList) updates) => super.copyWith((message) => updates(message as InternalSiteList)) as InternalSiteList;
+  InternalSiteList copyWith(void Function(InternalSiteList) updates) =>
+      super.copyWith((message) => updates(message as InternalSiteList))
+          as InternalSiteList;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -97,7 +112,8 @@ class InternalSiteList extends $pb.GeneratedMessage {
   @$core.override
   InternalSiteList createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static InternalSiteList getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<InternalSiteList>(create);
+  static InternalSiteList getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<InternalSiteList>(create);
   static InternalSiteList? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -115,20 +131,27 @@ class InternalDiveList extends $pb.GeneratedMessage {
 
   InternalDiveList._();
 
-  factory InternalDiveList.fromBuffer($core.List<$core.int> data, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory InternalDiveList.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory InternalDiveList.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory InternalDiveList.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'InternalDiveList',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'), createEmptyInstance: create)
-    ..pPM<$2.Dive>(1, _omitFieldNames ? '' : 'dives', subBuilder: $2.Dive.create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'InternalDiveList',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
+      createEmptyInstance: create)
+    ..pPM<$2.Dive>(1, _omitFieldNames ? '' : 'dives',
+        subBuilder: $2.Dive.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   InternalDiveList clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  InternalDiveList copyWith(void Function(InternalDiveList) updates) => super.copyWith((message) => updates(message as InternalDiveList)) as InternalDiveList;
+  InternalDiveList copyWith(void Function(InternalDiveList) updates) =>
+      super.copyWith((message) => updates(message as InternalDiveList))
+          as InternalDiveList;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -138,7 +161,8 @@ class InternalDiveList extends $pb.GeneratedMessage {
   @$core.override
   InternalDiveList createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static InternalDiveList getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<InternalDiveList>(create);
+  static InternalDiveList getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<InternalDiveList>(create);
   static InternalDiveList? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -156,20 +180,26 @@ class InternalLogList extends $pb.GeneratedMessage {
 
   InternalLogList._();
 
-  factory InternalLogList.fromBuffer($core.List<$core.int> data, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory InternalLogList.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory InternalLogList.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory InternalLogList.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'InternalLogList',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'InternalLogList',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
+      createEmptyInstance: create)
     ..pPM<$3.Log>(1, _omitFieldNames ? '' : 'logs', subBuilder: $3.Log.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   InternalLogList clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  InternalLogList copyWith(void Function(InternalLogList) updates) => super.copyWith((message) => updates(message as InternalLogList)) as InternalLogList;
+  InternalLogList copyWith(void Function(InternalLogList) updates) =>
+      super.copyWith((message) => updates(message as InternalLogList))
+          as InternalLogList;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -179,12 +209,64 @@ class InternalLogList extends $pb.GeneratedMessage {
   @$core.override
   InternalLogList createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static InternalLogList getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<InternalLogList>(create);
+  static InternalLogList getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<InternalLogList>(create);
   static InternalLogList? _defaultInstance;
 
   @$pb.TagNumber(1)
   $pb.PbList<$3.Log> get logs => $_getList(0);
 }
 
-const $core.bool _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const $core.bool _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
+class InternalComputerList extends $pb.GeneratedMessage {
+  factory InternalComputerList({
+    $core.Iterable<$4.Computer>? computers,
+  }) {
+    final result = create();
+    if (computers != null) result.computers.addAll(computers);
+    return result;
+  }
+
+  InternalComputerList._();
+
+  factory InternalComputerList.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory InternalComputerList.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'InternalComputerList',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
+      createEmptyInstance: create)
+    ..pPM<$4.Computer>(1, _omitFieldNames ? '' : 'computers',
+        subBuilder: $4.Computer.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  InternalComputerList clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  InternalComputerList copyWith(void Function(InternalComputerList) updates) =>
+      super.copyWith((message) => updates(message as InternalComputerList))
+          as InternalComputerList;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static InternalComputerList create() => InternalComputerList._();
+  @$core.override
+  InternalComputerList createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static InternalComputerList getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<InternalComputerList>(create);
+  static InternalComputerList? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$4.Computer> get computers => $_getList(0);
+}
+
+const $core.bool _omitFieldNames =
+    $core.bool.fromEnvironment('protobuf.omit_field_names');
+const $core.bool _omitMessageNames =
+    $core.bool.fromEnvironment('protobuf.omit_message_names');

@@ -36,7 +36,6 @@ class DiveListLoading extends DiveListState {
 class DiveListLoaded extends DiveListState {
   final List<Dive> dives;
   final List<Site> sites;
-  final Log? lastLog;
   final Set<String> tags;
   final Set<String> buddies;
 
@@ -70,7 +69,6 @@ class DiveListLoaded extends DiveListState {
   DiveListLoaded(
     this.dives,
     this.sites,
-    this.lastLog,
     this.tags,
     this.buddies, {
     this.selectedDive,
@@ -220,20 +218,11 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   Future<void> _onLoadDives(LoadDives event, Emitter<DiveListState> emit) async {
     final dives = await _store.dives.getAll();
     final sites = await _store.sites.getAll();
-    Log? lastLog;
-    if (dives.isNotEmpty) {
-      lastLog = (await _store.dives.getById(dives.first.id))?.logs.firstOrNull;
-      if (lastLog != null) {
-        lastLog = lastLog.rebuild((lastLog) {
-          lastLog.samples.clear();
-        });
-      }
-    }
     final currentState = state;
     if (currentState is DiveListLoaded) {
-      emit(currentState.copyWith(dives: dives, sites: sites, lastLog: lastLog, tags: _store.tags, buddies: _store.dives.buddies));
+      emit(currentState.copyWith(dives: dives, sites: sites, tags: _store.tags, buddies: _store.dives.buddies));
     } else {
-      emit(DiveListLoaded(dives, sites, lastLog, _store.tags, _store.dives.buddies));
+      emit(DiveListLoaded(dives, sites, _store.tags, _store.dives.buddies));
     }
   }
 

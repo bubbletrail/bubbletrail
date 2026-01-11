@@ -1,6 +1,6 @@
 // This is a generated file - do not edit.
 //
-// Generated from site.proto.
+// Generated from computer.proto.
 
 // @dart = 3.3
 
@@ -16,99 +16,93 @@ import 'package:protobuf/protobuf.dart' as $pb;
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart'
     as $0;
 
-import 'types.pb.dart' as $1;
-
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
-/// Dive site information.
-class Site extends $pb.GeneratedMessage {
-  factory Site({
-    $core.String? id,
+/// Remembered BLE computer
+class Computer extends $pb.GeneratedMessage {
+  factory Computer({
+    $core.String? remoteId,
     $0.Timestamp? createdAt,
     $0.Timestamp? updatedAt,
     $0.Timestamp? deletedAt,
-    $core.String? name,
-    $1.Position? position,
-    $core.String? country,
-    $core.String? location,
-    $core.String? bodyOfWater,
-    $core.String? difficulty,
-    $core.Iterable<$core.String>? tags,
-    $core.String? notes,
+    $core.String? advertisedName,
+    $core.String? vendor,
+    $core.String? product,
+    $core.String? serial,
+    $core.List<$core.int>? ldcFingerprint,
+    $0.Timestamp? lastLogDate,
   }) {
     final result = create();
-    if (id != null) result.id = id;
+    if (remoteId != null) result.remoteId = remoteId;
     if (createdAt != null) result.createdAt = createdAt;
     if (updatedAt != null) result.updatedAt = updatedAt;
     if (deletedAt != null) result.deletedAt = deletedAt;
-    if (name != null) result.name = name;
-    if (position != null) result.position = position;
-    if (country != null) result.country = country;
-    if (location != null) result.location = location;
-    if (bodyOfWater != null) result.bodyOfWater = bodyOfWater;
-    if (difficulty != null) result.difficulty = difficulty;
-    if (tags != null) result.tags.addAll(tags);
-    if (notes != null) result.notes = notes;
+    if (advertisedName != null) result.advertisedName = advertisedName;
+    if (vendor != null) result.vendor = vendor;
+    if (product != null) result.product = product;
+    if (serial != null) result.serial = serial;
+    if (ldcFingerprint != null) result.ldcFingerprint = ldcFingerprint;
+    if (lastLogDate != null) result.lastLogDate = lastLogDate;
     return result;
   }
 
-  Site._();
+  Computer._();
 
-  factory Site.fromBuffer($core.List<$core.int> data,
+  factory Computer.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory Site.fromJson($core.String json,
+  factory Computer.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'Site',
+      _omitMessageNames ? '' : 'Computer',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
       createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'id')
+    ..aOS(1, _omitFieldNames ? '' : 'remoteId')
     ..aOM<$0.Timestamp>(2, _omitFieldNames ? '' : 'createdAt',
         subBuilder: $0.Timestamp.create)
     ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'updatedAt',
         subBuilder: $0.Timestamp.create)
     ..aOM<$0.Timestamp>(4, _omitFieldNames ? '' : 'deletedAt',
         subBuilder: $0.Timestamp.create)
-    ..aOS(5, _omitFieldNames ? '' : 'name')
-    ..aOM<$1.Position>(6, _omitFieldNames ? '' : 'position',
-        subBuilder: $1.Position.create)
-    ..aOS(7, _omitFieldNames ? '' : 'country')
-    ..aOS(8, _omitFieldNames ? '' : 'location')
-    ..aOS(9, _omitFieldNames ? '' : 'bodyOfWater')
-    ..aOS(10, _omitFieldNames ? '' : 'difficulty')
-    ..pPS(11, _omitFieldNames ? '' : 'tags')
-    ..aOS(12, _omitFieldNames ? '' : 'notes')
+    ..aOS(5, _omitFieldNames ? '' : 'advertisedName')
+    ..aOS(6, _omitFieldNames ? '' : 'vendor')
+    ..aOS(7, _omitFieldNames ? '' : 'product')
+    ..aOS(8, _omitFieldNames ? '' : 'serial')
+    ..a<$core.List<$core.int>>(
+        9, _omitFieldNames ? '' : 'ldcFingerprint', $pb.PbFieldType.OY)
+    ..aOM<$0.Timestamp>(10, _omitFieldNames ? '' : 'lastLogDate',
+        subBuilder: $0.Timestamp.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Site clone() => deepCopy();
+  Computer clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Site copyWith(void Function(Site) updates) =>
-      super.copyWith((message) => updates(message as Site)) as Site;
+  Computer copyWith(void Function(Computer) updates) =>
+      super.copyWith((message) => updates(message as Computer)) as Computer;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static Site create() => Site._();
+  static Computer create() => Computer._();
   @$core.override
-  Site createEmptyInstance() => create();
+  Computer createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static Site getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Site>(create);
-  static Site? _defaultInstance;
+  static Computer getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Computer>(create);
+  static Computer? _defaultInstance;
 
+  /// Bluetooth LE remote ID as seen in a scan
   @$pb.TagNumber(1)
-  $core.String get id => $_getSZ(0);
+  $core.String get remoteId => $_getSZ(0);
   @$pb.TagNumber(1)
-  set id($core.String value) => $_setString(0, value);
+  set remoteId($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
-  $core.bool hasId() => $_has(0);
+  $core.bool hasRemoteId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearId() => $_clearField(1);
+  void clearRemoteId() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $0.Timestamp get createdAt => $_getN(1);
@@ -143,73 +137,67 @@ class Site extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $0.Timestamp ensureDeletedAt() => $_ensure(3);
 
+  /// Bluetooth LE advertised name as seen in a scan
   @$pb.TagNumber(5)
-  $core.String get name => $_getSZ(4);
+  $core.String get advertisedName => $_getSZ(4);
   @$pb.TagNumber(5)
-  set name($core.String value) => $_setString(4, value);
+  set advertisedName($core.String value) => $_setString(4, value);
   @$pb.TagNumber(5)
-  $core.bool hasName() => $_has(4);
+  $core.bool hasAdvertisedName() => $_has(4);
   @$pb.TagNumber(5)
-  void clearName() => $_clearField(5);
+  void clearAdvertisedName() => $_clearField(5);
 
+  /// Vendor as set on the selected libdivecomputer descriptor
   @$pb.TagNumber(6)
-  $1.Position get position => $_getN(5);
+  $core.String get vendor => $_getSZ(5);
   @$pb.TagNumber(6)
-  set position($1.Position value) => $_setField(6, value);
+  set vendor($core.String value) => $_setString(5, value);
   @$pb.TagNumber(6)
-  $core.bool hasPosition() => $_has(5);
+  $core.bool hasVendor() => $_has(5);
   @$pb.TagNumber(6)
-  void clearPosition() => $_clearField(6);
-  @$pb.TagNumber(6)
-  $1.Position ensurePosition() => $_ensure(5);
+  void clearVendor() => $_clearField(6);
 
+  /// Product as set on the selected libdivecomputer descriptor
   @$pb.TagNumber(7)
-  $core.String get country => $_getSZ(6);
+  $core.String get product => $_getSZ(6);
   @$pb.TagNumber(7)
-  set country($core.String value) => $_setString(6, value);
+  set product($core.String value) => $_setString(6, value);
   @$pb.TagNumber(7)
-  $core.bool hasCountry() => $_has(6);
+  $core.bool hasProduct() => $_has(6);
   @$pb.TagNumber(7)
-  void clearCountry() => $_clearField(7);
+  void clearProduct() => $_clearField(7);
 
+  /// Serial number as reported by device info
   @$pb.TagNumber(8)
-  $core.String get location => $_getSZ(7);
+  $core.String get serial => $_getSZ(7);
   @$pb.TagNumber(8)
-  set location($core.String value) => $_setString(7, value);
+  set serial($core.String value) => $_setString(7, value);
   @$pb.TagNumber(8)
-  $core.bool hasLocation() => $_has(7);
+  $core.bool hasSerial() => $_has(7);
   @$pb.TagNumber(8)
-  void clearLocation() => $_clearField(8);
+  void clearSerial() => $_clearField(8);
 
+  /// libdivecomputer fingerprint from last download
   @$pb.TagNumber(9)
-  $core.String get bodyOfWater => $_getSZ(8);
+  $core.List<$core.int> get ldcFingerprint => $_getN(8);
   @$pb.TagNumber(9)
-  set bodyOfWater($core.String value) => $_setString(8, value);
+  set ldcFingerprint($core.List<$core.int> value) => $_setBytes(8, value);
   @$pb.TagNumber(9)
-  $core.bool hasBodyOfWater() => $_has(8);
+  $core.bool hasLdcFingerprint() => $_has(8);
   @$pb.TagNumber(9)
-  void clearBodyOfWater() => $_clearField(9);
+  void clearLdcFingerprint() => $_clearField(9);
 
+  /// The latest log date we saw from this computer
   @$pb.TagNumber(10)
-  $core.String get difficulty => $_getSZ(9);
+  $0.Timestamp get lastLogDate => $_getN(9);
   @$pb.TagNumber(10)
-  set difficulty($core.String value) => $_setString(9, value);
+  set lastLogDate($0.Timestamp value) => $_setField(10, value);
   @$pb.TagNumber(10)
-  $core.bool hasDifficulty() => $_has(9);
+  $core.bool hasLastLogDate() => $_has(9);
   @$pb.TagNumber(10)
-  void clearDifficulty() => $_clearField(10);
-
-  @$pb.TagNumber(11)
-  $pb.PbList<$core.String> get tags => $_getList(10);
-
-  @$pb.TagNumber(12)
-  $core.String get notes => $_getSZ(11);
-  @$pb.TagNumber(12)
-  set notes($core.String value) => $_setString(11, value);
-  @$pb.TagNumber(12)
-  $core.bool hasNotes() => $_has(11);
-  @$pb.TagNumber(12)
-  void clearNotes() => $_clearField(12);
+  void clearLastLogDate() => $_clearField(10);
+  @$pb.TagNumber(10)
+  $0.Timestamp ensureLastLogDate() => $_ensure(9);
 }
 
 const $core.bool _omitFieldNames =

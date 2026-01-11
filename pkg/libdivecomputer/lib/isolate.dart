@@ -57,6 +57,12 @@ List<ComputerDescriptor> _dcDescriptorIterate(String? filterForName) {
     bindings.dc_descriptor_free(desc);
   }
 
+  descs.sort((a, b) {
+    final vd = a.vendor.compareTo(b.vendor);
+    if (vd != 0) return vd;
+    return a.model.compareTo(b.model);
+  });
+
   return descs;
 }
 
@@ -158,9 +164,17 @@ class DownloadRequest extends RequestBase {
   final String writeFifoPath;
   final int descriptorIndex;
   final SendPort sendPort;
-  final Log? lastDiveLog;
+  final List<int>? ldcFingerprint;
+  final DateTime? lastLogDate;
 
-  DownloadRequest({required this.readFifoPath, required this.writeFifoPath, required this.descriptorIndex, required this.sendPort, this.lastDiveLog});
+  DownloadRequest({
+    required this.readFifoPath,
+    required this.writeFifoPath,
+    required this.descriptorIndex,
+    required this.sendPort,
+    this.ldcFingerprint,
+    this.lastLogDate,
+  });
 }
 
 /// Entry point for the download isolate.
@@ -266,16 +280,8 @@ void _downloadIsolateEntry(DownloadRequest request) {
         try {
           final dive = parseDiveFromParser(parser.value, fingerprint: fpBytes, model: deviceModel, serial: deviceSerial);
 
-          _log.info('comparing last dive fp ${request.lastDiveLog?.ldcFingerprint} to ${dive.ldcFingerprint}');
-          if (request.lastDiveLog != null && request.lastDiveLog!.ldcFingerprint == dive.ldcFingerprint) {
+          if (request.lastLogDate != null && request.lastLogDate!.isAfter(dive.dateTime.toDateTime())) {
             // We've already seen this one.
-            // calloc.free(parser);
-            return 0;
-          }
-          _log.info('comparing last dive date ${request.lastDiveLog?.dateTime.seconds} to ${dive.dateTime.seconds}');
-          if (request.lastDiveLog != null && request.lastDiveLog!.dateTime.seconds.compareTo(dive.dateTime.seconds) >= 0) {
-            // XXX: This should definitely be optional
-            // The last dive is newer than what we're importing now
             // calloc.free(parser);
             return 0;
           }
@@ -297,6 +303,16 @@ void _downloadIsolateEntry(DownloadRequest request) {
     },
     exceptionalReturn: 0, // Return 0 (abort) if exception is thrown
   );
+
+  // If we have a fingerprint, set it to return early when indexing dives
+  // for download.
+  if (request.ldcFingerprint != null) {
+    final fpList = request.ldcFingerprint!;
+    final fpFfi = calloc<ffi.Uint8>(fpList.length);
+    final tl = fpFfi.asTypedList(fpList.length);
+    for (var i = 0; i < fpList.length; i++) tl[i] = fpList[i];
+    bindings.dc_device_set_fingerprint(device.value, fpFfi.cast<ffi.UnsignedChar>(), fpList.length);
+  }
 
   // Download dives
   final foreachStatus = bindings.dc_device_foreach(device.value, diveCallback.nativeFunction, ffi.nullptr);

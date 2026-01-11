@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import '../gen/dive.pb.dart';
 import '../gen/dive_ext.dart';
 import '../sync/syncprovider.dart';
+import 'computers.dart';
 import 'cylinders.dart';
 import 'dives.dart';
 import 'sites.dart';
@@ -12,24 +13,32 @@ final _log = Logger('store/store.dart');
 class Store {
   final String path;
 
+  final Computers computers;
   final Cylinders cylinders;
-  final Sites sites;
   final Dives dives;
+  final Sites sites;
 
   Store(this.path, {bool readonly = false})
-    : cylinders = Cylinders('$path/cylinders.binpb', readonly: readonly),
-      sites = Sites('$path/sites.binpb', readonly: readonly),
-      dives = Dives('$path/dives', readonly: readonly);
+    : computers = Computers('$path/computers.binpb', readonly: readonly),
+      cylinders = Cylinders('$path/cylinders.binpb', readonly: readonly),
+      dives = Dives('$path/dives', readonly: readonly),
+      sites = Sites('$path/sites.binpb', readonly: readonly);
 
   Future<void> init() async {
+    await computers.init();
     await cylinders.init();
-    await sites.init();
     await dives.init();
+    await sites.init();
   }
 
   Set<String> get tags => sites.tags.union(dives.tags);
 
   Future<void> syncWith(SyncProvider provider) async {
+    try {
+      await computers.syncWith(provider);
+    } catch (e) {
+      _log.warning('failed to sync computers', e);
+    }
     try {
       await cylinders.syncWith(provider);
     } catch (e) {
