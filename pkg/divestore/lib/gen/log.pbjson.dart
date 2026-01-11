@@ -193,20 +193,20 @@ const Log$json = {
       '10': 'dateTime'
     },
     {'1': 'dive_time', '3': 4, '4': 1, '5': 5, '10': 'diveTime'},
-    {'1': 'max_depth', '3': 6, '4': 1, '5': 1, '10': 'maxDepth'},
-    {'1': 'avg_depth', '3': 7, '4': 1, '5': 1, '10': 'avgDepth'},
+    {'1': 'max_depth', '3': 5, '4': 1, '5': 1, '10': 'maxDepth'},
+    {'1': 'avg_depth', '3': 6, '4': 1, '5': 1, '10': 'avgDepth'},
     {
       '1': 'surface_temperature',
-      '3': 8,
+      '3': 7,
       '4': 1,
       '5': 1,
       '10': 'surfaceTemperature'
     },
-    {'1': 'min_temperature', '3': 9, '4': 1, '5': 1, '10': 'minTemperature'},
-    {'1': 'max_temperature', '3': 10, '4': 1, '5': 1, '10': 'maxTemperature'},
+    {'1': 'min_temperature', '3': 8, '4': 1, '5': 1, '10': 'minTemperature'},
+    {'1': 'max_temperature', '3': 9, '4': 1, '5': 1, '10': 'maxTemperature'},
     {
       '1': 'salinity',
-      '3': 11,
+      '3': 10,
       '4': 1,
       '5': 11,
       '6': '.divestore.Salinity',
@@ -214,14 +214,14 @@ const Log$json = {
     },
     {
       '1': 'atmospheric_pressure',
-      '3': 12,
+      '3': 11,
       '4': 1,
       '5': 1,
       '10': 'atmosphericPressure'
     },
     {
       '1': 'dive_mode',
-      '3': 13,
+      '3': 12,
       '4': 1,
       '5': 14,
       '6': '.divestore.DiveMode',
@@ -229,7 +229,7 @@ const Log$json = {
     },
     {
       '1': 'deco_model',
-      '3': 14,
+      '3': 13,
       '4': 1,
       '5': 11,
       '6': '.divestore.DecoModel',
@@ -237,7 +237,7 @@ const Log$json = {
     },
     {
       '1': 'position',
-      '3': 15,
+      '3': 14,
       '4': 1,
       '5': 11,
       '6': '.divestore.Position',
@@ -245,7 +245,7 @@ const Log$json = {
     },
     {
       '1': 'gas_mixes',
-      '3': 16,
+      '3': 15,
       '4': 3,
       '5': 11,
       '6': '.divestore.GasMix',
@@ -253,7 +253,7 @@ const Log$json = {
     },
     {
       '1': 'tanks',
-      '3': 17,
+      '3': 16,
       '4': 3,
       '5': 11,
       '6': '.divestore.Tank',
@@ -261,14 +261,14 @@ const Log$json = {
     },
     {
       '1': 'samples',
-      '3': 18,
+      '3': 17,
       '4': 3,
       '5': 11,
       '6': '.divestore.LogSample',
       '10': 'samples'
     },
-    {'1': 'ldc_fingerprint', '3': 19, '4': 1, '5': 12, '10': 'ldcFingerprint'},
-    {'1': 'uniqueID', '3': 20, '4': 1, '5': 9, '10': 'uniqueID'},
+    {'1': 'ldc_fingerprint', '3': 18, '4': 1, '5': 12, '10': 'ldcFingerprint'},
+    {'1': 'uniqueID', '3': 19, '4': 1, '5': 9, '10': 'uniqueID'},
   ],
 };
 
@@ -276,18 +276,18 @@ const Log$json = {
 final $typed_data.Uint8List logDescriptor = $convert.base64Decode(
     'CgNMb2cSFAoFbW9kZWwYASABKAlSBW1vZGVsEhYKBnNlcmlhbBgCIAEoCVIGc2VyaWFsEjcKCW'
     'RhdGVfdGltZRgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSCGRhdGVUaW1lEhsK'
-    'CWRpdmVfdGltZRgEIAEoBVIIZGl2ZVRpbWUSGwoJbWF4X2RlcHRoGAYgASgBUghtYXhEZXB0aB'
-    'IbCglhdmdfZGVwdGgYByABKAFSCGF2Z0RlcHRoEi8KE3N1cmZhY2VfdGVtcGVyYXR1cmUYCCAB'
-    'KAFSEnN1cmZhY2VUZW1wZXJhdHVyZRInCg9taW5fdGVtcGVyYXR1cmUYCSABKAFSDm1pblRlbX'
-    'BlcmF0dXJlEicKD21heF90ZW1wZXJhdHVyZRgKIAEoAVIObWF4VGVtcGVyYXR1cmUSLwoIc2Fs'
-    'aW5pdHkYCyABKAsyEy5kaXZlc3RvcmUuU2FsaW5pdHlSCHNhbGluaXR5EjEKFGF0bW9zcGhlcm'
-    'ljX3ByZXNzdXJlGAwgASgBUhNhdG1vc3BoZXJpY1ByZXNzdXJlEjAKCWRpdmVfbW9kZRgNIAEo'
-    'DjITLmRpdmVzdG9yZS5EaXZlTW9kZVIIZGl2ZU1vZGUSMwoKZGVjb19tb2RlbBgOIAEoCzIULm'
-    'RpdmVzdG9yZS5EZWNvTW9kZWxSCWRlY29Nb2RlbBIvCghwb3NpdGlvbhgPIAEoCzITLmRpdmVz'
-    'dG9yZS5Qb3NpdGlvblIIcG9zaXRpb24SLgoJZ2FzX21peGVzGBAgAygLMhEuZGl2ZXN0b3JlLk'
-    'dhc01peFIIZ2FzTWl4ZXMSJQoFdGFua3MYESADKAsyDy5kaXZlc3RvcmUuVGFua1IFdGFua3MS'
-    'LgoHc2FtcGxlcxgSIAMoCzIULmRpdmVzdG9yZS5Mb2dTYW1wbGVSB3NhbXBsZXMSJwoPbGRjX2'
-    'ZpbmdlcnByaW50GBMgASgMUg5sZGNGaW5nZXJwcmludBIaCgh1bmlxdWVJRBgUIAEoCVIIdW5p'
+    'CWRpdmVfdGltZRgEIAEoBVIIZGl2ZVRpbWUSGwoJbWF4X2RlcHRoGAUgASgBUghtYXhEZXB0aB'
+    'IbCglhdmdfZGVwdGgYBiABKAFSCGF2Z0RlcHRoEi8KE3N1cmZhY2VfdGVtcGVyYXR1cmUYByAB'
+    'KAFSEnN1cmZhY2VUZW1wZXJhdHVyZRInCg9taW5fdGVtcGVyYXR1cmUYCCABKAFSDm1pblRlbX'
+    'BlcmF0dXJlEicKD21heF90ZW1wZXJhdHVyZRgJIAEoAVIObWF4VGVtcGVyYXR1cmUSLwoIc2Fs'
+    'aW5pdHkYCiABKAsyEy5kaXZlc3RvcmUuU2FsaW5pdHlSCHNhbGluaXR5EjEKFGF0bW9zcGhlcm'
+    'ljX3ByZXNzdXJlGAsgASgBUhNhdG1vc3BoZXJpY1ByZXNzdXJlEjAKCWRpdmVfbW9kZRgMIAEo'
+    'DjITLmRpdmVzdG9yZS5EaXZlTW9kZVIIZGl2ZU1vZGUSMwoKZGVjb19tb2RlbBgNIAEoCzIULm'
+    'RpdmVzdG9yZS5EZWNvTW9kZWxSCWRlY29Nb2RlbBIvCghwb3NpdGlvbhgOIAEoCzITLmRpdmVz'
+    'dG9yZS5Qb3NpdGlvblIIcG9zaXRpb24SLgoJZ2FzX21peGVzGA8gAygLMhEuZGl2ZXN0b3JlLk'
+    'dhc01peFIIZ2FzTWl4ZXMSJQoFdGFua3MYECADKAsyDy5kaXZlc3RvcmUuVGFua1IFdGFua3MS'
+    'LgoHc2FtcGxlcxgRIAMoCzIULmRpdmVzdG9yZS5Mb2dTYW1wbGVSB3NhbXBsZXMSJwoPbGRjX2'
+    'ZpbmdlcnByaW50GBIgASgMUg5sZGNGaW5nZXJwcmludBIaCgh1bmlxdWVJRBgTIAEoCVIIdW5p'
     'cXVlSUQ=');
 
 @$core.Deprecated('Use logSampleDescriptor instead')

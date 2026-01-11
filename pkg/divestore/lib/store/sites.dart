@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
-import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 
 import '../gen/gen.dart';
@@ -44,10 +43,7 @@ class Sites {
       if (!site.hasId()) {
         site.id = Uuid().v4().toString();
       }
-      site.updatedAt = Timestamp.fromDateTime(DateTime.now());
-      if (!site.hasCreatedAt()) {
-        site.createdAt = site.updatedAt;
-      }
+      site.meta = site.meta.rebuildUpdated();
     });
     _sites[site.id] = site;
     _tags.addAll(site.tags);
@@ -58,10 +54,7 @@ class Sites {
     if (readonly) throw Exception('readonly');
     if (!site.isFrozen) site.freeze();
     site = site.rebuild((site) {
-      site.updatedAt = Timestamp.fromDateTime(DateTime.now());
-      if (!site.hasCreatedAt()) {
-        site.createdAt = site.updatedAt;
-      }
+      site.meta = site.meta.rebuildUpdated();
     });
     _sites[site.id] = site;
     _tags.addAll(site.tags);
@@ -72,7 +65,7 @@ class Sites {
     if (readonly) throw Exception('readonly');
     if (_sites.containsKey(id)) {
       _sites[id] = _sites[id]!.rebuild((site) {
-        site.deletedAt = Timestamp.fromDateTime(DateTime.now());
+        site.meta = site.meta.rebuildDeleted();
       });
     }
     _scheduleSave();
@@ -87,7 +80,7 @@ class Sites {
   }
 
   Future<List<Site>> getAll({bool withDeleted = false}) async {
-    final sites = _sites.values.where((s) => withDeleted || !s.hasDeletedAt()).toList();
+    final sites = _sites.values.where((s) => withDeleted || !s.meta.isDeleted).toList();
     sites.sort((a, b) => a.name.compareTo(b.name));
     return sites;
   }
@@ -122,7 +115,7 @@ class Sites {
   void _rebuildTags() {
     _tags.clear();
     for (final site in _sites.values) {
-      if (site.hasDeletedAt()) continue;
+      if (site.meta.isDeleted) continue;
       _tags.addAll(site.tags);
     }
   }
@@ -136,12 +129,12 @@ class Sites {
       sl.freeze();
       for (final site in sl.sites) {
         final cur = _sites[site.id];
-        if (site.hasDeletedAt()) {
+        if (site.meta.isDeleted) {
           if (cur != null) {
             _log.fine('deleting site ${site.id}');
             await delete(site.id);
           }
-        } else if (cur == null || site.updatedAt.toDateTime().isAfter(cur.updatedAt.toDateTime())) {
+        } else if (cur == null || site.meta.isAfter(cur.meta)) {
           _log.fine('importing site ${site.id}');
           _sites[site.id] = site;
         }

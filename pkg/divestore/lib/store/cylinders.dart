@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
-import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 
 import '../divestore.dart';
@@ -31,10 +30,7 @@ class Cylinders {
       if (!cylinder.hasId()) {
         cylinder.id = Uuid().v4().toString();
       }
-      cylinder.updatedAt = Timestamp.fromDateTime(DateTime.now());
-      if (!cylinder.hasCreatedAt()) {
-        cylinder.createdAt = cylinder.updatedAt;
-      }
+      cylinder.meta = cylinder.meta.rebuildUpdated();
     });
     if (!_cylinders.containsKey(cylinder.id)) {
       _cylinders[cylinder.id] = cylinder;
@@ -47,10 +43,7 @@ class Cylinders {
     if (readonly) throw Exception('readonly');
     if (!cylinder.isFrozen) cylinder.freeze();
     cylinder = cylinder.rebuild((cylinder) {
-      cylinder.updatedAt = Timestamp.fromDateTime(DateTime.now());
-      if (!cylinder.hasCreatedAt()) {
-        cylinder.createdAt = cylinder.updatedAt;
-      }
+      cylinder.meta = cylinder.meta.rebuildUpdated();
     });
     _cylinders[cylinder.id] = cylinder;
     _scheduleSave();
@@ -60,7 +53,7 @@ class Cylinders {
     if (readonly) throw Exception('readonly');
     if (_cylinders.containsKey(id)) {
       _cylinders[id] = _cylinders[id]!.rebuild((cylinder) {
-        cylinder.deletedAt = Timestamp.fromDateTime(DateTime.now());
+        cylinder.meta = cylinder.meta.rebuildDeleted();
       });
     }
     _scheduleSave();
@@ -71,14 +64,14 @@ class Cylinders {
   }
 
   Future<List<Cylinder>> getAll({bool withDeleted = false}) async {
-    final vals = _cylinders.values.where((c) => withDeleted || !c.hasDeletedAt()).toList();
+    final vals = _cylinders.values.where((c) => withDeleted || !c.meta.isDeleted).toList();
     vals.sort((a, b) => a.description.compareTo(b.description));
     return vals;
   }
 
   Future<Cylinder?> findByProperties(double? volumeL, double? workingPressureBar, String? description) async {
     return _cylinders.values.firstWhereOrNull((c) {
-      if (c.hasDeletedAt()) return false;
+      if (c.meta.isDeleted) return false;
       if (volumeL != null && volumeL != c.volumeL) return false;
       if (workingPressureBar != null && workingPressureBar != c.workingPressureBar) return false;
       if (description != null && description != c.description) return false;
@@ -134,12 +127,12 @@ class Cylinders {
       _log.fine('got ${cls.cylinders.length} cylinders from provider');
       for (final cyl in cls.cylinders) {
         final cur = _cylinders[cyl.id];
-        if (cyl.hasDeletedAt()) {
+        if (cyl.meta.isDeleted) {
           if (cur != null) {
             _log.fine('deleting cylinder ${cyl.id}');
             await delete(cyl.id);
           }
-        } else if (cur == null || cyl.updatedAt.toDateTime().isAfter(cur.updatedAt.toDateTime())) {
+        } else if (cur == null || cyl.meta.isAfter(cur.meta)) {
           _log.fine('importing cylinder ${cyl.id}');
           _cylinders[cyl.id] = cyl;
         }

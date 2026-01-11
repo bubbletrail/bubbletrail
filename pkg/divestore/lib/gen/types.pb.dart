@@ -96,6 +96,92 @@ class Position extends $pb.GeneratedMessage {
   void clearAltitude() => $_clearField(3);
 }
 
+class Metadata extends $pb.GeneratedMessage {
+  factory Metadata({
+    $0.Timestamp? createdAt,
+    $0.Timestamp? updatedAt,
+    $0.Timestamp? deletedAt,
+  }) {
+    final result = create();
+    if (createdAt != null) result.createdAt = createdAt;
+    if (updatedAt != null) result.updatedAt = updatedAt;
+    if (deletedAt != null) result.deletedAt = deletedAt;
+    return result;
+  }
+
+  Metadata._();
+
+  factory Metadata.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory Metadata.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Metadata',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
+      createEmptyInstance: create)
+    ..aOM<$0.Timestamp>(1, _omitFieldNames ? '' : 'createdAt',
+        subBuilder: $0.Timestamp.create)
+    ..aOM<$0.Timestamp>(2, _omitFieldNames ? '' : 'updatedAt',
+        subBuilder: $0.Timestamp.create)
+    ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'deletedAt',
+        subBuilder: $0.Timestamp.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Metadata clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Metadata copyWith(void Function(Metadata) updates) =>
+      super.copyWith((message) => updates(message as Metadata)) as Metadata;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static Metadata create() => Metadata._();
+  @$core.override
+  Metadata createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static Metadata getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Metadata>(create);
+  static Metadata? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $0.Timestamp get createdAt => $_getN(0);
+  @$pb.TagNumber(1)
+  set createdAt($0.Timestamp value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasCreatedAt() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCreatedAt() => $_clearField(1);
+  @$pb.TagNumber(1)
+  $0.Timestamp ensureCreatedAt() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $0.Timestamp get updatedAt => $_getN(1);
+  @$pb.TagNumber(2)
+  set updatedAt($0.Timestamp value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasUpdatedAt() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearUpdatedAt() => $_clearField(2);
+  @$pb.TagNumber(2)
+  $0.Timestamp ensureUpdatedAt() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  $0.Timestamp get deletedAt => $_getN(2);
+  @$pb.TagNumber(3)
+  set deletedAt($0.Timestamp value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasDeletedAt() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearDeletedAt() => $_clearField(3);
+  @$pb.TagNumber(3)
+  $0.Timestamp ensureDeletedAt() => $_ensure(2);
+}
+
 /// Cylinder/tank definition.
 /// Metric fields (size, workpressure) are always populated for calculations.
 /// Imperial fields (size_cuft, workpressure_psi) are optionally stored when
@@ -103,9 +189,7 @@ class Position extends $pb.GeneratedMessage {
 class Cylinder extends $pb.GeneratedMessage {
   factory Cylinder({
     $core.String? id,
-    $0.Timestamp? createdAt,
-    $0.Timestamp? updatedAt,
-    $0.Timestamp? deletedAt,
+    Metadata? meta,
     $core.double? volumeL,
     $core.double? workingPressureBar,
     $core.String? description,
@@ -114,9 +198,7 @@ class Cylinder extends $pb.GeneratedMessage {
   }) {
     final result = create();
     if (id != null) result.id = id;
-    if (createdAt != null) result.createdAt = createdAt;
-    if (updatedAt != null) result.updatedAt = updatedAt;
-    if (deletedAt != null) result.deletedAt = deletedAt;
+    if (meta != null) result.meta = meta;
     if (volumeL != null) result.volumeL = volumeL;
     if (workingPressureBar != null)
       result.workingPressureBar = workingPressureBar;
@@ -141,17 +223,13 @@ class Cylinder extends $pb.GeneratedMessage {
       package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'id')
-    ..aOM<$0.Timestamp>(2, _omitFieldNames ? '' : 'createdAt',
-        subBuilder: $0.Timestamp.create)
-    ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'updatedAt',
-        subBuilder: $0.Timestamp.create)
-    ..aOM<$0.Timestamp>(4, _omitFieldNames ? '' : 'deletedAt',
-        subBuilder: $0.Timestamp.create)
-    ..aD(5, _omitFieldNames ? '' : 'volumeL')
-    ..aD(6, _omitFieldNames ? '' : 'workingPressureBar')
-    ..aOS(7, _omitFieldNames ? '' : 'description')
-    ..aD(8, _omitFieldNames ? '' : 'volumeCuft')
-    ..aD(9, _omitFieldNames ? '' : 'workingPressurePsi')
+    ..aOM<Metadata>(2, _omitFieldNames ? '' : 'meta',
+        subBuilder: Metadata.create)
+    ..aD(3, _omitFieldNames ? '' : 'volumeL')
+    ..aD(4, _omitFieldNames ? '' : 'workingPressureBar')
+    ..aOS(5, _omitFieldNames ? '' : 'description')
+    ..aD(6, _omitFieldNames ? '' : 'volumeCuft')
+    ..aD(7, _omitFieldNames ? '' : 'workingPressurePsi')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -182,83 +260,61 @@ class Cylinder extends $pb.GeneratedMessage {
   void clearId() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $0.Timestamp get createdAt => $_getN(1);
+  Metadata get meta => $_getN(1);
   @$pb.TagNumber(2)
-  set createdAt($0.Timestamp value) => $_setField(2, value);
+  set meta(Metadata value) => $_setField(2, value);
   @$pb.TagNumber(2)
-  $core.bool hasCreatedAt() => $_has(1);
+  $core.bool hasMeta() => $_has(1);
   @$pb.TagNumber(2)
-  void clearCreatedAt() => $_clearField(2);
+  void clearMeta() => $_clearField(2);
   @$pb.TagNumber(2)
-  $0.Timestamp ensureCreatedAt() => $_ensure(1);
+  Metadata ensureMeta() => $_ensure(1);
 
   @$pb.TagNumber(3)
-  $0.Timestamp get updatedAt => $_getN(2);
+  $core.double get volumeL => $_getN(2);
   @$pb.TagNumber(3)
-  set updatedAt($0.Timestamp value) => $_setField(3, value);
+  set volumeL($core.double value) => $_setDouble(2, value);
   @$pb.TagNumber(3)
-  $core.bool hasUpdatedAt() => $_has(2);
+  $core.bool hasVolumeL() => $_has(2);
   @$pb.TagNumber(3)
-  void clearUpdatedAt() => $_clearField(3);
-  @$pb.TagNumber(3)
-  $0.Timestamp ensureUpdatedAt() => $_ensure(2);
+  void clearVolumeL() => $_clearField(3);
 
   @$pb.TagNumber(4)
-  $0.Timestamp get deletedAt => $_getN(3);
+  $core.double get workingPressureBar => $_getN(3);
   @$pb.TagNumber(4)
-  set deletedAt($0.Timestamp value) => $_setField(4, value);
+  set workingPressureBar($core.double value) => $_setDouble(3, value);
   @$pb.TagNumber(4)
-  $core.bool hasDeletedAt() => $_has(3);
+  $core.bool hasWorkingPressureBar() => $_has(3);
   @$pb.TagNumber(4)
-  void clearDeletedAt() => $_clearField(4);
-  @$pb.TagNumber(4)
-  $0.Timestamp ensureDeletedAt() => $_ensure(3);
+  void clearWorkingPressureBar() => $_clearField(4);
 
   @$pb.TagNumber(5)
-  $core.double get volumeL => $_getN(4);
+  $core.String get description => $_getSZ(4);
   @$pb.TagNumber(5)
-  set volumeL($core.double value) => $_setDouble(4, value);
+  set description($core.String value) => $_setString(4, value);
   @$pb.TagNumber(5)
-  $core.bool hasVolumeL() => $_has(4);
+  $core.bool hasDescription() => $_has(4);
   @$pb.TagNumber(5)
-  void clearVolumeL() => $_clearField(5);
-
-  @$pb.TagNumber(6)
-  $core.double get workingPressureBar => $_getN(5);
-  @$pb.TagNumber(6)
-  set workingPressureBar($core.double value) => $_setDouble(5, value);
-  @$pb.TagNumber(6)
-  $core.bool hasWorkingPressureBar() => $_has(5);
-  @$pb.TagNumber(6)
-  void clearWorkingPressureBar() => $_clearField(6);
-
-  @$pb.TagNumber(7)
-  $core.String get description => $_getSZ(6);
-  @$pb.TagNumber(7)
-  set description($core.String value) => $_setString(6, value);
-  @$pb.TagNumber(7)
-  $core.bool hasDescription() => $_has(6);
-  @$pb.TagNumber(7)
-  void clearDescription() => $_clearField(7);
+  void clearDescription() => $_clearField(5);
 
   /// Imperial values (set when entered in imperial units for exact round-trip)
-  @$pb.TagNumber(8)
-  $core.double get volumeCuft => $_getN(7);
-  @$pb.TagNumber(8)
-  set volumeCuft($core.double value) => $_setDouble(7, value);
-  @$pb.TagNumber(8)
-  $core.bool hasVolumeCuft() => $_has(7);
-  @$pb.TagNumber(8)
-  void clearVolumeCuft() => $_clearField(8);
+  @$pb.TagNumber(6)
+  $core.double get volumeCuft => $_getN(5);
+  @$pb.TagNumber(6)
+  set volumeCuft($core.double value) => $_setDouble(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasVolumeCuft() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearVolumeCuft() => $_clearField(6);
 
-  @$pb.TagNumber(9)
-  $core.double get workingPressurePsi => $_getN(8);
-  @$pb.TagNumber(9)
-  set workingPressurePsi($core.double value) => $_setDouble(8, value);
-  @$pb.TagNumber(9)
-  $core.bool hasWorkingPressurePsi() => $_has(8);
-  @$pb.TagNumber(9)
-  void clearWorkingPressurePsi() => $_clearField(9);
+  @$pb.TagNumber(7)
+  $core.double get workingPressurePsi => $_getN(6);
+  @$pb.TagNumber(7)
+  set workingPressurePsi($core.double value) => $_setDouble(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasWorkingPressurePsi() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearWorkingPressurePsi() => $_clearField(7);
 }
 
 const $core.bool _omitFieldNames =

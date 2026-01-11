@@ -13,10 +13,8 @@
 import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
-import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart'
-    as $0;
 
-import 'types.pb.dart' as $1;
+import 'types.pb.dart' as $0;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
@@ -24,11 +22,9 @@ export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 class Site extends $pb.GeneratedMessage {
   factory Site({
     $core.String? id,
-    $0.Timestamp? createdAt,
-    $0.Timestamp? updatedAt,
-    $0.Timestamp? deletedAt,
+    $0.Metadata? meta,
     $core.String? name,
-    $1.Position? position,
+    $0.Position? position,
     $core.String? country,
     $core.String? location,
     $core.String? bodyOfWater,
@@ -38,9 +34,7 @@ class Site extends $pb.GeneratedMessage {
   }) {
     final result = create();
     if (id != null) result.id = id;
-    if (createdAt != null) result.createdAt = createdAt;
-    if (updatedAt != null) result.updatedAt = updatedAt;
-    if (deletedAt != null) result.deletedAt = deletedAt;
+    if (meta != null) result.meta = meta;
     if (name != null) result.name = name;
     if (position != null) result.position = position;
     if (country != null) result.country = country;
@@ -66,21 +60,17 @@ class Site extends $pb.GeneratedMessage {
       package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'id')
-    ..aOM<$0.Timestamp>(2, _omitFieldNames ? '' : 'createdAt',
-        subBuilder: $0.Timestamp.create)
-    ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'updatedAt',
-        subBuilder: $0.Timestamp.create)
-    ..aOM<$0.Timestamp>(4, _omitFieldNames ? '' : 'deletedAt',
-        subBuilder: $0.Timestamp.create)
-    ..aOS(5, _omitFieldNames ? '' : 'name')
-    ..aOM<$1.Position>(6, _omitFieldNames ? '' : 'position',
-        subBuilder: $1.Position.create)
-    ..aOS(7, _omitFieldNames ? '' : 'country')
-    ..aOS(8, _omitFieldNames ? '' : 'location')
-    ..aOS(9, _omitFieldNames ? '' : 'bodyOfWater')
-    ..aOS(10, _omitFieldNames ? '' : 'difficulty')
-    ..pPS(11, _omitFieldNames ? '' : 'tags')
-    ..aOS(12, _omitFieldNames ? '' : 'notes')
+    ..aOM<$0.Metadata>(2, _omitFieldNames ? '' : 'meta',
+        subBuilder: $0.Metadata.create)
+    ..aOS(3, _omitFieldNames ? '' : 'name')
+    ..aOM<$0.Position>(4, _omitFieldNames ? '' : 'position',
+        subBuilder: $0.Position.create)
+    ..aOS(5, _omitFieldNames ? '' : 'country')
+    ..aOS(6, _omitFieldNames ? '' : 'location')
+    ..aOS(7, _omitFieldNames ? '' : 'bodyOfWater')
+    ..aOS(8, _omitFieldNames ? '' : 'difficulty')
+    ..pPS(9, _omitFieldNames ? '' : 'tags')
+    ..aOS(10, _omitFieldNames ? '' : 'notes')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -111,105 +101,83 @@ class Site extends $pb.GeneratedMessage {
   void clearId() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $0.Timestamp get createdAt => $_getN(1);
+  $0.Metadata get meta => $_getN(1);
   @$pb.TagNumber(2)
-  set createdAt($0.Timestamp value) => $_setField(2, value);
+  set meta($0.Metadata value) => $_setField(2, value);
   @$pb.TagNumber(2)
-  $core.bool hasCreatedAt() => $_has(1);
+  $core.bool hasMeta() => $_has(1);
   @$pb.TagNumber(2)
-  void clearCreatedAt() => $_clearField(2);
+  void clearMeta() => $_clearField(2);
   @$pb.TagNumber(2)
-  $0.Timestamp ensureCreatedAt() => $_ensure(1);
+  $0.Metadata ensureMeta() => $_ensure(1);
 
   @$pb.TagNumber(3)
-  $0.Timestamp get updatedAt => $_getN(2);
+  $core.String get name => $_getSZ(2);
   @$pb.TagNumber(3)
-  set updatedAt($0.Timestamp value) => $_setField(3, value);
+  set name($core.String value) => $_setString(2, value);
   @$pb.TagNumber(3)
-  $core.bool hasUpdatedAt() => $_has(2);
+  $core.bool hasName() => $_has(2);
   @$pb.TagNumber(3)
-  void clearUpdatedAt() => $_clearField(3);
-  @$pb.TagNumber(3)
-  $0.Timestamp ensureUpdatedAt() => $_ensure(2);
+  void clearName() => $_clearField(3);
 
   @$pb.TagNumber(4)
-  $0.Timestamp get deletedAt => $_getN(3);
+  $0.Position get position => $_getN(3);
   @$pb.TagNumber(4)
-  set deletedAt($0.Timestamp value) => $_setField(4, value);
+  set position($0.Position value) => $_setField(4, value);
   @$pb.TagNumber(4)
-  $core.bool hasDeletedAt() => $_has(3);
+  $core.bool hasPosition() => $_has(3);
   @$pb.TagNumber(4)
-  void clearDeletedAt() => $_clearField(4);
+  void clearPosition() => $_clearField(4);
   @$pb.TagNumber(4)
-  $0.Timestamp ensureDeletedAt() => $_ensure(3);
+  $0.Position ensurePosition() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  $core.String get name => $_getSZ(4);
+  $core.String get country => $_getSZ(4);
   @$pb.TagNumber(5)
-  set name($core.String value) => $_setString(4, value);
+  set country($core.String value) => $_setString(4, value);
   @$pb.TagNumber(5)
-  $core.bool hasName() => $_has(4);
+  $core.bool hasCountry() => $_has(4);
   @$pb.TagNumber(5)
-  void clearName() => $_clearField(5);
+  void clearCountry() => $_clearField(5);
 
   @$pb.TagNumber(6)
-  $1.Position get position => $_getN(5);
+  $core.String get location => $_getSZ(5);
   @$pb.TagNumber(6)
-  set position($1.Position value) => $_setField(6, value);
+  set location($core.String value) => $_setString(5, value);
   @$pb.TagNumber(6)
-  $core.bool hasPosition() => $_has(5);
+  $core.bool hasLocation() => $_has(5);
   @$pb.TagNumber(6)
-  void clearPosition() => $_clearField(6);
-  @$pb.TagNumber(6)
-  $1.Position ensurePosition() => $_ensure(5);
+  void clearLocation() => $_clearField(6);
 
   @$pb.TagNumber(7)
-  $core.String get country => $_getSZ(6);
+  $core.String get bodyOfWater => $_getSZ(6);
   @$pb.TagNumber(7)
-  set country($core.String value) => $_setString(6, value);
+  set bodyOfWater($core.String value) => $_setString(6, value);
   @$pb.TagNumber(7)
-  $core.bool hasCountry() => $_has(6);
+  $core.bool hasBodyOfWater() => $_has(6);
   @$pb.TagNumber(7)
-  void clearCountry() => $_clearField(7);
+  void clearBodyOfWater() => $_clearField(7);
 
   @$pb.TagNumber(8)
-  $core.String get location => $_getSZ(7);
+  $core.String get difficulty => $_getSZ(7);
   @$pb.TagNumber(8)
-  set location($core.String value) => $_setString(7, value);
+  set difficulty($core.String value) => $_setString(7, value);
   @$pb.TagNumber(8)
-  $core.bool hasLocation() => $_has(7);
+  $core.bool hasDifficulty() => $_has(7);
   @$pb.TagNumber(8)
-  void clearLocation() => $_clearField(8);
+  void clearDifficulty() => $_clearField(8);
 
   @$pb.TagNumber(9)
-  $core.String get bodyOfWater => $_getSZ(8);
-  @$pb.TagNumber(9)
-  set bodyOfWater($core.String value) => $_setString(8, value);
-  @$pb.TagNumber(9)
-  $core.bool hasBodyOfWater() => $_has(8);
-  @$pb.TagNumber(9)
-  void clearBodyOfWater() => $_clearField(9);
+  $pb.PbList<$core.String> get tags => $_getList(8);
 
   @$pb.TagNumber(10)
-  $core.String get difficulty => $_getSZ(9);
+  $core.String get notes => $_getSZ(9);
   @$pb.TagNumber(10)
-  set difficulty($core.String value) => $_setString(9, value);
+  set notes($core.String value) => $_setString(9, value);
   @$pb.TagNumber(10)
-  $core.bool hasDifficulty() => $_has(9);
+  $core.bool hasNotes() => $_has(9);
   @$pb.TagNumber(10)
-  void clearDifficulty() => $_clearField(10);
-
-  @$pb.TagNumber(11)
-  $pb.PbList<$core.String> get tags => $_getList(10);
-
-  @$pb.TagNumber(12)
-  $core.String get notes => $_getSZ(11);
-  @$pb.TagNumber(12)
-  set notes($core.String value) => $_setString(11, value);
-  @$pb.TagNumber(12)
-  $core.bool hasNotes() => $_has(11);
-  @$pb.TagNumber(12)
-  void clearNotes() => $_clearField(12);
+  void clearNotes() => $_clearField(10);
 }
 
 const $core.bool _omitFieldNames =

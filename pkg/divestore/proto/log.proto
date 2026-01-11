@@ -14,29 +14,29 @@ message Log {
   // Dive metadata
   google.protobuf.Timestamp date_time = 3;
   int32 dive_time = 4; // Seconds
-  double max_depth = 6; // Meters
-  double avg_depth = 7; // Meters
-  double surface_temperature = 8; // Celsius
-  double min_temperature = 9; // Celsius
-  double max_temperature = 10; // Celsius
-  Salinity salinity = 11;
-  double atmospheric_pressure = 12; // Bar
-  DiveMode dive_mode = 13;
-  DecoModel deco_model = 14;
-  Position position = 15;
+  double max_depth = 5; // Meters
+  double avg_depth = 6; // Meters
+  double surface_temperature = 7; // Celsius
+  double min_temperature = 8; // Celsius
+  double max_temperature = 9; // Celsius
+  Salinity salinity = 10;
+  double atmospheric_pressure = 11; // Bar
+  DiveMode dive_mode = 12;
+  DecoModel deco_model = 13;
+  Position position = 14;
 
   // Gas and tank data
-  repeated GasMix gas_mixes = 16;
-  repeated Tank tanks = 17;
+  repeated GasMix gas_mixes = 15;
+  repeated Tank tanks = 16;
 
   // Profile data
-  repeated LogSample samples = 18;
+  repeated LogSample samples = 17;
 
   // Fingerprint reported by libdivecomputer
-  bytes ldc_fingerprint = 19;
+  bytes ldc_fingerprint = 18;
 
   // Unique ID calculated by Bubbletrail
-  string uniqueID = 20;
+  string uniqueID = 19;
 }
 
 // A single sample point in the dive profile.
