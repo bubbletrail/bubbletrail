@@ -27,7 +27,7 @@ type Client struct {
 type MinioUserResult struct {
 	BucketName string `json:"bucketName"`
 	AccessKey  string `json:"accessKey"`
-	SecretKey  string `json:"secretKey"`
+	SecretKey  string `json:"-"`
 }
 
 // NewClient creates a new MinIO client for managing users and buckets.
@@ -207,8 +207,9 @@ func (c *Client) DeleteUser(ctx context.Context, email string) error {
 func hashEmail(email string) string {
 	email = strings.ToLower(strings.TrimSpace(email))
 	h := sha256.Sum256([]byte(email))
-	prefix := regexp.MustCompile(`[^0-9a-z]`).ReplaceAllLiteralString(email, "")
-	return prefix + "-" + hex.EncodeToString(h[:4])
+	user, _, _ := strings.Cut(email, "@")
+	user = regexp.MustCompile(`[^0-9a-z]`).ReplaceAllLiteralString(user, "")
+	return user + "-" + hex.EncodeToString(h[:4])
 }
 
 // generateSecretKey generates a random 32-character secret key.

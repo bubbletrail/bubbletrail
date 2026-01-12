@@ -35,9 +35,11 @@ func (c *Client) SendCredentials(ctx context.Context, creds Credentials) error {
 Your storage account has been created. Here are your credentials, which
 you can enter directly into Bubbletrail:
 
-  Bucket: %s
-  Access key: %s
-  Secret key: %s
+Bucket: %s
+
+Access key: %s
+
+Secret key: %s
 
 You also need to set a "Vault key" which is your personal password for
 encrypting the synced data. Pick one and set it on each of your Bubbletrail

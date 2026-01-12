@@ -140,12 +140,8 @@
             <div class="credential-label">Access Key</div>
             <div class="credential-value" id="access-key"></div>
         </div>
-        <div class="credential-item">
-            <div class="credential-label">Secret Key</div>
-            <div class="credential-value" id="secret-key"></div>
-        </div>
         <div class="note">
-            Save these credentials securely. The secret key will also be sent to your email address.
+            Check your email for the credentials. (It could end up in the spam folder.)
         </div>
     </div>
 
@@ -186,7 +182,6 @@
                 // Display credentials
                 document.getElementById('bucket-name').textContent = data.bucketName;
                 document.getElementById('access-key').textContent = data.accessKey;
-                document.getElementById('secret-key').textContent = data.secretKey;
                 credentialsDiv.classList.remove('hidden');
 
                 // Hide the form
