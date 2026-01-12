@@ -15,6 +15,7 @@ type Client struct {
 
 func NewClient(domain, apiKey, fromAddress string) *Client {
 	mg := mailgun.NewMailgun(domain, apiKey)
+	mg.SetAPIBase(mailgun.APIBaseEU)
 	return &Client{
 		mg:          mg,
 		fromAddress: fromAddress,
