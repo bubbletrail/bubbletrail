@@ -1,6 +1,6 @@
 import 'package:divestore/divestore.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_routes.dart';
@@ -31,22 +31,22 @@ class SiteListItemCard extends StatelessWidget {
         onTap: () {
           context.goNamed(AppRouteName.sitesDetails, pathParameters: {'siteID': site.id});
         },
-        borderRadius: .circular(12),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const .all(12),
+          padding: const EdgeInsets.all(12),
           child: Column(
-            crossAxisAlignment: .start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Top row: Site name
               Row(
                 children: [
-                  FaIcon(FontAwesomeIcons.locationDot, size: 18, color: theme.colorScheme.primary),
+                  Icon(FluentIcons.location_24_regular, size: 18, color: theme.colorScheme.primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       site.name,
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: .bold),
-                      overflow: .ellipsis,
+                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
@@ -55,30 +55,30 @@ class SiteListItemCard extends StatelessWidget {
               if (locationText != null) ...[
                 const SizedBox(height: 4),
                 Padding(
-                  padding: const .only(left: 28),
+                  padding: const EdgeInsets.only(left: 28),
                   child: Text(
                     locationText,
                     style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                    overflow: .ellipsis,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
               const SizedBox(height: 8),
               // Bottom row: Body of water, difficulty, dive count
               Padding(
-                padding: const .only(left: 28),
+                padding: const EdgeInsets.only(left: 28),
                 child: Row(
                   children: [
                     if (site.bodyOfWater.isNotEmpty) ...[
-                      _InfoChip(icon: FontAwesomeIcons.water, label: site.bodyOfWater, theme: theme),
+                      _InfoChip(icon: FluentIcons.water_24_regular, label: site.bodyOfWater, theme: theme),
                       const SizedBox(width: 12),
                     ],
                     if (site.difficulty.isNotEmpty) ...[
-                      _InfoChip(icon: FontAwesomeIcons.signal, label: site.difficulty, theme: theme),
+                      _InfoChip(icon: FluentIcons.cellular_data_1_24_regular, label: site.difficulty, theme: theme),
                       const SizedBox(width: 12),
                     ],
                     const Spacer(),
-                    _InfoChip(icon: FontAwesomeIcons.personSwimming, label: '$diveCount ${diveCount == 1 ? 'dive' : 'dives'}', theme: theme),
+                    _InfoChip(icon: FluentIcons.person_24_regular, label: '$diveCount ${diveCount == 1 ? 'dive' : 'dives'}', theme: theme),
                   ],
                 ),
               ),
@@ -100,9 +100,9 @@ class _InfoChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisSize: .min,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        FaIcon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
+        Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
         const SizedBox(width: 4),
         Text(label, style: theme.textTheme.bodySmall),
       ],

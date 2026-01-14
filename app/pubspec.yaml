@@ -21,13 +21,13 @@ dependencies:
   equatable: ^2.0.5
   file_picker: ^10.3.7
   fl_chart: ^1.1.1
+  fluentui_system_icons: ^1.1.263
   flutter: {sdk: flutter}
   flutter_archive: ^6.0.4
   flutter_bloc: ^9.1.1
   flutter_blue_plus: ^2.0.2
   flutter_localizations: {sdk: flutter}
   flutter_map: ^8.2.2
-  font_awesome_flutter: ^10.8.0
   glob: ^2.1.3
   go_router: ^17.0.0
   intl: ^0.20.2

@@ -65,19 +65,16 @@ class _$DiveListLoadedCWProxyImpl implements _$DiveListLoadedCWProxy {
   DiveListLoaded buddies(Set<String> buddies) => call(buddies: buddies);
 
   @override
-  DiveListLoaded selectedDive(Dive? selectedDive) =>
-      call(selectedDive: selectedDive);
+  DiveListLoaded selectedDive(Dive? selectedDive) => call(selectedDive: selectedDive);
 
   @override
-  DiveListLoaded selectedDiveSite(Site? selectedDiveSite) =>
-      call(selectedDiveSite: selectedDiveSite);
+  DiveListLoaded selectedDiveSite(Site? selectedDiveSite) => call(selectedDiveSite: selectedDiveSite);
 
   @override
   DiveListLoaded isNewDive(bool isNewDive) => call(isNewDive: isNewDive);
 
   @override
-  DiveListLoaded selectedSite(Site? selectedSite) =>
-      call(selectedSite: selectedSite);
+  DiveListLoaded selectedSite(Site? selectedSite) => call(selectedSite: selectedSite);
 
   @override
   DiveListLoaded isNewSite(bool isNewSite) => call(isNewSite: isNewSite);
@@ -155,11 +152,7 @@ extension $DiveListLoadedCopyWith on DiveListLoaded {
   /// ```dart
   /// DiveListLoaded(...).copyWithNull(firstField: true, secondField: true)
   /// ```
-  DiveListLoaded copyWithNull({
-    bool selectedDive = false,
-    bool selectedDiveSite = false,
-    bool selectedSite = false,
-  }) {
+  DiveListLoaded copyWithNull({bool selectedDive = false, bool selectedDiveSite = false, bool selectedSite = false}) {
     return DiveListLoaded(
       dives,
       sites,

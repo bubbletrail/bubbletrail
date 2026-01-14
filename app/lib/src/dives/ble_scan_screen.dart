@@ -1,8 +1,8 @@
 import 'package:divestore/divestore.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../bloc/ble_download_bloc.dart';
 import '../bloc/ble_scan_bloc.dart';
@@ -39,7 +39,7 @@ class BleScanScreen extends StatelessWidget {
                 actions: [
                   if (downloadState.connectedDevice != null)
                     IconButton(
-                      icon: const FaIcon(FontAwesomeIcons.bluetoothB),
+                      icon: const Icon(FluentIcons.bluetooth_24_regular),
                       tooltip: 'Disconnect',
                       onPressed: () => context.read<BleDownloadBloc>().add(.disconnect()),
                     ),
@@ -54,7 +54,7 @@ class BleScanScreen extends StatelessWidget {
                             context.read<BleScanBloc>().add(.start());
                           }
                         },
-                        icon: FaIcon(scanState.isScanning ? FontAwesomeIcons.stop : FontAwesomeIcons.magnifyingGlass),
+                        icon: Icon(scanState.isScanning ? FluentIcons.stop_24_regular : FluentIcons.search_24_regular),
                         label: Text(scanState.isScanning ? 'Stop' : 'Scan'),
                       )
                     : null,
@@ -72,7 +72,7 @@ class BleScanScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FaIcon(FontAwesomeIcons.bluetoothB, size: 64, color: Theme.of(context).colorScheme.error),
+            Icon(FluentIcons.bluetooth_24_regular, size: 64, color: Theme.of(context).colorScheme.error),
             const SizedBox(height: 16),
             Text('Bluetooth is ${scanState.adapterState.name}', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
@@ -90,7 +90,7 @@ class BleScanScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FaIcon(FontAwesomeIcons.bluetooth, size: 64, color: Theme.of(context).colorScheme.primary),
+            Icon(FluentIcons.bluetooth_24_regular, size: 64, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 16),
             const Text('Scan to find your dive computer'),
           ],
@@ -161,12 +161,12 @@ class BleScanScreen extends StatelessWidget {
   Widget _buildRememberedComputerCard(BuildContext context, BleScanState scanState, Computer computer) {
     return Card(
       child: ListTile(
-        leading: const FaIcon(FontAwesomeIcons.bluetoothB),
+        leading: const Icon(FluentIcons.bluetooth_24_regular),
         title: Text('${computer.vendor} ${computer.product}'),
         subtitle: Row(
           spacing: 4,
           children: [
-            const FaIcon(FontAwesomeIcons.idBadge, size: 16),
+            const Icon(FluentIcons.person_tag_24_regular, size: 16),
             Text(computer.hasSerial() ? computer.serial : computer.remoteId, style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
@@ -202,7 +202,7 @@ class BleScanScreen extends StatelessWidget {
       final device = result.device;
       return Card(
         child: ListTile(
-          leading: const FaIcon(FontAwesomeIcons.bluetoothB),
+          leading: const Icon(FluentIcons.bluetooth_24_regular),
           title: Text(device.platformName),
           subtitle: Padding(
             padding: const EdgeInsets.only(top: 4.0),
@@ -212,14 +212,14 @@ class BleScanScreen extends StatelessWidget {
                 Row(
                   spacing: 4,
                   children: [
-                    const FaIcon(FontAwesomeIcons.signal, size: 16),
+                    const Icon(FluentIcons.wifi_1_24_regular, size: 16),
                     Text('${_getSignalStrengthLabel(result.rssi)} (${result.rssi} dBm)', style: Theme.of(context).textTheme.bodySmall),
                   ],
                 ),
                 Row(
                   spacing: 4,
                   children: [
-                    const FaIcon(FontAwesomeIcons.idBadge, size: 16),
+                    const Icon(FluentIcons.person_tag_24_regular, size: 16),
                     Text(result.device.remoteId.str, style: Theme.of(context).textTheme.bodySmall),
                   ],
                 ),
@@ -240,7 +240,7 @@ class BleScanScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
-            leading: const FaIcon(FontAwesomeIcons.bluetoothB),
+            leading: const Icon(FluentIcons.bluetooth_24_regular),
             title: Text(downloadState.connectedDevice!.platformName),
             subtitle: Text('Status: ${downloadState.connectionState.name}'),
             trailing: TextButton(onPressed: () => context.read<BleDownloadBloc>().add(.disconnect()), child: const Text('Disconnect')),
@@ -297,7 +297,7 @@ class BleScanScreen extends StatelessWidget {
         children: [
           FilledButton.icon(
             onPressed: scanState.supportedComputers.isEmpty ? null : () => _showComputerSelectionDialog(context, scanState, downloadState),
-            icon: const FaIcon(FontAwesomeIcons.download),
+            icon: const Icon(FluentIcons.arrow_download_24_regular),
             label: const Text('Download dives'),
           ),
           if (scanState.supportedComputers.isEmpty)

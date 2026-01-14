@@ -1,6 +1,6 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_routes.dart';
@@ -15,7 +15,7 @@ class CylinderListScreen extends StatelessWidget {
     return ScreenScaffold(
       title: const Text('Cylinders'),
       actions: [
-        IconButton(icon: const FaIcon(FontAwesomeIcons.plus), tooltip: 'Add new cylinder', onPressed: () => context.goNamed(AppRouteName.cylindersNew)),
+        IconButton(icon: const Icon(FluentIcons.add_24_regular), tooltip: 'Add new cylinder', onPressed: () => context.goNamed(AppRouteName.cylindersNew)),
       ],
       body: BlocBuilder<CylinderListBloc, CylinderListState>(
         builder: (context, state) {
@@ -27,7 +27,7 @@ class CylinderListScreen extends StatelessWidget {
             final cylinders = state.cylinders;
 
             if (cylinders.isEmpty) {
-              return const EmptyStateWidget(message: 'No cylinders yet. Tap + to add one.', icon: FontAwesomeIcons.bottleWater);
+              return const EmptyStateWidget(message: 'No cylinders yet. Tap + to add one.', icon: FluentIcons.beaker_24_regular);
             }
 
             return ListView.builder(
@@ -43,7 +43,7 @@ class CylinderListScreen extends StatelessWidget {
                     workingPressureBar: cylinder.workingPressureBar,
                     volumeCuft: cylinder.volumeCuft,
                     workingPressurePsi: cylinder.workingPressurePsi,
-                    trailing: const FaIcon(FontAwesomeIcons.chevronRight, size: 16),
+                    trailing: const Icon(FluentIcons.chevron_right_24_regular, size: 16),
                     onTap: () => context.goNamed(AppRouteName.cylindersDetails, pathParameters: {'cylinderID': cylinder.id.toString()}),
                   ),
                 );

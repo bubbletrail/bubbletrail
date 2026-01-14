@@ -1,6 +1,6 @@
 import 'package:divestore/divestore.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_routes.dart';
@@ -54,7 +54,7 @@ class DiveListItemCard extends StatelessWidget {
               if (showSite && siteName != null) ...[
                 Row(
                   children: [
-                    FaIcon(FontAwesomeIcons.locationDot, size: 14, color: theme.colorScheme.primary),
+                    Icon(FluentIcons.location_24_regular, size: 14, color: theme.colorScheme.primary),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(siteName, style: theme.textTheme.bodyMedium, overflow: .ellipsis),
@@ -66,13 +66,13 @@ class DiveListItemCard extends StatelessWidget {
               // Bottom row: Depth and duration
               Row(
                 children: [
-                  _InfoChip(icon: FontAwesomeIcons.arrowDown, label: DepthText(maxDepth), theme: theme),
+                  _InfoChip(icon: FluentIcons.arrow_down_24_regular, label: DepthText(maxDepth), theme: theme),
                   const SizedBox(width: 12),
-                  _InfoChip(icon: FontAwesomeIcons.stopwatch, label: DurationText(dive.duration), theme: theme),
+                  _InfoChip(icon: FluentIcons.timer_24_regular, label: DurationText(dive.duration), theme: theme),
                   if (dive.sac > 0) ...[
                     const SizedBox(width: 12),
                     _InfoChip(
-                      icon: FontAwesomeIcons.gauge,
+                      icon: FluentIcons.gauge_24_regular,
                       label: VolumeText(dive.sac, suffix: '/min'),
                       theme: theme,
                     ),
@@ -101,7 +101,7 @@ class _InfoChip extends StatelessWidget {
     return Row(
       mainAxisSize: .min,
       children: [
-        FaIcon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
+        Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
         const SizedBox(width: 4),
         label,
       ],

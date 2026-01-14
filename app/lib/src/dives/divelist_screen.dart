@@ -1,7 +1,6 @@
-import 'package:file_picker/file_picker.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_routes.dart';
@@ -13,31 +12,11 @@ class DiveListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenScaffold(title: const Text('Dives'), actions: _actions(context), body: _body());
-  }
-
-  List<Widget> _actions(BuildContext context) {
-    return [
-      IconButton(
-        icon: const FaIcon(FontAwesomeIcons.fileImport),
-        tooltip: 'Import SSRF file',
-        onPressed: () async {
-          final result = await FilePicker.platform.pickFiles(type: .custom, allowedExtensions: ['ssrf', 'xml']);
-          if (result != null && result.files.single.path != null) {
-            if (context.mounted) {
-              context.read<DiveListBloc>().add(ImportDives(result.files.single.path!));
-            }
-          }
-        },
-      ),
-      IconButton(
-        icon: const FaIcon(FontAwesomeIcons.plus),
-        tooltip: 'Add new dive',
-        onPressed: () {
-          context.goNamed(AppRouteName.divesNew);
-        },
-      ),
-    ];
+    return ScreenScaffold(
+      title: const Text('Dives'),
+      actions: [IconButton(icon: const Icon(FluentIcons.add_24_regular), tooltip: 'Add new dive', onPressed: () => context.goNamed(AppRouteName.divesNew))],
+      body: _body(),
+    );
   }
 
   BlocBuilder<DiveListBloc, DiveListState> _body() {
@@ -51,7 +30,7 @@ class DiveListScreen extends StatelessWidget {
           final dives = state.dives;
 
           if (dives.isEmpty) {
-            return const EmptyStateWidget(message: 'No dives yet. Add your first dive!', icon: FontAwesomeIcons.personSwimming);
+            return const EmptyStateWidget(message: 'No dives yet. Add your first dive!', icon: FluentIcons.water_32_regular);
           }
 
           return DiveTableWidget(dives: dives, sitesByUuid: state.sitesByUuid, showSiteColumn: true);

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:window_manager/window_manager.dart';
@@ -29,6 +29,7 @@ import 'src/dives/divelist_screen.dart';
 import 'src/dives/fullscreen_profile_screen.dart';
 import 'src/equipment/cylinder_edit_screen.dart';
 import 'src/equipment/cylinder_list_screen.dart';
+import 'src/equipment/equipment_screen.dart';
 import 'src/preferences/logs_screen.dart';
 import 'src/preferences/preferences_screen.dart';
 import 'src/preferences/syncing_screen.dart';
@@ -118,10 +119,11 @@ class _MyAppState extends State<MyApp> with WindowListener {
           builder: (BuildContext context, GoRouterState state, StatefulNavigationShell shell) {
             final appBarTheme = Theme.of(context).appBarTheme;
             const destinations = [
-              (icon: FontAwesomeIcons.water, label: 'Dives'),
-              (icon: FontAwesomeIcons.locationDot, label: 'Sites'),
-              (icon: FontAwesomeIcons.gear, label: 'Preferences'),
-              (icon: FontAwesomeIcons.bluetooth, label: 'Connect'),
+              (icon: FluentIcons.water_32_regular, label: 'Dives'),
+              (icon: FluentIcons.location_28_regular, label: 'Sites'),
+              (icon: FluentIcons.box_24_regular, label: 'Equipment'),
+              (icon: FluentIcons.settings_cog_multiple_24_regular, label: 'Settings'),
+              (icon: FluentIcons.bluetooth_32_regular, label: 'Connect'),
             ];
 
             final cs = Theme.of(context).colorScheme;
@@ -145,7 +147,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       backgroundColor: Colors.transparent,
                       selectedIndex: shell.currentIndex,
                       onDestinationSelected: (n) => shell.goBranch(n),
-                      destinations: [for (final d in destinations) NavigationDestination(icon: FaIcon(d.icon), label: d.label)],
+                      destinations: [for (final d in destinations) NavigationDestination(icon: Icon(d.icon), label: d.label)],
                     ),
                   ),
                 ),
@@ -162,7 +164,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                     selectedIndex: shell.currentIndex,
                     onDestinationSelected: (n) => shell.goBranch(n),
                     leading: SizedBox(height: (appBarTheme.toolbarHeight ?? 48) - 8),
-                    destinations: [for (final d in destinations) NavigationRailDestination(icon: FaIcon(d.icon), label: Text(d.label))],
+                    destinations: [for (final d in destinations) NavigationRailDestination(icon: Icon(d.icon), label: Text(d.label))],
                   ),
                   Expanded(child: shell),
                 ],
@@ -256,9 +258,9 @@ class _MyAppState extends State<MyApp> with WindowListener {
             StatefulShellBranch(
               routes: <RouteBase>[
                 GoRoute(
-                  path: AppRoutePath.preferences,
-                  name: AppRouteName.preferences,
-                  builder: (context, state) => const PreferencesScreen(),
+                  path: AppRoutePath.equipment,
+                  name: AppRouteName.equipment,
+                  builder: (context, state) => const EquipmentScreen(),
                   routes: <RouteBase>[
                     GoRoute(
                       path: AppRoutePath.cylinders,
@@ -283,6 +285,17 @@ class _MyAppState extends State<MyApp> with WindowListener {
                         ),
                       ],
                     ),
+                  ],
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: <RouteBase>[
+                GoRoute(
+                  path: AppRoutePath.preferences,
+                  name: AppRouteName.preferences,
+                  builder: (context, state) => const PreferencesScreen(),
+                  routes: <RouteBase>[
                     GoRoute(path: AppRoutePath.units, name: AppRouteName.units, builder: (context, state) => const UnitsScreen()),
                     GoRoute(path: AppRoutePath.syncing, name: AppRouteName.syncing, builder: (context, state) => const SyncingScreen()),
                     GoRoute(path: AppRoutePath.logs, name: AppRouteName.logs, builder: (context, state) => const LogsScreen()),

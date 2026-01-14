@@ -12,11 +12,12 @@ abstract class AppRouteName {
   static const sitesDetailsEdit = 'site-edit';
   static const sitesNew = 'new-site';
 
-  static const preferences = 'preferences';
+  static const equipment = 'equipment';
   static const cylinders = 'cylinders';
   static const cylindersDetails = 'cylinder-details';
-  static const cylindersDetailsEdit = 'cylinder-edit';
   static const cylindersNew = 'new-cylinder';
+
+  static const preferences = 'preferences';
   static const units = 'units';
   static const syncing = 'syncing';
   static const logs = 'logs';
@@ -39,11 +40,12 @@ abstract class AppRoutePath {
 
   static const sitesDetailsMap = '/sites/:siteID/map';
 
-  static const preferences = '/preferences';
+  static const equipment = '/equipment';
   static const cylinders = 'cylinders';
   static const cylindersDetails = ':cylinderID';
-  static const cylindersDetailsEdit = 'edit';
   static const cylindersNew = 'new';
+
+  static const preferences = '/preferences';
   static const units = 'units';
   static const syncing = 'syncing';
   static const logs = 'logs';

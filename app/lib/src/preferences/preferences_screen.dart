@@ -3,13 +3,14 @@ import 'dart:async';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
 import '../bloc/archive_bloc.dart';
+import '../bloc/divelist_bloc.dart';
 import '../bloc/preferences_bloc.dart';
 import '../bloc/sync_bloc.dart';
 import '../common/common.dart';
@@ -27,48 +28,57 @@ class PreferencesScreen extends StatelessWidget {
           builder: (context, prefsState) {
             final prefs = prefsState.preferences;
             return ScreenScaffold(
-              title: const Text('Preferences'),
+              title: const Text('Settings'),
               body: ListView(
-                padding: const .all(16),
+                padding: const EdgeInsets.all(16),
                 children: [
-                  PreferencesCategoryCard(icon: FontAwesomeIcons.bottleWater, title: 'Cylinders', onTap: () => context.goNamed(AppRouteName.cylinders)),
-                  PreferencesCategoryCard(icon: FontAwesomeIcons.ruler, title: 'Units', onTap: () => context.goNamed(AppRouteName.units)),
-                  PreferencesCategoryCard(icon: FontAwesomeIcons.cloudArrowUp, title: 'Syncing', onTap: () => context.goNamed(AppRouteName.syncing)),
-                  const SizedBox(height: 24),
-                  const PreferencesSectionHeader(title: 'Appearance'),
-                  PreferencesTile(
-                    title: 'Theme',
-                    trailing: SegmentedButton<ThemeMode>(
-                      showSelectedIcon: true,
-                      segments: const [
-                        ButtonSegment(value: .system, label: Text('System'), icon: Icon(null)),
-                        ButtonSegment(value: .light, label: Text('Light'), icon: Icon(null)),
-                        ButtonSegment(value: .dark, label: Text('Dark'), icon: Icon(null)),
-                      ],
-                      selected: {prefs.themeMode},
-                      onSelectionChanged: (value) {
-                        context.read<PreferencesBloc>().add(UpdateThemeMode(value.first));
-                      },
-                    ),
+                  _SectionColumn(
+                    title: 'Syncing',
+                    children: [
+                      Wrap(
+                        spacing: 16,
+                        runSpacing: 8,
+                        children: [
+                          FilledButton.icon(
+                            icon: const Icon(FluentIcons.arrow_sync_24_regular, size: 16),
+                            label: const Text('Sync now'),
+                            onPressed: prefs.syncProvider == .none || !prefs.s3Config.isConfigured || syncState.syncing
+                                ? null
+                                : () => context.read<SyncBloc>().add(const StartSyncing()),
+                          ),
+                          OutlinedButton.icon(
+                            icon: Icon(FluentIcons.cloud_sync_24_regular),
+                            label: Text('Edit sync settings'),
+                            onPressed: () => context.goNamed(AppRouteName.syncing),
+                          ),
+                        ],
+                      ),
+                      if (prefs.syncProvider != .none && prefs.s3Config.isConfigured) SyncStatusTile(state: syncState),
+                    ],
                   ),
-                  const SizedBox(height: 24),
-                  const PreferencesSectionHeader(title: 'Backup'),
-                  _ImportExportButtons(),
-                  const SizedBox(height: 24),
-                  const SizedBox(height: 8),
-                  if (prefs.syncProvider != .none && prefs.s3Config.isConfigured)
-                    Wrap(
-                      spacing: 24,
-                      runSpacing: 8,
-                      children: [
-                        FilledButton.icon(
-                          onPressed: syncState.syncing ? null : () => context.read<SyncBloc>().add(const StartSyncing()),
-                          icon: const FaIcon(FontAwesomeIcons.arrowsRotate, size: 16),
-                          label: Text('Sync now'),
-                        ),
-                        SyncStatusTile(state: syncState),
-                      ],
-                    ),
+                  _SectionColumn(title: 'Import & export', children: [_ImportExportButtons()]),
+                  _SectionColumn(
+                    title: 'Preferences',
+                    children: [
+                      SegmentedButton<ThemeMode>(
+                        showSelectedIcon: true,
+                        segments: const [
+                          ButtonSegment(value: ThemeMode.system, label: Text('System'), icon: Icon(FluentIcons.weather_sunny_low_24_regular)),
+                          ButtonSegment(value: ThemeMode.light, label: Text('Light'), icon: Icon(FluentIcons.weather_sunny_24_regular)),
+                          ButtonSegment(value: ThemeMode.dark, label: Text('Dark'), icon: Icon(FluentIcons.weather_moon_24_regular)),
+                        ],
+                        selected: {prefs.themeMode},
+                        onSelectionChanged: (value) {
+                          context.read<PreferencesBloc>().add(UpdateThemeMode(value.first));
+                        },
+                      ),
+                      OutlinedButton.icon(
+                        icon: Icon(FluentIcons.ruler_32_regular),
+                        label: Text('Edit units'),
+                        onPressed: () => context.goNamed(AppRouteName.units),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 24),
                   _LogPreview(onTap: () => context.goNamed(AppRouteName.logs)),
                   const SizedBox(height: 24),
@@ -86,6 +96,25 @@ class PreferencesScreen extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+class _SectionColumn extends StatelessWidget {
+  const _SectionColumn({required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        spacing: 8,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[PreferencesSectionHeader(title: title)] + children,
+      ),
     );
   }
 }
@@ -140,7 +169,7 @@ class _LogPreviewState extends State<_LogPreview> {
               children: [
                 Text('Logs', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 const Spacer(),
-                FaIcon(FontAwesomeIcons.chevronRight, size: 12, color: theme.colorScheme.onSurfaceVariant),
+                Icon(FluentIcons.chevron_right_12_regular, size: 12, color: theme.colorScheme.onSurfaceVariant),
               ],
             ),
             const SizedBox(height: 4),
@@ -196,7 +225,7 @@ class _ImportExportButtons extends StatelessWidget {
     }
   }
 
-  Future<void> _import(BuildContext context) async {
+  Future<void> _importBackup(BuildContext context) async {
     final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: [backupFileExtension]);
     if (result == null || result.files.single.path == null) return;
 
@@ -215,6 +244,15 @@ class _ImportExportButtons extends StatelessWidget {
     if (confirmed != true || !context.mounted) return;
 
     context.read<ArchiveBloc>().add(ImportArchive(result.files.single.path!));
+  }
+
+  Future<void> _importDives(BuildContext context) async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['ssrf', 'xml']);
+    if (result == null || result.files.single.path == null) return;
+    if (!context.mounted) return;
+
+    context.read<DiveListBloc>().add(ImportDives(result.files.single.path!));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Importing dives...')));
   }
 
   @override
@@ -236,15 +274,20 @@ class _ImportExportButtons extends StatelessWidget {
           spacing: 16,
           runSpacing: 8,
           children: [
-            FilledButton.icon(
-              onPressed: state.working ? null : () => context.read<ArchiveBloc>().add(ExportArchive()),
-              icon: const FaIcon(FontAwesomeIcons.fileExport, size: 16),
-              label: const Text('Export'),
+            OutlinedButton.icon(
+              icon: const Icon(FluentIcons.arrow_import_24_regular, size: 16),
+              label: const Text('Import log file'),
+              onPressed: state.working ? null : () => _importDives(context),
             ),
             OutlinedButton.icon(
-              onPressed: state.working ? null : () => _import(context),
-              icon: const FaIcon(FontAwesomeIcons.fileImport, size: 16),
-              label: const Text('Import'),
+              icon: const Icon(FluentIcons.arrow_export_24_regular, size: 16),
+              label: const Text('Export database backup'),
+              onPressed: state.working ? null : () => context.read<ArchiveBloc>().add(ExportArchive()),
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(FluentIcons.arrow_import_24_regular, size: 16),
+              label: const Text('Import database backup'),
+              onPressed: state.working ? null : () => _importBackup(context),
             ),
             if (state.working) const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
           ],

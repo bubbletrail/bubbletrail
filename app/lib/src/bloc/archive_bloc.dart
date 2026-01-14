@@ -29,14 +29,7 @@ class ArchiveState extends Equatable {
     this.importComplete = false,
   });
 
-  ArchiveState copyWith({
-    bool? working,
-    String? error,
-    String? exportReadyPath,
-    String? exportReadyFilename,
-    bool? exportComplete,
-    bool? importComplete,
-  }) {
+  ArchiveState copyWith({bool? working, String? error, String? exportReadyPath, String? exportReadyFilename, bool? exportComplete, bool? importComplete}) {
     return ArchiveState(
       working: working ?? this.working,
       error: error,
@@ -70,9 +63,7 @@ class ImportArchive extends ArchiveEvent {
 class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
   final SyncBloc _syncBloc;
 
-  ArchiveBloc({required SyncBloc syncBloc})
-      : _syncBloc = syncBloc,
-        super(const ArchiveState()) {
+  ArchiveBloc({required SyncBloc syncBloc}) : _syncBloc = syncBloc, super(const ArchiveState()) {
     on<ExportArchive>(_onExport);
     on<ExportComplete>(_onExportComplete);
     on<ExportCancelled>(_onExportCancelled);

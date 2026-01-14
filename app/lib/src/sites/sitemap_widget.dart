@@ -1,6 +1,6 @@
 import 'package:divestore/divestore.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -36,7 +36,7 @@ class SiteMapWidget extends StatelessWidget {
                 top: 8,
                 right: 8,
                 child: IconButton.filled(
-                  icon: const FaIcon(FontAwesomeIcons.expand),
+                  icon: const Icon(FluentIcons.full_screen_maximize_24_regular),
                   onPressed: () {
                     context.pushNamed(AppRouteName.sitesDetailsMap, pathParameters: {'siteID': site.id});
                   },

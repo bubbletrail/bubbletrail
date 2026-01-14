@@ -27,12 +27,7 @@ class ZipExportProvider extends ArchiveExportProvider {
     }
 
     _log.info('creating zip at ${zipFile.path}');
-    await ZipFile.createFromDirectory(
-      sourceDir: tempDir,
-      zipFile: zipFile,
-      recurseSubDirs: true,
-      includeBaseDirectory: false,
-    );
+    await ZipFile.createFromDirectory(sourceDir: tempDir, zipFile: zipFile, recurseSubDirs: true, includeBaseDirectory: false);
     _log.fine('cleaning up temp dir');
     await tempDir.delete(recursive: true);
   }
@@ -50,10 +45,7 @@ class ZipImportProvider extends ArchiveImportProvider {
     _log.fine('created temp dir: ${_tempDir.path}');
 
     _log.info('extracting zip from ${zipFile.path}');
-    await ZipFile.extractToDirectory(
-      zipFile: zipFile,
-      destinationDir: _tempDir,
-    );
+    await ZipFile.extractToDirectory(zipFile: zipFile, destinationDir: _tempDir);
     _log.fine('extraction complete');
   }
 

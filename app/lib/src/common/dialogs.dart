@@ -1,5 +1,5 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 /// Result of a selection dialog - distinguishes between cancelled and selected value
 class SelectionResult<T> {
@@ -38,7 +38,7 @@ Future<SelectionResult<T>> showSelectionDialog<T>({
           itemBuilder: (context, index) {
             if (noneOption != null && index == 0) {
               return ListTile(
-                leading: const FaIcon(FontAwesomeIcons.xmark),
+                leading: const Icon(FluentIcons.dismiss_24_regular),
                 title: Text(noneOption),
                 selected: selectedItem == null,
                 onTap: () => Navigator.of(dialogContext).pop(null),
