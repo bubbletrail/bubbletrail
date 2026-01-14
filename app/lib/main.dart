@@ -13,6 +13,7 @@ import 'package:window_manager/window_manager.dart';
 
 import 'src/app_routes.dart';
 import 'src/app_theme.dart';
+import 'src/bloc/archive_bloc.dart';
 import 'src/bloc/ble_download_bloc.dart';
 import 'src/bloc/ble_scan_bloc.dart';
 import 'src/bloc/cylinderdetails_bloc.dart';
@@ -76,6 +77,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> with WindowListener {
   static const _channel = MethodChannel('app.bubbletrail.app/file_handler');
   late final SyncBloc _syncBloc;
+  late final ArchiveBloc _archiveBloc;
   late final DiveListBloc _diveListBloc;
   late final CylinderListBloc _cylinderListBloc;
   late final BleScanBloc _bleScanBloc;
@@ -87,6 +89,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
   void initState() {
     super.initState();
     _syncBloc = SyncBloc();
+    _archiveBloc = ArchiveBloc(syncBloc: _syncBloc);
     _diveListBloc = DiveListBloc(_syncBloc);
     _cylinderListBloc = CylinderListBloc(_syncBloc);
     _bleScanBloc = BleScanBloc(_syncBloc);
@@ -342,6 +345,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(value: _syncBloc),
+        BlocProvider.value(value: _archiveBloc),
         BlocProvider.value(value: _diveListBloc),
         BlocProvider.value(value: _cylinderListBloc),
         BlocProvider.value(value: _preferencesBloc),

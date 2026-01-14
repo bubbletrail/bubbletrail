@@ -82,6 +82,7 @@ class Computers {
   }
 
   Future<void> init() async {
+    _computers.clear();
     try {
       final bs = await File(path).readAsBytes();
       final cl = InternalComputerList.fromBuffer(bs);

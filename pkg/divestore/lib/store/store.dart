@@ -1,5 +1,10 @@
+import 'dart:io';
+
+import 'package:glob/glob.dart';
+import 'package:glob/list_local_fs.dart';
 import 'package:logging/logging.dart';
 
+import '../archive/archiveprovider.dart';
 import '../gen/dive.pb.dart';
 import '../gen/dive_ext.dart';
 import '../sync/syncprovider.dart';
@@ -54,6 +59,50 @@ class Store {
     } catch (e) {
       _log.warning('failed to sync dives', e);
     }
+  }
+
+  Future<void> exportTo(ArchiveExportProvider provider) async {
+    _log.info('exporting store to archive');
+    await provider.writeObjects(_exportObjects());
+    _log.info('export complete');
+  }
+
+  Stream<ArchiveObject> _exportObjects() async* {
+    await for (final match in Glob(path, recursive: true).list()) {
+      if (match is! File) continue;
+      final file = match as File;
+      final key = file.path.substring(path.length + 1);
+      final data = await file.readAsBytes();
+      _log.fine('exported $key');
+      yield ArchiveObject(key, data);
+    }
+  }
+
+  Future<void> importFrom(ArchiveImportProvider provider) async {
+    _log.info('importing store from archive');
+
+    // Move existing database out of the way
+    final dbDir = Directory(path);
+    if (await dbDir.exists()) {
+      final backupPath = '$path.backup.${DateTime.now().millisecondsSinceEpoch}';
+      _log.info('moving existing database to $backupPath');
+      await dbDir.rename(backupPath);
+    }
+
+    // Create fresh database directory
+    await dbDir.create(recursive: true);
+
+    // Import archive data
+    await for (final obj in provider.readObjects()) {
+      final file = File('$path/${obj.key}');
+      await file.parent.create(recursive: true);
+      await file.writeAsBytes(obj.data);
+      _log.fine('imported ${obj.key}');
+    }
+
+    _log.info('reinitializing stores');
+    await init();
+    _log.info('import complete');
   }
 
   Future<Dive?> diveById(String diveID) async {

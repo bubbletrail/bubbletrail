@@ -157,6 +157,11 @@ class Dives {
   }
 
   Future<void> init() async {
+    _dives.clear();
+    _tags.clear();
+    _buddies.clear();
+    _dirty.clear();
+    _saveTimer?.cancel();
     await for (final match in Glob('$pathPrefix/*/*.meta.binpb').list()) {
       try {
         final dive = await _loadMeta(match.path);

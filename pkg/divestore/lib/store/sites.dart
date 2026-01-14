@@ -86,6 +86,8 @@ class Sites {
   }
 
   Future<void> init() async {
+    _sites.clear();
+    _tags.clear();
     try {
       final bs = await File(path).readAsBytes();
       final dss = InternalSiteList.fromBuffer(bs);

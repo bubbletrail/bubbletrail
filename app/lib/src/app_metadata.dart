@@ -6,3 +6,5 @@ final buildTime = _buildSeconds > 0 ? DateTime.fromMillisecondsSinceEpoch(1000 *
 const gitVer = '$appBuild-$gitSHA';
 
 const azureMapsSubscriptionKey = String.fromEnvironment('AZURE_MAPS_SUBSCRIPTION_KEY', defaultValue: '');
+
+const backupFileExtension = 'btz';
