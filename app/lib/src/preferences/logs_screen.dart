@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -51,7 +50,7 @@ class _LogsScreenState extends State<LogsScreen> {
       title: const Text('Logs'),
       actions: [
         PopupMenuButton<Level>(
-          icon: const Icon(FluentIcons.filter_24_regular, size: 18),
+          icon: const Icon(Icons.filter_list, size: 18),
           tooltip: 'Filter by level',
           onSelected: (level) {
             setState(() {
@@ -67,7 +66,7 @@ class _LogsScreenState extends State<LogsScreen> {
           ],
         ),
         IconButton(
-          icon: const Icon(FluentIcons.copy_24_regular, size: 18),
+          icon: const Icon(Icons.content_copy, size: 18),
           tooltip: 'Copy all logs',
           onPressed: _records.isEmpty
               ? null
@@ -80,7 +79,7 @@ class _LogsScreenState extends State<LogsScreen> {
                 },
         ),
         IconButton(
-          icon: const Icon(FluentIcons.delete_24_regular, size: 18),
+          icon: const Icon(Icons.delete_outline, size: 18),
           tooltip: 'Clear logs',
           onPressed: () {
             LogBuffer.instance.clear();
@@ -104,7 +103,7 @@ class _LogsScreenState extends State<LogsScreen> {
       value: level,
       child: Row(
         children: [
-          if (_minLevel == level) const Icon(FluentIcons.checkmark_24_regular, size: 14) else const SizedBox(width: 18),
+          if (_minLevel == level) const Icon(Icons.check, size: 14) else const SizedBox(width: 18),
           const SizedBox(width: 8),
           Text(label),
         ],

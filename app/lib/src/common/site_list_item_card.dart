@@ -1,5 +1,4 @@
 import 'package:divestore/divestore.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -40,7 +39,7 @@ class SiteListItemCard extends StatelessWidget {
               // Top row: Site name
               Row(
                 children: [
-                  Icon(FluentIcons.location_24_regular, size: 18, color: theme.colorScheme.primary),
+                  Icon(Icons.location_on_outlined, size: 18, color: theme.colorScheme.primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -70,15 +69,15 @@ class SiteListItemCard extends StatelessWidget {
                 child: Row(
                   children: [
                     if (site.bodyOfWater.isNotEmpty) ...[
-                      _InfoChip(icon: FluentIcons.water_24_regular, label: site.bodyOfWater, theme: theme),
+                      _InfoChip(icon: Icons.water_drop_outlined, label: site.bodyOfWater, theme: theme),
                       const SizedBox(width: 12),
                     ],
                     if (site.difficulty.isNotEmpty) ...[
-                      _InfoChip(icon: FluentIcons.cellular_data_1_24_regular, label: site.difficulty, theme: theme),
+                      _InfoChip(icon: Icons.signal_cellular_alt, label: site.difficulty, theme: theme),
                       const SizedBox(width: 12),
                     ],
                     const Spacer(),
-                    _InfoChip(icon: FluentIcons.person_24_regular, label: '$diveCount ${diveCount == 1 ? 'dive' : 'dives'}', theme: theme),
+                    _InfoChip(icon: Icons.person_outline, label: '$diveCount ${diveCount == 1 ? 'dive' : 'dives'}', theme: theme),
                   ],
                 ),
               ),

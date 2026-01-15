@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 
@@ -40,14 +39,14 @@ class PreferencesScreen extends StatelessWidget {
                         runSpacing: 8,
                         children: [
                           FilledButton.icon(
-                            icon: const Icon(FluentIcons.arrow_sync_24_regular, size: 16),
+                            icon: const Icon(Icons.sync, size: 16),
                             label: const Text('Sync now'),
                             onPressed: prefs.syncProvider == .none || !prefs.s3Config.isConfigured || syncState.syncing
                                 ? null
                                 : () => context.read<SyncBloc>().add(const StartSyncing()),
                           ),
                           OutlinedButton.icon(
-                            icon: Icon(FluentIcons.cloud_sync_24_regular),
+                            icon: Icon(Icons.cloud_sync),
                             label: Text('Edit sync settings'),
                             onPressed: () => context.goNamed(AppRouteName.syncing),
                           ),
@@ -63,9 +62,9 @@ class PreferencesScreen extends StatelessWidget {
                       SegmentedButton<ThemeMode>(
                         showSelectedIcon: true,
                         segments: const [
-                          ButtonSegment(value: ThemeMode.system, label: Text('System'), icon: Icon(FluentIcons.weather_sunny_low_24_regular)),
-                          ButtonSegment(value: ThemeMode.light, label: Text('Light'), icon: Icon(FluentIcons.weather_sunny_24_regular)),
-                          ButtonSegment(value: ThemeMode.dark, label: Text('Dark'), icon: Icon(FluentIcons.weather_moon_24_regular)),
+                          ButtonSegment(value: ThemeMode.system, label: Text('System'), icon: Icon(Icons.brightness_auto)),
+                          ButtonSegment(value: ThemeMode.light, label: Text('Light'), icon: Icon(Icons.light_mode)),
+                          ButtonSegment(value: ThemeMode.dark, label: Text('Dark'), icon: Icon(Icons.dark_mode)),
                         ],
                         selected: {prefs.themeMode},
                         onSelectionChanged: (value) {
@@ -73,7 +72,7 @@ class PreferencesScreen extends StatelessWidget {
                         },
                       ),
                       OutlinedButton.icon(
-                        icon: Icon(FluentIcons.ruler_32_regular),
+                        icon: Icon(Icons.straighten),
                         label: Text('Edit units'),
                         onPressed: () => context.goNamed(AppRouteName.units),
                       ),
@@ -169,7 +168,7 @@ class _LogPreviewState extends State<_LogPreview> {
               children: [
                 Text('Logs', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 const Spacer(),
-                Icon(FluentIcons.chevron_right_12_regular, size: 12, color: theme.colorScheme.onSurfaceVariant),
+                Icon(Icons.chevron_right, size: 12, color: theme.colorScheme.onSurfaceVariant),
               ],
             ),
             const SizedBox(height: 4),
@@ -275,17 +274,17 @@ class _ImportExportButtons extends StatelessWidget {
           runSpacing: 8,
           children: [
             OutlinedButton.icon(
-              icon: const Icon(FluentIcons.arrow_import_24_regular, size: 16),
+              icon: const Icon(Icons.file_download_outlined, size: 16),
               label: const Text('Import log file'),
               onPressed: state.working ? null : () => _importDives(context),
             ),
             OutlinedButton.icon(
-              icon: const Icon(FluentIcons.arrow_export_24_regular, size: 16),
+              icon: const Icon(Icons.file_upload_outlined, size: 16),
               label: const Text('Export database backup'),
               onPressed: state.working ? null : () => context.read<ArchiveBloc>().add(ExportArchive()),
             ),
             OutlinedButton.icon(
-              icon: const Icon(FluentIcons.arrow_import_24_regular, size: 16),
+              icon: const Icon(Icons.file_download_outlined, size: 16),
               label: const Text('Import database backup'),
               onPressed: state.working ? null : () => _importBackup(context),
             ),

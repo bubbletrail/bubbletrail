@@ -1,5 +1,4 @@
 import 'package:divestore/divestore.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -54,7 +53,7 @@ class DiveListItemCard extends StatelessWidget {
               if (showSite && siteName != null) ...[
                 Row(
                   children: [
-                    Icon(FluentIcons.location_24_regular, size: 14, color: theme.colorScheme.primary),
+                    Icon(Icons.location_on_outlined, size: 14, color: theme.colorScheme.primary),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(siteName, style: theme.textTheme.bodyMedium, overflow: .ellipsis),
@@ -66,13 +65,13 @@ class DiveListItemCard extends StatelessWidget {
               // Bottom row: Depth and duration
               Row(
                 children: [
-                  _InfoChip(icon: FluentIcons.arrow_down_24_regular, label: DepthText(maxDepth), theme: theme),
+                  _InfoChip(icon: Icons.arrow_downward, label: DepthText(maxDepth), theme: theme),
                   const SizedBox(width: 12),
-                  _InfoChip(icon: FluentIcons.timer_24_regular, label: DurationText(dive.duration), theme: theme),
+                  _InfoChip(icon: Icons.timer, label: DurationText(dive.duration), theme: theme),
                   if (dive.sac > 0) ...[
                     const SizedBox(width: 12),
                     _InfoChip(
-                      icon: FluentIcons.gauge_24_regular,
+                      icon: Icons.speed,
                       label: VolumeText(dive.sac, suffix: '/min'),
                       theme: theme,
                     ),

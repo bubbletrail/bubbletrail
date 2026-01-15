@@ -1,6 +1,5 @@
 import 'package:chips_input_autocomplete/chips_input_autocomplete.dart';
 import 'package:divestore/divestore.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -131,7 +130,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
       },
       child: ScreenScaffold(
         title: Text(_isNew ? 'New dive site' : 'Edit ${_originalSite.name}'),
-        actions: [IconButton(icon: const Icon(FluentIcons.dismiss_24_regular), onPressed: _cancel, tooltip: 'Discard changes')],
+        actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes')],
         body: SingleChildScrollView(
           padding: const .all(16.0),
           child: Column(

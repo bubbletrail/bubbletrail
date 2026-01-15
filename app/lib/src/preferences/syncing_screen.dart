@@ -1,4 +1,3 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -180,7 +179,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
                 labelText: 'Secret key',
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
-                  icon: Icon(_obscureSecretKey ? FluentIcons.eye_24_regular : FluentIcons.eye_off_24_regular),
+                  icon: Icon(_obscureSecretKey ? Icons.visibility : Icons.visibility_off),
                   onPressed: () => setState(() => _obscureSecretKey = !_obscureSecretKey),
                 ),
               ),
@@ -205,7 +204,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
                 labelText: 'Vault key',
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
-                  icon: Icon(_obscureVaultKey ? FluentIcons.eye_24_regular : FluentIcons.eye_off_24_regular),
+                  icon: Icon(_obscureVaultKey ? Icons.visibility : Icons.visibility_off),
                   onPressed: () => setState(() => _obscureVaultKey = !_obscureVaultKey),
                 ),
               ),

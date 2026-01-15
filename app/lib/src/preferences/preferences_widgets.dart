@@ -1,4 +1,3 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 
 import '../bloc/sync_bloc.dart';
@@ -49,13 +48,13 @@ class SyncStatusTile extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     if (state.syncing) {
-      return _buildTile(context, icon: FluentIcons.arrow_sync_24_regular, iconColor: colorScheme.primary, message: 'Syncing...', isAnimating: true);
+      return _buildTile(context, icon: Icons.sync, iconColor: colorScheme.primary, message: 'Syncing...', isAnimating: true);
     }
 
     if (state.lastSyncSuccess == false) {
       return _buildTile(
         context,
-        icon: FluentIcons.error_circle_24_regular,
+        icon: Icons.error_outline,
         iconColor: colorScheme.error,
         message: 'Sync failed: ${state.error ?? "Unknown error"}',
       );
@@ -64,7 +63,7 @@ class SyncStatusTile extends StatelessWidget {
     if (state.lastSynced != null) {
       return _buildTile(
         context,
-        icon: FluentIcons.checkmark_circle_24_regular,
+        icon: Icons.check_circle_outline,
         iconColor: Theme.of(context).colorScheme.primary,
         message: 'Last synced',
         trailing: DateTimeText(state.lastSynced!, style: Theme.of(context).textTheme.bodySmall),
@@ -109,7 +108,7 @@ class PreferencesCategoryCard extends StatelessWidget {
       child: ListTile(
         leading: icon != null ? Icon(icon, size: 28) : null,
         title: Text(title, style: Theme.of(context).textTheme.titleMedium),
-        trailing: const Icon(FluentIcons.chevron_right_24_regular, size: 16),
+        trailing: const Icon(Icons.chevron_right, size: 16),
         onTap: onTap,
       ),
     );

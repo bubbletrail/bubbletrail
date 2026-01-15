@@ -1,4 +1,3 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -14,7 +13,7 @@ class DiveListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenScaffold(
       title: const Text('Dives'),
-      actions: [IconButton(icon: const Icon(FluentIcons.add_24_regular), tooltip: 'Add new dive', onPressed: () => context.goNamed(AppRouteName.divesNew))],
+      actions: [IconButton(icon: const Icon(Icons.add), tooltip: 'Add new dive', onPressed: () => context.goNamed(AppRouteName.divesNew))],
       body: _body(),
     );
   }
@@ -30,7 +29,7 @@ class DiveListScreen extends StatelessWidget {
           final dives = state.dives;
 
           if (dives.isEmpty) {
-            return const EmptyStateWidget(message: 'No dives yet. Add your first dive!', icon: FluentIcons.water_32_regular);
+            return const EmptyStateWidget(message: 'No dives yet. Add your first dive!', icon: Icons.water_drop_outlined);
           }
 
           return DiveTableWidget(dives: dives, sitesByUuid: state.sitesByUuid, showSiteColumn: true);

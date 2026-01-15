@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:divestore/divestore.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart' hide DataColumn;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -57,14 +56,14 @@ class _DiveDetails extends StatelessWidget {
       title: Text('Dive #${dive.number}: ${site?.name ?? 'Unknown site'}'),
       actions: [
         IconButton(
-          icon: const Icon(FluentIcons.edit_24_regular),
+          icon: const Icon(Icons.edit),
           onPressed: () {
             context.goNamed(AppRouteName.divesDetailsEdit, pathParameters: {'diveID': dive.id});
           },
           tooltip: 'Edit dive',
         ),
         IconButton(
-          icon: const Icon(FluentIcons.arrow_up_24_regular),
+          icon: const Icon(Icons.arrow_upward),
           onPressed: prevID != null
               ? () {
                   context.goNamed(AppRouteName.divesDetails, pathParameters: {'diveID': prevID!});
@@ -73,7 +72,7 @@ class _DiveDetails extends StatelessWidget {
           tooltip: 'Previous dive',
         ),
         IconButton(
-          icon: const Icon(FluentIcons.arrow_down_24_regular),
+          icon: const Icon(Icons.arrow_downward),
           onPressed: nextID != null
               ? () {
                   context.goNamed(AppRouteName.divesDetails, pathParameters: {'diveID': nextID!});
@@ -276,7 +275,7 @@ class _ProfileCard extends StatelessWidget {
                 top: 8,
                 right: 8,
                 child: IconButton.filled(
-                  icon: const Icon(FluentIcons.full_screen_maximize_24_regular),
+                  icon: const Icon(Icons.fullscreen),
                   onPressed: () {
                     context.pushNamed(AppRouteName.divesDetailsDepthProfile, pathParameters: {'diveID': dive.id});
                   },
@@ -342,7 +341,7 @@ class _SiteCard extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(child: Text(site.name, style: Theme.of(context).textTheme.titleMedium)),
-                  Icon(FluentIcons.chevron_right_24_regular, size: 14, color: Theme.of(context).colorScheme.primary),
+                  Icon(Icons.chevron_right, size: 14, color: Theme.of(context).colorScheme.primary),
                 ],
               ),
             ),
@@ -358,7 +357,7 @@ class _SiteCard extends StatelessWidget {
                     top: 8,
                     right: 8,
                     child: IconButton.filled(
-                      icon: const Icon(FluentIcons.full_screen_maximize_24_regular),
+                      icon: const Icon(Icons.fullscreen),
                       onPressed: () {
                         context.pushNamed(AppRouteName.sitesDetailsMap, pathParameters: {'siteID': site.id});
                       },

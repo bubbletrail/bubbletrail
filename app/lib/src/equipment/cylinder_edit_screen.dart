@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:divestore/divestore.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -107,7 +106,7 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
       },
       child: ScreenScaffold(
         title: Text(_isNew ? 'New cylinder' : 'Edit cylinder'),
-        actions: [IconButton(icon: const Icon(FluentIcons.dismiss_24_regular), onPressed: _cancel, tooltip: 'Discard changes')],
+        actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes')],
         body: Padding(
           padding: const .all(16.0),
           child: Column(spacing: 16, children: [_descriptionCard(), Platform.isIOS ? _verticalCards(context) : _horisontalCards(context)]),

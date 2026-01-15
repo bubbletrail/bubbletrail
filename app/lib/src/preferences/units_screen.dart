@@ -1,4 +1,3 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -24,8 +23,8 @@ class UnitsScreen extends StatelessWidget {
                 title: 'Depth',
                 trailing: SegmentedButton<DepthUnit>(
                   segments: const [
-                    ButtonSegment(value: .meters, label: Text('m'), icon: Icon(FluentIcons.globe_24_regular)),
-                    ButtonSegment(value: .feet, label: Text('ft'), icon: Icon(FluentIcons.star_24_regular)),
+                    ButtonSegment(value: .meters, label: Text('m'), icon: Icon(Icons.public)),
+                    ButtonSegment(value: .feet, label: Text('ft'), icon: Icon(Icons.star_border)),
                   ],
                   selected: {prefs.depthUnit},
                   onSelectionChanged: (value) {
@@ -37,8 +36,8 @@ class UnitsScreen extends StatelessWidget {
                 title: 'Pressure',
                 trailing: SegmentedButton<PressureUnit>(
                   segments: const [
-                    ButtonSegment(value: .bar, label: Text('bar'), icon: Icon(FluentIcons.globe_24_regular)),
-                    ButtonSegment(value: .psi, label: Text('psi'), icon: Icon(FluentIcons.star_24_regular)),
+                    ButtonSegment(value: .bar, label: Text('bar'), icon: Icon(Icons.public)),
+                    ButtonSegment(value: .psi, label: Text('psi'), icon: Icon(Icons.star_border)),
                   ],
                   selected: {prefs.pressureUnit},
                   onSelectionChanged: (value) {
@@ -50,8 +49,8 @@ class UnitsScreen extends StatelessWidget {
                 title: 'Temperature',
                 trailing: SegmentedButton<TemperatureUnit>(
                   segments: const [
-                    ButtonSegment(value: .celsius, label: Text('°C'), icon: Icon(FluentIcons.globe_24_regular)),
-                    ButtonSegment(value: .fahrenheit, label: Text('°F'), icon: Icon(FluentIcons.star_24_regular)),
+                    ButtonSegment(value: .celsius, label: Text('°C'), icon: Icon(Icons.public)),
+                    ButtonSegment(value: .fahrenheit, label: Text('°F'), icon: Icon(Icons.star_border)),
                   ],
                   selected: {prefs.temperatureUnit},
                   onSelectionChanged: (value) {
@@ -63,8 +62,8 @@ class UnitsScreen extends StatelessWidget {
                 title: 'Volume',
                 trailing: SegmentedButton<VolumeUnit>(
                   segments: const [
-                    ButtonSegment(value: .liters, label: Text('L'), icon: Icon(FluentIcons.globe_24_regular)),
-                    ButtonSegment(value: .cuft, label: Text('cuft'), icon: Icon(FluentIcons.star_24_regular)),
+                    ButtonSegment(value: .liters, label: Text('L'), icon: Icon(Icons.public)),
+                    ButtonSegment(value: .cuft, label: Text('cuft'), icon: Icon(Icons.star_border)),
                   ],
                   selected: {prefs.volumeUnit},
                   onSelectionChanged: (value) {
@@ -76,8 +75,8 @@ class UnitsScreen extends StatelessWidget {
                 title: 'Weight',
                 trailing: SegmentedButton<WeightUnit>(
                   segments: const [
-                    ButtonSegment(value: .kg, label: Text('kg'), icon: Icon(FluentIcons.globe_24_regular)),
-                    ButtonSegment(value: .lb, label: Text('lbs'), icon: Icon(FluentIcons.star_24_regular)),
+                    ButtonSegment(value: .kg, label: Text('kg'), icon: Icon(Icons.public)),
+                    ButtonSegment(value: .lb, label: Text('lbs'), icon: Icon(Icons.star_border)),
                   ],
                   selected: {prefs.weightUnit},
                   onSelectionChanged: (value) {
@@ -90,9 +89,9 @@ class UnitsScreen extends StatelessWidget {
                 title: 'Date format',
                 trailing: SegmentedButton<DateFormatPref>(
                   segments: const [
-                    ButtonSegment(value: DateFormatPref.eu, label: Text('25/12/2024'), icon: Icon(FluentIcons.globe_24_regular)),
-                    ButtonSegment(value: DateFormatPref.iso, label: Text('2024-12-25'), icon: Icon(FluentIcons.document_24_regular)),
-                    ButtonSegment(value: DateFormatPref.us, label: Text('12/25/2024'), icon: Icon(FluentIcons.star_24_regular)),
+                    ButtonSegment(value: DateFormatPref.eu, label: Text('25/12/2024'), icon: Icon(Icons.public)),
+                    ButtonSegment(value: DateFormatPref.iso, label: Text('2024-12-25'), icon: Icon(Icons.description)),
+                    ButtonSegment(value: DateFormatPref.us, label: Text('12/25/2024'), icon: Icon(Icons.star_border)),
                   ],
                   selected: {prefs.dateFormat},
                   onSelectionChanged: (value) {
@@ -104,8 +103,8 @@ class UnitsScreen extends StatelessWidget {
                 title: 'Time format',
                 trailing: SegmentedButton<TimeFormatPref>(
                   segments: const [
-                    ButtonSegment(value: TimeFormatPref.h24, label: Text('24h'), icon: Icon(FluentIcons.globe_24_regular)),
-                    ButtonSegment(value: TimeFormatPref.h12, label: Text('12h'), icon: Icon(FluentIcons.star_24_regular)),
+                    ButtonSegment(value: TimeFormatPref.h24, label: Text('24h'), icon: Icon(Icons.public)),
+                    ButtonSegment(value: TimeFormatPref.h12, label: Text('12h'), icon: Icon(Icons.star_border)),
                   ],
                   selected: {prefs.timeFormat},
                   onSelectionChanged: (value) {

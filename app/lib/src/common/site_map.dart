@@ -1,4 +1,3 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -56,7 +55,7 @@ class _SiteMapState extends State<SiteMap> {
               width: 32,
               height: 32,
               alignment: Alignment.topCenter, // point is at bottom center
-              child: Icon(FluentIcons.location_24_filled, size: 28, color: Colors.redAccent),
+              child: Icon(Icons.location_on, size: 28, color: Colors.redAccent),
             ),
           ],
         ),

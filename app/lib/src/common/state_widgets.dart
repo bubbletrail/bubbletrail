@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 
 /// A widget that displays an error state with an icon, title, and message.
 ///
@@ -20,14 +19,14 @@ class ErrorStateWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: .center,
           children: [
-            Icon(FluentIcons.error_circle_24_regular, size: 48, color: Theme.of(context).colorScheme.error),
+            Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
             const SizedBox(height: 16),
             Text(title, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(message, style: Theme.of(context).textTheme.bodyMedium, textAlign: .center),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
-              FilledButton.icon(onPressed: onRetry, icon: const Icon(FluentIcons.arrow_sync_24_regular), label: const Text('Retry')),
+              FilledButton.icon(onPressed: onRetry, icon: const Icon(Icons.sync), label: const Text('Retry')),
             ],
           ],
         ),

@@ -1,5 +1,4 @@
 import 'package:divestore/divestore.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -21,7 +20,7 @@ class SiteListScreen extends StatelessWidget {
     return ScreenScaffold(
       title: const Text('Dive Sites'),
       actions: [
-        IconButton(icon: const Icon(FluentIcons.add_24_regular), tooltip: 'Add new dive site', onPressed: () => context.goNamed(AppRouteName.sitesNew)),
+        IconButton(icon: const Icon(Icons.add), tooltip: 'Add new dive site', onPressed: () => context.goNamed(AppRouteName.sitesNew)),
       ],
       body: BlocBuilder<DiveListBloc, DiveListState>(
         builder: (context, state) {
@@ -33,7 +32,7 @@ class SiteListScreen extends StatelessWidget {
             final sites = state.sites;
 
             if (sites.isEmpty) {
-              return const EmptyStateWidget(message: 'No dive sites yet.', icon: FluentIcons.location_24_regular);
+              return const EmptyStateWidget(message: 'No dive sites yet.', icon: Icons.location_on_outlined);
             }
 
             return LayoutBuilder(

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:window_manager/window_manager.dart';
@@ -119,11 +118,11 @@ class _MyAppState extends State<MyApp> with WindowListener {
           builder: (BuildContext context, GoRouterState state, StatefulNavigationShell shell) {
             final appBarTheme = Theme.of(context).appBarTheme;
             const destinations = [
-              (icon: FluentIcons.water_32_regular, label: 'Dives'),
-              (icon: FluentIcons.location_28_regular, label: 'Sites'),
-              (icon: FluentIcons.box_24_regular, label: 'Equipment'),
-              (icon: FluentIcons.settings_cog_multiple_24_regular, label: 'Settings'),
-              (icon: FluentIcons.bluetooth_32_regular, label: 'Connect'),
+              (icon: Icons.water_outlined, label: 'Dives'),
+              (icon: Icons.location_on_outlined, label: 'Sites'),
+              (icon: Icons.inventory_2_outlined, label: 'Equipment'),
+              (icon: Icons.settings, label: 'Settings'),
+              (icon: Icons.bluetooth, label: 'Connect'),
             ];
 
             final cs = Theme.of(context).colorScheme;

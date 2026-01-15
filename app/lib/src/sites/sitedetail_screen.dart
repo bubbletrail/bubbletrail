@@ -1,4 +1,3 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -25,7 +24,7 @@ class SiteDetailScreen extends StatelessWidget {
       title: Text(site.name),
       actions: [
         IconButton(
-          icon: const Icon(FluentIcons.edit_24_regular),
+          icon: const Icon(Icons.edit),
           tooltip: 'Edit',
           onPressed: () => context.goNamed(AppRouteName.sitesDetailsEdit, pathParameters: {'siteID': site.id}),
         ),
