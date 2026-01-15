@@ -9,6 +9,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../preferences/preferences.dart';
 import 's3_provider.dart';
@@ -122,6 +123,8 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     emit(state.copyWith(syncing: true, error: null, lastSyncSuccess: null));
 
     try {
+      await WakelockPlus.enable();
+
       _log.fine('initialize syncing provider ${_s3Config.endpoint}');
       final provider = S3SyncProvider(
         endpoint: _s3Config.endpoint,
@@ -141,6 +144,8 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     } catch (e) {
       _log.severe('failed to sync', e);
       emit(state.copyWith(syncing: false, error: e.toString(), lastSyncSuccess: false));
+    } finally {
+      await WakelockPlus.disable();
     }
   }
 }
