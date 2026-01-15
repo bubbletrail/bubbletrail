@@ -178,6 +178,8 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
   StreamSubscription<DiveListState>? _diveListSubscription;
 
   BleDownloadBloc(this._diveListBloc, this._syncBloc, this._scanBloc) : super(const BleDownloadState()) {
+    _log.fine('starting');
+
     on<BleDownloadEvent>(_onEvent, transformer: sequential());
 
     _syncBloc.store.then((store) {
@@ -191,8 +193,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
   void _processDiveListState(DiveListState state) {
     if (state is! DiveListLoaded) return;
     final lastLogTime = state.dives.fold(DateTime.fromMillisecondsSinceEpoch(0), (dt, dive) {
-      if (dive.logs.isEmpty) return dt;
-      final diveT = dive.logs.first.dateTime.toDateTime();
+      final diveT = dive.start.toDateTime();
       if (diveT.isAfter(dt)) return diveT;
       return dt;
     });
@@ -227,15 +228,6 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
   }
 
   Future<void> _onDiveReceived(Emitter<BleDownloadState> emit, Dive dive) async {
-    final remoteId = state.connectedDevice!.remoteId.str;
-    final comp = await _store.computers.getByRemoteId(remoteId) ?? Computer();
-    final lld = dive.logs.first.dateTime.toDateTime();
-    if (!lld.isBefore(comp.lastLogDate.toDateTime())) {
-      // This is a newer dive than we've seen from this computer before (or
-      // the same time, but possibly with a newer fingerprint), so update
-      // the last log date and the corresponding fingerprint.
-      await _store.computers.update(remoteId: state.connectedDevice!.remoteId.str, lastLogDate: lld);
-    }
     emit(state.copyWith(downloadedDives: state.downloadedDives + [dive]));
   }
 
@@ -308,7 +300,9 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     // If we have a remembered computer already, grab the fingerprint from there
     final remembered = await _store.computers.getByRemoteId(device.remoteId.str);
     final ldcFingerprint = remembered?.ldcFingerprint;
-    final lastLogDate = remembered?.lastLogDate.toDateTime() ?? DateTime.fromMillisecondsSinceEpoch(0);
+    final lastLogDate = remembered?.hasLastLogDate() == true
+        ? remembered!.lastLogDate.toDateTime()
+        : state.lastLogDate ?? DateTime.fromMillisecondsSinceEpoch(0);
     _log.fine('current fingerprint is $ldcFingerprint and last log date $lastLogDate');
 
     // Remember this computer for future downloads
@@ -372,8 +366,9 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
 
   void _onDownloadCompleted(Emitter<BleDownloadState> emit) {
     try {
-      // Remember the fingerprint on the downloading computer
-      _store.computers.update(remoteId: state.connectedDevice!.remoteId.str, ldcFingerprint: state.downloadedDives.first.logs.first.ldcFingerprint);
+      // Remember the fingerprint & last log date on the downloading computer
+      final ll = state.downloadedDives.first.logs.last;
+      _store.computers.update(remoteId: state.connectedDevice!.remoteId.str, ldcFingerprint: ll.ldcFingerprint, lastLogDate: ll.dateTime.toDateTime());
     } on StateError catch (_) {}
 
     _diveListBloc.add(DownloadedDives(state.downloadedDives));

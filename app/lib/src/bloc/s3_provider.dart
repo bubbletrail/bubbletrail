@@ -46,7 +46,7 @@ class S3SyncProvider extends SyncProvider {
     final prefix = '$_syncPrefix/';
     _log.fine('listing bucket $_bucket');
     await for (final result in _minio.listObjects(_bucket, prefix: prefix)) {
-      _log.fine('listing got chuck of ${result.objects.length} objects');
+      _log.fine('listing got chunk of ${result.objects.length} objects');
       for (final obj in result.objects) {
         final key = obj.key;
         if (key == null) continue;

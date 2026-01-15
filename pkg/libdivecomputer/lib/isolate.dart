@@ -280,7 +280,7 @@ void _downloadIsolateEntry(DownloadRequest request) {
         try {
           final dive = parseDiveFromParser(parser.value, fingerprint: fpBytes, model: deviceModel, serial: deviceSerial);
 
-          if (request.lastLogDate != null && request.lastLogDate!.isAfter(dive.dateTime.toDateTime())) {
+          if (request.lastLogDate != null && !request.lastLogDate!.isBefore(dive.dateTime.toDateTime())) {
             // We've already seen this one.
             // calloc.free(parser);
             return 0;

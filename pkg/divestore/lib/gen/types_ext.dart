@@ -11,7 +11,8 @@ extension MetadataExtension on Metadata {
   bool get isDeleted => hasDeletedAt();
 
   bool isAfter(Metadata other) {
-    return this.updatedAt.toDateTime().isAfter(other.updatedAt.toDateTime()) || this.deletedAt.toDateTime().isAfter(other.deletedAt.toDateTime());
+    return this.updatedAt.toDateTime().isAfter(other.updatedAt.toDateTime()) ||
+        (this.deletedAt.toDateTime().isAfter(other.deletedAt.toDateTime()) && this.deletedAt.toDateTime().isAfter(other.updatedAt.toDateTime()));
   }
 
   Metadata rebuildUpdated() {

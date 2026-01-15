@@ -86,10 +86,8 @@ class Dives {
           });
         }
       });
-      if (!_dives.containsKey(dive.id)) {
-        _dives[dive.id] = dive;
-        _dirty.add(dive.id);
-      }
+      _dives[dive.id] = dive;
+      _dirty.add(dive.id);
       _tags.addAll(dive.tags);
       _buddies.addAll(dive.buddies);
     }

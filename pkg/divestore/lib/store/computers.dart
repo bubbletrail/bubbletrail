@@ -62,6 +62,8 @@ class Computers {
     if (_computers.containsKey(remoteId)) {
       _computers[remoteId] = _computers[remoteId]!.rebuild((computer) {
         computer.meta = computer.meta.rebuildDeleted();
+        computer.clearLastLogDate();
+        computer.clearLdcFingerprint();
       });
     }
     _scheduleSave();
