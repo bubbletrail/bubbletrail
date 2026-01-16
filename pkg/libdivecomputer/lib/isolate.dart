@@ -259,6 +259,25 @@ void _downloadIsolateEntry(DownloadRequest request) {
     _log.warning('failed to set event callback: $eventsStatus');
   }
 
+  // Synchronize the device clock with the current local time
+  final datetime = calloc<bindings.dc_datetime_t>();
+  final now = DateTime.now();
+  datetime.ref.year = now.year;
+  datetime.ref.month = now.month;
+  datetime.ref.day = now.day;
+  datetime.ref.hour = now.hour;
+  datetime.ref.minute = now.minute;
+  datetime.ref.second = now.second;
+  datetime.ref.timezone = now.timeZoneOffset.inSeconds;
+
+  final timesyncStatus = bindings.dc_device_timesync(device.value, datetime);
+  calloc.free(datetime);
+
+  if (timesyncStatus != bindings.dc_status_t.DC_STATUS_SUCCESS) {
+    _log.warning('failed to synchronize device clock: $timesyncStatus');
+    // Continue with download even if timesync fails - some devices may not support it
+  }
+
   // Set up dive callback using NativeCallable.isolateLocal (supports non-void return)
   // The exceptionalReturn value (0) is returned if the callback throws an exception
   final diveCallback = ffi.NativeCallable<bindings.dc_dive_callback_tFunction>.isolateLocal(
