@@ -54,8 +54,8 @@ class UpdateSyncConfig extends SyncEvent {
 class SyncBloc extends Bloc<SyncEvent, SyncState> {
   final Completer<Store> _storeCompleter = Completer();
 
-  SyncProviderKind _syncProvider = .none;
-  S3Config _s3Config = const S3Config();
+  SyncProvider? _syncProvider;
+  Timer? _syncDebounceTimer;
 
   Future<Store> get store => _storeCompleter.future;
   Future<String> get storePath async => '${(await getApplicationDocumentsDirectory()).path}/db';
@@ -81,11 +81,12 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     on<SyncEvent>((event, emit) async {
       if (event is _InitStore) {
         await _onInitStore(event, emit);
+      } else if (event is UpdateSyncConfig) {
+        if (event.provider == .none) return;
+        if (!event.s3Config.isConfigured) return;
+        await _onUpdateConfig(event);
       } else if (event is StartSyncing) {
         await _onStartSyncing(event, emit);
-      } else if (event is UpdateSyncConfig) {
-        _syncProvider = event.provider;
-        _s3Config = event.s3Config;
       }
     }, transformer: sequential());
 
@@ -98,23 +99,30 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     final store = Store(dir);
     await store.init();
     _storeCompleter.complete(store);
+
+    store.changes.listen((_) {
+      _syncDebounceTimer?.cancel();
+      _syncDebounceTimer = Timer(Duration(seconds: 60), () => add(StartSyncing()));
+    });
+
     add(StartSyncing());
   }
 
-  Future<void> _onStartSyncing(StartSyncing event, Emitter<SyncState> emit) async {
-    _log.info('start sync with provider: $_syncProvider');
-
-    switch (_syncProvider) {
-      case .none:
-        return;
-      case .bubbletrail:
-      case .s3:
-        await _syncWithS3(emit);
-    }
+  Future<void> _onUpdateConfig(UpdateSyncConfig event) async {
+    _log.fine('init sync provider');
+    final provider = S3SyncProvider(
+      endpoint: event.s3Config.endpoint,
+      bucket: event.s3Config.bucket,
+      accessKey: event.s3Config.accessKey,
+      secretKey: event.s3Config.secretKey,
+      vaultKey: event.s3Config.vaultKey,
+    );
+    await provider.init();
+    _syncProvider = provider;
   }
 
-  Future<void> _syncWithS3(Emitter<SyncState> emit) async {
-    if (!_s3Config.isConfigured) {
+  Future<void> _onStartSyncing(StartSyncing event, Emitter<SyncState> emit) async {
+    if (_syncProvider == null) {
       _log.warning('syncing not configured, skipping sync');
       emit(state.copyWith(error: 'Syncing not configured', lastSyncSuccess: false));
       return;
@@ -125,19 +133,9 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     try {
       await WakelockPlus.enable();
 
-      _log.fine('initialize syncing provider ${_s3Config.endpoint}');
-      final provider = S3SyncProvider(
-        endpoint: _s3Config.endpoint,
-        bucket: _s3Config.bucket,
-        accessKey: _s3Config.accessKey,
-        secretKey: _s3Config.secretKey,
-        vaultKey: _s3Config.vaultKey,
-      );
-      await provider.init();
-
       _log.info('start syncing');
       final s = await store;
-      await s.syncWith(provider);
+      await s.syncWith(_syncProvider!);
 
       _log.info('completed syncing');
       emit(state.copyWith(lastSynced: .now(), syncing: false, lastSyncSuccess: true));

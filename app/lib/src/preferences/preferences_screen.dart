@@ -71,11 +71,7 @@ class PreferencesScreen extends StatelessWidget {
                           context.read<PreferencesBloc>().add(UpdateThemeMode(value.first));
                         },
                       ),
-                      OutlinedButton.icon(
-                        icon: Icon(Icons.straighten),
-                        label: Text('Edit units'),
-                        onPressed: () => context.goNamed(AppRouteName.units),
-                      ),
+                      OutlinedButton.icon(icon: Icon(Icons.straighten), label: Text('Edit units'), onPressed: () => context.goNamed(AppRouteName.units)),
                     ],
                   ),
                   const SizedBox(height: 24),

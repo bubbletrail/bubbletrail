@@ -89,7 +89,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
   void initState() {
     super.initState();
     _syncBloc = SyncBloc();
-    _archiveBloc = ArchiveBloc(syncBloc: _syncBloc);
+    _archiveBloc = ArchiveBloc(_syncBloc);
     _diveListBloc = DiveListBloc(_syncBloc);
     _cylinderListBloc = CylinderListBloc(_syncBloc);
     _bleScanBloc = BleScanBloc(_syncBloc);

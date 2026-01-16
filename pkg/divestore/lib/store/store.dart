@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:glob/glob.dart';
@@ -23,11 +24,25 @@ class Store {
   final Dives dives;
   final Sites sites;
 
+  final _changes = StreamController<void>.broadcast();
+  Timer? _changesTimer;
+  Stream<void> get changes => _changes.stream;
+
   Store(this.path, {bool readonly = false})
     : computers = Computers('$path/computers.binpb', readonly: readonly),
       cylinders = Cylinders('$path/cylinders.binpb', readonly: readonly),
       dives = Dives('$path/dives', readonly: readonly),
-      sites = Sites('$path/sites.binpb', readonly: readonly);
+      sites = Sites('$path/sites.binpb', readonly: readonly) {
+    computers.changes.listen((_) => _scheduleChange());
+    cylinders.changes.listen((_) => _scheduleChange());
+    dives.changes.listen((_) => _scheduleChange());
+    sites.changes.listen((_) => _scheduleChange());
+  }
+
+  void _scheduleChange() {
+    _changesTimer?.cancel();
+    _changesTimer = Timer(Duration(seconds: 5), () => _changes.add(null));
+  }
 
   Future<void> init() async {
     await computers.init();

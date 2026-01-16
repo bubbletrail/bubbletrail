@@ -15,6 +15,10 @@ class Computers {
   final bool readonly;
   Map<String, Computer> _computers = {};
   Timer? _saveTimer;
+  bool _notify = false;
+  final _changes = StreamController<void>.broadcast();
+
+  Stream<void> get changes => _changes.stream;
 
   Computers(this.path, {this.readonly = false});
 
@@ -54,7 +58,7 @@ class Computers {
       }
     });
     _computers[computer.remoteId] = computer;
-    _scheduleSave();
+    _scheduleSave(notify: true);
   }
 
   Future<void> delete(String remoteId) async {
@@ -66,7 +70,7 @@ class Computers {
         computer.clearLdcFingerprint();
       });
     }
-    _scheduleSave();
+    _scheduleSave(notify: true);
   }
 
   Future<Computer?> getByRemoteId(String remoteId) async {
@@ -95,7 +99,8 @@ class Computers {
     } catch (_) {}
   }
 
-  void _scheduleSave() {
+  void _scheduleSave({required bool notify}) {
+    if (notify) _notify = true;
     _saveTimer?.cancel();
     _saveTimer = Timer(Duration(seconds: 1), _save);
   }
@@ -104,6 +109,10 @@ class Computers {
     try {
       final cl = InternalComputerList(computers: _computers.values);
       await atomicWriteProto(path, cl);
+      if (_notify) {
+        _notify = false;
+        _changes.add(null);
+      }
       _log.info('saved ${_computers.length} computers');
     } catch (e) {
       _log.warning('failed to save computers', e);
@@ -119,9 +128,13 @@ class Computers {
       for (final computer in cl.computers) {
         final cur = _computers[computer.remoteId];
         if (computer.meta.isDeleted) {
-          if (cur != null) {
+          if (cur != null && !cur.meta.isDeleted) {
             _log.fine('deleting computer ${computer.remoteId}');
-            await delete(computer.remoteId);
+            _computers[computer.remoteId] = cur.rebuild((c) {
+              c.meta = c.meta.rebuildDeleted();
+              c.clearLastLogDate();
+              c.clearLdcFingerprint();
+            });
           }
         } else if (cur == null || computer.meta.isAfter(cur.meta)) {
           _log.fine('importing computer ${computer.remoteId}');
@@ -138,6 +151,6 @@ class Computers {
     final bs = cl.writeToBuffer();
     await provider.putObject('computers', bs);
 
-    _scheduleSave();
+    _scheduleSave(notify: false);
   }
 }

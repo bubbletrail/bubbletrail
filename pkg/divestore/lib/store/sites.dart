@@ -17,6 +17,10 @@ class Sites {
   Map<String, Site> _sites = {};
   Set<String> _tags = {};
   Timer? _saveTimer;
+  bool _notify = false;
+  final _changes = StreamController<void>.broadcast();
+
+  Stream<void> get changes => _changes.stream;
 
   Sites(this.path, {this.readonly = false});
 
@@ -25,7 +29,7 @@ class Sites {
   Future<Site> insert(Site site) async {
     if (readonly) throw Exception('readonly');
     site = _insert(site);
-    _scheduleSave();
+    _scheduleSave(notify: true);
     return site;
   }
 
@@ -34,7 +38,7 @@ class Sites {
     for (final site in sites) {
       _insert(site);
     }
-    _scheduleSave();
+    _scheduleSave(notify: true);
   }
 
   Site _insert(Site site) {
@@ -58,7 +62,7 @@ class Sites {
     });
     _sites[site.id] = site;
     _tags.addAll(site.tags);
-    _scheduleSave();
+    _scheduleSave(notify: true);
   }
 
   Future<void> delete(String id) async {
@@ -68,7 +72,7 @@ class Sites {
         site.meta = site.meta.rebuildDeleted();
       });
     }
-    _scheduleSave();
+    _scheduleSave(notify: true);
   }
 
   Future<Site?> getById(String id) async {
@@ -99,7 +103,8 @@ class Sites {
     } catch (_) {}
   }
 
-  void _scheduleSave() {
+  void _scheduleSave({required bool notify}) {
+    if (notify) _notify = true;
     _saveTimer?.cancel();
     _saveTimer = Timer(Duration(seconds: 1), _save);
   }
@@ -108,6 +113,10 @@ class Sites {
     try {
       final cl = InternalSiteList(sites: _sites.values);
       await atomicWriteProto(path, cl);
+      if (_notify) {
+        _notify = false;
+        _changes.add(null);
+      }
       _log.info('saved ${_sites.length} sites');
     } catch (e) {
       _log.warning('failed to save sites', e);
@@ -132,9 +141,9 @@ class Sites {
       for (final site in sl.sites) {
         final cur = _sites[site.id];
         if (site.meta.isDeleted) {
-          if (cur != null) {
+          if (cur != null && !cur.meta.isDeleted) {
             _log.fine('deleting site ${site.id}');
-            await delete(site.id);
+            _sites[site.id] = cur.rebuild((s) => s.meta = s.meta.rebuildDeleted());
           }
         } else if (cur == null || site.meta.isAfter(cur.meta)) {
           _log.fine('importing site ${site.id}');
@@ -153,6 +162,6 @@ class Sites {
     await provider.putObject('sites', bs);
 
     _rebuildTags();
-    _scheduleSave();
+    _scheduleSave(notify: false);
   }
 }

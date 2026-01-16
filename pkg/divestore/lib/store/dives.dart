@@ -23,7 +23,11 @@ class Dives {
   Set<String> _tags = {};
   Set<String> _buddies = {};
   Set<String> _dirty = {};
+  bool _notify = false;
   Timer? _saveTimer;
+  final _changes = StreamController<void>.broadcast();
+
+  Stream<void> get changes => _changes.stream;
 
   Dives(this.pathPrefix, {this.readonly = false});
 
@@ -54,7 +58,7 @@ class Dives {
     _dives[dive.id] = dive;
     _tags.addAll(dive.tags);
     _buddies.addAll(dive.buddies);
-    _scheduleSave(dive.id);
+    _scheduleSave(dive.id, notify: true);
     return dive.id;
   }
 
@@ -91,7 +95,7 @@ class Dives {
       _tags.addAll(dive.tags);
       _buddies.addAll(dive.buddies);
     }
-    _scheduleSave(null);
+    _scheduleSave(null, notify: true);
   }
 
   Future<void> update(Dive dive) async {
@@ -109,7 +113,7 @@ class Dives {
     _dives[dive.id] = dive;
     _tags.addAll(dive.tags);
     _buddies.addAll(dive.buddies);
-    _scheduleSave(dive.id);
+    _scheduleSave(dive.id, notify: true);
   }
 
   Future<void> delete(String id) async {
@@ -120,7 +124,7 @@ class Dives {
         dive.clearSyncedEtag();
       });
     }
-    _scheduleSave(id);
+    _scheduleSave(id, notify: true);
   }
 
   Future<Dive?> getById(String id) async {
@@ -205,8 +209,9 @@ class Dives {
     }
   }
 
-  void _scheduleSave(String? id) {
+  void _scheduleSave(String? id, {required bool notify}) {
     if (id != null) _dirty.add(id);
+    if (notify) _notify = true;
     _saveTimer?.cancel();
     _saveTimer = Timer(Duration(seconds: 1), _save);
   }
@@ -231,6 +236,10 @@ class Dives {
 
       _log.info('saved ${_dirty.length} dives');
       _dirty.clear();
+      if (_notify) {
+        _notify = false;
+        _changes.add(null);
+      }
     } catch (e) {
       _log.warning('failed to save dives', e);
     }
@@ -283,7 +292,7 @@ class Dives {
       if (cur == null || dive.meta.isAfter(cur.meta)) {
         _log.fine('updating dive ${id} from provider');
         _dives[id] = dive;
-        _scheduleSave(id);
+        _scheduleSave(id, notify: false);
       }
     }
 
@@ -300,7 +309,7 @@ class Dives {
       _dives[dive.id] = dive.rebuild((dive) {
         dive.syncedEtag = etag;
       });
-      _scheduleSave(dive.id);
+      _scheduleSave(dive.id, notify: false);
     }
 
     _rebuildTags();

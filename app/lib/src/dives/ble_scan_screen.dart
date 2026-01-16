@@ -37,11 +37,7 @@ class BleScanScreen extends StatelessWidget {
                 title: const Text('Connect dive computer'),
                 actions: [
                   if (downloadState.connectedDevice != null)
-                    IconButton(
-                      icon: const Icon(Icons.bluetooth),
-                      tooltip: 'Disconnect',
-                      onPressed: () => context.read<BleDownloadBloc>().add(.disconnect()),
-                    ),
+                    IconButton(icon: const Icon(Icons.bluetooth), tooltip: 'Disconnect', onPressed: () => context.read<BleDownloadBloc>().add(.disconnect())),
                 ],
                 body: _buildBody(context, scanState, downloadState),
                 floatingActionButton: scanState.adapterState == BluetoothAdapterState.on && downloadState.connectedDevice == null

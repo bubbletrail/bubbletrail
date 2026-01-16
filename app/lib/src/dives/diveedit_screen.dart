@@ -500,11 +500,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                       child: InkWell(
                         onTap: _selectDuration,
                         child: InputDecorator(
-                          decoration: const InputDecoration(
-                            labelText: 'Duration',
-                            border: OutlineInputBorder(),
-                            suffixIcon: Icon(Icons.timer),
-                          ),
+                          decoration: const InputDecoration(labelText: 'Duration', border: OutlineInputBorder(), suffixIcon: Icon(Icons.timer)),
                           child: Text(_durationFormatted),
                         ),
                       ),
@@ -532,11 +528,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                   return InkWell(
                     onTap: _selectSite,
                     child: InputDecorator(
-                      decoration: const InputDecoration(
-                        labelText: 'Dive site',
-                        border: OutlineInputBorder(),
-                        suffixIcon: Icon(Icons.location_on_outlined),
-                      ),
+                      decoration: const InputDecoration(labelText: 'Dive site', border: OutlineInputBorder(), suffixIcon: Icon(Icons.location_on_outlined)),
                       child: Text(selectedSite?.name ?? 'No site selected', style: selectedSite == null ? TextStyle(color: Theme.of(context).hintColor) : null),
                     ),
                   );
@@ -580,11 +572,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                                 trailing: Row(
                                   mainAxisSize: .min,
                                   children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.edit, size: 18),
-                                      onPressed: () => _editCylinderGas(index),
-                                      tooltip: 'Edit gas mix',
-                                    ),
+                                    IconButton(icon: const Icon(Icons.edit, size: 18), onPressed: () => _editCylinderGas(index), tooltip: 'Edit gas mix'),
                                     IconButton(
                                       icon: const Icon(Icons.delete_outline, size: 18),
                                       onPressed: () => _removeCylinder(index),
@@ -662,11 +650,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                                 ),
                               ),
                               IconButton(icon: const Icon(Icons.edit, size: 18), onPressed: () => _editWeightsystem(index), tooltip: 'Edit'),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline, size: 18),
-                                onPressed: () => _removeWeightsystem(index),
-                                tooltip: 'Remove',
-                              ),
+                              IconButton(icon: const Icon(Icons.delete_outline, size: 18), onPressed: () => _removeWeightsystem(index), tooltip: 'Remove'),
                             ],
                           ),
                         ),
@@ -683,11 +667,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                     children: .generate(5, (index) {
                       final starValue = index + 1;
                       return IconButton(
-                        icon: Icon(
-                          _rating != null && starValue <= _rating! ? Icons.star : Icons.star_border,
-                          color: Colors.amber,
-                          size: 28,
-                        ),
+                        icon: Icon(_rating != null && starValue <= _rating! ? Icons.star : Icons.star_border, color: Colors.amber, size: 28),
                         onPressed: () {
                           setState(() {
                             _rating = starValue == _rating ? null : starValue;
