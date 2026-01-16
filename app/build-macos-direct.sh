@@ -61,7 +61,7 @@ codesign -f -s "Developer ID Application" -o runtime --timestamp \
 mv "$APP_NAME" .
 spctl -vvv --assess --type exec Bubbletrail.app || true
 
-ZIP_NAME=bubbletrail-macos-${MARKET_VERSION}.zip
+ZIP_NAME=bubbletrail-macos-${MARKET_VERSION}-${BUILD_NUMBER}.zip
 zip -r --symlinks "$ZIP_NAME" Bubbletrail.app
 
 # Notarize it
