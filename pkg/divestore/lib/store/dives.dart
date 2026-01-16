@@ -24,6 +24,9 @@ class Dives {
   Set<String> _buddies = {};
   Set<String> _dirty = {};
   Timer? _saveTimer;
+  final _changes = StreamController<void>.broadcast();
+
+  Stream<void> get changes => _changes.stream;
 
   Dives(this.pathPrefix, {this.readonly = false});
 
@@ -231,6 +234,7 @@ class Dives {
 
       _log.info('saved ${_dirty.length} dives');
       _dirty.clear();
+      _changes.add(null);
     } catch (e) {
       _log.warning('failed to save dives', e);
     }

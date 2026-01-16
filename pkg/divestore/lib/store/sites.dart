@@ -17,6 +17,9 @@ class Sites {
   Map<String, Site> _sites = {};
   Set<String> _tags = {};
   Timer? _saveTimer;
+  final _changes = StreamController<void>.broadcast();
+
+  Stream<void> get changes => _changes.stream;
 
   Sites(this.path, {this.readonly = false});
 
@@ -108,6 +111,7 @@ class Sites {
     try {
       final cl = InternalSiteList(sites: _sites.values);
       await atomicWriteProto(path, cl);
+      _changes.add(null);
       _log.info('saved ${_sites.length} sites');
     } catch (e) {
       _log.warning('failed to save sites', e);

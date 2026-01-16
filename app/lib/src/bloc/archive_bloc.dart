@@ -63,7 +63,7 @@ class ImportArchive extends ArchiveEvent {
 class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
   final SyncBloc _syncBloc;
 
-  ArchiveBloc({required SyncBloc syncBloc}) : _syncBloc = syncBloc, super(const ArchiveState()) {
+  ArchiveBloc(this._syncBloc) : super(const ArchiveState()) {
     on<ExportArchive>(_onExport);
     on<ExportComplete>(_onExportComplete);
     on<ExportCancelled>(_onExportCancelled);

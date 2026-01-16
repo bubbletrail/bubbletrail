@@ -15,6 +15,9 @@ class Computers {
   final bool readonly;
   Map<String, Computer> _computers = {};
   Timer? _saveTimer;
+  final _changes = StreamController<void>.broadcast();
+
+  Stream<void> get changes => _changes.stream;
 
   Computers(this.path, {this.readonly = false});
 
@@ -104,6 +107,7 @@ class Computers {
     try {
       final cl = InternalComputerList(computers: _computers.values);
       await atomicWriteProto(path, cl);
+      _changes.add(null);
       _log.info('saved ${_computers.length} computers');
     } catch (e) {
       _log.warning('failed to save computers', e);

@@ -17,9 +17,9 @@ class Cylinders {
 
   Map<String, Cylinder> _cylinders = Map();
   Timer? _saveTimer;
-  final _changes = StreamController<List<Cylinder>>.broadcast();
+  final _changes = StreamController<void>.broadcast();
 
-  Stream<List<Cylinder>> get changes => _changes.stream;
+  Stream<void> get changes => _changes.stream;
 
   Cylinders(this.path, {this.readonly = false});
 
@@ -111,7 +111,7 @@ class Cylinders {
       vals.sort((a, b) => a.description.compareTo(b.description));
       final cl = InternalCylinderList(cylinders: vals);
       await atomicWriteProto(path, cl);
-      _changes.add(vals);
+      _changes.add(null);
       _log.info('saved ${_cylinders.length} cylinders');
     } catch (e) {
       _log.warning('failed to save cylinders', e);
