@@ -62,7 +62,8 @@ class CylinderListBloc extends Bloc<CylinderListEvent, CylinderListState> {
 
   Future<void> _onInit(_Init event, Emitter<CylinderListState> emit) async {
     final store = await _syncBloc.store;
-    _cylindersSub = store.cylinders.changes.listen((cylinders) {
+    _cylindersSub = store.cylinders.changes.listen((cylinders) async {
+      final cylinders = await store.cylinders.getAll();
       add(_LoadedCylinders(cylinders));
     });
     final cylinders = await store.cylinders.getAll();

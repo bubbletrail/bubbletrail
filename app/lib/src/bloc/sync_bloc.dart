@@ -55,6 +55,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   final Completer<Store> _storeCompleter = Completer();
 
   SyncProvider? _syncProvider;
+  Timer? _syncDebounceTimer;
 
   Future<Store> get store => _storeCompleter.future;
   Future<String> get storePath async => '${(await getApplicationDocumentsDirectory()).path}/db';
@@ -98,6 +99,12 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     final store = Store(dir);
     await store.init();
     _storeCompleter.complete(store);
+
+    store.changes.listen((_) {
+      _syncDebounceTimer?.cancel();
+      _syncDebounceTimer = Timer(Duration(seconds: 60), () => add(StartSyncing()));
+    });
+
     add(StartSyncing());
   }
 

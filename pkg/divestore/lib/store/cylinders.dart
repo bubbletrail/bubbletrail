@@ -17,6 +17,7 @@ class Cylinders {
 
   Map<String, Cylinder> _cylinders = Map();
   Timer? _saveTimer;
+  bool _notify = false;
   final _changes = StreamController<void>.broadcast();
 
   Stream<void> get changes => _changes.stream;
@@ -34,7 +35,7 @@ class Cylinders {
     });
     if (!_cylinders.containsKey(cylinder.id)) {
       _cylinders[cylinder.id] = cylinder;
-      _scheduleSave();
+      _scheduleSave(notify: true);
     }
     return cylinder;
   }
@@ -46,7 +47,7 @@ class Cylinders {
       cylinder.meta = cylinder.meta.rebuildUpdated();
     });
     _cylinders[cylinder.id] = cylinder;
-    _scheduleSave();
+    _scheduleSave(notify: true);
   }
 
   Future<void> delete(String id) async {
@@ -56,7 +57,7 @@ class Cylinders {
         cylinder.meta = cylinder.meta.rebuildDeleted();
       });
     }
-    _scheduleSave();
+    _scheduleSave(notify: true);
   }
 
   Future<Cylinder?> getById(String id) async {
@@ -100,7 +101,8 @@ class Cylinders {
     } catch (_) {}
   }
 
-  void _scheduleSave() {
+  void _scheduleSave({required bool notify}) {
+    if (notify) _notify = true;
     _saveTimer?.cancel();
     _saveTimer = Timer(Duration(seconds: 1), _save);
   }
@@ -111,7 +113,10 @@ class Cylinders {
       vals.sort((a, b) => a.description.compareTo(b.description));
       final cl = InternalCylinderList(cylinders: vals);
       await atomicWriteProto(path, cl);
-      _changes.add(null);
+      if (_notify) {
+        _notify = false;
+        _changes.add(null);
+      }
       _log.info('saved ${_cylinders.length} cylinders');
     } catch (e) {
       _log.warning('failed to save cylinders', e);
@@ -129,9 +134,9 @@ class Cylinders {
       for (final cyl in cls.cylinders) {
         final cur = _cylinders[cyl.id];
         if (cyl.meta.isDeleted) {
-          if (cur != null) {
+          if (cur != null && !cur.meta.isDeleted) {
             _log.fine('deleting cylinder ${cyl.id}');
-            await delete(cyl.id);
+            _cylinders[cyl.id] = cur.rebuild((c) => c.meta = c.meta.rebuildDeleted());
           }
         } else if (cur == null || cyl.meta.isAfter(cur.meta)) {
           _log.fine('importing cylinder ${cyl.id}');
@@ -149,6 +154,6 @@ class Cylinders {
     final bs = cl.writeToBuffer();
     await provider.putObject('cylinders', bs);
 
-    _scheduleSave();
+    _scheduleSave(notify: false);
   }
 }
