@@ -169,8 +169,8 @@ void main() {
       final stopsConservative = decoConservative.calculateDecoSchedule(30, ean32);
 
       // Calculate total deco time (in seconds)
-      final totalDefault = stopsDefault.fold<int>(0, (sum, stop) => sum + stop.time);
-      final totalConservative = stopsConservative.fold<int>(0, (sum, stop) => sum + stop.time);
+      final totalDefault = stopsDefault.fold<double>(0, (sum, stop) => sum + stop.time);
+      final totalConservative = stopsConservative.fold<double>(0, (sum, stop) => sum + stop.time);
 
       expect(totalConservative, greaterThan(totalDefault), reason: 'Conservative GF should require more deco time');
     });
@@ -350,6 +350,85 @@ void main() {
         expect(stop.time % 60, 0, reason: 'Stop time should be in whole minutes');
         expect(stop.time, greaterThanOrEqualTo(60), reason: 'Minimum 1 minute stop');
       }
+    });
+  });
+
+  group('Gradient factor', () {
+    test('GF at surface equilibrium is negative (undersaturated)', () {
+      final deco = BuhlmannDeco();
+
+      // At surface equilibrium, tissues are at alveolar N2 pressure (~0.75 bar)
+      // which is less than ambient (~1.01 bar) due to water vapor pressure.
+      // This means tissues are undersaturated and GF is negative.
+      final surfGF = deco.surfaceGradientFactor();
+      expect(surfGF, lessThan(0), reason: 'GF at equilibrium should be negative');
+      expect(surfGF, greaterThan(-20), reason: 'GF should not be too negative');
+    });
+
+    test('GF increases after diving', () {
+      final deco = BuhlmannDeco();
+
+      final initialGF = deco.surfaceGradientFactor();
+
+      // Dive to 30m for 20 minutes
+      deco.addSegment(30, GasMix.air, 1200);
+
+      final afterDiveGF = deco.surfaceGradientFactor();
+
+      expect(afterDiveGF, greaterThan(initialGF), reason: 'GF should increase after diving');
+    });
+
+    test('GF exceeds 100 when in deco violation', () {
+      final deco = BuhlmannDeco();
+
+      // Deep dive that puts us well into deco
+      deco.addSegment(40, GasMix.air, 1800);
+
+      final surfGF = deco.surfaceGradientFactor();
+
+      // Should be over 100% - can't safely surface
+      expect(surfGF, greaterThan(100), reason: 'SurfGF should exceed 100 when in deco');
+    });
+
+    test('GF at depth is lower than at surface', () {
+      final deco = BuhlmannDeco();
+
+      // Dive to 30m for 25 minutes
+      deco.addSegment(30, GasMix.air, 1500);
+
+      final surfGF = deco.gradientFactor(deco.depthToPressure(0));
+      final gfAt30m = deco.gradientFactor(deco.depthToPressure(30));
+
+      expect(gfAt30m, lessThan(surfGF), reason: 'GF at depth should be lower than at surface');
+    });
+
+    test('GF differs from tissuesSaturation', () {
+      final deco = BuhlmannDeco();
+
+      // Dive to create some loading
+      deco.addSegment(30, GasMix.air, 1200);
+
+      final surfacePressure = deco.depthToPressure(0);
+      final saturation = deco.tissuesSaturation(surfacePressure);
+      final gf = deco.gradientFactor(surfacePressure);
+
+      // These should be different values
+      expect(saturation, isNot(closeTo(gf, 1)), reason: 'Saturation and GF use different formulas');
+
+      // Saturation should be lower than GF for supersaturated tissues
+      // because saturation = P_tissue/M while GF = (P_tissue-P_amb)/(M-P_amb)
+      expect(saturation, lessThan(gf), reason: 'Saturation formula gives lower values');
+    });
+
+    test('surfaceGradientFactor matches gradientFactor at surface', () {
+      final deco = BuhlmannDeco();
+
+      deco.addSegment(25, GasMix.air, 1500);
+
+      final surfGF = deco.surfaceGradientFactor();
+      final gfAtSurface = deco.gradientFactor(deco.depthToPressure(0));
+
+      expect(surfGF, closeTo(gfAtSurface, 0.001));
     });
   });
 }

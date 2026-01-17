@@ -1,3 +1,5 @@
+import 'package:buhlmann/buhlmann.dart' as buhlmann;
+import 'package:collection/collection.dart';
 import 'package:divestore/divestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +26,8 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
   final List<LogSample> samplesWithDepth = [];
   final List<FlSpot> _depthSpots = [];
   final List<FlSpot> _ceilingSpots = [];
+  final List<FlSpot> _buhlmannCeilingSpots = [];
+  final List<({double time, double ceiling, double surfGF})> _buhlmann = [];
   final _pressureData = <int, ({List<FlSpot> spots, double minPressure, double maxPressure})>{};
   final _gasSwitches = <({double timeMinutes, String gasName})>[];
 
@@ -65,12 +69,16 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
       }
     }
 
-    // Deco ceiling
+    // Deco ceiling (from dive computer)
     for (final sample in samplesWithDepth) {
       final hasCeiling = sample.deco.type == .DECO_STOP_TYPE_DECO_STOP && sample.deco.depth > 0;
       final ceilingDepth = hasCeiling ? sample.deco.depth : -1.0;
       _ceilingSpots.add(FlSpot(sample.time / 60, depthMult * -ceilingDepth));
     }
+
+    // Buhlmann calculated ceiling & surfGF
+    _calculateBuhlmann();
+    _buhlmannCeilingSpots.addAll(_buhlmann.map((e) => FlSpot(e.time / 60, depthMult * -e.ceiling)));
 
     // Pressure data - find all tank indices used
     final tankIndices = <int>{};
@@ -139,11 +147,26 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
     final tempColor = Colors.cyan;
     final pressureColors = [Colors.orange, Colors.green, Colors.lime, Colors.teal];
     final ceilingColor = Colors.red;
+    final buhlmannCeilingColor = Colors.deepPurple;
 
     // Build line bars
     final lineBars = <LineChartBarData>[];
 
-    // Deco ceiling
+    // Buhlmann calculated ceiling - dashed purple line
+    if (_buhlmannCeilingSpots.isNotEmpty) {
+      lineBars.add(
+        LineChartBarData(
+          spots: _buhlmannCeilingSpots,
+          color: buhlmannCeilingColor,
+          barWidth: 1.5,
+          dotData: const FlDotData(show: false),
+          dashArray: [6, 3],
+          aboveBarData: BarAreaData(show: true, color: buhlmannCeilingColor.withValues(alpha: 0.2), cutOffY: 0, applyCutOffY: true),
+        ),
+      );
+    }
+
+    // Deco ceiling (from dive computer) - solid red line
     if (_ceilingSpots.isNotEmpty) {
       lineBars.add(
         LineChartBarData(
@@ -188,6 +211,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
       pressureColorIdx++;
     }
 
+    final buhlmann = _buhlmann.firstWhereOrNull((s) => s.time == _displaySample?.time);
     return Stack(
       children: [
         // Top info line
@@ -202,7 +226,9 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
                 if (_displaySample!.hasTemperature()) TemperatureText(_displaySample!.temperature),
                 if (_displaySample!.pressures.isNotEmpty && _displaySample!.pressures.first.pressure > 0)
                   PressureText(_displaySample!.pressures.first.pressure),
-                if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0) DepthText(_displaySample!.deco.depth, prefix: 'Ceil: '),
+                if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0) DepthText(_displaySample!.deco.depth, prefix: 'Comp ceil: '),
+                if (buhlmann != null && buhlmann.ceiling > 0) DepthText(buhlmann.ceiling, prefix: 'Calc ceil: '),
+                if (buhlmann != null) Text('SurfGF: ${buhlmann.surfGF.round()}%'),
               ],
             ),
           ),
@@ -305,6 +331,63 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
         ),
       ],
     );
+  }
+
+  void _calculateBuhlmann() {
+    if (samplesWithDepth.isEmpty) return;
+
+    final deco = buhlmann.BuhlmannDeco(config: buhlmann.BuhlmannConfig(gfHigh: 80, gfLow: 20));
+
+    // Build gas mixes from cylinders, defaulting to air if none
+    final gasMixes = <buhlmann.GasMix>[];
+    if (widget.cylinders.isNotEmpty) {
+      for (final cyl in widget.cylinders) {
+        gasMixes.add(buhlmann.GasMix(oxygen: cyl.oxygen, helium: cyl.helium));
+      }
+    } else {
+      gasMixes.add(buhlmann.GasMix.air);
+    }
+
+    // Build sorted list of gas switch times from events
+    final gasSwitches = <({int time, int gasIndex})>[];
+    for (final event in widget.events) {
+      if (event.type == .SAMPLE_EVENT_TYPE_GAS_CHANGE && event.value < gasMixes.length) {
+        gasSwitches.add((time: event.time, gasIndex: event.value));
+      }
+    }
+    gasSwitches.sort((a, b) => a.time.compareTo(b.time));
+
+    // Track current gas - start with first cylinder
+    var currentGas = gasMixes[0];
+    var nextSwitchIdx = 0;
+
+    // Process samples to calculate ceiling at each point
+    var prevTime = 0.0;
+    var firstStopDepth = 0.0;
+    for (final sample in samplesWithDepth) {
+      // Check for gas switches up to current sample time
+      while (nextSwitchIdx < gasSwitches.length && gasSwitches[nextSwitchIdx].time <= sample.time) {
+        currentGas = gasMixes[gasSwitches[nextSwitchIdx].gasIndex];
+        nextSwitchIdx++;
+      }
+
+      // Calculate time delta and add segment
+      final timeDelta = sample.time - prevTime;
+      if (timeDelta > 0 && sample.hasDepth()) {
+        deco.addSegment(sample.depth, currentGas, timeDelta);
+      }
+      prevTime = sample.time;
+
+      final ceiling = deco.gfCeilingDepth(sample.depth);
+      if (ceiling > firstStopDepth) {
+        deco.setFirstStopDepth(ceiling);
+        firstStopDepth = ceiling;
+      }
+
+      final surfGF = deco.surfaceGradientFactor();
+
+      _buhlmann.add((time: sample.time, ceiling: ceiling, surfGF: surfGF));
+    }
   }
 
   LogSample? _findClosestSample(List<LogSample> samples, int timeSeconds) {

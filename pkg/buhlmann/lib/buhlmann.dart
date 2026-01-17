@@ -282,7 +282,7 @@ class BuhlmannDeco {
   /// [depthMeters] - depth in meters
   /// [gas] - breathing gas mixture
   /// [timeSeconds] - time at depth in seconds
-  void addSegment(double depthMeters, GasMix gas, int timeSeconds) {
+  void addSegment(double depthMeters, GasMix gas, double timeSeconds) {
     final timeMinutes = timeSeconds / 60.0;
     final ambientPressure = depthToPressure(depthMeters);
     final inspired = _inspiredGasPressure(ambientPressure, gas);
@@ -334,12 +334,15 @@ class BuhlmannDeco {
   }
 
   /// Calculate the overall ceiling depth in meters.
-  double ceilingDepth() {
+  double ceilingDepth({double? gf}) {
     var maxCeiling = 0.0;
 
+    if (gf == null) {
+      gf = config.gfLow;
+    }
+    gf = gf / 100.0;
+
     for (var i = 0; i < numTissueCompartments; i++) {
-      // Use GF_low for the ceiling calculation
-      final gf = config.gfLow / 100.0;
       final ceiling = _compartmentCeiling(i, gf);
       if (ceiling > maxCeiling) {
         maxCeiling = ceiling;
@@ -386,14 +389,14 @@ class BuhlmannDeco {
   /// [stopDepth] - stop depth in meters
   /// [gas] - breathing gas mixture
   /// [maxTime] - maximum time to simulate in seconds (default 60000 = 1000 min)
-  int timeToSurface(double stopDepth, GasMix gas, {int maxTime = 60000}) {
+  double timeToSurface(double stopDepth, GasMix gas, {double maxTime = 60000}) {
     if (stopDepth <= 0) return 0;
 
     final testDeco = BuhlmannDeco(config: config, tissues: tissues.copy());
     testDeco._firstStopDepth = _firstStopDepth;
 
-    var time = 0;
-    const timeStep = 60; // 60 second (1 minute) steps
+    var time = 0.0;
+    const timeStep = 60.0; // 60 second (1 minute) steps
 
     while (time < maxTime) {
       testDeco.addSegment(stopDepth, gas, timeStep);
@@ -414,14 +417,14 @@ class BuhlmannDeco {
   /// [depthMeters] - depth to calculate NDL for
   /// [gas] - breathing gas mixture
   /// [maxNdl] - maximum NDL to calculate in seconds (default 59940 = 999 min)
-  int? ndl(double depthMeters, GasMix gas, {int maxNdl = 59940}) {
+  double? ndl(double depthMeters, GasMix gas, {double maxNdl = 59940}) {
     // Check if we're already past the ceiling
     if (ceilingDepth() > 0) return null;
 
     final testDeco = BuhlmannDeco(config: config, tissues: tissues.copy());
 
-    var time = 0;
-    const timeStep = 60; // 60 second (1 minute) steps
+    var time = 0.0;
+    const timeStep = 60.0; // 60 second (1 minute) steps
 
     while (time < maxNdl) {
       testDeco.addSegment(depthMeters, gas, timeStep);
@@ -438,6 +441,8 @@ class BuhlmannDeco {
 
   /// Calculate tissue saturation as a percentage of the M-value.
   /// 100% means the tissue is at its M-value limit.
+  ///
+  /// Note: This is NOT the same as gradient factor. Use [gradientFactor] for GF.
   double tissuesSaturation(double ambientPressure) {
     var maxSaturation = 0.0;
 
@@ -451,6 +456,39 @@ class BuhlmannDeco {
     }
 
     return maxSaturation;
+  }
+
+  /// Calculate the gradient factor at a given ambient pressure.
+  ///
+  /// GF represents how much of the supersaturation headroom is being used:
+  /// - GF = 0% means tissue pressure equals ambient pressure (no supersaturation)
+  /// - GF = 100% means tissue pressure equals M-value (at the limit)
+  /// - GF > 100% means tissue pressure exceeds M-value (decompression violation)
+  ///
+  /// Formula: GF = (P_tissue - P_amb) / (M - P_amb) * 100
+  ///
+  /// Returns the highest GF across all tissue compartments (the limiting tissue).
+  double gradientFactor(double ambientPressure) {
+    var maxGF = double.negativeInfinity;
+
+    for (var i = 0; i < numTissueCompartments; i++) {
+      final totalInert = tissues.totalInertPressure(i);
+      final mVal = mValue(i, ambientPressure);
+      final gf = (totalInert - ambientPressure) / (mVal - ambientPressure) * 100;
+      if (gf > maxGF) {
+        maxGF = gf;
+      }
+    }
+
+    return maxGF;
+  }
+
+  /// Calculate the surface gradient factor (SurfGF).
+  ///
+  /// This is the GF you would have if you ascended directly to the surface.
+  /// Commonly displayed on dive computers to show decompression status.
+  double surfaceGradientFactor() {
+    return gradientFactor(config.surfacePressure);
   }
 
   /// Get the leading (most saturated) tissue compartment index.
@@ -497,14 +535,14 @@ class BuhlmannDeco {
 
       if (nextStop <= 0) {
         // Can ascend to surface
-        final ascentTime = (depth / ascentRate).round();
+        final ascentTime = depth / ascentRate;
         testDeco.addSegment(depth / 2, gas, ascentTime); // Approximate ascent
         break;
       }
 
       if (nextStop < depth) {
         // Ascend to next stop
-        final ascentTime = ((depth - nextStop) / ascentRate).round();
+        final ascentTime = (depth - nextStop) / ascentRate;
         testDeco.addSegment((depth + nextStop) / 2, gas, ascentTime);
         depth = nextStop;
       }
@@ -546,7 +584,7 @@ class DecoStop {
   final double depth;
 
   /// Time at stop in seconds.
-  final int time;
+  final double time;
 
   const DecoStop({required this.depth, required this.time});
 
