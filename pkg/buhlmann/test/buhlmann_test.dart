@@ -123,10 +123,9 @@ void main() {
 
       final ceiling = deco.ceilingDepth();
 
-      // With no gradient factors, this dive should require some deco
-      // Ceiling should be somewhere between 0 and 10m typically
-      expect(ceiling, greaterThan(0), reason: 'Should require deco stops');
-      expect(ceiling, lessThan(15), reason: 'Ceiling should not be too deep');
+      // With no gradient factors, this dive should be precisely out of NDL.
+      expect(ceiling, greaterThan(0), reason: 'Out of NDL');
+      expect(ceiling, lessThan(1), reason: 'Almost at NDL');
     });
 
     test('NDL is null when in deco obligation', () {
@@ -139,6 +138,18 @@ void main() {
       // Should be in deco, so NDL should be null
       final ndl = deco.ndl(30, ean32);
       expect(ndl, isNull, reason: 'Should be in deco obligation');
+    });
+
+    test('SurfGF', () {
+      final deco = BuhlmannDeco();
+      final ean32 = GasMix.nitrox(32);
+
+      // Dive to 30m for 30 minutes
+      deco.addSegment(30, ean32, 30);
+
+      final surfGf = deco.tissuesSaturation(deco.depthToPressure(0));
+      expect(surfGf, greaterThan(100), reason: 'Slightly out of NDL');
+      expect(surfGf, lessThan(105), reason: 'Slightly out of NDL');
     });
 
     test('deco schedule produces stops', () {
