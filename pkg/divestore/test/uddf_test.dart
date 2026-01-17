@@ -6,7 +6,7 @@ import 'package:xml/xml.dart';
 
 void main() {
   group('UDDF Import', () {
-    late Ssrf ssrf;
+    late Container ssrf;
 
     setUpAll(() {
       final file = File('test/testdata/sample-1.uddf');
@@ -159,7 +159,7 @@ void main() {
   });
 
   group('UDDF Import - Subsurface format', () {
-    late Ssrf ssrf;
+    late Container ssrf;
 
     setUpAll(() {
       final file = File('test/testdata/sample-2.uddf');

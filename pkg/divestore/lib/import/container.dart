@@ -1,7 +1,7 @@
 import '../gen/gen.dart';
 
-class Ssrf {
+class Container {
   final List<Dive> dives;
   final List<Site> sites;
-  Ssrf({List<Dive>? dives, List<Site>? sites}) : dives = dives ?? [], sites = sites ?? [];
+  Container({List<Dive>? dives, List<Site>? sites}) : dives = dives ?? [], sites = sites ?? [];
 }

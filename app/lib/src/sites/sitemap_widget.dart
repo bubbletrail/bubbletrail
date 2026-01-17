@@ -1,4 +1,4 @@
-import 'package:divestore/divestore.dart';
+import 'package:divestore/divestore.dart' hide Container;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';

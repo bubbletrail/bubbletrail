@@ -7,7 +7,7 @@ import 'package:xml/xml.dart';
 
 void main() {
   group('MacDive Import', () {
-    late Ssrf ssrf;
+    late Container ssrf;
 
     setUpAll(() {
       final file = File('test/testdata/macdive.xml');

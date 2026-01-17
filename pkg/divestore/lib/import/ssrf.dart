@@ -7,15 +7,15 @@ import '../gen/gen.dart';
 import 'formatting.dart';
 import 'container.dart';
 
-extension SsrfXml on Ssrf {
-  static Ssrf fromXml(XmlElement elem) {
+extension SsrfXml on Container {
+  static Container fromXml(XmlElement elem) {
     final divesitesElem = elem.getElement('divesites');
     final divesElem = elem.getElement('dives');
 
     final divesList = divesElem?.findElements('dive').map(DiveXml.fromXml).toList() ?? [];
     divesList.addAll(divesElem?.findAllElements('trip').map((e) => e.findElements('dive').map(DiveXml.fromXml).toList()).flattened ?? []);
 
-    final ssrf = Ssrf();
+    final ssrf = Container();
     ssrf.dives.addAll(divesList);
     ssrf.sites.addAll(divesitesElem?.findElements('site').map(SiteXml.fromXml).toList() ?? []);
     return ssrf;
@@ -338,7 +338,7 @@ extension ComputerDiveXml on Log {
 
         // Add samples
         double? prevTemp;
-        double? prevPressure;
+        var prevPressure = 0.0;
         for (final sample in samples) {
           builder.element(
             'sample',
@@ -351,7 +351,7 @@ extension ComputerDiveXml on Log {
                 builder.attribute('temp', formatTemp(sample.temperature));
                 prevTemp = sample.temperature;
               }
-              if (sample.pressures.isNotEmpty && sample.pressures.first.pressure > 0 && sample.pressures.first.pressure != prevPressure) {
+              if (sample.pressures.isNotEmpty && sample.pressures.first.pressure != prevPressure) {
                 builder.attribute('pressure', '${sample.pressures.first.pressure.toStringAsFixed(1)} bar');
                 prevPressure = sample.pressures.first.pressure;
               }

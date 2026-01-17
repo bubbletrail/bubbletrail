@@ -160,32 +160,8 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
         }
       }
 
-      final tempContainer = Ssrf(dives: dives, sites: sites);
-      final xmlDoc = await compute((container) {
-        // Subsurface requires site IDs to be exactly 8 hex digits.
-        // Create a mapping from our UUIDs to 8-hex-digit IDs using first 4 bytes of SHA256.
-        final siteIdMap = <String, String>{};
-        for (final site in container.sites) {
-          siteIdMap[site.id] = _toSubsurfaceSiteId(site.id);
-        }
-
-        // Rebuild sites with Subsurface-compatible IDs
-        final exportSites = container.sites.map((site) {
-          return site.rebuild((s) => s.id = siteIdMap[site.id]!);
-        }).toList();
-
-        // Rebuild dives with remapped site IDs
-        final exportDives = container.dives.map((dive) {
-          if (dive.hasSiteId() && siteIdMap.containsKey(dive.siteId)) {
-            return dive.rebuild((d) => d.siteId = siteIdMap[dive.siteId]!);
-          }
-          return dive;
-        }).toList();
-
-        // Create SSRF container and generate XML
-        final ssrf = Ssrf(dives: exportDives, sites: exportSites);
-        return ssrf.toXmlDocument().toXmlString(pretty: true);
-      }, tempContainer);
+      final tempContainer = Container(dives: dives, sites: sites);
+      final xmlDoc = await compute(_subsurfaceXml, tempContainer);
 
       await ssrfFile.writeAsString(xmlDoc);
 
@@ -198,8 +174,37 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
   }
 }
 
-/// Converts our UUID site ID to a Subsurface-compatible 8 hex digit ID.
-/// Uses the first 4 bytes of SHA256 hash of the original ID.
+// Generate a Subsrurface XML document from the given container of dives &
+// sites, using required remapping of IDs for Subsurface compatibility.
+String _subsurfaceXml(Container container) {
+  // Subsurface requires site IDs to be exactly 8 hex digits.
+  // Create a mapping from our UUIDs to 8-hex-digit IDs using first 4 bytes of SHA256.
+  final siteIdMap = <String, String>{};
+  for (final site in container.sites) {
+    siteIdMap[site.id] = _toSubsurfaceSiteId(site.id);
+  }
+
+  // Rebuild sites with Subsurface-compatible IDs
+  final exportSites = container.sites.map((site) {
+    return site.rebuild((s) => s.id = siteIdMap[site.id]!);
+  }).toList();
+
+  // Rebuild dives with remapped site IDs
+  final exportDives = container.dives.map((dive) {
+    if (dive.hasSiteId() && siteIdMap.containsKey(dive.siteId)) {
+      return dive.rebuild((d) => d.siteId = siteIdMap[dive.siteId]!);
+    }
+    return dive;
+  }).toList();
+
+  // Create SSRF container and generate XML
+  final ssrf = Container(dives: exportDives, sites: exportSites);
+  return ssrf.toXmlDocument().toXmlString(pretty: true);
+}
+
+// Converts our site ID to a Subsurface-compatible 8 hex digit ID. Uses the
+// first 4 bytes of SHA256 hash of the original ID. There is a risk of hash
+// collision, which we ignore for now.
 String _toSubsurfaceSiteId(String id) {
   final bytes = sha256.convert(utf8.encode(id)).bytes;
   return bytes.take(4).map((b) => b.toRadixString(16).padLeft(2, '0')).join();

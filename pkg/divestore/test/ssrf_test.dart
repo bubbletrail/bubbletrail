@@ -91,7 +91,7 @@ void main() {
 
   test('Serialize and deserialize SSRF data', () {
     // Create test data
-    final originalSsrf = Ssrf(
+    final originalSsrf = Container(
       dives: [
         Dive(number: 1, start: proto.Timestamp.fromDateTime(DateTime(2019, 10, 30, 10, 49, 15)), duration: 43 * 60 + 30, rating: 2)
           ..logs.add(Log(maxDepth: 8.88, avgDepth: 4.952)),
@@ -142,7 +142,7 @@ void main() {
         ),
       );
 
-    final ssrf = Ssrf(dives: [dive], sites: []);
+    final ssrf = Container(dives: [dive], sites: []);
     final xmlDoc = ssrf.toXmlDocument();
     final xmlString = xmlDoc.toXmlString(pretty: true);
 

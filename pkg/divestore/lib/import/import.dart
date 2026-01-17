@@ -41,7 +41,7 @@ DiveLogFormat detectXmlFormat(XmlDocument doc) {
 /// Import dive log data from an XML document, auto-detecting the format.
 ///
 /// Throws [FormatException] if the format cannot be detected.
-Ssrf importXml(XmlDocument doc) {
+Container importXml(XmlDocument doc) {
   final format = detectXmlFormat(doc);
 
   switch (format) {
@@ -60,7 +60,7 @@ Ssrf importXml(XmlDocument doc) {
 ///
 /// Throws [FormatException] if the format cannot be detected.
 /// Throws [XmlParserException] if the XML is malformed.
-Ssrf importXmlString(String xmlString) {
+Container importXmlString(String xmlString) {
   final doc = XmlDocument.parse(xmlString);
   return importXml(doc);
 }

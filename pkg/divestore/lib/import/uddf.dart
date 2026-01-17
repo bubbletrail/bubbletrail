@@ -84,9 +84,9 @@ class _Buddy {
   String get fullName => '$firstName $lastName'.trim();
 }
 
-extension UddfXml on Ssrf {
+extension UddfXml on Container {
   /// Parse UDDF XML and return an Ssrf container with dives and sites.
-  static Ssrf fromXml(XmlElement elem) {
+  static Container fromXml(XmlElement elem) {
     // Parse gas definitions (referenced by dives)
     final gasMixes = <String, _GasMix>{};
     final gasDefs = elem.getElement('gasdefinitions');
@@ -141,7 +141,7 @@ extension UddfXml on Ssrf {
       }
     }
 
-    return Ssrf(dives: dives, sites: sites);
+    return Container(dives: dives, sites: sites);
   }
 }
 

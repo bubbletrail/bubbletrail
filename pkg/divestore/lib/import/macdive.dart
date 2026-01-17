@@ -4,9 +4,9 @@ import 'package:xml/xml.dart';
 import '../gen/gen.dart';
 import 'container.dart';
 
-extension MacDiveXml on Ssrf {
+extension MacDiveXml on Container {
   /// Parse MacDive XML and return an Ssrf container with dives and sites.
-  static Ssrf fromXml(XmlElement elem) {
+  static Container fromXml(XmlElement elem) {
     final dives = <Dive>[];
     final sites = <Site>[];
     final sitesByKey = <String, Site>{};
@@ -20,7 +20,7 @@ extension MacDiveXml on Ssrf {
       }
     }
 
-    return Ssrf(dives: dives, sites: sites);
+    return Container(dives: dives, sites: sites);
   }
 }
 
