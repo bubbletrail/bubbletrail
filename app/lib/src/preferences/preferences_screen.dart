@@ -55,7 +55,7 @@ class PreferencesScreen extends StatelessWidget {
                       if (prefs.syncProvider != .none && prefs.s3Config.isConfigured) SyncStatusTile(state: syncState),
                     ],
                   ),
-                  _SectionColumn(title: 'Import & export', children: [_ImportExportButtons()]),
+                  if (platformIsDesktop) _SectionColumn(title: 'Import & export', children: [_ImportExportButtons()]),
                   _SectionColumn(
                     title: 'Preferences',
                     children: [
