@@ -1,3 +1,5 @@
+import 'dart:io';
+
 const appBuild = int.fromEnvironment('BUILD', defaultValue: 9000);
 const appVer = String.fromEnvironment('MARKETINGVERSION', defaultValue: '1.0.0');
 const gitSHA = String.fromEnvironment('GITSHA', defaultValue: 'development');
@@ -8,3 +10,6 @@ const gitVer = '$appBuild-$gitSHA';
 const azureMapsSubscriptionKey = String.fromEnvironment('AZURE_MAPS_SUBSCRIPTION_KEY', defaultValue: '');
 
 const backupFileExtension = 'btz';
+
+final platformIsMobile = Platform.isIOS || Platform.isAndroid;
+final platformIsDesktop = !platformIsMobile;

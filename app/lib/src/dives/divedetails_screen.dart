@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart' hide DataColumn;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:protobuf/protobuf.dart';
 
+import '../app_metadata.dart';
 import '../app_routes.dart';
 import '../bloc/divelist_bloc.dart';
 import '../bloc/preferences_bloc.dart';
@@ -254,7 +253,7 @@ class _ProfileCard extends StatelessWidget {
           Stack(
             children: [
               IgnorePointer(
-                ignoring: Platform.isIOS,
+                ignoring: platformIsMobile,
                 child: _AspectMaxHeight(
                   aspectRatio: 2.5,
                   maxHeight: 250,

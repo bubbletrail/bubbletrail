@@ -1,8 +1,9 @@
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
+
+import '../app_metadata.dart';
 
 class WindowPreferences {
   static const _windowXKey = 'window_x';
@@ -14,7 +15,7 @@ class WindowPreferences {
   static const _defaultWidth = 1200.0;
   static const _defaultHeight = 800.0;
 
-  static bool get isSupported => Platform.isMacOS || Platform.isWindows || Platform.isLinux;
+  static bool get isSupported => platformIsDesktop;
 
   static Future<void> initialize() async {
     if (!isSupported) return;

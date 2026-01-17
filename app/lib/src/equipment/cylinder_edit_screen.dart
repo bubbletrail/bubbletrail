@@ -1,10 +1,9 @@
-import 'dart:io';
-
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../app_metadata.dart';
 import '../bloc/cylinderdetails_bloc.dart';
 import '../common/common.dart';
 
@@ -109,7 +108,7 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
         actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes')],
         body: Padding(
           padding: const .all(16.0),
-          child: Column(spacing: 16, children: [_descriptionCard(), Platform.isIOS ? _verticalCards(context) : _horisontalCards(context)]),
+          child: Column(spacing: 16, children: [_descriptionCard(), platformIsMobile ? _verticalCards(context) : _horisontalCards(context)]),
         ),
       ),
     );
