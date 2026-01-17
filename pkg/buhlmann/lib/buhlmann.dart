@@ -1,10 +1,5 @@
 import 'dart:math';
 
-/// Buhlmann ZHL-16 decompression algorithm implementation.
-///
-/// Based on the Subsurface implementation and standard ZHL-16b/c coefficients.
-/// Supports gradient factors and mixed gas (N2/He) calculations.
-
 const int numTissueCompartments = 16;
 
 /// ZHL-16b nitrogen half-times in minutes.
@@ -168,10 +163,7 @@ class GasMix {
 
   /// Create a trimix with given oxygen and helium percentages.
   factory GasMix.trimix(int oxygenPercent, int heliumPercent) {
-    return GasMix(
-      oxygen: oxygenPercent / 100.0,
-      helium: heliumPercent / 100.0,
-    );
+    return GasMix(oxygen: oxygenPercent / 100.0, helium: heliumPercent / 100.0);
   }
 
   @override
@@ -225,11 +217,9 @@ class TissueState {
   /// Helium partial pressure in each compartment (bar).
   final List<double> hePressures;
 
-  TissueState({
-    List<double>? n2Pressures,
-    List<double>? hePressures,
-  })  : n2Pressures = n2Pressures ?? List.filled(numTissueCompartments, 0.0),
-        hePressures = hePressures ?? List.filled(numTissueCompartments, 0.0);
+  TissueState({List<double>? n2Pressures, List<double>? hePressures})
+    : n2Pressures = n2Pressures ?? List.filled(numTissueCompartments, 0.0),
+      hePressures = hePressures ?? List.filled(numTissueCompartments, 0.0);
 
   /// Create a copy of this state.
   TissueState copy() {
@@ -275,11 +265,9 @@ class BuhlmannDeco {
   /// First decompression stop depth encountered (for GF interpolation).
   double? _firstStopDepth;
 
-  BuhlmannDeco({
-    BuhlmannConfig? config,
-    TissueState? tissues,
-  })  : config = config ?? BuhlmannConfig.defaultConfig,
-        tissues = tissues ?? TissueState() {
+  BuhlmannDeco({BuhlmannConfig? config, TissueState? tissues})
+    : config = config ?? BuhlmannConfig.defaultConfig,
+      tissues = tissues ?? TissueState() {
     // Initialize tissues to surface equilibrium if not provided
     if (tissues == null) {
       _initializeSurfaceEquilibrium();
@@ -313,7 +301,9 @@ class BuhlmannDeco {
 
   /// Calculate inspired gas partial pressures accounting for water vapor.
   ({double n2, double he}) _inspiredGasPressure(
-      double ambientPressure, GasMix gas) {
+    double ambientPressure,
+    GasMix gas,
+  ) {
     final alveolarPressure = ambientPressure - waterVaporPressure;
     return (
       n2: alveolarPressure * gas.nitrogen,
@@ -445,8 +435,7 @@ class BuhlmannDeco {
     if (ceiling <= 0) return 0;
 
     // Round up to nearest stop depth
-    var stopDepth =
-        (ceiling / stopDepthIncrement).ceil() * stopDepthIncrement;
+    var stopDepth = (ceiling / stopDepthIncrement).ceil() * stopDepthIncrement;
 
     // Enforce minimum last stop depth
     if (stopDepth < config.lastStopDepth && ceiling > 0) {
@@ -461,10 +450,7 @@ class BuhlmannDeco {
   double timeToSurface(double stopDepth, GasMix gas, {double maxTime = 1000}) {
     if (stopDepth <= 0) return 0;
 
-    final testDeco = BuhlmannDeco(
-      config: config,
-      tissues: tissues.copy(),
-    );
+    final testDeco = BuhlmannDeco(config: config, tissues: tissues.copy());
     testDeco._firstStopDepth = _firstStopDepth;
 
     var time = 0.0;
@@ -489,10 +475,7 @@ class BuhlmannDeco {
     // Check if we're already past the ceiling
     if (ceilingDepth() > 0) return null;
 
-    final testDeco = BuhlmannDeco(
-      config: config,
-      tissues: tissues.copy(),
-    );
+    final testDeco = BuhlmannDeco(config: config, tissues: tissues.copy());
 
     var time = 0.0;
     const timeStep = 1.0; // 1 minute steps
@@ -552,10 +535,7 @@ class BuhlmannDeco {
     double ascentRate = 10.0, // meters per minute
   }) {
     final stops = <DecoStop>[];
-    final testDeco = BuhlmannDeco(
-      config: config,
-      tissues: tissues.copy(),
-    );
+    final testDeco = BuhlmannDeco(config: config, tissues: tissues.copy());
 
     var depth = currentDepth;
 
