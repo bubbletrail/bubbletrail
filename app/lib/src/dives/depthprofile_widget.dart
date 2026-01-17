@@ -336,7 +336,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
   void _calculateBuhlmann() {
     if (samplesWithDepth.isEmpty) return;
 
-    final deco = buhlmann.BuhlmannDeco(config: buhlmann.BuhlmannConfig(gfHigh: 80, gfLow: 20));
+    final deco = buhlmann.BuhlmannDeco(config: buhlmann.BuhlmannConfig(gfHigh: 70, gfLow: 30));
 
     // Build gas mixes from cylinders, defaulting to air if none
     final gasMixes = <buhlmann.GasMix>[];
@@ -378,13 +378,22 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
       }
       prevTime = sample.time;
 
-      final ceiling = deco.gfCeilingDepth(sample.depth);
+      // if (ceiling > firstStopDepth) {
+      //   deco.setFirstStopDepth(ceiling);
+      //   firstStopDepth = ceiling;
+      // }
+
+      final surfGF = deco.surfaceGradientFactor();
+      var ceiling = 0.0;
+      // if (surfGF > 70) {
+      // final stops = deco.calculateDecoSchedule(sample.depth, currentGas);
+      // ceiling = stops.firstOrNull?.depth ?? 0;
+      ceiling = deco.gfCeilingDepth(sample.depth);
       if (ceiling > firstStopDepth) {
         deco.setFirstStopDepth(ceiling);
         firstStopDepth = ceiling;
       }
-
-      final surfGF = deco.surfaceGradientFactor();
+      // }
 
       _buhlmann.add((time: sample.time, ceiling: ceiling, surfGF: surfGF));
     }

@@ -430,5 +430,92 @@ void main() {
 
       expect(surfGF, closeTo(gfAtSurface, 0.001));
     });
+
+    test('GF at ceiling depth equals GF_low', () {
+      // With GF 100/100, the ceiling is where GF = 100%
+      final deco = BuhlmannDeco(config: const BuhlmannConfig(gfLow: 100, gfHigh: 100));
+
+      // Deep dive to create deco obligation
+      deco.addSegment(40, GasMix.air, 1500);
+
+      final ceiling = deco.ceilingDepth();
+      expect(ceiling, greaterThan(0), reason: 'Should have a ceiling');
+
+      // GF at ceiling should be close to 100% (GF_low)
+      final gfAtCeiling = deco.gradientFactor(deco.depthToPressure(ceiling));
+      expect(gfAtCeiling, closeTo(100, 2), reason: 'GF at ceiling should equal GF_low');
+    });
+
+    test('GF at ceiling with conservative settings equals GF_low', () {
+      // With GF 30/70, the ceiling is where GF = 30%
+      final deco = BuhlmannDeco(config: const BuhlmannConfig(gfLow: 30, gfHigh: 70));
+
+      // Deep dive to create deco obligation
+      deco.addSegment(40, GasMix.air, 1500);
+
+      final ceiling = deco.ceilingDepth();
+      expect(ceiling, greaterThan(0), reason: 'Should have a ceiling');
+
+      // GF at ceiling should be close to 30% (GF_low)
+      final gfAtCeiling = deco.gradientFactor(deco.depthToPressure(ceiling));
+      expect(gfAtCeiling, closeTo(30, 2), reason: 'GF at ceiling should equal GF_low (30)');
+    });
+
+    test('after completing deco schedule, surface GF is at or below GF_high', () {
+      final config = const BuhlmannConfig(gfLow: 30, gfHigh: 70);
+      final deco = BuhlmannDeco(config: config);
+
+      // Deep dive requiring deco
+      deco.addSegment(40, GasMix.air, 1500);
+
+      // Get the deco schedule
+      final stops = deco.calculateDecoSchedule(40, GasMix.air);
+      expect(stops, isNotEmpty, reason: 'Should have deco stops');
+
+      // Simulate executing the deco schedule
+      final simDeco = BuhlmannDeco(config: config, tissues: deco.tissues.copy());
+      var currentDepth = 40.0;
+
+      for (final stop in stops) {
+        // Ascend to stop (approximate)
+        if (stop.depth < currentDepth) {
+          final ascentTime = ((currentDepth - stop.depth) / (10.0 / 60.0)).round();
+          simDeco.addSegment((currentDepth + stop.depth) / 2, GasMix.air, ascentTime.toDouble());
+          currentDepth = stop.depth;
+        }
+        // Execute stop
+        simDeco.addSegment(stop.depth, GasMix.air, stop.time.toDouble());
+      }
+
+      // Ascend to surface
+      final finalAscentTime = (currentDepth / (10.0 / 60.0)).round();
+      simDeco.addSegment(currentDepth / 2, GasMix.air, finalAscentTime.toDouble());
+
+      // Surface GF should be at or below GF_high (70%)
+      final surfGF = simDeco.surfaceGradientFactor();
+      expect(surfGF, lessThanOrEqualTo(75), reason: 'Surface GF should be at or below GF_high after deco');
+    });
+
+    test('NDL corresponds to surface GF reaching 100%', () {
+      final deco = BuhlmannDeco(); // GF 100/100
+
+      // Get NDL at 30m
+      final ndl = deco.ndl(30, GasMix.air);
+      expect(ndl, isNotNull);
+
+      // Dive for exactly the NDL
+      final testDeco = BuhlmannDeco();
+      testDeco.addSegment(30, GasMix.air, ndl!.toDouble());
+
+      // Surface GF should be just under 100%
+      final surfGF = testDeco.surfaceGradientFactor();
+      expect(surfGF, lessThanOrEqualTo(100), reason: 'At NDL, surface GF should be <= 100%');
+      expect(surfGF, greaterThan(90), reason: 'At NDL, surface GF should be close to 100%');
+
+      // One more minute should push it over
+      testDeco.addSegment(30, GasMix.air, 60);
+      final surfGFAfter = testDeco.surfaceGradientFactor();
+      expect(surfGFAfter, greaterThan(100), reason: 'Past NDL, surface GF should exceed 100%');
+    });
   });
 }

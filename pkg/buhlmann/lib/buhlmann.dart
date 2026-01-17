@@ -356,7 +356,6 @@ class BuhlmannDeco {
   double gfCeilingDepth(double currentDepth) {
     var maxCeiling = 0.0;
     final gf = _gradientFactorAtDepth(currentDepth);
-
     for (var i = 0; i < numTissueCompartments; i++) {
       final ceiling = _compartmentCeiling(i, gf);
       if (ceiling > maxCeiling) {
@@ -514,11 +513,7 @@ class BuhlmannDeco {
   /// [currentDepth] - current depth in meters
   /// [gas] - breathing gas mixture
   /// [ascentRate] - ascent rate in meters per second (default 10/60 = 0.167 m/s)
-  List<DecoStop> calculateDecoSchedule(
-    double currentDepth,
-    GasMix gas, {
-    double ascentRate = 10.0 / 60.0, // meters per second (10 m/min default)
-  }) {
+  List<DecoStop> calculateDecoSchedule(double currentDepth, GasMix gas, {double ascentRate = 9.0 / 60.0}) {
     final stops = <DecoStop>[];
     final testDeco = BuhlmannDeco(config: config, tissues: tissues.copy());
 
@@ -553,20 +548,6 @@ class BuhlmannDeco {
         stops.add(DecoStop(depth: depth, time: stopTime));
         testDeco.addSegment(depth, gas, stopTime);
       }
-
-      // Check for next stop
-      final newNextStop = testDeco.nextStopDepth(depth);
-      if (newNextStop >= depth) {
-        // Still can't ascend, add more time
-        testDeco.addSegment(depth, gas, 60);
-      }
-
-      if (newNextStop < depth) {
-        depth = newNextStop;
-      }
-
-      // Safety check to prevent infinite loops
-      if (stops.length > 100) break;
     }
 
     return stops;
