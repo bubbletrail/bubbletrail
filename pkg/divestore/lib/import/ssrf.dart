@@ -337,6 +337,8 @@ extension ComputerDiveXml on Log {
         }
 
         // Add samples
+        double? prevTemp;
+        double? prevPressure;
         for (final sample in samples) {
           builder.element(
             'sample',
@@ -345,11 +347,13 @@ extension ComputerDiveXml on Log {
               if (sample.hasDepth()) {
                 builder.attribute('depth', formatDepth(sample.depth));
               }
-              if (sample.hasTemperature()) {
+              if (sample.hasTemperature() && sample.temperature != prevTemp) {
                 builder.attribute('temp', formatTemp(sample.temperature));
+                prevTemp = sample.temperature;
               }
-              if (sample.pressures.isNotEmpty) {
+              if (sample.pressures.isNotEmpty && sample.pressures.first.pressure > 0 && sample.pressures.first.pressure != prevPressure) {
                 builder.attribute('pressure', '${sample.pressures.first.pressure.toStringAsFixed(1)} bar');
+                prevPressure = sample.pressures.first.pressure;
               }
             },
           );
