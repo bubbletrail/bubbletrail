@@ -65,16 +65,12 @@ void main() {
       // Record initial tissue pressures
       final initialN2 = List<double>.from(deco.tissues.n2Pressures);
 
-      // Dive to 30m for 30 minutes
-      deco.addSegment(30, ean32, 30);
+      // Dive to 30m for 30 minutes (1800 seconds)
+      deco.addSegment(30, ean32, 1800);
 
       // All tissues should have increased N2 loading
       for (var i = 0; i < numTissueCompartments; i++) {
-        expect(
-          deco.tissues.n2Pressures[i],
-          greaterThan(initialN2[i]),
-          reason: 'Tissue $i should have increased N2 loading',
-        );
+        expect(deco.tissues.n2Pressures[i], greaterThan(initialN2[i]), reason: 'Tissue $i should have increased N2 loading');
       }
     });
 
@@ -82,33 +78,19 @@ void main() {
       final deco = BuhlmannDeco();
       final ean32 = GasMix.nitrox(32);
 
-      // Dive to 30m for 30 minutes
-      deco.addSegment(30, ean32, 30);
+      // Dive to 30m for 30 minutes (1800 seconds)
+      deco.addSegment(30, ean32, 1800);
 
       // Inspired N2 at 30m = (4.01325 - 0.0627) * 0.68 ≈ 2.686 bar
       final inspiredN2 = (4.01325 - waterVaporPressure) * 0.68;
 
       // Fast tissues (compartment 0-3) should be closer to inspired pressure
       // than slow tissues (compartment 12-15)
-      final fastTissueAvg =
-          (deco.tissues.n2Pressures[0] +
-              deco.tissues.n2Pressures[1] +
-              deco.tissues.n2Pressures[2] +
-              deco.tissues.n2Pressures[3]) /
-          4;
+      final fastTissueAvg = (deco.tissues.n2Pressures[0] + deco.tissues.n2Pressures[1] + deco.tissues.n2Pressures[2] + deco.tissues.n2Pressures[3]) / 4;
 
-      final slowTissueAvg =
-          (deco.tissues.n2Pressures[12] +
-              deco.tissues.n2Pressures[13] +
-              deco.tissues.n2Pressures[14] +
-              deco.tissues.n2Pressures[15]) /
-          4;
+      final slowTissueAvg = (deco.tissues.n2Pressures[12] + deco.tissues.n2Pressures[13] + deco.tissues.n2Pressures[14] + deco.tissues.n2Pressures[15]) / 4;
 
-      expect(
-        fastTissueAvg,
-        greaterThan(slowTissueAvg),
-        reason: 'Fast tissues should be more saturated after 30 min',
-      );
+      expect(fastTissueAvg, greaterThan(slowTissueAvg), reason: 'Fast tissues should be more saturated after 30 min');
 
       // Fast tissues should be close to inspired pressure
       expect(fastTissueAvg, closeTo(inspiredN2, 0.3));
@@ -118,8 +100,8 @@ void main() {
       final deco = BuhlmannDeco();
       final ean32 = GasMix.nitrox(32);
 
-      // Dive to 30m for 30 minutes on EAN32
-      deco.addSegment(30, ean32, 30);
+      // Dive to 30m for 30 minutes (1800 seconds) on EAN32
+      deco.addSegment(30, ean32, 1800);
 
       final ceiling = deco.ceilingDepth();
 
@@ -132,8 +114,8 @@ void main() {
       final deco = BuhlmannDeco();
       final ean32 = GasMix.nitrox(32);
 
-      // Dive to 30m for 30 minutes
-      deco.addSegment(30, ean32, 30);
+      // Dive to 30m for 30 minutes (1800 seconds)
+      deco.addSegment(30, ean32, 1800);
 
       // Should be in deco, so NDL should be null
       final ndl = deco.ndl(30, ean32);
@@ -144,8 +126,8 @@ void main() {
       final deco = BuhlmannDeco();
       final ean32 = GasMix.nitrox(32);
 
-      // Dive to 30m for 30 minutes
-      deco.addSegment(30, ean32, 30);
+      // Dive to 30m for 30 minutes (1800 seconds)
+      deco.addSegment(30, ean32, 1800);
 
       final surfGf = deco.tissuesSaturation(deco.depthToPressure(0));
       expect(surfGf, greaterThan(100), reason: 'Slightly out of NDL');
@@ -156,8 +138,8 @@ void main() {
       final deco = BuhlmannDeco();
       final ean32 = GasMix.nitrox(32);
 
-      // Dive to 30m for 30 minutes
-      deco.addSegment(30, ean32, 30);
+      // Dive to 30m for 30 minutes (1800 seconds)
+      deco.addSegment(30, ean32, 1800);
 
       final stops = deco.calculateDecoSchedule(30, ean32);
 
@@ -166,11 +148,7 @@ void main() {
       // All stops should be at valid depths (multiples of 3m)
       for (final stop in stops) {
         expect(stop.depth % 3, 0, reason: 'Stop should be at 3m increment');
-        expect(
-          stop.time,
-          greaterThan(0),
-          reason: 'Stop time should be positive',
-        );
+        expect(stop.time, greaterThan(0), reason: 'Stop time should be positive');
       }
 
       // Last stop should be at 3m or 6m
@@ -182,34 +160,19 @@ void main() {
 
       // Default GF (100/100)
       final decoDefault = BuhlmannDeco();
-      decoDefault.addSegment(30, ean32, 30);
+      decoDefault.addSegment(30, ean32, 1800);
       final stopsDefault = decoDefault.calculateDecoSchedule(30, ean32);
 
       // Conservative GF (30/70)
-      final decoConservative = BuhlmannDeco(
-        config: BuhlmannConfig.conservative,
-      );
-      decoConservative.addSegment(30, ean32, 30);
-      final stopsConservative = decoConservative.calculateDecoSchedule(
-        30,
-        ean32,
-      );
+      final decoConservative = BuhlmannDeco(config: BuhlmannConfig.conservative);
+      decoConservative.addSegment(30, ean32, 1800);
+      final stopsConservative = decoConservative.calculateDecoSchedule(30, ean32);
 
-      // Calculate total deco time
-      final totalDefault = stopsDefault.fold<int>(
-        0,
-        (sum, stop) => sum + stop.time,
-      );
-      final totalConservative = stopsConservative.fold<int>(
-        0,
-        (sum, stop) => sum + stop.time,
-      );
+      // Calculate total deco time (in seconds)
+      final totalDefault = stopsDefault.fold<int>(0, (sum, stop) => sum + stop.time);
+      final totalConservative = stopsConservative.fold<int>(0, (sum, stop) => sum + stop.time);
 
-      expect(
-        totalConservative,
-        greaterThan(totalDefault),
-        reason: 'Conservative GF should require more deco time',
-      );
+      expect(totalConservative, greaterThan(totalDefault), reason: 'Conservative GF should require more deco time');
     });
   });
 
@@ -235,18 +198,25 @@ void main() {
 
       expect(ndlAir, isNotNull);
       expect(ndlEan32, isNotNull);
-      expect(
-        ndlEan32!,
-        greaterThan(ndlAir!),
-        reason: 'EAN32 should have longer NDL than air at 30m',
-      );
+      expect(ndlEan32!, greaterThan(ndlAir!), reason: 'EAN32 should have longer NDL than air at 30m');
+    });
+
+    test('NDL is returned in seconds', () {
+      final deco = BuhlmannDeco();
+
+      final ndl = deco.ndl(20, GasMix.air);
+
+      expect(ndl, isNotNull);
+      // NDL at 20m on air should be around 30-40 minutes = 1800-2400 seconds
+      expect(ndl!, greaterThan(1500), reason: 'NDL should be in seconds');
+      expect(ndl, lessThan(3000), reason: 'NDL should be reasonable');
     });
 
     test('shallow recreational dive stays within NDL', () {
       final deco = BuhlmannDeco();
 
-      // 18m for 40 minutes on air should be within NDL
-      deco.addSegment(18, GasMix.air, 40);
+      // 18m for 40 minutes (2400 seconds) on air should be within NDL
+      deco.addSegment(18, GasMix.air, 2400);
 
       final ceiling = deco.ceilingDepth();
       expect(ceiling, lessThanOrEqualTo(0), reason: 'Should not require deco');
@@ -263,16 +233,12 @@ void main() {
         expect(deco.tissues.hePressures[i], 0.0);
       }
 
-      // Dive to 50m for 20 minutes
-      deco.addSegment(50, tmx2135, 20);
+      // Dive to 50m for 20 minutes (1200 seconds)
+      deco.addSegment(50, tmx2135, 1200);
 
       // He should now be loaded
       for (var i = 0; i < numTissueCompartments; i++) {
-        expect(
-          deco.tissues.hePressures[i],
-          greaterThan(0),
-          reason: 'Tissue $i should have He loading',
-        );
+        expect(deco.tissues.hePressures[i], greaterThan(0), reason: 'Tissue $i should have He loading');
       }
     });
 
@@ -280,27 +246,21 @@ void main() {
       final deco = BuhlmannDeco();
       final tmx2135 = GasMix.trimix(21, 35);
 
-      // Load tissues at 50m
-      deco.addSegment(50, tmx2135, 30);
+      // Load tissues at 50m for 30 minutes (1800 seconds)
+      deco.addSegment(50, tmx2135, 1800);
 
       final heAfterDive = List<double>.from(deco.tissues.hePressures);
       final n2AfterDive = List<double>.from(deco.tissues.n2Pressures);
 
-      // Switch to air and off-gas at 6m for 30 minutes
-      deco.addSegment(6, GasMix.air, 30);
+      // Switch to air and off-gas at 6m for 30 minutes (1800 seconds)
+      deco.addSegment(6, GasMix.air, 1800);
 
       // Calculate percentage of gas eliminated for fast tissue (compartment 1)
-      final heEliminated =
-          (heAfterDive[1] - deco.tissues.hePressures[1]) / heAfterDive[1];
-      final n2Change =
-          (n2AfterDive[1] - deco.tissues.n2Pressures[1]).abs() / n2AfterDive[1];
+      final heEliminated = (heAfterDive[1] - deco.tissues.hePressures[1]) / heAfterDive[1];
+      final n2Change = (n2AfterDive[1] - deco.tissues.n2Pressures[1]).abs() / n2AfterDive[1];
 
       // He should off-gas faster (higher percentage eliminated)
-      expect(
-        heEliminated,
-        greaterThan(n2Change),
-        reason: 'He should off-gas faster than N2',
-      );
+      expect(heEliminated, greaterThan(n2Change), reason: 'He should off-gas faster than N2');
     });
   });
 
@@ -312,17 +272,14 @@ void main() {
       final surfacePressure = deco.depthToPressure(0);
       final surfaceSat = deco.tissuesSaturation(surfacePressure);
 
-      deco.addSegment(30, GasMix.air, 20);
+      // 20 minutes (1200 seconds) at 30m
+      deco.addSegment(30, GasMix.air, 1200);
 
       // After diving, saturation relative to SURFACE M-value should increase
       // (this is what determines if we can safely ascend)
       final afterDiveSat = deco.tissuesSaturation(surfacePressure);
 
-      expect(
-        afterDiveSat,
-        greaterThan(surfaceSat),
-        reason: 'Saturation relative to surface should increase after diving',
-      );
+      expect(afterDiveSat, greaterThan(surfaceSat), reason: 'Saturation relative to surface should increase after diving');
     });
   });
 
@@ -341,8 +298,9 @@ void main() {
     test('surface segment maintains equilibrium', () {
       final deco = BuhlmannDeco();
 
-      // Staying at surface breathing air should maintain equilibrium
-      deco.addSegment(0, GasMix.air, 60);
+      // Staying at surface breathing air for 60 minutes (3600 seconds)
+      // should maintain equilibrium
+      deco.addSegment(0, GasMix.air, 3600);
 
       for (var i = 0; i < numTissueCompartments; i++) {
         expect(deco.tissues.n2Pressures[i], closeTo(0.751, 0.02));
@@ -352,8 +310,8 @@ void main() {
     test('reset returns to initial state', () {
       final deco = BuhlmannDeco();
 
-      // Do a deep dive
-      deco.addSegment(50, GasMix.air, 30);
+      // Do a deep dive for 30 minutes (1800 seconds)
+      deco.addSegment(50, GasMix.air, 1800);
 
       // Reset
       deco.reset();
@@ -362,6 +320,35 @@ void main() {
       for (var i = 0; i < numTissueCompartments; i++) {
         expect(deco.tissues.n2Pressures[i], closeTo(0.751, 0.02));
         expect(deco.tissues.hePressures[i], 0.0);
+      }
+    });
+  });
+
+  group('Time units verification', () {
+    test('addSegment accepts time in seconds', () {
+      final deco = BuhlmannDeco();
+
+      // Add 5 minutes = 300 seconds
+      deco.addSegment(20, GasMix.air, 300);
+
+      // Tissues should have loaded some gas
+      expect(deco.tissues.n2Pressures[0], greaterThan(0.751), reason: 'Fast tissue should load gas in 5 minutes');
+    });
+
+    test('DecoStop time is in seconds', () {
+      final deco = BuhlmannDeco();
+
+      // Deep dive requiring deco: 40m for 25 minutes (1500 seconds)
+      deco.addSegment(40, GasMix.air, 1500);
+
+      final stops = deco.calculateDecoSchedule(40, GasMix.air);
+
+      expect(stops, isNotEmpty);
+
+      // Stop times should be reasonable in seconds (multiples of 60)
+      for (final stop in stops) {
+        expect(stop.time % 60, 0, reason: 'Stop time should be in whole minutes');
+        expect(stop.time, greaterThanOrEqualTo(60), reason: 'Minimum 1 minute stop');
       }
     });
   });
