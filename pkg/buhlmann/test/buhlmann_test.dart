@@ -133,47 +133,6 @@ void main() {
       expect(surfGf, greaterThan(100), reason: 'Slightly out of NDL');
       expect(surfGf, lessThan(105), reason: 'Slightly out of NDL');
     });
-
-    test('deco schedule produces stops', () {
-      final deco = BuhlmannDeco();
-      final ean32 = GasMix.nitrox(32);
-
-      // Dive to 30m for 30 minutes (1800 seconds)
-      deco.addSegment(30, ean32, 1800);
-
-      final stops = deco.calculateDecoSchedule(30, ean32);
-
-      expect(stops, isNotEmpty, reason: 'Should have deco stops');
-
-      // All stops should be at valid depths (multiples of 3m)
-      for (final stop in stops) {
-        expect(stop.depth % 3, 0, reason: 'Stop should be at 3m increment');
-        expect(stop.time, greaterThan(0), reason: 'Stop time should be positive');
-      }
-
-      // Last stop should be at 3m or 6m
-      expect(stops.last.depth, lessThanOrEqualTo(6));
-    });
-
-    test('with conservative GF produces longer stops', () {
-      final ean32 = GasMix.nitrox(32);
-
-      // Default GF (100/100)
-      final decoDefault = BuhlmannDeco();
-      decoDefault.addSegment(30, ean32, 1800);
-      final stopsDefault = decoDefault.calculateDecoSchedule(30, ean32);
-
-      // Conservative GF (30/70)
-      final decoConservative = BuhlmannDeco(config: BuhlmannConfig.conservative);
-      decoConservative.addSegment(30, ean32, 1800);
-      final stopsConservative = decoConservative.calculateDecoSchedule(30, ean32);
-
-      // Calculate total deco time (in seconds)
-      final totalDefault = stopsDefault.fold<double>(0, (sum, stop) => sum + stop.time);
-      final totalConservative = stopsConservative.fold<double>(0, (sum, stop) => sum + stop.time);
-
-      expect(totalConservative, greaterThan(totalDefault), reason: 'Conservative GF should require more deco time');
-    });
   });
 
   group('No-decompression limits', () {
@@ -186,7 +145,7 @@ void main() {
 
       expect(ndl20m, isNotNull);
       expect(ndl30m, isNotNull);
-      expect(ndl30m!, lessThan(ndl20m!), reason: 'Deeper = shorter NDL');
+      expect(ndl30m, lessThan(ndl20m!), reason: 'Deeper = shorter NDL');
     });
 
     test('nitrox extends NDL compared to air', () {
@@ -198,7 +157,7 @@ void main() {
 
       expect(ndlAir, isNotNull);
       expect(ndlEan32, isNotNull);
-      expect(ndlEan32!, greaterThan(ndlAir!), reason: 'EAN32 should have longer NDL than air at 30m');
+      expect(ndlEan32, greaterThan(ndlAir!), reason: 'EAN32 should have longer NDL than air at 30m');
     });
 
     test('NDL is returned in seconds', () {
@@ -208,7 +167,7 @@ void main() {
 
       expect(ndl, isNotNull);
       // NDL at 20m on air should be around 30-40 minutes = 1800-2400 seconds
-      expect(ndl!, greaterThan(1500), reason: 'NDL should be in seconds');
+      expect(ndl, greaterThan(1500), reason: 'NDL should be in seconds');
       expect(ndl, lessThan(3000), reason: 'NDL should be reasonable');
     });
 
@@ -324,35 +283,6 @@ void main() {
     });
   });
 
-  group('Time units verification', () {
-    test('addSegment accepts time in seconds', () {
-      final deco = BuhlmannDeco();
-
-      // Add 5 minutes = 300 seconds
-      deco.addSegment(20, GasMix.air, 300);
-
-      // Tissues should have loaded some gas
-      expect(deco.tissues.n2Pressures[0], greaterThan(0.751), reason: 'Fast tissue should load gas in 5 minutes');
-    });
-
-    test('DecoStop time is in seconds', () {
-      final deco = BuhlmannDeco();
-
-      // Deep dive requiring deco: 40m for 25 minutes (1500 seconds)
-      deco.addSegment(40, GasMix.air, 1500);
-
-      final stops = deco.calculateDecoSchedule(40, GasMix.air);
-
-      expect(stops, isNotEmpty);
-
-      // Stop times should be reasonable in seconds (multiples of 60)
-      for (final stop in stops) {
-        expect(stop.time % 60, 0, reason: 'Stop time should be in whole minutes');
-        expect(stop.time, greaterThanOrEqualTo(60), reason: 'Minimum 1 minute stop');
-      }
-    });
-  });
-
   group('Gradient factor', () {
     test('GF at surface equilibrium is negative (undersaturated)', () {
       final deco = BuhlmannDeco();
@@ -459,41 +389,6 @@ void main() {
       // GF at ceiling should be close to 30% (GF_low)
       final gfAtCeiling = deco.gradientFactor(deco.depthToPressure(ceiling));
       expect(gfAtCeiling, closeTo(30, 2), reason: 'GF at ceiling should equal GF_low (30)');
-    });
-
-    test('after completing deco schedule, surface GF is at or below GF_high', () {
-      final config = const BuhlmannConfig(gfLow: 30, gfHigh: 70);
-      final deco = BuhlmannDeco(config: config);
-
-      // Deep dive requiring deco
-      deco.addSegment(40, GasMix.air, 1500);
-
-      // Get the deco schedule
-      final stops = deco.calculateDecoSchedule(40, GasMix.air);
-      expect(stops, isNotEmpty, reason: 'Should have deco stops');
-
-      // Simulate executing the deco schedule
-      final simDeco = BuhlmannDeco(config: config, tissues: deco.tissues.copy());
-      var currentDepth = 40.0;
-
-      for (final stop in stops) {
-        // Ascend to stop (approximate)
-        if (stop.depth < currentDepth) {
-          final ascentTime = ((currentDepth - stop.depth) / (10.0 / 60.0)).round();
-          simDeco.addSegment((currentDepth + stop.depth) / 2, GasMix.air, ascentTime.toDouble());
-          currentDepth = stop.depth;
-        }
-        // Execute stop
-        simDeco.addSegment(stop.depth, GasMix.air, stop.time.toDouble());
-      }
-
-      // Ascend to surface
-      final finalAscentTime = (currentDepth / (10.0 / 60.0)).round();
-      simDeco.addSegment(currentDepth / 2, GasMix.air, finalAscentTime.toDouble());
-
-      // Surface GF should be at or below GF_high (70%)
-      final surfGF = simDeco.surfaceGradientFactor();
-      expect(surfGF, lessThanOrEqualTo(75), reason: 'Surface GF should be at or below GF_high after deco');
     });
 
     test('NDL corresponds to surface GF reaching 100%', () {

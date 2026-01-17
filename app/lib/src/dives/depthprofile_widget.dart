@@ -228,7 +228,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
                   PressureText(_displaySample!.pressures.first.pressure),
                 if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0) DepthText(_displaySample!.deco.depth, prefix: 'Comp ceil: '),
                 if (buhlmann != null && buhlmann.ceiling > 0) DepthText(buhlmann.ceiling, prefix: 'Calc ceil: '),
-                if (buhlmann != null) Text('SurfGF: ${buhlmann.surfGF.round()}%'),
+                if (buhlmann != null && buhlmann.surfGF > 0) Text('SurfGF: ${buhlmann.surfGF.round()}%'),
               ],
             ),
           ),
@@ -363,7 +363,6 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
 
     // Process samples to calculate ceiling at each point
     var prevTime = 0.0;
-    var firstStopDepth = 0.0;
     for (final sample in samplesWithDepth) {
       // Check for gas switches up to current sample time
       while (nextSwitchIdx < gasSwitches.length && gasSwitches[nextSwitchIdx].time <= sample.time) {
@@ -378,22 +377,8 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
       }
       prevTime = sample.time;
 
-      // if (ceiling > firstStopDepth) {
-      //   deco.setFirstStopDepth(ceiling);
-      //   firstStopDepth = ceiling;
-      // }
-
       final surfGF = deco.surfaceGradientFactor();
-      var ceiling = 0.0;
-      // if (surfGF > 70) {
-      // final stops = deco.calculateDecoSchedule(sample.depth, currentGas);
-      // ceiling = stops.firstOrNull?.depth ?? 0;
-      ceiling = deco.gfCeilingDepth(sample.depth);
-      if (ceiling > firstStopDepth) {
-        deco.setFirstStopDepth(ceiling);
-        firstStopDepth = ceiling;
-      }
-      // }
+      final ceiling = deco.displayCeiling();
 
       _buhlmann.add((time: sample.time, ceiling: ceiling, surfGF: surfGF));
     }

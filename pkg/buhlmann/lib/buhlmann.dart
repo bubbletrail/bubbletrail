@@ -2,30 +2,13 @@ import 'dart:math';
 
 const int numTissueCompartments = 16;
 
-/// ZHL-16b nitrogen half-times in minutes.
+/// ZHL-16c nitrogen half-times in minutes.
 const List<double> n2HalfTimes = [5.0, 8.0, 12.5, 18.5, 27.0, 38.3, 54.3, 77.0, 109.0, 146.0, 187.0, 239.0, 305.0, 390.0, 498.0, 635.0];
 
-/// ZHL-16b nitrogen a coefficients (bar).
-const List<double> n2ACoefficients = [
-  1.1696,
-  1.0000,
-  0.8618,
-  0.7562,
-  0.6667,
-  0.5933,
-  0.5282,
-  0.4701,
-  0.4187,
-  0.3798,
-  0.3497,
-  0.3223,
-  0.2971,
-  0.2737,
-  0.2523,
-  0.2327,
-];
+/// ZHL-16c nitrogen a coefficients (bar).
+const List<double> n2ACoefficients = [1.1696, 1.0, 0.8618, 0.7562, 0.62, 0.5043, 0.441, 0.4, 0.375, 0.35, 0.3295, 0.3065, 0.2835, 0.261, 0.248, 0.2327];
 
-/// ZHL-16b nitrogen b coefficients (dimensionless).
+/// ZHL-16c nitrogen b coefficients (dimensionless).
 const List<double> n2BCoefficients = [
   0.5578,
   0.6514,
@@ -45,10 +28,10 @@ const List<double> n2BCoefficients = [
   0.9653,
 ];
 
-/// ZHL-16b helium half-times in minutes.
+/// ZHL-16c helium half-times in minutes.
 const List<double> heHalfTimes = [1.88, 3.02, 4.72, 6.99, 10.21, 14.48, 20.53, 29.11, 41.20, 55.19, 70.69, 90.34, 115.29, 147.42, 188.24, 240.03];
 
-/// ZHL-16b helium a coefficients (bar).
+/// ZHL-16c helium a coefficients (bar).
 const List<double> heACoefficients = [
   1.6189,
   1.3830,
@@ -68,7 +51,7 @@ const List<double> heACoefficients = [
   0.5119,
 ];
 
-/// ZHL-16b helium b coefficients (dimensionless).
+/// ZHL-16c helium b coefficients (dimensionless).
 const List<double> heBCoefficients = [
   0.4770,
   0.5747,
@@ -301,23 +284,40 @@ class BuhlmannDeco {
     return a + ambientPressure / b;
   }
 
-  /// Calculate the gradient factor at a given depth, interpolating between
+  /// Calculate the GF limit at a given depth, interpolating between
   /// GF_low at the first stop and GF_high at the surface.
-  double _gradientFactorAtDepth(double depthMeters) {
+  double _gfLimitAtDepth(double depthMeters, double firstStop) {
     final gfLow = config.gfLow / 100.0;
     final gfHigh = config.gfHigh / 100.0;
 
-    if (_firstStopDepth == null || _firstStopDepth! <= 0) {
+    if (firstStop <= 0) {
+      // No first stop established - use gfHigh everywhere
+      return gfHigh;
+    }
+
+    if (depthMeters >= firstStop) {
       return gfLow;
     }
 
-    if (depthMeters >= _firstStopDepth!) {
-      return gfLow;
-    }
+    // Linear interpolation from firstStop (gfLow) to surface (gfHigh)
+    final fraction = 1 - depthMeters / firstStop;
+    return gfLow + (gfHigh - gfLow) * fraction;
+  }
 
-    // Linear interpolation between first stop and surface
-    final fraction = depthMeters / _firstStopDepth!;
-    return gfHigh - fraction * (gfHigh - gfLow);
+  /// Check if all tissues are within the GF limit at the given depth.
+  bool _withinGfLimit(double depth, double firstStop) {
+    final gfLimit = _gfLimitAtDepth(depth, firstStop);
+    final ambientPressure = depthToPressure(depth);
+
+    for (var i = 0; i < numTissueCompartments; i++) {
+      final totalInert = tissues.totalInertPressure(i);
+      final mVal = mValue(i, ambientPressure);
+      final gf = (totalInert - ambientPressure) / (mVal - ambientPressure);
+      if (gf > gfLimit) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /// Calculate the ceiling (minimum ambient pressure) for a compartment
@@ -352,23 +352,65 @@ class BuhlmannDeco {
     return pressureToDepth(maxCeiling);
   }
 
-  /// Calculate the ceiling depth with gradient factor interpolation.
-  double gfCeilingDepth(double currentDepth) {
-    var maxCeiling = 0.0;
-    final gf = _gradientFactorAtDepth(currentDepth);
-    for (var i = 0; i < numTissueCompartments; i++) {
-      final ceiling = _compartmentCeiling(i, gf);
-      if (ceiling > maxCeiling) {
-        maxCeiling = ceiling;
+  /// Calculate the display ceiling with smooth GF transition.
+  ///
+  /// This method:
+  /// 1. Enters deco when surface GF exceeds gfHigh (ceiling at gfHigh > 0)
+  /// 2. Tracks first stop depth (maximum ceiling seen at gfLow)
+  /// 3. Smoothly interpolates GF from firstStop (gfLow) to surface (gfHigh)
+  ///
+  /// The key property is continuity: when we first enter deco, the ceiling
+  /// is at the gfHigh depth. As firstStop gets established (deeper), the
+  /// ceiling smoothly transitions toward using gfLow at firstStop.
+  double displayCeiling() {
+    // Calculate ceiling at gfLow (potential first stop depth)
+    final ceilingAtGfLow = ceilingDepth(gf: config.gfLow);
+
+    // Update first stop tracking (maximum ceiling seen at gfLow)
+    if (ceilingAtGfLow > 0) {
+      _firstStopDepth = max(_firstStopDepth ?? 0, ceilingAtGfLow);
+    }
+
+    // Check if in deco using gfHigh
+    final ceilingAtGfHigh = ceilingDepth(gf: config.gfHigh);
+    if (ceilingAtGfHigh <= 0) {
+      return 0;
+    }
+
+    // First stop depth for interpolation
+    final firstStop = _firstStopDepth ?? 0;
+
+    // If first stop is at or shallower than gfHigh ceiling, use gfHigh ceiling
+    // This ensures continuity when first entering deco
+    if (firstStop <= ceilingAtGfHigh) {
+      return ceilingAtGfHigh;
+    }
+
+    // Binary search for the ceiling with interpolated GF
+    // We want the shallowest depth where all tissues are within the GF limit
+    var lo = 0.0;
+    var hi = firstStop;
+
+    for (var i = 0; i < 20; i++) {
+      final depth = (lo + hi) / 2;
+      if (_withinGfLimit(depth, firstStop)) {
+        hi = depth;
+      } else {
+        lo = depth;
       }
     }
 
-    return pressureToDepth(maxCeiling);
+    return max(lo, 0);
+  }
+
+  /// Check if currently in decompression (surface GF > gfHigh).
+  bool inDeco() {
+    return ceilingDepth(gf: config.gfHigh) > 0;
   }
 
   /// Get the next decompression stop depth, rounded up to stop increment.
-  double nextStopDepth(double currentDepth) {
-    final ceiling = gfCeilingDepth(currentDepth);
+  double nextStopDepth() {
+    final ceiling = displayCeiling();
     if (ceiling <= 0) return 0;
 
     // Round up to nearest stop depth
@@ -382,34 +424,6 @@ class BuhlmannDeco {
     return stopDepth;
   }
 
-  /// Calculate time to clear a decompression stop.
-  /// Returns the time in seconds needed at the stop before ascending.
-  ///
-  /// [stopDepth] - stop depth in meters
-  /// [gas] - breathing gas mixture
-  /// [maxTime] - maximum time to simulate in seconds (default 60000 = 1000 min)
-  double timeToSurface(double stopDepth, GasMix gas, {double maxTime = 60000}) {
-    if (stopDepth <= 0) return 0;
-
-    final testDeco = BuhlmannDeco(config: config, tissues: tissues.copy());
-    testDeco._firstStopDepth = _firstStopDepth;
-
-    var time = 0.0;
-    const timeStep = 60.0; // 60 second (1 minute) steps
-
-    while (time < maxTime) {
-      testDeco.addSegment(stopDepth, gas, timeStep);
-      time += timeStep;
-
-      final nextStop = testDeco.nextStopDepth(stopDepth);
-      if (nextStop < stopDepth) {
-        return time;
-      }
-    }
-
-    return maxTime;
-  }
-
   /// Calculate the no-decompression limit (NDL) in seconds.
   /// Returns null if already in decompression.
   ///
@@ -417,8 +431,8 @@ class BuhlmannDeco {
   /// [gas] - breathing gas mixture
   /// [maxNdl] - maximum NDL to calculate in seconds (default 59940 = 999 min)
   double? ndl(double depthMeters, GasMix gas, {double maxNdl = 59940}) {
-    // Check if we're already past the ceiling
-    if (ceilingDepth() > 0) return null;
+    // Check if we're already in deco (surface GF > gfHigh)
+    if (inDeco()) return null;
 
     final testDeco = BuhlmannDeco(config: config, tissues: tissues.copy());
 
@@ -429,8 +443,8 @@ class BuhlmannDeco {
       testDeco.addSegment(depthMeters, gas, timeStep);
       time += timeStep;
 
-      // Check if a deco stop is now required
-      if (testDeco.ceilingDepth() > 0) {
+      // Check if a deco stop is now required (surface GF > gfHigh)
+      if (testDeco.inDeco()) {
         return time - timeStep;
       }
     }
@@ -506,51 +520,6 @@ class BuhlmannDeco {
     }
 
     return leading;
-  }
-
-  /// Calculate a complete decompression schedule.
-  ///
-  /// [currentDepth] - current depth in meters
-  /// [gas] - breathing gas mixture
-  /// [ascentRate] - ascent rate in meters per second (default 10/60 = 0.167 m/s)
-  List<DecoStop> calculateDecoSchedule(double currentDepth, GasMix gas, {double ascentRate = 9.0 / 60.0}) {
-    final stops = <DecoStop>[];
-    final testDeco = BuhlmannDeco(config: config, tissues: tissues.copy());
-
-    var depth = currentDepth;
-
-    // Find the first stop depth
-    final firstStop = testDeco.nextStopDepth(depth);
-    if (firstStop > 0) {
-      testDeco._firstStopDepth = firstStop;
-    }
-
-    while (depth > 0) {
-      final nextStop = testDeco.nextStopDepth(depth);
-
-      if (nextStop <= 0) {
-        // Can ascend to surface
-        final ascentTime = depth / ascentRate;
-        testDeco.addSegment(depth / 2, gas, ascentTime); // Approximate ascent
-        break;
-      }
-
-      if (nextStop < depth) {
-        // Ascend to next stop
-        final ascentTime = (depth - nextStop) / ascentRate;
-        testDeco.addSegment((depth + nextStop) / 2, gas, ascentTime);
-        depth = nextStop;
-      }
-
-      // Stay at stop until cleared
-      final stopTime = testDeco.timeToSurface(depth, gas);
-      if (stopTime > 0) {
-        stops.add(DecoStop(depth: depth, time: stopTime));
-        testDeco.addSegment(depth, gas, stopTime);
-      }
-    }
-
-    return stops;
   }
 
   /// Set the first stop depth for GF interpolation.
