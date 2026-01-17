@@ -14,6 +14,7 @@ dependencies:
   buhlmann: {path: ../pkg/buhlmann}
   chips_input_autocomplete: ^1.2.2
   chunked_stream: ^1.4.2
+  collection: ^1.19.1
   convert: ^3.1.2
   copy_with_extension: ^11.0.0
   crypto: ^3.0.7

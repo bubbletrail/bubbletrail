@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:buhlmann/buhlmann.dart' as buhlmann;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
@@ -11,6 +12,7 @@ import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
+import '../utils/tissue_calculator.dart';
 import 'sync_bloc.dart';
 
 part 'divelist_bloc.g.dart';
@@ -216,14 +218,84 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   }
 
   Future<void> _onLoadDives(LoadDives event, Emitter<DiveListState> emit) async {
-    final dives = await _store.dives.getAll();
+    var dives = await _store.dives.getAll();
     final sites = await _store.sites.getAll();
+
+    // Calculate tissues for dives that are missing them
+    dives = await _calculateMissingTissues(dives);
+
     final currentState = state;
     if (currentState is DiveListLoaded) {
       emit(currentState.copyWith(dives: dives, sites: sites, tags: _store.tags, buddies: _store.dives.buddies));
     } else {
       emit(DiveListLoaded(dives, sites, _store.tags, _store.dives.buddies));
     }
+  }
+
+  /// Calculate and persist tissues for any dives that are missing them.
+  Future<List<Dive>> _calculateMissingTissues(List<Dive> dives) async {
+    // Find dives missing tissues (either start or end)
+    final missingTissues = dives.where((d) => !d.hasEndTissues() || !d.hasStartTissues()).toList();
+    if (missingTissues.isEmpty) return dives;
+
+    _log.info('calculating tissues for ${missingTissues.length} dives');
+
+    // Sort all dives chronologically for tissue chaining
+    final chronological = List<Dive>.from(dives);
+    chronological.sort((a, b) => a.start.seconds.compareTo(b.start.seconds));
+
+    // Track which dives need updating
+    final updatedDives = <String, Dive>{};
+    DateTime? prevDiveEnd;
+    buhlmann.TissueState? prevEndTissues;
+
+    for (final dive in chronological) {
+      final diveStart = dive.start.toDateTime();
+
+      // Calculate start tissues from previous dive
+      buhlmann.TissueState? startTissues;
+      if (prevDiveEnd == null || diveStart.difference(prevDiveEnd) > tissueResetDuration) {
+        startTissues = null; // Start with clean tissues
+      } else if (prevEndTissues != null) {
+        // Simulate surface interval off-gassing
+        final surfaceInterval = diveStart.difference(prevDiveEnd).inSeconds.toDouble();
+        if (surfaceInterval > 0) {
+          final deco = buhlmann.BuhlmannDeco(tissues: prevEndTissues.copy());
+          deco.addSegment(0, buhlmann.GasMix.air, surfaceInterval);
+          startTissues = deco.tissues;
+        } else {
+          startTissues = prevEndTissues.copy();
+        }
+      }
+
+      // Calculate tissues if missing either start or end
+      if (!dive.hasEndTissues() || !dive.hasStartTissues()) {
+        // Load full dive data with samples
+        final fullDive = await _store.dives.getById(dive.id);
+        if (fullDive != null && fullDive.logs.isNotEmpty) {
+          final endTissues = calculateDiveTissues(fullDive, startTissues?.copy());
+          final updatedDive = fullDive.rebuild((d) {
+            if (startTissues != null) {
+              d.startTissues = tissueStateToProto(startTissues);
+            }
+            d.endTissues = tissueStateToProto(endTissues);
+          });
+          await _store.dives.update(updatedDive);
+          updatedDives[dive.id] = updatedDive.rebuild((d) => d.logs.clear()); // Clear logs for list view
+          prevEndTissues = endTissues;
+        }
+      } else {
+        // Use existing tissues for next dive
+        prevEndTissues = protoToTissueState(dive.endTissues);
+      }
+
+      // Update previous dive end time
+      prevDiveEnd = diveStart.add(Duration(seconds: dive.duration));
+    }
+
+    // Return updated dive list
+    if (updatedDives.isEmpty) return dives;
+    return dives.map((d) => updatedDives[d.id] ?? d).toList();
   }
 
   Future<void> _onUpdateDive(UpdateDive event, Emitter<DiveListState> emit) async {

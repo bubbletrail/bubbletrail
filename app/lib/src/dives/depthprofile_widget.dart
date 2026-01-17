@@ -5,6 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../common/common.dart';
+import '../utils/tissue_calculator.dart';
 
 class DepthProfileWidget extends StatefulWidget {
   final Log log;
@@ -12,7 +13,11 @@ class DepthProfileWidget extends StatefulWidget {
   final List<SampleEvent> events;
   final List<DiveCylinder> cylinders;
 
-  const DepthProfileWidget({super.key, required this.log, required this.preferences, required this.events, required this.cylinders});
+  /// Starting tissue state (from previous dive, accounting for surface interval).
+  /// If null, assumes clean tissues (no residual loading).
+  final Tissues? startTissues;
+
+  const DepthProfileWidget({super.key, required this.log, required this.preferences, required this.events, required this.cylinders, this.startTissues});
 
   @override
   State<DepthProfileWidget> createState() => _DepthProfileWidgetState();
@@ -336,7 +341,11 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
   void _calculateBuhlmann() {
     if (samplesWithDepth.isEmpty) return;
 
-    final deco = buhlmann.BuhlmannDeco(config: buhlmann.BuhlmannConfig(gfHigh: 70, gfLow: 30));
+    // Convert start tissues from proto if provided
+    final startTissues = protoToTissueState(widget.startTissues);
+
+    final config = buhlmann.BuhlmannConfig(gfHigh: 70, gfLow: 30);
+    final deco = buhlmann.BuhlmannDeco(config: config, tissues: startTissues);
 
     // Build gas mixes from cylinders, defaulting to air if none
     final gasMixes = <buhlmann.GasMix>[];
@@ -351,7 +360,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
     // Build sorted list of gas switch times from events
     final gasSwitches = <({int time, int gasIndex})>[];
     for (final event in widget.events) {
-      if (event.type == .SAMPLE_EVENT_TYPE_GAS_CHANGE && event.value < gasMixes.length) {
+      if (event.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE && event.value < gasMixes.length) {
         gasSwitches.add((time: event.time, gasIndex: event.value));
       }
     }

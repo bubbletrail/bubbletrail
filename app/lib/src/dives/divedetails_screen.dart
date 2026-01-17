@@ -10,6 +10,7 @@ import '../app_routes.dart';
 import '../bloc/divelist_bloc.dart';
 import '../bloc/preferences_bloc.dart';
 import '../common/common.dart';
+import '../utils/tissue_calculator.dart' show getStartTissues;
 import 'depthprofile_widget.dart';
 
 class DiveDetailsScreen extends StatelessWidget {
@@ -244,10 +245,12 @@ class _ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final startTissues = getStartTissues(dive);
+
     return Padding(
-      padding: const .all(8.0),
+      padding: const EdgeInsets.all(8.0),
       child: Column(
-        crossAxisAlignment: .stretch,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 8,
         children: [
           Stack(
@@ -265,6 +268,7 @@ class _ProfileCard extends StatelessWidget {
                         preferences: state.preferences,
                         cylinders: dive.cylinders,
                         events: dive.events,
+                        startTissues: startTissues,
                       );
                     },
                   ),

@@ -46,6 +46,14 @@ message Dive {
   // Events like gas changed, initially extracted from dive computer data
   // but editable.
   repeated SampleEvent events = 24;
+
+  // Tissue state at the end of this dive (for calculating repetitive dives).
+  // Calculated from previous dive's tissues + this dive's profile.
+  Tissues end_tissues = 25;
+
+  // Tissue state at the start of this dive (after surface interval off-gassing).
+  // Calculated from previous dive's end_tissues.
+  Tissues start_tissues = 26;
 }
 
 // Per-dive cylinder usage information.
