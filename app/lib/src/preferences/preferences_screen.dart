@@ -270,19 +270,24 @@ class _ImportExportButtons extends StatelessWidget {
           runSpacing: 8,
           children: [
             OutlinedButton.icon(
-              icon: const Icon(Icons.file_download_outlined, size: 16),
+              icon: const Icon(Icons.file_upload_outlined, size: 16),
               label: const Text('Import log file'),
               onPressed: state.working ? null : () => _importDives(context),
             ),
             OutlinedButton.icon(
+              icon: const Icon(Icons.file_download_outlined, size: 16),
+              label: const Text('Export Subsurface file'),
+              onPressed: state.working ? null : () => context.read<ArchiveBloc>().add(ExportSsrf()),
+            ),
+            OutlinedButton.icon(
               icon: const Icon(Icons.file_upload_outlined, size: 16),
-              label: const Text('Export database backup'),
-              onPressed: state.working ? null : () => context.read<ArchiveBloc>().add(ExportArchive()),
+              label: const Text('Import database backup'),
+              onPressed: state.working ? null : () => _importBackup(context),
             ),
             OutlinedButton.icon(
               icon: const Icon(Icons.file_download_outlined, size: 16),
-              label: const Text('Import database backup'),
-              onPressed: state.working ? null : () => _importBackup(context),
+              label: const Text('Export database backup'),
+              onPressed: state.working ? null : () => context.read<ArchiveBloc>().add(ExportArchive()),
             ),
             if (state.working) const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
           ],

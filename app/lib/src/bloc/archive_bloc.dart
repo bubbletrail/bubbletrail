@@ -1,6 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
+import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
@@ -60,6 +64,8 @@ class ImportArchive extends ArchiveEvent {
   ImportArchive(this.zipPath);
 }
 
+class ExportSsrf extends ArchiveEvent {}
+
 class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
   final SyncBloc _syncBloc;
 
@@ -68,6 +74,7 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
     on<ExportComplete>(_onExportComplete);
     on<ExportCancelled>(_onExportCancelled);
     on<ImportArchive>(_onImport);
+    on<ExportSsrf>(_onExportSsrf);
   }
 
   Future<void> _onExport(ExportArchive event, Emitter<ArchiveState> emit) async {
@@ -131,4 +138,69 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
       emit(state.copyWith(working: false, error: e.toString()));
     }
   }
+
+  Future<void> _onExportSsrf(ExportSsrf event, Emitter<ArchiveState> emit) async {
+    emit(state.copyWith(working: true, error: null));
+    try {
+      final store = await _syncBloc.store;
+      final tempDir = await getTemporaryDirectory();
+      final filename = 'bubbletrail_${DateFormat('yyyy-MM-dd_HHmmss').format(DateTime.now())}.ssrf';
+      final ssrfFile = File('${tempDir.path}/$filename');
+
+      // Get all sites
+      final sites = await store.sites.getAll();
+
+      // Get all dives with full data (including logs/samples)
+      final overviewDives = await store.dives.getAll();
+      final dives = <Dive>[];
+      for (final d in overviewDives) {
+        final fullDive = await store.diveById(d.id);
+        if (fullDive != null) {
+          dives.add(fullDive);
+        }
+      }
+
+      final tempContainer = Ssrf(dives: dives, sites: sites);
+      final xmlDoc = await compute((container) {
+        // Subsurface requires site IDs to be exactly 8 hex digits.
+        // Create a mapping from our UUIDs to 8-hex-digit IDs using first 4 bytes of SHA256.
+        final siteIdMap = <String, String>{};
+        for (final site in container.sites) {
+          siteIdMap[site.id] = _toSubsurfaceSiteId(site.id);
+        }
+
+        // Rebuild sites with Subsurface-compatible IDs
+        final exportSites = container.sites.map((site) {
+          return site.rebuild((s) => s.id = siteIdMap[site.id]!);
+        }).toList();
+
+        // Rebuild dives with remapped site IDs
+        final exportDives = container.dives.map((dive) {
+          if (dive.hasSiteId() && siteIdMap.containsKey(dive.siteId)) {
+            return dive.rebuild((d) => d.siteId = siteIdMap[dive.siteId]!);
+          }
+          return dive;
+        }).toList();
+
+        // Create SSRF container and generate XML
+        final ssrf = Ssrf(dives: exportDives, sites: exportSites);
+        return ssrf.toXmlDocument().toXmlString(pretty: true);
+      }, tempContainer);
+
+      await ssrfFile.writeAsString(xmlDoc);
+
+      _log.info('SSRF export ready at ${ssrfFile.path}');
+      emit(state.copyWith(working: false, exportReadyPath: ssrfFile.path, exportReadyFilename: filename));
+    } catch (e) {
+      _log.severe('SSRF export failed', e);
+      emit(state.copyWith(working: false, error: e.toString()));
+    }
+  }
+}
+
+/// Converts our UUID site ID to a Subsurface-compatible 8 hex digit ID.
+/// Uses the first 4 bytes of SHA256 hash of the original ID.
+String _toSubsurfaceSiteId(String id) {
+  final bytes = sha256.convert(utf8.encode(id)).bytes;
+  return bytes.take(4).map((b) => b.toRadixString(16).padLeft(2, '0')).join();
 }
