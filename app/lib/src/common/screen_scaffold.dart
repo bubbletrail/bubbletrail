@@ -1,6 +1,6 @@
-import 'dart:io' as io;
-
 import 'package:flutter/material.dart';
+
+import '../app_metadata.dart';
 
 class ScreenScaffold extends StatelessWidget {
   final Widget title;
@@ -15,7 +15,7 @@ class ScreenScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
 
-    final inner = io.Platform.isIOS
+    final inner = platformIsMobile
         ? transparent
               ? body
               : DecoratedBox(
@@ -43,7 +43,7 @@ class ScreenScaffold extends StatelessWidget {
         backgroundColor: Colors.transparent,
         appBar: AppBar(title: title, backgroundColor: Colors.transparent, actions: actions, actionsPadding: .only(right: 16)),
         body: Padding(
-          padding: io.Platform.isIOS ? const .all(0) : const .only(right: 4.0, bottom: 4.0),
+          padding: platformIsMobile ? const .all(0) : const .only(right: 4.0, bottom: 4.0),
           child: Row(
             crossAxisAlignment: .stretch,
             children: [Expanded(child: inner)],

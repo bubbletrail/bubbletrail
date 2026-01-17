@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'src/app_metadata.dart';
 import 'src/app_routes.dart';
 import 'src/app_theme.dart';
 import 'src/bloc/archive_bloc.dart';
@@ -44,7 +44,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _initLogging();
   await WindowPreferences.initialize();
-  if (Platform.isIOS || Platform.isAndroid) {
+  if (platformIsMobile) {
     unawaited(SystemChrome.setPreferredOrientations([.portraitUp]));
   }
   runApp(const MyApp());
@@ -135,7 +135,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
               ),
             );
 
-            if (Platform.isIOS) {
+            if (platformIsMobile) {
               return Container(
                 decoration: decoration,
                 child: SafeArea(
@@ -206,7 +206,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                     ),
                   ],
                 ),
-                if (!Platform.isIOS) profileDetailRoute,
+                if (platformIsDesktop) profileDetailRoute,
                 GoRoute(
                   path: AppRoutePath.sitesDetailsMap,
                   name: AppRouteName.sitesDetailsMap,
@@ -307,7 +307,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
             ),
           ],
         ),
-        if (Platform.isIOS) profileDetailRoute,
+        if (platformIsMobile) profileDetailRoute,
       ],
     );
   }

@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:trina_grid/trina_grid.dart';
 
+import 'app_metadata.dart';
 import 'common/common.dart';
 
 class AppTheme {
@@ -22,7 +21,7 @@ class AppTheme {
   static const Color _l3 = Color(0xFF339CCC); // primary
   static const Color _l4 = Color(0xFF096688); // secondary
 
-  static final density = Platform.isAndroid || Platform.isIOS ? VisualDensity.standard : VisualDensity.compact;
+  static final density = platformIsMobile ? VisualDensity.standard : VisualDensity.compact;
 
   static const transitions = PageTransitionsTheme(
     builders: <TargetPlatform, PageTransitionsBuilder>{

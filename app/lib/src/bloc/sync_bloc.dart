@@ -1,9 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:crypto/crypto.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -59,23 +56,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
 
   Future<Store> get store => _storeCompleter.future;
   Future<String> get storePath async => '${(await getApplicationDocumentsDirectory()).path}/db';
-
-  Future<String> get systemID async {
-    final di = DeviceInfoPlugin();
-    late final String hash;
-    if (Platform.isIOS) {
-      final info = await di.iosInfo;
-      final dig = sha256.convert((info.identifierForVendor ?? '').codeUnits);
-      hash = dig.toString();
-    } else if (Platform.isMacOS) {
-      final info = await di.macOsInfo;
-      final dig = sha256.convert((info.systemGUID ?? '').codeUnits);
-      hash = dig.toString();
-    } else {
-      throw Exception('unimplemented platform');
-    }
-    return hash.substring(0, 12);
-  }
 
   SyncBloc() : super(SyncState()) {
     on<SyncEvent>((event, emit) async {
