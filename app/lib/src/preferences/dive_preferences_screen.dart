@@ -35,8 +35,8 @@ class DivePreferencesScreen extends StatelessWidget {
 
 class _GfSlider extends StatelessWidget {
   final String label;
-  final int value;
-  final ValueChanged<int> onChanged;
+  final double value;
+  final ValueChanged<double> onChanged;
 
   const _GfSlider({required this.label, required this.value, required this.onChanged});
 
@@ -49,10 +49,10 @@ class _GfSlider extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(label, style: Theme.of(context).textTheme.bodyLarge),
-            Text('$value%', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+            Text('${(value * 100).round()}%', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
           ],
         ),
-        Slider(value: value.toDouble(), min: 10, max: 100, divisions: 18, label: '$value%', onChanged: (v) => onChanged(v.round())),
+        Slider(value: value, min: 0.1, max: 1.0, divisions: 18, label: '${(value * 100).round()}%', onChanged: (v) => onChanged(v)),
       ],
     );
   }

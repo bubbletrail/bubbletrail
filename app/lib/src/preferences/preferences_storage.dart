@@ -43,8 +43,8 @@ class PreferencesStorage {
         region: prefs.getString(_s3RegionKey) ?? 'us-east-1',
         vaultKey: prefs.getString(_s3VaultKey) ?? '',
       ),
-      gfLow: prefs.getInt(_gfLowKey) ?? 50,
-      gfHigh: prefs.getInt(_gfHighKey) ?? 70,
+      gfLow: prefs.getDouble(_gfLowKey) ?? 0.5,
+      gfHigh: prefs.getDouble(_gfHighKey) ?? 0.7,
     );
   }
 
@@ -66,7 +66,7 @@ class PreferencesStorage {
     await prefs.setString(_s3SecretKeyKey, preferences.s3Config.secretKey);
     await prefs.setString(_s3RegionKey, preferences.s3Config.region);
     await prefs.setString(_s3VaultKey, preferences.s3Config.vaultKey);
-    await prefs.setInt(_gfLowKey, preferences.gfLow);
-    await prefs.setInt(_gfHighKey, preferences.gfHigh);
+    await prefs.setDouble(_gfLowKey, preferences.gfLow);
+    await prefs.setDouble(_gfHighKey, preferences.gfHigh);
   }
 }

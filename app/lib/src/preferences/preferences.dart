@@ -116,8 +116,8 @@ class Preferences {
   final ThemeMode themeMode;
   final SyncProviderKind syncProvider;
   final S3Config s3Config;
-  final int gfLow;
-  final int gfHigh;
+  final double gfLow;
+  final double gfHigh;
 
   String get dateTimeFormat => '${dateFormat.format} ${timeFormat.format}';
 
@@ -132,8 +132,8 @@ class Preferences {
     this.themeMode = ThemeMode.system,
     this.syncProvider = .none,
     this.s3Config = const S3Config(),
-    this.gfLow = 50,
-    this.gfHigh = 70,
+    this.gfLow = 0.5,
+    this.gfHigh = 0.7,
   });
 
   Preferences copyWith({
@@ -147,8 +147,8 @@ class Preferences {
     ThemeMode? themeMode,
     SyncProviderKind? syncProvider,
     S3Config? s3Config,
-    int? gfLow,
-    int? gfHigh,
+    double? gfLow,
+    double? gfHigh,
   }) {
     return Preferences(
       depthUnit: depthUnit ?? this.depthUnit,
