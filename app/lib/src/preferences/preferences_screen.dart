@@ -71,7 +71,14 @@ class PreferencesScreen extends StatelessWidget {
                           context.read<PreferencesBloc>().add(UpdateThemeMode(value.first));
                         },
                       ),
-                      OutlinedButton.icon(icon: Icon(Icons.straighten), label: Text('Edit units'), onPressed: () => context.goNamed(AppRouteName.units)),
+                      Wrap(
+                        spacing: 16,
+                        runSpacing: 8,
+                        children: [
+                          OutlinedButton.icon(icon: Icon(Icons.straighten), label: Text('Edit units'), onPressed: () => context.goNamed(AppRouteName.units)),
+                          OutlinedButton.icon(icon: Icon(Icons.scuba_diving), label: Text('Dive settings'), onPressed: () => context.goNamed(AppRouteName.divePreferences)),
+                        ],
+                      ),
                     ],
                   ),
                   const SizedBox(height: 24),

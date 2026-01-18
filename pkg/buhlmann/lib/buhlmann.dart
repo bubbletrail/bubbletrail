@@ -130,10 +130,10 @@ class GasMix {
 /// Configuration for the Buhlmann algorithm.
 class BuhlmannConfig {
   /// Low gradient factor (at depth) as percentage (0-100).
-  final double gfLow;
+  final int gfLow;
 
   /// High gradient factor (at surface) as percentage (0-100).
-  final double gfHigh;
+  final int gfHigh;
 
   /// Last decompression stop depth in meters (typically 3 or 6).
   final double lastStopDepth;
@@ -141,16 +141,16 @@ class BuhlmannConfig {
   /// Surface pressure in bar.
   final double surfacePressure;
 
-  const BuhlmannConfig({this.gfLow = 100.0, this.gfHigh = 100.0, this.lastStopDepth = 3.0, this.surfacePressure = atmPressure});
+  const BuhlmannConfig({this.gfLow = 100, this.gfHigh = 100, this.lastStopDepth = 3.0, this.surfacePressure = atmPressure});
 
   /// Default configuration without gradient factors.
   static const defaultConfig = BuhlmannConfig();
 
   /// Conservative configuration with GF 30/70.
-  static const conservative = BuhlmannConfig(gfLow: 30.0, gfHigh: 70.0);
+  static const conservative = BuhlmannConfig(gfLow: 30, gfHigh: 70);
 
   /// Moderate configuration with GF 40/85.
-  static const moderate = BuhlmannConfig(gfLow: 40.0, gfHigh: 85.0);
+  static const moderate = BuhlmannConfig(gfLow: 40, gfHigh: 85);
 }
 
 /// Tissue compartment state.
@@ -334,16 +334,15 @@ class BuhlmannDeco {
   }
 
   /// Calculate the overall ceiling depth in meters.
-  double ceilingDepth({double? gf}) {
+  double ceilingDepth({int? gf}) {
     var maxCeiling = 0.0;
 
     if (gf == null) {
       gf = config.gfLow;
     }
-    gf = gf / 100.0;
 
     for (var i = 0; i < numTissueCompartments; i++) {
-      final ceiling = _compartmentCeiling(i, gf);
+      final ceiling = _compartmentCeiling(i, gf / 100.0);
       if (ceiling > maxCeiling) {
         maxCeiling = ceiling;
       }

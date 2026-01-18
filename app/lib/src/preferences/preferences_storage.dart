@@ -19,6 +19,8 @@ class PreferencesStorage {
   static const _s3SecretKeyKey = 's3_secret_key';
   static const _s3RegionKey = 's3_region';
   static const _s3VaultKey = 's3_vault_key';
+  static const _gfLowKey = 'gf_low';
+  static const _gfHighKey = 'gf_high';
 
   Future<Preferences> load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -41,6 +43,8 @@ class PreferencesStorage {
         region: prefs.getString(_s3RegionKey) ?? 'us-east-1',
         vaultKey: prefs.getString(_s3VaultKey) ?? '',
       ),
+      gfLow: prefs.getInt(_gfLowKey) ?? 50,
+      gfHigh: prefs.getInt(_gfHighKey) ?? 70,
     );
   }
 
@@ -62,5 +66,7 @@ class PreferencesStorage {
     await prefs.setString(_s3SecretKeyKey, preferences.s3Config.secretKey);
     await prefs.setString(_s3RegionKey, preferences.s3Config.region);
     await prefs.setString(_s3VaultKey, preferences.s3Config.vaultKey);
+    await prefs.setInt(_gfLowKey, preferences.gfLow);
+    await prefs.setInt(_gfHighKey, preferences.gfHigh);
   }
 }

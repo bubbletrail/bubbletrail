@@ -218,7 +218,7 @@ class _DiveDetails extends StatelessWidget {
     }
     if (dive.hasOtu()) children.add(ColumnRow(label: 'OTU', child: Text(dive.otu.toString())));
     if (dive.hasCns()) children.add(ColumnRow(label: 'CNS', child: Text('${dive.cns}%')));
-    if (dive.hasEndSurfGf()) children.add(ColumnRow(label: 'SurfGF', child: Text('${dive.endSurfGf.round()}%')));
+    if (dive.hasEndSurfGf()) children.add(ColumnRow(label: 'SurfGF', child: Text('${dive.endSurfGf.round().clamp(0, 999)}%')));
     if (worstDeco != null) children.add(ColumnRow(label: 'Deco', child: DecoStatusText(worstDeco)));
     if (decoModel != null) children.add(ColumnRow(label: 'Model', child: DecoModelText(decoModel)));
     if (dive.logs.isNotEmpty && dive.logs.first.hasModel()) children.add(ColumnRow(label: 'Computer', child: Text(dive.logs.first.model)));

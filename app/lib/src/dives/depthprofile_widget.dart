@@ -233,7 +233,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
                   PressureText(_displaySample!.pressures.first.pressure),
                 if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0) DepthText(_displaySample!.deco.depth, prefix: 'Comp ceil: '),
                 if (buhlmann != null && buhlmann.ceiling > 0) DepthText(buhlmann.ceiling, prefix: 'Calc ceil: '),
-                if (buhlmann != null && buhlmann.surfGF > 0) Text('SurfGF: ${buhlmann.surfGF.round()}%'),
+                if (buhlmann != null) Text('SurfGF: ${buhlmann.surfGF.round().clamp(0, 999)}%'),
               ],
             ),
           ),
@@ -344,7 +344,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
     // Convert start tissues from proto if provided
     final startTissues = protoToTissueState(widget.startTissues);
 
-    final config = buhlmann.BuhlmannConfig(gfHigh: 70, gfLow: 30);
+    final config = buhlmann.BuhlmannConfig(gfLow: widget.preferences.gfLow, gfHigh: widget.preferences.gfHigh);
     final deco = buhlmann.BuhlmannDeco(config: config, tissues: startTissues);
 
     // Build gas mixes from cylinders, defaulting to air if none

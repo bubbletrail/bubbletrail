@@ -116,6 +116,24 @@ class UpdateS3Config extends PreferencesEvent {
   List<Object?> get props => [s3Config];
 }
 
+class UpdateGfLow extends PreferencesEvent {
+  final int gfLow;
+
+  const UpdateGfLow(this.gfLow);
+
+  @override
+  List<Object?> get props => [gfLow];
+}
+
+class UpdateGfHigh extends PreferencesEvent {
+  final int gfHigh;
+
+  const UpdateGfHigh(this.gfHigh);
+
+  @override
+  List<Object?> get props => [gfHigh];
+}
+
 class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
   final PreferencesStorage _storage = PreferencesStorage();
 
@@ -143,6 +161,10 @@ class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
         await _onUpdateSyncProvider(event, emit);
       } else if (event is UpdateS3Config) {
         await _onUpdateS3Config(event, emit);
+      } else if (event is UpdateGfLow) {
+        await _onUpdateGfLow(event, emit);
+      } else if (event is UpdateGfHigh) {
+        await _onUpdateGfHigh(event, emit);
       }
     }, transformer: sequential());
 
@@ -220,6 +242,20 @@ class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
   Future<void> _onUpdateS3Config(UpdateS3Config event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(s3Config: event.s3Config);
+    await _storage.save(updated);
+    emit(PreferencesState(updated));
+  }
+
+  Future<void> _onUpdateGfLow(UpdateGfLow event, Emitter<PreferencesState> emit) async {
+    final current = state.preferences;
+    final updated = current.copyWith(gfLow: event.gfLow);
+    await _storage.save(updated);
+    emit(PreferencesState(updated));
+  }
+
+  Future<void> _onUpdateGfHigh(UpdateGfHigh event, Emitter<PreferencesState> emit) async {
+    final current = state.preferences;
+    final updated = current.copyWith(gfHigh: event.gfHigh);
     await _storage.save(updated);
     emit(PreferencesState(updated));
   }

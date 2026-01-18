@@ -116,6 +116,8 @@ class Preferences {
   final ThemeMode themeMode;
   final SyncProviderKind syncProvider;
   final S3Config s3Config;
+  final int gfLow;
+  final int gfHigh;
 
   String get dateTimeFormat => '${dateFormat.format} ${timeFormat.format}';
 
@@ -130,6 +132,8 @@ class Preferences {
     this.themeMode = ThemeMode.system,
     this.syncProvider = .none,
     this.s3Config = const S3Config(),
+    this.gfLow = 50,
+    this.gfHigh = 70,
   });
 
   Preferences copyWith({
@@ -143,6 +147,8 @@ class Preferences {
     ThemeMode? themeMode,
     SyncProviderKind? syncProvider,
     S3Config? s3Config,
+    int? gfLow,
+    int? gfHigh,
   }) {
     return Preferences(
       depthUnit: depthUnit ?? this.depthUnit,
@@ -155,6 +161,8 @@ class Preferences {
       themeMode: themeMode ?? this.themeMode,
       syncProvider: syncProvider ?? this.syncProvider,
       s3Config: s3Config ?? this.s3Config,
+      gfLow: gfLow ?? this.gfLow,
+      gfHigh: gfHigh ?? this.gfHigh,
     );
   }
 
@@ -171,9 +179,12 @@ class Preferences {
         other.timeFormat == timeFormat &&
         other.themeMode == themeMode &&
         other.syncProvider == syncProvider &&
-        other.s3Config == s3Config;
+        other.s3Config == s3Config &&
+        other.gfLow == gfLow &&
+        other.gfHigh == gfHigh;
   }
 
   @override
-  int get hashCode => Object.hash(depthUnit, pressureUnit, temperatureUnit, volumeUnit, weightUnit, dateFormat, timeFormat, themeMode, syncProvider, s3Config);
+  int get hashCode =>
+      Object.hash(depthUnit, pressureUnit, temperatureUnit, volumeUnit, weightUnit, dateFormat, timeFormat, themeMode, syncProvider, s3Config, gfLow, gfHigh);
 }
