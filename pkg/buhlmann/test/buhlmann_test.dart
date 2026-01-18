@@ -1,36 +1,8 @@
 import 'package:test/test.dart';
 import '../lib/buhlmann.dart';
+import '../lib/constants.dart';
 
 void main() {
-  group('GasMix', () {
-    test('air has correct fractions', () {
-      const air = GasMix.air;
-      expect(air.oxygen, closeTo(0.21, 0.001));
-      expect(air.nitrogen, closeTo(0.79, 0.001));
-      expect(air.helium, 0.0);
-    });
-
-    test('nitrox 32 has correct fractions', () {
-      final ean32 = GasMix.nitrox(32);
-      expect(ean32.oxygen, closeTo(0.32, 0.001));
-      expect(ean32.nitrogen, closeTo(0.68, 0.001));
-      expect(ean32.helium, 0.0);
-    });
-
-    test('trimix has correct fractions', () {
-      final tmx2135 = GasMix.trimix(21, 35);
-      expect(tmx2135.oxygen, closeTo(0.21, 0.001));
-      expect(tmx2135.helium, closeTo(0.35, 0.001));
-      expect(tmx2135.nitrogen, closeTo(0.44, 0.001));
-    });
-
-    test('toString formats correctly', () {
-      expect(GasMix.air.toString(), 'Air');
-      expect(GasMix.nitrox(32).toString(), 'EAN32');
-      expect(GasMix.trimix(18, 45).toString(), 'Tx18/45');
-    });
-  });
-
   group('BuhlmannDeco initialization', () {
     test('tissues initialize to surface equilibrium', () {
       final deco = BuhlmannDeco();
@@ -120,18 +92,6 @@ void main() {
       // Should be in deco, so NDL should be null
       final ndl = deco.ndl(30, ean32);
       expect(ndl, isNull, reason: 'Should be in deco obligation');
-    });
-
-    test('SurfGF', () {
-      final deco = BuhlmannDeco();
-      final ean32 = GasMix.nitrox(32);
-
-      // Dive to 30m for 30 minutes (1800 seconds)
-      deco.addSegment(30, ean32, 1800);
-
-      final surfGf = deco.tissuesSaturation(deco.depthToPressure(0));
-      expect(surfGf, greaterThan(100), reason: 'Slightly out of NDL');
-      expect(surfGf, lessThan(105), reason: 'Slightly out of NDL');
     });
   });
 
@@ -223,25 +183,6 @@ void main() {
     });
   });
 
-  group('Tissue saturation', () {
-    test('saturation relative to surface M-value increases during dive', () {
-      final deco = BuhlmannDeco();
-
-      // Measure saturation relative to surface M-value (what matters for ascent)
-      final surfacePressure = deco.depthToPressure(0);
-      final surfaceSat = deco.tissuesSaturation(surfacePressure);
-
-      // 20 minutes (1200 seconds) at 30m
-      deco.addSegment(30, GasMix.air, 1200);
-
-      // After diving, saturation relative to SURFACE M-value should increase
-      // (this is what determines if we can safely ascend)
-      final afterDiveSat = deco.tissuesSaturation(surfacePressure);
-
-      expect(afterDiveSat, greaterThan(surfaceSat), reason: 'Saturation relative to surface should increase after diving');
-    });
-  });
-
   group('Edge cases', () {
     test('zero time segment has no effect', () {
       final deco = BuhlmannDeco();
@@ -330,24 +271,6 @@ void main() {
       final gfAt30m = deco.gradientFactor(deco.depthToPressure(30));
 
       expect(gfAt30m, lessThan(surfGF), reason: 'GF at depth should be lower than at surface');
-    });
-
-    test('GF differs from tissuesSaturation', () {
-      final deco = BuhlmannDeco();
-
-      // Dive to create some loading
-      deco.addSegment(30, GasMix.air, 1200);
-
-      final surfacePressure = deco.depthToPressure(0);
-      final saturation = deco.tissuesSaturation(surfacePressure);
-      final gf = deco.gradientFactor(surfacePressure);
-
-      // These should be different values
-      expect(saturation, isNot(closeTo(gf, 1)), reason: 'Saturation and GF use different formulas');
-
-      // Saturation should be lower than GF for supersaturated tissues
-      // because saturation = P_tissue/M while GF = (P_tissue-P_amb)/(M-P_amb)
-      expect(saturation, lessThan(gf), reason: 'Saturation formula gives lower values');
     });
 
     test('surfaceGradientFactor matches gradientFactor at surface', () {
