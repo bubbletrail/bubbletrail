@@ -26,11 +26,11 @@ class GasMix {
 
 // Configuration for the Buhlmann algorithm.
 class BuhlmannConfig {
-  final int gfLow;
-  final int gfHigh;
+  final double gfLow;
+  final double gfHigh;
   final double surfacePressure;
 
-  const BuhlmannConfig({this.gfLow = 100, this.gfHigh = 100, this.surfacePressure = atmPressure});
+  const BuhlmannConfig({this.gfLow = 1.0, this.gfHigh = 1.0, this.surfacePressure = atmPressure});
 
   static const defaultConfig = BuhlmannConfig();
 }
@@ -76,7 +76,7 @@ class BuhlmannDeco {
   // First decompression stop depth encountered (for GF interpolation).
   double _firstStopDepth;
 
-  BuhlmannDeco({BuhlmannConfig? config, TissueState? tissues}) : config = config ?? BuhlmannConfig(), tissues = tissues ?? TissueState(), _firstStopDepth = 0 {
+  BuhlmannDeco({BuhlmannConfig? config, TissueState? tissues}) : config = config ?? BuhlmannConfig(), tissues = tissues ?? TissueState(), _firstStopDepth = 3 {
     if (tissues == null) {
       _initializeSurfaceEquilibrium();
     }
@@ -108,15 +108,15 @@ class BuhlmannDeco {
   }
 
   // Calculate the overall ceiling depth in meters.
-  double ceilingDepth({int? gf}) {
+  double ceilingDepth({double? gf}) {
     var maxCeiling = 0.0;
 
     if (gf == null) {
-      gf = config.gfLow;
+      gf = config.gfLow.toDouble();
     }
 
     for (var i = 0; i < numTissueCompartments; i++) {
-      final ceiling = _compartmentCeiling(i, gf / 100.0);
+      final ceiling = _compartmentCeiling(i, gf);
       if (ceiling > maxCeiling) {
         maxCeiling = ceiling;
       }
@@ -134,31 +134,26 @@ class BuhlmannDeco {
     //    (gfHigh)
 
     // Check if in deco using gfHigh
-    final ceilingAtGfHigh = ceilingDepth(gf: config.gfHigh);
+    final ceilingAtGfHigh = ceilingDepth(gf: config.gfHigh.toDouble());
     if (ceilingAtGfHigh <= 0) {
       return 0;
     }
 
     // Update first stop tracking (maximum ceiling seen at gfLow)
-    final ceilingAtGfLow = ceilingDepth(gf: config.gfLow);
+    final ceilingAtGfLow = ceilingDepth(gf: config.gfLow.toDouble());
     _firstStopDepth = max(_firstStopDepth, ceilingAtGfLow);
 
-    // Binary search for the ceiling with interpolated GF
-    // We want the shallowest depth where all tissues are within the GF limit
-    var lo = 0.0;
-    var hi = _firstStopDepth;
-
-    for (var i = 0; i < 20; i++) {
-      if (hi - lo < 0.1) break;
-      final depth = (lo + hi) / 2;
-      if (_withinGfLimit(depth, _firstStopDepth)) {
-        hi = depth;
-      } else {
-        lo = depth;
-      }
+    // Find current stop depth by iterating until the ceiling at a given GF
+    // aligns with with the GF at that depth.
+    var depth = _firstStopDepth / 2;
+    for (var i = 0; i < 16; i++) {
+      final gf = _gfLimitAtDepth(depth);
+      depth = ceilingDepth(gf: gf);
+      final newGF = _gfLimitAtDepth(depth).round();
+      if ((newGF - gf).abs() < 0.01) break;
     }
 
-    return max(lo, 0);
+    return depth;
   }
 
   // Initialize tissues to surface equilibrium breathing air.
@@ -210,40 +205,21 @@ class BuhlmannDeco {
     return (totalInert - a * gf) * b / (gf + b * (1 - gf));
   }
 
-  // Check if all tissues are within the GF limit at the given depth.
-  bool _withinGfLimit(double depth, double firstStop) {
-    final gfLimit = _gfLimitAtDepth(depth, firstStop);
-    final ambientPressure = depthToPressure(depth);
-
-    for (var i = 0; i < numTissueCompartments; i++) {
-      final totalInert = tissues.totalInertPressure(i);
-      final mVal = _mValue(i, ambientPressure);
-      final gf = (totalInert - ambientPressure) / (mVal - ambientPressure);
-      if (gf > gfLimit) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   // Calculate the GF limit at a given depth, interpolating between
   // gfLow at the first stop and gfHigh at the surface.
-  double _gfLimitAtDepth(double depthMeters, double firstStop) {
-    final gfLow = config.gfLow / 100.0;
-    final gfHigh = config.gfHigh / 100.0;
-
-    if (firstStop <= 0) {
+  double _gfLimitAtDepth(double depthMeters) {
+    if (_firstStopDepth <= 0) {
       // No first stop established - use gfHigh everywhere
-      return gfHigh;
+      return config.gfHigh;
     }
 
-    if (depthMeters >= firstStop) {
-      return gfLow;
+    if (depthMeters >= _firstStopDepth) {
+      return config.gfLow;
     }
 
     // Linear interpolation from firstStop (gfLow) to surface (gfHigh)
-    final fraction = 1 - depthMeters / firstStop;
-    return gfLow + (gfHigh - gfLow) * fraction;
+    final fraction = 1 - depthMeters / _firstStopDepth;
+    return config.gfLow + (config.gfHigh - config.gfLow) * fraction;
   }
 
   // Check if currently in decompression (surface GF > gfHigh).
@@ -282,13 +258,13 @@ class BuhlmannDeco {
     for (var i = 0; i < numTissueCompartments; i++) {
       final totalInert = tissues.totalInertPressure(i);
       final mVal = _mValue(i, ambientPressure);
-      final gf = (totalInert - ambientPressure) / (mVal - ambientPressure) * 100;
+      final gf = (totalInert - ambientPressure) / (mVal - ambientPressure);
       if (gf > maxGF) {
         maxGF = gf;
       }
     }
 
-    return maxGF;
+    return maxGF * 100;
   }
 
   // Calculate the surface gradient factor (SurfGF).

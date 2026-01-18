@@ -120,7 +120,7 @@ class UpdateS3Config extends PreferencesEvent {
 }
 
 class UpdateGfLow extends PreferencesEvent {
-  final int gfLow;
+  final double gfLow;
 
   const UpdateGfLow(this.gfLow);
 
@@ -129,7 +129,7 @@ class UpdateGfLow extends PreferencesEvent {
 }
 
 class UpdateGfHigh extends PreferencesEvent {
-  final int gfHigh;
+  final double gfHigh;
 
   const UpdateGfHigh(this.gfHigh);
 
