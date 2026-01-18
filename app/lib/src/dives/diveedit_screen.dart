@@ -440,7 +440,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       dive.clearEndSurfGf();
 
       // Update calculated info.
-      dive.recalculateMedata();
+      dive.recalculateMetadata();
     });
     // Send update event to bloc
     context.read<DiveListBloc>().add(UpdateDive(upd));

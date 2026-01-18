@@ -75,7 +75,7 @@ Dive convertDcDive(Log dl) {
     }
   }
 
-  dive.recalculateMedata();
+  dive.recalculateMetadata();
 
   return dive;
 }

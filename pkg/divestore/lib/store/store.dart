@@ -139,7 +139,7 @@ class Store {
       return dive.rebuild((dive) {
         dive.cylinders.clear();
         dive.cylinders.addAll(mappedCyls);
-        dive.recalculateMedata();
+        dive.recalculateMetadata();
       });
     } catch (e) {
       _log.warning('failed to load dive $diveID', e);

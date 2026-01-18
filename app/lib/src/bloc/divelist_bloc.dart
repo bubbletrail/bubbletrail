@@ -351,7 +351,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
           cyl.cylinderId = cr.id;
         }
       }
-      dive.recalculateMedata();
+      dive.recalculateMetadata();
     }
 
     // Insert all imported dives
