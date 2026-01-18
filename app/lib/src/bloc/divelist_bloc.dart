@@ -278,7 +278,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
         _log.fine('calculate end tissues for dive ${dive.id}');
         final fullDive = await _store.dives.getById(dive.id);
         if (fullDive != null && fullDive.logs.isNotEmpty) {
-          final (endTissues, surfGF) = calculateDiveTissues(fullDive, protoToTissueState(startTissues));
+          final (endTissues, surfGF) = calculateDiveTissues(dive: fullDive, startTissues: protoToTissueState(startTissues));
           final updatedDive = fullDive.rebuild((d) {
             if (startTissues != null) {
               d.startTissues = startTissues;

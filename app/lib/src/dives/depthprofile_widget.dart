@@ -342,7 +342,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
       surfacePressure: widget.log.hasAtmosphericPressure() ? widget.log.atmosphericPressure : buhlmann.atmPressure,
     );
 
-    processDiveWithTissues(
+    calculateDiveTissues(
       dive: widget.dive,
       startTissues: protoToTissueState(widget.dive.startTissues),
       config: config,
