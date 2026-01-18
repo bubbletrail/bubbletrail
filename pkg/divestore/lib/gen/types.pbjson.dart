@@ -83,6 +83,7 @@ const Tissues$json = {
       '10': 'timestamp'
     },
     {'1': 'chain_id', '3': 4, '4': 1, '5': 9, '10': 'chainId'},
+    {'1': 'generation', '3': 5, '4': 1, '5': 5, '10': 'generation'},
   ],
 };
 
@@ -90,7 +91,8 @@ const Tissues$json = {
 final $typed_data.Uint8List tissuesDescriptor = $convert.base64Decode(
     'CgdUaXNzdWVzEiEKDG4yX3ByZXNzdXJlcxgBIAMoAVILbjJQcmVzc3VyZXMSIQoMaGVfcHJlc3'
     'N1cmVzGAIgAygBUgtoZVByZXNzdXJlcxI4Cgl0aW1lc3RhbXAYAyABKAsyGi5nb29nbGUucHJv'
-    'dG9idWYuVGltZXN0YW1wUgl0aW1lc3RhbXASGQoIY2hhaW5faWQYBCABKAlSB2NoYWluSWQ=');
+    'dG9idWYuVGltZXN0YW1wUgl0aW1lc3RhbXASGQoIY2hhaW5faWQYBCABKAlSB2NoYWluSWQSHg'
+    'oKZ2VuZXJhdGlvbhgFIAEoBVIKZ2VuZXJhdGlvbg==');
 
 @$core.Deprecated('Use cylinderDescriptor instead')
 const Cylinder$json = {

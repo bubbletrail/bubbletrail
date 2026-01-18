@@ -234,12 +234,6 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
 
   /// Calculate and persist tissues for any dives that are missing them.
   Future<List<Dive>> _calculateMissingTissues(List<Dive> dives) async {
-    // Find dives missing tissues (either start or end)
-    final missingTissues = dives.where((d) => !d.hasEndTissues() || !d.hasStartTissues()).toList();
-    if (missingTissues.isEmpty) return dives;
-
-    _log.info('calculating tissues for ${missingTissues.length} dives');
-
     // Sort all dives chronologically for tissue chaining
     final chronological = List<Dive>.from(dives);
     chronological.sort((a, b) => a.start.seconds.compareTo(b.start.seconds));
@@ -251,16 +245,15 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
 
     for (final dive in chronological) {
       final diveStart = dive.start.toDateTime();
-      var startTissues = dive.hasStartTissues() ? dive.startTissues : null;
+      final diveEnd = diveStart.add(Duration(seconds: dive.duration));
+      var startTissues = dive.hasStartTissues() && dive.startTissues.generation == buhlmann.generation ? dive.startTissues : null;
       var startChanged = false;
 
       // Calculate start tissues from previous dive
       if (prevDiveEnd == null || diveStart.difference(prevDiveEnd) > tissueResetDuration) {
         startTissues = null; // Start with clean tissues
-        _log.fine('clear start tissues for dive ${dive.id}');
       } else if (prevEndTissues != null && startTissues != null && startTissues.chainId.isNotEmpty && startTissues.chainId == prevEndTissues.chainId) {
         // We have an unbroken chain, start tissues are already calculated
-        _log.fine('unchanged start tissues for dive ${dive.id}');
       } else if (prevEndTissues != null) {
         // Simulate surface interval off-gassing
         _log.fine('calculate start tissues for dive ${dive.id}');
@@ -275,8 +268,12 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
         startChanged = true;
       }
 
-      // Calculate tissues if missing either start or end
-      if (!dive.hasEndTissues() || !dive.hasEndSurfGf() || dive.endTissues.chainId.isEmpty || startChanged) {
+      // If we're missing end tissues or the chain has changed, recalculate
+      if (!dive.hasEndTissues() ||
+          !dive.hasEndSurfGf() ||
+          dive.endTissues.chainId.isEmpty ||
+          dive.endTissues.generation != buhlmann.generation ||
+          startChanged) {
         // Load full dive data with samples
         _log.fine('calculate end tissues for dive ${dive.id}');
         final fullDive = await _store.dives.getById(dive.id);
@@ -288,7 +285,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
             } else {
               d.clearStartTissues();
             }
-            d.endTissues = tissueStateToProto(endTissues, fullDive.start.toDateTime().add(Duration(seconds: dive.duration)), Uuid().v4().toString());
+            d.endTissues = tissueStateToProto(endTissues, diveEnd, Uuid().v4().toString());
             d.endSurfGf = surfGF;
           });
           await _store.dives.update(updatedDive);
@@ -296,13 +293,11 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
           prevEndTissues = updatedDive.endTissues;
         }
       } else {
-        _log.fine('unchanged end tissues for dive ${dive.id}');
         // Use existing tissues for next dive
         prevEndTissues = dive.endTissues;
       }
 
-      // Update previous dive end time
-      prevDiveEnd = diveStart.add(Duration(seconds: dive.duration));
+      prevDiveEnd = diveEnd;
     }
 
     // Return updated dive list

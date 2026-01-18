@@ -190,12 +190,14 @@ class Tissues extends $pb.GeneratedMessage {
     $core.Iterable<$core.double>? hePressures,
     $0.Timestamp? timestamp,
     $core.String? chainId,
+    $core.int? generation,
   }) {
     final result = create();
     if (n2Pressures != null) result.n2Pressures.addAll(n2Pressures);
     if (hePressures != null) result.hePressures.addAll(hePressures);
     if (timestamp != null) result.timestamp = timestamp;
     if (chainId != null) result.chainId = chainId;
+    if (generation != null) result.generation = generation;
     return result;
   }
 
@@ -219,6 +221,7 @@ class Tissues extends $pb.GeneratedMessage {
     ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'timestamp',
         subBuilder: $0.Timestamp.create)
     ..aOS(4, _omitFieldNames ? '' : 'chainId')
+    ..aI(5, _omitFieldNames ? '' : 'generation')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -264,6 +267,15 @@ class Tissues extends $pb.GeneratedMessage {
   $core.bool hasChainId() => $_has(3);
   @$pb.TagNumber(4)
   void clearChainId() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.int get generation => $_getIZ(4);
+  @$pb.TagNumber(5)
+  set generation($core.int value) => $_setSignedInt32(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasGeneration() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearGeneration() => $_clearField(5);
 }
 
 /// Cylinder/tank definition.

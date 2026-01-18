@@ -81,7 +81,13 @@ buhlmann.TissueState? protoToTissueState(Tissues? tissues) {
 
 /// Convert buhlmann TissueState to proto Tissues.
 Tissues tissueStateToProto(buhlmann.TissueState tissues, DateTime timestamp, String chainId) {
-  return Tissues(n2Pressures: tissues.n2Pressures, hePressures: tissues.hePressures, timestamp: .fromDateTime(timestamp), chainId: chainId);
+  return Tissues(
+    n2Pressures: tissues.n2Pressures,
+    hePressures: tissues.hePressures,
+    timestamp: .fromDateTime(timestamp),
+    chainId: chainId,
+    generation: buhlmann.generation,
+  );
 }
 
 /// Build gas mixes from dive cylinders.

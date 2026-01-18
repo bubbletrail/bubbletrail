@@ -1,8 +1,9 @@
 import 'dart:math';
 
 import 'constants.dart';
-
 export 'constants.dart' show atmPressure;
+
+const int generation = 1; // increase when bugs are fixed to force recalc
 
 // Gas mixture definition.
 class GasMix {
