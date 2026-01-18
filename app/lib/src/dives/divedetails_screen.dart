@@ -11,7 +11,6 @@ import '../app_routes.dart';
 import '../bloc/divelist_bloc.dart';
 import '../bloc/preferences_bloc.dart';
 import '../common/common.dart';
-import '../utils/tissue_calculator.dart' show getStartTissues;
 import 'depthprofile_widget.dart';
 
 class DiveDetailsScreen extends StatelessWidget {
@@ -247,8 +246,6 @@ class _ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final startTissues = getStartTissues(dive);
-
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -264,14 +261,7 @@ class _ProfileCard extends StatelessWidget {
                   maxHeight: 250,
                   child: BlocBuilder<PreferencesBloc, PreferencesState>(
                     builder: (context, state) {
-                      return DepthProfileWidget(
-                        key: ValueKey((dive, state.preferences)),
-                        log: dive.logs[0],
-                        preferences: state.preferences,
-                        cylinders: dive.cylinders,
-                        events: dive.events,
-                        startTissues: startTissues,
-                      );
+                      return DepthProfileWidget(key: ValueKey((dive, state.preferences)), dive: dive, preferences: state.preferences);
                     },
                   ),
                 ),

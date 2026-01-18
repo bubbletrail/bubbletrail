@@ -4,17 +4,6 @@ import 'package:divestore/divestore.dart';
 /// Duration after which we consider tissues to be fully off-gassed.
 const tissueResetDuration = Duration(hours: 24);
 
-/// Get the start tissues for a dive.
-///
-/// Returns the stored start_tissues if available, otherwise null.
-/// Use [calculateAndStoreStartTissues] to calculate if not stored.
-Tissues? getStartTissues(Dive dive) {
-  if (dive.hasStartTissues() && dive.startTissues.n2Pressures.isNotEmpty) {
-    return dive.startTissues;
-  }
-  return null;
-}
-
 /// Calculate the start tissues for a dive, accounting for the previous dive
 /// and surface interval off-gassing.
 ///

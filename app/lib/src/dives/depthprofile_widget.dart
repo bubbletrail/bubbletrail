@@ -8,16 +8,11 @@ import '../common/common.dart';
 import '../utils/tissue_calculator.dart';
 
 class DepthProfileWidget extends StatefulWidget {
-  final Log log;
+  final Dive dive;
   final Preferences preferences;
-  final List<SampleEvent> events;
-  final List<DiveCylinder> cylinders;
+  final Log log;
 
-  /// Starting tissue state (from previous dive, accounting for surface interval).
-  /// If null, assumes clean tissues (no residual loading).
-  final Tissues? startTissues;
-
-  const DepthProfileWidget({super.key, required this.log, required this.preferences, required this.events, required this.cylinders, this.startTissues});
+  DepthProfileWidget({super.key, required this.dive, required this.preferences}) : log = dive.logs.firstOrNull ?? Log();
 
   @override
   State<DepthProfileWidget> createState() => _DepthProfileWidgetState();
@@ -119,18 +114,18 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
       }
     }
 
-    if (widget.cylinders.length > 1) {
+    if (widget.dive.cylinders.length > 1) {
       // Find gas switches
-      for (final event in widget.events) {
+      for (final event in widget.dive.events) {
         if (event.type == .SAMPLE_EVENT_TYPE_GAS_CHANGE) {
-          if (event.value >= widget.cylinders.length) continue;
+          if (event.value >= widget.dive.cylinders.length) continue;
           if (event.time > samplesWithDepth.first.time && event.value != 0 && _gasSwitches.isEmpty) {
             // We're switching to a non-default gas, without having switched
             // to the default gas, so for illustrative purposes we add a
             // synthetic switch at the first sample.
-            _gasSwitches.add((timeMinutes: 0, gasName: formatGasFraction(widget.cylinders.first.oxygen, widget.cylinders.first.helium)));
+            _gasSwitches.add((timeMinutes: 0, gasName: formatGasFraction(widget.dive.cylinders.first.oxygen, widget.dive.cylinders.first.helium)));
           }
-          final cyl = widget.cylinders[event.value];
+          final cyl = widget.dive.cylinders[event.value];
           final gasName = formatGasFraction(cyl.oxygen, cyl.helium);
           _gasSwitches.add((timeMinutes: event.time / 60, gasName: gasName));
         }
@@ -342,7 +337,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
     if (samplesWithDepth.isEmpty) return;
 
     // Convert start tissues from proto if provided
-    final startTissues = protoToTissueState(widget.startTissues);
+    final startTissues = protoToTissueState(widget.dive.startTissues);
 
     final config = buhlmann.BuhlmannConfig(
       gfLow: widget.preferences.gfLow,
@@ -353,8 +348,8 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
 
     // Build gas mixes from cylinders, defaulting to air if none
     final gasMixes = <buhlmann.GasMix>[];
-    if (widget.cylinders.isNotEmpty) {
-      for (final cyl in widget.cylinders) {
+    if (widget.dive.cylinders.isNotEmpty) {
+      for (final cyl in widget.dive.cylinders) {
         gasMixes.add(buhlmann.GasMix(oxygen: cyl.oxygen, helium: cyl.helium));
       }
     } else {
@@ -363,7 +358,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
 
     // Build sorted list of gas switch times from events
     final gasSwitches = <({int time, int gasIndex})>[];
-    for (final event in widget.events) {
+    for (final event in widget.dive.events) {
       if (event.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE && event.value < gasMixes.length) {
         gasSwitches.add((time: event.time, gasIndex: event.value));
       }

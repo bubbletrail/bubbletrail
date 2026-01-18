@@ -6,7 +6,6 @@ import '../app_metadata.dart';
 import '../bloc/divelist_bloc.dart';
 import '../bloc/preferences_bloc.dart';
 import '../common/common.dart';
-import '../utils/tissue_calculator.dart' show getStartTissues;
 import 'depthprofile_widget.dart';
 
 class FullscreenProfileScreen extends StatefulWidget {
@@ -63,19 +62,11 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
                 if (divesState is! DiveListLoaded) return Placeholder(); // can't happen
                 final dive = divesState.selectedDive!;
                 final site = divesState.selectedDiveSite;
-                final startTissues = getStartTissues(dive);
                 return ScreenScaffold(
                   title: Text('Dive #${dive.number}: ${site?.name ?? 'Unknown site'}'),
                   body: Padding(
                     padding: platformIsMobile ? EdgeInsets.zero : const EdgeInsets.all(8.0),
-                    child: DepthProfileWidget(
-                      key: ValueKey((dive, prefsState.preferences)),
-                      log: dive.logs.first,
-                      preferences: prefsState.preferences,
-                      events: dive.events,
-                      cylinders: dive.cylinders,
-                      startTissues: startTissues,
-                    ),
+                    child: DepthProfileWidget(key: ValueKey((dive, prefsState.preferences)), dive: dive, preferences: prefsState.preferences),
                   ),
                   transparent: true,
                 );
