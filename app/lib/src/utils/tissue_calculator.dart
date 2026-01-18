@@ -46,7 +46,7 @@ Tissues? calculateStartTissuesFromPrevious(Dive dive, Dive? prevDive) {
   final deco = buhlmann.BuhlmannDeco(tissues: tissues);
   deco.addSegment(0, buhlmann.GasMix.air, surfaceInterval);
 
-  return tissueStateToProto(deco.tissues);
+  return tissueStateToProto(deco.tissues, diveStart, prevDive.endTissues.chainId);
 }
 
 /// Find the chronologically previous dive.
@@ -80,8 +80,8 @@ buhlmann.TissueState? protoToTissueState(Tissues? tissues) {
 }
 
 /// Convert buhlmann TissueState to proto Tissues.
-Tissues tissueStateToProto(buhlmann.TissueState tissues) {
-  return Tissues(n2Pressures: tissues.n2Pressures, hePressures: tissues.hePressures);
+Tissues tissueStateToProto(buhlmann.TissueState tissues, DateTime timestamp, String chainId) {
+  return Tissues(n2Pressures: tissues.n2Pressures, hePressures: tissues.hePressures, timestamp: .fromDateTime(timestamp), chainId: chainId);
 }
 
 /// Build gas mixes from dive cylinders.
@@ -106,7 +106,7 @@ List<({int time, int gasIndex})> buildGasSwitches(Dive dive, int maxGasIndex) {
 
 /// Calculate end tissues for a dive given starting tissues.
 /// Returns the tissue state at the end of the dive.
-buhlmann.TissueState calculateDiveTissues(Dive dive, buhlmann.TissueState? startTissues) {
+(buhlmann.TissueState, double) calculateDiveTissues(Dive dive, buhlmann.TissueState? startTissues) {
   final deco = buhlmann.BuhlmannDeco(tissues: startTissues);
 
   final gasMixes = buildGasMixes(dive);
@@ -120,6 +120,7 @@ buhlmann.TissueState calculateDiveTissues(Dive dive, buhlmann.TissueState? start
   // Get samples from dive log
   final samples = dive.logs.isNotEmpty ? dive.logs.first.samples : <LogSample>[];
 
+  var endSurfGF = 0.0;
   for (final sample in samples) {
     // Check for gas switches
     while (nextSwitchIdx < gasSwitches.length && gasSwitches[nextSwitchIdx].time <= sample.time) {
@@ -133,9 +134,10 @@ buhlmann.TissueState calculateDiveTissues(Dive dive, buhlmann.TissueState? start
       deco.addSegment(sample.depth, currentGas, timeDelta);
     }
     prevTime = sample.time.toDouble();
+    if (sample.depth > 0) endSurfGF = deco.surfaceGradientFactor();
   }
 
-  return deco.tissues;
+  return (deco.tissues, endSurfGF);
 }
 
 /// Process dive samples with tissue tracking, calling the callback for each sample.

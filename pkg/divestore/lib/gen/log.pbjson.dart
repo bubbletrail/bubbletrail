@@ -27,7 +27,8 @@ const WaterType$json = {
 };
 
 /// Descriptor for `WaterType`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List waterTypeDescriptor = $convert.base64Decode('CglXYXRlclR5cGUSGgoWV0FURVJfVFlQRV9VTlNQRUNJRklFRBAAEhYKEldBVEVSX1RZUEVfRU'
+final $typed_data.Uint8List waterTypeDescriptor = $convert.base64Decode(
+    'CglXYXRlclR5cGUSGgoWV0FURVJfVFlQRV9VTlNQRUNJRklFRBAAEhYKEldBVEVSX1RZUEVfRU'
     '4xMzMxORABEhQKEFdBVEVSX1RZUEVfRlJFU0gQAhITCg9XQVRFUl9UWVBFX1NBTFQQAw==');
 
 @$core.Deprecated('Use diveModeDescriptor instead')
@@ -44,7 +45,8 @@ const DiveMode$json = {
 };
 
 /// Descriptor for `DiveMode`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List diveModeDescriptor = $convert.base64Decode('CghEaXZlTW9kZRIZChVESVZFX01PREVfVU5TUEVDSUZJRUQQABIWChJESVZFX01PREVfRlJFRU'
+final $typed_data.Uint8List diveModeDescriptor = $convert.base64Decode(
+    'CghEaXZlTW9kZRIZChVESVZFX01PREVfVU5TUEVDSUZJRUQQABIWChJESVZFX01PREVfRlJFRU'
     'RJVkUQARITCg9ESVZFX01PREVfR0FVR0UQAhIZChVESVZFX01PREVfT1BFTkNJUkNVSVQQAxIn'
     'CiNESVZFX01PREVfQ0xPU0VEX0NJUkNVSVRfUkVCUkVBVEhFUhAEEiQKIERJVkVfTU9ERV9TRU'
     '1JX0NMT1NFRF9SRUJSRUFUSEVSEAU=');
@@ -62,7 +64,8 @@ const GasUsage$json = {
 };
 
 /// Descriptor for `GasUsage`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List gasUsageDescriptor = $convert.base64Decode('CghHYXNVc2FnZRIZChVHQVNfVVNBR0VfVU5TUEVDSUZJRUQQABISCg5HQVNfVVNBR0VfTk9ORR'
+final $typed_data.Uint8List gasUsageDescriptor = $convert.base64Decode(
+    'CghHYXNVc2FnZRIZChVHQVNfVVNBR0VfVU5TUEVDSUZJRUQQABISCg5HQVNfVVNBR0VfTk9ORR'
     'ABEhQKEEdBU19VU0FHRV9PWFlHRU4QAhIVChFHQVNfVVNBR0VfRElMVUVOVBADEhcKE0dBU19V'
     'U0FHRV9TSURFTU9VTlQQBA==');
 
@@ -78,7 +81,8 @@ const TankVolumeType$json = {
 };
 
 /// Descriptor for `TankVolumeType`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List tankVolumeTypeDescriptor = $convert.base64Decode('Cg5UYW5rVm9sdW1lVHlwZRIgChxUQU5LX1ZPTFVNRV9UWVBFX1VOU1BFQ0lGSUVEEAASGQoVVE'
+final $typed_data.Uint8List tankVolumeTypeDescriptor = $convert.base64Decode(
+    'Cg5UYW5rVm9sdW1lVHlwZRIgChxUQU5LX1ZPTFVNRV9UWVBFX1VOU1BFQ0lGSUVEEAASGQoVVE'
     'FOS19WT0xVTUVfVFlQRV9OT05FEAESGwoXVEFOS19WT0xVTUVfVFlQRV9NRVRSSUMQAhIdChlU'
     'QU5LX1ZPTFVNRV9UWVBFX0lNUEVSSUFMEAM=');
 
@@ -96,7 +100,8 @@ const DecoModelType$json = {
 };
 
 /// Descriptor for `DecoModelType`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List decoModelTypeDescriptor = $convert.base64Decode('Cg1EZWNvTW9kZWxUeXBlEh8KG0RFQ09fTU9ERUxfVFlQRV9VTlNQRUNJRklFRBAAEhgKFERFQ0'
+final $typed_data.Uint8List decoModelTypeDescriptor = $convert.base64Decode(
+    'Cg1EZWNvTW9kZWxUeXBlEh8KG0RFQ09fTU9ERUxfVFlQRV9VTlNQRUNJRklFRBAAEhgKFERFQ0'
     '9fTU9ERUxfVFlQRV9OT05FEAESHAoYREVDT19NT0RFTF9UWVBFX0JVSExNQU5OEAISFwoTREVD'
     'T19NT0RFTF9UWVBFX1ZQTRADEhgKFERFQ09fTU9ERUxfVFlQRV9SR0JNEAQSGQoVREVDT19NT0'
     'RFTF9UWVBFX0RDSUVNEAU=');
@@ -114,7 +119,8 @@ const DecoStopType$json = {
 };
 
 /// Descriptor for `DecoStopType`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List decoStopTypeDescriptor = $convert.base64Decode('CgxEZWNvU3RvcFR5cGUSHgoaREVDT19TVE9QX1RZUEVfVU5TUEVDSUZJRUQQABIWChJERUNPX1'
+final $typed_data.Uint8List decoStopTypeDescriptor = $convert.base64Decode(
+    'CgxEZWNvU3RvcFR5cGUSHgoaREVDT19TVE9QX1RZUEVfVU5TUEVDSUZJRUQQABIWChJERUNPX1'
     'NUT1BfVFlQRV9OREwQARIeChpERUNPX1NUT1BfVFlQRV9TQUZFVFlfU1RPUBACEhwKGERFQ09f'
     'U1RPUF9UWVBFX0RFQ09fU1RPUBADEhwKGERFQ09fU1RPUF9UWVBFX0RFRVBfU1RPUBAE');
 
@@ -153,7 +159,8 @@ const SampleEventType$json = {
 };
 
 /// Descriptor for `SampleEventType`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List sampleEventTypeDescriptor = $convert.base64Decode('Cg9TYW1wbGVFdmVudFR5cGUSIQodU0FNUExFX0VWRU5UX1RZUEVfVU5TUEVDSUZJRUQQABIaCh'
+final $typed_data.Uint8List sampleEventTypeDescriptor = $convert.base64Decode(
+    'Cg9TYW1wbGVFdmVudFR5cGUSIQodU0FNUExFX0VWRU5UX1RZUEVfVU5TUEVDSUZJRUQQABIaCh'
     'ZTQU1QTEVfRVZFTlRfVFlQRV9OT05FEAESHwobU0FNUExFX0VWRU5UX1RZUEVfREVDT19TVE9Q'
     'EAISGQoVU0FNUExFX0VWRU5UX1RZUEVfUkJUEAMSHAoYU0FNUExFX0VWRU5UX1RZUEVfQVNDRU'
     '5UEAQSHQoZU0FNUExFX0VWRU5UX1RZUEVfQ0VJTElORxAFEh4KGlNBTVBMRV9FVkVOVF9UWVBF'
@@ -177,28 +184,97 @@ const Log$json = {
   '2': [
     {'1': 'model', '3': 1, '4': 1, '5': 9, '10': 'model'},
     {'1': 'serial', '3': 2, '4': 1, '5': 9, '10': 'serial'},
-    {'1': 'date_time', '3': 3, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'dateTime'},
+    {
+      '1': 'date_time',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Timestamp',
+      '10': 'dateTime'
+    },
     {'1': 'dive_time', '3': 4, '4': 1, '5': 5, '10': 'diveTime'},
     {'1': 'max_depth', '3': 5, '4': 1, '5': 1, '10': 'maxDepth'},
     {'1': 'avg_depth', '3': 6, '4': 1, '5': 1, '10': 'avgDepth'},
-    {'1': 'surface_temperature', '3': 7, '4': 1, '5': 1, '10': 'surfaceTemperature'},
+    {
+      '1': 'surface_temperature',
+      '3': 7,
+      '4': 1,
+      '5': 1,
+      '10': 'surfaceTemperature'
+    },
     {'1': 'min_temperature', '3': 8, '4': 1, '5': 1, '10': 'minTemperature'},
     {'1': 'max_temperature', '3': 9, '4': 1, '5': 1, '10': 'maxTemperature'},
-    {'1': 'salinity', '3': 10, '4': 1, '5': 11, '6': '.divestore.Salinity', '10': 'salinity'},
-    {'1': 'atmospheric_pressure', '3': 11, '4': 1, '5': 1, '10': 'atmosphericPressure'},
-    {'1': 'dive_mode', '3': 12, '4': 1, '5': 14, '6': '.divestore.DiveMode', '10': 'diveMode'},
-    {'1': 'deco_model', '3': 13, '4': 1, '5': 11, '6': '.divestore.DecoModel', '10': 'decoModel'},
-    {'1': 'position', '3': 14, '4': 1, '5': 11, '6': '.divestore.Position', '10': 'position'},
-    {'1': 'gas_mixes', '3': 15, '4': 3, '5': 11, '6': '.divestore.GasMix', '10': 'gasMixes'},
-    {'1': 'tanks', '3': 16, '4': 3, '5': 11, '6': '.divestore.Tank', '10': 'tanks'},
-    {'1': 'samples', '3': 17, '4': 3, '5': 11, '6': '.divestore.LogSample', '10': 'samples'},
+    {
+      '1': 'salinity',
+      '3': 10,
+      '4': 1,
+      '5': 11,
+      '6': '.divestore.Salinity',
+      '10': 'salinity'
+    },
+    {
+      '1': 'atmospheric_pressure',
+      '3': 11,
+      '4': 1,
+      '5': 1,
+      '10': 'atmosphericPressure'
+    },
+    {
+      '1': 'dive_mode',
+      '3': 12,
+      '4': 1,
+      '5': 14,
+      '6': '.divestore.DiveMode',
+      '10': 'diveMode'
+    },
+    {
+      '1': 'deco_model',
+      '3': 13,
+      '4': 1,
+      '5': 11,
+      '6': '.divestore.DecoModel',
+      '10': 'decoModel'
+    },
+    {
+      '1': 'position',
+      '3': 14,
+      '4': 1,
+      '5': 11,
+      '6': '.divestore.Position',
+      '10': 'position'
+    },
+    {
+      '1': 'gas_mixes',
+      '3': 15,
+      '4': 3,
+      '5': 11,
+      '6': '.divestore.GasMix',
+      '10': 'gasMixes'
+    },
+    {
+      '1': 'tanks',
+      '3': 16,
+      '4': 3,
+      '5': 11,
+      '6': '.divestore.Tank',
+      '10': 'tanks'
+    },
+    {
+      '1': 'samples',
+      '3': 17,
+      '4': 3,
+      '5': 11,
+      '6': '.divestore.LogSample',
+      '10': 'samples'
+    },
     {'1': 'ldc_fingerprint', '3': 18, '4': 1, '5': 12, '10': 'ldcFingerprint'},
     {'1': 'uniqueID', '3': 19, '4': 1, '5': 9, '10': 'uniqueID'},
   ],
 };
 
 /// Descriptor for `Log`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List logDescriptor = $convert.base64Decode('CgNMb2cSFAoFbW9kZWwYASABKAlSBW1vZGVsEhYKBnNlcmlhbBgCIAEoCVIGc2VyaWFsEjcKCW'
+final $typed_data.Uint8List logDescriptor = $convert.base64Decode(
+    'CgNMb2cSFAoFbW9kZWwYASABKAlSBW1vZGVsEhYKBnNlcmlhbBgCIAEoCVIGc2VyaWFsEjcKCW'
     'RhdGVfdGltZRgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSCGRhdGVUaW1lEhsK'
     'CWRpdmVfdGltZRgEIAEoBVIIZGl2ZVRpbWUSGwoJbWF4X2RlcHRoGAUgASgBUghtYXhEZXB0aB'
     'IbCglhdmdfZGVwdGgYBiABKAFSCGF2Z0RlcHRoEi8KE3N1cmZhY2VfdGVtcGVyYXR1cmUYByAB'
@@ -221,22 +297,58 @@ const LogSample$json = {
     {'1': 'time', '3': 1, '4': 1, '5': 1, '10': 'time'},
     {'1': 'depth', '3': 2, '4': 1, '5': 1, '10': 'depth'},
     {'1': 'temperature', '3': 3, '4': 1, '5': 1, '10': 'temperature'},
-    {'1': 'pressures', '3': 4, '4': 3, '5': 11, '6': '.divestore.TankPressure', '10': 'pressures'},
-    {'1': 'events', '3': 5, '4': 3, '5': 11, '6': '.divestore.SampleEvent', '10': 'events'},
+    {
+      '1': 'pressures',
+      '3': 4,
+      '4': 3,
+      '5': 11,
+      '6': '.divestore.TankPressure',
+      '10': 'pressures'
+    },
+    {
+      '1': 'events',
+      '3': 5,
+      '4': 3,
+      '5': 11,
+      '6': '.divestore.SampleEvent',
+      '10': 'events'
+    },
     {'1': 'rbt', '3': 6, '4': 1, '5': 5, '10': 'rbt'},
     {'1': 'heartbeat', '3': 7, '4': 1, '5': 5, '10': 'heartbeat'},
     {'1': 'bearing', '3': 8, '4': 1, '5': 5, '10': 'bearing'},
     {'1': 'setpoint', '3': 9, '4': 1, '5': 1, '10': 'setpoint'},
-    {'1': 'ppo2', '3': 10, '4': 3, '5': 11, '6': '.divestore.Ppo2Reading', '10': 'ppo2'},
+    {
+      '1': 'ppo2',
+      '3': 10,
+      '4': 3,
+      '5': 11,
+      '6': '.divestore.Ppo2Reading',
+      '10': 'ppo2'
+    },
     {'1': 'cns', '3': 11, '4': 1, '5': 1, '10': 'cns'},
-    {'1': 'deco', '3': 12, '4': 1, '5': 11, '6': '.divestore.DecoStatus', '10': 'deco'},
+    {
+      '1': 'deco',
+      '3': 12,
+      '4': 1,
+      '5': 11,
+      '6': '.divestore.DecoStatus',
+      '10': 'deco'
+    },
     {'1': 'gas_mix_index', '3': 13, '4': 1, '5': 5, '10': 'gasMixIndex'},
-    {'1': 'vendor_data', '3': 14, '4': 3, '5': 11, '6': '.divestore.VendorData', '10': 'vendorData'},
+    {
+      '1': 'vendor_data',
+      '3': 14,
+      '4': 3,
+      '5': 11,
+      '6': '.divestore.VendorData',
+      '10': 'vendorData'
+    },
   ],
 };
 
 /// Descriptor for `LogSample`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List logSampleDescriptor = $convert.base64Decode('CglMb2dTYW1wbGUSEgoEdGltZRgBIAEoAVIEdGltZRIUCgVkZXB0aBgCIAEoAVIFZGVwdGgSIA'
+final $typed_data.Uint8List logSampleDescriptor = $convert.base64Decode(
+    'CglMb2dTYW1wbGUSEgoEdGltZRgBIAEoAVIEdGltZRIUCgVkZXB0aBgCIAEoAVIFZGVwdGgSIA'
     'oLdGVtcGVyYXR1cmUYAyABKAFSC3RlbXBlcmF0dXJlEjUKCXByZXNzdXJlcxgEIAMoCzIXLmRp'
     'dmVzdG9yZS5UYW5rUHJlc3N1cmVSCXByZXNzdXJlcxIuCgZldmVudHMYBSADKAsyFi5kaXZlc3'
     'RvcmUuU2FtcGxlRXZlbnRSBmV2ZW50cxIQCgNyYnQYBiABKAVSA3JidBIcCgloZWFydGJlYXQY'
@@ -250,13 +362,21 @@ final $typed_data.Uint8List logSampleDescriptor = $convert.base64Decode('CglMb2d
 const Salinity$json = {
   '1': 'Salinity',
   '2': [
-    {'1': 'type', '3': 1, '4': 1, '5': 14, '6': '.divestore.WaterType', '10': 'type'},
+    {
+      '1': 'type',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.divestore.WaterType',
+      '10': 'type'
+    },
     {'1': 'density', '3': 2, '4': 1, '5': 1, '10': 'density'},
   ],
 };
 
 /// Descriptor for `Salinity`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List salinityDescriptor = $convert.base64Decode('CghTYWxpbml0eRIoCgR0eXBlGAEgASgOMhQuZGl2ZXN0b3JlLldhdGVyVHlwZVIEdHlwZRIYCg'
+final $typed_data.Uint8List salinityDescriptor = $convert.base64Decode(
+    'CghTYWxpbml0eRIoCgR0eXBlGAEgASgOMhQuZGl2ZXN0b3JlLldhdGVyVHlwZVIEdHlwZRIYCg'
     'dkZW5zaXR5GAIgASgBUgdkZW5zaXR5');
 
 @$core.Deprecated('Use gasMixDescriptor instead')
@@ -266,12 +386,20 @@ const GasMix$json = {
     {'1': 'oxygen', '3': 1, '4': 1, '5': 1, '10': 'oxygen'},
     {'1': 'helium', '3': 2, '4': 1, '5': 1, '10': 'helium'},
     {'1': 'nitrogen', '3': 3, '4': 1, '5': 1, '10': 'nitrogen'},
-    {'1': 'usage', '3': 4, '4': 1, '5': 14, '6': '.divestore.GasUsage', '10': 'usage'},
+    {
+      '1': 'usage',
+      '3': 4,
+      '4': 1,
+      '5': 14,
+      '6': '.divestore.GasUsage',
+      '10': 'usage'
+    },
   ],
 };
 
 /// Descriptor for `GasMix`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List gasMixDescriptor = $convert.base64Decode('CgZHYXNNaXgSFgoGb3h5Z2VuGAEgASgBUgZveHlnZW4SFgoGaGVsaXVtGAIgASgBUgZoZWxpdW'
+final $typed_data.Uint8List gasMixDescriptor = $convert.base64Decode(
+    'CgZHYXNNaXgSFgoGb3h5Z2VuGAEgASgBUgZveHlnZW4SFgoGaGVsaXVtGAIgASgBUgZoZWxpdW'
     '0SGgoIbml0cm9nZW4YAyABKAFSCG5pdHJvZ2VuEikKBXVzYWdlGAQgASgOMhMuZGl2ZXN0b3Jl'
     'Lkdhc1VzYWdlUgV1c2FnZQ==');
 
@@ -280,17 +408,32 @@ const Tank$json = {
   '1': 'Tank',
   '2': [
     {'1': 'gas_mix_index', '3': 1, '4': 1, '5': 5, '10': 'gasMixIndex'},
-    {'1': 'volume_type', '3': 2, '4': 1, '5': 14, '6': '.divestore.TankVolumeType', '10': 'volumeType'},
+    {
+      '1': 'volume_type',
+      '3': 2,
+      '4': 1,
+      '5': 14,
+      '6': '.divestore.TankVolumeType',
+      '10': 'volumeType'
+    },
     {'1': 'volume', '3': 3, '4': 1, '5': 1, '10': 'volume'},
     {'1': 'work_pressure', '3': 4, '4': 1, '5': 1, '10': 'workPressure'},
     {'1': 'begin_pressure', '3': 5, '4': 1, '5': 1, '10': 'beginPressure'},
     {'1': 'end_pressure', '3': 6, '4': 1, '5': 1, '10': 'endPressure'},
-    {'1': 'usage', '3': 7, '4': 1, '5': 14, '6': '.divestore.GasUsage', '10': 'usage'},
+    {
+      '1': 'usage',
+      '3': 7,
+      '4': 1,
+      '5': 14,
+      '6': '.divestore.GasUsage',
+      '10': 'usage'
+    },
   ],
 };
 
 /// Descriptor for `Tank`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List tankDescriptor = $convert.base64Decode('CgRUYW5rEiIKDWdhc19taXhfaW5kZXgYASABKAVSC2dhc01peEluZGV4EjoKC3ZvbHVtZV90eX'
+final $typed_data.Uint8List tankDescriptor = $convert.base64Decode(
+    'CgRUYW5rEiIKDWdhc19taXhfaW5kZXgYASABKAVSC2dhc01peEluZGV4EjoKC3ZvbHVtZV90eX'
     'BlGAIgASgOMhkuZGl2ZXN0b3JlLlRhbmtWb2x1bWVUeXBlUgp2b2x1bWVUeXBlEhYKBnZvbHVt'
     'ZRgDIAEoAVIGdm9sdW1lEiMKDXdvcmtfcHJlc3N1cmUYBCABKAFSDHdvcmtQcmVzc3VyZRIlCg'
     '5iZWdpbl9wcmVzc3VyZRgFIAEoAVINYmVnaW5QcmVzc3VyZRIhCgxlbmRfcHJlc3N1cmUYBiAB'
@@ -301,7 +444,14 @@ final $typed_data.Uint8List tankDescriptor = $convert.base64Decode('CgRUYW5rEiIK
 const DecoModel$json = {
   '1': 'DecoModel',
   '2': [
-    {'1': 'type', '3': 1, '4': 1, '5': 14, '6': '.divestore.DecoModelType', '10': 'type'},
+    {
+      '1': 'type',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.divestore.DecoModelType',
+      '10': 'type'
+    },
     {'1': 'conservatism', '3': 2, '4': 1, '5': 5, '10': 'conservatism'},
     {'1': 'gf_low', '3': 3, '4': 1, '5': 5, '10': 'gfLow'},
     {'1': 'gf_high', '3': 4, '4': 1, '5': 5, '10': 'gfHigh'},
@@ -309,7 +459,8 @@ const DecoModel$json = {
 };
 
 /// Descriptor for `DecoModel`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List decoModelDescriptor = $convert.base64Decode('CglEZWNvTW9kZWwSLAoEdHlwZRgBIAEoDjIYLmRpdmVzdG9yZS5EZWNvTW9kZWxUeXBlUgR0eX'
+final $typed_data.Uint8List decoModelDescriptor = $convert.base64Decode(
+    'CglEZWNvTW9kZWwSLAoEdHlwZRgBIAEoDjIYLmRpdmVzdG9yZS5EZWNvTW9kZWxUeXBlUgR0eX'
     'BlEiIKDGNvbnNlcnZhdGlzbRgCIAEoBVIMY29uc2VydmF0aXNtEhUKBmdmX2xvdxgDIAEoBVIF'
     'Z2ZMb3cSFwoHZ2ZfaGlnaBgEIAEoBVIGZ2ZIaWdo');
 
@@ -323,7 +474,8 @@ const TankPressure$json = {
 };
 
 /// Descriptor for `TankPressure`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List tankPressureDescriptor = $convert.base64Decode('CgxUYW5rUHJlc3N1cmUSHQoKdGFua19pbmRleBgBIAEoBVIJdGFua0luZGV4EhoKCHByZXNzdX'
+final $typed_data.Uint8List tankPressureDescriptor = $convert.base64Decode(
+    'CgxUYW5rUHJlc3N1cmUSHQoKdGFua19pbmRleBgBIAEoBVIJdGFua0luZGV4EhoKCHByZXNzdX'
     'JlGAIgASgBUghwcmVzc3VyZQ==');
 
 @$core.Deprecated('Use ppo2ReadingDescriptor instead')
@@ -336,14 +488,22 @@ const Ppo2Reading$json = {
 };
 
 /// Descriptor for `Ppo2Reading`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List ppo2ReadingDescriptor = $convert.base64Decode('CgtQcG8yUmVhZGluZxIhCgxzZW5zb3JfaW5kZXgYASABKAVSC3NlbnNvckluZGV4EhQKBXZhbH'
+final $typed_data.Uint8List ppo2ReadingDescriptor = $convert.base64Decode(
+    'CgtQcG8yUmVhZGluZxIhCgxzZW5zb3JfaW5kZXgYASABKAVSC3NlbnNvckluZGV4EhQKBXZhbH'
     'VlGAIgASgBUgV2YWx1ZQ==');
 
 @$core.Deprecated('Use decoStatusDescriptor instead')
 const DecoStatus$json = {
   '1': 'DecoStatus',
   '2': [
-    {'1': 'type', '3': 1, '4': 1, '5': 14, '6': '.divestore.DecoStopType', '10': 'type'},
+    {
+      '1': 'type',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.divestore.DecoStopType',
+      '10': 'type'
+    },
     {'1': 'time', '3': 2, '4': 1, '5': 5, '10': 'time'},
     {'1': 'depth', '3': 3, '4': 1, '5': 1, '10': 'depth'},
     {'1': 'tts', '3': 4, '4': 1, '5': 5, '10': 'tts'},
@@ -351,7 +511,8 @@ const DecoStatus$json = {
 };
 
 /// Descriptor for `DecoStatus`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List decoStatusDescriptor = $convert.base64Decode('CgpEZWNvU3RhdHVzEisKBHR5cGUYASABKA4yFy5kaXZlc3RvcmUuRGVjb1N0b3BUeXBlUgR0eX'
+final $typed_data.Uint8List decoStatusDescriptor = $convert.base64Decode(
+    'CgpEZWNvU3RhdHVzEisKBHR5cGUYASABKA4yFy5kaXZlc3RvcmUuRGVjb1N0b3BUeXBlUgR0eX'
     'BlEhIKBHRpbWUYAiABKAVSBHRpbWUSFAoFZGVwdGgYAyABKAFSBWRlcHRoEhAKA3R0cxgEIAEo'
     'BVIDdHRz');
 
@@ -359,7 +520,14 @@ final $typed_data.Uint8List decoStatusDescriptor = $convert.base64Decode('CgpEZW
 const SampleEvent$json = {
   '1': 'SampleEvent',
   '2': [
-    {'1': 'type', '3': 1, '4': 1, '5': 14, '6': '.divestore.SampleEventType', '10': 'type'},
+    {
+      '1': 'type',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.divestore.SampleEventType',
+      '10': 'type'
+    },
     {'1': 'time', '3': 2, '4': 1, '5': 5, '10': 'time'},
     {'1': 'flags', '3': 3, '4': 1, '5': 13, '10': 'flags'},
     {'1': 'value', '3': 4, '4': 1, '5': 5, '10': 'value'},
@@ -367,7 +535,8 @@ const SampleEvent$json = {
 };
 
 /// Descriptor for `SampleEvent`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List sampleEventDescriptor = $convert.base64Decode('CgtTYW1wbGVFdmVudBIuCgR0eXBlGAEgASgOMhouZGl2ZXN0b3JlLlNhbXBsZUV2ZW50VHlwZV'
+final $typed_data.Uint8List sampleEventDescriptor = $convert.base64Decode(
+    'CgtTYW1wbGVFdmVudBIuCgR0eXBlGAEgASgOMhouZGl2ZXN0b3JlLlNhbXBsZUV2ZW50VHlwZV'
     'IEdHlwZRISCgR0aW1lGAIgASgFUgR0aW1lEhQKBWZsYWdzGAMgASgNUgVmbGFncxIUCgV2YWx1'
     'ZRgEIAEoBVIFdmFsdWU=');
 
@@ -381,4 +550,5 @@ const VendorData$json = {
 };
 
 /// Descriptor for `VendorData`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List vendorDataDescriptor = $convert.base64Decode('CgpWZW5kb3JEYXRhEhIKBHR5cGUYASABKAVSBHR5cGUSEgoEZGF0YRgCIAEoDFIEZGF0YQ==');
+final $typed_data.Uint8List vendorDataDescriptor = $convert.base64Decode(
+    'CgpWZW5kb3JEYXRhEhIKBHR5cGUYASABKAVSBHR5cGUSEgoEZGF0YRgCIAEoDFIEZGF0YQ==');

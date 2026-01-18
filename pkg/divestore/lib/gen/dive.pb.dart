@@ -13,7 +13,8 @@
 import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
-import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart' as $1;
+import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart'
+    as $1;
 
 import 'log.pb.dart' as $2;
 import 'types.pb.dart' as $0;
@@ -45,10 +46,12 @@ class Dive extends $pb.GeneratedMessage {
     $core.String? notes,
     $core.Iterable<DiveCylinder>? cylinders,
     $core.Iterable<Weightsystem>? weightsystems,
-    $core.Iterable<$2.Log>? logs,
+    $core.Iterable<$2.Log>? deprecatedLogs,
     $core.Iterable<$2.SampleEvent>? events,
-    $0.Tissues? endTissues,
     $0.Tissues? startTissues,
+    $0.Tissues? endTissues,
+    $core.double? endSurfGf,
+    $core.Iterable<$2.Log>? logs,
   }) {
     final result = create();
     if (id != null) result.id = id;
@@ -73,53 +76,71 @@ class Dive extends $pb.GeneratedMessage {
     if (notes != null) result.notes = notes;
     if (cylinders != null) result.cylinders.addAll(cylinders);
     if (weightsystems != null) result.weightsystems.addAll(weightsystems);
-    if (logs != null) result.logs.addAll(logs);
+    if (deprecatedLogs != null) result.deprecatedLogs.addAll(deprecatedLogs);
     if (events != null) result.events.addAll(events);
-    if (endTissues != null) result.endTissues = endTissues;
     if (startTissues != null) result.startTissues = startTissues;
+    if (endTissues != null) result.endTissues = endTissues;
+    if (endSurfGf != null) result.endSurfGf = endSurfGf;
+    if (logs != null) result.logs.addAll(logs);
     return result;
   }
 
   Dive._();
 
-  factory Dive.fromBuffer($core.List<$core.int> data, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory Dive.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory Dive.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(json, registry);
+  factory Dive.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i =
-      $pb.BuilderInfo(_omitMessageNames ? '' : 'Dive', package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'), createEmptyInstance: create)
-        ..aOS(1, _omitFieldNames ? '' : 'id')
-        ..aOM<$0.Metadata>(2, _omitFieldNames ? '' : 'meta', subBuilder: $0.Metadata.create)
-        ..aOS(3, _omitFieldNames ? '' : 'syncedEtag')
-        ..aI(4, _omitFieldNames ? '' : 'number')
-        ..aI(5, _omitFieldNames ? '' : 'rating')
-        ..pPS(6, _omitFieldNames ? '' : 'tags')
-        ..aOM<$1.Timestamp>(7, _omitFieldNames ? '' : 'start', subBuilder: $1.Timestamp.create)
-        ..aI(8, _omitFieldNames ? '' : 'duration')
-        ..aD(9, _omitFieldNames ? '' : 'maxDepth')
-        ..aD(10, _omitFieldNames ? '' : 'meanDepth')
-        ..aD(11, _omitFieldNames ? '' : 'minTemp')
-        ..aD(12, _omitFieldNames ? '' : 'maxTemp')
-        ..aD(13, _omitFieldNames ? '' : 'sac')
-        ..aI(14, _omitFieldNames ? '' : 'otu')
-        ..aI(15, _omitFieldNames ? '' : 'cns')
-        ..aOS(16, _omitFieldNames ? '' : 'siteId')
-        ..aOS(17, _omitFieldNames ? '' : 'instructor')
-        ..aOS(18, _omitFieldNames ? '' : 'divemaster')
-        ..pPS(19, _omitFieldNames ? '' : 'buddies')
-        ..aOS(20, _omitFieldNames ? '' : 'notes')
-        ..pPM<DiveCylinder>(21, _omitFieldNames ? '' : 'cylinders', subBuilder: DiveCylinder.create)
-        ..pPM<Weightsystem>(22, _omitFieldNames ? '' : 'weightsystems', subBuilder: Weightsystem.create)
-        ..pPM<$2.Log>(23, _omitFieldNames ? '' : 'logs', subBuilder: $2.Log.create)
-        ..pPM<$2.SampleEvent>(24, _omitFieldNames ? '' : 'events', subBuilder: $2.SampleEvent.create)
-        ..aOM<$0.Tissues>(25, _omitFieldNames ? '' : 'endTissues', subBuilder: $0.Tissues.create)
-        ..aOM<$0.Tissues>(26, _omitFieldNames ? '' : 'startTissues', subBuilder: $0.Tissues.create)
-        ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Dive',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'id')
+    ..aOM<$0.Metadata>(2, _omitFieldNames ? '' : 'meta',
+        subBuilder: $0.Metadata.create)
+    ..aOS(3, _omitFieldNames ? '' : 'syncedEtag')
+    ..aI(4, _omitFieldNames ? '' : 'number')
+    ..aI(5, _omitFieldNames ? '' : 'rating')
+    ..pPS(6, _omitFieldNames ? '' : 'tags')
+    ..aOM<$1.Timestamp>(7, _omitFieldNames ? '' : 'start',
+        subBuilder: $1.Timestamp.create)
+    ..aI(8, _omitFieldNames ? '' : 'duration')
+    ..aD(9, _omitFieldNames ? '' : 'maxDepth')
+    ..aD(10, _omitFieldNames ? '' : 'meanDepth')
+    ..aD(11, _omitFieldNames ? '' : 'minTemp')
+    ..aD(12, _omitFieldNames ? '' : 'maxTemp')
+    ..aD(13, _omitFieldNames ? '' : 'sac')
+    ..aI(14, _omitFieldNames ? '' : 'otu')
+    ..aI(15, _omitFieldNames ? '' : 'cns')
+    ..aOS(16, _omitFieldNames ? '' : 'siteId')
+    ..aOS(17, _omitFieldNames ? '' : 'instructor')
+    ..aOS(18, _omitFieldNames ? '' : 'divemaster')
+    ..pPS(19, _omitFieldNames ? '' : 'buddies')
+    ..aOS(20, _omitFieldNames ? '' : 'notes')
+    ..pPM<DiveCylinder>(21, _omitFieldNames ? '' : 'cylinders',
+        subBuilder: DiveCylinder.create)
+    ..pPM<Weightsystem>(22, _omitFieldNames ? '' : 'weightsystems',
+        subBuilder: Weightsystem.create)
+    ..pPM<$2.Log>(23, _omitFieldNames ? '' : 'deprecatedLogs',
+        subBuilder: $2.Log.create)
+    ..pPM<$2.SampleEvent>(24, _omitFieldNames ? '' : 'events',
+        subBuilder: $2.SampleEvent.create)
+    ..aOM<$0.Tissues>(25, _omitFieldNames ? '' : 'startTissues',
+        subBuilder: $0.Tissues.create)
+    ..aOM<$0.Tissues>(26, _omitFieldNames ? '' : 'endTissues',
+        subBuilder: $0.Tissues.create)
+    ..aD(28, _omitFieldNames ? '' : 'endSurfGf')
+    ..pPM<$2.Log>(64, _omitFieldNames ? '' : 'logs', subBuilder: $2.Log.create)
+    ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Dive clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Dive copyWith(void Function(Dive) updates) => super.copyWith((message) => updates(message as Dive)) as Dive;
+  Dive copyWith(void Function(Dive) updates) =>
+      super.copyWith((message) => updates(message as Dive)) as Dive;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -129,7 +150,8 @@ class Dive extends $pb.GeneratedMessage {
   @$core.override
   Dive createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static Dive getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Dive>(create);
+  static Dive getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Dive>(create);
   static Dive? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -316,38 +338,47 @@ class Dive extends $pb.GeneratedMessage {
 
   /// Raw dive computer data
   @$pb.TagNumber(23)
-  $pb.PbList<$2.Log> get logs => $_getList(22);
+  $pb.PbList<$2.Log> get deprecatedLogs => $_getList(22);
 
   /// Events like gas changed, initially extracted from dive computer data
   /// but editable.
   @$pb.TagNumber(24)
   $pb.PbList<$2.SampleEvent> get events => $_getList(23);
 
-  /// Tissue state at the end of this dive (for calculating repetitive dives).
-  /// Calculated from previous dive's tissues + this dive's profile.
+  /// Start and end tissues for this dive, calculated
   @$pb.TagNumber(25)
-  $0.Tissues get endTissues => $_getN(24);
+  $0.Tissues get startTissues => $_getN(24);
   @$pb.TagNumber(25)
-  set endTissues($0.Tissues value) => $_setField(25, value);
+  set startTissues($0.Tissues value) => $_setField(25, value);
   @$pb.TagNumber(25)
-  $core.bool hasEndTissues() => $_has(24);
+  $core.bool hasStartTissues() => $_has(24);
   @$pb.TagNumber(25)
-  void clearEndTissues() => $_clearField(25);
+  void clearStartTissues() => $_clearField(25);
   @$pb.TagNumber(25)
-  $0.Tissues ensureEndTissues() => $_ensure(24);
+  $0.Tissues ensureStartTissues() => $_ensure(24);
 
-  /// Tissue state at the start of this dive (after surface interval off-gassing).
-  /// Calculated from previous dive's end_tissues.
   @$pb.TagNumber(26)
-  $0.Tissues get startTissues => $_getN(25);
+  $0.Tissues get endTissues => $_getN(25);
   @$pb.TagNumber(26)
-  set startTissues($0.Tissues value) => $_setField(26, value);
+  set endTissues($0.Tissues value) => $_setField(26, value);
   @$pb.TagNumber(26)
-  $core.bool hasStartTissues() => $_has(25);
+  $core.bool hasEndTissues() => $_has(25);
   @$pb.TagNumber(26)
-  void clearStartTissues() => $_clearField(26);
+  void clearEndTissues() => $_clearField(26);
   @$pb.TagNumber(26)
-  $0.Tissues ensureStartTissues() => $_ensure(25);
+  $0.Tissues ensureEndTissues() => $_ensure(25);
+
+  @$pb.TagNumber(28)
+  $core.double get endSurfGf => $_getN(26);
+  @$pb.TagNumber(28)
+  set endSurfGf($core.double value) => $_setDouble(26, value);
+  @$pb.TagNumber(28)
+  $core.bool hasEndSurfGf() => $_has(26);
+  @$pb.TagNumber(28)
+  void clearEndSurfGf() => $_clearField(28);
+
+  @$pb.TagNumber(64)
+  $pb.PbList<$2.Log> get logs => $_getList(27);
 }
 
 /// Per-dive cylinder usage information.
@@ -376,12 +407,17 @@ class DiveCylinder extends $pb.GeneratedMessage {
 
   DiveCylinder._();
 
-  factory DiveCylinder.fromBuffer($core.List<$core.int> data, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory DiveCylinder.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory DiveCylinder.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(json, registry);
+  factory DiveCylinder.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DiveCylinder',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'DiveCylinder',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
+      createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'cylinderId')
     ..aD(2, _omitFieldNames ? '' : 'beginPressure')
     ..aD(3, _omitFieldNames ? '' : 'endPressure')
@@ -389,13 +425,16 @@ class DiveCylinder extends $pb.GeneratedMessage {
     ..aD(5, _omitFieldNames ? '' : 'helium')
     ..aD(6, _omitFieldNames ? '' : 'usedVolume')
     ..aD(7, _omitFieldNames ? '' : 'sac')
-    ..aOM<$0.Cylinder>(8, _omitFieldNames ? '' : 'cylinder', subBuilder: $0.Cylinder.create)
+    ..aOM<$0.Cylinder>(8, _omitFieldNames ? '' : 'cylinder',
+        subBuilder: $0.Cylinder.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   DiveCylinder clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  DiveCylinder copyWith(void Function(DiveCylinder) updates) => super.copyWith((message) => updates(message as DiveCylinder)) as DiveCylinder;
+  DiveCylinder copyWith(void Function(DiveCylinder) updates) =>
+      super.copyWith((message) => updates(message as DiveCylinder))
+          as DiveCylinder;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -405,7 +444,8 @@ class DiveCylinder extends $pb.GeneratedMessage {
   @$core.override
   DiveCylinder createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static DiveCylinder getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DiveCylinder>(create);
+  static DiveCylinder getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<DiveCylinder>(create);
   static DiveCylinder? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -498,12 +538,17 @@ class Weightsystem extends $pb.GeneratedMessage {
 
   Weightsystem._();
 
-  factory Weightsystem.fromBuffer($core.List<$core.int> data, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory Weightsystem.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory Weightsystem.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(json, registry);
+  factory Weightsystem.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Weightsystem',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Weightsystem',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
+      createEmptyInstance: create)
     ..aD(1, _omitFieldNames ? '' : 'weight')
     ..aOS(2, _omitFieldNames ? '' : 'description')
     ..hasRequiredFields = false;
@@ -511,7 +556,9 @@ class Weightsystem extends $pb.GeneratedMessage {
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Weightsystem clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Weightsystem copyWith(void Function(Weightsystem) updates) => super.copyWith((message) => updates(message as Weightsystem)) as Weightsystem;
+  Weightsystem copyWith(void Function(Weightsystem) updates) =>
+      super.copyWith((message) => updates(message as Weightsystem))
+          as Weightsystem;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -521,7 +568,8 @@ class Weightsystem extends $pb.GeneratedMessage {
   @$core.override
   Weightsystem createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static Weightsystem getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Weightsystem>(create);
+  static Weightsystem getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Weightsystem>(create);
   static Weightsystem? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -543,5 +591,7 @@ class Weightsystem extends $pb.GeneratedMessage {
   void clearDescription() => $_clearField(2);
 }
 
-const $core.bool _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const $core.bool _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
+const $core.bool _omitFieldNames =
+    $core.bool.fromEnvironment('protobuf.omit_field_names');
+const $core.bool _omitMessageNames =
+    $core.bool.fromEnvironment('protobuf.omit_message_names');

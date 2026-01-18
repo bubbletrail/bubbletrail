@@ -20,12 +20,26 @@ const Dive$json = {
   '1': 'Dive',
   '2': [
     {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
-    {'1': 'meta', '3': 2, '4': 1, '5': 11, '6': '.divestore.Metadata', '10': 'meta'},
+    {
+      '1': 'meta',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.divestore.Metadata',
+      '10': 'meta'
+    },
     {'1': 'synced_etag', '3': 3, '4': 1, '5': 9, '10': 'syncedEtag'},
     {'1': 'number', '3': 4, '4': 1, '5': 5, '10': 'number'},
     {'1': 'rating', '3': 5, '4': 1, '5': 5, '10': 'rating'},
     {'1': 'tags', '3': 6, '4': 3, '5': 9, '10': 'tags'},
-    {'1': 'start', '3': 7, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'start'},
+    {
+      '1': 'start',
+      '3': 7,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Timestamp',
+      '10': 'start'
+    },
     {'1': 'duration', '3': 8, '4': 1, '5': 5, '10': 'duration'},
     {'1': 'max_depth', '3': 9, '4': 1, '5': 1, '10': 'maxDepth'},
     {'1': 'mean_depth', '3': 10, '4': 1, '5': 1, '10': 'meanDepth'},
@@ -39,17 +53,72 @@ const Dive$json = {
     {'1': 'divemaster', '3': 18, '4': 1, '5': 9, '10': 'divemaster'},
     {'1': 'buddies', '3': 19, '4': 3, '5': 9, '10': 'buddies'},
     {'1': 'notes', '3': 20, '4': 1, '5': 9, '10': 'notes'},
-    {'1': 'cylinders', '3': 21, '4': 3, '5': 11, '6': '.divestore.DiveCylinder', '10': 'cylinders'},
-    {'1': 'weightsystems', '3': 22, '4': 3, '5': 11, '6': '.divestore.Weightsystem', '10': 'weightsystems'},
-    {'1': 'logs', '3': 23, '4': 3, '5': 11, '6': '.divestore.Log', '10': 'logs'},
-    {'1': 'events', '3': 24, '4': 3, '5': 11, '6': '.divestore.SampleEvent', '10': 'events'},
-    {'1': 'end_tissues', '3': 25, '4': 1, '5': 11, '6': '.divestore.Tissues', '10': 'endTissues'},
-    {'1': 'start_tissues', '3': 26, '4': 1, '5': 11, '6': '.divestore.Tissues', '10': 'startTissues'},
+    {
+      '1': 'cylinders',
+      '3': 21,
+      '4': 3,
+      '5': 11,
+      '6': '.divestore.DiveCylinder',
+      '10': 'cylinders'
+    },
+    {
+      '1': 'weightsystems',
+      '3': 22,
+      '4': 3,
+      '5': 11,
+      '6': '.divestore.Weightsystem',
+      '10': 'weightsystems'
+    },
+    {
+      '1': 'events',
+      '3': 24,
+      '4': 3,
+      '5': 11,
+      '6': '.divestore.SampleEvent',
+      '10': 'events'
+    },
+    {
+      '1': 'start_tissues',
+      '3': 25,
+      '4': 1,
+      '5': 11,
+      '6': '.divestore.Tissues',
+      '10': 'startTissues'
+    },
+    {
+      '1': 'end_tissues',
+      '3': 26,
+      '4': 1,
+      '5': 11,
+      '6': '.divestore.Tissues',
+      '10': 'endTissues'
+    },
+    {'1': 'end_surf_gf', '3': 28, '4': 1, '5': 1, '10': 'endSurfGf'},
+    {
+      '1': 'deprecated_logs',
+      '3': 23,
+      '4': 3,
+      '5': 11,
+      '6': '.divestore.Log',
+      '10': 'deprecatedLogs'
+    },
+    {
+      '1': 'logs',
+      '3': 64,
+      '4': 3,
+      '5': 11,
+      '6': '.divestore.Log',
+      '10': 'logs'
+    },
+  ],
+  '9': [
+    {'1': 27, '2': 28},
   ],
 };
 
 /// Descriptor for `Dive`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List diveDescriptor = $convert.base64Decode('CgREaXZlEg4KAmlkGAEgASgJUgJpZBInCgRtZXRhGAIgASgLMhMuZGl2ZXN0b3JlLk1ldGFkYX'
+final $typed_data.Uint8List diveDescriptor = $convert.base64Decode(
+    'CgREaXZlEg4KAmlkGAEgASgJUgJpZBInCgRtZXRhGAIgASgLMhMuZGl2ZXN0b3JlLk1ldGFkYX'
     'RhUgRtZXRhEh8KC3N5bmNlZF9ldGFnGAMgASgJUgpzeW5jZWRFdGFnEhYKBm51bWJlchgEIAEo'
     'BVIGbnVtYmVyEhYKBnJhdGluZxgFIAEoBVIGcmF0aW5nEhIKBHRhZ3MYBiADKAlSBHRhZ3MSMA'
     'oFc3RhcnQYByABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUgVzdGFydBIaCghkdXJh'
@@ -61,10 +130,12 @@ final $typed_data.Uint8List diveDescriptor = $convert.base64Decode('CgREaXZlEg4K
     'IYCgdidWRkaWVzGBMgAygJUgdidWRkaWVzEhQKBW5vdGVzGBQgASgJUgVub3RlcxI1CgljeWxp'
     'bmRlcnMYFSADKAsyFy5kaXZlc3RvcmUuRGl2ZUN5bGluZGVyUgljeWxpbmRlcnMSPQoNd2VpZ2'
     'h0c3lzdGVtcxgWIAMoCzIXLmRpdmVzdG9yZS5XZWlnaHRzeXN0ZW1SDXdlaWdodHN5c3RlbXMS'
-    'IgoEbG9ncxgXIAMoCzIOLmRpdmVzdG9yZS5Mb2dSBGxvZ3MSLgoGZXZlbnRzGBggAygLMhYuZG'
-    'l2ZXN0b3JlLlNhbXBsZUV2ZW50UgZldmVudHMSMwoLZW5kX3Rpc3N1ZXMYGSABKAsyEi5kaXZl'
-    'c3RvcmUuVGlzc3Vlc1IKZW5kVGlzc3VlcxI3Cg1zdGFydF90aXNzdWVzGBogASgLMhIuZGl2ZX'
-    'N0b3JlLlRpc3N1ZXNSDHN0YXJ0VGlzc3Vlcw==');
+    'LgoGZXZlbnRzGBggAygLMhYuZGl2ZXN0b3JlLlNhbXBsZUV2ZW50UgZldmVudHMSNwoNc3Rhcn'
+    'RfdGlzc3VlcxgZIAEoCzISLmRpdmVzdG9yZS5UaXNzdWVzUgxzdGFydFRpc3N1ZXMSMwoLZW5k'
+    'X3Rpc3N1ZXMYGiABKAsyEi5kaXZlc3RvcmUuVGlzc3Vlc1IKZW5kVGlzc3VlcxIeCgtlbmRfc3'
+    'VyZl9nZhgcIAEoAVIJZW5kU3VyZkdmEjcKD2RlcHJlY2F0ZWRfbG9ncxgXIAMoCzIOLmRpdmVz'
+    'dG9yZS5Mb2dSDmRlcHJlY2F0ZWRMb2dzEiIKBGxvZ3MYQCADKAsyDi5kaXZlc3RvcmUuTG9nUg'
+    'Rsb2dzSgQIGxAc');
 
 @$core.Deprecated('Use diveCylinderDescriptor instead')
 const DiveCylinder$json = {
@@ -77,12 +148,20 @@ const DiveCylinder$json = {
     {'1': 'helium', '3': 5, '4': 1, '5': 1, '10': 'helium'},
     {'1': 'used_volume', '3': 6, '4': 1, '5': 1, '10': 'usedVolume'},
     {'1': 'sac', '3': 7, '4': 1, '5': 1, '10': 'sac'},
-    {'1': 'cylinder', '3': 8, '4': 1, '5': 11, '6': '.divestore.Cylinder', '10': 'cylinder'},
+    {
+      '1': 'cylinder',
+      '3': 8,
+      '4': 1,
+      '5': 11,
+      '6': '.divestore.Cylinder',
+      '10': 'cylinder'
+    },
   ],
 };
 
 /// Descriptor for `DiveCylinder`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List diveCylinderDescriptor = $convert.base64Decode('CgxEaXZlQ3lsaW5kZXISHwoLY3lsaW5kZXJfaWQYASABKAlSCmN5bGluZGVySWQSJQoOYmVnaW'
+final $typed_data.Uint8List diveCylinderDescriptor = $convert.base64Decode(
+    'CgxEaXZlQ3lsaW5kZXISHwoLY3lsaW5kZXJfaWQYASABKAlSCmN5bGluZGVySWQSJQoOYmVnaW'
     '5fcHJlc3N1cmUYAiABKAFSDWJlZ2luUHJlc3N1cmUSIQoMZW5kX3ByZXNzdXJlGAMgASgBUgtl'
     'bmRQcmVzc3VyZRIWCgZveHlnZW4YBCABKAFSBm94eWdlbhIWCgZoZWxpdW0YBSABKAFSBmhlbG'
     'l1bRIfCgt1c2VkX3ZvbHVtZRgGIAEoAVIKdXNlZFZvbHVtZRIQCgNzYWMYByABKAFSA3NhYxIv'
@@ -98,5 +177,6 @@ const Weightsystem$json = {
 };
 
 /// Descriptor for `Weightsystem`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List weightsystemDescriptor = $convert.base64Decode('CgxXZWlnaHRzeXN0ZW0SFgoGd2VpZ2h0GAEgASgBUgZ3ZWlnaHQSIAoLZGVzY3JpcHRpb24YAi'
+final $typed_data.Uint8List weightsystemDescriptor = $convert.base64Decode(
+    'CgxXZWlnaHRzeXN0ZW0SFgoGd2VpZ2h0GAEgASgBUgZ3ZWlnaHQSIAoLZGVzY3JpcHRpb24YAi'
     'ABKAlSC2Rlc2NyaXB0aW9u');

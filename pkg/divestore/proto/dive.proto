@@ -40,20 +40,19 @@ message Dive {
   repeated DiveCylinder cylinders = 21;
   repeated Weightsystem weightsystems = 22;
 
-  // Raw dive computer data
-  repeated Log logs = 23;
-
   // Events like gas changed, initially extracted from dive computer data
   // but editable.
   repeated SampleEvent events = 24;
 
-  // Tissue state at the end of this dive (for calculating repetitive dives).
-  // Calculated from previous dive's tissues + this dive's profile.
-  Tissues end_tissues = 25;
+  // Start and end tissues for this dive, calculated
+  Tissues start_tissues = 25;
+  Tissues end_tissues = 26;
+  reserved 27;
+  double end_surf_gf = 28;
 
-  // Tissue state at the start of this dive (after surface interval off-gassing).
-  // Calculated from previous dive's end_tissues.
-  Tissues start_tissues = 26;
+  // Raw dive computer data
+  repeated Log deprecated_logs = 23;
+  repeated Log logs = 64;
 }
 
 // Per-dive cylinder usage information.

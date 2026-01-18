@@ -22,6 +22,8 @@ message Metadata {
 message Tissues {
   repeated double n2_pressures = 1; // N2 partial pressure in each compartment (bar)
   repeated double he_pressures = 2; // He partial pressure in each compartment (bar)
+  google.protobuf.Timestamp timestamp = 3;
+  string chain_id = 4;
 }
 
 // Cylinder/tank definition.
