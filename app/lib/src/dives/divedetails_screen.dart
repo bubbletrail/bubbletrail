@@ -52,16 +52,10 @@ class _DiveDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final title = platformIsDesktop ? 'Dive ' : '';
     return ScreenScaffold(
-      title: Text('Dive #${dive.number}: ${site?.name ?? 'Unknown site'}'),
+      title: Text('$title#${dive.number}: ${site?.name ?? 'Unknown site'}'),
       actions: [
-        IconButton(
-          icon: const Icon(Icons.edit),
-          onPressed: () {
-            context.goNamed(AppRouteName.divesDetailsEdit, pathParameters: {'diveID': dive.id});
-          },
-          tooltip: 'Edit dive',
-        ),
         IconButton(
           icon: const Icon(Icons.arrow_upward),
           onPressed: prevID != null
@@ -80,32 +74,15 @@ class _DiveDetails extends StatelessWidget {
               : null,
           tooltip: 'Next dive',
         ),
-        PopupMenuButton<String>(
-          onSelected: (value) async {
-            if (value == 'debug') {
-              await showDialog(
-                context: context,
-                builder: (context) => _RawDiveDataScreen(dive: dive),
-              );
-            } else if (value == 'delete') {
-              final confirmed = await showConfirmationDialog(
-                context: context,
-                title: 'Delete dive',
-                message: 'Are you sure you want to delete dive #${dive.number}? This cannot be undone.',
-                confirmText: 'Delete',
-                isDestructive: true,
-              );
-              if (confirmed && context.mounted) {
-                context.read<DiveListBloc>().add(DeleteDive(dive.id));
-                context.goNamed(AppRouteName.dives);
-              }
-            }
-          },
-          itemBuilder: (context) => [
-            const PopupMenuItem(value: 'debug', child: Text('View raw data')),
-            const PopupMenuItem(value: 'delete', child: Text('Delete dive')),
-          ],
-        ),
+        if (platformIsDesktop)
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              context.goNamed(AppRouteName.divesDetailsEdit, pathParameters: {'diveID': dive.id});
+            },
+            tooltip: 'Edit dive',
+          ),
+        if (platformIsDesktop) _popupMenuActions(context),
       ],
       body: SingleChildScrollView(
         child: Padding(
@@ -152,7 +129,52 @@ class _DiveDetails extends StatelessWidget {
         narrow: Column(crossAxisAlignment: .stretch, spacing: 8, children: datacolumns),
         wide: Wrap(alignment: .start, crossAxisAlignment: .start, spacing: 8, runSpacing: 8, children: datacolumns),
       ),
+      if (platformIsMobile)
+        Wrap(
+          spacing: 16,
+          runSpacing: 8,
+          alignment: .spaceBetween,
+          children: [
+            OutlinedButton.icon(
+              icon: const Icon(Icons.edit),
+              label: Text('Edit dive'),
+              onPressed: () {
+                context.goNamed(AppRouteName.divesDetailsEdit, pathParameters: {'diveID': dive.id});
+              },
+            ),
+            if (platformIsMobile) _popupMenuActions(context),
+          ],
+        ),
     ];
+  }
+
+  PopupMenuButton<String> _popupMenuActions(BuildContext context) {
+    return PopupMenuButton<String>(
+      onSelected: (value) async {
+        if (value == 'debug') {
+          await showDialog(
+            context: context,
+            builder: (context) => _RawDiveDataScreen(dive: dive),
+          );
+        } else if (value == 'delete') {
+          final confirmed = await showConfirmationDialog(
+            context: context,
+            title: 'Delete dive',
+            message: 'Are you sure you want to delete dive #${dive.number}? This cannot be undone.',
+            confirmText: 'Delete',
+            isDestructive: true,
+          );
+          if (confirmed && context.mounted) {
+            context.read<DiveListBloc>().add(DeleteDive(dive.id));
+            context.goNamed(AppRouteName.dives);
+          }
+        }
+      },
+      itemBuilder: (context) => [
+        const PopupMenuItem(value: 'debug', child: Text('View raw data')),
+        const PopupMenuItem(value: 'delete', child: Text('Delete dive')),
+      ],
+    );
   }
 
   Wrap _buddiesTagsEtc() {
