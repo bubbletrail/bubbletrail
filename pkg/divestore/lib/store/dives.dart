@@ -285,6 +285,10 @@ class Dives {
         await provider.deleteObject(obj.key);
         continue;
       }
+      if (dive.deprecatedLogs.isNotEmpty) {
+        dive.logs.addAll(dive.deprecatedLogs);
+        dive.deprecatedLogs.clear();
+      }
       dive.syncedEtag = obj.eTag;
       dive.freeze();
 

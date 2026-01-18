@@ -1,9 +1,10 @@
+import 'dart:convert';
+
 import 'package:divestore/divestore.dart';
 import 'package:flutter/material.dart' hide DataColumn;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:protobuf/protobuf.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
@@ -216,6 +217,7 @@ class _DiveDetails extends StatelessWidget {
     }
     if (dive.hasOtu()) children.add(ColumnRow(label: 'OTU', child: Text(dive.otu.toString())));
     if (dive.hasCns()) children.add(ColumnRow(label: 'CNS', child: Text('${dive.cns}%')));
+    if (dive.hasEndSurfGf()) children.add(ColumnRow(label: 'SurfGF', child: Text('${dive.endSurfGf.round().clamp(0, 999)}%')));
     if (worstDeco != null) children.add(ColumnRow(label: 'Deco', child: DecoStatusText(worstDeco)));
     if (decoModel != null) children.add(ColumnRow(label: 'Model', child: DecoModelText(decoModel)));
     if (dive.logs.isNotEmpty && dive.logs.first.hasModel()) children.add(ColumnRow(label: 'Computer', child: Text(dive.logs.first.model)));
@@ -259,13 +261,7 @@ class _ProfileCard extends StatelessWidget {
                   maxHeight: 250,
                   child: BlocBuilder<PreferencesBloc, PreferencesState>(
                     builder: (context, state) {
-                      return DepthProfileWidget(
-                        key: ValueKey((dive, state.preferences)),
-                        log: dive.logs[0],
-                        preferences: state.preferences,
-                        cylinders: dive.cylinders,
-                        events: dive.events,
-                      );
+                      return DepthProfileWidget(key: ValueKey((dive, state.preferences)), dive: dive, preferences: state.preferences);
                     },
                   ),
                 ),
@@ -398,7 +394,10 @@ class _RawDiveDataScreen extends StatelessWidget {
     return Dialog(
       child: SingleChildScrollView(
         padding: const .all(16),
-        child: SelectableText(dive.toTextFormat(), style: Theme.of(context).textTheme.bodyMedium?.apply(fontFamily: 'Courier')),
+        child: SelectableText(
+          JsonEncoder.withIndent('  ').convert(dive.toProto3Json()),
+          style: Theme.of(context).textTheme.bodyMedium?.apply(fontFamily: 'Courier'),
+        ),
       ),
     );
   }

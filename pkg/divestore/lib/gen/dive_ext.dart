@@ -3,7 +3,7 @@ import 'dart:math';
 import 'gen.dart';
 
 extension DiveExtensions on Dive {
-  void recalculateMedata() {
+  void recalculateMetadata() {
     // Process samples, calculating depths, durations, etc.
 
     // We want to update only cylinder that don't already have pressure data

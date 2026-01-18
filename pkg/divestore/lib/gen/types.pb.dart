@@ -182,6 +182,102 @@ class Metadata extends $pb.GeneratedMessage {
   $0.Timestamp ensureDeletedAt() => $_ensure(2);
 }
 
+/// Buhlmann ZHL-16c tissue compartment state.
+/// Stores the inert gas partial pressures in each of the 16 tissue compartments.
+class Tissues extends $pb.GeneratedMessage {
+  factory Tissues({
+    $core.Iterable<$core.double>? n2Pressures,
+    $core.Iterable<$core.double>? hePressures,
+    $0.Timestamp? timestamp,
+    $core.String? chainId,
+    $core.int? generation,
+  }) {
+    final result = create();
+    if (n2Pressures != null) result.n2Pressures.addAll(n2Pressures);
+    if (hePressures != null) result.hePressures.addAll(hePressures);
+    if (timestamp != null) result.timestamp = timestamp;
+    if (chainId != null) result.chainId = chainId;
+    if (generation != null) result.generation = generation;
+    return result;
+  }
+
+  Tissues._();
+
+  factory Tissues.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory Tissues.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Tissues',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'divestore'),
+      createEmptyInstance: create)
+    ..p<$core.double>(
+        1, _omitFieldNames ? '' : 'n2Pressures', $pb.PbFieldType.KD)
+    ..p<$core.double>(
+        2, _omitFieldNames ? '' : 'hePressures', $pb.PbFieldType.KD)
+    ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'timestamp',
+        subBuilder: $0.Timestamp.create)
+    ..aOS(4, _omitFieldNames ? '' : 'chainId')
+    ..aI(5, _omitFieldNames ? '' : 'generation')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Tissues clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Tissues copyWith(void Function(Tissues) updates) =>
+      super.copyWith((message) => updates(message as Tissues)) as Tissues;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static Tissues create() => Tissues._();
+  @$core.override
+  Tissues createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static Tissues getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Tissues>(create);
+  static Tissues? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$core.double> get n2Pressures => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $pb.PbList<$core.double> get hePressures => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $0.Timestamp get timestamp => $_getN(2);
+  @$pb.TagNumber(3)
+  set timestamp($0.Timestamp value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasTimestamp() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearTimestamp() => $_clearField(3);
+  @$pb.TagNumber(3)
+  $0.Timestamp ensureTimestamp() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  $core.String get chainId => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set chainId($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasChainId() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearChainId() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.int get generation => $_getIZ(4);
+  @$pb.TagNumber(5)
+  set generation($core.int value) => $_setSignedInt32(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasGeneration() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearGeneration() => $_clearField(5);
+}
+
 /// Cylinder/tank definition.
 /// Metric fields (size, workpressure) are always populated for calculations.
 /// Imperial fields (size_cuft, workpressure_psi) are optionally stored when

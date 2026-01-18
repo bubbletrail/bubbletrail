@@ -31,6 +31,7 @@ import 'src/equipment/cylinder_list_screen.dart';
 import 'src/equipment/equipment_screen.dart';
 import 'src/preferences/logs_screen.dart';
 import 'src/preferences/preferences_screen.dart';
+import 'src/preferences/dive_preferences_screen.dart';
 import 'src/preferences/syncing_screen.dart';
 import 'src/preferences/units_screen.dart';
 import 'src/preferences/window_preferences.dart';
@@ -296,6 +297,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                   builder: (context, state) => const PreferencesScreen(),
                   routes: <RouteBase>[
                     GoRoute(path: AppRoutePath.units, name: AppRouteName.units, builder: (context, state) => const UnitsScreen()),
+                    GoRoute(path: AppRoutePath.divePreferences, name: AppRouteName.divePreferences, builder: (context, state) => const DivePreferencesScreen()),
                     GoRoute(path: AppRoutePath.syncing, name: AppRouteName.syncing, builder: (context, state) => const SyncingScreen()),
                     GoRoute(path: AppRoutePath.logs, name: AppRouteName.logs, builder: (context, state) => const LogsScreen()),
                   ],

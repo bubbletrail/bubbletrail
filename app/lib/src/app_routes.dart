@@ -19,6 +19,7 @@ abstract class AppRouteName {
 
   static const preferences = 'preferences';
   static const units = 'units';
+  static const divePreferences = 'dive-preferences';
   static const syncing = 'syncing';
   static const logs = 'logs';
 
@@ -47,6 +48,7 @@ abstract class AppRoutePath {
 
   static const preferences = '/preferences';
   static const units = 'units';
+  static const divePreferences = 'dive';
   static const syncing = 'syncing';
   static const logs = 'logs';
 

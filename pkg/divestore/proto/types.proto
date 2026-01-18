@@ -17,6 +17,16 @@ message Metadata {
   google.protobuf.Timestamp deleted_at = 3;
 }
 
+// Buhlmann ZHL-16c tissue compartment state.
+// Stores the inert gas partial pressures in each of the 16 tissue compartments.
+message Tissues {
+  repeated double n2_pressures = 1; // N2 partial pressure in each compartment (bar)
+  repeated double he_pressures = 2; // He partial pressure in each compartment (bar)
+  google.protobuf.Timestamp timestamp = 3; // time at which tissues are valid
+  string chain_id = 4; // for determining repetitive dive chains
+  int32 generation = 5; // bumped when we update the calculation, to force recalc
+}
+
 // Cylinder/tank definition.
 // Metric fields (size, workpressure) are always populated for calculations.
 // Imperial fields (size_cuft, workpressure_psi) are optionally stored when

@@ -68,6 +68,32 @@ final $typed_data.Uint8List metadataDescriptor = $convert.base64Decode(
     'ZXN0YW1wUgl1cGRhdGVkQXQSOQoKZGVsZXRlZF9hdBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi'
     '5UaW1lc3RhbXBSCWRlbGV0ZWRBdA==');
 
+@$core.Deprecated('Use tissuesDescriptor instead')
+const Tissues$json = {
+  '1': 'Tissues',
+  '2': [
+    {'1': 'n2_pressures', '3': 1, '4': 3, '5': 1, '10': 'n2Pressures'},
+    {'1': 'he_pressures', '3': 2, '4': 3, '5': 1, '10': 'hePressures'},
+    {
+      '1': 'timestamp',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Timestamp',
+      '10': 'timestamp'
+    },
+    {'1': 'chain_id', '3': 4, '4': 1, '5': 9, '10': 'chainId'},
+    {'1': 'generation', '3': 5, '4': 1, '5': 5, '10': 'generation'},
+  ],
+};
+
+/// Descriptor for `Tissues`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List tissuesDescriptor = $convert.base64Decode(
+    'CgdUaXNzdWVzEiEKDG4yX3ByZXNzdXJlcxgBIAMoAVILbjJQcmVzc3VyZXMSIQoMaGVfcHJlc3'
+    'N1cmVzGAIgAygBUgtoZVByZXNzdXJlcxI4Cgl0aW1lc3RhbXAYAyABKAsyGi5nb29nbGUucHJv'
+    'dG9idWYuVGltZXN0YW1wUgl0aW1lc3RhbXASGQoIY2hhaW5faWQYBCABKAlSB2NoYWluSWQSHg'
+    'oKZ2VuZXJhdGlvbhgFIAEoBVIKZ2VuZXJhdGlvbg==');
+
 @$core.Deprecated('Use cylinderDescriptor instead')
 const Cylinder$json = {
   '1': 'Cylinder',

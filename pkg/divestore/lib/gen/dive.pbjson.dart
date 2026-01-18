@@ -70,14 +70,6 @@ const Dive$json = {
       '10': 'weightsystems'
     },
     {
-      '1': 'logs',
-      '3': 23,
-      '4': 3,
-      '5': 11,
-      '6': '.divestore.Log',
-      '10': 'logs'
-    },
-    {
       '1': 'events',
       '3': 24,
       '4': 3,
@@ -85,6 +77,42 @@ const Dive$json = {
       '6': '.divestore.SampleEvent',
       '10': 'events'
     },
+    {
+      '1': 'start_tissues',
+      '3': 25,
+      '4': 1,
+      '5': 11,
+      '6': '.divestore.Tissues',
+      '10': 'startTissues'
+    },
+    {
+      '1': 'end_tissues',
+      '3': 26,
+      '4': 1,
+      '5': 11,
+      '6': '.divestore.Tissues',
+      '10': 'endTissues'
+    },
+    {'1': 'end_surf_gf', '3': 28, '4': 1, '5': 1, '10': 'endSurfGf'},
+    {
+      '1': 'deprecated_logs',
+      '3': 23,
+      '4': 3,
+      '5': 11,
+      '6': '.divestore.Log',
+      '10': 'deprecatedLogs'
+    },
+    {
+      '1': 'logs',
+      '3': 64,
+      '4': 3,
+      '5': 11,
+      '6': '.divestore.Log',
+      '10': 'logs'
+    },
+  ],
+  '9': [
+    {'1': 27, '2': 28},
   ],
 };
 
@@ -102,8 +130,12 @@ final $typed_data.Uint8List diveDescriptor = $convert.base64Decode(
     'IYCgdidWRkaWVzGBMgAygJUgdidWRkaWVzEhQKBW5vdGVzGBQgASgJUgVub3RlcxI1CgljeWxp'
     'bmRlcnMYFSADKAsyFy5kaXZlc3RvcmUuRGl2ZUN5bGluZGVyUgljeWxpbmRlcnMSPQoNd2VpZ2'
     'h0c3lzdGVtcxgWIAMoCzIXLmRpdmVzdG9yZS5XZWlnaHRzeXN0ZW1SDXdlaWdodHN5c3RlbXMS'
-    'IgoEbG9ncxgXIAMoCzIOLmRpdmVzdG9yZS5Mb2dSBGxvZ3MSLgoGZXZlbnRzGBggAygLMhYuZG'
-    'l2ZXN0b3JlLlNhbXBsZUV2ZW50UgZldmVudHM=');
+    'LgoGZXZlbnRzGBggAygLMhYuZGl2ZXN0b3JlLlNhbXBsZUV2ZW50UgZldmVudHMSNwoNc3Rhcn'
+    'RfdGlzc3VlcxgZIAEoCzISLmRpdmVzdG9yZS5UaXNzdWVzUgxzdGFydFRpc3N1ZXMSMwoLZW5k'
+    'X3Rpc3N1ZXMYGiABKAsyEi5kaXZlc3RvcmUuVGlzc3Vlc1IKZW5kVGlzc3VlcxIeCgtlbmRfc3'
+    'VyZl9nZhgcIAEoAVIJZW5kU3VyZkdmEjcKD2RlcHJlY2F0ZWRfbG9ncxgXIAMoCzIOLmRpdmVz'
+    'dG9yZS5Mb2dSDmRlcHJlY2F0ZWRMb2dzEiIKBGxvZ3MYQCADKAsyDi5kaXZlc3RvcmUuTG9nUg'
+    'Rsb2dzSgQIGxAc');
 
 @$core.Deprecated('Use diveCylinderDescriptor instead')
 const DiveCylinder$json = {

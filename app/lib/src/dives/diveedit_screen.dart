@@ -434,8 +434,13 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       dive.events.clear();
       dive.events.addAll(_gasChanges.map((gs) => gs.toSampleEvent()));
 
+      // Clear tissues, since times and gases may have changed
+      dive.clearStartTissues();
+      dive.clearEndTissues();
+      dive.clearEndSurfGf();
+
       // Update calculated info.
-      dive.recalculateMedata();
+      dive.recalculateMetadata();
     });
     // Send update event to bloc
     context.read<DiveListBloc>().add(UpdateDive(upd));

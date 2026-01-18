@@ -1,16 +1,18 @@
+import 'package:buhlmann/buhlmann.dart' as buhlmann;
+import 'package:collection/collection.dart';
 import 'package:divestore/divestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../common/common.dart';
+import '../utils/tissue_calculator.dart';
 
 class DepthProfileWidget extends StatefulWidget {
-  final Log log;
+  final Dive dive;
   final Preferences preferences;
-  final List<SampleEvent> events;
-  final List<DiveCylinder> cylinders;
+  final Log log;
 
-  const DepthProfileWidget({super.key, required this.log, required this.preferences, required this.events, required this.cylinders});
+  DepthProfileWidget({super.key, required this.dive, required this.preferences}) : log = dive.logs.firstOrNull ?? Log();
 
   @override
   State<DepthProfileWidget> createState() => _DepthProfileWidgetState();
@@ -24,6 +26,8 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
   final List<LogSample> samplesWithDepth = [];
   final List<FlSpot> _depthSpots = [];
   final List<FlSpot> _ceilingSpots = [];
+  final List<FlSpot> _buhlmannCeilingSpots = [];
+  final List<({double time, double ceiling, double surfGF})> _buhlmann = [];
   final _pressureData = <int, ({List<FlSpot> spots, double minPressure, double maxPressure})>{};
   final _gasSwitches = <({double timeMinutes, String gasName})>[];
 
@@ -65,12 +69,16 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
       }
     }
 
-    // Deco ceiling
+    // Deco ceiling (from dive computer)
     for (final sample in samplesWithDepth) {
       final hasCeiling = sample.deco.type == .DECO_STOP_TYPE_DECO_STOP && sample.deco.depth > 0;
       final ceilingDepth = hasCeiling ? sample.deco.depth : -1.0;
       _ceilingSpots.add(FlSpot(sample.time / 60, depthMult * -ceilingDepth));
     }
+
+    // Buhlmann calculated ceiling & surfGF
+    _calculateBuhlmann();
+    _buhlmannCeilingSpots.addAll(_buhlmann.map((e) => FlSpot(e.time / 60, depthMult * -e.ceiling)));
 
     // Pressure data - find all tank indices used
     final tankIndices = <int>{};
@@ -106,18 +114,18 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
       }
     }
 
-    if (widget.cylinders.length > 1) {
+    if (widget.dive.cylinders.length > 1) {
       // Find gas switches
-      for (final event in widget.events) {
+      for (final event in widget.dive.events) {
         if (event.type == .SAMPLE_EVENT_TYPE_GAS_CHANGE) {
-          if (event.value >= widget.cylinders.length) continue;
+          if (event.value >= widget.dive.cylinders.length) continue;
           if (event.time > samplesWithDepth.first.time && event.value != 0 && _gasSwitches.isEmpty) {
             // We're switching to a non-default gas, without having switched
             // to the default gas, so for illustrative purposes we add a
             // synthetic switch at the first sample.
-            _gasSwitches.add((timeMinutes: 0, gasName: formatGasFraction(widget.cylinders.first.oxygen, widget.cylinders.first.helium)));
+            _gasSwitches.add((timeMinutes: 0, gasName: formatGasFraction(widget.dive.cylinders.first.oxygen, widget.dive.cylinders.first.helium)));
           }
-          final cyl = widget.cylinders[event.value];
+          final cyl = widget.dive.cylinders[event.value];
           final gasName = formatGasFraction(cyl.oxygen, cyl.helium);
           _gasSwitches.add((timeMinutes: event.time / 60, gasName: gasName));
         }
@@ -139,11 +147,26 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
     final tempColor = Colors.cyan;
     final pressureColors = [Colors.orange, Colors.green, Colors.lime, Colors.teal];
     final ceilingColor = Colors.red;
+    final buhlmannCeilingColor = Colors.deepPurple;
 
     // Build line bars
     final lineBars = <LineChartBarData>[];
 
-    // Deco ceiling
+    // Buhlmann calculated ceiling - dashed purple line
+    if (_buhlmannCeilingSpots.isNotEmpty) {
+      lineBars.add(
+        LineChartBarData(
+          spots: _buhlmannCeilingSpots,
+          color: buhlmannCeilingColor,
+          barWidth: 1.5,
+          dotData: const FlDotData(show: false),
+          dashArray: [6, 3],
+          aboveBarData: BarAreaData(show: true, color: buhlmannCeilingColor.withValues(alpha: 0.2), cutOffY: 0, applyCutOffY: true),
+        ),
+      );
+    }
+
+    // Deco ceiling (from dive computer) - solid red line
     if (_ceilingSpots.isNotEmpty) {
       lineBars.add(
         LineChartBarData(
@@ -188,6 +211,7 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
       pressureColorIdx++;
     }
 
+    final buhlmann = _buhlmann.firstWhereOrNull((s) => s.time == _displaySample?.time);
     return Stack(
       children: [
         // Top info line
@@ -202,7 +226,9 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
                 if (_displaySample!.hasTemperature()) TemperatureText(_displaySample!.temperature),
                 if (_displaySample!.pressures.isNotEmpty && _displaySample!.pressures.first.pressure > 0)
                   PressureText(_displaySample!.pressures.first.pressure),
-                if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0) DepthText(_displaySample!.deco.depth, prefix: 'Ceil: '),
+                if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0) DepthText(_displaySample!.deco.depth, prefix: 'Comp ceil: '),
+                if (buhlmann != null && buhlmann.ceiling > 0) DepthText(buhlmann.ceiling, prefix: 'Calc ceil: '),
+                if (buhlmann != null) Text('SurfGF: ${buhlmann.surfGF.round().clamp(0, 999)}%'),
               ],
             ),
           ),
@@ -304,6 +330,27 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
           ),
         ),
       ],
+    );
+  }
+
+  void _calculateBuhlmann() {
+    if (samplesWithDepth.isEmpty) return;
+
+    final config = buhlmann.BuhlmannConfig(
+      gfLow: widget.preferences.gfLow,
+      gfHigh: widget.preferences.gfHigh,
+      surfacePressure: widget.log.hasAtmosphericPressure() ? widget.log.atmosphericPressure : buhlmann.atmPressure,
+    );
+
+    calculateDiveTissues(
+      dive: widget.dive,
+      startTissues: protoToTissueState(widget.dive.startTissues),
+      config: config,
+      onSample: (sample, deco) {
+        if (sample.hasDepth()) {
+          _buhlmann.add((time: sample.time, ceiling: deco.displayCeiling(), surfGF: deco.surfaceGradientFactor()));
+        }
+      },
     );
   }
 

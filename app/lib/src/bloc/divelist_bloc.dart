@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:buhlmann/buhlmann.dart' as buhlmann;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
@@ -11,6 +12,7 @@ import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
+import '../utils/tissue_calculator.dart';
 import 'sync_bloc.dart';
 
 part 'divelist_bloc.g.dart';
@@ -216,14 +218,91 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   }
 
   Future<void> _onLoadDives(LoadDives event, Emitter<DiveListState> emit) async {
-    final dives = await _store.dives.getAll();
+    var dives = await _store.dives.getAll();
     final sites = await _store.sites.getAll();
+
+    // Calculate tissues for dives that are missing them
+    dives = await _calculateMissingTissues(dives);
+
     final currentState = state;
     if (currentState is DiveListLoaded) {
       emit(currentState.copyWith(dives: dives, sites: sites, tags: _store.tags, buddies: _store.dives.buddies));
     } else {
       emit(DiveListLoaded(dives, sites, _store.tags, _store.dives.buddies));
     }
+  }
+
+  /// Calculate and persist tissues for any dives that are missing them.
+  Future<List<Dive>> _calculateMissingTissues(List<Dive> dives) async {
+    // Sort all dives chronologically for tissue chaining
+    final chronological = List<Dive>.from(dives);
+    chronological.sort((a, b) => a.start.seconds.compareTo(b.start.seconds));
+
+    // Track which dives need updating
+    final updatedDives = <String, Dive>{};
+    DateTime? prevDiveEnd;
+    Tissues? prevEndTissues;
+
+    for (final dive in chronological) {
+      final diveStart = dive.start.toDateTime();
+      final diveEnd = diveStart.add(Duration(seconds: dive.duration));
+      var startTissues = dive.hasStartTissues() && dive.startTissues.generation == buhlmann.generation ? dive.startTissues : null;
+      var startChanged = false;
+
+      // Calculate start tissues from previous dive
+      if (prevDiveEnd == null || diveStart.difference(prevDiveEnd) > tissueResetDuration) {
+        startTissues = null; // Start with clean tissues
+      } else if (prevEndTissues != null && startTissues != null && startTissues.chainId.isNotEmpty && startTissues.chainId == prevEndTissues.chainId) {
+        // We have an unbroken chain, start tissues are already calculated
+      } else if (prevEndTissues != null) {
+        // Simulate surface interval off-gassing
+        _log.fine('calculate start tissues for dive ${dive.id}');
+        final surfaceInterval = diveStart.difference(prevDiveEnd).inSeconds.toDouble();
+        if (surfaceInterval > 0) {
+          final deco = buhlmann.BuhlmannDeco(tissues: protoToTissueState(prevEndTissues));
+          deco.addSegment(0, buhlmann.GasMix.air, surfaceInterval);
+          startTissues = tissueStateToProto(deco.tissues, diveStart, prevEndTissues.chainId);
+        } else {
+          startTissues = prevEndTissues;
+        }
+        startChanged = true;
+      }
+
+      // If we're missing end tissues or the chain has changed, recalculate
+      if (!dive.hasEndTissues() ||
+          !dive.hasEndSurfGf() ||
+          dive.endTissues.chainId.isEmpty ||
+          dive.endTissues.generation != buhlmann.generation ||
+          startChanged) {
+        // Load full dive data with samples
+        _log.fine('calculate end tissues for dive ${dive.id}');
+        final fullDive = await _store.dives.getById(dive.id);
+        if (fullDive != null && fullDive.logs.isNotEmpty) {
+          final (endTissues, surfGF) = calculateDiveTissues(dive: fullDive, startTissues: protoToTissueState(startTissues));
+          final updatedDive = fullDive.rebuild((d) {
+            if (startTissues != null) {
+              d.startTissues = startTissues;
+            } else {
+              d.clearStartTissues();
+            }
+            d.endTissues = tissueStateToProto(endTissues, diveEnd, Uuid().v4().toString());
+            d.endSurfGf = surfGF;
+          });
+          await _store.dives.update(updatedDive);
+          updatedDives[dive.id] = updatedDive.rebuild((d) => d.logs.clear()); // Clear logs for list view
+          prevEndTissues = updatedDive.endTissues;
+        }
+      } else {
+        // Use existing tissues for next dive
+        prevEndTissues = dive.endTissues;
+      }
+
+      prevDiveEnd = diveEnd;
+    }
+
+    // Return updated dive list
+    if (updatedDives.isEmpty) return dives;
+    return dives.map((d) => updatedDives[d.id] ?? d).toList();
   }
 
   Future<void> _onUpdateDive(UpdateDive event, Emitter<DiveListState> emit) async {
@@ -272,7 +351,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
           cyl.cylinderId = cr.id;
         }
       }
-      dive.recalculateMedata();
+      dive.recalculateMetadata();
     }
 
     // Insert all imported dives
