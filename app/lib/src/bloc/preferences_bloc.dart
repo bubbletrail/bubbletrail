@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -136,6 +139,7 @@ class UpdateGfHigh extends PreferencesEvent {
 
 class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
   final PreferencesStorage _storage = PreferencesStorage();
+  Timer? _saveTimer;
 
   PreferencesBloc() : super(const PreferencesState(Preferences())) {
     on<PreferencesEvent>((event, emit) async {
@@ -171,6 +175,11 @@ class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
     add(const LoadPreferences());
   }
 
+  void _scheduleSave() {
+    _saveTimer?.cancel();
+    _saveTimer = Timer(Duration(seconds: 5), () => _storage.save(state.preferences));
+  }
+
   Future<void> _onLoad(LoadPreferences event, Emitter<PreferencesState> emit) async {
     final preferences = await _storage.load();
     emit(PreferencesState(preferences));
@@ -179,84 +188,84 @@ class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
   Future<void> _onUpdateDepthUnit(UpdateDepthUnit event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(depthUnit: event.depthUnit);
-    await _storage.save(updated);
     emit(PreferencesState(updated));
+    _scheduleSave();
   }
 
   Future<void> _onUpdatePressureUnit(UpdatePressureUnit event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(pressureUnit: event.pressureUnit);
-    await _storage.save(updated);
     emit(PreferencesState(updated));
+    _scheduleSave();
   }
 
   Future<void> _onUpdateTemperatureUnit(UpdateTemperatureUnit event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(temperatureUnit: event.temperatureUnit);
-    await _storage.save(updated);
     emit(PreferencesState(updated));
+    _scheduleSave();
   }
 
   Future<void> _onUpdateVolumeUnit(UpdateVolumeUnit event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(volumeUnit: event.volumeUnit);
-    await _storage.save(updated);
     emit(PreferencesState(updated));
+    _scheduleSave();
   }
 
   Future<void> _onUpdateWeightUnit(UpdateWeightUnit event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(weightUnit: event.weightUnit);
-    await _storage.save(updated);
     emit(PreferencesState(updated));
+    _scheduleSave();
   }
 
   Future<void> _onUpdateDateFormat(UpdateDateFormat event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(dateFormat: event.dateFormat);
-    await _storage.save(updated);
     emit(PreferencesState(updated));
+    _scheduleSave();
   }
 
   Future<void> _onUpdateTimeFormat(UpdateTimeFormat event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(timeFormat: event.timeFormat);
-    await _storage.save(updated);
     emit(PreferencesState(updated));
+    _scheduleSave();
   }
 
   Future<void> _onUpdateThemeMode(UpdateThemeMode event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(themeMode: event.themeMode);
-    await _storage.save(updated);
     emit(PreferencesState(updated));
+    _scheduleSave();
   }
 
   Future<void> _onUpdateSyncProvider(UpdateSyncProvider event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(syncProvider: event.syncProvider);
-    await _storage.save(updated);
     emit(PreferencesState(updated));
+    _scheduleSave();
   }
 
   Future<void> _onUpdateS3Config(UpdateS3Config event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(s3Config: event.s3Config);
-    await _storage.save(updated);
     emit(PreferencesState(updated));
+    _scheduleSave();
   }
 
   Future<void> _onUpdateGfLow(UpdateGfLow event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
-    final updated = current.copyWith(gfLow: event.gfLow);
-    await _storage.save(updated);
+    final updated = current.copyWith(gfLow: event.gfLow, gfHigh: max(state.preferences.gfHigh, event.gfLow));
     emit(PreferencesState(updated));
+    _scheduleSave();
   }
 
   Future<void> _onUpdateGfHigh(UpdateGfHigh event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
-    final updated = current.copyWith(gfHigh: event.gfHigh);
-    await _storage.save(updated);
+    final updated = current.copyWith(gfHigh: event.gfHigh, gfLow: min(state.preferences.gfLow, event.gfHigh));
     emit(PreferencesState(updated));
+    _scheduleSave();
   }
 }
