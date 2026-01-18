@@ -12,7 +12,7 @@ class GasMix {
 
   const GasMix({required this.oxygen, this.helium = 0.0});
 
-  static const air = GasMix(oxygen: airO2Fraction);
+  static const air = GasMix(oxygen: 0.21);
   double get nitrogen => 1.0 - oxygen - helium;
 
   factory GasMix.nitrox(int oxygenPercent) {

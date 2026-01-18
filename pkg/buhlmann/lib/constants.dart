@@ -75,11 +75,5 @@ const double atmPressure = 1.01325;
 /// Water vapor pressure in the lungs (bar) at 37°C.
 const double waterVaporPressure = 0.0627;
 
-/// Nitrogen fraction in air.
-const double airN2Fraction = 0.79;
-
-/// Oxygen fraction in air.
-const double airO2Fraction = 0.21;
-
 /// Depth increment for decompression stops in meters.
 const double stopDepthIncrement = 3.0;
