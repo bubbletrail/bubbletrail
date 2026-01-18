@@ -336,60 +336,22 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
   void _calculateBuhlmann() {
     if (samplesWithDepth.isEmpty) return;
 
-    // Convert start tissues from proto if provided
-    final startTissues = protoToTissueState(widget.dive.startTissues);
-
     final config = buhlmann.BuhlmannConfig(
       gfLow: widget.preferences.gfLow,
       gfHigh: widget.preferences.gfHigh,
       surfacePressure: widget.log.hasAtmosphericPressure() ? widget.log.atmosphericPressure : buhlmann.atmPressure,
     );
-    final deco = buhlmann.BuhlmannDeco(config: config, tissues: startTissues);
 
-    // Build gas mixes from cylinders, defaulting to air if none
-    final gasMixes = <buhlmann.GasMix>[];
-    if (widget.dive.cylinders.isNotEmpty) {
-      for (final cyl in widget.dive.cylinders) {
-        gasMixes.add(buhlmann.GasMix(oxygen: cyl.oxygen, helium: cyl.helium));
-      }
-    } else {
-      gasMixes.add(buhlmann.GasMix.air);
-    }
-
-    // Build sorted list of gas switch times from events
-    final gasSwitches = <({int time, int gasIndex})>[];
-    for (final event in widget.dive.events) {
-      if (event.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE && event.value < gasMixes.length) {
-        gasSwitches.add((time: event.time, gasIndex: event.value));
-      }
-    }
-    gasSwitches.sort((a, b) => a.time.compareTo(b.time));
-
-    // Track current gas - start with first cylinder
-    var currentGas = gasMixes[0];
-    var nextSwitchIdx = 0;
-
-    // Process samples to calculate ceiling at each point
-    var prevTime = 0.0;
-    for (final sample in samplesWithDepth) {
-      // Check for gas switches up to current sample time
-      while (nextSwitchIdx < gasSwitches.length && gasSwitches[nextSwitchIdx].time <= sample.time) {
-        currentGas = gasMixes[gasSwitches[nextSwitchIdx].gasIndex];
-        nextSwitchIdx++;
-      }
-
-      // Calculate time delta and add segment
-      final timeDelta = sample.time - prevTime;
-      if (timeDelta > 0 && sample.hasDepth()) {
-        deco.addSegment(sample.depth, currentGas, timeDelta);
-      }
-      prevTime = sample.time;
-
-      final surfGF = deco.surfaceGradientFactor();
-      final ceiling = deco.displayCeiling();
-
-      _buhlmann.add((time: sample.time, ceiling: ceiling, surfGF: surfGF));
-    }
+    processDiveWithTissues(
+      dive: widget.dive,
+      startTissues: protoToTissueState(widget.dive.startTissues),
+      config: config,
+      onSample: (sample, deco) {
+        if (sample.hasDepth()) {
+          _buhlmann.add((time: sample.time, ceiling: deco.displayCeiling(), surfGF: deco.surfaceGradientFactor()));
+        }
+      },
+    );
   }
 
   LogSample? _findClosestSample(List<LogSample> samples, int timeSeconds) {
