@@ -344,7 +344,11 @@ class _DepthProfileWidgetState extends State<DepthProfileWidget> {
     // Convert start tissues from proto if provided
     final startTissues = protoToTissueState(widget.startTissues);
 
-    final config = buhlmann.BuhlmannConfig(gfLow: widget.preferences.gfLow, gfHigh: widget.preferences.gfHigh);
+    final config = buhlmann.BuhlmannConfig(
+      gfLow: widget.preferences.gfLow,
+      gfHigh: widget.preferences.gfHigh,
+      surfacePressure: widget.log.hasAtmosphericPressure() ? widget.log.atmosphericPressure : buhlmann.atmPressure,
+    );
     final deco = buhlmann.BuhlmannDeco(config: config, tissues: startTissues);
 
     // Build gas mixes from cylinders, defaulting to air if none

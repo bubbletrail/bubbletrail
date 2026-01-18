@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'constants.dart';
 
+export 'constants.dart' show atmPressure;
+
 // Gas mixture definition.
 class GasMix {
   // Oxygen fraction (0.0 to 1.0).
