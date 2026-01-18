@@ -11,12 +11,12 @@ class DivePreferencesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
-      title: const Text('Dive Settings'),
+      title: const Text('Dive settings'),
       body: BlocBuilder<PreferencesBloc, PreferencesState>(
         builder: (context, state) {
           final prefs = state.preferences;
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const .all(16),
             children: [
               PreferencesSectionHeader(title: 'Gradient Factors'),
               const SizedBox(height: 8),
