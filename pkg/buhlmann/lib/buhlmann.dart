@@ -7,26 +7,18 @@ const int generation = 1; // increase when bugs are fixed to force recalc
 
 // Gas mixture definition.
 class GasMix {
-  // Oxygen fraction (0.0 to 1.0).
   final double oxygen;
-
-  // Helium fraction (0.0 to 1.0).
   final double helium;
 
   const GasMix({required this.oxygen, this.helium = 0.0});
 
-  // Standard air mixture.
   static const air = GasMix(oxygen: airO2Fraction);
-
-  // Nitrogen fraction (remainder after O2 and He).
   double get nitrogen => 1.0 - oxygen - helium;
 
-  // Create a nitrox mix with the given oxygen percentage.
   factory GasMix.nitrox(int oxygenPercent) {
     return GasMix(oxygen: oxygenPercent / 100.0);
   }
 
-  // Create a trimix with given oxygen and helium percentages.
   factory GasMix.trimix(int oxygenPercent, int heliumPercent) {
     return GasMix(oxygen: oxygenPercent / 100.0, helium: heliumPercent / 100.0);
   }
@@ -34,50 +26,32 @@ class GasMix {
 
 // Configuration for the Buhlmann algorithm.
 class BuhlmannConfig {
-  // Low gradient factor (at depth) as percentage (0-100).
   final int gfLow;
-
-  // High gradient factor (at surface) as percentage (0-100).
   final int gfHigh;
-
-  // Surface pressure in bar.
   final double surfacePressure;
 
   const BuhlmannConfig({this.gfLow = 100, this.gfHigh = 100, this.surfacePressure = atmPressure});
 
-  // Default configuration without gradient factors.
   static const defaultConfig = BuhlmannConfig();
-
-  // Conservative configuration with GF 30/70.
-  static const conservative = BuhlmannConfig(gfLow: 30, gfHigh: 70);
-
-  // Moderate configuration with GF 40/85.
-  static const moderate = BuhlmannConfig(gfLow: 40, gfHigh: 85);
 }
 
 // Tissue compartment state.
 class TissueState {
-  // Nitrogen partial pressure in each compartment (bar).
   final List<double> n2Pressures;
-
-  // Helium partial pressure in each compartment (bar).
   final List<double> hePressures;
 
   TissueState({List<double>? n2Pressures, List<double>? hePressures})
     : n2Pressures = n2Pressures ?? List.filled(numTissueCompartments, 0.0),
       hePressures = hePressures ?? List.filled(numTissueCompartments, 0.0);
 
-  // Create a copy of this state.
   TissueState copy() {
     return TissueState(n2Pressures: List.from(n2Pressures), hePressures: List.from(hePressures));
   }
 
-  // Total inert gas pressure in a compartment.
   double totalInertPressure(int compartment) {
     return n2Pressures[compartment] + hePressures[compartment];
   }
 
-  // Get the combined a coefficient for a compartment based on gas loadings.
   double combinedACoefficient(int compartment) {
     final n2 = n2Pressures[compartment];
     final he = hePressures[compartment];
@@ -86,7 +60,6 @@ class TissueState {
     return (n2 * n2ACoefficients[compartment] + he * heACoefficients[compartment]) / total;
   }
 
-  // Get the combined b coefficient for a compartment based on gas loadings.
   double combinedBCoefficient(int compartment) {
     final n2 = n2Pressures[compartment];
     final he = hePressures[compartment];
@@ -96,7 +69,6 @@ class TissueState {
   }
 }
 
-// Buhlmann decompression calculator.
 class BuhlmannDeco {
   final BuhlmannConfig config;
   final TissueState tissues;
@@ -104,37 +76,26 @@ class BuhlmannDeco {
   // First decompression stop depth encountered (for GF interpolation).
   double _firstStopDepth;
 
-  BuhlmannDeco({BuhlmannConfig? config, TissueState? tissues})
-    : config = config ?? BuhlmannConfig.defaultConfig,
-      tissues = tissues ?? TissueState(),
-      _firstStopDepth = 0 {
-    // Initialize tissues to surface equilibrium if not provided
+  BuhlmannDeco({BuhlmannConfig? config, TissueState? tissues}) : config = config ?? BuhlmannConfig(), tissues = tissues ?? TissueState(), _firstStopDepth = 0 {
     if (tissues == null) {
       _initializeSurfaceEquilibrium();
     }
   }
 
-  // Reset to surface equilibrium.
   void reset() {
     _firstStopDepth = 0;
     _initializeSurfaceEquilibrium();
   }
 
-  // Convert depth in meters to absolute pressure in bar.
   double depthToPressure(double depthMeters) {
     return config.surfacePressure + depthMeters / 10.0;
   }
 
-  // Convert absolute pressure in bar to depth in meters.
   double pressureToDepth(double pressureBar) {
     return (pressureBar - config.surfacePressure) * 10.0;
   }
 
   // Add a segment at constant depth.
-  //
-  // [depthMeters] - depth in meters
-  // [gas] - breathing gas mixture
-  // [timeSeconds] - time at depth in seconds
   void addSegment(double depthMeters, GasMix gas, double timeSeconds) {
     final timeMinutes = timeSeconds / 60.0;
     final ambientPressure = depthToPressure(depthMeters);
@@ -165,12 +126,13 @@ class BuhlmannDeco {
   }
 
   // Calculate the display ceiling with smooth GF transition.
-  //
-  // This method:
-  // 1. Enters deco when surface GF exceeds gfHigh (ceiling at gfHigh > 0)
-  // 2. Tracks first stop depth (maximum ceiling seen at gfLow)
-  // 3. Smoothly interpolates GF from firstStop (gfLow) to surface (gfHigh)
   double displayCeiling() {
+    // This method:
+    // 1. Enters deco when surface GF exceeds gfHigh (ceiling at gfHigh > 0)
+    // 2. Tracks first stop depth (maximum ceiling seen at gfLow)
+    // 3. Smoothly interpolates GF from firstStop (gfLow) to surface
+    //    (gfHigh)
+
     // Check if in deco using gfHigh
     final ceilingAtGfHigh = ceilingDepth(gf: config.gfHigh);
     if (ceilingAtGfHigh <= 0) {
@@ -222,15 +184,6 @@ class BuhlmannDeco {
   }
 
   // Calculate new tissue pressure using the Schreiner equation.
-  //
-  // P_t = P_i + (P_0 - P_i) * (1 - e^(-k*t))
-  //
-  // Where:
-  // - P_t = final tissue pressure
-  // - P_i = inspired gas pressure
-  // - P_0 = initial tissue pressure
-  // - k = tissue constant (ln(2) / half-time)
-  // - t = time in minutes
   double _schreinerEquation(double initialPressure, double inspiredPressure, double halfTime, double timeMinutes) {
     final k = _tissueConstant(halfTime);
     return inspiredPressure + (initialPressure - inspiredPressure) * exp(-k * timeMinutes);
@@ -274,7 +227,7 @@ class BuhlmannDeco {
   }
 
   // Calculate the GF limit at a given depth, interpolating between
-  // GF_low at the first stop and GF_high at the surface.
+  // gfLow at the first stop and gfHigh at the surface.
   double _gfLimitAtDepth(double depthMeters, double firstStop) {
     final gfLow = config.gfLow / 100.0;
     final gfHigh = config.gfHigh / 100.0;
@@ -300,10 +253,6 @@ class BuhlmannDeco {
 
   // Calculate the no-decompression limit (NDL) in seconds.
   // Returns null if already in decompression.
-  //
-  // [depthMeters] - depth to calculate NDL for
-  // [gas] - breathing gas mixture
-  // [maxNdl] - maximum NDL to calculate in seconds (default 59940 = 999 min)
   double? ndl(double depthMeters, GasMix gas, {double maxNdl = 59940}) {
     // Check if we're already in deco (surface GF > gfHigh)
     if (inDeco()) return null;
@@ -364,38 +313,4 @@ class BuhlmannDeco {
 
     return leading;
   }
-}
-
-// A decompression stop.
-class DecoStop {
-  // Stop depth in meters.
-  final double depth;
-
-  // Time at stop in seconds.
-  final double time;
-
-  const DecoStop({required this.depth, required this.time});
-
-  @override
-  String toString() => '${depth.toStringAsFixed(0)}m for ${(time / 60).round()}min';
-}
-
-// Decompression status at a point in a dive.
-class DecoStatus {
-  // True if currently in decompression.
-  final bool inDeco;
-
-  // No-decompression limit in seconds (null if in deco).
-  final int? ndl;
-
-  // Ceiling depth in meters.
-  final double ceiling;
-
-  // Time to surface in seconds.
-  final int? tts;
-
-  // Tissue saturation percentage.
-  final double saturation;
-
-  const DecoStatus({required this.inDeco, this.ndl, required this.ceiling, this.tts, required this.saturation});
 }
