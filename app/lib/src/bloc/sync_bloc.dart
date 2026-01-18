@@ -52,6 +52,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   final Completer<Store> _storeCompleter = Completer();
 
   SyncProvider? _syncProvider;
+  S3Config? _syncConfig;
   Timer? _syncDebounceTimer;
 
   Future<Store> get store => _storeCompleter.future;
@@ -89,6 +90,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   }
 
   Future<void> _onUpdateConfig(UpdateSyncConfig event) async {
+    if (_syncConfig == event.s3Config) return;
     _log.fine('init sync provider');
     final provider = S3SyncProvider(
       endpoint: event.s3Config.endpoint,
@@ -99,6 +101,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     );
     await provider.init();
     _syncProvider = provider;
+    _syncConfig = event.s3Config;
   }
 
   Future<void> _onStartSyncing(StartSyncing event, Emitter<SyncState> emit) async {
