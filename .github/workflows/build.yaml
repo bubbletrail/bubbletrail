@@ -191,8 +191,10 @@ jobs:
       - name: Build & push
         run: |
             cd app
+
             echo "$ANDROID_KEY_PROPERTIES" > android/key.properties
             echo "$ANDROID_UPLOAD_KEYSTORE" | base64 -d > android/app/upload-keystore.jks
+
             flutter pub get
             flutter build appbundle \
                 --release --no-pub \
@@ -203,6 +205,9 @@ jobs:
                 --dart-define=BUILDSECONDS="$SOURCE_DATE_EPOCH" \
                 --dart-define=GITSHA="$GIT_SHA" \
                 --dart-define=MARKETINGVERSION="$MARKET_VERSION"
+
+            mv build/app/outputs/bundle/release/app-release.aab \
+              bubbletrail-android-$MARKET_VERSION-$BUILD_NUMBER.aab
         env:
           ANDROID_KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
           ANDROID_UPLOAD_KEYSTORE: ${{ secrets.ANDROID_UPLOAD_KEYSTORE }}
@@ -210,7 +215,7 @@ jobs:
       - name: Save artifacts (Android)
         uses: actions/upload-artifact@v4
         with:
-          path: app/build/app/outputs/bundle/release/app-release.aab
+          path: app/bubbletrail*.aab
 
   publish-release:
     name: Publish GitHub release
