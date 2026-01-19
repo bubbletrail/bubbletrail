@@ -18,6 +18,7 @@ dependencies:
   convert: ^3.1.2
   copy_with_extension: ^11.0.0
   crypto: ^3.0.7
+  cryptography: ^2.9.0
   device_info_plus: ^12.3.0
   divestore: {path: ../pkg/divestore}
   equatable: ^2.0.5
@@ -56,6 +57,7 @@ dev_dependencies:
   dependency_validator: ^3.2.3
   flutter_lints: ^6.0.0
   json_serializable: ^6.11.3
+  test: ^1.29.0
 
 flutter:
   uses-material-design: true
@@ -92,9 +94,9 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 
 flutter_native_splash:
-  color: "#42a5f5"
-  image:  ../assets/icon-1024.png
+  color: "#01403A"
+  image:  ../assets/icon-1024-t.png
   android_12:
-    color: "#42a5f5"
-    image: ../assets/icon-1024.png
-    icon_background_color: "#111111"
+    color: "#01403A"
+    image: ../assets/icon-512-t.png
+    icon_background_color: "#01403A"
