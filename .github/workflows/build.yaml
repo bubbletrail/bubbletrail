@@ -169,7 +169,7 @@ jobs:
 
 
   build-android:
-    name: Build for Android
+    name: Build for Android (Play Store)
     runs-on: ubuntu-latest
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/release' || github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/jb/android')
     environment: release
@@ -206,6 +206,11 @@ jobs:
         env:
           ANDROID_KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
           ANDROID_UPLOAD_KEYSTORE: ${{ secrets.ANDROID_UPLOAD_KEYSTORE }}
+
+      - name: Save artifacts (Android)
+        uses: actions/upload-artifact@v4
+        with:
+          path: app/build/app/outputs/bundle/release/app-release.aab
 
   publish-release:
     name: Publish GitHub release
