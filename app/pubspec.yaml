@@ -28,6 +28,7 @@ dependencies:
   flutter_bloc: ^9.1.1
   flutter_blue_plus: ^2.0.2
   flutter_localizations: {sdk: flutter}
+  flutter_native_splash: ^2.4.7
   flutter_map: ^8.2.2
   glob: ^2.1.3
   go_router: ^17.0.0
@@ -54,7 +55,6 @@ dev_dependencies:
   dependency_validator: ^3.2.3
   flutter_launcher_icons: ^0.14.4
   flutter_lints: ^6.0.0
-  flutter_native_splash: ^2.4.7
   json_serializable: ^6.11.3
   test: ^1.29.0
 
