@@ -167,6 +167,41 @@ jobs:
           MATCH_KEYCHAIN_PASSWORD: ${{ secrets.MATCH_KEYCHAIN_PASSWORD }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
 
+
+  build-android:
+    name: Build for Android
+    runs-on: ubuntu-latest
+    # if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/release' || github.ref == 'refs/heads/beta')
+    # environment: release
+    needs:
+      - test
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - uses: ./.github/actions/build-info
+
+      - name: Build & push
+        run: |
+            cd app
+            flutter pub get
+            flutter build appbundle \
+                --release --no-pub \
+                --build-number="$BUILD_NUMBER" \
+                --build-name="$MARKET_VERSION" \
+                --dart-define=AZURE_MAPS_SUBSCRIPTION_KEY="$AZURE_MAPS_SUBSCRIPTION_KEY" \
+                --dart-define=BUILD="$BUILD_NUMBER" \
+                --dart-define=BUILDSECONDS="$SOURCE_DATE_EPOCH" \
+                --dart-define=GITSHA="$GIT_SHA" \
+                --dart-define=MARKETINGVERSION="$MARKET_VERSION"
+
   publish-release:
     name: Publish GitHub release
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/release'
