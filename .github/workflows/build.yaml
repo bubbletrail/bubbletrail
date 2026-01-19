@@ -171,8 +171,8 @@ jobs:
   build-android:
     name: Build for Android
     runs-on: ubuntu-latest
-    # if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/release' || github.ref == 'refs/heads/beta')
-    # environment: release
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/release' || github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/jb/android')
+    environment: release
     needs:
       - test
     steps:
