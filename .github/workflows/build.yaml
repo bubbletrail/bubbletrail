@@ -191,6 +191,8 @@ jobs:
       - name: Build & push
         run: |
             cd app
+            echo "$ANDROID_KEY_PROPERTIES" > android/key.properties
+            echo "$ANDROID_UPLOAD_KEYSTORE" | base64 -d > android/app/upload-keystore.jks
             flutter pub get
             flutter build appbundle \
                 --release --no-pub \
@@ -201,6 +203,9 @@ jobs:
                 --dart-define=BUILDSECONDS="$SOURCE_DATE_EPOCH" \
                 --dart-define=GITSHA="$GIT_SHA" \
                 --dart-define=MARKETINGVERSION="$MARKET_VERSION"
+        env:
+          ANDROID_KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
+          ANDROID_UPLOAD_KEYSTORE: ${{ secrets.ANDROID_UPLOAD_KEYSTORE }}
 
   publish-release:
     name: Publish GitHub release
