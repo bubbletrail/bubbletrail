@@ -154,7 +154,7 @@ class Dives {
 
   Future<int> get nextDiveNo async {
     final dives = await getAll();
-    final next = dives.fold(0, (n, d) => max(n, d.number + 1));
+    final next = dives.fold(1, (n, d) => max(n, d.number + 1));
     return next;
   }
 
