@@ -17,7 +17,6 @@ dependencies:
   collection: ^1.19.1
   convert: ^3.1.2
   copy_with_extension: ^11.0.0
-  crypto: ^3.0.7
   cryptography: ^2.9.0
   device_info_plus: ^12.3.0
   divestore: {path: ../pkg/divestore}
@@ -38,7 +37,6 @@ dependencies:
   logging: ^1.3.0
   minio: ^3.5.0
   path_provider: ^2.1.5
-  pinenacl: ^0.6.0
   protobuf: ^6.0.0
   shared_preferences: ^2.3.4
   trina_grid: ^2.1.1

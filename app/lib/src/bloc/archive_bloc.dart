@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:crypto/crypto.dart';
+import 'package:cryptography/cryptography.dart';
 import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -176,12 +176,12 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
 
 // Generate a Subsrurface XML document from the given container of dives &
 // sites, using required remapping of IDs for Subsurface compatibility.
-String _subsurfaceXml(Container container) {
+Future<String> _subsurfaceXml(Container container) async {
   // Subsurface requires site IDs to be exactly 8 hex digits.
   // Create a mapping from our UUIDs to 8-hex-digit IDs using first 4 bytes of SHA256.
   final siteIdMap = <String, String>{};
   for (final site in container.sites) {
-    siteIdMap[site.id] = _toSubsurfaceSiteId(site.id);
+    siteIdMap[site.id] = await _toSubsurfaceSiteId(site.id);
   }
 
   // Rebuild sites with Subsurface-compatible IDs
@@ -205,7 +205,7 @@ String _subsurfaceXml(Container container) {
 // Converts our site ID to a Subsurface-compatible 8 hex digit ID. Uses the
 // first 4 bytes of SHA256 hash of the original ID. There is a risk of hash
 // collision, which we ignore for now.
-String _toSubsurfaceSiteId(String id) {
-  final bytes = sha256.convert(utf8.encode(id)).bytes;
+Future<String> _toSubsurfaceSiteId(String id) async {
+  final bytes = (await Sha256().hash(utf8.encode(id))).bytes;
   return bytes.take(4).map((b) => b.toRadixString(16).padLeft(2, '0')).join();
 }
