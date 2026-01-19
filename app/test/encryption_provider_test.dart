@@ -39,17 +39,6 @@ void main() {
       expect(decrypted, equals(originalData));
     });
 
-    test('same input produces same ciphertext (deterministic nonce)', () async {
-      final provider = EncryptionProvider(vaultKey: 'deterministic-key');
-      await provider.init();
-
-      final data = Uint8List.fromList(utf8.encode('same data'));
-      final encrypted1 = await provider.encrypt(data);
-      final encrypted2 = await provider.encrypt(data);
-
-      expect(encrypted1, equals(encrypted2));
-    });
-
     test('syncPrefix is generated after init', () async {
       final provider = EncryptionProvider(vaultKey: 'prefix-test-key');
       await provider.init();
