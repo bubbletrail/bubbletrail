@@ -15,7 +15,7 @@ class Cylinders {
   final String path;
   final bool readonly;
 
-  Map<String, Cylinder> _cylinders = Map();
+  Map<String, Cylinder> _cylinders = {};
   Timer? _saveTimer;
   bool _notify = false;
   final _changes = StreamController<void>.broadcast();
@@ -98,7 +98,9 @@ class Cylinders {
       for (final c in cl.cylinders) {
         _cylinders[c.id] = c;
       }
-    } catch (_) {}
+    } catch (e) {
+      _log.warning('failed to load cylinders', e);
+    }
   }
 
   void _scheduleSave({required bool notify}) {

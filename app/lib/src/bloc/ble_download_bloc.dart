@@ -369,7 +369,9 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
       // Remember the fingerprint & last log date on the downloading computer
       final ll = state.downloadedDives.first.logs.last;
       _store.computers.update(remoteId: state.connectedDevice!.remoteId.str, ldcFingerprint: ll.ldcFingerprint, lastLogDate: ll.dateTime.toDateTime());
-    } on StateError catch (_) {}
+    } on StateError catch (_) {
+      // no downloaded dive or no logs in dive
+    }
 
     _diveListBloc.add(DownloadedDives(state.downloadedDives));
 
