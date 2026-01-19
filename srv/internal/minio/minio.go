@@ -160,7 +160,7 @@ func (c *Client) DeleteUser(ctx context.Context, email string) error {
 		}
 		err := c.minioClient.RemoveObject(ctx, bucketName, obj.Key, minio.RemoveObjectOptions{})
 		if err != nil {
-			log.Error("failed to delete object", "object", obj.Key, "error", obj.Err)
+			log.Error("failed to delete object", "object", obj.Key, "error", err)
 			success = false
 		}
 	}

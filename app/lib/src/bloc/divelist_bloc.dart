@@ -212,8 +212,12 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       add(LoadDives());
     });
 
+    DateTime? lastSynced;
     _syncBlocSub = _syncBloc.stream.listen((state) {
-      add(LoadDives());
+      if (state.lastSyncSuccess == true && state.lastSynced != lastSynced) {
+        lastSynced = state.lastSynced;
+        add(LoadDives());
+      }
     });
   }
 
