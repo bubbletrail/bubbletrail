@@ -173,7 +173,10 @@ class Dives {
           continue;
         }
         _dives[dive.id] = dive;
-      } catch (_) {}
+      } catch (e) {
+        _log.warning('failed to load dive, deleting ${match.basename}', e);
+        await match.delete();
+      }
     }
     _rebuildTags();
   }
@@ -204,7 +207,8 @@ class Dives {
       }
       ll.freeze();
       return ll.logs;
-    } catch (_) {
+    } catch (e) {
+      _log.warning('failed to load logs', e);
       return [];
     }
   }

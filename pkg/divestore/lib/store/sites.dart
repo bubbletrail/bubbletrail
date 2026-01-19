@@ -100,7 +100,9 @@ class Sites {
         _sites[site.id] = site;
         _tags.addAll(site.tags);
       }
-    } catch (_) {}
+    } catch (e) {
+      _log.warning('failed to load sites', e);
+    }
   }
 
   void _scheduleSave({required bool notify}) {

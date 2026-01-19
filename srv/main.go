@@ -4,7 +4,6 @@ import (
 	"embed"
 	"encoding/json"
 	"io/fs"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -59,7 +58,10 @@ func main() {
 	http.Handle("/", http.FileServer(http.FS(staticFS)))
 
 	slog.Info("starting server", "address", ":8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		slog.Error("failed to listen", "error", err)
+		os.Exit(1)
+	}
 }
 
 type server struct {
@@ -93,7 +95,7 @@ func (s *server) newAccount(w http.ResponseWriter, r *http.Request) {
 		SecretKey: result.SecretKey,
 	})
 	if err != nil {
-		log.Printf("failed to send credentials email: %v", err)
+		slog.Error("failed to send credentials email", "error", err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
