@@ -19,6 +19,7 @@ void main(List<String> args) async {
       assetName: '${packageName}_bindings_generated.dart',
       includes: ['$libdir/include', '$libdir/src'],
       sources: localsources + libsources,
+      libraries: ['m'],
     );
     await cbuilder.run(
       input: input,
