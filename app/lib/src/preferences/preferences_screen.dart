@@ -8,10 +8,10 @@ import 'package:logging/logging.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
-import '../bloc/archive_bloc.dart';
+import 'archive_bloc.dart';
 import '../dives_sites/dive_list_bloc.dart';
 import 'preferences_bloc.dart';
-import '../bloc/sync_bloc.dart';
+import 'sync_bloc.dart';
 import '../common/common.dart';
 import '../services/log_buffer.dart';
 import 'preferences_widgets.dart';

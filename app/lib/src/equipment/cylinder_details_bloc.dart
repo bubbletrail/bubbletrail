@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 
-import '../bloc/details_state.dart';
+import '../common/details_state.dart';
 import '../providers/storage_provider.dart';
 
 final _log = Logger('cylinderdetails_bloc.dart');

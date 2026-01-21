@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../bloc/sync_bloc.dart';
+import 'sync_bloc.dart';
 import '../common/common.dart';
 
 class PreferencesSectionHeader extends StatelessWidget {

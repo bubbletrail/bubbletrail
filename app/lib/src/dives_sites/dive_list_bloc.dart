@@ -14,7 +14,7 @@ import 'package:xml/xml.dart';
 
 import '../providers/storage_provider.dart';
 import 'tissue_calculator.dart';
-import '../bloc/sync_bloc.dart';
+import '../preferences/sync_bloc.dart';
 
 part 'dive_list_bloc.g.dart';
 
