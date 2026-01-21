@@ -1,0 +1,2 @@
+json_key_file("fastlane/apikey.json")
+package_name("app.bubbletrail.bubbletrail")

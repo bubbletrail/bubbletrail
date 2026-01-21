@@ -1,0 +1,10 @@
+default_platform(:android)
+
+platform :android do
+  lane :deploy do
+    upload_to_play_store(
+      aab: 'app-release.aab',
+      track: 'beta',
+    )
+  end
+end
