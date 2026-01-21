@@ -230,7 +230,7 @@ jobs:
         shell: bash
         run: |
           cd app/android
-          mv bubbletrail-android-$MARKET_VERSION-$BUILD_NUMBER.aab app-release.aab
+          mv ../bubbletrail-android-$MARKET_VERSION-$BUILD_NUMBER.aab app-release.aab
           echo "$GOOGLE_PLAY_API_KEY_JSON" > fastlane/apikey.json
           bundle exec fastlane deploy
         env:
