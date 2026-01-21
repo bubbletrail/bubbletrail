@@ -11,8 +11,8 @@ import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../app_metadata.dart';
-import 'sync_bloc.dart';
-import 'zip_archive_provider.dart';
+import '../providers/storage_provider.dart';
+import '../providers/zip_archive_provider.dart';
 
 final _log = Logger('archive_bloc.dart');
 
@@ -67,9 +67,7 @@ class ImportArchive extends ArchiveEvent {
 class ExportSsrf extends ArchiveEvent {}
 
 class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
-  final SyncBloc _syncBloc;
-
-  ArchiveBloc(this._syncBloc) : super(const ArchiveState()) {
+  ArchiveBloc() : super(const ArchiveState()) {
     on<ExportArchive>(_onExport);
     on<ExportComplete>(_onExportComplete);
     on<ExportCancelled>(_onExportCancelled);
@@ -80,7 +78,7 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
   Future<void> _onExport(ExportArchive event, Emitter<ArchiveState> emit) async {
     emit(state.copyWith(working: true, error: null));
     try {
-      final store = await _syncBloc.store;
+      final store = await StorageProvider.store;
       final tempDir = await getTemporaryDirectory();
       final filename = 'bubbletrail_${DateFormat('yyyy-MM-dd_HHmmss').format(DateTime.now())}.$backupFileExtension';
       final zipFile = File('${tempDir.path}/$filename');
@@ -124,7 +122,7 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
   Future<void> _onImport(ImportArchive event, Emitter<ArchiveState> emit) async {
     emit(state.copyWith(working: true, error: null));
     try {
-      final store = await _syncBloc.store;
+      final store = await StorageProvider.store;
       final zipFile = File(event.zipPath);
 
       final provider = ZipImportProvider(zipFile: zipFile);
@@ -142,7 +140,7 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
   Future<void> _onExportSsrf(ExportSsrf event, Emitter<ArchiveState> emit) async {
     emit(state.copyWith(working: true, error: null));
     try {
-      final store = await _syncBloc.store;
+      final store = await StorageProvider.store;
       final tempDir = await getTemporaryDirectory();
       final filename = 'bubbletrail_${DateFormat('yyyy-MM-dd_HHmmss').format(DateTime.now())}.ssrf';
       final ssrfFile = File('${tempDir.path}/$filename');

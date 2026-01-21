@@ -6,8 +6,9 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
-import '../bloc/divelist_bloc.dart';
+import 'dive_list_bloc.dart';
 import '../common/common.dart';
+import 'site_map.dart';
 
 class SiteEditScreen extends StatefulWidget {
   const SiteEditScreen({super.key});

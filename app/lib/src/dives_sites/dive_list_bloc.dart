@@ -12,10 +12,11 @@ import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
-import '../utils/tissue_calculator.dart';
-import 'sync_bloc.dart';
+import '../providers/storage_provider.dart';
+import 'tissue_calculator.dart';
+import '../preferences/sync_bloc.dart';
 
-part 'divelist_bloc.g.dart';
+part 'dive_list_bloc.g.dart';
 
 final _log = Logger('divelist_bloc.dart');
 
@@ -207,7 +208,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       }
     }, transformer: sequential());
 
-    _syncBloc.store.then((value) {
+    StorageProvider.store.then((value) {
       _store = value;
       add(LoadDives());
     });

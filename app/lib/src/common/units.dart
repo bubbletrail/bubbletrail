@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 
-import '../bloc/preferences_bloc.dart';
+import '../preferences/preferences_bloc.dart';
 import 'common.dart';
 
 export '../preferences/preferences.dart';

@@ -5,11 +5,11 @@ import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-import '../preferences/preferences.dart';
-import 's3_provider.dart';
+import 'preferences.dart';
+import '../providers/s3_provider.dart';
+import '../providers/storage_provider.dart';
 
 final _log = Logger('sync_bloc.dart');
 
@@ -49,14 +49,9 @@ class UpdateSyncConfig extends SyncEvent {
 }
 
 class SyncBloc extends Bloc<SyncEvent, SyncState> {
-  final Completer<Store> _storeCompleter = Completer();
-
   SyncProvider? _syncProvider;
   S3Config? _syncConfig;
   Timer? _syncDebounceTimer;
-
-  Future<Store> get store => _storeCompleter.future;
-  Future<String> get storePath async => '${(await getApplicationDocumentsDirectory()).path}/db';
 
   SyncBloc() : super(SyncState()) {
     on<SyncEvent>((event, emit) async {
@@ -75,12 +70,8 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   }
 
   Future<void> _onInitStore(_InitStore event, Emitter<SyncState> emit) async {
-    _log.fine('init storage');
-    final dir = await storePath;
-    final store = Store(dir);
-    await store.init();
-    _storeCompleter.complete(store);
-
+    _log.fine('init');
+    final store = await StorageProvider.store;
     store.changes.listen((_) {
       _syncDebounceTimer?.cancel();
       _syncDebounceTimer = Timer(Duration(seconds: 60), () => add(StartSyncing()));
@@ -117,7 +108,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       await WakelockPlus.enable();
 
       _log.info('start syncing');
-      final s = await store;
+      final s = await StorageProvider.store;
       await s.syncWith(_syncProvider!);
 
       _log.info('completed syncing');

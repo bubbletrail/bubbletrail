@@ -8,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:libdivecomputer/libdivecomputer.dart';
 
-import 'sync_bloc.dart';
+import '../providers/storage_provider.dart';
 
 part 'ble_scan_bloc.g.dart';
 
@@ -138,19 +138,18 @@ class BleScanState extends Equatable {
 
 // Bloc
 class BleScanBloc extends Bloc<BleScanEvent, BleScanState> {
-  final SyncBloc _syncBloc;
   late final Store _store;
   StreamSubscription<BluetoothAdapterState>? _adapterStateSubscription;
   StreamSubscription<List<ScanResult>>? _scanSubscription;
   StreamSubscription<bool>? _scanStatusSubscription;
   final _matchedDevices = <String, List<ComputerDescriptor>>{};
 
-  BleScanBloc(this._syncBloc) : super(const BleScanState()) {
+  BleScanBloc() : super(const BleScanState()) {
     on<BleScanEvent>(_onEvent, transformer: sequential());
 
     dcDescriptorIterate().then((comps) => add(_LoadedSupportedComputers(comps)));
 
-    _syncBloc.store.then((store) async {
+    StorageProvider.store.then((store) async {
       _store = store;
       final computers = await _store.computers.getAll();
       add(_LoadedRememberedComputers(computers));

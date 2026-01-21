@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/details_state.dart';
+import 'details_state.dart';
 import 'screen_scaffold.dart';
 
 /// A generic wrapper widget that shows loading/error states for a details BLoC.

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_routes.dart';
-import 'units.dart';
+import '../common/units.dart';
 
 /// A card widget for displaying a dive in a mobile-friendly list layout.
 class DiveListItemCard extends StatelessWidget {

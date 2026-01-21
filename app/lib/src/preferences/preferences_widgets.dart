@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../bloc/sync_bloc.dart';
+import 'sync_bloc.dart';
 import '../common/common.dart';
 
 class PreferencesSectionHeader extends StatelessWidget {
@@ -86,26 +86,6 @@ class SyncStatusTile extends StatelessWidget {
         Text(message, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: iconColor)),
         if (trailing != null) ...[const SizedBox(width: 4), trailing],
       ],
-    );
-  }
-}
-
-class PreferencesCategoryCard extends StatelessWidget {
-  final IconData? icon;
-  final String title;
-  final VoidCallback onTap;
-
-  const PreferencesCategoryCard({super.key, this.icon, required this.title, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: icon != null ? Icon(icon, size: 28) : null,
-        title: Text(title, style: Theme.of(context).textTheme.titleMedium),
-        trailing: const Icon(Icons.chevron_right, size: 16),
-        onTap: onTap,
-      ),
     );
   }
 }

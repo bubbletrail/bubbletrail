@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/preferences_bloc.dart';
+import 'preferences_bloc.dart';
 import '../common/common.dart';
 import 'preferences_widgets.dart';
 
-class SyncingScreen extends StatelessWidget {
-  const SyncingScreen({super.key});
+class SyncSettingsScreen extends StatelessWidget {
+  const SyncSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

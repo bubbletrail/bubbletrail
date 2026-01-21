@@ -8,10 +8,10 @@ import 'package:logging/logging.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
-import '../bloc/archive_bloc.dart';
-import '../bloc/divelist_bloc.dart';
-import '../bloc/preferences_bloc.dart';
-import '../bloc/sync_bloc.dart';
+import 'archive_bloc.dart';
+import '../dives_sites/dive_list_bloc.dart';
+import 'preferences_bloc.dart';
+import 'sync_bloc.dart';
 import '../common/common.dart';
 import '../services/log_buffer.dart';
 import 'preferences_widgets.dart';
@@ -27,7 +27,7 @@ class PreferencesScreen extends StatelessWidget {
           builder: (context, prefsState) {
             final prefs = prefsState.preferences;
             return ScreenScaffold(
-              title: const Text('Settings'),
+              title: const Text('Preferences'),
               body: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
@@ -78,7 +78,7 @@ class PreferencesScreen extends StatelessWidget {
                           OutlinedButton.icon(icon: Icon(Icons.straighten), label: Text('Edit units'), onPressed: () => context.goNamed(AppRouteName.units)),
                           OutlinedButton.icon(
                             icon: Icon(Icons.scuba_diving),
-                            label: Text('Dive settings'),
+                            label: Text('Dive preferences'),
                             onPressed: () => context.goNamed(AppRouteName.divePreferences),
                           ),
                         ],

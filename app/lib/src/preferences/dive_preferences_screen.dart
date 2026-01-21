@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/preferences_bloc.dart';
+import 'preferences_bloc.dart';
 import '../common/screen_scaffold.dart';
 import 'preferences_widgets.dart';
 
@@ -11,7 +11,7 @@ class DivePreferencesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
-      title: const Text('Dive settings'),
+      title: const Text('Dive preferences'),
       body: BlocBuilder<PreferencesBloc, PreferencesState>(
         builder: (context, state) {
           final prefs = state.preferences;

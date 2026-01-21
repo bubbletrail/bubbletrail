@@ -6,18 +6,19 @@ import 'package:trina_grid/trina_grid.dart';
 
 import '../app_routes.dart';
 import '../app_theme.dart';
-import '../bloc/preferences_bloc.dart';
-import 'common.dart';
+import '../common/common.dart';
+import '../preferences/preferences_bloc.dart';
+import 'dive_list_item_card.dart';
 
 /// Breakpoint width for switching between card (narrow) and table (wide) layouts.
 const double _narrowLayoutBreakpoint = 600;
 
-class DiveTableWidget extends StatelessWidget {
+class DiveTable extends StatelessWidget {
   final List<Dive> dives;
   final Map<String, Site> sitesByUuid;
   final bool showSiteColumn;
 
-  const DiveTableWidget({super.key, required this.dives, required this.sitesByUuid, this.showSiteColumn = true});
+  const DiveTable({super.key, required this.dives, required this.sitesByUuid, this.showSiteColumn = true});
 
   Site? _getSite(Dive dive) {
     if (dive.siteId.isEmpty) return null;
