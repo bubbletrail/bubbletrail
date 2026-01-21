@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../app_routes.dart';
-import 'common.dart';
+import 'site_map.dart';
 
 class SiteMapCard extends StatelessWidget {
   final Site site;

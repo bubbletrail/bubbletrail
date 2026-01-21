@@ -8,6 +8,7 @@ import '../app_routes.dart';
 import '../app_theme.dart';
 import 'dive_list_bloc.dart';
 import '../common/common.dart';
+import 'site_list_item_card.dart';
 
 /// Breakpoint width for switching between card (narrow) and table (wide) layouts.
 const double _narrowLayoutBreakpoint = 600;

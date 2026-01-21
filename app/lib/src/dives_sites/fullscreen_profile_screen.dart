@@ -6,7 +6,7 @@ import '../app_metadata.dart';
 import 'dive_list_bloc.dart';
 import '../preferences/preferences_bloc.dart';
 import '../common/common.dart';
-import 'depthprofile_widget.dart';
+import 'depth_profile_widget.dart';
 
 class FullscreenProfileScreen extends StatefulWidget {
   const FullscreenProfileScreen({super.key});
@@ -66,7 +66,7 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
                   title: Text('Dive #${dive.number}: ${site?.name ?? 'Unknown site'}'),
                   body: Padding(
                     padding: platformIsMobile ? EdgeInsets.zero : const EdgeInsets.all(8.0),
-                    child: DepthProfileWidget(key: ValueKey((dive, prefsState.preferences)), dive: dive, preferences: prefsState.preferences),
+                    child: DepthProfile(key: ValueKey((dive, prefsState.preferences)), dive: dive, preferences: prefsState.preferences),
                   ),
                   transparent: true,
                 );

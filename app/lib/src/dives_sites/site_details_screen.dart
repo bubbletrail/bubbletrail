@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../app_routes.dart';
 import 'dive_list_bloc.dart';
 import '../common/common.dart';
+import 'dive_table.dart';
+import 'site_map_card.dart';
 
 class SiteDetailsScreen extends StatelessWidget {
   const SiteDetailsScreen({super.key});
@@ -71,7 +73,7 @@ class SiteDetailsScreen extends StatelessWidget {
               if (dives.isNotEmpty)
                 AspectRatio(
                   aspectRatio: 2,
-                  child: DiveTableWidget(dives: dives, sitesByUuid: state.sitesByUuid, showSiteColumn: false),
+                  child: DiveTable(dives: dives, sitesByUuid: state.sitesByUuid, showSiteColumn: false),
                 ),
             ],
           ),

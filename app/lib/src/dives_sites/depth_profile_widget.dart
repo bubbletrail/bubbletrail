@@ -7,18 +7,18 @@ import 'package:flutter/material.dart';
 import '../common/common.dart';
 import 'tissue_calculator.dart';
 
-class DepthProfileWidget extends StatefulWidget {
+class DepthProfile extends StatefulWidget {
   final Dive dive;
   final Preferences preferences;
   final Log log;
 
-  DepthProfileWidget({super.key, required this.dive, required this.preferences}) : log = dive.logs.firstOrNull ?? Log();
+  DepthProfile({super.key, required this.dive, required this.preferences}) : log = dive.logs.firstOrNull ?? Log();
 
   @override
-  State<DepthProfileWidget> createState() => _DepthProfileWidgetState();
+  State<DepthProfile> createState() => _DepthProfileState();
 }
 
-class _DepthProfileWidgetState extends State<DepthProfileWidget> {
+class _DepthProfileState extends State<DepthProfile> {
   LogSample? _displaySample;
   double _maxTime = 0;
   double _chartMaxDepth = 0;
