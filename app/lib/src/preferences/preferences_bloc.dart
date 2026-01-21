@@ -6,8 +6,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../preferences/preferences.dart';
-import '../preferences/preferences_storage.dart';
+import 'preferences.dart';
+import 'preferences_storage.dart';
 
 class PreferencesState extends Equatable {
   final Preferences preferences;

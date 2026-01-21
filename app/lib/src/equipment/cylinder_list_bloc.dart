@@ -4,7 +4,7 @@ import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'sync_bloc.dart';
+import '../providers/storage_provider.dart';
 
 abstract class CylinderListState extends Equatable {
   const CylinderListState();
@@ -51,17 +51,16 @@ class _LoadedCylinders extends CylinderListEvent {
 }
 
 class CylinderListBloc extends Bloc<CylinderListEvent, CylinderListState> {
-  final SyncBloc _syncBloc;
   StreamSubscription? _cylindersSub;
 
-  CylinderListBloc(this._syncBloc) : super(const CylinderListInitial()) {
+  CylinderListBloc() : super(const CylinderListInitial()) {
     on<_Init>(_onInit);
     on<_LoadedCylinders>(_onLoadedCylinders);
     add(const _Init());
   }
 
   Future<void> _onInit(_Init event, Emitter<CylinderListState> emit) async {
-    final store = await _syncBloc.store;
+    final store = await StorageProvider.store;
     _cylindersSub = store.cylinders.changes.listen((cylinders) async {
       final cylinders = await store.cylinders.getAll();
       add(_LoadedCylinders(cylinders));

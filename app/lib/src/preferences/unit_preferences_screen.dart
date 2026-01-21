@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/preferences_bloc.dart';
+import 'preferences_bloc.dart';
 import '../common/screen_scaffold.dart';
 import 'preferences.dart';
 import 'preferences_widgets.dart';
 
-class UnitsScreen extends StatelessWidget {
-  const UnitsScreen({super.key});
+class UnitPreferencessScreen extends StatelessWidget {
+  const UnitPreferencessScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

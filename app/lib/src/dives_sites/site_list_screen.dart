@@ -6,7 +6,7 @@ import 'package:trina_grid/trina_grid.dart';
 
 import '../app_routes.dart';
 import '../app_theme.dart';
-import '../bloc/divelist_bloc.dart';
+import 'dive_list_bloc.dart';
 import '../common/common.dart';
 
 /// Breakpoint width for switching between card (narrow) and table (wide) layouts.

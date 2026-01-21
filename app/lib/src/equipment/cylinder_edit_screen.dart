@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_metadata.dart';
-import '../bloc/cylinderdetails_bloc.dart';
+import 'cylinder_details_bloc.dart';
 import '../common/common.dart';
 
 class CylinderEditScreen extends StatefulWidget {

@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../app_metadata.dart';
-import '../bloc/divelist_bloc.dart';
-import '../bloc/preferences_bloc.dart';
+import 'dive_list_bloc.dart';
+import '../preferences/preferences_bloc.dart';
 import '../common/common.dart';
 import 'depthprofile_widget.dart';
 

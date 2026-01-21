@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'divelist_bloc.dart';
+part of 'dive_list_bloc.dart';
 
 // **************************************************************************
 // CopyWithGenerator

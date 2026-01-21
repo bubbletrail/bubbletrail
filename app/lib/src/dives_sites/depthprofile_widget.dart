@@ -5,7 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../common/common.dart';
-import '../utils/tissue_calculator.dart';
+import 'tissue_calculator.dart';
 
 class DepthProfileWidget extends StatefulWidget {
   final Dive dive;

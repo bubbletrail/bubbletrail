@@ -4,14 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../app_routes.dart';
-import '../common/common.dart';
+import 'common.dart';
 
-class SiteMapWidget extends StatelessWidget {
+class SiteMapCard extends StatelessWidget {
   final Site site;
   final double height;
   final bool showFullscreenButton;
 
-  const SiteMapWidget({super.key, required this.site, this.height = 300, this.showFullscreenButton = false});
+  const SiteMapCard({super.key, required this.site, this.height = 300, this.showFullscreenButton = false});
 
   @override
   Widget build(BuildContext context) {

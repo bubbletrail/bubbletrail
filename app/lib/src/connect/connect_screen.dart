@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
-import '../bloc/ble_download_bloc.dart';
-import '../bloc/ble_scan_bloc.dart';
+import 'ble_download_bloc.dart';
+import 'ble_scan_bloc.dart';
 import '../common/common.dart';
 
-class BleScanScreen extends StatelessWidget {
-  const BleScanScreen({super.key});
+class ConnectScreen extends StatelessWidget {
+  const ConnectScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

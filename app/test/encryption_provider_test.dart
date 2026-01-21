@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:bubbletrail/src/bloc/encryption_provider.dart';
+import 'package:bubbletrail/src/providers/encryption_provider.dart';
 import 'package:test/test.dart';
 
 void main() {

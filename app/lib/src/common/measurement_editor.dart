@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/preferences_bloc.dart';
+import '../preferences/preferences_bloc.dart';
 import 'common.dart';
 
 /// A text field for editing measurements with a unit dropdown.

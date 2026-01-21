@@ -3,12 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_routes.dart';
-import '../bloc/divelist_bloc.dart';
+import 'dive_list_bloc.dart';
 import '../common/common.dart';
-import 'sitemap_widget.dart';
 
-class SiteDetailScreen extends StatelessWidget {
-  const SiteDetailScreen({super.key});
+class SiteDetailsScreen extends StatelessWidget {
+  const SiteDetailsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +41,7 @@ class SiteDetailScreen extends StatelessWidget {
                 crossAxisAlignment: .start,
                 spacing: 8,
                 children: [
-                  SiteMapWidget(site: site, showFullscreenButton: true),
+                  SiteMapCard(site: site, showFullscreenButton: true),
                   TagsList(tags: site.tags, prefix: '#'),
                 ],
               ),

@@ -3,8 +3,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 
-import 'details_state.dart';
-import 'sync_bloc.dart';
+import '../bloc/details_state.dart';
+import '../providers/storage_provider.dart';
 
 final _log = Logger('cylinderdetails_bloc.dart');
 
@@ -76,9 +76,7 @@ class UpdateCylinderDetails extends CylinderDetailsEvent {
 }
 
 class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsState> {
-  final SyncBloc _syncBloc;
-
-  CylinderDetailsBloc(this._syncBloc) : super(const CylinderDetailsInitial()) {
+  CylinderDetailsBloc() : super(const CylinderDetailsInitial()) {
     on<LoadCylinderDetails>(_onLoadCylinderDetails);
     on<UpdateCylinderDetails>(_onUpdateCylinderDetails);
     on<NewCylinderEvent>(_onNewCylinder);
@@ -86,7 +84,7 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
 
   Future<void> _onLoadCylinderDetails(LoadCylinderDetails event, Emitter<CylinderDetailsState> emit) async {
     try {
-      final store = await _syncBloc.store;
+      final store = await StorageProvider.store;
       final cylinder = await store.cylinders.getById(event.cylinderId);
       if (cylinder == null) {
         emit(const CylinderDetailsError('Cylinder not found'));
@@ -102,7 +100,7 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
   Future<void> _onUpdateCylinderDetails(UpdateCylinderDetails event, Emitter<CylinderDetailsState> emit) async {
     try {
       final details = state as CylinderDetailsLoaded;
-      final store = await _syncBloc.store;
+      final store = await StorageProvider.store;
       if (details.isNew) {
         final cyl = await store.cylinders.insert(event.cylinder);
         add(LoadCylinderDetails(cyl.id));

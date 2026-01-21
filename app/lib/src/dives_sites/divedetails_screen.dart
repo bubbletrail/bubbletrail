@@ -8,8 +8,8 @@ import 'package:latlong2/latlong.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
-import '../bloc/divelist_bloc.dart';
-import '../bloc/preferences_bloc.dart';
+import 'dive_list_bloc.dart';
+import '../preferences/preferences_bloc.dart';
 import '../common/common.dart';
 import 'depthprofile_widget.dart';
 

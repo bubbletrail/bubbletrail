@@ -13,33 +13,33 @@ import 'src/app_metadata.dart';
 import 'src/app_routes.dart';
 import 'src/app_theme.dart';
 import 'src/bloc/archive_bloc.dart';
-import 'src/bloc/ble_download_bloc.dart';
-import 'src/bloc/ble_scan_bloc.dart';
-import 'src/bloc/cylinderdetails_bloc.dart';
-import 'src/bloc/cylinderlist_bloc.dart';
-import 'src/bloc/divelist_bloc.dart';
-import 'src/bloc/preferences_bloc.dart';
+import 'src/connect/ble_download_bloc.dart';
+import 'src/connect/ble_scan_bloc.dart';
+import 'src/equipment/cylinder_details_bloc.dart';
+import 'src/equipment/cylinder_list_bloc.dart';
+import 'src/dives_sites/dive_list_bloc.dart';
+import 'src/preferences/preferences_bloc.dart';
 import 'src/bloc/sync_bloc.dart';
 import 'src/common/common.dart';
-import 'src/dives/ble_scan_screen.dart';
-import 'src/dives/divedetails_screen.dart';
-import 'src/dives/diveedit_screen.dart';
-import 'src/dives/divelist_screen.dart';
-import 'src/dives/fullscreen_profile_screen.dart';
+import 'src/connect/connect_screen.dart';
+import 'src/dives_sites/divedetails_screen.dart';
+import 'src/dives_sites/diveedit_screen.dart';
+import 'src/dives_sites/divelist_screen.dart';
+import 'src/dives_sites/fullscreen_profile_screen.dart';
 import 'src/equipment/cylinder_edit_screen.dart';
 import 'src/equipment/cylinder_list_screen.dart';
 import 'src/equipment/equipment_screen.dart';
 import 'src/preferences/logs_screen.dart';
 import 'src/preferences/preferences_screen.dart';
 import 'src/preferences/dive_preferences_screen.dart';
-import 'src/preferences/syncing_screen.dart';
-import 'src/preferences/units_screen.dart';
+import 'src/preferences/sync_settings_screen.dart';
+import 'src/preferences/unit_preferences_screen.dart';
 import 'src/preferences/window_preferences.dart';
 import 'src/services/log_buffer.dart';
-import 'src/sites/fullscreen_map_screen.dart';
-import 'src/sites/sitedetail_screen.dart';
-import 'src/sites/siteedit_screen.dart';
-import 'src/sites/sitelist_screen.dart';
+import 'src/dives_sites/fullscreen_map_screen.dart';
+import 'src/dives_sites/site_details_screen.dart';
+import 'src/dives_sites/site_edit_screen.dart';
+import 'src/dives_sites/site_list_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -90,11 +90,11 @@ class _MyAppState extends State<MyApp> with WindowListener {
   void initState() {
     super.initState();
     _syncBloc = SyncBloc();
-    _archiveBloc = ArchiveBloc(_syncBloc);
+    _archiveBloc = ArchiveBloc();
     _diveListBloc = DiveListBloc(_syncBloc);
-    _cylinderListBloc = CylinderListBloc(_syncBloc);
-    _bleScanBloc = BleScanBloc(_syncBloc);
-    _bleDownloadBloc = BleDownloadBloc(_diveListBloc, _syncBloc, _bleScanBloc);
+    _cylinderListBloc = CylinderListBloc();
+    _bleScanBloc = BleScanBloc();
+    _bleDownloadBloc = BleDownloadBloc(_diveListBloc, _bleScanBloc);
     _setupFileHandler();
     if (WindowPreferences.isSupported) {
       windowManager.addListener(this);
@@ -122,7 +122,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
               (icon: Icons.water_outlined, label: 'Dives'),
               (icon: Icons.location_on_outlined, label: 'Sites'),
               (icon: Icons.inventory_2_outlined, label: 'Equipment'),
-              (icon: Icons.settings, label: 'Settings'),
+              (icon: Icons.settings, label: 'Preferences'),
               (icon: Icons.bluetooth, label: 'Connect'),
             ];
 
@@ -238,7 +238,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       name: AppRouteName.sitesDetails,
                       builder: (context, state) {
                         context.read<DiveListBloc>().add(SelectSite(state.pathParameters['siteID']!));
-                        return _WaitForSelectedSite(child: const SiteDetailScreen());
+                        return _WaitForSelectedSite(child: const SiteDetailsScreen());
                       },
                       routes: [
                         GoRoute(
@@ -271,7 +271,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           path: AppRoutePath.cylindersNew,
                           name: AppRouteName.cylindersNew,
                           builder: (context, state) => BlocProvider(
-                            create: (context) => CylinderDetailsBloc(_syncBloc)..add(const NewCylinderEvent()),
+                            create: (context) => CylinderDetailsBloc()..add(const NewCylinderEvent()),
                             child: DetailsAvailable<CylinderDetailsBloc, CylinderDetailsState>(child: CylinderEditScreen()),
                           ),
                         ),
@@ -279,7 +279,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           path: AppRoutePath.cylindersDetails,
                           name: AppRouteName.cylindersDetails,
                           builder: (context, state) => BlocProvider(
-                            create: (context) => CylinderDetailsBloc(_syncBloc)..add(LoadCylinderDetails(state.pathParameters['cylinderID']!)),
+                            create: (context) => CylinderDetailsBloc()..add(LoadCylinderDetails(state.pathParameters['cylinderID']!)),
                             child: DetailsAvailable<CylinderDetailsBloc, CylinderDetailsState>(child: CylinderEditScreen()),
                           ),
                         ),
@@ -296,16 +296,16 @@ class _MyAppState extends State<MyApp> with WindowListener {
                   name: AppRouteName.preferences,
                   builder: (context, state) => const PreferencesScreen(),
                   routes: <RouteBase>[
-                    GoRoute(path: AppRoutePath.units, name: AppRouteName.units, builder: (context, state) => const UnitsScreen()),
+                    GoRoute(path: AppRoutePath.units, name: AppRouteName.units, builder: (context, state) => const UnitPreferencessScreen()),
                     GoRoute(path: AppRoutePath.divePreferences, name: AppRouteName.divePreferences, builder: (context, state) => const DivePreferencesScreen()),
-                    GoRoute(path: AppRoutePath.syncing, name: AppRouteName.syncing, builder: (context, state) => const SyncingScreen()),
+                    GoRoute(path: AppRoutePath.syncing, name: AppRouteName.syncing, builder: (context, state) => const SyncSettingsScreen()),
                     GoRoute(path: AppRoutePath.logs, name: AppRouteName.logs, builder: (context, state) => const LogsScreen()),
                   ],
                 ),
               ],
             ),
             StatefulShellBranch(
-              routes: <RouteBase>[GoRoute(path: AppRoutePath.connect, name: AppRouteName.connect, builder: (context, state) => BleScanScreen())],
+              routes: <RouteBase>[GoRoute(path: AppRoutePath.connect, name: AppRouteName.connect, builder: (context, state) => ConnectScreen())],
             ),
           ],
         ),

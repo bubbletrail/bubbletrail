@@ -11,9 +11,9 @@ import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+import '../dives_sites/dive_list_bloc.dart';
+import '../providers/storage_provider.dart';
 import 'ble_scan_bloc.dart';
-import 'divelist_bloc.dart';
-import 'sync_bloc.dart';
 
 part 'ble_download_bloc.g.dart';
 
@@ -171,18 +171,17 @@ class BleDownloadState extends Equatable {
 // Bloc
 class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
   final DiveListBloc _diveListBloc;
-  final SyncBloc _syncBloc;
   final BleScanBloc _scanBloc;
   late final Store _store;
   StreamSubscription<BluetoothConnectionState>? _connectionSubscription;
   StreamSubscription<DiveListState>? _diveListSubscription;
 
-  BleDownloadBloc(this._diveListBloc, this._syncBloc, this._scanBloc) : super(const BleDownloadState()) {
+  BleDownloadBloc(this._diveListBloc, this._scanBloc) : super(const BleDownloadState()) {
     _log.fine('starting');
 
     on<BleDownloadEvent>(_onEvent, transformer: sequential());
 
-    _syncBloc.store.then((store) {
+    StorageProvider.store.then((store) {
       _store = store;
     });
 

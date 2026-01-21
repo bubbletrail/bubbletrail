@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:latlong2/latlong.dart';
 
-import '../bloc/divelist_bloc.dart';
+import 'dive_list_bloc.dart';
 import '../common/common.dart';
 
 class FullscreenMapScreen extends StatelessWidget {

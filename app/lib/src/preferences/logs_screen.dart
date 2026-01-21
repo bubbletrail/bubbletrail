@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 
-import '../bloc/preferences_bloc.dart';
+import 'preferences_bloc.dart';
 import '../common/common.dart';
 import '../services/log_buffer.dart';
 

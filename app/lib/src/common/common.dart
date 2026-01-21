@@ -13,6 +13,7 @@ export 'measurement_editor.dart';
 export 'screen_scaffold.dart';
 export 'site_list_item_card.dart';
 export 'site_map.dart';
+export 'site_map_card.dart';
 export 'state_widgets.dart';
 export 'tags_list.dart';
 export 'units.dart';
