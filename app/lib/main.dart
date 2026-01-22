@@ -12,36 +12,36 @@ import 'package:window_manager/window_manager.dart';
 import 'src/app_metadata.dart';
 import 'src/app_routes.dart';
 import 'src/app_theme.dart';
-import 'src/dives_sites/dive_details_bloc.dart';
-import 'src/dives_sites/site_details_bloc.dart';
-import 'src/preferences/archive_bloc.dart';
+import 'src/common/common.dart';
 import 'src/connect/ble_download_bloc.dart';
 import 'src/connect/ble_scan_bloc.dart';
-import 'src/equipment/cylinder_details_bloc.dart';
-import 'src/equipment/cylinder_list_bloc.dart';
-import 'src/dives_sites/dive_list_bloc.dart';
-import 'src/preferences/preferences_bloc.dart';
-import 'src/preferences/sync_bloc.dart';
-import 'src/common/common.dart';
 import 'src/connect/connect_screen.dart';
+import 'src/dives_sites/dive_details_bloc.dart';
 import 'src/dives_sites/dive_details_screen.dart';
 import 'src/dives_sites/dive_edit_screen.dart';
+import 'src/dives_sites/dive_list_bloc.dart';
 import 'src/dives_sites/dive_list_screen.dart';
+import 'src/dives_sites/fullscreen_map_screen.dart';
 import 'src/dives_sites/fullscreen_profile_screen.dart';
+import 'src/dives_sites/site_details_bloc.dart';
+import 'src/dives_sites/site_details_screen.dart';
+import 'src/dives_sites/site_edit_screen.dart';
+import 'src/dives_sites/site_list_screen.dart';
+import 'src/equipment/cylinder_details_bloc.dart';
 import 'src/equipment/cylinder_edit_screen.dart';
+import 'src/equipment/cylinder_list_bloc.dart';
 import 'src/equipment/cylinder_list_screen.dart';
 import 'src/equipment/equipment_screen.dart';
-import 'src/preferences/logs_screen.dart';
-import 'src/preferences/preferences_screen.dart';
+import 'src/preferences/archive_bloc.dart';
 import 'src/preferences/dive_preferences_screen.dart';
+import 'src/preferences/logs_screen.dart';
+import 'src/preferences/preferences_bloc.dart';
+import 'src/preferences/preferences_screen.dart';
+import 'src/preferences/sync_bloc.dart';
 import 'src/preferences/sync_settings_screen.dart';
 import 'src/preferences/unit_preferences_screen.dart';
 import 'src/preferences/window_preferences.dart';
 import 'src/services/log_buffer.dart';
-import 'src/dives_sites/fullscreen_map_screen.dart';
-import 'src/dives_sites/site_details_screen.dart';
-import 'src/dives_sites/site_edit_screen.dart';
-import 'src/dives_sites/site_list_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -222,8 +222,10 @@ class _MyAppState extends State<MyApp> with WindowListener {
                   path: AppRoutePath.sitesDetailsMap,
                   name: AppRouteName.sitesDetailsMap,
                   builder: (context, state) {
-                    context.read<DiveListBloc>().add(SelectSite(state.pathParameters['siteID']!));
-                    return _WaitForSelectedSite(child: const FullscreenMapScreen());
+                    return BlocProvider(
+                      create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.loadSite(state.pathParameters['siteID']!)),
+                      child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const FullscreenMapScreen()),
+                    );
                   },
                 ),
               ],
@@ -402,25 +404,6 @@ class _MyAppState extends State<MyApp> with WindowListener {
           },
         ),
       ),
-    );
-  }
-}
-
-/// Helper widget that waits for selectedSite to be available
-class _WaitForSelectedSite extends StatelessWidget {
-  final Widget child;
-
-  const _WaitForSelectedSite({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<DiveListBloc, DiveListState>(
-      builder: (context, state) {
-        if (state is DiveListLoaded && state.selectedSite != null) {
-          return child;
-        }
-        return const Center(child: CircularProgressIndicator());
-      },
     );
   }
 }
