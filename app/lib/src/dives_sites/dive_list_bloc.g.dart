@@ -19,11 +19,7 @@ abstract class _$DiveListLoadedCWProxy {
 
   DiveListLoaded selectedDiveSite(Site? selectedDiveSite);
 
-  DiveListLoaded isNewDive(bool isNewDive);
-
   DiveListLoaded selectedSite(Site? selectedSite);
-
-  DiveListLoaded isNewSite(bool isNewSite);
 
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `DiveListLoaded(...).copyWith.fieldName(value)`.
@@ -39,9 +35,7 @@ abstract class _$DiveListLoadedCWProxy {
     Set<String> buddies,
     Dive? selectedDive,
     Site? selectedDiveSite,
-    bool isNewDive,
     Site? selectedSite,
-    bool isNewSite,
   });
 }
 
@@ -65,19 +59,16 @@ class _$DiveListLoadedCWProxyImpl implements _$DiveListLoadedCWProxy {
   DiveListLoaded buddies(Set<String> buddies) => call(buddies: buddies);
 
   @override
-  DiveListLoaded selectedDive(Dive? selectedDive) => call(selectedDive: selectedDive);
+  DiveListLoaded selectedDive(Dive? selectedDive) =>
+      call(selectedDive: selectedDive);
 
   @override
-  DiveListLoaded selectedDiveSite(Site? selectedDiveSite) => call(selectedDiveSite: selectedDiveSite);
+  DiveListLoaded selectedDiveSite(Site? selectedDiveSite) =>
+      call(selectedDiveSite: selectedDiveSite);
 
   @override
-  DiveListLoaded isNewDive(bool isNewDive) => call(isNewDive: isNewDive);
-
-  @override
-  DiveListLoaded selectedSite(Site? selectedSite) => call(selectedSite: selectedSite);
-
-  @override
-  DiveListLoaded isNewSite(bool isNewSite) => call(isNewSite: isNewSite);
+  DiveListLoaded selectedSite(Site? selectedSite) =>
+      call(selectedSite: selectedSite);
 
   @override
   /// Creates a new instance with the provided field values.
@@ -94,9 +85,7 @@ class _$DiveListLoadedCWProxyImpl implements _$DiveListLoadedCWProxy {
     Object? buddies = const $CopyWithPlaceholder(),
     Object? selectedDive = const $CopyWithPlaceholder(),
     Object? selectedDiveSite = const $CopyWithPlaceholder(),
-    Object? isNewDive = const $CopyWithPlaceholder(),
     Object? selectedSite = const $CopyWithPlaceholder(),
-    Object? isNewSite = const $CopyWithPlaceholder(),
   }) {
     return DiveListLoaded(
       dives == const $CopyWithPlaceholder() || dives == null
@@ -123,18 +112,10 @@ class _$DiveListLoadedCWProxyImpl implements _$DiveListLoadedCWProxy {
           ? _value.selectedDiveSite
           // ignore: cast_nullable_to_non_nullable
           : selectedDiveSite as Site?,
-      isNewDive: isNewDive == const $CopyWithPlaceholder() || isNewDive == null
-          ? _value.isNewDive
-          // ignore: cast_nullable_to_non_nullable
-          : isNewDive as bool,
       selectedSite: selectedSite == const $CopyWithPlaceholder()
           ? _value.selectedSite
           // ignore: cast_nullable_to_non_nullable
           : selectedSite as Site?,
-      isNewSite: isNewSite == const $CopyWithPlaceholder() || isNewSite == null
-          ? _value.isNewSite
-          // ignore: cast_nullable_to_non_nullable
-          : isNewSite as bool,
     );
   }
 }
@@ -152,7 +133,11 @@ extension $DiveListLoadedCopyWith on DiveListLoaded {
   /// ```dart
   /// DiveListLoaded(...).copyWithNull(firstField: true, secondField: true)
   /// ```
-  DiveListLoaded copyWithNull({bool selectedDive = false, bool selectedDiveSite = false, bool selectedSite = false}) {
+  DiveListLoaded copyWithNull({
+    bool selectedDive = false,
+    bool selectedDiveSite = false,
+    bool selectedSite = false,
+  }) {
     return DiveListLoaded(
       dives,
       sites,
@@ -160,9 +145,7 @@ extension $DiveListLoadedCopyWith on DiveListLoaded {
       buddies,
       selectedDive: selectedDive == true ? null : this.selectedDive,
       selectedDiveSite: selectedDiveSite == true ? null : this.selectedDiveSite,
-      isNewDive: isNewDive,
       selectedSite: selectedSite == true ? null : this.selectedSite,
-      isNewSite: isNewSite,
     );
   }
 }

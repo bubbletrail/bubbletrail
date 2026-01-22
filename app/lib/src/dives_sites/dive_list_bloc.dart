@@ -49,13 +49,13 @@ class DiveListLoaded extends DiveListState {
   final Site? selectedDiveSite;
 
   /// Whether the selected dive is new (not yet saved)
-  final bool isNewDive;
+  bool get isNewDive => selectedDive?.id.isEmpty ?? true;
 
   /// Selected site for edit screen
   final Site? selectedSite;
 
   /// Whether the selected site is new (not yet saved)
-  final bool isNewSite;
+  bool get isNewSite => selectedSite?.id.isEmpty ?? true;
 
   /// Index map for O(1) dive lookup by ID
   late final Map<String, Dive> divesById;
@@ -69,17 +69,7 @@ class DiveListLoaded extends DiveListState {
   /// Index map for O(1) dive count lookup by site UUID
   late final Map<String, int> diveCountBySiteId;
 
-  DiveListLoaded(
-    this.dives,
-    this.sites,
-    this.tags,
-    this.buddies, {
-    this.selectedDive,
-    this.selectedDiveSite,
-    this.isNewDive = false,
-    this.selectedSite,
-    this.isNewSite = false,
-  }) {
+  DiveListLoaded(this.dives, this.sites, this.tags, this.buddies, {this.selectedDive, this.selectedDiveSite, this.selectedSite}) {
     divesById = {for (final d in dives) d.id: d};
     diveIndexById = {for (var i = 0; i < dives.length; i++) dives[i].id: i};
     sitesByUuid = {for (final s in sites) s.id: s};
@@ -93,7 +83,7 @@ class DiveListLoaded extends DiveListState {
   }
 
   @override
-  List<Object?> get props => [dives, sites, tags, buddies, selectedDive, selectedDiveSite, isNewDive, selectedSite, isNewSite];
+  List<Object?> get props => [dives, sites, tags, buddies, selectedDive, selectedDiveSite, selectedSite];
 }
 
 abstract class DiveListEvent extends Equatable {
@@ -399,7 +389,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       site = await _store.sites.getById(dive.siteId);
     }
 
-    emit(currentState.copyWith(selectedDive: dive, selectedDiveSite: site, isNewDive: false));
+    emit(currentState.copyWith(selectedDive: dive, selectedDiveSite: site));
   }
 
   Future<void> _onSelectNewDive(SelectNewDive event, Emitter<DiveListState> emit) async {
@@ -407,9 +397,9 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     final currentState = state as DiveListLoaded;
 
     final diveNo = await _store.dives.nextDiveNo;
-    final dive = Dive(number: diveNo, start: .fromDateTime(.now()), duration: 0)..freeze();
+    final dive = Dive(number: diveNo, start: .fromDateTime(.now()))..freeze();
 
-    emit(currentState.copyWith(selectedDive: dive, isNewDive: true).copyWithNull(selectedDiveSite: true));
+    emit(currentState.copyWith(selectedDive: dive).copyWithNull(selectedDiveSite: true));
   }
 
   Future<void> _onSelectSite(SelectSite event, Emitter<DiveListState> emit) async {
@@ -422,16 +412,14 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       return;
     }
 
-    emit(currentState.copyWith(selectedSite: site, isNewSite: false));
+    emit(currentState.copyWith(selectedSite: site));
   }
 
   Future<void> _onSelectNewSite(SelectNewSite event, Emitter<DiveListState> emit) async {
     if (state is! DiveListLoaded) return;
     final currentState = state as DiveListLoaded;
 
-    final site = Site(id: const Uuid().v4(), name: '');
-
-    emit(currentState.copyWith(selectedSite: site, isNewSite: true));
+    emit(currentState.copyWith(selectedSite: Site()));
   }
 
   Future<void> _onUpdateSite(UpdateSite event, Emitter<DiveListState> emit) async {
