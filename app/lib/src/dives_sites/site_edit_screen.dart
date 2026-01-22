@@ -1,5 +1,5 @@
 import 'package:chips_input_autocomplete/chips_input_autocomplete.dart';
-import 'package:divestore/divestore.dart';
+import 'package:btstore/btstore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';

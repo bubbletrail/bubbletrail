@@ -1,0 +1,210 @@
+syntax = "proto3";
+
+package btstore;
+
+import "google/protobuf/timestamp.proto";
+import "types.proto";
+
+// Complete dive data parsed from a dive computer.
+message Log {
+  // Dive computer identity
+  string model = 1;
+  string serial = 2;
+
+  // Dive metadata
+  google.protobuf.Timestamp date_time = 3;
+  int32 dive_time = 4; // Seconds
+  double max_depth = 5; // Meters
+  double avg_depth = 6; // Meters
+  double surface_temperature = 7; // Celsius
+  double min_temperature = 8; // Celsius
+  double max_temperature = 9; // Celsius
+  Salinity salinity = 10;
+  double atmospheric_pressure = 11; // Bar
+  DiveMode dive_mode = 12;
+  DecoModel deco_model = 13;
+  Position position = 14;
+
+  // Gas and tank data
+  repeated GasMix gas_mixes = 15;
+  repeated Tank tanks = 16;
+
+  // Profile data
+  repeated LogSample samples = 17;
+
+  // Fingerprint reported by libdivecomputer
+  bytes ldc_fingerprint = 18;
+
+  // Unique ID calculated by Bubbletrail
+  string uniqueID = 19;
+}
+
+// A single sample point in the dive profile.
+message LogSample {
+  double time = 1; // Seconds
+  double depth = 2; // Meters
+  double temperature = 3; // Celsius
+  repeated TankPressure pressures = 4;
+  repeated SampleEvent events = 5;
+  int32 rbt = 6; // Remaining bottom time (seconds)
+  int32 heartbeat = 7; // Heart rate (bpm)
+  int32 bearing = 8; // Compass bearing (degrees)
+  double setpoint = 9; // CCR setpoint (bar)
+  repeated Ppo2Reading ppo2 = 10;
+  double cns = 11; // CNS percentage (0-100+)
+  DecoStatus deco = 12;
+  int32 gas_mix_index = 13; // Current gas mix index
+  repeated VendorData vendor_data = 14;
+}
+
+// Water salinity information.
+message Salinity {
+  WaterType type = 1;
+  double density = 2; // kg/m³
+}
+
+// Gas mix composition.
+message GasMix {
+  double oxygen = 1; // Fraction (0.0 - 1.0)
+  double helium = 2; // Fraction (0.0 - 1.0)
+  double nitrogen = 3; // Fraction (0.0 - 1.0)
+  GasUsage usage = 4;
+}
+
+// Tank information.
+message Tank {
+  int32 gas_mix_index = 1; // Index into gas_mixes list
+  TankVolumeType volume_type = 2;
+  double volume = 3; // Liters (water capacity)
+  double work_pressure = 4; // Bar
+  double begin_pressure = 5; // Bar
+  double end_pressure = 6; // Bar
+  GasUsage usage = 7;
+}
+
+// Decompression model settings.
+message DecoModel {
+  DecoModelType type = 1;
+  int32 conservatism = 2; // Personal adjustment (-ve aggressive, +ve conservative)
+  int32 gf_low = 3; // Gradient factor low (Buhlmann only)
+  int32 gf_high = 4; // Gradient factor high (Buhlmann only)
+}
+
+// Pressure reading from a tank sensor.
+message TankPressure {
+  int32 tank_index = 1;
+  double pressure = 2; // Bar
+}
+
+// PPO2 reading from a sensor.
+message Ppo2Reading {
+  int32 sensor_index = 1;
+  double value = 2; // Bar
+}
+
+// Decompression status at a sample point.
+message DecoStatus {
+  DecoStopType type = 1;
+  int32 time = 2; // Time at this stop / NDL remaining (seconds)
+  double depth = 3; // Stop depth in meters (0 for NDL)
+  int32 tts = 4; // Time to surface (seconds)
+}
+
+// An event that occurred during the dive.
+message SampleEvent {
+  SampleEventType type = 1;
+  int32 time = 2; // Seconds
+  uint32 flags = 3; // Bitmask: 0x01 = begin, 0x02 = end
+  int32 value = 4;
+}
+
+// Vendor-specific data.
+message VendorData {
+  int32 type = 1;
+  bytes data = 2;
+}
+
+// Water type for salinity.
+enum WaterType {
+  WATER_TYPE_UNSPECIFIED = 0;
+  WATER_TYPE_EN13319 = 1;
+  WATER_TYPE_FRESH = 2;
+  WATER_TYPE_SALT = 3;
+}
+
+// Dive mode.
+enum DiveMode {
+  DIVE_MODE_UNSPECIFIED = 0;
+  DIVE_MODE_FREEDIVE = 1;
+  DIVE_MODE_GAUGE = 2;
+  DIVE_MODE_OPENCIRCUIT = 3;
+  DIVE_MODE_CLOSED_CIRCUIT_REBREATHER = 4;
+  DIVE_MODE_SEMI_CLOSED_REBREATHER = 5;
+}
+
+// Gas usage type.
+enum GasUsage {
+  GAS_USAGE_UNSPECIFIED = 0;
+  GAS_USAGE_NONE = 1;
+  GAS_USAGE_OXYGEN = 2;
+  GAS_USAGE_DILUENT = 3;
+  GAS_USAGE_SIDEMOUNT = 4;
+}
+
+// Tank volume type.
+enum TankVolumeType {
+  TANK_VOLUME_TYPE_UNSPECIFIED = 0;
+  TANK_VOLUME_TYPE_NONE = 1;
+  TANK_VOLUME_TYPE_METRIC = 2;
+  TANK_VOLUME_TYPE_IMPERIAL = 3;
+}
+
+// Decompression model type.
+enum DecoModelType {
+  DECO_MODEL_TYPE_UNSPECIFIED = 0;
+  DECO_MODEL_TYPE_NONE = 1;
+  DECO_MODEL_TYPE_BUHLMANN = 2;
+  DECO_MODEL_TYPE_VPM = 3;
+  DECO_MODEL_TYPE_RGBM = 4;
+  DECO_MODEL_TYPE_DCIEM = 5;
+}
+
+// Decompression stop type (in samples).
+enum DecoStopType {
+  DECO_STOP_TYPE_UNSPECIFIED = 0;
+  DECO_STOP_TYPE_NDL = 1;
+  DECO_STOP_TYPE_SAFETY_STOP = 2;
+  DECO_STOP_TYPE_DECO_STOP = 3;
+  DECO_STOP_TYPE_DEEP_STOP = 4;
+}
+
+// Sample event type.
+enum SampleEventType {
+  SAMPLE_EVENT_TYPE_UNSPECIFIED = 0;
+  SAMPLE_EVENT_TYPE_NONE = 1;
+  SAMPLE_EVENT_TYPE_DECO_STOP = 2;
+  SAMPLE_EVENT_TYPE_RBT = 3;
+  SAMPLE_EVENT_TYPE_ASCENT = 4;
+  SAMPLE_EVENT_TYPE_CEILING = 5;
+  SAMPLE_EVENT_TYPE_WORKLOAD = 6;
+  SAMPLE_EVENT_TYPE_TRANSMITTER = 7;
+  SAMPLE_EVENT_TYPE_VIOLATION = 8;
+  SAMPLE_EVENT_TYPE_BOOKMARK = 9;
+  SAMPLE_EVENT_TYPE_SURFACE = 10;
+  SAMPLE_EVENT_TYPE_SAFETY_STOP = 11;
+  SAMPLE_EVENT_TYPE_GAS_CHANGE = 12;
+  SAMPLE_EVENT_TYPE_SAFETY_STOP_VOLUNTARY = 13;
+  SAMPLE_EVENT_TYPE_SAFETY_STOP_MANDATORY = 14;
+  SAMPLE_EVENT_TYPE_DEEP_STOP = 15;
+  SAMPLE_EVENT_TYPE_CEILING_SAFETY_STOP = 16;
+  SAMPLE_EVENT_TYPE_FLOOR = 17;
+  SAMPLE_EVENT_TYPE_DIVE_TIME = 18;
+  SAMPLE_EVENT_TYPE_MAX_DEPTH = 19;
+  SAMPLE_EVENT_TYPE_OLF = 20;
+  SAMPLE_EVENT_TYPE_PO2 = 21;
+  SAMPLE_EVENT_TYPE_AIR_TIME = 22;
+  SAMPLE_EVENT_TYPE_RGBM = 23;
+  SAMPLE_EVENT_TYPE_HEADING = 24;
+  SAMPLE_EVENT_TYPE_TISSUE_LEVEL = 25;
+  SAMPLE_EVENT_TYPE_GAS_CHANGE_2 = 26;
+}

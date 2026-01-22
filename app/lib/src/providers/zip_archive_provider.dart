@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:divestore/divestore.dart';
+import 'package:btstore/btstore.dart';
 import 'package:flutter_archive/flutter_archive.dart';
 import 'package:glob/glob.dart';
 import 'package:glob/list_local_fs.dart';

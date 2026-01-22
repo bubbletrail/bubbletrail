@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package btstore;
+
+import "computer.proto";
+import "dive.proto";
+import "log.proto";
+import "site.proto";
+import "types.proto";
+
+message InternalCylinderList {
+  repeated Cylinder cylinders = 1;
+}
+
+message InternalSiteList {
+  repeated Site sites = 1;
+}
+
+message InternalDiveList {
+  repeated Dive dives = 1;
+}
+
+message InternalLogList {
+  repeated Log logs = 1;
+}
+
+message InternalComputerList {
+  repeated Computer computers = 1;
+}

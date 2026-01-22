@@ -1,6 +1,6 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:divestore/divestore.dart';
+import 'package:btstore/btstore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';

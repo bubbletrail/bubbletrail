@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:divestore/divestore.dart';
+import 'package:btstore/btstore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

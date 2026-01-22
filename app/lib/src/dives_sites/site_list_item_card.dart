@@ -1,4 +1,4 @@
-import 'package:divestore/divestore.dart';
+import 'package:btstore/btstore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
