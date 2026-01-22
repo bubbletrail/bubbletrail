@@ -19,8 +19,12 @@ void main(List<String> args) async {
     final packageName = input.packageName;
 
     final os = input.config.code.targetOS;
+    final defines = <String, String>{};
     final configH = File('config.h.$os');
-    if (configH.existsSync()) configH.copySync('$libdir/config.h');
+    if (configH.existsSync()) {
+      configH.copySync('$libdir/config.h');
+      defines['HAVE_CONFIG_H'] = '1';
+    }
 
     final cbuilder = CBuilder.library(
       name: packageName,
@@ -28,7 +32,7 @@ void main(List<String> args) async {
       includes: [libdir, '$libdir/include', '$libdir/src'],
       sources: localsources + libsources,
       libraries: ['m'],
-      defines: {'HAVE_CONFIG_H': '1'},
+      defines: defines,
     );
     await cbuilder.run(
       input: input,
