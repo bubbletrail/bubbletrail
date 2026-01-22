@@ -12,6 +12,7 @@ import 'package:window_manager/window_manager.dart';
 import 'src/app_metadata.dart';
 import 'src/app_routes.dart';
 import 'src/app_theme.dart';
+import 'src/dives_sites/dive_details_bloc.dart';
 import 'src/dives_sites/site_details_bloc.dart';
 import 'src/preferences/archive_bloc.dart';
 import 'src/connect/ble_download_bloc.dart';
@@ -192,8 +193,10 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       path: AppRoutePath.divesDetails,
                       name: AppRouteName.divesDetails,
                       builder: (context, state) {
-                        context.read<DiveListBloc>().add(SelectDive(state.pathParameters['diveID']!));
-                        return _WaitForSelectedDive(child: const DiveDetailsScreen());
+                        return BlocProvider(
+                          create: (_) => DiveDetailsBloc()..add(DiveDetailsEvent.loadDive(state.pathParameters['diveID']!)),
+                          child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: DiveDetailsScreen()),
+                        );
                       },
                       routes: [
                         GoRoute(
