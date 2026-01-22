@@ -42,21 +42,6 @@ class DiveListLoaded extends DiveListState {
   final Set<String> tags;
   final Set<String> buddies;
 
-  /// Selected dive (full data with samples) for details/edit screens
-  final Dive? selectedDive;
-
-  /// Site for the selected dive
-  final Site? selectedDiveSite;
-
-  /// Whether the selected dive is new (not yet saved)
-  bool get isNewDive => selectedDive?.id.isEmpty ?? true;
-
-  /// Selected site for edit screen
-  final Site? selectedSite;
-
-  /// Whether the selected site is new (not yet saved)
-  bool get isNewSite => selectedSite?.id.isEmpty ?? true;
-
   /// Index map for O(1) dive lookup by ID
   late final Map<String, Dive> divesById;
 
@@ -69,7 +54,7 @@ class DiveListLoaded extends DiveListState {
   /// Index map for O(1) dive count lookup by site UUID
   late final Map<String, int> diveCountBySiteId;
 
-  DiveListLoaded(this.dives, this.sites, this.tags, this.buddies, {this.selectedDive, this.selectedDiveSite, this.selectedSite}) {
+  DiveListLoaded(this.dives, this.sites, this.tags, this.buddies) {
     divesById = {for (final d in dives) d.id: d};
     diveIndexById = {for (var i = 0; i < dives.length; i++) dives[i].id: i};
     sitesByUuid = {for (final s in sites) s.id: s};
@@ -83,7 +68,7 @@ class DiveListLoaded extends DiveListState {
   }
 
   @override
-  List<Object?> get props => [dives, sites, tags, buddies, selectedDive, selectedDiveSite, selectedSite];
+  List<Object?> get props => [dives, sites, tags, buddies];
 }
 
 abstract class DiveListEvent extends Equatable {
@@ -93,17 +78,8 @@ abstract class DiveListEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadDives extends DiveListEvent {
-  const LoadDives();
-}
-
-class UpdateDive extends DiveListEvent {
-  final Dive dive;
-
-  const UpdateDive(this.dive);
-
-  @override
-  List<Object?> get props => [dive];
+class _LoadAll extends DiveListEvent {
+  const _LoadAll();
 }
 
 class DownloadedDives extends DiveListEvent {
@@ -124,95 +100,45 @@ class ImportDives extends DiveListEvent {
   List<Object?> get props => [filePath];
 }
 
-class SelectDive extends DiveListEvent {
-  final String diveId;
-
-  const SelectDive(this.diveId);
-
-  @override
-  List<Object?> get props => [diveId];
-}
-
-class SelectNewDive extends DiveListEvent {
-  const SelectNewDive();
-}
-
-class SelectSite extends DiveListEvent {
-  final String siteId;
-
-  const SelectSite(this.siteId);
-
-  @override
-  List<Object?> get props => [siteId];
-}
-
-class SelectNewSite extends DiveListEvent {
-  const SelectNewSite();
-}
-
-class UpdateSite extends DiveListEvent {
-  final Site site;
-
-  const UpdateSite(this.site);
-
-  @override
-  List<Object?> get props => [site];
-}
-
-class DeleteDive extends DiveListEvent {
-  final String diveId;
-
-  const DeleteDive(this.diveId);
-
-  @override
-  List<Object?> get props => [diveId];
-}
-
 class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   final SyncBloc _syncBloc;
   late final Store _store;
   StreamSubscription? _syncBlocSub;
+  StreamSubscription? _divesStorageSub;
+  StreamSubscription? _sitesStorageSub;
 
   DiveListBloc(this._syncBloc) : super(const DiveListInitial()) {
     on<DiveListEvent>((event, emit) async {
-      if (event is LoadDives) {
+      if (event is _LoadAll) {
         await _onLoadDives(event, emit);
-      } else if (event is UpdateDive) {
-        await _onUpdateDive(event, emit);
       } else if (event is ImportDives) {
         await _onImportDives(event, emit);
       } else if (event is DownloadedDives) {
         await _onDownloadedDives(event, emit);
-      } else if (event is SelectDive) {
-        await _onSelectDive(event, emit);
-      } else if (event is SelectNewDive) {
-        await _onSelectNewDive(event, emit);
-      } else if (event is SelectSite) {
-        await _onSelectSite(event, emit);
-      } else if (event is SelectNewSite) {
-        await _onSelectNewSite(event, emit);
-      } else if (event is UpdateSite) {
-        await _onUpdateSite(event, emit);
-      } else if (event is DeleteDive) {
-        await _onDeleteDive(event, emit);
       }
     }, transformer: sequential());
 
     StorageProvider.store.then((value) {
       _store = value;
-      add(LoadDives());
+      _divesStorageSub = _store.dives.changes.listen((event) {
+        add(_LoadAll());
+      });
+      _sitesStorageSub = _store.sites.changes.listen((event) {
+        add(_LoadAll());
+      });
+      add(_LoadAll());
     });
 
     DateTime? lastSynced;
     _syncBlocSub = _syncBloc.stream.listen((state) {
       if (state.lastSyncSuccess == true && state.lastSynced != lastSynced) {
         lastSynced = state.lastSynced;
-        add(LoadDives());
+        add(_LoadAll());
       }
     });
   }
 
-  Future<void> _onLoadDives(LoadDives event, Emitter<DiveListState> emit) async {
+  Future<void> _onLoadDives(_LoadAll event, Emitter<DiveListState> emit) async {
     var dives = await _store.dives.getAll();
     final sites = await _store.sites.getAll();
 
@@ -300,23 +226,6 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     return dives.map((d) => updatedDives[d.id] ?? d).toList();
   }
 
-  Future<void> _onUpdateDive(UpdateDive event, Emitter<DiveListState> emit) async {
-    if (state is! DiveListLoaded) return;
-
-    // Is it a new dive? If so, set the dive number and insert it.
-    if (!event.dive.hasId()) {
-      await _store.dives.insert(event.dive);
-      _log.fine('inserted new dive #${event.dive.number}');
-    } else {
-      // Update existing dive
-      await _store.dives.update(event.dive);
-      _log.fine('updated dive #${event.dive.number}');
-    }
-
-    // Reload overview list after update
-    add(LoadDives());
-  }
-
   Future<void> _onImportDives(ImportDives event, Emitter<DiveListState> emit) async {
     final currentState = state as DiveListLoaded;
     emit(DiveListLoading());
@@ -353,7 +262,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     await _store.dives.insertAll(importedDoc.dives);
 
     // Reload overview list after update
-    add(LoadDives());
+    add(_LoadAll());
   }
 
   Future<void> _onDownloadedDives(DownloadedDives event, Emitter<DiveListState> emit) async {
@@ -371,80 +280,14 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     await _store.dives.insertAll(downloaded);
 
     // Reload overview list after update
-    add(LoadDives());
-  }
-
-  Future<void> _onSelectDive(SelectDive event, Emitter<DiveListState> emit) async {
-    if (state is! DiveListLoaded) return;
-    final currentState = state as DiveListLoaded;
-
-    final dive = await _store.diveById(event.diveId);
-    if (dive == null) {
-      _log.warning('dive ${event.diveId} not found');
-      return;
-    }
-
-    Site? site;
-    if (dive.hasSiteId()) {
-      site = await _store.sites.getById(dive.siteId);
-    }
-
-    emit(currentState.copyWith(selectedDive: dive, selectedDiveSite: site));
-  }
-
-  Future<void> _onSelectNewDive(SelectNewDive event, Emitter<DiveListState> emit) async {
-    if (state is! DiveListLoaded) return;
-    final currentState = state as DiveListLoaded;
-
-    final diveNo = await _store.dives.nextDiveNo;
-    final dive = Dive(number: diveNo, start: .fromDateTime(.now()))..freeze();
-
-    emit(currentState.copyWith(selectedDive: dive).copyWithNull(selectedDiveSite: true));
-  }
-
-  Future<void> _onSelectSite(SelectSite event, Emitter<DiveListState> emit) async {
-    if (state is! DiveListLoaded) return;
-    final currentState = state as DiveListLoaded;
-
-    final site = await _store.sites.getById(event.siteId);
-    if (site == null) {
-      _log.warning('site ${event.siteId} not found');
-      return;
-    }
-
-    emit(currentState.copyWith(selectedSite: site));
-  }
-
-  Future<void> _onSelectNewSite(SelectNewSite event, Emitter<DiveListState> emit) async {
-    if (state is! DiveListLoaded) return;
-    final currentState = state as DiveListLoaded;
-
-    emit(currentState.copyWith(selectedSite: Site()));
-  }
-
-  Future<void> _onUpdateSite(UpdateSite event, Emitter<DiveListState> emit) async {
-    if (state is! DiveListLoaded) return;
-
-    await _store.sites.update(event.site);
-    _log.fine('updated site ${event.site.name}');
-
-    // Reload list after update
-    add(LoadDives());
-  }
-
-  Future<void> _onDeleteDive(DeleteDive event, Emitter<DiveListState> emit) async {
-    if (state is! DiveListLoaded) return;
-
-    await _store.dives.delete(event.diveId);
-    _log.fine('deleted dive ${event.diveId}');
-
-    // Reload list after delete
-    add(LoadDives());
+    add(_LoadAll());
   }
 
   @override
   Future<void> close() {
     _syncBlocSub?.cancel();
+    _divesStorageSub?.cancel();
+    _sitesStorageSub?.cancel();
     return super.close();
   }
 }

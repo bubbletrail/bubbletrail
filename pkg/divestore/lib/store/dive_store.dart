@@ -33,33 +33,6 @@ class DiveStore {
   Set<String> get tags => _tags;
   Set<String> get buddies => _buddies;
 
-  Future<String> insert(Dive dive) async {
-    if (!dive.isFrozen) dive.freeze();
-    dive = dive.rebuild((dive) {
-      if (!dive.hasId()) {
-        dive.id = Uuid().v4().toString();
-      }
-      dive.meta = dive.meta.rebuild((meta) {
-        meta.updatedAt = Timestamp.fromDateTime(DateTime.now());
-        if (!meta.hasCreatedAt()) {
-          if (dive.hasStart()) {
-            meta.createdAt = dive.start;
-          } else if (dive.logs.isNotEmpty) {
-            meta.createdAt = dive.logs.first.dateTime;
-          } else {
-            meta.createdAt = meta.updatedAt;
-          }
-        }
-        meta.clearDeletedAt();
-      });
-    });
-    _dives[dive.id] = dive;
-    _tags.addAll(dive.tags);
-    _buddies.addAll(dive.buddies);
-    _scheduleSave(dive.id, notify: true);
-    return dive.id;
-  }
-
   Future<void> insertAll(Iterable<Dive> dives) async {
     for (var dive in dives) {
       if (!dive.isFrozen) dive.freeze();
@@ -98,6 +71,9 @@ class DiveStore {
   Future<void> update(Dive dive) async {
     if (!dive.isFrozen) dive.freeze();
     dive = dive.rebuild((dive) {
+      if (dive.id.isEmpty) {
+        dive.id = Uuid().v4().toString();
+      }
       dive.meta = dive.meta.rebuildUpdated();
       dive.clearSyncedEtag();
       for (final (idx, cyl) in dive.cylinders.indexed) {

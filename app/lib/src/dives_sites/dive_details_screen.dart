@@ -8,11 +8,10 @@ import 'package:latlong2/latlong.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
-import 'dive_details_bloc.dart';
-import 'dive_list_bloc.dart';
-import '../preferences/preferences_bloc.dart';
 import '../common/common.dart';
+import '../preferences/preferences_bloc.dart';
 import 'depth_profile_widget.dart';
+import 'dive_details_bloc.dart';
 import 'site_map.dart';
 
 class DiveDetailsScreen extends StatelessWidget {
@@ -160,7 +159,7 @@ class _DiveDetails extends StatelessWidget {
             isDestructive: true,
           );
           if (confirmed && context.mounted) {
-            context.read<DiveListBloc>().add(DeleteDive(dive.id));
+            context.read<DiveDetailsBloc>().add(DiveDetailsEvent.deleteAndClose(dive.id));
             context.goNamed(AppRouteName.dives);
           }
         }

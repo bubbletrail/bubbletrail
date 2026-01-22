@@ -57,6 +57,7 @@ abstract class DiveDetailsEvent extends Equatable {
   const factory DiveDetailsEvent.loadDive(String diveId) = _LoadDive;
   const factory DiveDetailsEvent.close() = _Close;
   const factory DiveDetailsEvent.saveAndClose(Dive dive) = _SaveAndClose;
+  const factory DiveDetailsEvent.deleteAndClose(String diveID) = _DeleteAndClose;
 }
 
 class _NewDive extends DiveDetailsEvent {
@@ -79,6 +80,12 @@ class _SaveAndClose extends DiveDetailsEvent {
   const _SaveAndClose(this.dive);
 }
 
+class _DeleteAndClose extends DiveDetailsEvent {
+  final String diveID;
+
+  const _DeleteAndClose(this.diveID);
+}
+
 class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
   DiveDetailsBloc() : super(const DiveDetailsInitial()) {
     _log.fine('init');
@@ -97,6 +104,11 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
         await s.dives.update(event.dive);
         _log.fine('saved dive #${event.dive.number}');
         emit(DiveDetailsClosed());
+      } else if (event is _DeleteAndClose) {
+        final s = await StorageProvider.store;
+        await s.dives.delete(event.diveID);
+        _log.fine('deleted dive ${event.diveID}');
+        emit(DiveDetailsClosed());
       }
     }, transformer: sequential());
   }
@@ -107,7 +119,7 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
     if (dive == null) {
       return; // xxx error state
     }
-    _log.fine('loaded dive #${dive.number}');
+    _log.fine('loaded dive #${dive.number} (${dive.id})');
 
     Dive? nextDive;
     Dive? prevDive;
