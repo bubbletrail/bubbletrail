@@ -18,22 +18,16 @@ jobs:
         with:
           channel: stable
 
-      - name: Run tests (btstore)
+      - name: Run tests
         run: |
-          pushd pkg/btstore
-          dart pub get
-          dart analyze --fatal-infos
-          dart format --output=none --set-exit-if-changed $(find . -name \*.dart -not -name \*.g.dart -not -name \*.pb\*.dart)
-          dart test
-
-      - name: Run tests (app)
-        run: |
-          pushd app
-          dart pub get
-          dart analyze --fatal-infos
-          dart format --output=none --set-exit-if-changed $(find . -name \*.dart -not -name \*.g.dart -not -name \*.pb\*.dart)
-          # dart test
-
+          for f in pkg/* app ; do
+            pushd f
+            dart pub get
+            dart analyze --fatal-infos
+            dart format --output=none --set-exit-if-changed $(find . -name \*.dart -not -name \*.g.dart -not -name \*.pb\*.dart)
+            dart test
+            popd
+          done
 
   build-macos:
     name: Build for macOS (direct)
