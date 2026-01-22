@@ -81,15 +81,6 @@ class _LoadAll extends DiveListEvent {
   const _LoadAll();
 }
 
-class DownloadedDives extends DiveListEvent {
-  final List<Dive> dives;
-
-  const DownloadedDives(this.dives);
-
-  @override
-  List<Object?> get props => [dives];
-}
-
 class ImportDives extends DiveListEvent {
   final String filePath;
 
@@ -110,8 +101,6 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
         await _onLoadDives(event, emit);
       } else if (event is ImportDives) {
         await _onImportDives(event, emit);
-      } else if (event is DownloadedDives) {
-        await _onDownloadedDives(event, emit);
       }
     }, transformer: sequential());
 
@@ -249,24 +238,6 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
 
     // Insert all imported dives
     await _store.dives.insertAll(importedDoc.dives);
-
-    // Reload overview list after update
-    add(_LoadAll());
-  }
-
-  Future<void> _onDownloadedDives(DownloadedDives event, Emitter<DiveListState> emit) async {
-    // Sort dives by time; number them; insert.
-
-    final downloaded = event.dives;
-    downloaded.sort((a, b) => a.start.seconds.compareTo(b.start.seconds));
-
-    var nextID = await _store.dives.nextDiveNo;
-    for (final d in downloaded) {
-      d.number = nextID;
-      nextID++;
-    }
-
-    await _store.dives.insertAll(downloaded);
 
     // Reload overview list after update
     add(_LoadAll());

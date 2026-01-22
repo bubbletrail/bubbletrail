@@ -6,6 +6,9 @@ import 'ssrf.dart';
 import 'uddf.dart';
 
 export 'container.dart';
+export 'macdive.dart';
+export 'ssrf.dart';
+export 'uddf.dart';
 
 /// Supported dive log XML formats.
 enum DiveLogFormat { uddf, subsurface, macdive, unknown }

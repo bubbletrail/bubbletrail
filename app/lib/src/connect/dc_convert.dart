@@ -1,18 +1,12 @@
-import 'gen/gen.dart';
+import 'package:btstore/btstore.dart';
 
-export 'gen/dive_ext.dart';
-export 'gen/gen.dart';
-export 'import/ssrf.dart';
-export 'import/uddf.dart';
-export 'store/store.dart';
-
-/// Converts a Log from a dive computer into a Dive.
-///
-/// Maps available fields from the dive computer data to the Dive structure:
-/// - Copies dive number, start time, duration, depths
-/// - Converts tank information to cylinders with gas mix data
-/// - Extracts events from samples
-/// - Stores the original Log in logs
+// Converts a Log from a dive computer into a Dive.
+//
+// Maps available fields from the dive computer data to the Dive structure:
+// - Copies dive number, start time, duration, depths
+// - Converts tank information to cylinders with gas mix data
+// - Extracts events from samples
+// - Stores the original Log in logs
 Dive convertDcDive(Log dl) {
   final dive = Dive()..logs.add(dl);
 

@@ -1,5 +1,6 @@
 import 'package:btstore/btstore.dart';
 import 'package:test/test.dart';
+import 'package:bubbletrail/src/connect/dc_convert.dart';
 
 void main() {
   group('dive log conversion', () {
