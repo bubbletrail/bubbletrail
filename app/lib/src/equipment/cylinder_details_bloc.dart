@@ -99,15 +99,9 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
 
   Future<void> _onUpdateCylinderDetails(UpdateCylinderDetails event, Emitter<CylinderDetailsState> emit) async {
     try {
-      final details = state as CylinderDetailsLoaded;
       final store = await StorageProvider.store;
-      if (details.isNew) {
-        final cyl = await store.cylinders.insert(event.cylinder);
-        add(LoadCylinderDetails(cyl.id));
-      } else {
-        await store.cylinders.update(event.cylinder);
-        add(LoadCylinderDetails(event.cylinder.id));
-      }
+      await store.cylinders.update(event.cylinder);
+      add(LoadCylinderDetails(event.cylinder.id));
     } catch (e) {
       _log.warning('failed to update cylinder', e);
       emit(CylinderDetailsError('Failed to update cylinder: $e'));

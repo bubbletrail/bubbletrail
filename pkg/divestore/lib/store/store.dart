@@ -6,33 +6,32 @@ import 'package:glob/list_local_fs.dart';
 import 'package:logging/logging.dart';
 
 import '../archive/archiveprovider.dart';
-import '../gen/dive.pb.dart';
-import '../gen/dive_ext.dart';
+import '../gen/gen.dart';
 import '../sync/syncprovider.dart';
-import 'computers.dart';
-import 'cylinders.dart';
-import 'dives.dart';
-import 'sites.dart';
+import 'computer_store.dart';
+import 'cylinder_store.dart';
+import 'dive_store.dart';
+import 'site_store.dart';
 
 final _log = Logger('store/store.dart');
 
 class Store {
   final String path;
 
-  final Computers computers;
-  final Cylinders cylinders;
-  final Dives dives;
-  final Sites sites;
+  final ComputerStore computers;
+  final CylinderStore cylinders;
+  final DiveStore dives;
+  final SiteStore sites;
 
   final _changes = StreamController<void>.broadcast();
   Timer? _changesTimer;
   Stream<void> get changes => _changes.stream;
 
-  Store(this.path, {bool readonly = false})
-    : computers = Computers('$path/computers.binpb', readonly: readonly),
-      cylinders = Cylinders('$path/cylinders.binpb', readonly: readonly),
-      dives = Dives('$path/dives', readonly: readonly),
-      sites = Sites('$path/sites.binpb', readonly: readonly) {
+  Store(this.path)
+    : computers = ComputerStore('$path/computers.binpb'),
+      cylinders = CylinderStore('$path/cylinders.binpb'),
+      dives = DiveStore('$path/dives'),
+      sites = SiteStore('$path/sites.binpb') {
     computers.changes.listen((_) => _scheduleChange());
     cylinders.changes.listen((_) => _scheduleChange());
     dives.changes.listen((_) => _scheduleChange());

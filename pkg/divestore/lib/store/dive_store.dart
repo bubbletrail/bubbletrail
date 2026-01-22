@@ -14,11 +14,10 @@ import '../divestore.dart';
 import '../gen/internal.pb.dart';
 import 'fileio.dart';
 
-final _log = Logger('store/dives.dart');
+final _log = Logger('dive_store.dart');
 
-class Dives {
+class DiveStore {
   final String pathPrefix;
-  final bool readonly;
   Map<String, Dive> _dives = {};
   Set<String> _tags = {};
   Set<String> _buddies = {};
@@ -29,13 +28,12 @@ class Dives {
 
   Stream<void> get changes => _changes.stream;
 
-  Dives(this.pathPrefix, {this.readonly = false});
+  DiveStore(this.pathPrefix);
 
   Set<String> get tags => _tags;
   Set<String> get buddies => _buddies;
 
   Future<String> insert(Dive dive) async {
-    if (readonly) throw Exception('readonly');
     if (!dive.isFrozen) dive.freeze();
     dive = dive.rebuild((dive) {
       if (!dive.hasId()) {
@@ -63,7 +61,6 @@ class Dives {
   }
 
   Future<void> insertAll(Iterable<Dive> dives) async {
-    if (readonly) throw Exception('readonly');
     for (var dive in dives) {
       if (!dive.isFrozen) dive.freeze();
       dive = dive.rebuild((dive) {
@@ -99,7 +96,6 @@ class Dives {
   }
 
   Future<void> update(Dive dive) async {
-    if (readonly) throw Exception('readonly');
     if (!dive.isFrozen) dive.freeze();
     dive = dive.rebuild((dive) {
       dive.meta = dive.meta.rebuildUpdated();
@@ -117,7 +113,6 @@ class Dives {
   }
 
   Future<void> delete(String id) async {
-    if (readonly) throw Exception('readonly');
     if (_dives.containsKey(id)) {
       _dives[id] = _dives[id]!.rebuild((dive) {
         dive.meta = dive.meta.rebuildDeleted();

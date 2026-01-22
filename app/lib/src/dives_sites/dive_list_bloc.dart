@@ -341,7 +341,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     // Merge dive sites: only add new ones (check by uuid)
     final existingSiteUuids = currentState.sites.map((s) => s.id).toSet();
     final newSites = importedDoc.sites.where((s) => !existingSiteUuids.contains(s.id)).toList();
-    await _store.sites.insertAll(newSites);
+    await _store.sites.updateAll(newSites);
 
     // Process cylinders
     for (final dive in importedDoc.dives) {
@@ -436,15 +436,9 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
 
   Future<void> _onUpdateSite(UpdateSite event, Emitter<DiveListState> emit) async {
     if (state is! DiveListLoaded) return;
-    final currentState = state as DiveListLoaded;
 
-    if (currentState.isNewSite) {
-      await _store.sites.insert(event.site);
-      _log.fine('inserted new site ${event.site.name}');
-    } else {
-      await _store.sites.update(event.site);
-      _log.fine('updated site ${event.site.name}');
-    }
+    await _store.sites.update(event.site);
+    _log.fine('updated site ${event.site.name}');
 
     // Reload list after update
     add(LoadDives());

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package divestore;
+
+import "google/protobuf/timestamp.proto";
+import "types.proto";
+
+// Dive equipment item.
+message Equipment {
+  string id = 1;
+  Metadata meta = 2;
+
+  string type = 3; // Type of equipment (e.g., "BCD", "Regulator", "Wetsuit")
+  string manufacturer = 4;
+  string name = 5;
+  google.protobuf.Timestamp purchase_date = 6;
+  double purchase_price = 7; // In user's currency
+  double weight = 8; // Weight in kilograms
+}

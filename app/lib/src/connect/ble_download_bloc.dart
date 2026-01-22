@@ -305,7 +305,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     _log.fine('current fingerprint is $ldcFingerprint and last log date $lastLogDate');
 
     // Remember this computer for future downloads
-    await _store.computers.update(remoteId: device.remoteId.str, advertisedName: device.platformName, vendor: computer.vendor, product: computer.model);
+    await _store.computers.updateFields(remoteId: device.remoteId.str, advertisedName: device.platformName, vendor: computer.vendor, product: computer.model);
 
     // Set up BLE notifications on the RX characteristic
     try {
@@ -332,7 +332,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
         case DownloadDeviceInfo(:final info):
           _log.fine('device info: $info');
           // Remember the device serial
-          _store.computers.update(remoteId: state.connectedDevice!.remoteId.str, serial: info.serial);
+          _store.computers.updateFields(remoteId: state.connectedDevice!.remoteId.str, serial: info.serial);
 
         case DownloadDiveReceived(dive: final log):
           _log.fine('received dive ${log.dateTime.toDateTime()} with fingerprint ${log.ldcFingerprint}');
@@ -367,7 +367,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     try {
       // Remember the fingerprint & last log date on the downloading computer
       final ll = state.downloadedDives.first.logs.last;
-      _store.computers.update(remoteId: state.connectedDevice!.remoteId.str, ldcFingerprint: ll.ldcFingerprint, lastLogDate: ll.dateTime.toDateTime());
+      _store.computers.updateFields(remoteId: state.connectedDevice!.remoteId.str, ldcFingerprint: ll.ldcFingerprint, lastLogDate: ll.dateTime.toDateTime());
     } on StateError catch (_) {
       // no downloaded dive or no logs in dive
     }
