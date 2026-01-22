@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../app_metadata.dart';
-import 'dive_list_bloc.dart';
-import '../preferences/preferences_bloc.dart';
 import '../common/common.dart';
+import '../preferences/preferences_bloc.dart';
 import 'depth_profile_widget.dart';
+import 'dive_details_bloc.dart';
 
 class FullscreenProfileScreen extends StatefulWidget {
   const FullscreenProfileScreen({super.key});
@@ -57,16 +57,14 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
       child: SafeArea(
         child: BlocBuilder<PreferencesBloc, PreferencesState>(
           builder: (context, prefsState) {
-            return BlocBuilder<DiveListBloc, DiveListState>(
-              builder: (context, divesState) {
-                if (divesState is! DiveListLoaded) return Placeholder(); // can't happen
-                final dive = divesState.selectedDive!;
-                final site = divesState.selectedDiveSite;
+            return BlocBuilder<DiveDetailsBloc, DiveDetailsState>(
+              builder: (context, state) {
+                if (state is! DiveDetailsLoaded) return Placeholder();
                 return ScreenScaffold(
-                  title: Text('Dive #${dive.number}: ${site?.name ?? 'Unknown site'}'),
+                  title: Text('Dive #${state.dive.number}: ${state.site?.name ?? 'Unknown site'}'),
                   body: Padding(
                     padding: platformIsMobile ? EdgeInsets.zero : const EdgeInsets.all(8.0),
-                    child: DepthProfile(key: ValueKey((dive, prefsState.preferences)), dive: dive, preferences: prefsState.preferences),
+                    child: DepthProfile(key: ValueKey((state.dive, prefsState.preferences)), dive: state.dive, preferences: prefsState.preferences),
                   ),
                   transparent: true,
                 );

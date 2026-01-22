@@ -109,8 +109,10 @@ class _MyAppState extends State<MyApp> with WindowListener {
       path: AppRoutePath.divesDetailsDepthProfile,
       name: AppRouteName.divesDetailsDepthProfile,
       builder: (context, state) {
-        context.read<DiveListBloc>().add(SelectDive(state.pathParameters['diveID']!));
-        return _WaitForSelectedDive(child: const FullscreenProfileScreen());
+        return BlocProvider(
+          create: (_) => DiveDetailsBloc()..add(DiveDetailsEvent.loadDive(state.pathParameters['diveID']!)),
+          child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const FullscreenProfileScreen()),
+        );
       },
     );
 
@@ -400,25 +402,6 @@ class _MyAppState extends State<MyApp> with WindowListener {
           },
         ),
       ),
-    );
-  }
-}
-
-/// Helper widget that waits for selectedDive to be available
-class _WaitForSelectedDive extends StatelessWidget {
-  final Widget child;
-
-  const _WaitForSelectedDive({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<DiveListBloc, DiveListState>(
-      builder: (context, state) {
-        if (state is DiveListLoaded && state.selectedDive != null) {
-          return child;
-        }
-        return const Center(child: CircularProgressIndicator());
-      },
     );
   }
 }
