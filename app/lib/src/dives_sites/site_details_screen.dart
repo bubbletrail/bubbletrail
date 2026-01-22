@@ -6,6 +6,7 @@ import '../app_routes.dart';
 import 'dive_list_bloc.dart';
 import '../common/common.dart';
 import 'dive_table.dart';
+import 'site_details_bloc.dart';
 import 'site_map_card.dart';
 
 class SiteDetailsScreen extends StatelessWidget {
@@ -13,13 +14,20 @@ class SiteDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<DiveListBloc>().state;
-    if (state is! DiveListLoaded) {
+    final siteDetailState = context.read<SiteDetailsBloc>().state;
+    if (siteDetailState is! SiteDetailsLoaded) {
+      // Can't happen
       return Placeholder();
     }
 
-    final site = state.selectedSite!;
-    final dives = state.dives.where((s) => s.siteId == site.id).toList();
+    final diveListState = context.read<DiveListBloc>().state;
+    if (diveListState is! DiveListLoaded) {
+      // Can't happen
+      return Placeholder();
+    }
+
+    final site = siteDetailState.site;
+    final dives = diveListState.dives.where((s) => s.siteId == site.id).toList();
 
     return ScreenScaffold(
       title: Text(site.name),
@@ -73,7 +81,7 @@ class SiteDetailsScreen extends StatelessWidget {
               if (dives.isNotEmpty)
                 AspectRatio(
                   aspectRatio: 2,
-                  child: DiveTable(dives: dives, sitesByUuid: state.sitesByUuid, showSiteColumn: false),
+                  child: DiveTable(dives: dives, sitesByUuid: diveListState.sitesByUuid, showSiteColumn: false),
                 ),
             ],
           ),

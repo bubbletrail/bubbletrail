@@ -1,0 +1,55 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'site_details_bloc.dart';
+
+// **************************************************************************
+// CopyWithGenerator
+// **************************************************************************
+
+abstract class _$SiteDetailLoadedCWProxy {
+  SiteDetailsLoaded site(Site site);
+
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `SiteDetailLoaded(...).copyWith.fieldName(value)`.
+  ///
+  /// Example:
+  /// ```dart
+  /// SiteDetailLoaded(...).copyWith(id: 12, name: "My name")
+  /// ```
+  SiteDetailsLoaded call({Site site});
+}
+
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfSiteDetailLoaded.copyWith(...)` or call `instanceOfSiteDetailLoaded.copyWith.fieldName(value)` for a single field.
+class _$SiteDetailLoadedCWProxyImpl implements _$SiteDetailLoadedCWProxy {
+  const _$SiteDetailLoadedCWProxyImpl(this._value);
+
+  final SiteDetailsLoaded _value;
+
+  @override
+  SiteDetailsLoaded site(Site site) => call(site: site);
+
+  @override
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `SiteDetailLoaded(...).copyWith.fieldName(value)`.
+  ///
+  /// Example:
+  /// ```dart
+  /// SiteDetailLoaded(...).copyWith(id: 12, name: "My name")
+  /// ```
+  SiteDetailsLoaded call({Object? site = const $CopyWithPlaceholder()}) {
+    return SiteDetailsLoaded(
+      site == const $CopyWithPlaceholder() || site == null
+          ? _value.site
+          // ignore: cast_nullable_to_non_nullable
+          : site as Site,
+    );
+  }
+}
+
+extension $SiteDetailLoadedCopyWith on SiteDetailsLoaded {
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfSiteDetailLoaded.copyWith(...)` or `instanceOfSiteDetailLoaded.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$SiteDetailLoadedCWProxy get copyWith => _$SiteDetailLoadedCWProxyImpl(this);
+}

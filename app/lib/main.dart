@@ -12,6 +12,7 @@ import 'package:window_manager/window_manager.dart';
 import 'src/app_metadata.dart';
 import 'src/app_routes.dart';
 import 'src/app_theme.dart';
+import 'src/dives_sites/site_details_bloc.dart';
 import 'src/preferences/archive_bloc.dart';
 import 'src/connect/ble_download_bloc.dart';
 import 'src/connect/ble_scan_bloc.dart';
@@ -229,24 +230,30 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       path: AppRoutePath.sitesNew,
                       name: AppRouteName.sitesNew,
                       builder: (context, state) {
-                        context.read<DiveListBloc>().add(const SelectNewSite());
-                        return _WaitForSelectedSite(child: const SiteEditScreen());
+                        return BlocProvider(
+                          create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.newSite()),
+                          child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: SiteEditScreen()),
+                        );
                       },
                     ),
                     GoRoute(
                       path: AppRoutePath.sitesDetails,
                       name: AppRouteName.sitesDetails,
                       builder: (context, state) {
-                        context.read<DiveListBloc>().add(SelectSite(state.pathParameters['siteID']!));
-                        return _WaitForSelectedSite(child: const SiteDetailsScreen());
+                        return BlocProvider(
+                          create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.loadSite(state.pathParameters['siteID']!)),
+                          child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: SiteDetailsScreen()),
+                        );
                       },
                       routes: [
                         GoRoute(
                           path: AppRoutePath.sitesDetailsEdit,
                           name: AppRouteName.sitesDetailsEdit,
                           builder: (context, state) {
-                            context.read<DiveListBloc>().add(SelectSite(state.pathParameters['siteID']!));
-                            return _WaitForSelectedSite(child: const SiteEditScreen());
+                            return BlocProvider(
+                              create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.loadSite(state.pathParameters['siteID']!)),
+                              child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: SiteEditScreen()),
+                            );
                           },
                         ),
                       ],
