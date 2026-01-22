@@ -80,7 +80,7 @@ class SiteDetailsBloc extends Bloc<SiteDetailsEvent, SiteDetailsState> {
     _log.fine('init');
     on<SiteDetailsEvent>((event, emit) async {
       if (event is _NewSite) {
-        emit(SiteDetailsLoaded(Site()));
+        emit(SiteDetailsLoaded(Site()..freeze()));
       } else if (event is _LoadSite) {
         final s = await StorageProvider.store;
         final site = await s.sites.getById(event.siteId);

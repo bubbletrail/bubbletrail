@@ -185,8 +185,10 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       path: AppRoutePath.divesNew,
                       name: AppRouteName.divesNew,
                       builder: (context, state) {
-                        context.read<DiveListBloc>().add(const SelectNewDive());
-                        return _WaitForSelectedDive(child: const DiveEditScreen());
+                        return BlocProvider(
+                          create: (_) => DiveDetailsBloc()..add(DiveDetailsEvent.newDive()),
+                          child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const DiveEditScreen()),
+                        );
                       },
                     ),
                     GoRoute(
@@ -195,7 +197,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       builder: (context, state) {
                         return BlocProvider(
                           create: (_) => DiveDetailsBloc()..add(DiveDetailsEvent.loadDive(state.pathParameters['diveID']!)),
-                          child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: DiveDetailsScreen()),
+                          child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const DiveDetailsScreen()),
                         );
                       },
                       routes: [
@@ -203,8 +205,10 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           path: AppRoutePath.divesDetailsEdit,
                           name: AppRouteName.divesDetailsEdit,
                           builder: (context, state) {
-                            context.read<DiveListBloc>().add(SelectDive(state.pathParameters['diveID']!));
-                            return _WaitForSelectedDive(child: const DiveEditScreen());
+                            return BlocProvider(
+                              create: (_) => DiveDetailsBloc()..add(DiveDetailsEvent.loadDive(state.pathParameters['diveID']!)),
+                              child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const DiveEditScreen()),
+                            );
                           },
                         ),
                       ],
@@ -235,7 +239,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       builder: (context, state) {
                         return BlocProvider(
                           create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.newSite()),
-                          child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: SiteEditScreen()),
+                          child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const SiteEditScreen()),
                         );
                       },
                     ),
@@ -245,7 +249,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       builder: (context, state) {
                         return BlocProvider(
                           create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.loadSite(state.pathParameters['siteID']!)),
-                          child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: SiteDetailsScreen()),
+                          child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const SiteDetailsScreen()),
                         );
                       },
                       routes: [
@@ -255,7 +259,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           builder: (context, state) {
                             return BlocProvider(
                               create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.loadSite(state.pathParameters['siteID']!)),
-                              child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: SiteEditScreen()),
+                              child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const SiteEditScreen()),
                             );
                           },
                         ),

@@ -4,6 +4,7 @@ import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
+import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 
 import '../common/details_state.dart';
 import '../providers/storage_provider.dart';
@@ -83,7 +84,10 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
     _log.fine('init');
     on<DiveDetailsEvent>((event, emit) async {
       if (event is _NewDive) {
-        emit(DiveDetailsLoaded(Dive()));
+        final s = await StorageProvider.store;
+        final n = await s.dives.nextDiveNo;
+        final t = Timestamp.fromDateTime(DateTime.now());
+        emit(DiveDetailsLoaded(Dive(number: n, start: t)..freeze()));
       } else if (event is _LoadDive) {
         await _onLoadDive(event, emit);
       } else if (event is _Close) {
