@@ -230,18 +230,11 @@ jobs:
         shell: bash
         run: |
           cd app/android
-          mv bubbletrail-android-$MARKET_VERSION-$BUILD_NUMBER.aab app-release.aab
+          mv ../bubbletrail-android-$MARKET_VERSION-$BUILD_NUMBER.aab app-release.aab
           echo "$GOOGLE_PLAY_API_KEY_JSON" > fastlane/apikey.json
           bundle exec fastlane deploy
         env:
           GOOGLE_PLAY_API_KEY_JSON: ${{ secrets.GOOGLE_PLAY_API_KEY_JSON }}
-
-      - name: Archive artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: android
-          path: app/android/*.aab
-          retention-days: 1
 
   publish-release:
     name: Publish GitHub release
