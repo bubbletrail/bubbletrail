@@ -145,4 +145,19 @@ class Store {
       return null;
     }
   }
+
+  Future<void> deleteSite(String siteID) async {
+    // Remove site from any dives currently using it
+    for (final dive in await dives.getAll()) {
+      if (dive.siteId == siteID) {
+        await dives.update(
+          dive.rebuild((dive) {
+            dive.clearSiteId();
+          }),
+        );
+      }
+    }
+    // Remove the site itself
+    await sites.delete(siteID);
+  }
 }

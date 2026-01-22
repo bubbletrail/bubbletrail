@@ -53,6 +53,7 @@ abstract class SiteDetailsEvent extends Equatable {
   const factory SiteDetailsEvent.loadSite(String siteId) = _LoadSite;
   const factory SiteDetailsEvent.close() = _Close;
   const factory SiteDetailsEvent.saveAndClose(Site site) = _SaveAndClose;
+  const factory SiteDetailsEvent.deleteAndClose(String siteID) = _DeleteAndClose;
 }
 
 class _NewSite extends SiteDetailsEvent {
@@ -75,6 +76,12 @@ class _SaveAndClose extends SiteDetailsEvent {
   const _SaveAndClose(this.site);
 }
 
+class _DeleteAndClose extends SiteDetailsEvent {
+  final String siteID;
+
+  const _DeleteAndClose(this.siteID);
+}
+
 class SiteDetailsBloc extends Bloc<SiteDetailsEvent, SiteDetailsState> {
   SiteDetailsBloc() : super(const SiteDetailsInitial()) {
     _log.fine('init');
@@ -94,6 +101,11 @@ class SiteDetailsBloc extends Bloc<SiteDetailsEvent, SiteDetailsState> {
         final s = await StorageProvider.store;
         await s.sites.update(event.site);
         _log.fine('saved ${event.site.name}');
+        emit(SiteDetailsClosed());
+      } else if (event is _DeleteAndClose) {
+        final s = await StorageProvider.store;
+        await s.deleteSite(event.siteID);
+        _log.fine('deleted ${event.siteID}');
         emit(SiteDetailsClosed());
       }
     }, transformer: sequential());

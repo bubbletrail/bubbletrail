@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import '../lib/buhlmann.dart';
+import '../lib/btbuhlmann.dart';
 import '../lib/constants.dart';
 
 void main() {
