@@ -10,9 +10,9 @@ environment:
 
 dependencies:
   bloc_concurrency: ^0.3.0
+  btbuhlmann: {path: ../pkg/btbuhlmann}
   btsparkle: {path: ../pkg/btsparkle}
   btstore: {path: ../pkg/btstore}
-  buhlmann: {path: ../pkg/buhlmann}
   chips_input_autocomplete: ^1.2.2
   chunked_stream: ^1.4.2
   collection: ^1.19.1

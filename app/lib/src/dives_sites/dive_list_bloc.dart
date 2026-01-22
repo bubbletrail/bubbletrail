@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:buhlmann/buhlmann.dart' as buhlmann;
+import 'package:btbuhlmann/btbuhlmann.dart' as buhlmann;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:btstore/btstore.dart';
 import 'package:equatable/equatable.dart';
