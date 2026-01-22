@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:btstore/btstore.dart';
-import 'package:btstore/import/macdive.dart';
 import 'package:test/test.dart';
 import 'package:xml/xml.dart';
 
