@@ -14,7 +14,6 @@ import 'package:xml/xml.dart';
 
 import '../providers/storage_provider.dart';
 import 'tissue_calculator.dart';
-import '../preferences/sync_bloc.dart';
 
 part 'dive_list_bloc.g.dart';
 
@@ -101,13 +100,11 @@ class ImportDives extends DiveListEvent {
 }
 
 class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
-  final SyncBloc _syncBloc;
   late final Store _store;
-  StreamSubscription? _syncBlocSub;
   StreamSubscription? _divesStorageSub;
   StreamSubscription? _sitesStorageSub;
 
-  DiveListBloc(this._syncBloc) : super(const DiveListInitial()) {
+  DiveListBloc() : super(const DiveListInitial()) {
     on<DiveListEvent>((event, emit) async {
       if (event is _LoadAll) {
         await _onLoadDives(event, emit);
@@ -127,14 +124,6 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
         add(_LoadAll());
       });
       add(_LoadAll());
-    });
-
-    DateTime? lastSynced;
-    _syncBlocSub = _syncBloc.stream.listen((state) {
-      if (state.lastSyncSuccess == true && state.lastSynced != lastSynced) {
-        lastSynced = state.lastSynced;
-        add(_LoadAll());
-      }
     });
   }
 
@@ -285,7 +274,6 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
 
   @override
   Future<void> close() {
-    _syncBlocSub?.cancel();
     _divesStorageSub?.cancel();
     _sitesStorageSub?.cancel();
     return super.close();
