@@ -286,7 +286,7 @@ void main() {
 
     test('GF at ceiling depth equals GF_low', () {
       // With GF 100/100, the ceiling is where GF = 100%
-      final deco = BuhlmannDeco(config: const BuhlmannConfig(gfLow: 100, gfHigh: 100));
+      final deco = BuhlmannDeco(config: const BuhlmannConfig(gfLow: 1.0, gfHigh: 1.0));
 
       // Deep dive to create deco obligation
       deco.addSegment(40, GasMix.air, 1500);
@@ -301,7 +301,7 @@ void main() {
 
     test('GF at ceiling with conservative settings equals GF_low', () {
       // With GF 30/70, the ceiling is where GF = 30%
-      final deco = BuhlmannDeco(config: const BuhlmannConfig(gfLow: 30, gfHigh: 70));
+      final deco = BuhlmannDeco(config: const BuhlmannConfig(gfLow: 0.3, gfHigh: 0.7));
 
       // Deep dive to create deco obligation
       deco.addSegment(40, GasMix.air, 1500);

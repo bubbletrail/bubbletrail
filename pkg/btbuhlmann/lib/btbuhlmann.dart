@@ -112,7 +112,7 @@ class BuhlmannDeco {
     var maxCeiling = 0.0;
 
     if (gf == null) {
-      gf = config.gfLow.toDouble();
+      gf = config.gfLow;
     }
 
     for (var i = 0; i < numTissueCompartments; i++) {
