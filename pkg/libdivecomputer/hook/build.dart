@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:code_assets/code_assets.dart';
@@ -18,9 +17,11 @@ void main(List<String> args) async {
 
   await build(args, (input, output) async {
     final packageName = input.packageName;
+
     final os = input.config.code.targetOS;
     final configH = File('config.h.$os');
     if (configH.existsSync()) configH.copySync('$libdir/config.h');
+
     final cbuilder = CBuilder.library(
       name: packageName,
       assetName: '${packageName}_bindings_generated.dart',
