@@ -1,13 +1,15 @@
 import 'dart:math';
 
 import 'package:chips_input_autocomplete/chips_input_autocomplete.dart';
-import 'package:divestore/divestore.dart';
+import 'package:collection/collection.dart';
+import 'package:btstore/btstore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart' as proto;
 
 import '../equipment/cylinder_list_bloc.dart';
+import 'dive_details_bloc.dart';
 import 'dive_list_bloc.dart';
 import '../common/common.dart';
 
@@ -28,15 +30,24 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   late final ChipsAutocompleteController _buddiesController;
   late DateTime _selectedDateTime;
   late int? _rating;
-  String? _selectedSiteId;
   late List<_EditableDiveCylinder> _cylinders;
   late List<_EditableGasChange> _gasChanges;
   late List<_EditableWeightsystem> _weightsystems;
+  late List<String> _availableTags;
+  late List<String> _availableBuddies;
+  late List<Site> _availableSites;
+  late List<Cylinder> _availableCylinders;
+
+  Site? _selectedSite;
 
   @override
   void initState() {
     super.initState();
-    dive = (context.read<DiveListBloc>().state as DiveListLoaded).selectedDive!;
+
+    final detailsState = context.read<DiveDetailsBloc>().state as DiveDetailsLoaded;
+    dive = detailsState.dive;
+    _selectedSite = detailsState.site;
+
     _selectedDateTime = dive.start.toDateTime();
     _durationSeconds = dive.duration;
     _maxDepth = dive.maxDepth;
@@ -45,7 +56,14 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     _tagsController = ChipsAutocompleteController();
     _buddiesController = ChipsAutocompleteController();
     _rating = dive.hasRating() ? dive.rating : null;
-    _selectedSiteId = dive.siteId.isEmpty ? null : dive.siteId;
+
+    final diveListState = context.read<DiveListBloc>().state as DiveListLoaded;
+    _availableTags = diveListState.tags.sorted((a, b) => a.compareTo(b));
+    _availableBuddies = diveListState.buddies.sorted((a, b) => a.compareTo(b));
+    _availableSites = diveListState.sites;
+
+    final cylinderListState = context.read<CylinderListBloc>().state as CylinderListLoaded;
+    _availableCylinders = cylinderListState.cylinders;
 
     // Initialize cylinders from dive
     _cylinders = dive.cylinders.map((dc) => _EditableDiveCylinder.fromDiveCylinder(dc)).toList();
@@ -115,42 +133,29 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   }
 
   Future<void> _selectSite() async {
-    final diveListState = context.read<DiveListBloc>().state;
-    if (diveListState is! DiveListLoaded) return;
-
-    final sites = diveListState.sites;
-    if (sites.isEmpty) {
+    if (_availableSites.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No dive sites available')));
       return;
     }
 
-    final currentSite = _selectedSiteId != null ? diveListState.sitesByUuid[_selectedSiteId] : null;
-
     final result = await showSelectionDialog<Site>(
       context: context,
       title: 'Select dive site',
-      items: sites,
-      selectedItem: currentSite,
+      items: _availableSites,
+      selectedItem: _selectedSite,
       noneOption: 'No site',
       itemBuilder: (site) => ListTile(leading: const Icon(Icons.location_on_outlined), title: Text(site.name)),
     );
 
     if (!result.cancelled) {
       setState(() {
-        _selectedSiteId = result.value?.id;
+        _selectedSite = result.value;
       });
     }
   }
 
   Future<void> _addCylinder() async {
-    final cylinderState = context.read<CylinderListBloc>().state;
-    if (cylinderState is! CylinderListLoaded) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Loading cylinders...')));
-      return;
-    }
-
-    final cylinders = cylinderState.cylinders;
-    if (cylinders.isEmpty) {
+    if (_availableCylinders.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No cylinders defined. Add cylinders in Equipment first.')));
       return;
     }
@@ -158,7 +163,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     final result = await showSelectionDialog<Cylinder>(
       context: context,
       title: 'Select cylinder',
-      items: cylinders,
+      items: _availableCylinders,
       itemBuilder: (cyl) {
         return ListTile(leading: const Icon(Icons.science_outlined), title: Text(cyl.description.isNotEmpty ? cyl.description : 'Cylinder ${cyl.id}'));
       },
@@ -207,8 +212,6 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     final o2Controller = TextEditingController(text: cyl.oxygen.toString());
     final heController = TextEditingController(text: cyl.helium.toString());
 
-    final cylinderState = context.read<CylinderListBloc>().state;
-    final availableCylinders = cylinderState is CylinderListLoaded ? cylinderState.cylinders : <Cylinder>[];
     Cylinder? selectedCylinder = cyl.cylinder;
 
     // Track pressure values in metric (bar)
@@ -224,17 +227,17 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
             child: Column(
               mainAxisSize: .min,
               children: [
-                if (availableCylinders.isNotEmpty) ...[
+                if (_availableCylinders.isNotEmpty) ...[
                   DropdownButtonFormField<String>(
                     initialValue: selectedCylinder?.id,
                     decoration: const InputDecoration(labelText: 'Cylinder type', border: OutlineInputBorder()),
-                    items: availableCylinders.map((c) {
+                    items: _availableCylinders.map((c) {
                       return DropdownMenuItem(value: c.id, child: Text(c.description.isNotEmpty ? c.description : 'Cylinder ${c.id}'));
                     }).toList(),
                     onChanged: (id) {
                       if (id != null) {
                         setDialogState(() {
-                          selectedCylinder = availableCylinders.firstWhere((c) => c.id == id);
+                          selectedCylinder = _availableCylinders.firstWhere((c) => c.id == id);
                         });
                       }
                     },
@@ -410,7 +413,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
         dive.clearRating();
       }
 
-      dive.siteId = _selectedSiteId ?? '';
+      dive.siteId = _selectedSite?.id ?? '';
       dive.divemaster = _divemasterController.text.trim();
       dive.notes = _notesController.text.trim();
 
@@ -442,8 +445,9 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       // Update calculated info.
       dive.recalculateMetadata();
     });
+
     // Send update event to bloc
-    context.read<DiveListBloc>().add(UpdateDive(upd));
+    context.read<DiveDetailsBloc>().add(DiveDetailsEvent.saveAndClose(upd));
   }
 
   void _saveAndPop() {
@@ -466,7 +470,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
         }
       },
       child: ScreenScaffold(
-        title: Text('Edit Dive #${dive.number}'),
+        title: Text('Edit dive #${dive.number}'),
         actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes')],
         body: SingleChildScrollView(
           padding: const .all(16.0),
@@ -527,14 +531,14 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                 ),
               Builder(
                 builder: (context) {
-                  final diveListState = context.watch<DiveListBloc>().state;
-                  final selectedSite = _selectedSiteId != null && diveListState is DiveListLoaded ? diveListState.sitesByUuid[_selectedSiteId] : null;
-
                   return InkWell(
                     onTap: _selectSite,
                     child: InputDecorator(
                       decoration: const InputDecoration(labelText: 'Dive site', border: OutlineInputBorder(), suffixIcon: Icon(Icons.location_on_outlined)),
-                      child: Text(selectedSite?.name ?? 'No site selected', style: selectedSite == null ? TextStyle(color: Theme.of(context).hintColor) : null),
+                      child: Text(
+                        _selectedSite?.name ?? 'No site selected',
+                        style: _selectedSite == null ? TextStyle(color: Theme.of(context).hintColor) : null,
+                      ),
                     ),
                   );
                 },
@@ -685,12 +689,9 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
               ),
               Builder(
                 builder: (context) {
-                  final diveListState = context.watch<DiveListBloc>().state;
-                  final suggestions = diveListState is DiveListLoaded ? diveListState.tags.toList() : <String>[];
-                  suggestions.sort();
                   return ChipsInputAutocomplete(
                     controller: _tagsController,
-                    options: suggestions,
+                    options: _availableTags,
                     initialChips: dive.tags.toList(),
                     decorationTextField: const InputDecoration(labelText: 'Tags', border: OutlineInputBorder()),
                     addChipOnSelection: true,
@@ -707,12 +708,9 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
               ),
               Builder(
                 builder: (context) {
-                  final diveListState = context.watch<DiveListBloc>().state;
-                  final suggestions = diveListState is DiveListLoaded ? diveListState.buddies.toList() : <String>[];
-                  suggestions.sort();
                   return ChipsInputAutocomplete(
                     controller: _buddiesController,
-                    options: suggestions,
+                    options: _availableBuddies,
                     initialChips: dive.buddies.toList(),
                     decorationTextField: const InputDecoration(labelText: 'Buddies', border: OutlineInputBorder()),
                     addChipOnSelection: true,

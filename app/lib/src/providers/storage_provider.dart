@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:divestore/divestore.dart';
+import 'package:btstore/btstore.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 

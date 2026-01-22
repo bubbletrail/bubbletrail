@@ -1,13 +1,14 @@
 import 'package:chips_input_autocomplete/chips_input_autocomplete.dart';
-import 'package:divestore/divestore.dart';
+import 'package:btstore/btstore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
-import 'dive_list_bloc.dart';
 import '../common/common.dart';
+import 'dive_list_bloc.dart';
+import 'site_details_bloc.dart';
 import 'site_map.dart';
 
 class SiteEditScreen extends StatefulWidget {
@@ -34,9 +35,9 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
   @override
   void initState() {
     super.initState();
-    final state = context.read<DiveListBloc>().state as DiveListLoaded;
-    _originalSite = state.selectedSite!;
-    _isNew = state.isNewSite;
+    final state = context.read<SiteDetailsBloc>().state as SiteDetailsLoaded;
+    _originalSite = state.site;
+    _isNew = _originalSite.id.isEmpty;
     _nameController = TextEditingController(text: _originalSite.name);
     _countryController = TextEditingController(text: _originalSite.country);
     _locationController = TextEditingController(text: _originalSite.location);
@@ -65,11 +66,11 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
     super.dispose();
   }
 
-  bool _saveSite() {
+  void _saveSite() {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Name is required')));
-      return false;
+      return;
     }
 
     // Parse GPS position if provided
@@ -96,20 +97,11 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
       notes: _notesController.text.trim(),
     );
 
-    // Send update event to bloc
-    context.read<DiveListBloc>().add(UpdateSite(updatedSite));
-
-    return true;
-  }
-
-  void _saveAndPop() {
-    if (_saveSite()) {
-      context.pop();
-    }
+    context.read<SiteDetailsBloc>().add(SiteDetailsEvent.saveAndClose(updatedSite));
   }
 
   void _cancel() {
-    context.pop();
+    context.read<SiteDetailsBloc>().add(SiteDetailsEvent.close());
   }
 
   void _onMapTap(TapPosition tapPosition, LatLng point) {
@@ -122,96 +114,105 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) {
-          _saveAndPop();
+    return BlocListener<SiteDetailsBloc, SiteDetailsState>(
+      listener: (context, state) {
+        if (state is SiteDetailsClosed) {
+          // Pop when the bloc considers us done
+          context.pop();
         }
       },
-      child: ScreenScaffold(
-        title: Text(_isNew ? 'New dive site' : 'Edit ${_originalSite.name}'),
-        actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes')],
-        body: SingleChildScrollView(
-          padding: const .all(16.0),
-          child: Column(
-            crossAxisAlignment: .start,
-            spacing: 16,
-            children: [
-              TextField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Name *', border: OutlineInputBorder()),
-                textCapitalization: .words,
-              ),
-              TextField(
-                controller: _countryController,
-                decoration: const InputDecoration(labelText: 'Country', border: OutlineInputBorder()),
-                textCapitalization: .words,
-              ),
-              TextField(
-                controller: _locationController,
-                decoration: const InputDecoration(labelText: 'Location', border: OutlineInputBorder()),
-                textCapitalization: .words,
-              ),
-              TextField(
-                controller: _bodyOfWaterController,
-                decoration: const InputDecoration(labelText: 'Body of water', border: OutlineInputBorder()),
-                textCapitalization: .words,
-              ),
-              TextField(
-                controller: _difficultyController,
-                decoration: const InputDecoration(labelText: 'Difficulty', border: OutlineInputBorder()),
-              ),
-              Builder(
-                builder: (context) {
-                  final diveListState = context.watch<DiveListBloc>().state;
-                  final suggestions = diveListState is DiveListLoaded ? diveListState.tags.toList() : <String>[];
-                  suggestions.sort();
-                  return ChipsInputAutocomplete(
-                    controller: _tagsController,
-                    options: suggestions,
-                    initialChips: _originalSite.tags.toList(),
-                    decorationTextField: const InputDecoration(labelText: 'Tags', border: OutlineInputBorder()),
-                    addChipOnSelection: true,
-                    placeChipsSectionAbove: false,
-                    paddingInsideWidgetContainer: .zero,
-                    secondaryTheme: true,
-                  );
-                },
-              ),
-              TextField(
-                controller: _notesController,
-                decoration: const InputDecoration(labelText: 'Notes', border: OutlineInputBorder(), alignLabelWithHint: true),
-                maxLines: 4,
-                textCapitalization: .sentences,
-              ),
-              Row(
-                spacing: 16,
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _latController,
-                      decoration: const InputDecoration(labelText: 'Latitude', border: OutlineInputBorder()),
-                      keyboardType: const .numberWithOptions(decimal: true, signed: true),
-                    ),
-                  ),
-                  Expanded(
-                    child: TextField(
-                      controller: _lonController,
-                      decoration: const InputDecoration(labelText: 'Longitude', border: OutlineInputBorder()),
-                      keyboardType: const .numberWithOptions(decimal: true, signed: true),
-                    ),
-                  ),
-                ],
-              ),
-              AspectRatio(
-                aspectRatio: 2,
-                child: ClipRRect(
-                  borderRadius: .circular(12),
-                  child: SiteMap(position: _markerPosition ?? LatLng(0, 0), onTap: _onMapTap, alwaysCenterPosition: false),
+      child: PopScope(
+        canPop: false, // Block pop on left chevron
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop) {
+            // Catch the attempt to pop and save
+            _saveSite();
+          }
+        },
+        child: ScreenScaffold(
+          title: Text(_isNew ? 'New dive site' : 'Edit ${_originalSite.name}'),
+          actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes')],
+          body: SingleChildScrollView(
+            padding: const .all(16.0),
+            child: Column(
+              crossAxisAlignment: .start,
+              spacing: 16,
+              children: [
+                TextField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(labelText: 'Name *', border: OutlineInputBorder()),
+                  textCapitalization: .words,
                 ),
-              ),
-            ],
+                TextField(
+                  controller: _countryController,
+                  decoration: const InputDecoration(labelText: 'Country', border: OutlineInputBorder()),
+                  textCapitalization: .words,
+                ),
+                TextField(
+                  controller: _locationController,
+                  decoration: const InputDecoration(labelText: 'Location', border: OutlineInputBorder()),
+                  textCapitalization: .words,
+                ),
+                TextField(
+                  controller: _bodyOfWaterController,
+                  decoration: const InputDecoration(labelText: 'Body of water', border: OutlineInputBorder()),
+                  textCapitalization: .words,
+                ),
+                TextField(
+                  controller: _difficultyController,
+                  decoration: const InputDecoration(labelText: 'Difficulty', border: OutlineInputBorder()),
+                ),
+                Builder(
+                  builder: (context) {
+                    final diveListState = context.watch<DiveListBloc>().state;
+                    final suggestions = diveListState is DiveListLoaded ? diveListState.tags.toList() : <String>[];
+                    suggestions.sort();
+                    return ChipsInputAutocomplete(
+                      controller: _tagsController,
+                      options: suggestions,
+                      initialChips: _originalSite.tags.toList(),
+                      decorationTextField: const InputDecoration(labelText: 'Tags', border: OutlineInputBorder()),
+                      addChipOnSelection: true,
+                      placeChipsSectionAbove: false,
+                      paddingInsideWidgetContainer: .zero,
+                      secondaryTheme: true,
+                    );
+                  },
+                ),
+                TextField(
+                  controller: _notesController,
+                  decoration: const InputDecoration(labelText: 'Notes', border: OutlineInputBorder(), alignLabelWithHint: true),
+                  maxLines: 4,
+                  textCapitalization: .sentences,
+                ),
+                Row(
+                  spacing: 16,
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _latController,
+                        decoration: const InputDecoration(labelText: 'Latitude', border: OutlineInputBorder()),
+                        keyboardType: const .numberWithOptions(decimal: true, signed: true),
+                      ),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _lonController,
+                        decoration: const InputDecoration(labelText: 'Longitude', border: OutlineInputBorder()),
+                        keyboardType: const .numberWithOptions(decimal: true, signed: true),
+                      ),
+                    ),
+                  ],
+                ),
+                AspectRatio(
+                  aspectRatio: 2,
+                  child: ClipRRect(
+                    borderRadius: .circular(12),
+                    child: SiteMap(position: _markerPosition ?? LatLng(0, 0), onTap: _onMapTap, alwaysCenterPosition: false),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

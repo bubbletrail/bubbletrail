@@ -12,34 +12,36 @@ import 'package:window_manager/window_manager.dart';
 import 'src/app_metadata.dart';
 import 'src/app_routes.dart';
 import 'src/app_theme.dart';
-import 'src/preferences/archive_bloc.dart';
+import 'src/common/common.dart';
 import 'src/connect/ble_download_bloc.dart';
 import 'src/connect/ble_scan_bloc.dart';
-import 'src/equipment/cylinder_details_bloc.dart';
-import 'src/equipment/cylinder_list_bloc.dart';
-import 'src/dives_sites/dive_list_bloc.dart';
-import 'src/preferences/preferences_bloc.dart';
-import 'src/preferences/sync_bloc.dart';
-import 'src/common/common.dart';
 import 'src/connect/connect_screen.dart';
+import 'src/dives_sites/dive_details_bloc.dart';
 import 'src/dives_sites/dive_details_screen.dart';
 import 'src/dives_sites/dive_edit_screen.dart';
+import 'src/dives_sites/dive_list_bloc.dart';
 import 'src/dives_sites/dive_list_screen.dart';
+import 'src/dives_sites/fullscreen_map_screen.dart';
 import 'src/dives_sites/fullscreen_profile_screen.dart';
+import 'src/dives_sites/site_details_bloc.dart';
+import 'src/dives_sites/site_details_screen.dart';
+import 'src/dives_sites/site_edit_screen.dart';
+import 'src/dives_sites/site_list_screen.dart';
+import 'src/equipment/cylinder_details_bloc.dart';
 import 'src/equipment/cylinder_edit_screen.dart';
+import 'src/equipment/cylinder_list_bloc.dart';
 import 'src/equipment/cylinder_list_screen.dart';
 import 'src/equipment/equipment_screen.dart';
-import 'src/preferences/logs_screen.dart';
-import 'src/preferences/preferences_screen.dart';
+import 'src/preferences/archive_bloc.dart';
 import 'src/preferences/dive_preferences_screen.dart';
+import 'src/preferences/logs_screen.dart';
+import 'src/preferences/preferences_bloc.dart';
+import 'src/preferences/preferences_screen.dart';
+import 'src/preferences/sync_bloc.dart';
 import 'src/preferences/sync_settings_screen.dart';
 import 'src/preferences/unit_preferences_screen.dart';
 import 'src/preferences/window_preferences.dart';
 import 'src/services/log_buffer.dart';
-import 'src/dives_sites/fullscreen_map_screen.dart';
-import 'src/dives_sites/site_details_screen.dart';
-import 'src/dives_sites/site_edit_screen.dart';
-import 'src/dives_sites/site_list_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -91,7 +93,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
     super.initState();
     _syncBloc = SyncBloc();
     _archiveBloc = ArchiveBloc();
-    _diveListBloc = DiveListBloc(_syncBloc);
+    _diveListBloc = DiveListBloc();
     _cylinderListBloc = CylinderListBloc();
     _bleScanBloc = BleScanBloc();
     _bleDownloadBloc = BleDownloadBloc(_diveListBloc, _bleScanBloc);
@@ -107,8 +109,10 @@ class _MyAppState extends State<MyApp> with WindowListener {
       path: AppRoutePath.divesDetailsDepthProfile,
       name: AppRouteName.divesDetailsDepthProfile,
       builder: (context, state) {
-        context.read<DiveListBloc>().add(SelectDive(state.pathParameters['diveID']!));
-        return _WaitForSelectedDive(child: const FullscreenProfileScreen());
+        return BlocProvider(
+          create: (_) => DiveDetailsBloc()..add(DiveDetailsEvent.loadDive(state.pathParameters['diveID']!)),
+          child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const FullscreenProfileScreen()),
+        );
       },
     );
 
@@ -183,24 +187,30 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       path: AppRoutePath.divesNew,
                       name: AppRouteName.divesNew,
                       builder: (context, state) {
-                        context.read<DiveListBloc>().add(const SelectNewDive());
-                        return _WaitForSelectedDive(child: const DiveEditScreen());
+                        return BlocProvider(
+                          create: (_) => DiveDetailsBloc()..add(DiveDetailsEvent.newDive()),
+                          child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const DiveEditScreen()),
+                        );
                       },
                     ),
                     GoRoute(
                       path: AppRoutePath.divesDetails,
                       name: AppRouteName.divesDetails,
                       builder: (context, state) {
-                        context.read<DiveListBloc>().add(SelectDive(state.pathParameters['diveID']!));
-                        return _WaitForSelectedDive(child: const DiveDetailsScreen());
+                        return BlocProvider(
+                          create: (_) => DiveDetailsBloc()..add(DiveDetailsEvent.loadDive(state.pathParameters['diveID']!)),
+                          child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const DiveDetailsScreen()),
+                        );
                       },
                       routes: [
                         GoRoute(
                           path: AppRoutePath.divesDetailsEdit,
                           name: AppRouteName.divesDetailsEdit,
                           builder: (context, state) {
-                            context.read<DiveListBloc>().add(SelectDive(state.pathParameters['diveID']!));
-                            return _WaitForSelectedDive(child: const DiveEditScreen());
+                            return BlocProvider(
+                              create: (_) => DiveDetailsBloc()..add(DiveDetailsEvent.loadDive(state.pathParameters['diveID']!)),
+                              child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const DiveEditScreen()),
+                            );
                           },
                         ),
                       ],
@@ -212,8 +222,10 @@ class _MyAppState extends State<MyApp> with WindowListener {
                   path: AppRoutePath.sitesDetailsMap,
                   name: AppRouteName.sitesDetailsMap,
                   builder: (context, state) {
-                    context.read<DiveListBloc>().add(SelectSite(state.pathParameters['siteID']!));
-                    return _WaitForSelectedSite(child: const FullscreenMapScreen());
+                    return BlocProvider(
+                      create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.loadSite(state.pathParameters['siteID']!)),
+                      child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const FullscreenMapScreen()),
+                    );
                   },
                 ),
               ],
@@ -229,24 +241,30 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       path: AppRoutePath.sitesNew,
                       name: AppRouteName.sitesNew,
                       builder: (context, state) {
-                        context.read<DiveListBloc>().add(const SelectNewSite());
-                        return _WaitForSelectedSite(child: const SiteEditScreen());
+                        return BlocProvider(
+                          create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.newSite()),
+                          child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const SiteEditScreen()),
+                        );
                       },
                     ),
                     GoRoute(
                       path: AppRoutePath.sitesDetails,
                       name: AppRouteName.sitesDetails,
                       builder: (context, state) {
-                        context.read<DiveListBloc>().add(SelectSite(state.pathParameters['siteID']!));
-                        return _WaitForSelectedSite(child: const SiteDetailsScreen());
+                        return BlocProvider(
+                          create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.loadSite(state.pathParameters['siteID']!)),
+                          child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const SiteDetailsScreen()),
+                        );
                       },
                       routes: [
                         GoRoute(
                           path: AppRoutePath.sitesDetailsEdit,
                           name: AppRouteName.sitesDetailsEdit,
                           builder: (context, state) {
-                            context.read<DiveListBloc>().add(SelectSite(state.pathParameters['siteID']!));
-                            return _WaitForSelectedSite(child: const SiteEditScreen());
+                            return BlocProvider(
+                              create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.loadSite(state.pathParameters['siteID']!)),
+                              child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const SiteEditScreen()),
+                            );
                           },
                         ),
                       ],
@@ -386,44 +404,6 @@ class _MyAppState extends State<MyApp> with WindowListener {
           },
         ),
       ),
-    );
-  }
-}
-
-/// Helper widget that waits for selectedDive to be available
-class _WaitForSelectedDive extends StatelessWidget {
-  final Widget child;
-
-  const _WaitForSelectedDive({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<DiveListBloc, DiveListState>(
-      builder: (context, state) {
-        if (state is DiveListLoaded && state.selectedDive != null) {
-          return child;
-        }
-        return const Center(child: CircularProgressIndicator());
-      },
-    );
-  }
-}
-
-/// Helper widget that waits for selectedSite to be available
-class _WaitForSelectedSite extends StatelessWidget {
-  final Widget child;
-
-  const _WaitForSelectedSite({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<DiveListBloc, DiveListState>(
-      builder: (context, state) {
-        if (state is DiveListLoaded && state.selectedSite != null) {
-          return child;
-        }
-        return const Center(child: CircularProgressIndicator());
-      },
     );
   }
 }

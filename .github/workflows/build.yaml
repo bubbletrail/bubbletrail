@@ -18,9 +18,9 @@ jobs:
         with:
           channel: stable
 
-      - name: Run tests (divestore)
+      - name: Run tests (btstore)
         run: |
-          pushd pkg/divestore
+          pushd pkg/btstore
           dart pub get
           dart analyze --fatal-infos
           dart format --output=none --set-exit-if-changed $(find . -name \*.dart -not -name \*.g.dart -not -name \*.pb\*.dart)

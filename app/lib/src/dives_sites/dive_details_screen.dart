@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:divestore/divestore.dart';
+import 'package:btstore/btstore.dart';
 import 'package:flutter/material.dart' hide DataColumn;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -8,10 +8,10 @@ import 'package:latlong2/latlong.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
-import 'dive_list_bloc.dart';
-import '../preferences/preferences_bloc.dart';
 import '../common/common.dart';
+import '../preferences/preferences_bloc.dart';
 import 'depth_profile_widget.dart';
+import 'dive_details_bloc.dart';
 import 'site_map.dart';
 
 class DiveDetailsScreen extends StatelessWidget {
@@ -19,25 +19,14 @@ class DiveDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<DiveListBloc, DiveListState>(
+    return BlocBuilder<DiveDetailsBloc, DiveDetailsState>(
       builder: (context, state) {
-        if (state is! DiveListLoaded || state.selectedDive == null) {
-          return const Center(child: CircularProgressIndicator());
+        if (state is! DiveDetailsLoaded) {
+          // Can't happen
+          return Placeholder();
         }
 
-        final dive = state.selectedDive!;
-        final site = state.selectedDiveSite;
-
-        String? nextDiveID;
-        String? prevDiveID;
-
-        final diveIdx = state.diveIndexById[dive.id];
-        if (diveIdx != null) {
-          nextDiveID = diveIdx < state.dives.length - 1 ? state.dives[diveIdx + 1].id : null;
-          prevDiveID = diveIdx > 0 ? state.dives[diveIdx - 1].id : null;
-        }
-
-        return _DiveDetails(dive: dive, site: site, nextID: nextDiveID, prevID: prevDiveID);
+        return _DiveDetails(dive: state.dive, site: state.site, nextDive: state.nextDive, prevDive: state.prevDive);
       },
     );
   }
@@ -46,51 +35,55 @@ class DiveDetailsScreen extends StatelessWidget {
 class _DiveDetails extends StatelessWidget {
   final Dive dive;
   final Site? site;
-  final String? nextID;
-  final String? prevID;
+  final Dive? nextDive;
+  final Dive? prevDive;
 
-  const _DiveDetails({required this.dive, required this.site, required this.nextID, required this.prevID});
+  const _DiveDetails({required this.dive, this.site, this.nextDive, this.prevDive});
 
   @override
   Widget build(BuildContext context) {
     final title = platformIsDesktop ? 'Dive ' : '';
-    return ScreenScaffold(
-      title: Text('$title#${dive.number}: ${site?.name ?? 'Unknown site'}'),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.arrow_upward),
-          onPressed: prevID != null
-              ? () {
-                  context.goNamed(AppRouteName.divesDetails, pathParameters: {'diveID': prevID!});
-                }
-              : null,
-          tooltip: 'Previous dive',
-        ),
-        IconButton(
-          icon: const Icon(Icons.arrow_downward),
-          onPressed: nextID != null
-              ? () {
-                  context.goNamed(AppRouteName.divesDetails, pathParameters: {'diveID': nextID!});
-                }
-              : null,
-          tooltip: 'Next dive',
-        ),
-        if (platformIsDesktop)
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              context.goNamed(AppRouteName.divesDetailsEdit, pathParameters: {'diveID': dive.id});
-            },
-            tooltip: 'Edit dive',
+    return BlocBuilder<DiveDetailsBloc, DiveDetailsState>(
+      builder: (context, state) {
+        return ScreenScaffold(
+          title: Text('$title#${dive.number}: ${site?.name ?? 'Unknown site'}'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.arrow_upward),
+              onPressed: prevDive != null
+                  ? () {
+                      context.read<DiveDetailsBloc>().add(DiveDetailsEvent.loadDive(prevDive!.id));
+                    }
+                  : null,
+              tooltip: prevDive != null ? 'Dive #${prevDive?.number}' : null,
+            ),
+            IconButton(
+              icon: const Icon(Icons.arrow_downward),
+              onPressed: nextDive != null
+                  ? () {
+                      context.read<DiveDetailsBloc>().add(DiveDetailsEvent.loadDive(nextDive!.id));
+                    }
+                  : null,
+              tooltip: nextDive != null ? 'Dive #${nextDive?.number}' : null,
+            ),
+            if (platformIsDesktop)
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () {
+                  context.goNamed(AppRouteName.divesDetailsEdit, pathParameters: {'diveID': dive.id});
+                },
+                tooltip: 'Edit dive',
+              ),
+            if (platformIsDesktop) _popupMenuActions(context),
+          ],
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const .all(8.0),
+              child: Column(crossAxisAlignment: .stretch, spacing: 8, children: _buildAllSections(context)),
+            ),
           ),
-        if (platformIsDesktop) _popupMenuActions(context),
-      ],
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const .all(8.0),
-          child: Column(crossAxisAlignment: .stretch, spacing: 8, children: _buildAllSections(context)),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -166,7 +159,7 @@ class _DiveDetails extends StatelessWidget {
             isDestructive: true,
           );
           if (confirmed && context.mounted) {
-            context.read<DiveListBloc>().add(DeleteDive(dive.id));
+            context.read<DiveDetailsBloc>().add(DiveDetailsEvent.deleteAndClose(dive.id));
             context.goNamed(AppRouteName.dives);
           }
         }

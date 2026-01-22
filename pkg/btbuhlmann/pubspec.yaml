@@ -1,0 +1,10 @@
+name: btbuhlmann
+description: "Buhlmann ZHL-16C implementation"
+version: 1.0.0
+publish_to: 'none'
+
+environment:
+  sdk: ^3.10.7
+
+dev_dependencies:
+  test: ^1.26.3

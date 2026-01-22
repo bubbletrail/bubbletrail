@@ -1,5 +1,5 @@
-import 'package:buhlmann/buhlmann.dart' as buhlmann;
-import 'package:divestore/divestore.dart';
+import 'package:btbuhlmann/btbuhlmann.dart' as buhlmann;
+import 'package:btstore/btstore.dart';
 
 // Duration after which we consider tissues to be fully off-gassed.
 const tissueResetDuration = Duration(hours: 24);

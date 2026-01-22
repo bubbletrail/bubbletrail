@@ -1,7 +1,7 @@
 import 'dart:ffi' as ffi;
 import 'dart:typed_data';
 
-import 'package:divestore/divestore.dart';
+import 'package:btstore/btstore.dart';
 import 'package:ffi/ffi.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 

@@ -97,10 +97,24 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  btbuhlmann:
+    dependency: "direct main"
+    description:
+      path: "../pkg/btbuhlmann"
+      relative: true
+    source: path
+    version: "1.0.0"
   btsparkle:
     dependency: "direct main"
     description:
       path: "../pkg/btsparkle"
+      relative: true
+    source: path
+    version: "1.0.0"
+  btstore:
+    dependency: "direct main"
+    description:
+      path: "../pkg/btstore"
       relative: true
     source: path
     version: "1.0.0"
@@ -112,13 +126,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.3"
-  buhlmann:
-    dependency: "direct main"
-    description:
-      path: "../pkg/buhlmann"
-      relative: true
-    source: path
-    version: "1.0.0"
   build:
     dependency: transitive
     description:
@@ -367,13 +374,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.3"
-  divestore:
-    dependency: "direct main"
-    description:
-      path: "../pkg/divestore"
-      relative: true
-    source: path
-    version: "1.0.0"
   equatable:
     dependency: "direct main"
     description:

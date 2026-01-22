@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:btstore/btstore.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:divestore/divestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -14,6 +14,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import '../dives_sites/dive_list_bloc.dart';
 import '../providers/storage_provider.dart';
 import 'ble_scan_bloc.dart';
+import 'dc_convert.dart';
 
 part 'ble_download_bloc.g.dart';
 
@@ -218,7 +219,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
       case _DiveReceived(:final dive):
         await _onDiveReceived(emit, dive);
       case _Completed():
-        _onDownloadCompleted(emit);
+        await _onDownloadCompleted(emit);
       case _Failed(:final error):
         emit(state.copyWith(isDownloading: false, error: error).copyWithNull(downloadProgress: true));
       case _Disconnect():
@@ -305,7 +306,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     _log.fine('current fingerprint is $ldcFingerprint and last log date $lastLogDate');
 
     // Remember this computer for future downloads
-    await _store.computers.update(remoteId: device.remoteId.str, advertisedName: device.platformName, vendor: computer.vendor, product: computer.model);
+    await _store.computers.updateFields(remoteId: device.remoteId.str, advertisedName: device.platformName, vendor: computer.vendor, product: computer.model);
 
     // Set up BLE notifications on the RX characteristic
     try {
@@ -332,7 +333,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
         case DownloadDeviceInfo(:final info):
           _log.fine('device info: $info');
           // Remember the device serial
-          _store.computers.update(remoteId: state.connectedDevice!.remoteId.str, serial: info.serial);
+          _store.computers.updateFields(remoteId: state.connectedDevice!.remoteId.str, serial: info.serial);
 
         case DownloadDiveReceived(dive: final log):
           _log.fine('received dive ${log.dateTime.toDateTime()} with fingerprint ${log.ldcFingerprint}');
@@ -363,16 +364,31 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     });
   }
 
-  void _onDownloadCompleted(Emitter<BleDownloadState> emit) {
+  Future<void> _onDownloadCompleted(Emitter<BleDownloadState> emit) async {
     try {
       // Remember the fingerprint & last log date on the downloading computer
       final ll = state.downloadedDives.first.logs.last;
-      _store.computers.update(remoteId: state.connectedDevice!.remoteId.str, ldcFingerprint: ll.ldcFingerprint, lastLogDate: ll.dateTime.toDateTime());
+      await _store.computers.updateFields(
+        remoteId: state.connectedDevice!.remoteId.str,
+        ldcFingerprint: ll.ldcFingerprint,
+        lastLogDate: ll.dateTime.toDateTime(),
+      );
     } on StateError catch (_) {
       // no downloaded dive or no logs in dive
     }
 
-    _diveListBloc.add(DownloadedDives(state.downloadedDives));
+    // Sort dives by time; number them; insert.
+
+    final downloaded = state.downloadedDives;
+    downloaded.sort((a, b) => a.start.seconds.compareTo(b.start.seconds));
+
+    var nextID = await _store.dives.nextDiveNo;
+    for (final d in downloaded) {
+      d.number = nextID;
+      nextID++;
+    }
+
+    await _store.dives.insertAll(downloaded);
 
     // Refresh the remembered computers list in scan bloc
     _scanBloc.add(BleScanEvent.refreshRemembered());

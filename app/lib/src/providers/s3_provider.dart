@@ -1,5 +1,5 @@
 import 'package:chunked_stream/chunked_stream.dart';
-import 'package:divestore/divestore.dart';
+import 'package:btstore/btstore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:minio/minio.dart';
