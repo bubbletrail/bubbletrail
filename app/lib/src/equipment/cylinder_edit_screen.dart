@@ -79,7 +79,7 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
       workingPressurePsi: _isImperialMode ? _workpressurePsi : null,
     );
 
-    context.read<CylinderDetailsBloc>().add(UpdateCylinderDetails(updatedCylinder));
+    context.read<CylinderDetailsBloc>().add(CylinderDetailsEvent.update(updatedCylinder));
 
     return true;
   }

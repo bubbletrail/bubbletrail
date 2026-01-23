@@ -70,21 +70,23 @@ class DiveListLoaded extends DiveListState {
   List<Object?> get props => [dives, sites, tags, buddies];
 }
 
-abstract class DiveListEvent extends Equatable {
+sealed class DiveListEvent extends Equatable {
   const DiveListEvent();
 
   @override
   List<Object?> get props => [];
+
+  const factory DiveListEvent.importDives(String filePath) = _ImportDives;
 }
 
 class _LoadAll extends DiveListEvent {
   const _LoadAll();
 }
 
-class ImportDives extends DiveListEvent {
+class _ImportDives extends DiveListEvent {
   final String filePath;
 
-  const ImportDives(this.filePath);
+  const _ImportDives(this.filePath);
 
   @override
   List<Object?> get props => [filePath];
@@ -97,10 +99,11 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
 
   DiveListBloc() : super(const DiveListInitial()) {
     on<DiveListEvent>((event, emit) async {
-      if (event is _LoadAll) {
-        await _onLoadDives(event, emit);
-      } else if (event is ImportDives) {
-        await _onImportDives(event, emit);
+      switch (event) {
+        case _LoadAll():
+          await _onLoadDives(emit);
+        case _ImportDives():
+          await _onImportDives(event, emit);
       }
     }, transformer: sequential());
 
@@ -116,7 +119,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     });
   }
 
-  Future<void> _onLoadDives(_LoadAll event, Emitter<DiveListState> emit) async {
+  Future<void> _onLoadDives(Emitter<DiveListState> emit) async {
     var dives = await _store.dives.getAll();
     final sites = await _store.sites.getAll();
 
@@ -204,7 +207,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     return dives.map((d) => updatedDives[d.id] ?? d).toList();
   }
 
-  Future<void> _onImportDives(ImportDives event, Emitter<DiveListState> emit) async {
+  Future<void> _onImportDives(_ImportDives event, Emitter<DiveListState> emit) async {
     final currentState = state as DiveListLoaded;
     emit(DiveListLoading());
 

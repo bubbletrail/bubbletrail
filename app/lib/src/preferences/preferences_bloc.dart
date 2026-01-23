@@ -19,130 +19,141 @@ class PreferencesState extends Equatable {
   List<Object?> get props => [preferences];
 }
 
-abstract class PreferencesEvent extends Equatable {
+sealed class PreferencesEvent extends Equatable {
   const PreferencesEvent();
 
   @override
   List<Object?> get props => [];
+
+  const factory PreferencesEvent.updateDepthUnit(DepthUnit depthUnit) = _UpdateDepthUnit;
+  const factory PreferencesEvent.updatePressureUnit(PressureUnit pressureUnit) = _UpdatePressureUnit;
+  const factory PreferencesEvent.updateTemperatureUnit(TemperatureUnit temperatureUnit) = _UpdateTemperatureUnit;
+  const factory PreferencesEvent.updateVolumeUnit(VolumeUnit volumeUnit) = _UpdateVolumeUnit;
+  const factory PreferencesEvent.updateWeightUnit(WeightUnit weightUnit) = _UpdateWeightUnit;
+  const factory PreferencesEvent.updateDateFormat(DateFormatPref dateFormat) = _UpdateDateFormat;
+  const factory PreferencesEvent.updateTimeFormat(TimeFormatPref timeFormat) = _UpdateTimeFormat;
+  const factory PreferencesEvent.updateThemeMode(ThemeMode themeMode) = _UpdateThemeMode;
+  const factory PreferencesEvent.updateSyncProvider(SyncProviderKind syncProvider) = _UpdateSyncProvider;
+  const factory PreferencesEvent.updateS3Config(S3Config s3Config) = _UpdateS3Config;
+  const factory PreferencesEvent.updateGfLow(double gfLow) = _UpdateGfLow;
+  const factory PreferencesEvent.updateGfHigh(double gfHigh) = _UpdateGfHigh;
+  const factory PreferencesEvent.resetDatabase() = _ResetDatabase;
 }
 
-class LoadPreferences extends PreferencesEvent {
-  const LoadPreferences();
+class _LoadPreferences extends PreferencesEvent {
+  const _LoadPreferences();
 }
 
-class UpdateDepthUnit extends PreferencesEvent {
+class _UpdateDepthUnit extends PreferencesEvent {
   final DepthUnit depthUnit;
 
-  const UpdateDepthUnit(this.depthUnit);
+  const _UpdateDepthUnit(this.depthUnit);
 
   @override
   List<Object?> get props => [depthUnit];
 }
 
-class UpdatePressureUnit extends PreferencesEvent {
+class _UpdatePressureUnit extends PreferencesEvent {
   final PressureUnit pressureUnit;
 
-  const UpdatePressureUnit(this.pressureUnit);
+  const _UpdatePressureUnit(this.pressureUnit);
 
   @override
   List<Object?> get props => [pressureUnit];
 }
 
-class UpdateTemperatureUnit extends PreferencesEvent {
+class _UpdateTemperatureUnit extends PreferencesEvent {
   final TemperatureUnit temperatureUnit;
 
-  const UpdateTemperatureUnit(this.temperatureUnit);
+  const _UpdateTemperatureUnit(this.temperatureUnit);
 
   @override
   List<Object?> get props => [temperatureUnit];
 }
 
-class UpdateVolumeUnit extends PreferencesEvent {
+class _UpdateVolumeUnit extends PreferencesEvent {
   final VolumeUnit volumeUnit;
 
-  const UpdateVolumeUnit(this.volumeUnit);
+  const _UpdateVolumeUnit(this.volumeUnit);
 
   @override
   List<Object?> get props => [volumeUnit];
 }
 
-class UpdateWeightUnit extends PreferencesEvent {
+class _UpdateWeightUnit extends PreferencesEvent {
   final WeightUnit weightUnit;
 
-  const UpdateWeightUnit(this.weightUnit);
+  const _UpdateWeightUnit(this.weightUnit);
 
   @override
   List<Object?> get props => [weightUnit];
 }
 
-class UpdateDateFormat extends PreferencesEvent {
+class _UpdateDateFormat extends PreferencesEvent {
   final DateFormatPref dateFormat;
 
-  const UpdateDateFormat(this.dateFormat);
+  const _UpdateDateFormat(this.dateFormat);
 
   @override
   List<Object?> get props => [dateFormat];
 }
 
-class UpdateTimeFormat extends PreferencesEvent {
+class _UpdateTimeFormat extends PreferencesEvent {
   final TimeFormatPref timeFormat;
 
-  const UpdateTimeFormat(this.timeFormat);
+  const _UpdateTimeFormat(this.timeFormat);
 
   @override
   List<Object?> get props => [timeFormat];
 }
 
-class UpdateThemeMode extends PreferencesEvent {
+class _UpdateThemeMode extends PreferencesEvent {
   final ThemeMode themeMode;
 
-  const UpdateThemeMode(this.themeMode);
+  const _UpdateThemeMode(this.themeMode);
 
   @override
   List<Object?> get props => [themeMode];
 }
 
-class UpdateSyncProvider extends PreferencesEvent {
+class _UpdateSyncProvider extends PreferencesEvent {
   final SyncProviderKind syncProvider;
 
-  const UpdateSyncProvider(this.syncProvider);
+  const _UpdateSyncProvider(this.syncProvider);
 
   @override
   List<Object?> get props => [syncProvider];
 }
 
-class UpdateS3Config extends PreferencesEvent {
+class _UpdateS3Config extends PreferencesEvent {
   final S3Config s3Config;
 
-  const UpdateS3Config(this.s3Config);
+  const _UpdateS3Config(this.s3Config);
 
   @override
   List<Object?> get props => [s3Config];
 }
 
-class UpdateGfLow extends PreferencesEvent {
+class _UpdateGfLow extends PreferencesEvent {
   final double gfLow;
 
-  const UpdateGfLow(this.gfLow);
+  const _UpdateGfLow(this.gfLow);
 
   @override
   List<Object?> get props => [gfLow];
 }
 
-class UpdateGfHigh extends PreferencesEvent {
+class _UpdateGfHigh extends PreferencesEvent {
   final double gfHigh;
 
-  const UpdateGfHigh(this.gfHigh);
+  const _UpdateGfHigh(this.gfHigh);
 
   @override
   List<Object?> get props => [gfHigh];
 }
 
-class ResetDatabase extends PreferencesEvent {
-  const ResetDatabase();
-
-  @override
-  List<Object?> get props => [];
+class _ResetDatabase extends PreferencesEvent {
+  const _ResetDatabase();
 }
 
 class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
@@ -151,38 +162,39 @@ class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
 
   PreferencesBloc() : super(const PreferencesState(Preferences())) {
     on<PreferencesEvent>((event, emit) async {
-      if (event is LoadPreferences) {
-        await _onLoad(event, emit);
-      } else if (event is UpdateDepthUnit) {
-        await _onUpdateDepthUnit(event, emit);
-      } else if (event is UpdatePressureUnit) {
-        await _onUpdatePressureUnit(event, emit);
-      } else if (event is UpdateTemperatureUnit) {
-        await _onUpdateTemperatureUnit(event, emit);
-      } else if (event is UpdateVolumeUnit) {
-        await _onUpdateVolumeUnit(event, emit);
-      } else if (event is UpdateWeightUnit) {
-        await _onUpdateWeightUnit(event, emit);
-      } else if (event is UpdateDateFormat) {
-        await _onUpdateDateFormat(event, emit);
-      } else if (event is UpdateTimeFormat) {
-        await _onUpdateTimeFormat(event, emit);
-      } else if (event is UpdateThemeMode) {
-        await _onUpdateThemeMode(event, emit);
-      } else if (event is UpdateSyncProvider) {
-        await _onUpdateSyncProvider(event, emit);
-      } else if (event is UpdateS3Config) {
-        await _onUpdateS3Config(event, emit);
-      } else if (event is UpdateGfLow) {
-        await _onUpdateGfLow(event, emit);
-      } else if (event is UpdateGfHigh) {
-        await _onUpdateGfHigh(event, emit);
-      } else if (event is ResetDatabase) {
-        await _onResetDatabase(emit);
+      switch (event) {
+        case _LoadPreferences():
+          await _onLoad(emit);
+        case _UpdateDepthUnit():
+          await _onUpdateDepthUnit(event, emit);
+        case _UpdatePressureUnit():
+          await _onUpdatePressureUnit(event, emit);
+        case _UpdateTemperatureUnit():
+          await _onUpdateTemperatureUnit(event, emit);
+        case _UpdateVolumeUnit():
+          await _onUpdateVolumeUnit(event, emit);
+        case _UpdateWeightUnit():
+          await _onUpdateWeightUnit(event, emit);
+        case _UpdateDateFormat():
+          await _onUpdateDateFormat(event, emit);
+        case _UpdateTimeFormat():
+          await _onUpdateTimeFormat(event, emit);
+        case _UpdateThemeMode():
+          await _onUpdateThemeMode(event, emit);
+        case _UpdateSyncProvider():
+          await _onUpdateSyncProvider(event, emit);
+        case _UpdateS3Config():
+          await _onUpdateS3Config(event, emit);
+        case _UpdateGfLow():
+          await _onUpdateGfLow(event, emit);
+        case _UpdateGfHigh():
+          await _onUpdateGfHigh(event, emit);
+        case _ResetDatabase():
+          await _onResetDatabase(emit);
       }
     }, transformer: sequential());
 
-    add(const LoadPreferences());
+    add(const _LoadPreferences());
   }
 
   void _scheduleSave() {
@@ -190,89 +202,89 @@ class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
     _saveTimer = Timer(Duration(seconds: 5), () => _storage.save(state.preferences));
   }
 
-  Future<void> _onLoad(LoadPreferences event, Emitter<PreferencesState> emit) async {
+  Future<void> _onLoad(Emitter<PreferencesState> emit) async {
     final preferences = await _storage.load();
     emit(PreferencesState(preferences));
   }
 
-  Future<void> _onUpdateDepthUnit(UpdateDepthUnit event, Emitter<PreferencesState> emit) async {
+  Future<void> _onUpdateDepthUnit(_UpdateDepthUnit event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(depthUnit: event.depthUnit);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
-  Future<void> _onUpdatePressureUnit(UpdatePressureUnit event, Emitter<PreferencesState> emit) async {
+  Future<void> _onUpdatePressureUnit(_UpdatePressureUnit event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(pressureUnit: event.pressureUnit);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
-  Future<void> _onUpdateTemperatureUnit(UpdateTemperatureUnit event, Emitter<PreferencesState> emit) async {
+  Future<void> _onUpdateTemperatureUnit(_UpdateTemperatureUnit event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(temperatureUnit: event.temperatureUnit);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
-  Future<void> _onUpdateVolumeUnit(UpdateVolumeUnit event, Emitter<PreferencesState> emit) async {
+  Future<void> _onUpdateVolumeUnit(_UpdateVolumeUnit event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(volumeUnit: event.volumeUnit);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
-  Future<void> _onUpdateWeightUnit(UpdateWeightUnit event, Emitter<PreferencesState> emit) async {
+  Future<void> _onUpdateWeightUnit(_UpdateWeightUnit event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(weightUnit: event.weightUnit);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
-  Future<void> _onUpdateDateFormat(UpdateDateFormat event, Emitter<PreferencesState> emit) async {
+  Future<void> _onUpdateDateFormat(_UpdateDateFormat event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(dateFormat: event.dateFormat);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
-  Future<void> _onUpdateTimeFormat(UpdateTimeFormat event, Emitter<PreferencesState> emit) async {
+  Future<void> _onUpdateTimeFormat(_UpdateTimeFormat event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(timeFormat: event.timeFormat);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
-  Future<void> _onUpdateThemeMode(UpdateThemeMode event, Emitter<PreferencesState> emit) async {
+  Future<void> _onUpdateThemeMode(_UpdateThemeMode event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(themeMode: event.themeMode);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
-  Future<void> _onUpdateSyncProvider(UpdateSyncProvider event, Emitter<PreferencesState> emit) async {
+  Future<void> _onUpdateSyncProvider(_UpdateSyncProvider event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(syncProvider: event.syncProvider);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
-  Future<void> _onUpdateS3Config(UpdateS3Config event, Emitter<PreferencesState> emit) async {
+  Future<void> _onUpdateS3Config(_UpdateS3Config event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(s3Config: event.s3Config);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
-  Future<void> _onUpdateGfLow(UpdateGfLow event, Emitter<PreferencesState> emit) async {
+  Future<void> _onUpdateGfLow(_UpdateGfLow event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(gfLow: event.gfLow, gfHigh: max(state.preferences.gfHigh, event.gfLow));
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
-  Future<void> _onUpdateGfHigh(UpdateGfHigh event, Emitter<PreferencesState> emit) async {
+  Future<void> _onUpdateGfHigh(_UpdateGfHigh event, Emitter<PreferencesState> emit) async {
     final current = state.preferences;
     final updated = current.copyWith(gfHigh: event.gfHigh, gfLow: min(state.preferences.gfLow, event.gfHigh));
     emit(PreferencesState(updated));

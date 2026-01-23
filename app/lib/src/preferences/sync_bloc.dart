@@ -10,6 +10,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'preferences.dart';
 import '../providers/s3_provider.dart';
 import '../providers/storage_provider.dart';
+import 'preferences_bloc.dart';
 
 final _log = Logger('sync_bloc.dart');
 
@@ -29,58 +30,75 @@ class SyncState extends Equatable {
   List<Object?> get props => [lastSynced, syncing, error, lastSyncSuccess];
 }
 
-class SyncEvent {
+sealed class SyncEvent extends Equatable {
   const SyncEvent();
+
+  @override
+  List<Object?> get props => [];
+
+  const factory SyncEvent.startSyncing() = _StartSyncing;
 }
 
 class _InitStore extends SyncEvent {
   const _InitStore();
 }
 
-class StartSyncing extends SyncEvent {
-  const StartSyncing();
+class _StartSyncing extends SyncEvent {
+  const _StartSyncing();
 }
 
-class UpdateSyncConfig extends SyncEvent {
+class _UpdateSyncConfig extends SyncEvent {
   final SyncProviderKind provider;
   final S3Config s3Config;
 
-  const UpdateSyncConfig({required this.provider, required this.s3Config});
+  const _UpdateSyncConfig({required this.provider, required this.s3Config});
+
+  @override
+  List<Object?> get props => [provider, s3Config];
 }
 
 class SyncBloc extends Bloc<SyncEvent, SyncState> {
   SyncProvider? _syncProvider;
   S3Config? _syncConfig;
   Timer? _syncDebounceTimer;
+  StreamSubscription? _preferencesSub;
 
-  SyncBloc() : super(SyncState()) {
+  SyncBloc(PreferencesBloc preferencesBloc) : super(SyncState()) {
     on<SyncEvent>((event, emit) async {
-      if (event is _InitStore) {
-        await _onInitStore(event, emit);
-      } else if (event is UpdateSyncConfig) {
-        if (event.provider == .none) return;
-        if (!event.s3Config.isConfigured) return;
-        await _onUpdateConfig(event);
-      } else if (event is StartSyncing) {
-        await _onStartSyncing(event, emit);
+      switch (event) {
+        case _InitStore():
+          await _onInitStore(emit);
+        case _UpdateSyncConfig():
+          if (event.provider == .none) return;
+          if (!event.s3Config.isConfigured) return;
+          await _onUpdateConfig(event);
+        case _StartSyncing():
+          await _onStartSyncing(emit);
       }
     }, transformer: sequential());
 
+    _preferencesSub = preferencesBloc.stream.listen(_newPreferencesState);
+    _newPreferencesState(preferencesBloc.state);
     add(const _InitStore());
+    add(const _StartSyncing());
   }
 
-  Future<void> _onInitStore(_InitStore event, Emitter<SyncState> emit) async {
+  void _newPreferencesState(PreferencesState state) {
+    final prefs = state.preferences;
+    add(_UpdateSyncConfig(provider: prefs.syncProvider, s3Config: prefs.s3Config));
+  }
+
+  Future<void> _onInitStore(Emitter<SyncState> emit) async {
     _log.fine('init');
+
     final store = await StorageProvider.store;
     store.changes.listen((_) {
       _syncDebounceTimer?.cancel();
-      _syncDebounceTimer = Timer(Duration(seconds: 60), () => add(StartSyncing()));
+      _syncDebounceTimer = Timer(Duration(seconds: 60), () => add(SyncEvent.startSyncing()));
     });
-
-    add(StartSyncing());
   }
 
-  Future<void> _onUpdateConfig(UpdateSyncConfig event) async {
+  Future<void> _onUpdateConfig(_UpdateSyncConfig event) async {
     if (_syncConfig == event.s3Config) return;
     _log.fine('init sync provider');
     final provider = S3SyncProvider(
@@ -95,7 +113,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     _syncConfig = event.s3Config;
   }
 
-  Future<void> _onStartSyncing(StartSyncing event, Emitter<SyncState> emit) async {
+  Future<void> _onStartSyncing(Emitter<SyncState> emit) async {
     if (_syncProvider == null) {
       _log.info('syncing not configured, skipping sync');
       emit(state.copyWith(error: 'Syncing not configured', lastSyncSuccess: false));
@@ -119,5 +137,11 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     } finally {
       await WakelockPlus.disable();
     }
+  }
+
+  @override
+  Future<void> close() {
+    _preferencesSub?.cancel();
+    return super.close();
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:btstore/btstore.dart';
 import 'package:equatable/equatable.dart';
@@ -48,34 +49,68 @@ class ArchiveState extends Equatable {
   List<Object?> get props => [working, error, exportReadyPath, exportReadyFilename, exportComplete, importComplete];
 }
 
-sealed class ArchiveEvent {}
+sealed class ArchiveEvent extends Equatable {
+  const ArchiveEvent();
 
-class ExportArchive extends ArchiveEvent {}
+  @override
+  List<Object?> get props => [];
 
-class ExportComplete extends ArchiveEvent {
+  const factory ArchiveEvent.exportArchive() = _ExportArchive;
+  const factory ArchiveEvent.exportComplete(String destinationPath) = _ExportComplete;
+  const factory ArchiveEvent.exportCancelled() = _ExportCancelled;
+  const factory ArchiveEvent.importArchive(String zipPath) = _ImportArchive;
+  const factory ArchiveEvent.exportSsrf() = _ExportSsrf;
+}
+
+class _ExportArchive extends ArchiveEvent {
+  const _ExportArchive();
+}
+
+class _ExportComplete extends ArchiveEvent {
   final String destinationPath;
-  ExportComplete(this.destinationPath);
+
+  const _ExportComplete(this.destinationPath);
+
+  @override
+  List<Object?> get props => [destinationPath];
 }
 
-class ExportCancelled extends ArchiveEvent {}
+class _ExportCancelled extends ArchiveEvent {
+  const _ExportCancelled();
+}
 
-class ImportArchive extends ArchiveEvent {
+class _ImportArchive extends ArchiveEvent {
   final String zipPath;
-  ImportArchive(this.zipPath);
+
+  const _ImportArchive(this.zipPath);
+
+  @override
+  List<Object?> get props => [zipPath];
 }
 
-class ExportSsrf extends ArchiveEvent {}
+class _ExportSsrf extends ArchiveEvent {
+  const _ExportSsrf();
+}
 
 class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
   ArchiveBloc() : super(const ArchiveState()) {
-    on<ExportArchive>(_onExport);
-    on<ExportComplete>(_onExportComplete);
-    on<ExportCancelled>(_onExportCancelled);
-    on<ImportArchive>(_onImport);
-    on<ExportSsrf>(_onExportSsrf);
+    on<ArchiveEvent>((event, emit) async {
+      switch (event) {
+        case _ExportArchive():
+          await _onExport(emit);
+        case _ExportComplete():
+          await _onExportComplete(event, emit);
+        case _ExportCancelled():
+          await _onExportCancelled(emit);
+        case _ImportArchive():
+          await _onImport(event, emit);
+        case _ExportSsrf():
+          await _onExportSsrf(emit);
+      }
+    }, transformer: sequential());
   }
 
-  Future<void> _onExport(ExportArchive event, Emitter<ArchiveState> emit) async {
+  Future<void> _onExport(Emitter<ArchiveState> emit) async {
     emit(state.copyWith(working: true, error: null));
     try {
       final store = await StorageProvider.store;
@@ -94,7 +129,7 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
     }
   }
 
-  Future<void> _onExportComplete(ExportComplete event, Emitter<ArchiveState> emit) async {
+  Future<void> _onExportComplete(_ExportComplete event, Emitter<ArchiveState> emit) async {
     final exportPath = state.exportReadyPath;
     if (exportPath == null) return;
 
@@ -109,7 +144,7 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
     }
   }
 
-  Future<void> _onExportCancelled(ExportCancelled event, Emitter<ArchiveState> emit) async {
+  Future<void> _onExportCancelled(Emitter<ArchiveState> emit) async {
     final exportPath = state.exportReadyPath;
     if (exportPath != null) {
       try {
@@ -119,7 +154,7 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
     emit(const ArchiveState());
   }
 
-  Future<void> _onImport(ImportArchive event, Emitter<ArchiveState> emit) async {
+  Future<void> _onImport(_ImportArchive event, Emitter<ArchiveState> emit) async {
     emit(state.copyWith(working: true, error: null));
     try {
       final store = await StorageProvider.store;
@@ -137,7 +172,7 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
     }
   }
 
-  Future<void> _onExportSsrf(ExportSsrf event, Emitter<ArchiveState> emit) async {
+  Future<void> _onExportSsrf(Emitter<ArchiveState> emit) async {
     emit(state.copyWith(working: true, error: null));
     try {
       final store = await StorageProvider.store;

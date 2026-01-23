@@ -1,3 +1,4 @@
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:btstore/btstore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -43,33 +44,34 @@ class CylinderDetailsError extends CylinderDetailsState with DetailsErrorMixin {
   List<Object?> get props => [errorMessage];
 }
 
-abstract class CylinderDetailsEvent extends Equatable {
+sealed class CylinderDetailsEvent extends Equatable {
   const CylinderDetailsEvent();
 
   @override
   List<Object?> get props => [];
+
+  const factory CylinderDetailsEvent.load(String cylinderId) = _LoadCylinderDetails;
+  const factory CylinderDetailsEvent.newCylinder() = _NewCylinder;
+  const factory CylinderDetailsEvent.update(Cylinder cylinder) = _UpdateCylinderDetails;
 }
 
-class LoadCylinderDetails extends CylinderDetailsEvent {
+class _LoadCylinderDetails extends CylinderDetailsEvent {
   final String cylinderId;
 
-  const LoadCylinderDetails(this.cylinderId);
+  const _LoadCylinderDetails(this.cylinderId);
 
   @override
   List<Object?> get props => [cylinderId];
 }
 
-class NewCylinderEvent extends CylinderDetailsEvent {
-  const NewCylinderEvent();
-
-  @override
-  List<Object?> get props => [];
+class _NewCylinder extends CylinderDetailsEvent {
+  const _NewCylinder();
 }
 
-class UpdateCylinderDetails extends CylinderDetailsEvent {
+class _UpdateCylinderDetails extends CylinderDetailsEvent {
   final Cylinder cylinder;
 
-  const UpdateCylinderDetails(this.cylinder);
+  const _UpdateCylinderDetails(this.cylinder);
 
   @override
   List<Object?> get props => [cylinder];
@@ -77,12 +79,19 @@ class UpdateCylinderDetails extends CylinderDetailsEvent {
 
 class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsState> {
   CylinderDetailsBloc() : super(const CylinderDetailsInitial()) {
-    on<LoadCylinderDetails>(_onLoadCylinderDetails);
-    on<UpdateCylinderDetails>(_onUpdateCylinderDetails);
-    on<NewCylinderEvent>(_onNewCylinder);
+    on<CylinderDetailsEvent>((event, emit) async {
+      switch (event) {
+        case _LoadCylinderDetails():
+          await _onLoadCylinderDetails(event, emit);
+        case _NewCylinder():
+          emit(CylinderDetailsLoaded(Cylinder(), true));
+        case _UpdateCylinderDetails():
+          await _onUpdateCylinderDetails(event, emit);
+      }
+    }, transformer: sequential());
   }
 
-  Future<void> _onLoadCylinderDetails(LoadCylinderDetails event, Emitter<CylinderDetailsState> emit) async {
+  Future<void> _onLoadCylinderDetails(_LoadCylinderDetails event, Emitter<CylinderDetailsState> emit) async {
     try {
       final store = await StorageProvider.store;
       final cylinder = await store.cylinders.getById(event.cylinderId);
@@ -97,18 +106,14 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
     }
   }
 
-  Future<void> _onUpdateCylinderDetails(UpdateCylinderDetails event, Emitter<CylinderDetailsState> emit) async {
+  Future<void> _onUpdateCylinderDetails(_UpdateCylinderDetails event, Emitter<CylinderDetailsState> emit) async {
     try {
       final store = await StorageProvider.store;
       await store.cylinders.update(event.cylinder);
-      add(LoadCylinderDetails(event.cylinder.id));
+      add(_LoadCylinderDetails(event.cylinder.id));
     } catch (e) {
       _log.warning('failed to update cylinder', e);
       emit(CylinderDetailsError('Failed to update cylinder: $e'));
     }
-  }
-
-  Future<void> _onNewCylinder(NewCylinderEvent event, Emitter<CylinderDetailsState> emit) async {
-    emit(CylinderDetailsLoaded(Cylinder(), true));
   }
 }
