@@ -321,11 +321,13 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
 
     // Start the download and process events
     final dir = await getApplicationSupportDirectory();
-    final sub = startDownload(ble: ble, computer: computer, fifoDirectory: dir.path, ldcFingerprint: ldcFingerprint, lastLogDate: lastLogDate).listen((event) {
+    final sub = startDownload(ble: ble, computer: computer, fifoDirectory: dir.path, ldcFingerprint: ldcFingerprint, lastLogDate: lastLogDate).listen((
+      event,
+    ) async {
       switch (event) {
         case DownloadStarted():
           _log.info('download started');
-          WakelockPlus.enable();
+          await WakelockPlus.enable();
 
         case DownloadProgressEvent(:final progress):
           add(_Progress(progress));
@@ -333,7 +335,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
         case DownloadDeviceInfo(:final info):
           _log.fine('device info: $info');
           // Remember the device serial
-          _store.computers.updateFields(remoteId: state.connectedDevice!.remoteId.str, serial: info.serial);
+          await _store.computers.updateFields(remoteId: state.connectedDevice!.remoteId.str, serial: info.serial);
 
         case DownloadDiveReceived(dive: final log):
           _log.fine('received dive ${log.dateTime.toDateTime()} with fingerprint ${log.ldcFingerprint}');
@@ -343,12 +345,12 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
         case DownloadCompleted():
           _log.info('download completed');
           add(const _Completed());
-          WakelockPlus.disable();
+          await WakelockPlus.disable();
 
         case DownloadError(:final message):
           _log.warning('download error: $message');
           add(_Failed(message));
-          WakelockPlus.disable();
+          await WakelockPlus.disable();
 
         case DownloadWaiting():
           _log.info('waiting for user action on device');
