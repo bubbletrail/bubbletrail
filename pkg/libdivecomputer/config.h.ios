@@ -43,7 +43,7 @@
 #define HAVE_INTTYPES_H 1
 
 /* Define to 1 if you have the <IOKit/serial/ioss.h> header file. */
-#define HAVE_IOKIT_SERIAL_IOSS_H 1
+/* #undef HAVE_IOKIT_SERIAL_IOSS_H */
 
 /* libusb library */
 /* #undef HAVE_LIBUSB */
