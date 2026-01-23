@@ -118,7 +118,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   Future<void> _onStartSyncing(Emitter<SyncState> emit) async {
     if (_syncProvider == null) {
       _log.info('syncing not configured, skipping sync');
-      emit(state.copyWith(error: 'Syncing not configured', lastSyncSuccess: false));
       return;
     }
 
