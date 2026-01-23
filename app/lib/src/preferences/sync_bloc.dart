@@ -7,10 +7,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-import 'preferences.dart';
 import '../providers/s3_provider.dart';
 import '../providers/storage_provider.dart';
-import 'preferences_bloc.dart';
+import 'preferences.dart';
+import 'preferences_storage.dart';
 
 final _log = Logger('sync_bloc.dart');
 
@@ -63,7 +63,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   Timer? _syncDebounceTimer;
   StreamSubscription? _preferencesSub;
 
-  SyncBloc(PreferencesBloc preferencesBloc) : super(SyncState()) {
+  SyncBloc() : super(SyncState()) {
     on<SyncEvent>((event, emit) async {
       switch (event) {
         case _InitStore():
@@ -77,14 +77,10 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       }
     }, transformer: sequential());
 
-    _preferencesSub = preferencesBloc.stream.listen(_newPreferencesState);
-    _newPreferencesState(preferencesBloc.state);
     add(const _InitStore());
-    add(const _StartSyncing());
   }
 
-  void _newPreferencesState(PreferencesState state) {
-    final prefs = state.preferences;
+  void _newPreferences(Preferences prefs) {
     add(_UpdateSyncConfig(provider: prefs.syncProvider, s3Config: prefs.s3Config));
   }
 
@@ -96,6 +92,12 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       _syncDebounceTimer?.cancel();
       _syncDebounceTimer = Timer(Duration(seconds: 60), () => add(SyncEvent.startSyncing()));
     });
+
+    _preferencesSub = PreferencesStorage.changes.listen(_newPreferences);
+    final preferences = await PreferencesStorage.load();
+    _newPreferences(preferences);
+
+    add(const _StartSyncing());
   }
 
   Future<void> _onUpdateConfig(_UpdateSyncConfig event) async {

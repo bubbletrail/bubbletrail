@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -22,51 +24,65 @@ class PreferencesStorage {
   static const _gfLowKey = 'gf_low';
   static const _gfHighKey = 'gf_high';
 
-  Future<Preferences> load() async {
-    final prefs = await SharedPreferences.getInstance();
+  static final _changes = StreamController<Preferences>.broadcast();
+  static var _current = Preferences();
+  static Stream<Preferences> get changes => _changes.stream;
 
-    return Preferences(
-      depthUnit: DepthUnit.values[prefs.getInt(_depthUnitKey) ?? 0],
-      pressureUnit: PressureUnit.values[prefs.getInt(_pressureUnitKey) ?? 0],
-      temperatureUnit: TemperatureUnit.values[prefs.getInt(_temperatureUnitKey) ?? 0],
-      volumeUnit: VolumeUnit.values[prefs.getInt(_volumeUnitKey) ?? 0],
-      weightUnit: WeightUnit.values[prefs.getInt(_weightUnitKey) ?? 0],
-      dateFormat: DateFormatPref.values[prefs.getInt(_dateFormatKey) ?? 0],
-      timeFormat: TimeFormatPref.values[prefs.getInt(_timeFormatKey) ?? 0],
-      themeMode: ThemeMode.values[prefs.getInt(_themeModeKey) ?? 0],
-      syncProvider: SyncProviderKind.values[prefs.getInt(_syncProviderKey) ?? 0],
+  static Future<Preferences> load() async {
+    final sp = await SharedPreferences.getInstance();
+    final prefs = Preferences(
+      depthUnit: DepthUnit.values[sp.getInt(_depthUnitKey) ?? 0],
+      pressureUnit: PressureUnit.values[sp.getInt(_pressureUnitKey) ?? 0],
+      temperatureUnit: TemperatureUnit.values[sp.getInt(_temperatureUnitKey) ?? 0],
+      volumeUnit: VolumeUnit.values[sp.getInt(_volumeUnitKey) ?? 0],
+      weightUnit: WeightUnit.values[sp.getInt(_weightUnitKey) ?? 0],
+      dateFormat: DateFormatPref.values[sp.getInt(_dateFormatKey) ?? 0],
+      timeFormat: TimeFormatPref.values[sp.getInt(_timeFormatKey) ?? 0],
+      themeMode: ThemeMode.values[sp.getInt(_themeModeKey) ?? 0],
+      syncProvider: SyncProviderKind.values[sp.getInt(_syncProviderKey) ?? 0],
       s3Config: S3Config(
-        endpoint: prefs.getString(_s3EndpointKey) ?? '',
-        bucket: prefs.getString(_s3BucketKey) ?? '',
-        accessKey: prefs.getString(_s3AccessKeyKey) ?? '',
-        secretKey: prefs.getString(_s3SecretKeyKey) ?? '',
-        region: prefs.getString(_s3RegionKey) ?? 'us-east-1',
-        vaultKey: prefs.getString(_s3VaultKey) ?? '',
+        endpoint: sp.getString(_s3EndpointKey) ?? '',
+        bucket: sp.getString(_s3BucketKey) ?? '',
+        accessKey: sp.getString(_s3AccessKeyKey) ?? '',
+        secretKey: sp.getString(_s3SecretKeyKey) ?? '',
+        region: sp.getString(_s3RegionKey) ?? 'us-east-1',
+        vaultKey: sp.getString(_s3VaultKey) ?? '',
       ),
-      gfLow: prefs.getDouble(_gfLowKey) ?? 0.5,
-      gfHigh: prefs.getDouble(_gfHighKey) ?? 0.7,
+      gfLow: sp.getDouble(_gfLowKey) ?? 0.5,
+      gfHigh: sp.getDouble(_gfHighKey) ?? 0.7,
     );
+
+    if (prefs != _current) {
+      _changes.add(prefs);
+      _current = prefs;
+    }
+    return prefs;
   }
 
-  Future<void> save(Preferences preferences) async {
-    final prefs = await SharedPreferences.getInstance();
+  static Future<void> save(Preferences prefs) async {
+    final sp = await SharedPreferences.getInstance();
 
-    await prefs.setInt(_depthUnitKey, preferences.depthUnit.index);
-    await prefs.setInt(_pressureUnitKey, preferences.pressureUnit.index);
-    await prefs.setInt(_temperatureUnitKey, preferences.temperatureUnit.index);
-    await prefs.setInt(_volumeUnitKey, preferences.volumeUnit.index);
-    await prefs.setInt(_weightUnitKey, preferences.weightUnit.index);
-    await prefs.setInt(_dateFormatKey, preferences.dateFormat.index);
-    await prefs.setInt(_timeFormatKey, preferences.timeFormat.index);
-    await prefs.setInt(_themeModeKey, preferences.themeMode.index);
-    await prefs.setInt(_syncProviderKey, preferences.syncProvider.index);
-    await prefs.setString(_s3EndpointKey, preferences.s3Config.endpoint);
-    await prefs.setString(_s3BucketKey, preferences.s3Config.bucket);
-    await prefs.setString(_s3AccessKeyKey, preferences.s3Config.accessKey);
-    await prefs.setString(_s3SecretKeyKey, preferences.s3Config.secretKey);
-    await prefs.setString(_s3RegionKey, preferences.s3Config.region);
-    await prefs.setString(_s3VaultKey, preferences.s3Config.vaultKey);
-    await prefs.setDouble(_gfLowKey, preferences.gfLow);
-    await prefs.setDouble(_gfHighKey, preferences.gfHigh);
+    await sp.setInt(_depthUnitKey, prefs.depthUnit.index);
+    await sp.setInt(_pressureUnitKey, prefs.pressureUnit.index);
+    await sp.setInt(_temperatureUnitKey, prefs.temperatureUnit.index);
+    await sp.setInt(_volumeUnitKey, prefs.volumeUnit.index);
+    await sp.setInt(_weightUnitKey, prefs.weightUnit.index);
+    await sp.setInt(_dateFormatKey, prefs.dateFormat.index);
+    await sp.setInt(_timeFormatKey, prefs.timeFormat.index);
+    await sp.setInt(_themeModeKey, prefs.themeMode.index);
+    await sp.setInt(_syncProviderKey, prefs.syncProvider.index);
+    await sp.setString(_s3EndpointKey, prefs.s3Config.endpoint);
+    await sp.setString(_s3BucketKey, prefs.s3Config.bucket);
+    await sp.setString(_s3AccessKeyKey, prefs.s3Config.accessKey);
+    await sp.setString(_s3SecretKeyKey, prefs.s3Config.secretKey);
+    await sp.setString(_s3RegionKey, prefs.s3Config.region);
+    await sp.setString(_s3VaultKey, prefs.s3Config.vaultKey);
+    await sp.setDouble(_gfLowKey, prefs.gfLow);
+    await sp.setDouble(_gfHighKey, prefs.gfHigh);
+
+    if (prefs != _current) {
+      _changes.add(prefs);
+      _current = prefs;
+    }
   }
 }

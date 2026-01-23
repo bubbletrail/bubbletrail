@@ -157,7 +157,6 @@ class _ResetDatabase extends PreferencesEvent {
 }
 
 class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
-  final PreferencesStorage _storage = PreferencesStorage();
   Timer? _saveTimer;
 
   PreferencesBloc() : super(const PreferencesState(Preferences())) {
@@ -199,11 +198,11 @@ class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
 
   void _scheduleSave() {
     _saveTimer?.cancel();
-    _saveTimer = Timer(Duration(seconds: 5), () => _storage.save(state.preferences));
+    _saveTimer = Timer(Duration(seconds: 1), () async => await PreferencesStorage.save(state.preferences));
   }
 
   Future<void> _onLoad(Emitter<PreferencesState> emit) async {
-    final preferences = await _storage.load();
+    final preferences = await PreferencesStorage.load();
     emit(PreferencesState(preferences));
   }
 
