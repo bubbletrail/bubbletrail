@@ -11,7 +11,6 @@ import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-import '../dives_sites/dive_list_bloc.dart';
 import '../providers/storage_provider.dart';
 import 'ble_scan_bloc.dart';
 import 'dc_convert.dart';
@@ -169,30 +168,29 @@ class BleDownloadState extends Equatable {
   ];
 }
 
-// Bloc
 class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
-  final DiveListBloc _diveListBloc;
   final BleScanBloc _scanBloc;
   late final Store _store;
   StreamSubscription<BluetoothConnectionState>? _connectionSubscription;
-  StreamSubscription<DiveListState>? _diveListSubscription;
+  StreamSubscription? _storeSubscription;
 
-  BleDownloadBloc(this._diveListBloc, this._scanBloc) : super(const BleDownloadState()) {
+  BleDownloadBloc(this._scanBloc) : super(const BleDownloadState()) {
     _log.fine('starting');
 
     on<BleDownloadEvent>(_onEvent, transformer: sequential());
 
-    StorageProvider.store.then((store) {
+    StorageProvider.store.then((store) async {
       _store = store;
+      await _processDiveListState();
+      _storeSubscription = _store.changes.listen((_) async {
+        await _processDiveListState();
+      });
     });
-
-    _processDiveListState(_diveListBloc.state);
-    _diveListSubscription = _diveListBloc.stream.listen(_processDiveListState);
   }
 
-  void _processDiveListState(DiveListState state) {
-    if (state is! DiveListLoaded) return;
-    final lastLogTime = state.dives.fold(DateTime.fromMillisecondsSinceEpoch(0), (dt, dive) {
+  Future<void> _processDiveListState() async {
+    final dives = await _store.dives.getAll();
+    final lastLogTime = dives.fold(DateTime.fromMillisecondsSinceEpoch(0), (dt, dive) {
       final diveT = dive.start.toDateTime();
       if (diveT.isAfter(dt)) return diveT;
       return dt;
@@ -203,6 +201,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
   Future<void> _onEvent(BleDownloadEvent event, Emitter<BleDownloadState> emit) async {
     switch (event) {
       case _NewLastLogDate(:final lastLogDate):
+        _log.fine('last log date is $lastLogDate');
         emit(state.copyWith(lastLogDate: lastLogDate));
       case _ConnectToDevice(:final device):
         await _onConnectToDevice(device, null, emit);
@@ -412,7 +411,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
   @override
   Future<void> close() {
     _connectionSubscription?.cancel();
-    _diveListSubscription?.cancel();
+    _storeSubscription?.cancel();
     return super.close();
   }
 }

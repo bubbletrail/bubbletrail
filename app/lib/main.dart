@@ -96,7 +96,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
     _diveListBloc = DiveListBloc();
     _cylinderListBloc = CylinderListBloc();
     _bleScanBloc = BleScanBloc();
-    _bleDownloadBloc = BleDownloadBloc(_diveListBloc, _bleScanBloc);
+    _bleDownloadBloc = BleDownloadBloc(_bleScanBloc);
     _setupFileHandler();
     if (WindowPreferences.isSupported) {
       windowManager.addListener(this);
