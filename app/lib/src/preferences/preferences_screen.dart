@@ -90,10 +90,11 @@ class PreferencesScreen extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          OutlinedButton(
+                          OutlinedButton.icon(
                             onPressed: () => _resetDatabase(context),
                             style: OutlinedButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
-                            child: Text('Reset database'),
+                            icon: Icon(Icons.delete_forever_outlined),
+                            label: Text('Reset database'),
                           ),
                         ],
                       ),
