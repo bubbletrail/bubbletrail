@@ -91,7 +91,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
   @override
   void initState() {
     super.initState();
-    _syncBloc = SyncBloc();
+    _syncBloc = SyncBloc(_preferencesBloc);
     _archiveBloc = ArchiveBloc();
     _diveListBloc = DiveListBloc();
     _cylinderListBloc = CylinderListBloc();
@@ -289,7 +289,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           path: AppRoutePath.cylindersNew,
                           name: AppRouteName.cylindersNew,
                           builder: (context, state) => BlocProvider(
-                            create: (context) => CylinderDetailsBloc()..add(const NewCylinderEvent()),
+                            create: (context) => CylinderDetailsBloc()..add(const CylinderDetailsEvent.newCylinder()),
                             child: DetailsAvailable<CylinderDetailsBloc, CylinderDetailsState>(child: CylinderEditScreen()),
                           ),
                         ),
@@ -297,7 +297,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           path: AppRoutePath.cylindersDetails,
                           name: AppRouteName.cylindersDetails,
                           builder: (context, state) => BlocProvider(
-                            create: (context) => CylinderDetailsBloc()..add(LoadCylinderDetails(state.pathParameters['cylinderID']!)),
+                            create: (context) => CylinderDetailsBloc()..add(CylinderDetailsEvent.load(state.pathParameters['cylinderID']!)),
                             child: DetailsAvailable<CylinderDetailsBloc, CylinderDetailsState>(child: CylinderEditScreen()),
                           ),
                         ),
@@ -356,7 +356,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
     _channel.setMethodCallHandler((call) async {
       if (call.method == 'fileReceived') {
         final filePath = call.arguments as String;
-        _diveListBloc.add(ImportDives(filePath));
+        _diveListBloc.add(DiveListEvent.importDives(filePath));
       }
     });
 
@@ -364,7 +364,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
         .invokeMethod<String>('getInitialFile')
         .then((filePath) {
           if (filePath != null) {
-            _diveListBloc.add(ImportDives(filePath));
+            _diveListBloc.add(DiveListEvent.importDives(filePath));
           }
         })
         .onError((_, _) {
@@ -384,25 +384,19 @@ class _MyAppState extends State<MyApp> with WindowListener {
         BlocProvider.value(value: _bleScanBloc),
         BlocProvider.value(value: _bleDownloadBloc),
       ],
-      child: BlocListener<PreferencesBloc, PreferencesState>(
-        listener: (context, state) {
-          // Update sync config when preferences change
-          context.read<SyncBloc>().add(UpdateSyncConfig(provider: state.preferences.syncProvider, s3Config: state.preferences.s3Config));
+      child: BlocBuilder<PreferencesBloc, PreferencesState>(
+        builder: (context, state) {
+          final themeMode = state.preferences.themeMode;
+          return MaterialApp.router(
+            title: 'Bubbletrail',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeMode,
+            debugShowCheckedModeBanner: false,
+            routerConfig: _router,
+            localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
+          );
         },
-        child: BlocBuilder<PreferencesBloc, PreferencesState>(
-          builder: (context, state) {
-            final themeMode = state.preferences.themeMode;
-            return MaterialApp.router(
-              title: 'Bubbletrail',
-              theme: AppTheme.lightTheme,
-              darkTheme: AppTheme.darkTheme,
-              themeMode: themeMode,
-              debugShowCheckedModeBanner: false,
-              routerConfig: _router,
-              localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
-            );
-          },
-        ),
       ),
     );
   }

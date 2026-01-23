@@ -22,9 +22,9 @@ class DivePreferencesScreen extends StatelessWidget {
               const SizedBox(height: 8),
               Text('Gradient factors adjust the conservatism of the Buhlmann decompression algorithm.', style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(height: 16),
-              _GfSlider(label: 'GF Low', value: prefs.gfLow, onChanged: (value) => context.read<PreferencesBloc>().add(UpdateGfLow(value))),
+              _GfSlider(label: 'GF Low', value: prefs.gfLow, onChanged: (value) => context.read<PreferencesBloc>().add(PreferencesEvent.updateGfLow(value))),
               const SizedBox(height: 8),
-              _GfSlider(label: 'GF High', value: prefs.gfHigh, onChanged: (value) => context.read<PreferencesBloc>().add(UpdateGfHigh(value))),
+              _GfSlider(label: 'GF High', value: prefs.gfHigh, onChanged: (value) => context.read<PreferencesBloc>().add(PreferencesEvent.updateGfHigh(value))),
             ],
           );
         },

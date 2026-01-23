@@ -47,7 +47,7 @@ class DiveDetailsClosed extends DiveDetailsState {
   List<Object?> get props => [];
 }
 
-abstract class DiveDetailsEvent extends Equatable {
+sealed class DiveDetailsEvent extends Equatable {
   const DiveDetailsEvent();
 
   @override
@@ -90,25 +90,26 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
   DiveDetailsBloc() : super(const DiveDetailsInitial()) {
     _log.fine('init');
     on<DiveDetailsEvent>((event, emit) async {
-      if (event is _NewDive) {
-        final s = await StorageProvider.store;
-        final n = await s.dives.nextDiveNo;
-        final t = Timestamp.fromDateTime(DateTime.now());
-        emit(DiveDetailsLoaded(Dive(number: n, start: t)..freeze()));
-      } else if (event is _LoadDive) {
-        await _onLoadDive(event, emit);
-      } else if (event is _Close) {
-        emit(DiveDetailsClosed());
-      } else if (event is _SaveAndClose) {
-        final s = await StorageProvider.store;
-        await s.dives.update(event.dive);
-        _log.fine('saved dive #${event.dive.number}');
-        emit(DiveDetailsClosed());
-      } else if (event is _DeleteAndClose) {
-        final s = await StorageProvider.store;
-        await s.dives.delete(event.diveID);
-        _log.fine('deleted dive ${event.diveID}');
-        emit(DiveDetailsClosed());
+      switch (event) {
+        case _NewDive():
+          final s = await StorageProvider.store;
+          final n = await s.dives.nextDiveNo;
+          final t = Timestamp.fromDateTime(DateTime.now());
+          emit(DiveDetailsLoaded(Dive(number: n, start: t)..freeze()));
+        case _LoadDive():
+          await _onLoadDive(event, emit);
+        case _Close():
+          emit(DiveDetailsClosed());
+        case _SaveAndClose():
+          final s = await StorageProvider.store;
+          await s.dives.update(event.dive);
+          _log.fine('saved dive #${event.dive.number}');
+          emit(DiveDetailsClosed());
+        case _DeleteAndClose():
+          final s = await StorageProvider.store;
+          await s.dives.delete(event.diveID);
+          _log.fine('deleted dive ${event.diveID}');
+          emit(DiveDetailsClosed());
       }
     }, transformer: sequential());
   }

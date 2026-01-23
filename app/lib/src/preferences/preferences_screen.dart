@@ -43,7 +43,7 @@ class PreferencesScreen extends StatelessWidget {
                             label: const Text('Sync now'),
                             onPressed: prefs.syncProvider == .none || !prefs.s3Config.isConfigured || syncState.syncing
                                 ? null
-                                : () => context.read<SyncBloc>().add(const StartSyncing()),
+                                : () => context.read<SyncBloc>().add(const SyncEvent.startSyncing()),
                           ),
                           OutlinedButton.icon(
                             icon: Icon(Icons.cloud_sync),
@@ -68,7 +68,7 @@ class PreferencesScreen extends StatelessWidget {
                         ],
                         selected: {prefs.themeMode},
                         onSelectionChanged: (value) {
-                          context.read<PreferencesBloc>().add(UpdateThemeMode(value.first));
+                          context.read<PreferencesBloc>().add(PreferencesEvent.updateThemeMode(value.first));
                         },
                       ),
                       Wrap(
@@ -133,7 +133,7 @@ class PreferencesScreen extends StatelessWidget {
     );
     if (confirmed != true || !context.mounted) return;
 
-    context.read<PreferencesBloc>().add(ResetDatabase());
+    context.read<PreferencesBloc>().add(PreferencesEvent.resetDatabase());
   }
 }
 
@@ -256,9 +256,9 @@ class _ImportExportButtons extends StatelessWidget {
     );
 
     if (result != null) {
-      archiveBloc.add(ExportComplete(result));
+      archiveBloc.add(ArchiveEvent.exportComplete(result));
     } else {
-      archiveBloc.add(ExportCancelled());
+      archiveBloc.add(ArchiveEvent.exportCancelled());
     }
   }
 
@@ -280,7 +280,7 @@ class _ImportExportButtons extends StatelessWidget {
     );
     if (confirmed != true || !context.mounted) return;
 
-    context.read<ArchiveBloc>().add(ImportArchive(result.files.single.path!));
+    context.read<ArchiveBloc>().add(ArchiveEvent.importArchive(result.files.single.path!));
   }
 
   Future<void> _importDives(BuildContext context) async {
@@ -288,7 +288,7 @@ class _ImportExportButtons extends StatelessWidget {
     if (result == null || result.files.single.path == null) return;
     if (!context.mounted) return;
 
-    context.read<DiveListBloc>().add(ImportDives(result.files.single.path!));
+    context.read<DiveListBloc>().add(DiveListEvent.importDives(result.files.single.path!));
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Importing dives...')));
   }
 
@@ -319,7 +319,7 @@ class _ImportExportButtons extends StatelessWidget {
             OutlinedButton.icon(
               icon: const Icon(Icons.file_download_outlined, size: 16),
               label: const Text('Export Subsurface file'),
-              onPressed: state.working ? null : () => context.read<ArchiveBloc>().add(ExportSsrf()),
+              onPressed: state.working ? null : () => context.read<ArchiveBloc>().add(ArchiveEvent.exportSsrf()),
             ),
             OutlinedButton.icon(
               icon: const Icon(Icons.file_upload_outlined, size: 16),
@@ -329,7 +329,7 @@ class _ImportExportButtons extends StatelessWidget {
             OutlinedButton.icon(
               icon: const Icon(Icons.file_download_outlined, size: 16),
               label: const Text('Export database backup'),
-              onPressed: state.working ? null : () => context.read<ArchiveBloc>().add(ExportArchive()),
+              onPressed: state.working ? null : () => context.read<ArchiveBloc>().add(ArchiveEvent.exportArchive()),
             ),
             if (state.working) const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
           ],

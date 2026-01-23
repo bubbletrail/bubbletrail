@@ -43,7 +43,7 @@ class SiteDetailsClosed extends SiteDetailsState {
   List<Object?> get props => [];
 }
 
-abstract class SiteDetailsEvent extends Equatable {
+sealed class SiteDetailsEvent extends Equatable {
   const SiteDetailsEvent();
 
   @override
@@ -86,27 +86,28 @@ class SiteDetailsBloc extends Bloc<SiteDetailsEvent, SiteDetailsState> {
   SiteDetailsBloc() : super(const SiteDetailsInitial()) {
     _log.fine('init');
     on<SiteDetailsEvent>((event, emit) async {
-      if (event is _NewSite) {
-        emit(SiteDetailsLoaded(Site()..freeze()));
-      } else if (event is _LoadSite) {
-        final s = await StorageProvider.store;
-        final site = await s.sites.getById(event.siteId);
-        if (site != null) {
-          _log.fine('loaded ${site.name}');
-          emit(SiteDetailsLoaded(site));
-        } // XXX else error
-      } else if (event is _Close) {
-        emit(SiteDetailsClosed());
-      } else if (event is _SaveAndClose) {
-        final s = await StorageProvider.store;
-        await s.sites.update(event.site);
-        _log.fine('saved ${event.site.name}');
-        emit(SiteDetailsClosed());
-      } else if (event is _DeleteAndClose) {
-        final s = await StorageProvider.store;
-        await s.deleteSite(event.siteID);
-        _log.fine('deleted ${event.siteID}');
-        emit(SiteDetailsClosed());
+      switch (event) {
+        case _NewSite():
+          emit(SiteDetailsLoaded(Site()..freeze()));
+        case _LoadSite():
+          final s = await StorageProvider.store;
+          final site = await s.sites.getById(event.siteId);
+          if (site != null) {
+            _log.fine('loaded ${site.name}');
+            emit(SiteDetailsLoaded(site));
+          } // XXX else error
+        case _Close():
+          emit(SiteDetailsClosed());
+        case _SaveAndClose():
+          final s = await StorageProvider.store;
+          await s.sites.update(event.site);
+          _log.fine('saved ${event.site.name}');
+          emit(SiteDetailsClosed());
+        case _DeleteAndClose():
+          final s = await StorageProvider.store;
+          await s.deleteSite(event.siteID);
+          _log.fine('deleted ${event.siteID}');
+          emit(SiteDetailsClosed());
       }
     }, transformer: sequential());
   }
