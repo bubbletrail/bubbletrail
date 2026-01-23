@@ -80,6 +80,7 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
 
   Future<void> init() async {
     _entities.clear();
+    _saveTimer?.cancel();
     try {
       final bs = await File(path).readAsBytes();
       final list = listFromBuffer(bs);
@@ -91,9 +92,12 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
         }
         _entities[getId(entity)] = entity;
       }
+    } on PathNotFoundException {
+      log.info('no $entityName on disk, nothing loaded');
     } catch (e) {
       log.warning('failed to load $entityName', e);
     }
+    _changes.add(null);
   }
 
   T _prepareInsert(T entity) {

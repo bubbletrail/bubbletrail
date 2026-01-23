@@ -5,7 +5,7 @@ import '../gen/gen.dart';
 import '../gen/internal.pb.dart';
 import 'entity_store.dart';
 
-final _log = Logger('store/computers.dart');
+final _log = Logger('computer_store.dart');
 
 class ComputerStore extends EntityStore<Computer, InternalComputerList> {
   ComputerStore(String path) : super(path, syncKey: 'computers', entityName: 'computer', log: _log);

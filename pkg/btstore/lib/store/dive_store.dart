@@ -150,6 +150,7 @@ class btstore {
       }
     }
     _rebuildTags();
+    _changes.add(null);
   }
 
   void _rebuildTags() {

@@ -85,6 +85,21 @@ class PreferencesScreen extends StatelessWidget {
                       ),
                     ],
                   ),
+                  _SectionColumn(
+                    title: 'Maintenance',
+                    children: [
+                      Row(
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: () => _resetDatabase(context),
+                            style: OutlinedButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+                            icon: Icon(Icons.delete_forever_outlined),
+                            label: Text('Reset database'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 24),
                   _LogPreview(onTap: () => context.goNamed(AppRouteName.logs)),
                   const SizedBox(height: 24),
@@ -103,6 +118,22 @@ class PreferencesScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _resetDatabase(BuildContext context) async {
+    final confirmed = await showConfirmationDialog(
+      context: context,
+      title: 'Reset database',
+      message:
+          'This will remove all dives, sites, etc. in Bubbletrail and revert to an empty state. '
+          'Syncing will be disabled, but synced data remains untouched in the cloud. Continue?',
+      cancelText: 'Cancel',
+      confirmText: 'Reset database',
+      isDestructive: true,
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    context.read<PreferencesBloc>().add(ResetDatabase());
   }
 }
 
