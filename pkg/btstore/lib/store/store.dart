@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:glob/glob.dart';
 import 'package:glob/list_local_fs.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 
 import '../archive/archiveprovider.dart';
@@ -13,7 +14,7 @@ import 'cylinder_store.dart';
 import 'dive_store.dart';
 import 'site_store.dart';
 
-final _log = Logger('store/store.dart');
+final _log = Logger('store.dart');
 
 class Store {
   final String path;
@@ -48,6 +49,20 @@ class Store {
     await cylinders.init();
     await dives.init();
     await sites.init();
+  }
+
+  Future<void> reset() async {
+    // Move the database out of the way, clear internal state.
+    _log.warning('resetting database');
+    try {
+      final ts = DateFormat('yyyyMMdd-HHmmss').format(DateTime.now());
+      await Directory(path).rename('$path.removed-$ts');
+    } on PathNotFoundException {
+      // No worries, there just wasn't a database already
+    } catch (e) {
+      _log.warning('failed to reset database', e);
+    }
+    await init();
   }
 
   Set<String> get tags => sites.tags.union(dives.tags);

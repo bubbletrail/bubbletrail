@@ -6,6 +6,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../providers/storage_provider.dart';
 import 'preferences.dart';
 import 'preferences_storage.dart';
 
@@ -137,6 +138,13 @@ class UpdateGfHigh extends PreferencesEvent {
   List<Object?> get props => [gfHigh];
 }
 
+class ResetDatabase extends PreferencesEvent {
+  const ResetDatabase();
+
+  @override
+  List<Object?> get props => [];
+}
+
 class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
   final PreferencesStorage _storage = PreferencesStorage();
   Timer? _saveTimer;
@@ -169,6 +177,8 @@ class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
         await _onUpdateGfLow(event, emit);
       } else if (event is UpdateGfHigh) {
         await _onUpdateGfHigh(event, emit);
+      } else if (event is ResetDatabase) {
+        await _onResetDatabase(emit);
       }
     }, transformer: sequential());
 
@@ -267,5 +277,15 @@ class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
     final updated = current.copyWith(gfHigh: event.gfHigh, gfLow: min(state.preferences.gfLow, event.gfHigh));
     emit(PreferencesState(updated));
     _scheduleSave();
+  }
+
+  Future<void> _onResetDatabase(Emitter<PreferencesState> emit) async {
+    final current = state.preferences;
+    final updated = current.copyWith(syncProvider: .none);
+    emit(PreferencesState(updated));
+    _scheduleSave();
+
+    final store = await StorageProvider.store;
+    await store.reset();
   }
 }
