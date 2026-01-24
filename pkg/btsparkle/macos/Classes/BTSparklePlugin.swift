@@ -21,5 +21,9 @@ public class BTSparklePlugin: NSObject, FlutterPlugin {
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    if call.method == "checkForUpdates" {
+      updaterController.checkForUpdates(nil)
+      result(nil)
+    }
   }
 }

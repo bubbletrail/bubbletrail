@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:btsparkle/btsparkle.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,7 +36,7 @@ class PreferencesScreen extends StatelessWidget {
                     title: 'Syncing',
                     children: [
                       Wrap(
-                        spacing: 16,
+                        spacing: 8,
                         runSpacing: 8,
                         children: [
                           FilledButton.icon(
@@ -72,7 +73,7 @@ class PreferencesScreen extends StatelessWidget {
                         },
                       ),
                       Wrap(
-                        spacing: 16,
+                        spacing: 8,
                         runSpacing: 8,
                         children: [
                           OutlinedButton.icon(icon: Icon(Icons.straighten), label: Text('Edit units'), onPressed: () => context.goNamed(AppRouteName.units)),
@@ -88,8 +89,16 @@ class PreferencesScreen extends StatelessWidget {
                   _SectionColumn(
                     title: 'Maintenance',
                     children: [
-                      Row(
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
                         children: [
+                          if (platformIsDesktop)
+                            OutlinedButton.icon(
+                              onPressed: () => BTSparkle.checkForUpdates(),
+                              icon: Icon(Icons.update_outlined),
+                              label: Text('Check for updates'),
+                            ),
                           OutlinedButton.icon(
                             onPressed: () => _resetDatabase(context),
                             style: OutlinedButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
@@ -308,7 +317,7 @@ class _ImportExportButtons extends StatelessWidget {
       },
       builder: (context, state) {
         return Wrap(
-          spacing: 16,
+          spacing: 8,
           runSpacing: 8,
           children: [
             OutlinedButton.icon(
