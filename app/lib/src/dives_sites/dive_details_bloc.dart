@@ -127,8 +127,12 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
     }
 
     _storageSubscription ??= s.dives.changes.listen((_) {
-      // Reload the dive when storage changes
-      add(_LoadDive(event.diveId));
+      // Reload the dive when storage changes. Use the dive ID from the
+      // current state, because the dive we track may have changed since the
+      // bloc was created.
+      final s = state;
+      if (s is! DiveDetailsLoaded) return;
+      add(_LoadDive(s.dive.id));
     });
 
     _log.fine('loaded dive #${dive.number} (${dive.id})');
