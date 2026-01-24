@@ -17,6 +17,37 @@ The app aims for a modern, intuitive interface and surfaces best-practice
 metrics like surface gradient factors (SurfGF) to help you understand your
 dives better.
 
+## Rationale & goals
+
+Bubbletrail takes inspiration from existing apps and wouldn't exist without
+them. Nonetheless, the existing alternatives have flaws that were serious
+enough to motivate me to create this app. I mention the forebears here not
+with scorn but with the utmost respect for their creators:
+
+- **MacDive**, which has been my primary dive log for a log time and would
+  continue to be so had it been maintained or, at least, open source so I
+  could attempt to maintain it myself.
+
+- **Subsurface**, which provides excellent tools for technical analysis of
+  dives and a fantastic dive planner, but unfortunately falls flat as a user
+  interface I want to use on my phone. Had I been more enamoured with C and
+  Qt I'd have made a serious attempt to contribute a better mobile
+  experience; alas, that's not me.
+
+Hence, Bubbletrail. Bubbletrail should be:
+
+- Well maintained, and work on the latest version of all popular platforms
+  (Windows, macOS, Linux, Android, and iOS);
+
+- Free, open, and technically excellent like Subsurface; and
+
+- Full-featured and with an attractive user interface, like MacDive.
+
+It isn't full-featured, yet. But it _is_ open source, written in a fashion
+that should have a fairly low threshold to contribution for other people,
+and I'm also building out functionality as we speak. We'll see if we get
+there!
+
 ## Features
 
 - Connect to dive computers via Bluetooth LE using libdivecomputer
