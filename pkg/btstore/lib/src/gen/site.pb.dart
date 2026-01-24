@@ -48,28 +48,36 @@ class Site extends $pb.GeneratedMessage {
 
   Site._();
 
-  factory Site.fromBuffer($core.List<$core.int> data, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory Site.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory Site.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(json, registry);
+  factory Site.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i =
-      $pb.BuilderInfo(_omitMessageNames ? '' : 'Site', package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'), createEmptyInstance: create)
-        ..aOS(1, _omitFieldNames ? '' : 'id')
-        ..aOM<$0.Metadata>(2, _omitFieldNames ? '' : 'meta', subBuilder: $0.Metadata.create)
-        ..aOS(3, _omitFieldNames ? '' : 'name')
-        ..aOM<$0.Position>(4, _omitFieldNames ? '' : 'position', subBuilder: $0.Position.create)
-        ..aOS(5, _omitFieldNames ? '' : 'country')
-        ..aOS(6, _omitFieldNames ? '' : 'location')
-        ..aOS(7, _omitFieldNames ? '' : 'bodyOfWater')
-        ..aOS(8, _omitFieldNames ? '' : 'difficulty')
-        ..pPS(9, _omitFieldNames ? '' : 'tags')
-        ..aOS(10, _omitFieldNames ? '' : 'notes')
-        ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Site',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'id')
+    ..aOM<$0.Metadata>(2, _omitFieldNames ? '' : 'meta',
+        subBuilder: $0.Metadata.create)
+    ..aOS(3, _omitFieldNames ? '' : 'name')
+    ..aOM<$0.Position>(4, _omitFieldNames ? '' : 'position',
+        subBuilder: $0.Position.create)
+    ..aOS(5, _omitFieldNames ? '' : 'country')
+    ..aOS(6, _omitFieldNames ? '' : 'location')
+    ..aOS(7, _omitFieldNames ? '' : 'bodyOfWater')
+    ..aOS(8, _omitFieldNames ? '' : 'difficulty')
+    ..pPS(9, _omitFieldNames ? '' : 'tags')
+    ..aOS(10, _omitFieldNames ? '' : 'notes')
+    ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Site clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Site copyWith(void Function(Site) updates) => super.copyWith((message) => updates(message as Site)) as Site;
+  Site copyWith(void Function(Site) updates) =>
+      super.copyWith((message) => updates(message as Site)) as Site;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -79,7 +87,8 @@ class Site extends $pb.GeneratedMessage {
   @$core.override
   Site createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static Site getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Site>(create);
+  static Site getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Site>(create);
   static Site? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -171,5 +180,7 @@ class Site extends $pb.GeneratedMessage {
   void clearNotes() => $_clearField(10);
 }
 
-const $core.bool _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const $core.bool _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
+const $core.bool _omitFieldNames =
+    $core.bool.fromEnvironment('protobuf.omit_field_names');
+const $core.bool _omitMessageNames =
+    $core.bool.fromEnvironment('protobuf.omit_message_names');

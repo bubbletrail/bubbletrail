@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
 
-import '../btstore.dart';
+import '../../btstore.dart';
 import '../gen/internal.pb.dart';
 import 'entity_store.dart';
 
