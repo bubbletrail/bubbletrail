@@ -20,9 +20,23 @@ const Site$json = {
   '1': 'Site',
   '2': [
     {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
-    {'1': 'meta', '3': 2, '4': 1, '5': 11, '6': '.btstore.Metadata', '10': 'meta'},
+    {
+      '1': 'meta',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.btstore.Metadata',
+      '10': 'meta'
+    },
     {'1': 'name', '3': 3, '4': 1, '5': 9, '10': 'name'},
-    {'1': 'position', '3': 4, '4': 1, '5': 11, '6': '.btstore.Position', '10': 'position'},
+    {
+      '1': 'position',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.btstore.Position',
+      '10': 'position'
+    },
     {'1': 'country', '3': 5, '4': 1, '5': 9, '10': 'country'},
     {'1': 'location', '3': 6, '4': 1, '5': 9, '10': 'location'},
     {'1': 'body_of_water', '3': 7, '4': 1, '5': 9, '10': 'bodyOfWater'},
@@ -33,9 +47,10 @@ const Site$json = {
 };
 
 /// Descriptor for `Site`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List siteDescriptor = $convert.base64Decode('CgRTaXRlEg4KAmlkGAEgASgJUgJpZBInCgRtZXRhGAIgASgLMhMuZGl2ZXN0b3JlLk1ldGFkYX'
-    'RhUgRtZXRhEhIKBG5hbWUYAyABKAlSBG5hbWUSLwoIcG9zaXRpb24YBCABKAsyEy5kaXZlc3Rv'
-    'cmUuUG9zaXRpb25SCHBvc2l0aW9uEhgKB2NvdW50cnkYBSABKAlSB2NvdW50cnkSGgoIbG9jYX'
-    'Rpb24YBiABKAlSCGxvY2F0aW9uEiIKDWJvZHlfb2Zfd2F0ZXIYByABKAlSC2JvZHlPZldhdGVy'
-    'Eh4KCmRpZmZpY3VsdHkYCCABKAlSCmRpZmZpY3VsdHkSEgoEdGFncxgJIAMoCVIEdGFncxIUCg'
-    'Vub3RlcxgKIAEoCVIFbm90ZXM=');
+final $typed_data.Uint8List siteDescriptor = $convert.base64Decode(
+    'CgRTaXRlEg4KAmlkGAEgASgJUgJpZBIlCgRtZXRhGAIgASgLMhEuYnRzdG9yZS5NZXRhZGF0YV'
+    'IEbWV0YRISCgRuYW1lGAMgASgJUgRuYW1lEi0KCHBvc2l0aW9uGAQgASgLMhEuYnRzdG9yZS5Q'
+    'b3NpdGlvblIIcG9zaXRpb24SGAoHY291bnRyeRgFIAEoCVIHY291bnRyeRIaCghsb2NhdGlvbh'
+    'gGIAEoCVIIbG9jYXRpb24SIgoNYm9keV9vZl93YXRlchgHIAEoCVILYm9keU9mV2F0ZXISHgoK'
+    'ZGlmZmljdWx0eRgIIAEoCVIKZGlmZmljdWx0eRISCgR0YWdzGAkgAygJUgR0YWdzEhQKBW5vdG'
+    'VzGAogASgJUgVub3Rlcw==');

@@ -120,7 +120,7 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
 
   Future<void> _onLoadDive(_LoadDive event, Emitter<DiveDetailsState> emit) async {
     final s = await StorageProvider.store;
-    final dive = await s.dives.getById(event.diveId);
+    final dive = await s.diveById(event.diveId);
     if (dive == null) {
       emit(DiveDetailsClosed());
       return;

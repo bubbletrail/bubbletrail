@@ -7,10 +7,11 @@ import 'package:glob/glob.dart';
 import 'package:glob/list_local_fs.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 
-import '../btstore.dart';
+import '../../btstore.dart';
 import '../gen/internal.pb.dart';
 import 'fileio.dart';
 
@@ -98,6 +99,7 @@ class btstore {
     _scheduleSave(id, notify: true);
   }
 
+  @internal
   Future<Dive?> getById(String id) async {
     var dive = _dives[id];
     if (dive == null) {
