@@ -131,6 +131,7 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
 
   Future<void> syncWith(SyncProvider provider) async {
     log.fine('syncing $entityName');
+    var changed = false;
     try {
       final obj = await provider.getObject(syncKey);
       final list = listFromBuffer(obj);
@@ -146,10 +147,12 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
           if (cur != null && !getMeta(cur).isDeleted) {
             log.fine('deleting $entityName ${getId(entity)}');
             _entities[getId(entity)] = rebuildDeleted(cur);
+            changed = true;
           }
         } else if (cur == null || getMeta(entity).isAfter(getMeta(cur))) {
           log.fine('importing $entityName ${getId(entity)}');
           _entities[getId(entity)] = entity;
+          changed = true;
         }
       }
     } catch (e) {
@@ -162,6 +165,6 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
     final bs = list.writeToBuffer();
     await provider.putObject(syncKey, bs);
 
-    _scheduleSave(notify: false);
+    if (changed) _scheduleSave(notify: true);
   }
 }

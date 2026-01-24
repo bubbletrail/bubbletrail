@@ -69,8 +69,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         case _InitStore():
           await _onInitStore(emit);
         case _UpdateSyncConfig():
-          if (event.provider == .none) return;
-          if (!event.s3Config.isConfigured) return;
           await _onUpdateConfig(event);
         case _StartSyncing():
           await _onStartSyncing(emit);
@@ -101,7 +99,14 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   }
 
   Future<void> _onUpdateConfig(_UpdateSyncConfig event) async {
+    if (event.provider == .none) {
+      _syncProvider = null;
+      _syncConfig = null;
+      return;
+    }
+
     if (_syncConfig == event.s3Config) return;
+
     _log.fine('init sync provider');
     final provider = S3SyncProvider(
       endpoint: event.s3Config.endpoint,

@@ -8,7 +8,7 @@ import 'entity_store.dart';
 final _log = Logger('computer_store.dart');
 
 class ComputerStore extends EntityStore<Computer, InternalComputerList> {
-  ComputerStore(String path) : super(path, syncKey: 'computers', entityName: 'computer', log: _log);
+  ComputerStore(String path) : super(path, syncKey: 'computers', entityName: 'computers', log: _log);
 
   @override
   String getId(Computer entity) => entity.remoteId;

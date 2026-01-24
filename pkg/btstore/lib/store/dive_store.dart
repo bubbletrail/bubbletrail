@@ -272,7 +272,7 @@ class btstore {
       if (cur == null || dive.meta.isAfter(cur.meta)) {
         _log.fine('updating dive ${id} from provider');
         _dives[id] = dive;
-        _scheduleSave(id, notify: false);
+        _scheduleSave(id, notify: true);
       }
     }
 
