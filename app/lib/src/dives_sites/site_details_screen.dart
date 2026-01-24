@@ -15,91 +15,90 @@ class SiteDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final siteDetailState = context.read<SiteDetailsBloc>().state;
-    if (siteDetailState is! SiteDetailsLoaded) {
-      // Can't happen
-      return Placeholder();
-    }
-
     final diveListState = context.read<DiveListBloc>().state;
     if (diveListState is! DiveListLoaded) {
       // Can't happen
       return Placeholder();
     }
 
-    final site = siteDetailState.site;
-    final dives = diveListState.dives.where((s) => s.siteId == site.id).toList();
-
-    return BlocListener<SiteDetailsBloc, SiteDetailsState>(
+    return BlocConsumer<SiteDetailsBloc, SiteDetailsState>(
       listener: (context, state) {
         if (state is SiteDetailsClosed) {
           // Pop when the bloc considers us done
           context.pop();
         }
       },
-      child: ScreenScaffold(
-        title: Text(site.name),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            tooltip: 'Edit',
-            onPressed: () => context.goNamed(AppRouteName.sitesDetailsEdit, pathParameters: {'siteID': site.id}),
-          ),
-          _popupMenuActions(context, site),
-        ],
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const .all(8.0),
-            child: Wrap(
-              alignment: .start,
-              crossAxisAlignment: .start,
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                Column(
-                  crossAxisAlignment: .start,
-                  spacing: 8,
-                  children: [
-                    SiteMapCard(site: site, showFullscreenButton: true),
-                    TagsList(tags: site.tags, prefix: '#'),
-                  ],
-                ),
-                Card(
-                  child: Padding(
-                    padding: const .all(16.0),
-                    child: DataCardColumn(
-                      children: [
-                        if (site.country.isNotEmpty) ColumnRow(label: 'Country', child: Text(site.country)),
-                        if (site.location.isNotEmpty) ColumnRow(label: 'Location', child: Text(site.location)),
-                        if (site.bodyOfWater.isNotEmpty) ColumnRow(label: 'Body of Water', child: Text(site.bodyOfWater)),
-                        if (site.hasPosition())
-                          ColumnRow(
-                            label: 'Position',
-                            child: Text([formatLatitude(site.position.latitude), formatLongitude(site.position.longitude)].join(' ')),
-                          ),
-                        if (site.difficulty.isNotEmpty) ColumnRow(label: 'Difficulty', child: Text(site.difficulty)),
-                      ],
-                    ),
+      builder: (context, state) {
+        if (state is! SiteDetailsLoaded) {
+          // Can't happen
+          return Placeholder();
+        }
+        final site = state.site;
+        final dives = diveListState.dives.where((s) => s.siteId == site.id).toList();
+        return ScreenScaffold(
+          title: Text(site.name),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.edit),
+              tooltip: 'Edit',
+              onPressed: () => context.goNamed(AppRouteName.sitesDetailsEdit, pathParameters: {'siteID': site.id}),
+            ),
+            _popupMenuActions(context, site),
+          ],
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const .all(8.0),
+              child: Wrap(
+                alignment: .start,
+                crossAxisAlignment: .start,
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  Column(
+                    crossAxisAlignment: .start,
+                    spacing: 8,
+                    children: [
+                      SiteMapCard(site: site, showFullscreenButton: true),
+                      TagsList(tags: site.tags, prefix: '#'),
+                    ],
                   ),
-                ),
-                if (site.notes.isNotEmpty) ...[
                   Card(
                     child: Padding(
-                      padding: const .all(8.0),
-                      child: Text(site.notes, style: Theme.of(context).textTheme.bodyMedium),
+                      padding: const .all(16.0),
+                      child: DataCardColumn(
+                        children: [
+                          if (site.country.isNotEmpty) ColumnRow(label: 'Country', child: Text(site.country)),
+                          if (site.location.isNotEmpty) ColumnRow(label: 'Location', child: Text(site.location)),
+                          if (site.bodyOfWater.isNotEmpty) ColumnRow(label: 'Body of Water', child: Text(site.bodyOfWater)),
+                          if (site.hasPosition())
+                            ColumnRow(
+                              label: 'Position',
+                              child: Text([formatLatitude(site.position.latitude), formatLongitude(site.position.longitude)].join(' ')),
+                            ),
+                          if (site.difficulty.isNotEmpty) ColumnRow(label: 'Difficulty', child: Text(site.difficulty)),
+                        ],
+                      ),
                     ),
                   ),
+                  if (site.notes.isNotEmpty) ...[
+                    Card(
+                      child: Padding(
+                        padding: const .all(8.0),
+                        child: Text(site.notes, style: Theme.of(context).textTheme.bodyMedium),
+                      ),
+                    ),
+                  ],
+                  if (dives.isNotEmpty)
+                    AspectRatio(
+                      aspectRatio: 2,
+                      child: DiveTable(dives: dives, sitesByUuid: diveListState.sitesByUuid, showSiteColumn: false),
+                    ),
                 ],
-                if (dives.isNotEmpty)
-                  AspectRatio(
-                    aspectRatio: 2,
-                    child: DiveTable(dives: dives, sitesByUuid: diveListState.sitesByUuid, showSiteColumn: false),
-                  ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

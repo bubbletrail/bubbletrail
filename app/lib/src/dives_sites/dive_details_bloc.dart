@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:btstore/btstore.dart';
@@ -87,6 +89,8 @@ class _DeleteAndClose extends DiveDetailsEvent {
 }
 
 class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
+  StreamSubscription? _storageSubscription;
+
   DiveDetailsBloc() : super(const DiveDetailsInitial()) {
     _log.fine('init');
     on<DiveDetailsEvent>((event, emit) async {
@@ -118,8 +122,15 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
     final s = await StorageProvider.store;
     final dive = await s.dives.getById(event.diveId);
     if (dive == null) {
-      return; // xxx error state
+      emit(DiveDetailsClosed());
+      return;
     }
+
+    _storageSubscription ??= s.dives.changes.listen((_) {
+      // Reload the dive when storage changes
+      add(_LoadDive(event.diveId));
+    });
+
     _log.fine('loaded dive #${dive.number} (${dive.id})');
 
     Dive? nextDive;
@@ -142,6 +153,7 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
   @override
   Future<void> close() {
     _log.fine('close');
+    _storageSubscription?.cancel();
     return super.close();
   }
 }

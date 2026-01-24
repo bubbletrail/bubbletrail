@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:btstore/btstore.dart';
@@ -83,6 +85,8 @@ class _DeleteAndClose extends SiteDetailsEvent {
 }
 
 class SiteDetailsBloc extends Bloc<SiteDetailsEvent, SiteDetailsState> {
+  StreamSubscription? _storageSubscription;
+
   SiteDetailsBloc() : super(const SiteDetailsInitial()) {
     _log.fine('init');
     on<SiteDetailsEvent>((event, emit) async {
@@ -90,12 +94,7 @@ class SiteDetailsBloc extends Bloc<SiteDetailsEvent, SiteDetailsState> {
         case _NewSite():
           emit(SiteDetailsLoaded(Site()..freeze()));
         case _LoadSite():
-          final s = await StorageProvider.store;
-          final site = await s.sites.getById(event.siteId);
-          if (site != null) {
-            _log.fine('loaded ${site.name}');
-            emit(SiteDetailsLoaded(site));
-          } // XXX else error
+          await _onLoadSite(event, emit);
         case _Close():
           emit(SiteDetailsClosed());
         case _SaveAndClose():
@@ -112,9 +111,27 @@ class SiteDetailsBloc extends Bloc<SiteDetailsEvent, SiteDetailsState> {
     }, transformer: sequential());
   }
 
+  Future<void> _onLoadSite(_LoadSite event, Emitter<SiteDetailsState> emit) async {
+    final s = await StorageProvider.store;
+    final site = await s.sites.getById(event.siteId);
+    if (site == null) {
+      emit(SiteDetailsClosed());
+      return;
+    }
+
+    _storageSubscription ??= s.sites.changes.listen((_) {
+      // Reload the site when storage changes
+      add(_LoadSite(event.siteId));
+    });
+
+    _log.fine('loaded ${site.name}');
+    emit(SiteDetailsLoaded(site));
+  }
+
   @override
   Future<void> close() {
     _log.fine('close');
+    _storageSubscription?.cancel();
     return super.close();
   }
 }

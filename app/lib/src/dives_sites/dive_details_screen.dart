@@ -43,7 +43,13 @@ class _DiveDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = platformIsDesktop ? 'Dive ' : '';
-    return BlocBuilder<DiveDetailsBloc, DiveDetailsState>(
+    return BlocConsumer<DiveDetailsBloc, DiveDetailsState>(
+      listener: (context, state) {
+        if (state is DiveDetailsClosed) {
+          // Pop when the bloc considers us done
+          context.pop();
+        }
+      },
       builder: (context, state) {
         return ScreenScaffold(
           title: Text('$title#${dive.number}: ${site?.name ?? 'Unknown site'}'),
@@ -160,7 +166,6 @@ class _DiveDetails extends StatelessWidget {
           );
           if (confirmed && context.mounted) {
             context.read<DiveDetailsBloc>().add(DiveDetailsEvent.deleteAndClose(dive.id));
-            context.goNamed(AppRouteName.dives);
           }
         }
       },
