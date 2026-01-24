@@ -121,7 +121,7 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
     }
   }
 
-  PopupMenuButton<String> _popupMenuActions(BuildContext context) {
+  PopupMenuButton<String> _popupMenuActions() {
     return PopupMenuButton<String>(
       onSelected: (value) async {
         if (value == 'delete') {
@@ -162,7 +162,7 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
         child: ScreenScaffold(
           title: Text(_isNew ? 'New Equipment' : 'Edit Equipment'),
           actions: [
-            if (!_isNew) _popupMenuActions(context),
+            if (!_isNew) _popupMenuActions(),
             IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes'),
           ],
           body: SingleChildScrollView(
