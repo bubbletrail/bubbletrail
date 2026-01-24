@@ -4,6 +4,7 @@ package btstore;
 
 import "computer.proto";
 import "dive.proto";
+import "equipment.proto";
 import "log.proto";
 import "site.proto";
 import "types.proto";
@@ -26,4 +27,8 @@ message InternalLogList {
 
 message InternalComputerList {
   repeated Computer computers = 1;
+}
+
+message InternalEquipmentList {
+  repeated Equipment equipments = 1;
 }

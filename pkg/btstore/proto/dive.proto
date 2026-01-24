@@ -15,7 +15,7 @@ message Dive {
   int32 number = 4; // Dive number, human readable/assigned
   int32 rating = 5; // 0-5 stars
   repeated string tags = 6; // Free-form tag strings
-  google.protobuf.Timestamp start = 7; // Unix epoch timestamp (seconds)
+  google.protobuf.Timestamp start = 7;
 
   // Summary data (populated from dive computer data, but editable by the user)
   int32 duration = 8; // Seconds

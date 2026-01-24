@@ -19,37 +19,61 @@ import 'dart:typed_data' as $typed_data;
 const InternalCylinderList$json = {
   '1': 'InternalCylinderList',
   '2': [
-    {'1': 'cylinders', '3': 1, '4': 3, '5': 11, '6': '.btstore.Cylinder', '10': 'cylinders'},
+    {
+      '1': 'cylinders',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.btstore.Cylinder',
+      '10': 'cylinders'
+    },
   ],
 };
 
 /// Descriptor for `InternalCylinderList`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List internalCylinderListDescriptor = $convert.base64Decode('ChRJbnRlcm5hbEN5bGluZGVyTGlzdBIxCgljeWxpbmRlcnMYASADKAsyEy5kaXZlc3RvcmUuQ3'
-    'lsaW5kZXJSCWN5bGluZGVycw==');
+final $typed_data.Uint8List internalCylinderListDescriptor = $convert.base64Decode(
+    'ChRJbnRlcm5hbEN5bGluZGVyTGlzdBIvCgljeWxpbmRlcnMYASADKAsyES5idHN0b3JlLkN5bG'
+    'luZGVyUgljeWxpbmRlcnM=');
 
 @$core.Deprecated('Use internalSiteListDescriptor instead')
 const InternalSiteList$json = {
   '1': 'InternalSiteList',
   '2': [
-    {'1': 'sites', '3': 1, '4': 3, '5': 11, '6': '.btstore.Site', '10': 'sites'},
+    {
+      '1': 'sites',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.btstore.Site',
+      '10': 'sites'
+    },
   ],
 };
 
 /// Descriptor for `InternalSiteList`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List internalSiteListDescriptor = $convert.base64Decode('ChBJbnRlcm5hbFNpdGVMaXN0EiUKBXNpdGVzGAEgAygLMg8uZGl2ZXN0b3JlLlNpdGVSBXNpdG'
-    'Vz');
+final $typed_data.Uint8List internalSiteListDescriptor = $convert.base64Decode(
+    'ChBJbnRlcm5hbFNpdGVMaXN0EiMKBXNpdGVzGAEgAygLMg0uYnRzdG9yZS5TaXRlUgVzaXRlcw'
+    '==');
 
 @$core.Deprecated('Use internalDiveListDescriptor instead')
 const InternalDiveList$json = {
   '1': 'InternalDiveList',
   '2': [
-    {'1': 'dives', '3': 1, '4': 3, '5': 11, '6': '.btstore.Dive', '10': 'dives'},
+    {
+      '1': 'dives',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.btstore.Dive',
+      '10': 'dives'
+    },
   ],
 };
 
 /// Descriptor for `InternalDiveList`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List internalDiveListDescriptor = $convert.base64Decode('ChBJbnRlcm5hbERpdmVMaXN0EiUKBWRpdmVzGAEgAygLMg8uZGl2ZXN0b3JlLkRpdmVSBWRpdm'
-    'Vz');
+final $typed_data.Uint8List internalDiveListDescriptor = $convert.base64Decode(
+    'ChBJbnRlcm5hbERpdmVMaXN0EiMKBWRpdmVzGAEgAygLMg0uYnRzdG9yZS5EaXZlUgVkaXZlcw'
+    '==');
 
 @$core.Deprecated('Use internalLogListDescriptor instead')
 const InternalLogList$json = {
@@ -60,16 +84,45 @@ const InternalLogList$json = {
 };
 
 /// Descriptor for `InternalLogList`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List internalLogListDescriptor = $convert.base64Decode('Cg9JbnRlcm5hbExvZ0xpc3QSIgoEbG9ncxgBIAMoCzIOLmRpdmVzdG9yZS5Mb2dSBGxvZ3M=');
+final $typed_data.Uint8List internalLogListDescriptor = $convert.base64Decode(
+    'Cg9JbnRlcm5hbExvZ0xpc3QSIAoEbG9ncxgBIAMoCzIMLmJ0c3RvcmUuTG9nUgRsb2dz');
 
 @$core.Deprecated('Use internalComputerListDescriptor instead')
 const InternalComputerList$json = {
   '1': 'InternalComputerList',
   '2': [
-    {'1': 'computers', '3': 1, '4': 3, '5': 11, '6': '.btstore.Computer', '10': 'computers'},
+    {
+      '1': 'computers',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.btstore.Computer',
+      '10': 'computers'
+    },
   ],
 };
 
 /// Descriptor for `InternalComputerList`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List internalComputerListDescriptor = $convert.base64Decode('ChRJbnRlcm5hbENvbXB1dGVyTGlzdBIxCgljb21wdXRlcnMYASADKAsyEy5kaXZlc3RvcmUuQ2'
-    '9tcHV0ZXJSCWNvbXB1dGVycw==');
+final $typed_data.Uint8List internalComputerListDescriptor = $convert.base64Decode(
+    'ChRJbnRlcm5hbENvbXB1dGVyTGlzdBIvCgljb21wdXRlcnMYASADKAsyES5idHN0b3JlLkNvbX'
+    'B1dGVyUgljb21wdXRlcnM=');
+
+@$core.Deprecated('Use internalEquipmentListDescriptor instead')
+const InternalEquipmentList$json = {
+  '1': 'InternalEquipmentList',
+  '2': [
+    {
+      '1': 'equipments',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.btstore.Equipment',
+      '10': 'equipments'
+    },
+  ],
+};
+
+/// Descriptor for `InternalEquipmentList`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List internalEquipmentListDescriptor = $convert.base64Decode(
+    'ChVJbnRlcm5hbEVxdWlwbWVudExpc3QSMgoKZXF1aXBtZW50cxgBIAMoCzISLmJ0c3RvcmUuRX'
+    'F1aXBtZW50UgplcXVpcG1lbnRz');

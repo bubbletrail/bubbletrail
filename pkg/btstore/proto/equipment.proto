@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package btstore;
+
+import "google/protobuf/timestamp.proto";
+import "types.proto";
+
+message Equipment {
+  string id = 1;
+  Metadata meta = 2;
+
+  string type = 3; // Type of equipment (e.g., "BCD", "Regulator", "Wetsuit")
+  string manufacturer = 4;
+  string name = 5;
+  string serial = 6;
+  google.protobuf.Timestamp purchase_date = 7;
+  double purchase_price = 8; // In user's currency
+  double weight = 9; // Weight in kilograms
+  google.protobuf.Timestamp next_service = 10;
+}
