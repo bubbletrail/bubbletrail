@@ -31,6 +31,10 @@ import 'src/equipment/cylinder_details_bloc.dart';
 import 'src/equipment/cylinder_edit_screen.dart';
 import 'src/equipment/cylinder_list_bloc.dart';
 import 'src/equipment/cylinder_list_screen.dart';
+import 'src/equipment/equipment_details_bloc.dart';
+import 'src/equipment/equipment_edit_screen.dart';
+import 'src/equipment/equipment_list_bloc.dart';
+import 'src/equipment/equipment_list_screen.dart';
 import 'src/equipment/equipment_screen.dart';
 import 'src/preferences/archive_bloc.dart';
 import 'src/preferences/dive_preferences_screen.dart';
@@ -83,6 +87,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
   late final ArchiveBloc _archiveBloc;
   late final DiveListBloc _diveListBloc;
   late final CylinderListBloc _cylinderListBloc;
+  late final EquipmentListBloc _equipmentListBloc;
   late final BleScanBloc _bleScanBloc;
   late final BleDownloadBloc _bleDownloadBloc;
   late final GoRouter _router;
@@ -95,6 +100,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
     _archiveBloc = ArchiveBloc();
     _diveListBloc = DiveListBloc();
     _cylinderListBloc = CylinderListBloc();
+    _equipmentListBloc = EquipmentListBloc();
     _bleScanBloc = BleScanBloc();
     _bleDownloadBloc = BleDownloadBloc(_bleScanBloc);
     _setupFileHandler();
@@ -303,6 +309,29 @@ class _MyAppState extends State<MyApp> with WindowListener {
                         ),
                       ],
                     ),
+                    GoRoute(
+                      path: AppRoutePath.equipmentList,
+                      name: AppRouteName.equipmentList,
+                      builder: (context, state) => const EquipmentListScreen(),
+                      routes: <RouteBase>[
+                        GoRoute(
+                          path: AppRoutePath.equipmentNew,
+                          name: AppRouteName.equipmentNew,
+                          builder: (context, state) => BlocProvider(
+                            create: (context) => EquipmentDetailsBloc()..add(const EquipmentDetailsEvent.newEquipment()),
+                            child: DetailsAvailable<EquipmentDetailsBloc, EquipmentDetailsState>(child: const EquipmentEditScreen()),
+                          ),
+                        ),
+                        GoRoute(
+                          path: AppRoutePath.equipmentDetails,
+                          name: AppRouteName.equipmentDetails,
+                          builder: (context, state) => BlocProvider(
+                            create: (context) => EquipmentDetailsBloc()..add(EquipmentDetailsEvent.load(state.pathParameters['equipmentID']!)),
+                            child: DetailsAvailable<EquipmentDetailsBloc, EquipmentDetailsState>(child: const EquipmentEditScreen()),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ],
@@ -380,6 +409,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
         BlocProvider.value(value: _archiveBloc),
         BlocProvider.value(value: _diveListBloc),
         BlocProvider.value(value: _cylinderListBloc),
+        BlocProvider.value(value: _equipmentListBloc),
         BlocProvider.value(value: _preferencesBloc),
         BlocProvider.value(value: _bleScanBloc),
         BlocProvider.value(value: _bleDownloadBloc),

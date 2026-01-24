@@ -13,7 +13,11 @@ class EquipmentScreen extends StatelessWidget {
       title: const Text('Equipment'),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: [ListTileCard(title: 'Cylinders', onTap: () => context.goNamed(AppRouteName.cylinders))],
+        children: [
+          ListTileCard(title: 'Cylinders', subtitle: 'Tanks and gas cylinders', onTap: () => context.goNamed(AppRouteName.cylinders)),
+          const SizedBox(height: 8),
+          ListTileCard(title: 'Other Equipment', subtitle: 'BCDs, regulators, wetsuits, etc.', onTap: () => context.goNamed(AppRouteName.equipmentList)),
+        ],
       ),
     );
   }

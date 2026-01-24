@@ -12,6 +12,7 @@ import '../sync/syncprovider.dart';
 import 'computer_store.dart';
 import 'cylinder_store.dart';
 import 'dive_store.dart';
+import 'equipment_store.dart';
 import 'site_store.dart';
 
 final _log = Logger('store.dart');
@@ -22,6 +23,7 @@ class Store {
   final ComputerStore computers;
   final CylinderStore cylinders;
   final btstore dives;
+  final EquipmentStore equipment;
   final SiteStore sites;
 
   final _changes = StreamController<void>.broadcast();
@@ -32,10 +34,12 @@ class Store {
     : computers = ComputerStore('$path/computers.binpb'),
       cylinders = CylinderStore('$path/cylinders.binpb'),
       dives = btstore('$path/dives'),
+      equipment = EquipmentStore('$path/equipment.binpb'),
       sites = SiteStore('$path/sites.binpb') {
     computers.changes.listen((_) => _scheduleChange());
     cylinders.changes.listen((_) => _scheduleChange());
     dives.changes.listen((_) => _scheduleChange());
+    equipment.changes.listen((_) => _scheduleChange());
     sites.changes.listen((_) => _scheduleChange());
   }
 
@@ -48,6 +52,7 @@ class Store {
     await computers.init();
     await cylinders.init();
     await dives.init();
+    await equipment.init();
     await sites.init();
   }
 
@@ -77,6 +82,11 @@ class Store {
       await cylinders.syncWith(provider);
     } catch (e) {
       _log.warning('failed to sync cylinders', e);
+    }
+    try {
+      await equipment.syncWith(provider);
+    } catch (e) {
+      _log.warning('failed to sync equipment', e);
     }
     try {
       await sites.syncWith(provider);

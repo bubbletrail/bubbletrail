@@ -16,6 +16,9 @@ abstract class AppRouteName {
   static const cylinders = 'cylinders';
   static const cylindersDetails = 'cylinder-details';
   static const cylindersNew = 'new-cylinder';
+  static const equipmentList = 'equipment-list';
+  static const equipmentDetails = 'equipment-details';
+  static const equipmentNew = 'new-equipment';
 
   static const preferences = 'preferences';
   static const units = 'units';
@@ -45,6 +48,9 @@ abstract class AppRoutePath {
   static const cylinders = 'cylinders';
   static const cylindersDetails = ':cylinderID';
   static const cylindersNew = 'new';
+  static const equipmentList = 'other';
+  static const equipmentDetails = ':equipmentID';
+  static const equipmentNew = 'new';
 
   static const preferences = '/preferences';
   static const units = 'units';
