@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:glob/glob.dart';
 import 'package:glob/list_local_fs.dart';
@@ -17,7 +16,7 @@ import 'fileio.dart';
 
 final _log = Logger('dive_store.dart');
 
-class btstore {
+class DiveStore {
   final String pathPrefix;
   Map<String, Dive> _dives = {};
   Set<String> _tags = {};
@@ -29,7 +28,7 @@ class btstore {
 
   Stream<void> get changes => _changes.stream;
 
-  btstore(this.pathPrefix);
+  DiveStore(this.pathPrefix);
 
   Set<String> get tags => _tags;
   Set<String> get buddies => _buddies;
@@ -107,7 +106,7 @@ class btstore {
       return null;
     }
     if (dive.logs.isEmpty) {
-      final logs = await _loadLogs(dlName(diveDir(dive), dive));
+      final logs = await _loadLogs(_dlName(_diveDir(dive), dive));
       dive = dive.rebuild((dive) {
         dive.logs.addAll(logs);
       });
@@ -131,6 +130,7 @@ class btstore {
     return next;
   }
 
+  @internal
   Future<void> init() async {
     _dives.clear();
     _tags.clear();
@@ -199,17 +199,17 @@ class btstore {
       for (final id in _dirty) {
         final dive = _dives[id]!;
 
-        final dir = diveDir(dive);
+        final dir = _diveDir(dive);
         await Directory(dir).create(recursive: true);
 
         if (dive.logs.isNotEmpty) {
-          await atomicWriteProto(dlName(dir, dive), InternalLogList(logs: dive.logs));
+          await atomicWriteProto(_dlName(dir, dive), InternalLogList(logs: dive.logs));
         }
 
         final metaOnly = dive.rebuild((dive) {
           dive.logs.clear();
         });
-        await atomicWriteProto(metaName(dir, dive), metaOnly);
+        await atomicWriteProto(_metaName(dir, dive), metaOnly);
       }
 
       _log.info('saved ${_dirty.length} dives');
@@ -223,15 +223,7 @@ class btstore {
     }
   }
 
-  Future<Uint8List> mergedDives() async {
-    final dl = InternalDiveList();
-    for (final id in _dives.keys) {
-      final dive = await getById(id);
-      if (dive != null) dl.dives.add(dive);
-    }
-    return dl.writeToBuffer();
-  }
-
+  @internal
   Future<void> syncWith(SyncProvider provider) async {
     _log.fine('syncing dives');
     final seenEtags = <String, String>{}; // dive ID -> eTag
@@ -297,7 +289,9 @@ class btstore {
     _rebuildTags();
   }
 
-  String diveDir(Dive dive) => "$pathPrefix/${DateFormat('yyyy-MM').format(dive.meta.createdAt.toDateTime())}";
-  String dlName(String dir, Dive dive) => "$dir/${DateFormat('yyyy-MM-dd').format(dive.meta.createdAt.toDateTime())}.${dive.id}.logs.binpb";
-  String metaName(String dir, Dive dive) => "$dir/${DateFormat('yyyy-MM-dd').format(dive.meta.createdAt.toDateTime())}.${dive.id}.meta.binpb";
+  String _diveDir(Dive dive) => "$pathPrefix/${DateFormat('yyyy-MM').format(dive.meta.createdAt.toDateTime())}";
+
+  String _dlName(String dir, Dive dive) => "$dir/${DateFormat('yyyy-MM-dd').format(dive.meta.createdAt.toDateTime())}.${dive.id}.logs.binpb";
+
+  String _metaName(String dir, Dive dive) => "$dir/${DateFormat('yyyy-MM-dd').format(dive.meta.createdAt.toDateTime())}.${dive.id}.meta.binpb";
 }

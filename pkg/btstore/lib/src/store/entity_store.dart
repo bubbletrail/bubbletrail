@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:protobuf/protobuf.dart';
 import 'package:uuid/uuid.dart';
 
@@ -30,15 +31,20 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
 
   // Abstract methods for entity field access
 
+  @internal
   String getId(T entity);
 
+  @internal
   bool hasId(T entity);
 
+  @internal
   Metadata getMeta(T entity);
 
+  @internal
   T rebuildEntity(T entity, {String? id, Metadata? meta});
 
   /// Rebuild an entity as deleted. Override to clear entity-specific fields.
+  @internal
   T rebuildDeleted(T entity) {
     final meta = getMeta(entity).rebuildDeleted();
     return rebuildEntity(entity, meta: meta);
@@ -46,12 +52,16 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
 
   // Abstract methods for list wrapper
 
+  @internal
   TList createList(Iterable<T> entities);
 
+  @internal
   Iterable<T> entitiesFromList(TList list);
 
+  @internal
   TList listFromBuffer(List<int> bytes);
 
+  @internal
   int compare(T a, T b);
 
   Future<T> update(T entity) async {
@@ -78,6 +88,7 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
     return vals;
   }
 
+  @internal
   Future<void> init() async {
     _entities.clear();
     _saveTimer?.cancel();
@@ -129,6 +140,7 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
     }
   }
 
+  @internal
   Future<void> syncWith(SyncProvider provider) async {
     log.fine('syncing $entityName');
     var changed = false;

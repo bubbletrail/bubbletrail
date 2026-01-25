@@ -4,7 +4,6 @@ import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
 import '../gen/gen.dart';
-import 'formatting.dart';
 import 'container.dart';
 
 extension SsrfXml on Container {
@@ -61,7 +60,7 @@ extension SsrfXml on Container {
 extension DiveXml on Dive {
   static Dive fromXml(XmlElement elem) {
     // Dive ID or generate new UUID if not present
-    final diveID = ensureUUID(elem.getAttribute('uuid')) ?? const Uuid().v4();
+    final diveID = _ensureUUID(elem.getAttribute('uuid')) ?? const Uuid().v4();
 
     // Parse tags
     final tagsStr = elem.getAttribute('tags');
@@ -80,15 +79,15 @@ extension DiveXml on Dive {
     }
 
     // Parse DateTime and convert to Unix timestamp
-    final dateTime = tryParseDateTime(elem.getAttribute('date'), elem.getAttribute('time'));
+    final dateTime = _tryParseDateTime(elem.getAttribute('date'), elem.getAttribute('time'));
 
     final dive = Dive(
       id: diveID,
       number: int.tryParse(elem.getAttribute('number') ?? '0') ?? 0,
       start: Timestamp.fromDateTime(dateTime ?? DateTime.fromMillisecondsSinceEpoch(0)),
-      duration: (tryParseUnitString(elem.getAttribute('duration')) ?? 0).toInt(),
+      duration: (_tryParseUnitString(elem.getAttribute('duration')) ?? 0).toInt(),
       rating: int.tryParse(elem.getAttribute('rating') ?? ''),
-      sac: tryParseUnitString(elem.getAttribute('sac')),
+      sac: _tryParseUnitString(elem.getAttribute('sac')),
       otu: int.tryParse(elem.getAttribute('otu') ?? ''),
       cns: cns,
       siteId: elem.getAttribute('divesiteid'),
@@ -157,9 +156,9 @@ extension DiveXml on Dive {
 
         // Convert Int64 timestamp to DateTime for formatting
         final startDateTime = start.toDateTime();
-        builder.attribute('date', formatDate(startDateTime));
-        builder.attribute('time', formatTime(startDateTime));
-        builder.attribute('duration', formatDuration(duration));
+        builder.attribute('date', _formatDate(startDateTime));
+        builder.attribute('time', _formatTime(startDateTime));
+        builder.attribute('duration', _formatDuration(duration));
 
         // Add child elements
         if (hasDivemaster()) {
@@ -230,13 +229,13 @@ extension ComputerDiveXml on Log {
     }
 
     // Parse temperatures
-    final airTemp = temperature != null ? tryParseUnitString(temperature.getAttribute('air')) : null;
-    final waterTemp = temperature != null ? tryParseUnitString(temperature.getAttribute('water')) : null;
+    final airTemp = temperature != null ? _tryParseUnitString(temperature.getAttribute('air')) : null;
+    final waterTemp = temperature != null ? _tryParseUnitString(temperature.getAttribute('water')) : null;
 
     // Parse events (these will be associated with samples by time)
     final eventsByTime = <int, List<SampleEvent>>{};
     for (final eventElem in elem.findElements('event')) {
-      final time = (tryParseUnitString(eventElem.getAttribute('time')) ?? 0).toInt();
+      final time = (_tryParseUnitString(eventElem.getAttribute('time')) ?? 0).toInt();
       final name = eventElem.getAttribute('name');
       final value = int.tryParse(eventElem.getAttribute('cylinder') ?? eventElem.getAttribute('value') ?? '') ?? 0;
 
@@ -247,10 +246,10 @@ extension ComputerDiveXml on Log {
 
     // Parse samples
     final samples = elem.findElements('sample').map((sampleElem) {
-      final time = tryParseUnitString(sampleElem.getAttribute('time')) ?? 0;
-      final sampleDepth = tryParseUnitString(sampleElem.getAttribute('depth'));
-      final temp = tryParseUnitString(sampleElem.getAttribute('temp'));
-      final pressure = tryParseUnitString(sampleElem.getAttribute('pressure'));
+      final time = _tryParseUnitString(sampleElem.getAttribute('time')) ?? 0;
+      final sampleDepth = _tryParseUnitString(sampleElem.getAttribute('depth'));
+      final temp = _tryParseUnitString(sampleElem.getAttribute('temp'));
+      final pressure = _tryParseUnitString(sampleElem.getAttribute('pressure'));
 
       final sample = LogSample(time: time, depth: sampleDepth, temperature: temp);
 
@@ -271,8 +270,8 @@ extension ComputerDiveXml on Log {
     final log = Log(
       model: model,
       serial: serial,
-      maxDepth: tryParseUnitString(depth?.getAttribute('max')),
-      avgDepth: tryParseUnitString(depth?.getAttribute('mean')),
+      maxDepth: _tryParseUnitString(depth?.getAttribute('max')),
+      avgDepth: _tryParseUnitString(depth?.getAttribute('mean')),
       surfaceTemperature: airTemp,
       minTemperature: waterTemp,
     );
@@ -299,8 +298,8 @@ extension ComputerDiveXml on Log {
           builder.element(
             'depth',
             nest: () {
-              if (hasMaxDepth()) builder.attribute('max', formatDepth(maxDepth));
-              if (hasAvgDepth()) builder.attribute('mean', formatDepth(avgDepth));
+              if (hasMaxDepth()) builder.attribute('max', _formatDepth(maxDepth));
+              if (hasAvgDepth()) builder.attribute('mean', _formatDepth(avgDepth));
             },
           );
         }
@@ -311,10 +310,10 @@ extension ComputerDiveXml on Log {
             'temperature',
             nest: () {
               if (hasSurfaceTemperature()) {
-                builder.attribute('air', formatTemp(surfaceTemperature));
+                builder.attribute('air', _formatTemp(surfaceTemperature));
               }
               if (hasMinTemperature()) {
-                builder.attribute('water', formatTemp(minTemperature));
+                builder.attribute('water', _formatTemp(minTemperature));
               }
             },
           );
@@ -326,7 +325,7 @@ extension ComputerDiveXml on Log {
             builder.element(
               'event',
               nest: () {
-                builder.attribute('time', formatDuration(event.time));
+                builder.attribute('time', _formatDuration(event.time));
                 builder.attribute('name', _eventTypeToSsrfName(event.type));
                 if (event.value != 0) {
                   builder.attribute('value', event.value.toString());
@@ -343,12 +342,12 @@ extension ComputerDiveXml on Log {
           builder.element(
             'sample',
             nest: () {
-              builder.attribute('time', formatDuration(sample.time.toInt()));
+              builder.attribute('time', _formatDuration(sample.time.toInt()));
               if (sample.hasDepth()) {
-                builder.attribute('depth', formatDepth(sample.depth));
+                builder.attribute('depth', _formatDepth(sample.depth));
               }
               if (sample.hasTemperature() && sample.temperature != prevTemp) {
-                builder.attribute('temp', formatTemp(sample.temperature));
+                builder.attribute('temp', _formatTemp(sample.temperature));
                 prevTemp = sample.temperature;
               }
               if (sample.pressures.isNotEmpty && sample.pressures.first.pressure != prevPressure) {
@@ -453,7 +452,7 @@ extension SiteXml on Site {
     final notes = elem.getElement('notes')?.innerText;
 
     return Site(
-      id: ensureUUID(elem.getAttribute('uuid')) ?? '',
+      id: _ensureUUID(elem.getAttribute('uuid')) ?? '',
       name: name,
       position: position,
       country: country,
@@ -533,14 +532,14 @@ extension DiveCylinderXml on DiveCylinder {
   static DiveCylinder fromXml(XmlElement elem) {
     return DiveCylinder(
       cylinder: Cylinder(
-        volumeL: tryParseUnitString(elem.getAttribute('size')),
-        workingPressureBar: tryParseUnitString(elem.getAttribute('workpressure')),
+        volumeL: _tryParseUnitString(elem.getAttribute('size')),
+        workingPressureBar: _tryParseUnitString(elem.getAttribute('workpressure')),
         description: elem.getAttribute('description'),
       ),
-      beginPressure: tryParseUnitString(elem.getAttribute('start')),
-      endPressure: tryParseUnitString(elem.getAttribute('end')),
-      oxygen: tryParseUnitString(elem.getAttribute('o2')),
-      helium: tryParseUnitString(elem.getAttribute('he')),
+      beginPressure: _tryParseUnitString(elem.getAttribute('start')),
+      endPressure: _tryParseUnitString(elem.getAttribute('end')),
+      oxygen: _tryParseUnitString(elem.getAttribute('o2')),
+      helium: _tryParseUnitString(elem.getAttribute('he')),
     );
   }
 
@@ -578,7 +577,7 @@ extension DiveCylinderXml on DiveCylinder {
 
 extension WeightsystemXml on Weightsystem {
   static Weightsystem fromXml(XmlElement elem) {
-    return Weightsystem(weight: tryParseUnitString(elem.getAttribute('weight')), description: elem.getAttribute('description'));
+    return Weightsystem(weight: _tryParseUnitString(elem.getAttribute('weight')), description: elem.getAttribute('description'));
   }
 
   XmlElement toXml() {
@@ -598,4 +597,95 @@ extension WeightsystemXml on Weightsystem {
   }
 }
 
-String? ensureUUID(String? u) => u?.replaceAll(' ', '0');
+String? _ensureUUID(String? u) => u?.replaceAll(' ', '0');
+
+double? _tryParseUnitString(String? s) {
+  if (s == null) return null;
+
+  final asIs = double.tryParse(s);
+  if (asIs != null) return asIs;
+
+  // Handle percentage (e.g., "32.0%")
+  if (s.endsWith('%')) {
+    final d = double.tryParse(s.substring(0, s.length - 1));
+    if (d != null) return d / 100.0;
+    return null;
+  }
+
+  final parts = s.split(' ');
+  if (parts.length < 2) return null;
+
+  switch (parts[1]) {
+    case 'min': // "1:23 min"
+      final minSec = parts[0].split(':');
+      if (minSec.length != 2) return null;
+      final min = double.tryParse(minSec[0]);
+      final sec = double.tryParse(minSec[1]);
+      if (min == null || sec == null) return null;
+      return min * 60 + sec;
+    default:
+      return double.tryParse(parts[0]);
+  }
+}
+
+DateTime? _tryParseDateTime(String? date, String? time) {
+  if (date == null) return null;
+
+  try {
+    // Parse date in format 'YYYY-MM-DD'
+    final dateParts = date.split('-');
+    if (dateParts.length != 3) return null;
+
+    final year = int.tryParse(dateParts[0]);
+    final month = int.tryParse(dateParts[1]);
+    final day = int.tryParse(dateParts[2]);
+
+    if (year == null || month == null || day == null) return null;
+
+    // Parse time in format 'HH:MM:SS' if provided
+    int hour = 0;
+    int minute = 0;
+    int second = 0;
+
+    if (time != null) {
+      final timeParts = time.split(':');
+      if (timeParts.length >= 2) {
+        hour = int.tryParse(timeParts[0]) ?? 0;
+        minute = int.tryParse(timeParts[1]) ?? 0;
+        if (timeParts.length >= 3) {
+          second = int.tryParse(timeParts[2]) ?? 0;
+        }
+      }
+    }
+
+    return DateTime(year, month, day, hour, minute, second);
+  } catch (e) {
+    return null;
+  }
+}
+
+// Serialization helpers
+String _formatDuration(int seconds) {
+  final minutes = seconds ~/ 60;
+  final secs = (seconds % 60).round();
+  return '$minutes:${secs.toString().padLeft(2, '0')} min';
+}
+
+String _formatDepth(double meters) {
+  // Use up to 3 decimal places, but remove trailing zeros
+  final formatted = meters.toStringAsFixed(3);
+  final trimmed = formatted.replaceAll(RegExp(r'\.?0+$'), '');
+  return '$trimmed m';
+}
+
+String _formatTemp(double celsius) {
+  return '${celsius.toStringAsFixed(1)} C';
+}
+
+String _formatDate(DateTime dt) {
+  return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
+}
+
+String _formatTime(DateTime dt) {
+  return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:${dt.second.toString().padLeft(2, '0')}';
+}

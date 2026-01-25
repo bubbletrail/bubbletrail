@@ -14,9 +14,8 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'computer.pb.dart' as $4;
-import 'dive.pb.dart' as $2;
-import 'log.pb.dart' as $3;
+import 'computer.pb.dart' as $3;
+import 'log.pb.dart' as $2;
 import 'site.pb.dart' as $1;
 import 'types.pb.dart' as $0;
 
@@ -120,58 +119,9 @@ class InternalSiteList extends $pb.GeneratedMessage {
   $pb.PbList<$1.Site> get sites => $_getList(0);
 }
 
-class InternalDiveList extends $pb.GeneratedMessage {
-  factory InternalDiveList({
-    $core.Iterable<$2.Dive>? dives,
-  }) {
-    final result = create();
-    if (dives != null) result.dives.addAll(dives);
-    return result;
-  }
-
-  InternalDiveList._();
-
-  factory InternalDiveList.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory InternalDiveList.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'InternalDiveList',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
-    ..pPM<$2.Dive>(1, _omitFieldNames ? '' : 'dives',
-        subBuilder: $2.Dive.create)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  InternalDiveList clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  InternalDiveList copyWith(void Function(InternalDiveList) updates) =>
-      super.copyWith((message) => updates(message as InternalDiveList))
-          as InternalDiveList;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static InternalDiveList create() => InternalDiveList._();
-  @$core.override
-  InternalDiveList createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static InternalDiveList getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<InternalDiveList>(create);
-  static InternalDiveList? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $pb.PbList<$2.Dive> get dives => $_getList(0);
-}
-
 class InternalLogList extends $pb.GeneratedMessage {
   factory InternalLogList({
-    $core.Iterable<$3.Log>? logs,
+    $core.Iterable<$2.Log>? logs,
   }) {
     final result = create();
     if (logs != null) result.logs.addAll(logs);
@@ -191,7 +141,7 @@ class InternalLogList extends $pb.GeneratedMessage {
       _omitMessageNames ? '' : 'InternalLogList',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
       createEmptyInstance: create)
-    ..pPM<$3.Log>(1, _omitFieldNames ? '' : 'logs', subBuilder: $3.Log.create)
+    ..pPM<$2.Log>(1, _omitFieldNames ? '' : 'logs', subBuilder: $2.Log.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -214,12 +164,12 @@ class InternalLogList extends $pb.GeneratedMessage {
   static InternalLogList? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $pb.PbList<$3.Log> get logs => $_getList(0);
+  $pb.PbList<$2.Log> get logs => $_getList(0);
 }
 
 class InternalComputerList extends $pb.GeneratedMessage {
   factory InternalComputerList({
-    $core.Iterable<$4.Computer>? computers,
+    $core.Iterable<$3.Computer>? computers,
   }) {
     final result = create();
     if (computers != null) result.computers.addAll(computers);
@@ -239,8 +189,8 @@ class InternalComputerList extends $pb.GeneratedMessage {
       _omitMessageNames ? '' : 'InternalComputerList',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
       createEmptyInstance: create)
-    ..pPM<$4.Computer>(1, _omitFieldNames ? '' : 'computers',
-        subBuilder: $4.Computer.create)
+    ..pPM<$3.Computer>(1, _omitFieldNames ? '' : 'computers',
+        subBuilder: $3.Computer.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -263,7 +213,7 @@ class InternalComputerList extends $pb.GeneratedMessage {
   static InternalComputerList? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $pb.PbList<$4.Computer> get computers => $_getList(0);
+  $pb.PbList<$3.Computer> get computers => $_getList(0);
 }
 
 const $core.bool _omitFieldNames =

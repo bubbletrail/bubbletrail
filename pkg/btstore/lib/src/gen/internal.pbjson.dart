@@ -55,26 +55,6 @@ final $typed_data.Uint8List internalSiteListDescriptor = $convert.base64Decode(
     'ChBJbnRlcm5hbFNpdGVMaXN0EiMKBXNpdGVzGAEgAygLMg0uYnRzdG9yZS5TaXRlUgVzaXRlcw'
     '==');
 
-@$core.Deprecated('Use internalDiveListDescriptor instead')
-const InternalDiveList$json = {
-  '1': 'InternalDiveList',
-  '2': [
-    {
-      '1': 'dives',
-      '3': 1,
-      '4': 3,
-      '5': 11,
-      '6': '.btstore.Dive',
-      '10': 'dives'
-    },
-  ],
-};
-
-/// Descriptor for `InternalDiveList`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List internalDiveListDescriptor = $convert.base64Decode(
-    'ChBJbnRlcm5hbERpdmVMaXN0EiMKBWRpdmVzGAEgAygLMg0uYnRzdG9yZS5EaXZlUgVkaXZlcw'
-    '==');
-
 @$core.Deprecated('Use internalLogListDescriptor instead')
 const InternalLogList$json = {
   '1': 'InternalLogList',

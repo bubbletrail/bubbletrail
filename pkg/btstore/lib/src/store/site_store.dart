@@ -1,4 +1,5 @@
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 
 import '../gen/gen.dart';
 import '../gen/internal.pb.dart';
@@ -42,6 +43,10 @@ class SiteStore extends EntityStore<Site, InternalSiteList> {
 
   @override
   int compare(Site a, Site b) => a.name.compareTo(b.name);
+
+  @override
+  @internal
+  Future<void> delete(String id) => super.delete(id);
 
   // Site-specific methods with tag tracking
 

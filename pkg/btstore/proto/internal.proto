@@ -16,10 +16,6 @@ message InternalSiteList {
   repeated Site sites = 1;
 }
 
-message InternalDiveList {
-  repeated Dive dives = 1;
-}
-
 message InternalLogList {
   repeated Log logs = 1;
 }
