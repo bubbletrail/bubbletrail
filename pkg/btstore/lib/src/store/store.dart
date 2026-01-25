@@ -21,7 +21,7 @@ class Store {
 
   final ComputerStore computers;
   final CylinderStore cylinders;
-  final btstore dives;
+  final DiveStore dives;
   final SiteStore sites;
 
   final _changes = StreamController<void>.broadcast();
@@ -31,7 +31,7 @@ class Store {
   Store(this.path)
     : computers = ComputerStore('$path/computers.binpb'),
       cylinders = CylinderStore('$path/cylinders.binpb'),
-      dives = btstore('$path/dives'),
+      dives = DiveStore('$path/dives'),
       sites = SiteStore('$path/sites.binpb') {
     computers.changes.listen((_) => _scheduleChange());
     cylinders.changes.listen((_) => _scheduleChange());
