@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:glob/glob.dart';
 import 'package:glob/list_local_fs.dart';
@@ -12,6 +13,7 @@ import '../sync/syncprovider.dart';
 import 'computer_store.dart';
 import 'cylinder_store.dart';
 import 'dive_store.dart';
+import 'equipment_store.dart';
 import 'site_store.dart';
 
 final _log = Logger('store.dart');
@@ -22,6 +24,7 @@ class Store {
   final ComputerStore computers;
   final CylinderStore cylinders;
   final DiveStore dives;
+  final EquipmentStore equipment;
   final SiteStore sites;
 
   final _changes = StreamController<void>.broadcast();
@@ -29,13 +32,15 @@ class Store {
   Stream<void> get changes => _changes.stream;
 
   Store(this.path)
-    : computers = ComputerStore('$path/computers.binpb'),
-      cylinders = CylinderStore('$path/cylinders.binpb'),
+    : cylinders = CylinderStore('$path/cylinders.binpb'),
       dives = DiveStore('$path/dives'),
-      sites = SiteStore('$path/sites.binpb') {
+      equipment = EquipmentStore('$path/equipment.binpb'),
+      sites = SiteStore('$path/sites.binpb'),
+      computers = ComputerStore('$path/computers.binpb') {
     computers.changes.listen((_) => _scheduleChange());
     cylinders.changes.listen((_) => _scheduleChange());
     dives.changes.listen((_) => _scheduleChange());
+    equipment.changes.listen((_) => _scheduleChange());
     sites.changes.listen((_) => _scheduleChange());
   }
 
@@ -48,6 +53,7 @@ class Store {
     await computers.init();
     await cylinders.init();
     await dives.init();
+    await equipment.init();
     await sites.init();
   }
 
@@ -77,6 +83,11 @@ class Store {
       await cylinders.syncWith(provider);
     } catch (e) {
       _log.warning('failed to sync cylinders', e);
+    }
+    try {
+      await equipment.syncWith(provider);
+    } catch (e) {
+      _log.warning('failed to sync equipment', e);
     }
     try {
       await sites.syncWith(provider);
@@ -140,6 +151,7 @@ class Store {
       return null;
     }
     try {
+      // Map cylinders to get their physical properties.s
       final mappedCyls = <DiveCylinder>[];
       for (var dc in dive.cylinders) {
         final cyl = await cylinders.getById(dc.cylinderId);
@@ -150,9 +162,21 @@ class Store {
         }
         mappedCyls.add(dc);
       }
+      // Ensure any equipment on the dive is up to date and hasn't been
+      // deleted.
+      final mappedEquipment = <Equipment>[];
+      for (final teq in dive.equipment) {
+        final deq = await equipment.getById(teq.id);
+        if (deq != null && !deq.meta.isDeleted) {
+          mappedEquipment.add(deq);
+        }
+      }
+      mappedEquipment.sort((a, b) => compareSlices([a.type, a.manufacturer, a.name], [b.type, b.manufacturer, b.name]));
       return dive.rebuild((dive) {
         dive.cylinders.clear();
         dive.cylinders.addAll(mappedCyls);
+        dive.equipment.clear();
+        dive.equipment.addAll(mappedEquipment);
         dive.recalculateMetadata();
       });
     } catch (e) {
@@ -175,4 +199,12 @@ class Store {
     // Remove the site itself
     await sites.delete(siteID);
   }
+}
+
+int compareSlices(List<String> a, List<String> b) {
+  for (var i = 0; i < min(a.length, b.length); i++) {
+    final c = a[i].compareTo(b[i]);
+    if (c != 0) return c;
+  }
+  return a.length.compareTo(b.length);
 }

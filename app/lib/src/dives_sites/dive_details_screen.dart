@@ -214,12 +214,14 @@ class _DiveDetails extends StatelessWidget {
 
   Widget _weightsTable() {
     return DataCardColumn(
-      children: dive.weightsystems.indexed.map((entry) {
-        final idx = entry.$1;
-        final ws = entry.$2;
-        final desc = ws.description.isNotEmpty ? ws.description : 'Weight ${idx + 1}';
-        return ColumnRow(label: desc, child: WeightText(ws.weight));
-      }).toList(),
+      children:
+          dive.weightsystems.indexed.map((entry) {
+            final idx = entry.$1;
+            final ws = entry.$2;
+            final desc = ws.description.isNotEmpty ? ws.description : 'Weight ${idx + 1}';
+            return ColumnRow(label: desc, child: WeightText(ws.weight));
+          }).toList() +
+          dive.equipment.map((eq) => ColumnRow(label: eq.type, child: Text([eq.manufacturer, eq.name].join(' ').trim()))).toList(),
     );
   }
 

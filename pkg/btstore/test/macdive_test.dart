@@ -190,4 +190,90 @@ void main() {
       expect(dive.weightsystems[0].description, 'Weight belt');
     });
   });
+
+  group('MacDive Equipment CSV Import', () {
+    late List<Equipment> equipment;
+
+    setUpAll(() {
+      final file = File('test/testdata/macdive-gear.csv');
+      equipment = importMacDiveEquipmentCsv(file.readAsStringSync());
+    });
+
+    test('parses all equipment items', () {
+      expect(equipment, hasLength(3));
+    });
+
+    test('parses equipment with all fields', () {
+      final fins = equipment.firstWhere((e) => e.name == 'Recon');
+
+      expect(fins.manufacturer, 'Zeagle');
+      expect(fins.type, 'Fins');
+      expect(fins.serial, 'ABC123');
+      expect(fins.weight, closeTo(3.0, 0.01));
+      expect(fins.purchasePrice, closeTo(2000.0, 0.01));
+      expect(fins.shop, 'gidivestore.com');
+
+      expect(fins.hasPurchaseDate(), isTrue);
+      final purchaseDate = fins.purchaseDate.toDateTime().toUtc();
+      expect(purchaseDate.year, 2023);
+      expect(purchaseDate.month, 7);
+      expect(purchaseDate.day, 31);
+
+      expect(fins.hasWarrantyUntil(), isTrue);
+      final warrantyUntil = fins.warrantyUntil.toDateTime().toUtc();
+      expect(warrantyUntil.year, 2024);
+      expect(warrantyUntil.month, 7);
+      expect(warrantyUntil.day, 31);
+
+      expect(fins.hasLastService(), isTrue);
+      final lastService = fins.lastService.toDateTime().toUtc();
+      expect(lastService.year, 2023);
+      expect(lastService.month, 8);
+      expect(lastService.day, 1);
+    });
+
+    test('parses equipment with zero weight and price', () {
+      final undersuit = equipment.firstWhere((e) => e.name.contains('undersuit'));
+
+      expect(undersuit.manufacturer, 'Oceanic');
+      expect(undersuit.type, 'Other');
+      expect(undersuit.weight, closeTo(0.0, 0.01));
+      expect(undersuit.purchasePrice, closeTo(0.0, 0.01));
+    });
+
+    test('parses regulator with service date', () {
+      final regulator = equipment.firstWhere((e) => e.type == 'Regulator');
+
+      expect(regulator.manufacturer, 'Poseidon');
+      expect(regulator.name, 'Xstream Deep');
+      expect(regulator.purchasePrice, closeTo(10000.0, 0.01));
+
+      expect(regulator.hasPurchaseDate(), isTrue);
+      final purchaseDate = regulator.purchaseDate.toDateTime().toUtc();
+      expect(purchaseDate.year, 2023);
+      expect(purchaseDate.month, 3);
+      expect(purchaseDate.day, 22);
+
+      expect(regulator.hasLastService(), isTrue);
+      final lastService = regulator.lastService.toDateTime().toUtc();
+      expect(lastService.year, 2023);
+      expect(lastService.month, 4);
+      expect(lastService.day, 1);
+    });
+
+    test('generates unique IDs', () {
+      final ids = equipment.map((e) => e.id).toSet();
+      expect(ids, hasLength(equipment.length));
+    });
+
+    test('handles empty CSV', () {
+      final result = importMacDiveEquipmentCsv('');
+      expect(result, isEmpty);
+    });
+
+    test('handles header-only CSV', () {
+      final result = importMacDiveEquipmentCsv('Manufacturer, Name, Type, Serial, Weight, Purchase Date, Purchase Price, Shop, Warranty, Last Service\n');
+      expect(result, isEmpty);
+    });
+  });
 }

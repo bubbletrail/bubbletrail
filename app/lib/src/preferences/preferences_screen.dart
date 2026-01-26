@@ -11,6 +11,7 @@ import '../app_metadata.dart';
 import '../app_routes.dart';
 import 'archive_bloc.dart';
 import '../dives_sites/dive_list_bloc.dart';
+import '../equipment/equipment_list_bloc.dart';
 import 'preferences_bloc.dart';
 import 'sync_bloc.dart';
 import '../common/common.dart';
@@ -301,6 +302,15 @@ class _ImportExportButtons extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Importing dives...')));
   }
 
+  Future<void> _importEquipment(BuildContext context) async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['csv']);
+    if (result == null || result.files.single.path == null) return;
+    if (!context.mounted) return;
+
+    context.read<EquipmentListBloc>().add(EquipmentListEvent.importEquipment(result.files.single.path!));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Importing equipment...')));
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ArchiveBloc, ArchiveState>(
@@ -324,6 +334,11 @@ class _ImportExportButtons extends StatelessWidget {
               icon: const Icon(Icons.file_upload_outlined, size: 16),
               label: const Text('Import log file'),
               onPressed: state.working ? null : () => _importDives(context),
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.file_upload_outlined, size: 16),
+              label: const Text('Import equipment'),
+              onPressed: state.working ? null : () => _importEquipment(context),
             ),
             OutlinedButton.icon(
               icon: const Icon(Icons.file_download_outlined, size: 16),

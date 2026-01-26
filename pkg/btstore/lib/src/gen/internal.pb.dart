@@ -15,6 +15,7 @@ import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'computer.pb.dart' as $3;
+import 'equipment.pb.dart' as $4;
 import 'log.pb.dart' as $2;
 import 'site.pb.dart' as $1;
 import 'types.pb.dart' as $0;
@@ -214,6 +215,56 @@ class InternalComputerList extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(1)
   $pb.PbList<$3.Computer> get computers => $_getList(0);
+}
+
+class InternalEquipmentList extends $pb.GeneratedMessage {
+  factory InternalEquipmentList({
+    $core.Iterable<$4.Equipment>? equipments,
+  }) {
+    final result = create();
+    if (equipments != null) result.equipments.addAll(equipments);
+    return result;
+  }
+
+  InternalEquipmentList._();
+
+  factory InternalEquipmentList.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory InternalEquipmentList.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'InternalEquipmentList',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
+      createEmptyInstance: create)
+    ..pPM<$4.Equipment>(1, _omitFieldNames ? '' : 'equipments',
+        subBuilder: $4.Equipment.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  InternalEquipmentList clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  InternalEquipmentList copyWith(
+          void Function(InternalEquipmentList) updates) =>
+      super.copyWith((message) => updates(message as InternalEquipmentList))
+          as InternalEquipmentList;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static InternalEquipmentList create() => InternalEquipmentList._();
+  @$core.override
+  InternalEquipmentList createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static InternalEquipmentList getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<InternalEquipmentList>(create);
+  static InternalEquipmentList? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$4.Equipment> get equipments => $_getList(0);
 }
 
 const $core.bool _omitFieldNames =
