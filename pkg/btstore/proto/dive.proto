@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package btstore;
 
+import "equipment.proto";
 import "google/protobuf/timestamp.proto";
 import "log.proto";
 import "types.proto";
@@ -15,7 +16,7 @@ message Dive {
   int32 number = 4; // Dive number, human readable/assigned
   int32 rating = 5; // 0-5 stars
   repeated string tags = 6; // Free-form tag strings
-  google.protobuf.Timestamp start = 7; // Unix epoch timestamp (seconds)
+  google.protobuf.Timestamp start = 7;
 
   // Summary data (populated from dive computer data, but editable by the user)
   int32 duration = 8; // Seconds
@@ -50,9 +51,13 @@ message Dive {
   reserved 27;
   double end_surf_gf = 28;
 
+  // Equipment
+  repeated Equipment equipment = 29;
+
   // Raw dive computer data
-  repeated Log deprecated_logs = 23;
   repeated Log logs = 64;
+
+  reserved 23;
 }
 
 // Per-dive cylinder usage information.

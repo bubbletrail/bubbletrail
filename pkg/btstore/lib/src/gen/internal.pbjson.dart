@@ -86,3 +86,23 @@ const InternalComputerList$json = {
 final $typed_data.Uint8List internalComputerListDescriptor = $convert.base64Decode(
     'ChRJbnRlcm5hbENvbXB1dGVyTGlzdBIvCgljb21wdXRlcnMYASADKAsyES5idHN0b3JlLkNvbX'
     'B1dGVyUgljb21wdXRlcnM=');
+
+@$core.Deprecated('Use internalEquipmentListDescriptor instead')
+const InternalEquipmentList$json = {
+  '1': 'InternalEquipmentList',
+  '2': [
+    {
+      '1': 'equipments',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.btstore.Equipment',
+      '10': 'equipments'
+    },
+  ],
+};
+
+/// Descriptor for `InternalEquipmentList`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List internalEquipmentListDescriptor = $convert.base64Decode(
+    'ChVJbnRlcm5hbEVxdWlwbWVudExpc3QSMgoKZXF1aXBtZW50cxgBIAMoCzISLmJ0c3RvcmUuRX'
+    'F1aXBtZW50UgplcXVpcG1lbnRz');

@@ -1,8 +1,115 @@
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
+import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
 import '../gen/gen.dart';
 import 'container.dart';
+
+// Import equipment from MacDive CSV export.
+//
+// The CSV format has a header row followed by data rows:
+// Manufacturer, Name, Type, Serial, Weight, Purchase Date, Purchase Price, Shop, Warranty, Last Service
+List<Equipment> importMacDiveEquipmentCsv(String csv) {
+  final lines = csv.split('\n').where((line) => line.trim().isNotEmpty).toList();
+  if (lines.isEmpty) return [];
+
+  // Skip header row
+  final dataLines = lines.skip(1);
+  final equipment = <Equipment>[];
+
+  for (final line in dataLines) {
+    final fields = _parseCsvLine(line);
+    if (fields.length < 10) continue;
+
+    final manufacturer = fields[0].trim();
+    final name = fields[1].trim();
+    final type = fields[2].trim();
+    final serial = fields[3].trim();
+    final weight = double.tryParse(fields[4].trim()) ?? 0.0;
+    final purchaseDateStr = fields[5].trim();
+    final purchasePrice = double.tryParse(fields[6].trim()) ?? 0.0;
+    final shop = fields[7].trim();
+    final warrantyStr = fields[8].trim();
+    final lastServiceStr = fields[9].trim();
+
+    // Skip empty rows
+    if (manufacturer.isEmpty && name.isEmpty && type.isEmpty) continue;
+
+    // Parse dates (parse as UTC to avoid timezone issues)
+    Timestamp? purchaseDate;
+    if (purchaseDateStr.isNotEmpty) {
+      final dt = DateTime.tryParse(purchaseDateStr);
+      if (dt != null) {
+        purchaseDate = Timestamp.fromDateTime(DateTime.utc(dt.year, dt.month, dt.day));
+      }
+    }
+
+    Timestamp? warrantyUntil;
+    if (warrantyStr.isNotEmpty) {
+      final dt = DateTime.tryParse(warrantyStr);
+      if (dt != null) {
+        warrantyUntil = Timestamp.fromDateTime(DateTime.utc(dt.year, dt.month, dt.day));
+      }
+    }
+
+    Timestamp? lastService;
+    if (lastServiceStr.isNotEmpty) {
+      final dt = DateTime.tryParse(lastServiceStr);
+      if (dt != null) {
+        lastService = Timestamp.fromDateTime(DateTime.utc(dt.year, dt.month, dt.day));
+      }
+    }
+
+    equipment.add(
+      Equipment(
+        id: const Uuid().v4(),
+        type: type,
+        manufacturer: manufacturer,
+        name: name,
+        serial: serial,
+        weight: weight,
+        purchaseDate: purchaseDate,
+        purchasePrice: purchasePrice,
+        shop: shop,
+        warrantyUntil: warrantyUntil,
+        lastService: lastService,
+      ),
+    );
+  }
+
+  return equipment;
+}
+
+/// Parse a CSV line into fields, handling quoted values.
+List<String> _parseCsvLine(String line) {
+  final fields = <String>[];
+  final buffer = StringBuffer();
+  var inQuotes = false;
+
+  for (var i = 0; i < line.length; i++) {
+    final char = line[i];
+
+    if (char == '"') {
+      // Check for escaped quote ("")
+      if (inQuotes && i + 1 < line.length && line[i + 1] == '"') {
+        buffer.write('"');
+        i++; // Skip the next quote
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char == ',' && !inQuotes) {
+      fields.add(buffer.toString());
+      buffer.clear();
+    } else {
+      buffer.write(char);
+    }
+  }
+
+  // Add the last field
+  fields.add(buffer.toString());
+
+  return fields;
+}
 
 extension MacDiveXml on Container {
   /// Parse MacDive XML and return an Ssrf container with dives and sites.
@@ -116,6 +223,21 @@ extension _MacDiveDive on Dive {
       }
     }
 
+    // Parse gear/equipment
+    final equipmentItems = <Equipment>[];
+    final gearElem = elem.getElement('gear');
+    if (gearElem != null) {
+      for (final itemElem in gearElem.findElements('item')) {
+        final type = _getElementText(itemElem, 'type') ?? '';
+        final manufacturer = _getElementText(itemElem, 'manufacturer') ?? '';
+        final name = _getElementText(itemElem, 'name') ?? '';
+        final serial = _getElementText(itemElem, 'serial') ?? '';
+        if (type.isNotEmpty || manufacturer.isNotEmpty || name.isNotEmpty) {
+          equipmentItems.add(Equipment(type: type, manufacturer: manufacturer, name: name, serial: serial));
+        }
+      }
+    }
+
     // Parse gases/cylinders
     final cylinders = <DiveCylinder>[];
     final gasesElem = elem.getElement('gases');
@@ -174,6 +296,7 @@ extension _MacDiveDive on Dive {
     dive.buddies.addAll(buddies);
     dive.cylinders.addAll(cylinders);
     dive.weightsystems.addAll(weightsystems);
+    dive.equipment.addAll(equipmentItems);
     dive.logs.add(log);
 
     return _DiveResult(dive: dive, site: site);

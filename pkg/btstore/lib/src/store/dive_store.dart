@@ -76,11 +76,6 @@ class DiveStore {
       }
       dive.meta = dive.meta.rebuildUpdated();
       dive.clearSyncedEtag();
-      for (final (idx, cyl) in dive.cylinders.indexed) {
-        dive.cylinders[idx] = cyl.rebuild((cyl) {
-          cyl.clearCylinder();
-        });
-      }
     });
     _dives[dive.id] = dive;
     _tags.addAll(dive.tags);
@@ -208,6 +203,16 @@ class DiveStore {
 
         final metaOnly = dive.rebuild((dive) {
           dive.logs.clear();
+          // Clear cylinder data from cylinder list (retaining only the referencing ID)
+          for (final (idx, cyl) in dive.cylinders.indexed) {
+            dive.cylinders[idx] = cyl.rebuild((cyl) {
+              cyl.clearCylinder();
+            });
+          }
+          // Clear equipment data, retaining only the referencing ID
+          for (final (idx, eq) in dive.equipment.indexed) {
+            dive.equipment[idx] = Equipment(id: eq.id);
+          }
         });
         await atomicWriteProto(_metaName(dir, dive), metaOnly);
       }
@@ -254,10 +259,6 @@ class DiveStore {
         _log.warning('bug: object ${obj.key} contained unexpected dive ${dive.id}; deleting');
         await provider.deleteObject(obj.key);
         continue;
-      }
-      if (dive.deprecatedLogs.isNotEmpty) {
-        dive.logs.addAll(dive.deprecatedLogs);
-        dive.deprecatedLogs.clear();
       }
       dive.syncedEtag = obj.eTag;
       dive.freeze();

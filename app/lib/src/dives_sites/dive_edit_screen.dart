@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart' as proto;
 
 import '../equipment/cylinder_list_bloc.dart';
+import '../equipment/equipment_list_bloc.dart';
 import 'dive_details_bloc.dart';
 import 'dive_list_bloc.dart';
 import '../common/common.dart';
@@ -37,6 +38,8 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   late List<String> _availableBuddies;
   late List<Site> _availableSites;
   late List<Cylinder> _availableCylinders;
+  late List<Equipment> _availableEquipment;
+  late List<Equipment> _selectedEquipment;
 
   Site? _selectedSite;
 
@@ -64,6 +67,14 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
 
     final cylinderListState = context.read<CylinderListBloc>().state as CylinderListLoaded;
     _availableCylinders = cylinderListState.cylinders;
+
+    final equipmentListState = context.read<EquipmentListBloc>().state;
+    if (equipmentListState is EquipmentListLoaded) {
+      _availableEquipment = equipmentListState.equipment;
+    } else {
+      _availableEquipment = [];
+    }
+    _selectedEquipment = dive.equipment.toList();
 
     // Initialize cylinders from dive
     _cylinders = dive.cylinders.map((dc) => _EditableDiveCylinder.fromDiveCylinder(dc)).toList();
@@ -396,6 +407,15 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     descController.dispose();
   }
 
+  Future<void> _selectEquipment() async {
+    final result = await showEquipmentSelectionDialog(context: context, allEquipment: _availableEquipment, selectedEquipment: _selectedEquipment);
+    if (result != null) {
+      setState(() {
+        _selectedEquipment = result;
+      });
+    }
+  }
+
   void _saveDive() {
     final upd = dive.rebuild((dive) {
       // Update dive properties
@@ -432,6 +452,10 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       // Update weight systems
       dive.weightsystems.clear();
       dive.weightsystems.addAll(_weightsystems.map((ws) => ws.toWeightsystem()));
+
+      // Update equipment
+      dive.equipment.clear();
+      dive.equipment.addAll(_selectedEquipment);
 
       // Update gas change events
       dive.events.clear();
@@ -665,6 +689,37 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                         ),
                       );
                     }),
+                ],
+              ),
+              // Equipment section
+              Column(
+                crossAxisAlignment: .start,
+                children: [
+                  Row(
+                    mainAxisAlignment: .spaceBetween,
+                    children: [
+                      Text('Equipment', style: Theme.of(context).textTheme.titleMedium),
+                      IconButton(icon: const Icon(Icons.edit), onPressed: _selectEquipment, tooltip: 'Select equipment'),
+                    ],
+                  ),
+                  if (_selectedEquipment.isEmpty)
+                    Padding(
+                      padding: const .symmetric(vertical: 8),
+                      child: Text('No equipment selected', style: TextStyle(color: Theme.of(context).hintColor)),
+                    )
+                  else
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: _selectedEquipment
+                          .map(
+                            (e) => Chip(
+                              avatar: EquipmentIcons.icon(EquipmentIcons.forType(e.type), color: Theme.of(context).colorScheme.primary),
+                              label: Text(EquipmentListTile.equipmentTitle(e)),
+                            ),
+                          )
+                          .toList(),
+                    ),
                 ],
               ),
               Column(

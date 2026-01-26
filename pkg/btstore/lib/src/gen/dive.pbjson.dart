@@ -95,17 +95,18 @@ const Dive$json = {
     },
     {'1': 'end_surf_gf', '3': 28, '4': 1, '5': 1, '10': 'endSurfGf'},
     {
-      '1': 'deprecated_logs',
-      '3': 23,
+      '1': 'equipment',
+      '3': 29,
       '4': 3,
       '5': 11,
-      '6': '.btstore.Log',
-      '10': 'deprecatedLogs'
+      '6': '.btstore.Equipment',
+      '10': 'equipment'
     },
     {'1': 'logs', '3': 64, '4': 3, '5': 11, '6': '.btstore.Log', '10': 'logs'},
   ],
   '9': [
     {'1': 27, '2': 28},
+    {'1': 23, '2': 24},
   ],
 };
 
@@ -126,8 +127,8 @@ final $typed_data.Uint8List diveDescriptor = $convert.base64Decode(
     'bnRzGBggAygLMhQuYnRzdG9yZS5TYW1wbGVFdmVudFIGZXZlbnRzEjUKDXN0YXJ0X3Rpc3N1ZX'
     'MYGSABKAsyEC5idHN0b3JlLlRpc3N1ZXNSDHN0YXJ0VGlzc3VlcxIxCgtlbmRfdGlzc3Vlcxga'
     'IAEoCzIQLmJ0c3RvcmUuVGlzc3Vlc1IKZW5kVGlzc3VlcxIeCgtlbmRfc3VyZl9nZhgcIAEoAV'
-    'IJZW5kU3VyZkdmEjUKD2RlcHJlY2F0ZWRfbG9ncxgXIAMoCzIMLmJ0c3RvcmUuTG9nUg5kZXBy'
-    'ZWNhdGVkTG9ncxIgCgRsb2dzGEAgAygLMgwuYnRzdG9yZS5Mb2dSBGxvZ3NKBAgbEBw=');
+    'IJZW5kU3VyZkdmEjAKCWVxdWlwbWVudBgdIAMoCzISLmJ0c3RvcmUuRXF1aXBtZW50UgllcXVp'
+    'cG1lbnQSIAoEbG9ncxhAIAMoCzIMLmJ0c3RvcmUuTG9nUgRsb2dzSgQIGxAcSgQIFxAY');
 
 @$core.Deprecated('Use diveCylinderDescriptor instead')
 const DiveCylinder$json = {

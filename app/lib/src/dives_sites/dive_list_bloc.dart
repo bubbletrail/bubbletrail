@@ -223,8 +223,8 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     final newSites = importedDoc.sites.where((s) => !existingSiteUuids.contains(s.id)).toList();
     await _store.sites.updateAll(newSites);
 
-    // Process cylinders
     for (final dive in importedDoc.dives) {
+      // Process cylinders
       for (final cyl in dive.cylinders) {
         if (cyl.hasCylinder()) {
           final c = cyl.cylinder;
@@ -236,6 +236,24 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
           cyl.cylinderId = cr.id;
         }
       }
+
+      // Process equipment
+      for (final (idx, eq) in dive.equipment.indexed) {
+        final matched = await _store.equipment.getOrCreate(
+          type: eq.type,
+          manufacturer: eq.manufacturer,
+          name: eq.name,
+          serial: eq.serial,
+          weight: eq.hasWeight() ? eq.weight : null,
+          purchaseDate: eq.hasPurchaseDate() ? eq.purchaseDate : null,
+          purchasePrice: eq.hasPurchasePrice() ? eq.purchasePrice : null,
+          shop: eq.hasShop() ? eq.shop : null,
+          warrantyUntil: eq.hasWarrantyUntil() ? eq.warrantyUntil : null,
+          lastService: eq.hasLastService() ? eq.lastService : null,
+        );
+        dive.equipment[idx] = Equipment(id: matched.id);
+      }
+
       dive.recalculateMetadata();
     }
 

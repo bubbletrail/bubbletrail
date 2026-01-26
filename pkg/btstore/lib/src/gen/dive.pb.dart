@@ -16,6 +16,7 @@ import 'package:protobuf/protobuf.dart' as $pb;
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart'
     as $1;
 
+import 'equipment.pb.dart' as $3;
 import 'log.pb.dart' as $2;
 import 'types.pb.dart' as $0;
 
@@ -46,11 +47,11 @@ class Dive extends $pb.GeneratedMessage {
     $core.String? notes,
     $core.Iterable<DiveCylinder>? cylinders,
     $core.Iterable<Weightsystem>? weightsystems,
-    $core.Iterable<$2.Log>? deprecatedLogs,
     $core.Iterable<$2.SampleEvent>? events,
     $0.Tissues? startTissues,
     $0.Tissues? endTissues,
     $core.double? endSurfGf,
+    $core.Iterable<$3.Equipment>? equipment,
     $core.Iterable<$2.Log>? logs,
   }) {
     final result = create();
@@ -76,11 +77,11 @@ class Dive extends $pb.GeneratedMessage {
     if (notes != null) result.notes = notes;
     if (cylinders != null) result.cylinders.addAll(cylinders);
     if (weightsystems != null) result.weightsystems.addAll(weightsystems);
-    if (deprecatedLogs != null) result.deprecatedLogs.addAll(deprecatedLogs);
     if (events != null) result.events.addAll(events);
     if (startTissues != null) result.startTissues = startTissues;
     if (endTissues != null) result.endTissues = endTissues;
     if (endSurfGf != null) result.endSurfGf = endSurfGf;
+    if (equipment != null) result.equipment.addAll(equipment);
     if (logs != null) result.logs.addAll(logs);
     return result;
   }
@@ -124,8 +125,6 @@ class Dive extends $pb.GeneratedMessage {
         subBuilder: DiveCylinder.create)
     ..pPM<Weightsystem>(22, _omitFieldNames ? '' : 'weightsystems',
         subBuilder: Weightsystem.create)
-    ..pPM<$2.Log>(23, _omitFieldNames ? '' : 'deprecatedLogs',
-        subBuilder: $2.Log.create)
     ..pPM<$2.SampleEvent>(24, _omitFieldNames ? '' : 'events',
         subBuilder: $2.SampleEvent.create)
     ..aOM<$0.Tissues>(25, _omitFieldNames ? '' : 'startTissues',
@@ -133,6 +132,8 @@ class Dive extends $pb.GeneratedMessage {
     ..aOM<$0.Tissues>(26, _omitFieldNames ? '' : 'endTissues',
         subBuilder: $0.Tissues.create)
     ..aD(28, _omitFieldNames ? '' : 'endSurfGf')
+    ..pPM<$3.Equipment>(29, _omitFieldNames ? '' : 'equipment',
+        subBuilder: $3.Equipment.create)
     ..pPM<$2.Log>(64, _omitFieldNames ? '' : 'logs', subBuilder: $2.Log.create)
     ..hasRequiredFields = false;
 
@@ -336,47 +337,48 @@ class Dive extends $pb.GeneratedMessage {
   @$pb.TagNumber(22)
   $pb.PbList<Weightsystem> get weightsystems => $_getList(21);
 
-  /// Raw dive computer data
-  @$pb.TagNumber(23)
-  $pb.PbList<$2.Log> get deprecatedLogs => $_getList(22);
-
   /// Events like gas changed, initially extracted from dive computer data
   /// but editable.
   @$pb.TagNumber(24)
-  $pb.PbList<$2.SampleEvent> get events => $_getList(23);
+  $pb.PbList<$2.SampleEvent> get events => $_getList(22);
 
   /// Start and end tissues for this dive, calculated
   @$pb.TagNumber(25)
-  $0.Tissues get startTissues => $_getN(24);
+  $0.Tissues get startTissues => $_getN(23);
   @$pb.TagNumber(25)
   set startTissues($0.Tissues value) => $_setField(25, value);
   @$pb.TagNumber(25)
-  $core.bool hasStartTissues() => $_has(24);
+  $core.bool hasStartTissues() => $_has(23);
   @$pb.TagNumber(25)
   void clearStartTissues() => $_clearField(25);
   @$pb.TagNumber(25)
-  $0.Tissues ensureStartTissues() => $_ensure(24);
+  $0.Tissues ensureStartTissues() => $_ensure(23);
 
   @$pb.TagNumber(26)
-  $0.Tissues get endTissues => $_getN(25);
+  $0.Tissues get endTissues => $_getN(24);
   @$pb.TagNumber(26)
   set endTissues($0.Tissues value) => $_setField(26, value);
   @$pb.TagNumber(26)
-  $core.bool hasEndTissues() => $_has(25);
+  $core.bool hasEndTissues() => $_has(24);
   @$pb.TagNumber(26)
   void clearEndTissues() => $_clearField(26);
   @$pb.TagNumber(26)
-  $0.Tissues ensureEndTissues() => $_ensure(25);
+  $0.Tissues ensureEndTissues() => $_ensure(24);
 
   @$pb.TagNumber(28)
-  $core.double get endSurfGf => $_getN(26);
+  $core.double get endSurfGf => $_getN(25);
   @$pb.TagNumber(28)
-  set endSurfGf($core.double value) => $_setDouble(26, value);
+  set endSurfGf($core.double value) => $_setDouble(25, value);
   @$pb.TagNumber(28)
-  $core.bool hasEndSurfGf() => $_has(26);
+  $core.bool hasEndSurfGf() => $_has(25);
   @$pb.TagNumber(28)
   void clearEndSurfGf() => $_clearField(28);
 
+  /// Equipment
+  @$pb.TagNumber(29)
+  $pb.PbList<$3.Equipment> get equipment => $_getList(26);
+
+  /// Raw dive computer data
   @$pb.TagNumber(64)
   $pb.PbList<$2.Log> get logs => $_getList(27);
 }
