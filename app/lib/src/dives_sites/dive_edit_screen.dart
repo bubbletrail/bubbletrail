@@ -483,19 +483,6 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
     context.pop();
   }
 
-  String _equipmentTitle(Equipment item) {
-    if (item.name.isNotEmpty) {
-      return item.name;
-    }
-    if (item.manufacturer.isNotEmpty && item.type.isNotEmpty) {
-      return '${item.manufacturer} ${item.type}';
-    }
-    if (item.type.isNotEmpty) {
-      return item.type;
-    }
-    return 'Equipment #${item.id}';
-  }
-
   @override
   Widget build(BuildContext context) {
     final canEditDepthDuration = dive.logs.isEmpty || dive.logs.first.isSynthetic;
@@ -728,7 +715,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
                           .map(
                             (e) => Chip(
                               avatar: EquipmentIcons.icon(EquipmentIcons.forType(e.type), color: Theme.of(context).colorScheme.primary),
-                              label: Text(_equipmentTitle(e)),
+                              label: Text(EquipmentListTile.equipmentTitle(e)),
                             ),
                           )
                           .toList(),

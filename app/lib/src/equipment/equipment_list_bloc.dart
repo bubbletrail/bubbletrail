@@ -76,7 +76,7 @@ class EquipmentListBloc extends Bloc<EquipmentListEvent, EquipmentListState> {
 
   Future<void> _onInit(_Init event, Emitter<EquipmentListState> emit) async {
     _store = await StorageProvider.store;
-    _equipmentSub = _store.equipment.changes.listen((equipment) async {
+    _equipmentSub = _store.equipment.changes.listen((_) async {
       final equipment = await _store.equipment.getAll();
       add(_LoadedEquipment(equipment));
     });
