@@ -45,11 +45,13 @@ import 'src/preferences/sync_bloc.dart';
 import 'src/preferences/sync_settings_screen.dart';
 import 'src/preferences/unit_preferences_screen.dart';
 import 'src/preferences/window_preferences.dart';
+import 'src/services/licenses.dart';
 import 'src/services/log_buffer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _initLogging();
+  registerAdditionalLicenses();
   await WindowPreferences.initialize();
   if (platformIsMobile) {
     unawaited(SystemChrome.setPreferredOrientations([.portraitUp]));
