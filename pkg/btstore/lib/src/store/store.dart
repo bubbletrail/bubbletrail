@@ -14,6 +14,7 @@ import 'computer_store.dart';
 import 'cylinder_store.dart';
 import 'dive_store.dart';
 import 'equipment_store.dart';
+import 'preferences_store.dart';
 import 'site_store.dart';
 
 final _log = Logger('store.dart');
@@ -25,6 +26,7 @@ class Store {
   final CylinderStore cylinders;
   final DiveStore dives;
   final EquipmentStore equipment;
+  final PreferencesStore preferences;
   final SiteStore sites;
 
   final _changes = StreamController<void>.broadcast();
@@ -35,6 +37,7 @@ class Store {
     : cylinders = CylinderStore('$path/cylinders.binpb'),
       dives = DiveStore('$path/dives'),
       equipment = EquipmentStore('$path/equipment.binpb'),
+      preferences = PreferencesStore('$path/preferences.binpb'),
       sites = SiteStore('$path/sites.binpb'),
       computers = ComputerStore('$path/computers.binpb') {
     computers.changes.listen((_) => _scheduleChange());
@@ -54,6 +57,7 @@ class Store {
     await cylinders.init();
     await dives.init();
     await equipment.init();
+    await preferences.init();
     await sites.init();
   }
 

@@ -9,7 +9,6 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../providers/s3_provider.dart';
 import '../providers/storage_provider.dart';
-import 'preferences.dart';
 import 'preferences_storage.dart';
 
 final _log = Logger('sync_bloc.dart');
@@ -23,7 +22,12 @@ class SyncState extends Equatable {
   const SyncState({this.lastSynced, this.syncing = false, this.error, this.lastSyncSuccess});
 
   SyncState copyWith({DateTime? lastSynced, bool? syncing, String? error, bool? lastSyncSuccess}) {
-    return SyncState(lastSynced: lastSynced ?? this.lastSynced, syncing: syncing ?? this.syncing, error: error, lastSyncSuccess: lastSyncSuccess);
+    return SyncState(
+      lastSynced: lastSynced ?? this.lastSynced,
+      syncing: syncing ?? this.syncing,
+      error: error,
+      lastSyncSuccess: lastSyncSuccess,
+    );
   }
 
   @override
@@ -48,7 +52,7 @@ class _StartSyncing extends SyncEvent {
 }
 
 class _UpdateSyncConfig extends SyncEvent {
-  final SyncProviderKind provider;
+  final SyncProviderPref provider;
   final S3Config s3Config;
 
   const _UpdateSyncConfig({required this.provider, required this.s3Config});
@@ -99,7 +103,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   }
 
   Future<void> _onUpdateConfig(_UpdateSyncConfig event) async {
-    if (event.provider == .none) {
+    if (event.provider == .SYNC_PROVIDER_NONE) {
       _syncProvider = null;
       _syncConfig = null;
       return;

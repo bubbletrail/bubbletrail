@@ -328,7 +328,8 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           path: AppRoutePath.equipmentDetails,
                           name: AppRouteName.equipmentDetails,
                           builder: (context, state) => BlocProvider(
-                            create: (context) => EquipmentDetailsBloc()..add(EquipmentDetailsEvent.load(state.pathParameters['equipmentID']!)),
+                            create: (context) =>
+                                EquipmentDetailsBloc()..add(EquipmentDetailsEvent.load(state.pathParameters['equipmentID']!)),
                             child: DetailsAvailable<EquipmentDetailsBloc, EquipmentDetailsState>(child: const EquipmentEditScreen()),
                           ),
                         ),
@@ -345,16 +346,30 @@ class _MyAppState extends State<MyApp> with WindowListener {
                   name: AppRouteName.preferences,
                   builder: (context, state) => const PreferencesScreen(),
                   routes: <RouteBase>[
-                    GoRoute(path: AppRoutePath.units, name: AppRouteName.units, builder: (context, state) => const UnitPreferencessScreen()),
-                    GoRoute(path: AppRoutePath.divePreferences, name: AppRouteName.divePreferences, builder: (context, state) => const DivePreferencesScreen()),
-                    GoRoute(path: AppRoutePath.syncing, name: AppRouteName.syncing, builder: (context, state) => const SyncSettingsScreen()),
+                    GoRoute(
+                      path: AppRoutePath.units,
+                      name: AppRouteName.units,
+                      builder: (context, state) => const UnitPreferencessScreen(),
+                    ),
+                    GoRoute(
+                      path: AppRoutePath.divePreferences,
+                      name: AppRouteName.divePreferences,
+                      builder: (context, state) => const DivePreferencesScreen(),
+                    ),
+                    GoRoute(
+                      path: AppRoutePath.syncing,
+                      name: AppRouteName.syncing,
+                      builder: (context, state) => const SyncSettingsScreen(),
+                    ),
                     GoRoute(path: AppRoutePath.logs, name: AppRouteName.logs, builder: (context, state) => const LogsScreen()),
                   ],
                 ),
               ],
             ),
             StatefulShellBranch(
-              routes: <RouteBase>[GoRoute(path: AppRoutePath.connect, name: AppRouteName.connect, builder: (context, state) => ConnectScreen())],
+              routes: <RouteBase>[
+                GoRoute(path: AppRoutePath.connect, name: AppRouteName.connect, builder: (context, state) => ConnectScreen()),
+              ],
             ),
           ],
         ),
@@ -418,15 +433,18 @@ class _MyAppState extends State<MyApp> with WindowListener {
       ],
       child: BlocBuilder<PreferencesBloc, PreferencesState>(
         builder: (context, state) {
-          final themeMode = state.preferences.themeMode;
           return MaterialApp.router(
             title: 'Bubbletrail',
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
-            themeMode: themeMode,
+            themeMode: state.preferences.flutterThemeMode,
             debugShowCheckedModeBanner: false,
             routerConfig: _router,
-            localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
           );
         },
       ),

@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package btstore;
+
+enum DepthUnit {
+  DEPTH_UNIT_METERS = 0;
+  DEPTH_UNIT_FEET = 1;
+}
+
+enum PressureUnit {
+  PRESSURE_UNIT_BAR = 0;
+  PRESSURE_UNIT_PSI = 1;
+}
+
+enum TemperatureUnit {
+  TEMPERATURE_UNIT_CELSIUS = 0;
+  TEMPERATURE_UNIT_FAHRENHEIT = 1;
+}
+
+enum VolumeUnit {
+  VOLUME_UNIT_LITERS = 0;
+  VOLUME_UNIT_CUFT = 1;
+}
+
+enum WeightUnit {
+  WEIGHT_UNIT_KG = 0;
+  WEIGHT_UNIT_LB = 1;
+}
+
+enum DateFormatPref {
+  DATE_FORMAT_ISO = 0;
+  DATE_FORMAT_US = 1;
+  DATE_FORMAT_EU = 2;
+}
+
+enum TimeFormatPref {
+  TIME_FORMAT_H24 = 0;
+  TIME_FORMAT_H12 = 1;
+}
+
+enum ThemeModePref {
+  THEME_MODE_SYSTEM = 0;
+  THEME_MODE_LIGHT = 1;
+  THEME_MODE_DARK = 2;
+}
+
+enum SyncProviderPref {
+  SYNC_PROVIDER_NONE = 0;
+  SYNC_PROVIDER_BUBBLETRAIL = 1;
+  SYNC_PROVIDER_S3 = 2;
+}
+
+message S3Config {
+  string endpoint = 1;
+  string bucket = 2;
+  string access_key = 3;
+  string secret_key = 4;
+  string region = 5;
+  string vault_key = 6;
+}
+
+message Preferences {
+  DepthUnit depth_unit = 1;
+  PressureUnit pressure_unit = 2;
+  TemperatureUnit temperature_unit = 3;
+  VolumeUnit volume_unit = 4;
+  WeightUnit weight_unit = 5;
+  DateFormatPref date_format = 6;
+  TimeFormatPref time_format = 7;
+  ThemeModePref theme_mode = 8;
+  SyncProviderPref sync_provider = 9;
+  S3Config s3_config = 10;
+  double gf_low = 11;
+  double gf_high = 12;
+}

@@ -1,3 +1,4 @@
+import 'package:btstore/btstore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -7,7 +8,7 @@ import 'common.dart';
 /// A text field for editing measurements with a unit dropdown.
 /// Values are always stored internally in metric/base units.
 /// The display converts to/from the selected unit on the fly.
-class MeasurementEditor<T extends Enum> extends StatefulWidget {
+class MeasurementEditor<T> extends StatefulWidget {
   /// Label for the text field
   final String label;
 
@@ -52,7 +53,7 @@ class MeasurementEditor<T extends Enum> extends StatefulWidget {
   State<MeasurementEditor<T>> createState() => _MeasurementEditorState<T>();
 }
 
-class _MeasurementEditorState<T extends Enum> extends State<MeasurementEditor<T>> {
+class _MeasurementEditorState<T> extends State<MeasurementEditor<T>> {
   late TextEditingController _controller;
   late T _selectedUnit;
   double? _metricValue;
@@ -148,22 +149,25 @@ class PressureEditor extends StatelessWidget {
 
   static double _fromMetric(double value, PressureUnit unit) {
     return switch (unit) {
-      .bar => value,
-      .psi => value * barToPsi,
+      .PRESSURE_UNIT_BAR => value,
+      .PRESSURE_UNIT_PSI => value * barToPsi,
+      _ => value,
     };
   }
 
   static double _toMetric(double value, PressureUnit unit) {
     return switch (unit) {
-      .bar => value,
-      .psi => value / barToPsi,
+      .PRESSURE_UNIT_BAR => value,
+      .PRESSURE_UNIT_PSI => value / barToPsi,
+      _ => value,
     };
   }
 
   static String _unitLabel(PressureUnit unit) {
     return switch (unit) {
-      .bar => 'bar',
-      .psi => 'psi',
+      .PRESSURE_UNIT_BAR => 'bar',
+      .PRESSURE_UNIT_PSI => 'psi',
+      _ => 'bar',
     };
   }
 
@@ -193,22 +197,25 @@ class VolumeEditor extends StatelessWidget {
 
   static double _fromMetric(double value, VolumeUnit unit) {
     return switch (unit) {
-      .liters => value,
-      .cuft => value * litersToCuft,
+      .VOLUME_UNIT_LITERS => value,
+      .VOLUME_UNIT_CUFT => value * litersToCuft,
+      _ => value,
     };
   }
 
   static double _toMetric(double value, VolumeUnit unit) {
     return switch (unit) {
-      .liters => value,
-      .cuft => value / litersToCuft,
+      .VOLUME_UNIT_LITERS => value,
+      .VOLUME_UNIT_CUFT => value / litersToCuft,
+      _ => value,
     };
   }
 
   static String _unitLabel(VolumeUnit unit) {
     return switch (unit) {
-      .liters => 'L',
-      .cuft => 'cuft',
+      .VOLUME_UNIT_LITERS => 'L',
+      .VOLUME_UNIT_CUFT => 'cuft',
+      _ => 'L',
     };
   }
 
@@ -238,22 +245,25 @@ class WeightEditor extends StatelessWidget {
 
   static double _fromMetric(double value, WeightUnit unit) {
     return switch (unit) {
-      .kg => value,
-      .lb => value * kgToLbs,
+      .WEIGHT_UNIT_KG => value,
+      .WEIGHT_UNIT_LB => value * kgToLbs,
+      _ => value,
     };
   }
 
   static double _toMetric(double value, WeightUnit unit) {
     return switch (unit) {
-      .kg => value,
-      .lb => value / kgToLbs,
+      .WEIGHT_UNIT_KG => value,
+      .WEIGHT_UNIT_LB => value / kgToLbs,
+      _ => value,
     };
   }
 
   static String _unitLabel(WeightUnit unit) {
     return switch (unit) {
-      .kg => 'kg',
-      .lb => 'lbs',
+      .WEIGHT_UNIT_KG => 'kg',
+      .WEIGHT_UNIT_LB => 'lbs',
+      _ => 'kg',
     };
   }
 
@@ -283,15 +293,17 @@ class DepthEditor extends StatelessWidget {
 
   static double _fromMetric(double value, DepthUnit unit) {
     return switch (unit) {
-      .meters => value,
-      .feet => value * metersToFeet,
+      .DEPTH_UNIT_METERS => value,
+      .DEPTH_UNIT_FEET => value * metersToFeet,
+      _ => value,
     };
   }
 
   static double _toMetric(double value, DepthUnit unit) {
     return switch (unit) {
-      .meters => value,
-      .feet => value / metersToFeet,
+      .DEPTH_UNIT_METERS => value,
+      .DEPTH_UNIT_FEET => value / metersToFeet,
+      _ => value,
     };
   }
 

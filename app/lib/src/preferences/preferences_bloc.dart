@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:btstore/btstore.dart' as btstore;
+import 'package:btstore/btstore.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../providers/storage_provider.dart';
@@ -33,7 +35,7 @@ sealed class PreferencesEvent extends Equatable {
   const factory PreferencesEvent.updateDateFormat(DateFormatPref dateFormat) = _UpdateDateFormat;
   const factory PreferencesEvent.updateTimeFormat(TimeFormatPref timeFormat) = _UpdateTimeFormat;
   const factory PreferencesEvent.updateThemeMode(ThemeMode themeMode) = _UpdateThemeMode;
-  const factory PreferencesEvent.updateSyncProvider(SyncProviderKind syncProvider) = _UpdateSyncProvider;
+  const factory PreferencesEvent.updateSyncProvider(SyncProviderPref syncProvider) = _UpdateSyncProvider;
   const factory PreferencesEvent.updateS3Config(S3Config s3Config) = _UpdateS3Config;
   const factory PreferencesEvent.updateGfLow(double gfLow) = _UpdateGfLow;
   const factory PreferencesEvent.updateGfHigh(double gfHigh) = _UpdateGfHigh;
@@ -117,7 +119,7 @@ class _UpdateThemeMode extends PreferencesEvent {
 }
 
 class _UpdateSyncProvider extends PreferencesEvent {
-  final SyncProviderKind syncProvider;
+  final SyncProviderPref syncProvider;
 
   const _UpdateSyncProvider(this.syncProvider);
 
@@ -159,7 +161,7 @@ class _ResetDatabase extends PreferencesEvent {
 class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
   Timer? _saveTimer;
 
-  PreferencesBloc() : super(const PreferencesState(Preferences())) {
+  PreferencesBloc() : super(PreferencesState(Preferences())) {
     on<PreferencesEvent>((event, emit) async {
       switch (event) {
         case _LoadPreferences():
@@ -207,92 +209,85 @@ class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
   }
 
   Future<void> _onUpdateDepthUnit(_UpdateDepthUnit event, Emitter<PreferencesState> emit) async {
-    final current = state.preferences;
-    final updated = current.copyWith(depthUnit: event.depthUnit);
+    final updated = state.preferences.rebuild((p) => p.depthUnit = event.depthUnit);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
   Future<void> _onUpdatePressureUnit(_UpdatePressureUnit event, Emitter<PreferencesState> emit) async {
-    final current = state.preferences;
-    final updated = current.copyWith(pressureUnit: event.pressureUnit);
+    final updated = state.preferences.rebuild((p) => p.pressureUnit = event.pressureUnit);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
   Future<void> _onUpdateTemperatureUnit(_UpdateTemperatureUnit event, Emitter<PreferencesState> emit) async {
-    final current = state.preferences;
-    final updated = current.copyWith(temperatureUnit: event.temperatureUnit);
+    final updated = state.preferences.rebuild((p) => p.temperatureUnit = event.temperatureUnit);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
   Future<void> _onUpdateVolumeUnit(_UpdateVolumeUnit event, Emitter<PreferencesState> emit) async {
-    final current = state.preferences;
-    final updated = current.copyWith(volumeUnit: event.volumeUnit);
+    final updated = state.preferences.rebuild((p) => p.volumeUnit = event.volumeUnit);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
   Future<void> _onUpdateWeightUnit(_UpdateWeightUnit event, Emitter<PreferencesState> emit) async {
-    final current = state.preferences;
-    final updated = current.copyWith(weightUnit: event.weightUnit);
+    final updated = state.preferences.rebuild((p) => p.weightUnit = event.weightUnit);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
   Future<void> _onUpdateDateFormat(_UpdateDateFormat event, Emitter<PreferencesState> emit) async {
-    final current = state.preferences;
-    final updated = current.copyWith(dateFormat: event.dateFormat);
+    final updated = state.preferences.rebuild((p) => p.dateFormat = event.dateFormat);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
   Future<void> _onUpdateTimeFormat(_UpdateTimeFormat event, Emitter<PreferencesState> emit) async {
-    final current = state.preferences;
-    final updated = current.copyWith(timeFormat: event.timeFormat);
+    final updated = state.preferences.rebuild((p) => p.timeFormat = event.timeFormat);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
   Future<void> _onUpdateThemeMode(_UpdateThemeMode event, Emitter<PreferencesState> emit) async {
-    final current = state.preferences;
-    final updated = current.copyWith(themeMode: event.themeMode);
+    final updated = state.preferences.rebuild((p) => p.themeMode = themeModeToProto(event.themeMode));
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
   Future<void> _onUpdateSyncProvider(_UpdateSyncProvider event, Emitter<PreferencesState> emit) async {
-    final current = state.preferences;
-    final updated = current.copyWith(syncProvider: event.syncProvider);
+    final updated = state.preferences.rebuild((p) => p.syncProvider = event.syncProvider);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
   Future<void> _onUpdateS3Config(_UpdateS3Config event, Emitter<PreferencesState> emit) async {
-    final current = state.preferences;
-    final updated = current.copyWith(s3Config: event.s3Config);
+    final updated = state.preferences.rebuild((p) => p.s3Config = event.s3Config);
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
   Future<void> _onUpdateGfLow(_UpdateGfLow event, Emitter<PreferencesState> emit) async {
-    final current = state.preferences;
-    final updated = current.copyWith(gfLow: event.gfLow, gfHigh: max(state.preferences.gfHigh, event.gfLow));
+    final updated = state.preferences.rebuild((p) {
+      p.gfLow = event.gfLow;
+      p.gfHigh = max(state.preferences.gfHigh, event.gfLow);
+    });
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
   Future<void> _onUpdateGfHigh(_UpdateGfHigh event, Emitter<PreferencesState> emit) async {
-    final current = state.preferences;
-    final updated = current.copyWith(gfHigh: event.gfHigh, gfLow: min(state.preferences.gfLow, event.gfHigh));
+    final updated = state.preferences.rebuild((p) {
+      p.gfHigh = event.gfHigh;
+      p.gfLow = min(state.preferences.gfLow, event.gfHigh);
+    });
     emit(PreferencesState(updated));
     _scheduleSave();
   }
 
   Future<void> _onResetDatabase(Emitter<PreferencesState> emit) async {
-    final current = state.preferences;
-    final updated = current.copyWith(syncProvider: .none);
+    final updated = state.preferences.rebuild((p) => p.syncProvider = .SYNC_PROVIDER_NONE);
     emit(PreferencesState(updated));
     _scheduleSave();
 

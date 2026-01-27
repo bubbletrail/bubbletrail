@@ -1,190 +1,80 @@
-import 'package:flutter/material.dart';
+import 'package:btstore/btstore.dart' as btstore;
+import 'package:flutter/material.dart' show ThemeMode;
 
-enum DepthUnit {
-  meters('m'),
-  feet('ft');
-
-  const DepthUnit(this.label);
-
-  final String label;
+extension DepthUnitExt on btstore.DepthUnit {
+  String get label => switch (this) {
+    .DEPTH_UNIT_METERS => 'm',
+    .DEPTH_UNIT_FEET => 'ft',
+    _ => 'm',
+  };
 }
 
-enum PressureUnit {
-  bar('bar'),
-  psi('psi');
-
-  const PressureUnit(this.label);
-
-  final String label;
+extension PressureUnitExt on btstore.PressureUnit {
+  String get label => switch (this) {
+    .PRESSURE_UNIT_BAR => 'bar',
+    .PRESSURE_UNIT_PSI => 'psi',
+    _ => 'bar',
+  };
 }
 
-enum TemperatureUnit {
-  celsius('°C'),
-  fahrenheit('°F');
-
-  const TemperatureUnit(this.label);
-
-  final String label;
+extension TemperatureUnitExt on btstore.TemperatureUnit {
+  String get label => switch (this) {
+    .TEMPERATURE_UNIT_CELSIUS => '°C',
+    .TEMPERATURE_UNIT_FAHRENHEIT => '°F',
+    _ => '°C',
+  };
 }
 
-enum VolumeUnit {
-  liters('L'),
-  cuft('cuft');
-
-  const VolumeUnit(this.label);
-
-  final String label;
+extension VolumeUnitExt on btstore.VolumeUnit {
+  String get label => switch (this) {
+    .VOLUME_UNIT_LITERS => 'L',
+    .VOLUME_UNIT_CUFT => 'cuft',
+    _ => 'L',
+  };
 }
 
-enum WeightUnit {
-  kg('kg'),
-  lb('lb');
-
-  const WeightUnit(this.label);
-
-  final String label;
+extension WeightUnitExt on btstore.WeightUnit {
+  String get label => switch (this) {
+    .WEIGHT_UNIT_KG => 'kg',
+    .WEIGHT_UNIT_LB => 'lb',
+    _ => 'kg',
+  };
 }
 
-enum DateFormatPref {
-  iso('yyyy-MM-dd'),
-  us('MM/dd/yyyy'),
-  eu('dd/MM/yyyy');
-
-  const DateFormatPref(this.format);
-
-  final String format;
+extension DateFormatPrefExt on btstore.DateFormatPref {
+  String get format => switch (this) {
+    .DATE_FORMAT_ISO => 'yyyy-MM-dd',
+    .DATE_FORMAT_US => 'MM/dd/yyyy',
+    .DATE_FORMAT_EU => 'dd/MM/yyyy',
+    _ => 'yyyy-MM-dd',
+  };
 }
 
-enum TimeFormatPref {
-  h24('HH:mm'),
-  h12('h:mm a');
-
-  const TimeFormatPref(this.format);
-
-  final String format;
+extension TimeFormatPrefExt on btstore.TimeFormatPref {
+  String get format => switch (this) {
+    .TIME_FORMAT_H24 => 'HH:mm',
+    .TIME_FORMAT_H12 => 'h:mm a',
+    _ => 'HH:mm',
+  };
 }
 
-enum SyncProviderKind { none, bubbletrail, s3 }
-
-class S3Config {
-  final String endpoint;
-  final String bucket;
-  final String accessKey;
-  final String secretKey;
-  final String region;
-  final String vaultKey;
-
-  const S3Config({this.endpoint = '', this.bucket = '', this.accessKey = '', this.secretKey = '', this.region = 'us-east-1', this.vaultKey = ''});
-
+extension S3ConfigExt on btstore.S3Config {
   bool get isConfigured => endpoint.isNotEmpty && bucket.isNotEmpty && accessKey.isNotEmpty && secretKey.isNotEmpty && vaultKey.isNotEmpty;
-
-  S3Config copyWith({String? endpoint, String? bucket, String? accessKey, String? secretKey, String? region, String? vaultKey}) {
-    return S3Config(
-      endpoint: endpoint ?? this.endpoint,
-      bucket: bucket ?? this.bucket,
-      accessKey: accessKey ?? this.accessKey,
-      secretKey: secretKey ?? this.secretKey,
-      region: region ?? this.region,
-      vaultKey: vaultKey ?? this.vaultKey,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is S3Config &&
-        other.endpoint == endpoint &&
-        other.bucket == bucket &&
-        other.accessKey == accessKey &&
-        other.secretKey == secretKey &&
-        other.region == region &&
-        other.vaultKey == vaultKey;
-  }
-
-  @override
-  int get hashCode => Object.hash(endpoint, bucket, accessKey, secretKey, region, vaultKey);
 }
 
-class Preferences {
-  final DepthUnit depthUnit;
-  final PressureUnit pressureUnit;
-  final TemperatureUnit temperatureUnit;
-  final VolumeUnit volumeUnit;
-  final WeightUnit weightUnit;
-  final DateFormatPref dateFormat;
-  final TimeFormatPref timeFormat;
-  final ThemeMode themeMode;
-  final SyncProviderKind syncProvider;
-  final S3Config s3Config;
-  final double gfLow;
-  final double gfHigh;
-
+extension PreferencesExt on btstore.Preferences {
   String get dateTimeFormat => '${dateFormat.format} ${timeFormat.format}';
 
-  const Preferences({
-    this.depthUnit = .meters,
-    this.pressureUnit = .bar,
-    this.temperatureUnit = .celsius,
-    this.volumeUnit = .liters,
-    this.weightUnit = .kg,
-    this.dateFormat = DateFormatPref.iso,
-    this.timeFormat = TimeFormatPref.h24,
-    this.themeMode = ThemeMode.system,
-    this.syncProvider = .none,
-    this.s3Config = const S3Config(),
-    this.gfLow = 0.5,
-    this.gfHigh = 0.7,
-  });
-
-  Preferences copyWith({
-    DepthUnit? depthUnit,
-    PressureUnit? pressureUnit,
-    TemperatureUnit? temperatureUnit,
-    VolumeUnit? volumeUnit,
-    WeightUnit? weightUnit,
-    DateFormatPref? dateFormat,
-    TimeFormatPref? timeFormat,
-    ThemeMode? themeMode,
-    SyncProviderKind? syncProvider,
-    S3Config? s3Config,
-    double? gfLow,
-    double? gfHigh,
-  }) {
-    return Preferences(
-      depthUnit: depthUnit ?? this.depthUnit,
-      pressureUnit: pressureUnit ?? this.pressureUnit,
-      temperatureUnit: temperatureUnit ?? this.temperatureUnit,
-      volumeUnit: volumeUnit ?? this.volumeUnit,
-      weightUnit: weightUnit ?? this.weightUnit,
-      dateFormat: dateFormat ?? this.dateFormat,
-      timeFormat: timeFormat ?? this.timeFormat,
-      themeMode: themeMode ?? this.themeMode,
-      syncProvider: syncProvider ?? this.syncProvider,
-      s3Config: s3Config ?? this.s3Config,
-      gfLow: gfLow ?? this.gfLow,
-      gfHigh: gfHigh ?? this.gfHigh,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Preferences &&
-        other.depthUnit == depthUnit &&
-        other.pressureUnit == pressureUnit &&
-        other.temperatureUnit == temperatureUnit &&
-        other.volumeUnit == volumeUnit &&
-        other.weightUnit == weightUnit &&
-        other.dateFormat == dateFormat &&
-        other.timeFormat == timeFormat &&
-        other.themeMode == themeMode &&
-        other.syncProvider == syncProvider &&
-        other.s3Config == s3Config &&
-        other.gfLow == gfLow &&
-        other.gfHigh == gfHigh;
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(depthUnit, pressureUnit, temperatureUnit, volumeUnit, weightUnit, dateFormat, timeFormat, themeMode, syncProvider, s3Config, gfLow, gfHigh);
+  ThemeMode get flutterThemeMode => switch (themeMode) {
+    .THEME_MODE_SYSTEM => ThemeMode.system,
+    .THEME_MODE_LIGHT => ThemeMode.light,
+    .THEME_MODE_DARK => ThemeMode.dark,
+    _ => ThemeMode.system,
+  };
 }
+
+btstore.ThemeModePref themeModeToProto(ThemeMode mode) => switch (mode) {
+  ThemeMode.system => btstore.ThemeModePref.THEME_MODE_SYSTEM,
+  ThemeMode.light => btstore.ThemeModePref.THEME_MODE_LIGHT,
+  ThemeMode.dark => btstore.ThemeModePref.THEME_MODE_DARK,
+};

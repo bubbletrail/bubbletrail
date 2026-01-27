@@ -52,7 +52,12 @@ class SyncStatusTile extends StatelessWidget {
     }
 
     if (state.lastSyncSuccess == false) {
-      return _buildTile(context, icon: Icons.error_outline, iconColor: colorScheme.error, message: 'Sync failed: ${state.error ?? "Unknown error"}');
+      return _buildTile(
+        context,
+        icon: Icons.error_outline,
+        iconColor: colorScheme.error,
+        message: 'Sync failed: ${state.error ?? "Unknown error"}',
+      );
     }
 
     if (state.lastSynced != null) {

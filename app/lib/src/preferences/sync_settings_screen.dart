@@ -1,8 +1,9 @@
+import 'package:btstore/btstore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'preferences_bloc.dart';
 import '../common/common.dart';
+import 'preferences_bloc.dart';
 import 'preferences_widgets.dart';
 
 class SyncSettingsScreen extends StatelessWidget {
@@ -18,9 +19,9 @@ class SyncSettingsScreen extends StatelessWidget {
           return ListView(
             padding: const .all(16),
             children: [
-              _SyncProviderTile(prefs: prefs),
-              if (prefs.syncProvider == .bubbletrail || prefs.syncProvider == .s3)
-                _S3ConfigSection(prefs: prefs, isBubbletrail: prefs.syncProvider == .bubbletrail),
+              _SyncProviderPrefTile(prefs: prefs),
+              if (prefs.syncProvider == .SYNC_PROVIDER_BUBBLETRAIL || prefs.syncProvider == .SYNC_PROVIDER_S3)
+                _S3ConfigSection(prefs: prefs, isBubbletrail: prefs.syncProvider == .SYNC_PROVIDER_BUBBLETRAIL),
             ],
           );
         },
@@ -29,21 +30,21 @@ class SyncSettingsScreen extends StatelessWidget {
   }
 }
 
-class _SyncProviderTile extends StatelessWidget {
+class _SyncProviderPrefTile extends StatelessWidget {
   final Preferences prefs;
 
-  const _SyncProviderTile({required this.prefs});
+  const _SyncProviderPrefTile({required this.prefs});
 
   @override
   Widget build(BuildContext context) {
-    final availableProviders = <SyncProviderKind>[.none, .bubbletrail, .s3];
+    final availableProviders = <SyncProviderPref>[.SYNC_PROVIDER_NONE, .SYNC_PROVIDER_BUBBLETRAIL, .SYNC_PROVIDER_S3];
 
     return PreferencesTile(
       title: 'Sync provider',
-      trailing: DropdownButton<SyncProviderKind>(
+      trailing: DropdownButton<SyncProviderPref>(
         dropdownColor: Theme.of(context).colorScheme.primaryContainer,
         value: prefs.syncProvider,
-        items: [for (final provider in availableProviders) DropdownMenuItem<SyncProviderKind>(value: provider, child: Text(_syncProviderLabel(provider)))],
+        items: [for (final provider in availableProviders) DropdownMenuItem<SyncProviderPref>(value: provider, child: Text(_syncProviderLabel(provider)))],
         onChanged: (value) {
           context.read<PreferencesBloc>().add(PreferencesEvent.updateSyncProvider(value!));
         },
@@ -51,11 +52,12 @@ class _SyncProviderTile extends StatelessWidget {
     );
   }
 
-  String _syncProviderLabel(SyncProviderKind provider) {
+  String _syncProviderLabel(SyncProviderPref provider) {
     return switch (provider) {
-      .none => 'Off',
-      .bubbletrail => 'Bubbletrail',
-      .s3 => 'S3',
+      .SYNC_PROVIDER_NONE => 'Off',
+      .SYNC_PROVIDER_BUBBLETRAIL => 'Bubbletrail',
+      .SYNC_PROVIDER_S3 => 'S3',
+      _ => 'Unknown',
     };
   }
 }

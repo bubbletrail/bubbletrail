@@ -29,7 +29,7 @@ String formatDateTime(Preferences pref, DateTime dateTime) {
 }
 
 String formatLogTimestamp(TimeFormatPref pref, DateTime time) {
-  final format = pref == .h24 ? 'HH:mm:ss.SSS' : 'h:mm:ss.SSS a';
+  final format = pref == .TIME_FORMAT_H24 ? 'HH:mm:ss.SSS' : 'h:mm:ss.SSS a';
   return DateFormat(format).format(time);
 }
 
@@ -60,56 +60,68 @@ Color getLogLevelColor(Level level, ThemeData theme) {
 
 String formatDepth(DepthUnit unit, num depth) {
   switch (unit) {
-    case .meters:
+    case .DEPTH_UNIT_METERS:
       return '${depth.toStringAsFixed(1)} ${unit.label}';
-    case .feet:
+    case .DEPTH_UNIT_FEET:
       return '${(depth * metersToFeet).toStringAsFixed(0)} ${unit.label}';
+    default:
+      return '${depth.toStringAsFixed(1)} m';
   }
 }
 
 int convertDepth(DepthUnit unit, num depth) {
   switch (unit) {
-    case .meters:
+    case .DEPTH_UNIT_METERS:
       return depth.round();
-    case .feet:
+    case .DEPTH_UNIT_FEET:
       return (depth * 3.28).round();
+    default:
+      return depth.round();
   }
 }
 
 String formatTemperature(TemperatureUnit unit, num temperature) {
   switch (unit) {
-    case .celsius:
+    case .TEMPERATURE_UNIT_CELSIUS:
       return '${temperature.toStringAsFixed(1)} ${unit.label}';
-    case .fahrenheit:
+    case .TEMPERATURE_UNIT_FAHRENHEIT:
       return '${(temperature * 1.8 + 32).toStringAsFixed(0)} ${unit.label}';
+    default:
+      return '${temperature.toStringAsFixed(1)} °C';
   }
 }
 
 String formatPressure(PressureUnit unit, num pressure) {
   switch (unit) {
-    case .bar:
+    case .PRESSURE_UNIT_BAR:
       return '${pressure.toStringAsFixed(0)} ${unit.label}';
-    case .psi:
+    case .PRESSURE_UNIT_PSI:
       return '${(pressure * 14.504).toStringAsFixed(0)} ${unit.label}';
+    default:
+      return '${pressure.toStringAsFixed(0)} bar';
   }
 }
 
 String formatVolume(VolumeUnit unit, num volume) {
   switch (unit) {
-    case .liters:
+    case .VOLUME_UNIT_LITERS:
       return '${formatDisplayValue(volume)} ${unit.label}';
-    case .cuft:
+    case .VOLUME_UNIT_CUFT:
       final val = volume * 0.0353;
       return '${formatDisplayValue(val)} ${unit.label}';
+    default:
+      return '${formatDisplayValue(volume)} L';
   }
 }
 
 String formatWeight(WeightUnit unit, num weight) {
   switch (unit) {
-    case .kg:
+    case .WEIGHT_UNIT_KG:
       return '${weight.toStringAsFixed(1)} ${unit.label}';
-    case .lb:
+    case .WEIGHT_UNIT_LB:
       return '${(weight * 2.205).toStringAsFixed(1)} ${unit.label}';
+    default:
+      return '${weight.toStringAsFixed(1)} kg';
   }
 }
 

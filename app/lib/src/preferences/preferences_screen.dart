@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:btsparkle/btsparkle.dart';
+import 'package:btstore/btstore.dart' hide Container;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,14 +10,14 @@ import 'package:logging/logging.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
-import 'archive_bloc.dart';
+import '../common/common.dart';
 import '../dives_sites/dive_list_bloc.dart';
 import '../equipment/equipment_list_bloc.dart';
-import 'preferences_bloc.dart';
-import 'sync_bloc.dart';
-import '../common/common.dart';
 import '../services/log_buffer.dart';
+import 'archive_bloc.dart';
+import 'preferences_bloc.dart';
 import 'preferences_widgets.dart';
+import 'sync_bloc.dart';
 
 class PreferencesScreen extends StatelessWidget {
   const PreferencesScreen({super.key});
@@ -43,7 +44,7 @@ class PreferencesScreen extends StatelessWidget {
                           FilledButton.icon(
                             icon: const Icon(Icons.sync, size: 16),
                             label: const Text('Sync now'),
-                            onPressed: prefs.syncProvider == .none || !prefs.s3Config.isConfigured || syncState.syncing
+                            onPressed: prefs.syncProvider == .SYNC_PROVIDER_NONE || !prefs.s3Config.isConfigured || syncState.syncing
                                 ? null
                                 : () => context.read<SyncBloc>().add(const SyncEvent.startSyncing()),
                           ),
@@ -54,7 +55,7 @@ class PreferencesScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      if (prefs.syncProvider != .none && prefs.s3Config.isConfigured) SyncStatusTile(state: syncState),
+                      if (prefs.syncProvider != .SYNC_PROVIDER_NONE && prefs.s3Config.isConfigured) SyncStatusTile(state: syncState),
                     ],
                   ),
                   if (platformIsDesktop) _SectionColumn(title: 'Import & export', children: [_ImportExportButtons()]),
@@ -68,7 +69,7 @@ class PreferencesScreen extends StatelessWidget {
                           ButtonSegment(value: ThemeMode.light, label: Text('Light'), icon: Icon(Icons.light_mode)),
                           ButtonSegment(value: ThemeMode.dark, label: Text('Dark'), icon: Icon(Icons.dark_mode)),
                         ],
-                        selected: {prefs.themeMode},
+                        selected: {prefs.flutterThemeMode},
                         onSelectionChanged: (value) {
                           context.read<PreferencesBloc>().add(PreferencesEvent.updateThemeMode(value.first));
                         },
