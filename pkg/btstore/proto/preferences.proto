@@ -1,4 +1,4 @@
-syntax = "proto3";
+edition = "2023";
 
 package btstore;
 
@@ -70,6 +70,6 @@ message Preferences {
   ThemeModePref theme_mode = 8;
   SyncProviderPref sync_provider = 9;
   S3Config s3_config = 10;
-  double gf_low = 11;
-  double gf_high = 12;
+  double gf_low = 11 [default = 0.3];
+  double gf_high = 12 [default = 0.7];
 }

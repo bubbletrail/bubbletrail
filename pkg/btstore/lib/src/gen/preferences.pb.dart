@@ -197,8 +197,8 @@ class Preferences extends $pb.GeneratedMessage {
         enumValues: SyncProviderPref.values)
     ..aOM<S3Config>(10, _omitFieldNames ? '' : 's3Config',
         subBuilder: S3Config.create)
-    ..aD(11, _omitFieldNames ? '' : 'gfLow')
-    ..aD(12, _omitFieldNames ? '' : 'gfHigh')
+    ..aD(11, _omitFieldNames ? '' : 'gfLow', defaultOrMaker: 0.3)
+    ..aD(12, _omitFieldNames ? '' : 'gfHigh', defaultOrMaker: 0.7)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')

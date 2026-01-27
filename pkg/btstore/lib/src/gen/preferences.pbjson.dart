@@ -247,8 +247,8 @@ const Preferences$json = {
       '6': '.btstore.S3Config',
       '10': 's3Config'
     },
-    {'1': 'gf_low', '3': 11, '4': 1, '5': 1, '10': 'gfLow'},
-    {'1': 'gf_high', '3': 12, '4': 1, '5': 1, '10': 'gfHigh'},
+    {'1': 'gf_low', '3': 11, '4': 1, '5': 1, '7': '0.3', '10': 'gfLow'},
+    {'1': 'gf_high', '3': 12, '4': 1, '5': 1, '7': '0.7', '10': 'gfHigh'},
   ],
 };
 
@@ -264,5 +264,5 @@ final $typed_data.Uint8List preferencesDescriptor = $convert.base64Decode(
     'JlLlRpbWVGb3JtYXRQcmVmUgp0aW1lRm9ybWF0EjUKCnRoZW1lX21vZGUYCCABKA4yFi5idHN0'
     'b3JlLlRoZW1lTW9kZVByZWZSCXRoZW1lTW9kZRI+Cg1zeW5jX3Byb3ZpZGVyGAkgASgOMhkuYn'
     'RzdG9yZS5TeW5jUHJvdmlkZXJQcmVmUgxzeW5jUHJvdmlkZXISLgoJczNfY29uZmlnGAogASgL'
-    'MhEuYnRzdG9yZS5TM0NvbmZpZ1IIczNDb25maWcSFQoGZ2ZfbG93GAsgASgBUgVnZkxvdxIXCg'
-    'dnZl9oaWdoGAwgASgBUgZnZkhpZ2g=');
+    'MhEuYnRzdG9yZS5TM0NvbmZpZ1IIczNDb25maWcSGgoGZ2ZfbG93GAsgASgBOgMwLjNSBWdmTG'
+    '93EhwKB2dmX2hpZ2gYDCABKAE6AzAuN1IGZ2ZIaWdo');

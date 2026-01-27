@@ -15,27 +15,18 @@ class DivePreferencesScreen extends StatelessWidget {
       body: BlocBuilder<PreferencesBloc, PreferencesState>(
         builder: (context, state) {
           final prefs = state.preferences;
+          prefs.gfLow = prefs.gfLow.clamp(0.1, 1.0);
+          prefs.gfHigh = prefs.gfHigh.clamp(prefs.gfLow, 1.0);
           return ListView(
             padding: const .all(16),
             children: [
               PreferencesSectionHeader(title: 'Gradient Factors'),
               const SizedBox(height: 8),
-              Text(
-                'Gradient factors adjust the conservatism of the Buhlmann decompression algorithm.',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              Text('Gradient factors adjust the conservatism of the Buhlmann decompression algorithm.', style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(height: 16),
-              _GfSlider(
-                label: 'GF Low',
-                value: prefs.gfLow,
-                onChanged: (value) => context.read<PreferencesBloc>().add(PreferencesEvent.updateGfLow(value)),
-              ),
+              _GfSlider(label: 'GF Low', value: prefs.gfLow, onChanged: (value) => context.read<PreferencesBloc>().add(PreferencesEvent.updateGfLow(value))),
               const SizedBox(height: 8),
-              _GfSlider(
-                label: 'GF High',
-                value: prefs.gfHigh,
-                onChanged: (value) => context.read<PreferencesBloc>().add(PreferencesEvent.updateGfHigh(value)),
-              ),
+              _GfSlider(label: 'GF High', value: prefs.gfHigh, onChanged: (value) => context.read<PreferencesBloc>().add(PreferencesEvent.updateGfHigh(value))),
             ],
           );
         },
