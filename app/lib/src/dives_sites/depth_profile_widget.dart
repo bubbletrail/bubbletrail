@@ -104,7 +104,7 @@ class _DepthProfileState extends State<DepthProfile> {
     }
 
     // Buhlmann calculated ceiling & surfGF
-    _calculateBuhlmann(prefs);
+    _calculateBuhlmann(prefs.gfLow, prefs.gfHigh);
     _buhlmannCeilingSpots.addAll(_buhlmann.map((e) => FlSpot(e.time / 60, depthMult * -e.ceiling)));
 
     // Pressure data - find all tank indices used
@@ -360,12 +360,12 @@ class _DepthProfileState extends State<DepthProfile> {
     );
   }
 
-  void _calculateBuhlmann(PreferencesStore prefs) {
+  void _calculateBuhlmann(double gfLow, double gfHigh) {
     if (samplesWithDepth.isEmpty) return;
 
     final config = buhlmann.BuhlmannConfig(
-      gfLow: prefs.gfLow,
-      gfHigh: prefs.gfHigh,
+      gfLow: gfLow,
+      gfHigh: gfHigh,
       surfacePressure: widget.log.hasAtmosphericPressure() ? widget.log.atmosphericPressure : buhlmann.atmPressure,
     );
 
