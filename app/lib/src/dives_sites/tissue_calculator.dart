@@ -7,18 +7,15 @@ const tissueResetDuration = Duration(hours: 24);
 // Convert proto Tissues to buhlmann TissueState.
 buhlmann.TissueState? protoToTissueState(Tissues? tissues) {
   if (tissues == null || tissues.n2Pressures.isEmpty) return null;
-  return buhlmann.TissueState(n2Pressures: tissues.n2Pressures.toList(), hePressures: tissues.hePressures.toList());
+  final n2s = tissues.n2Pressures.length == buhlmann.numTissueCompartments ? tissues.n2Pressures.toList() : null;
+  final hes = tissues.hePressures.length == buhlmann.numTissueCompartments ? tissues.hePressures.toList() : null;
+  return buhlmann.TissueState(n2Pressures: n2s, hePressures: hes);
 }
 
 // Convert buhlmann TissueState to proto Tissues.
 Tissues tissueStateToProto(buhlmann.TissueState tissues, DateTime timestamp, String chainId) {
-  return Tissues(
-    n2Pressures: tissues.n2Pressures,
-    hePressures: tissues.hePressures,
-    timestamp: .fromDateTime(timestamp),
-    chainId: chainId,
-    generation: buhlmann.generation,
-  );
+  final hes = tissues.hePressures.any((p) => p != 0) ? tissues.hePressures : null;
+  return Tissues(n2Pressures: tissues.n2Pressures, hePressures: hes, timestamp: .fromDateTime(timestamp), chainId: chainId, generation: buhlmann.generation);
 }
 
 // Build gas mixes from dive cylinders.

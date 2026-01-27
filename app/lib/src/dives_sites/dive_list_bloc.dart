@@ -151,6 +151,11 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       var startTissues = dive.hasStartTissues() && dive.startTissues.generation == buhlmann.generation ? dive.startTissues : null;
       var startChanged = false;
 
+      var cfg = buhlmann.BuhlmannConfig();
+      if (dive.logs.firstOrNull?.hasAtmosphericPressure() == true) {
+        cfg = buhlmann.BuhlmannConfig(surfacePressure: dive.logs.first.atmosphericPressure);
+      }
+
       // Calculate start tissues from previous dive
       if (prevDiveEnd == null || diveStart.difference(prevDiveEnd) > tissueResetDuration) {
         startTissues = null; // Start with clean tissues
@@ -161,7 +166,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
         _log.fine('calculate start tissues for dive ${dive.id}');
         final surfaceInterval = diveStart.difference(prevDiveEnd).inSeconds.toDouble();
         if (surfaceInterval > 0) {
-          final deco = buhlmann.BuhlmannDeco(tissues: protoToTissueState(prevEndTissues));
+          final deco = buhlmann.BuhlmannDeco(config: cfg, tissues: protoToTissueState(prevEndTissues));
           deco.addSegment(0, buhlmann.GasMix.air, surfaceInterval);
           startTissues = tissueStateToProto(deco.tissues, diveStart, prevEndTissues.chainId);
         } else {
@@ -180,7 +185,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
         _log.fine('calculate end tissues for dive ${dive.id}');
         final fullDive = await _store.diveById(dive.id);
         if (fullDive != null && fullDive.logs.isNotEmpty) {
-          final (endTissues, surfGF) = calculateDiveTissues(dive: fullDive, startTissues: protoToTissueState(startTissues));
+          final (endTissues, surfGF) = calculateDiveTissues(config: cfg, dive: fullDive, startTissues: protoToTissueState(startTissues));
           final updatedDive = fullDive.rebuild((d) {
             if (startTissues != null) {
               d.startTissues = startTissues;

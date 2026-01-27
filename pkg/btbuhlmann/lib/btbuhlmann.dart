@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'constants.dart';
-export 'constants.dart' show atmPressure;
+export 'constants.dart' show atmPressure, numTissueCompartments;
 
 const int generation = 1; // increase when bugs are fixed to force recalc
 
