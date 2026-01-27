@@ -46,7 +46,7 @@ class _SyncProviderPrefTile extends StatelessWidget {
         value: prefs.syncProvider,
         items: [for (final provider in availableProviders) DropdownMenuItem<SyncProviderPref>(value: provider, child: Text(_syncProviderLabel(provider)))],
         onChanged: (value) {
-          context.read<PreferencesBloc>().add(PreferencesEvent.updateSyncProvider(value!));
+          context.read<PreferencesBloc>().add(PreferencesEvent.update((p) => p.syncProvider = value!));
         },
       ),
     );
@@ -114,7 +114,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
       region: widget.isBubbletrail ? 'eu' : _regionController.text.trim(),
       vaultKey: _vaultKeyController.text.trim(),
     );
-    context.read<PreferencesBloc>().add(PreferencesEvent.updateS3Config(config));
+    context.read<PreferencesBloc>().add(PreferencesEvent.update((p) => p.s3Config = config));
   }
 
   @override

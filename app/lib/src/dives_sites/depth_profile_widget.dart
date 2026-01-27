@@ -90,9 +90,7 @@ class _DepthProfileState extends State<DepthProfile> {
 
     // Build pressure spots for each tank, normalized to depth range, step-style
     for (final tankIndex in tankIndices) {
-      final samplesWithPressure = samplesWithDepth
-          .where((s) => s.pressures.any((p) => p.tankIndex == tankIndex && p.pressure > 0))
-          .toList();
+      final samplesWithPressure = samplesWithDepth.where((s) => s.pressures.any((p) => p.tankIndex == tankIndex && p.pressure > 0)).toList();
       if (samplesWithPressure.isEmpty) continue;
 
       final pressures = samplesWithPressure.map((s) => s.pressures.firstWhere((p) => p.tankIndex == tankIndex).pressure).toList();
@@ -125,10 +123,7 @@ class _DepthProfileState extends State<DepthProfile> {
             // We're switching to a non-default gas, without having switched
             // to the default gas, so for illustrative purposes we add a
             // synthetic switch at the first sample.
-            _gasSwitches.add((
-              timeMinutes: 0,
-              gasName: formatGasFraction(widget.dive.cylinders.first.oxygen, widget.dive.cylinders.first.helium),
-            ));
+            _gasSwitches.add((timeMinutes: 0, gasName: formatGasFraction(widget.dive.cylinders.first.oxygen, widget.dive.cylinders.first.helium)));
           }
           final cyl = widget.dive.cylinders[event.value];
           final gasName = formatGasFraction(cyl.oxygen, cyl.helium);
@@ -198,9 +193,7 @@ class _DepthProfileState extends State<DepthProfile> {
 
     // Temperature line
     if (_tempSpots.isNotEmpty) {
-      lineBars.add(
-        LineChartBarData(spots: _tempSpots, color: tempColor, barWidth: 1, dotData: const FlDotData(show: false), dashArray: [4, 2]),
-      );
+      lineBars.add(LineChartBarData(spots: _tempSpots, color: tempColor, barWidth: 1, dotData: const FlDotData(show: false), dashArray: [4, 2]));
     }
 
     // Pressure lines
@@ -233,8 +226,7 @@ class _DepthProfileState extends State<DepthProfile> {
                 if (_displaySample!.hasTemperature()) TemperatureText(_displaySample!.temperature),
                 if (_displaySample!.pressures.isNotEmpty && _displaySample!.pressures.first.pressure > 0)
                   PressureText(_displaySample!.pressures.first.pressure),
-                if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0)
-                  DepthText(_displaySample!.deco.depth, prefix: 'Comp ceil: '),
+                if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0) DepthText(_displaySample!.deco.depth, prefix: 'Comp ceil: '),
                 if (buhlmann != null && buhlmann.ceiling > 0) DepthText(buhlmann.ceiling, prefix: 'Calc ceil: '),
                 if (buhlmann != null) Text('SurfGF: ${buhlmann.surfGF.round().clamp(0, 999)}%'),
               ],
@@ -326,9 +318,7 @@ class _DepthProfileState extends State<DepthProfile> {
                   _displaySample = sample;
                 });
               },
-              touchTooltipData: LineTouchTooltipData(
-                getTooltipItems: (touchedSpots) => [for (var i = 0; i < touchedSpots.length; i++) null],
-              ),
+              touchTooltipData: LineTouchTooltipData(getTooltipItems: (touchedSpots) => [for (var i = 0; i < touchedSpots.length; i++) null]),
               getTouchedSpotIndicator: (barData, spotIndexes) => spotIndexes.map((idx) {
                 if (barData.barWidth < 2) return null; // hack to identify depth line
                 return TouchedSpotIndicatorData(FlLine(color: Theme.of(context).colorScheme.secondary, strokeWidth: 1), FlDotData());

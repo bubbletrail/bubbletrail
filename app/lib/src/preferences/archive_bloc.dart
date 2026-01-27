@@ -34,14 +34,7 @@ class ArchiveState extends Equatable {
     this.importComplete = false,
   });
 
-  ArchiveState copyWith({
-    bool? working,
-    String? error,
-    String? exportReadyPath,
-    String? exportReadyFilename,
-    bool? exportComplete,
-    bool? importComplete,
-  }) {
+  ArchiveState copyWith({bool? working, String? error, String? exportReadyPath, String? exportReadyFilename, bool? exportComplete, bool? importComplete}) {
     return ArchiveState(
       working: working ?? this.working,
       error: error,

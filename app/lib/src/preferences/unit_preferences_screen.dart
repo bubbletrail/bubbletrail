@@ -28,7 +28,7 @@ class UnitPreferencessScreen extends StatelessWidget {
                   ],
                   selected: {prefs.depthUnit},
                   onSelectionChanged: (value) {
-                    context.read<PreferencesBloc>().add(PreferencesEvent.updateDepthUnit(value.first));
+                    context.read<PreferencesBloc>().add(PreferencesEvent.update((p) => p.depthUnit = value.first));
                   },
                 ),
               ),
@@ -41,7 +41,7 @@ class UnitPreferencessScreen extends StatelessWidget {
                   ],
                   selected: {prefs.pressureUnit},
                   onSelectionChanged: (value) {
-                    context.read<PreferencesBloc>().add(PreferencesEvent.updatePressureUnit(value.first));
+                    context.read<PreferencesBloc>().add(PreferencesEvent.update((p) => p.pressureUnit = value.first));
                   },
                 ),
               ),
@@ -54,7 +54,7 @@ class UnitPreferencessScreen extends StatelessWidget {
                   ],
                   selected: {prefs.temperatureUnit},
                   onSelectionChanged: (value) {
-                    context.read<PreferencesBloc>().add(PreferencesEvent.updateTemperatureUnit(value.first));
+                    context.read<PreferencesBloc>().add(PreferencesEvent.update((p) => p.temperatureUnit = value.first));
                   },
                 ),
               ),
@@ -67,7 +67,7 @@ class UnitPreferencessScreen extends StatelessWidget {
                   ],
                   selected: {prefs.volumeUnit},
                   onSelectionChanged: (value) {
-                    context.read<PreferencesBloc>().add(PreferencesEvent.updateVolumeUnit(value.first));
+                    context.read<PreferencesBloc>().add(PreferencesEvent.update((p) => p.volumeUnit = value.first));
                   },
                 ),
               ),
@@ -80,7 +80,7 @@ class UnitPreferencessScreen extends StatelessWidget {
                   ],
                   selected: {prefs.weightUnit},
                   onSelectionChanged: (value) {
-                    context.read<PreferencesBloc>().add(PreferencesEvent.updateWeightUnit(value.first));
+                    context.read<PreferencesBloc>().add(PreferencesEvent.update((p) => p.weightUnit = value.first));
                   },
                 ),
               ),
@@ -95,7 +95,7 @@ class UnitPreferencessScreen extends StatelessWidget {
                   ],
                   selected: {prefs.dateFormat},
                   onSelectionChanged: (value) {
-                    context.read<PreferencesBloc>().add(PreferencesEvent.updateDateFormat(value.first));
+                    context.read<PreferencesBloc>().add(PreferencesEvent.update((p) => p.dateFormat = value.first));
                   },
                 ),
               ),
@@ -108,7 +108,7 @@ class UnitPreferencessScreen extends StatelessWidget {
                   ],
                   selected: {prefs.timeFormat},
                   onSelectionChanged: (value) {
-                    context.read<PreferencesBloc>().add(PreferencesEvent.updateTimeFormat(value.first));
+                    context.read<PreferencesBloc>().add(PreferencesEvent.update((p) => p.timeFormat = value.first));
                   },
                 ),
               ),

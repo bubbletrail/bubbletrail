@@ -71,7 +71,7 @@ class PreferencesScreen extends StatelessWidget {
                         ],
                         selected: {prefs.flutterThemeMode},
                         onSelectionChanged: (value) {
-                          context.read<PreferencesBloc>().add(PreferencesEvent.updateThemeMode(value.first));
+                          context.read<PreferencesBloc>().add(PreferencesEvent.update((p) => p.themeMode = themeModeToProto(value.first)));
                         },
                       ),
                       Wrap(

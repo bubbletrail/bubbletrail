@@ -11,9 +11,7 @@ abstract class _$BleDownloadStateCWProxy {
 
   BleDownloadState connectionState(BluetoothConnectionState connectionState);
 
-  BleDownloadState discoveredServices(
-    List<BluetoothService> discoveredServices,
-  );
+  BleDownloadState discoveredServices(List<BluetoothService> discoveredServices);
 
   BleDownloadState isDiscoveringServices(bool isDiscoveringServices);
 
@@ -58,45 +56,34 @@ class _$BleDownloadStateCWProxyImpl implements _$BleDownloadStateCWProxy {
   final BleDownloadState _value;
 
   @override
-  BleDownloadState connectedDevice(BluetoothDevice? connectedDevice) =>
-      call(connectedDevice: connectedDevice);
+  BleDownloadState connectedDevice(BluetoothDevice? connectedDevice) => call(connectedDevice: connectedDevice);
 
   @override
-  BleDownloadState connectionState(BluetoothConnectionState connectionState) =>
-      call(connectionState: connectionState);
+  BleDownloadState connectionState(BluetoothConnectionState connectionState) => call(connectionState: connectionState);
 
   @override
-  BleDownloadState discoveredServices(
-    List<BluetoothService> discoveredServices,
-  ) => call(discoveredServices: discoveredServices);
+  BleDownloadState discoveredServices(List<BluetoothService> discoveredServices) => call(discoveredServices: discoveredServices);
 
   @override
-  BleDownloadState isDiscoveringServices(bool isDiscoveringServices) =>
-      call(isDiscoveringServices: isDiscoveringServices);
+  BleDownloadState isDiscoveringServices(bool isDiscoveringServices) => call(isDiscoveringServices: isDiscoveringServices);
 
   @override
-  BleDownloadState isDownloading(bool isDownloading) =>
-      call(isDownloading: isDownloading);
+  BleDownloadState isDownloading(bool isDownloading) => call(isDownloading: isDownloading);
 
   @override
-  BleDownloadState downloadProgress(DownloadProgress? downloadProgress) =>
-      call(downloadProgress: downloadProgress);
+  BleDownloadState downloadProgress(DownloadProgress? downloadProgress) => call(downloadProgress: downloadProgress);
 
   @override
-  BleDownloadState downloadedDives(List<Dive> downloadedDives) =>
-      call(downloadedDives: downloadedDives);
+  BleDownloadState downloadedDives(List<Dive> downloadedDives) => call(downloadedDives: downloadedDives);
 
   @override
   BleDownloadState error(String? error) => call(error: error);
 
   @override
-  BleDownloadState lastLogDate(DateTime? lastLogDate) =>
-      call(lastLogDate: lastLogDate);
+  BleDownloadState lastLogDate(DateTime? lastLogDate) => call(lastLogDate: lastLogDate);
 
   @override
-  BleDownloadState autoStartDescriptor(
-    ComputerDescriptor? autoStartDescriptor,
-  ) => call(autoStartDescriptor: autoStartDescriptor);
+  BleDownloadState autoStartDescriptor(ComputerDescriptor? autoStartDescriptor) => call(autoStartDescriptor: autoStartDescriptor);
 
   @override
   /// Creates a new instance with the provided field values.
@@ -123,26 +110,19 @@ class _$BleDownloadStateCWProxyImpl implements _$BleDownloadStateCWProxy {
           ? _value.connectedDevice
           // ignore: cast_nullable_to_non_nullable
           : connectedDevice as BluetoothDevice?,
-      connectionState:
-          connectionState == const $CopyWithPlaceholder() ||
-              connectionState == null
+      connectionState: connectionState == const $CopyWithPlaceholder() || connectionState == null
           ? _value.connectionState
           // ignore: cast_nullable_to_non_nullable
           : connectionState as BluetoothConnectionState,
-      discoveredServices:
-          discoveredServices == const $CopyWithPlaceholder() ||
-              discoveredServices == null
+      discoveredServices: discoveredServices == const $CopyWithPlaceholder() || discoveredServices == null
           ? _value.discoveredServices
           // ignore: cast_nullable_to_non_nullable
           : discoveredServices as List<BluetoothService>,
-      isDiscoveringServices:
-          isDiscoveringServices == const $CopyWithPlaceholder() ||
-              isDiscoveringServices == null
+      isDiscoveringServices: isDiscoveringServices == const $CopyWithPlaceholder() || isDiscoveringServices == null
           ? _value.isDiscoveringServices
           // ignore: cast_nullable_to_non_nullable
           : isDiscoveringServices as bool,
-      isDownloading:
-          isDownloading == const $CopyWithPlaceholder() || isDownloading == null
+      isDownloading: isDownloading == const $CopyWithPlaceholder() || isDownloading == null
           ? _value.isDownloading
           // ignore: cast_nullable_to_non_nullable
           : isDownloading as bool,
@@ -150,9 +130,7 @@ class _$BleDownloadStateCWProxyImpl implements _$BleDownloadStateCWProxy {
           ? _value.downloadProgress
           // ignore: cast_nullable_to_non_nullable
           : downloadProgress as DownloadProgress?,
-      downloadedDives:
-          downloadedDives == const $CopyWithPlaceholder() ||
-              downloadedDives == null
+      downloadedDives: downloadedDives == const $CopyWithPlaceholder() || downloadedDives == null
           ? _value.downloadedDives
           // ignore: cast_nullable_to_non_nullable
           : downloadedDives as List<Dive>,
@@ -202,9 +180,7 @@ extension $BleDownloadStateCopyWith on BleDownloadState {
       downloadedDives: downloadedDives,
       error: error == true ? null : this.error,
       lastLogDate: lastLogDate == true ? null : this.lastLogDate,
-      autoStartDescriptor: autoStartDescriptor == true
-          ? null
-          : this.autoStartDescriptor,
+      autoStartDescriptor: autoStartDescriptor == true ? null : this.autoStartDescriptor,
     );
   }
 }

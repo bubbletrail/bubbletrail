@@ -26,15 +26,15 @@ class PreferencesStore {
     if (await file.exists()) {
       try {
         final bytes = await file.readAsBytes();
-        _preferences = Preferences.fromBuffer(bytes);
+        _preferences = Preferences.fromBuffer(bytes)..freeze();
         _log.fine('loaded preferences from $path');
       } catch (e) {
         _log.warning('failed to load preferences, using defaults', e);
-        _preferences = Preferences();
+        _preferences = Preferences()..freeze();
       }
     } else {
       _log.fine('no preferences file found, using defaults');
-      _preferences = Preferences();
+      _preferences = Preferences()..freeze();
     }
   }
 
@@ -44,7 +44,7 @@ class PreferencesStore {
   }
 
   Future<void> save(Preferences prefs) async {
-    _preferences = prefs;
+    _preferences = prefs..freeze();
     final file = File(path);
     await file.parent.create(recursive: true);
     await file.writeAsBytes(prefs.writeToBuffer());

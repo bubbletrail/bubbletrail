@@ -22,12 +22,7 @@ class SyncState extends Equatable {
   const SyncState({this.lastSynced, this.syncing = false, this.error, this.lastSyncSuccess});
 
   SyncState copyWith({DateTime? lastSynced, bool? syncing, String? error, bool? lastSyncSuccess}) {
-    return SyncState(
-      lastSynced: lastSynced ?? this.lastSynced,
-      syncing: syncing ?? this.syncing,
-      error: error,
-      lastSyncSuccess: lastSyncSuccess,
-    );
+    return SyncState(lastSynced: lastSynced ?? this.lastSynced, syncing: syncing ?? this.syncing, error: error, lastSyncSuccess: lastSyncSuccess);
   }
 
   @override
