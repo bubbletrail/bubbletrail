@@ -43,14 +43,16 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final decoration = BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [cs.tertiaryContainer, cs.onTertiaryFixedVariant],
-        tileMode: .mirror,
-      ),
-    );
+    final decoration = platformIsDesktop
+        ? BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [cs.tertiaryContainer, cs.onTertiaryFixedVariant],
+              tileMode: .mirror,
+            ),
+          )
+        : BoxDecoration(color: Theme.of(context).canvasColor);
 
     return Container(
       decoration: decoration,
