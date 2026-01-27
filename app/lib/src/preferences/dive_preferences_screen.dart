@@ -10,23 +10,20 @@ class DivePreferencesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final prefs = context.watch<PreferencesStore>();
     return ScreenScaffold(
       title: const Text('Dive preferences'),
-      body: Consumer<PreferencesStore>(
-        builder: (context, prefs, _) {
-          return ListView(
-            padding: const .all(16),
-            children: [
-              PreferencesSectionHeader(title: 'Gradient Factors'),
-              const SizedBox(height: 8),
-              Text('Gradient factors adjust the conservatism of the Buhlmann decompression algorithm.', style: Theme.of(context).textTheme.bodySmall),
-              const SizedBox(height: 16),
-              _GfSlider(label: 'GF Low', value: prefs.gfLow, onChanged: (value) => PreferencesStore.instance.gfLow = value),
-              const SizedBox(height: 8),
-              _GfSlider(label: 'GF High', value: prefs.gfHigh, onChanged: (value) => PreferencesStore.instance.gfHigh = value),
-            ],
-          );
-        },
+      body: ListView(
+        padding: const .all(16),
+        children: [
+          PreferencesSectionHeader(title: 'Gradient Factors'),
+          const SizedBox(height: 8),
+          Text('Gradient factors adjust the conservatism of the Buhlmann decompression algorithm.', style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 16),
+          _GfSlider(label: 'GF Low', value: prefs.gfLow, onChanged: (value) => PreferencesStore.instance.gfLow = value),
+          const SizedBox(height: 8),
+          _GfSlider(label: 'GF High', value: prefs.gfHigh, onChanged: (value) => PreferencesStore.instance.gfHigh = value),
+        ],
       ),
     );
   }

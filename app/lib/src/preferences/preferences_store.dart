@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../providers/storage_provider.dart';
 import 'preferences.dart';
 
 class PreferencesStore extends ChangeNotifier {
@@ -129,11 +128,4 @@ class PreferencesStore extends ChangeNotifier {
 
   // Computed getter
   String get dateTimeFormat => '${dateFormat.format} ${timeFormat.format}';
-
-  // Reset database: sets syncProvider to none and resets storage
-  Future<void> resetDatabase() async {
-    syncProvider = .none;
-    final store = await StorageProvider.store;
-    await store.reset();
-  }
 }

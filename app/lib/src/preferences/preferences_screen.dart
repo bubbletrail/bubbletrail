@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
+import '../providers/storage_provider.dart';
 import 'archive_bloc.dart';
 import '../dives_sites/dive_list_bloc.dart';
 import '../equipment/equipment_list_bloc.dart';
@@ -172,7 +173,9 @@ class PreferencesScreen extends StatelessWidget {
     );
     if (confirmed != true || !context.mounted) return;
 
-    await PreferencesStore.instance.resetDatabase();
+    PreferencesStore.instance.syncProvider = .none;
+    final store = await StorageProvider.store;
+    await store.reset();
   }
 }
 

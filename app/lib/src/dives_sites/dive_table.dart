@@ -84,12 +84,12 @@ class DiveTable extends StatelessWidget {
             value: dive.sac * 10,
             renderer: (rendererContext) => rendererContext.cell.value != 0 ? VolumeText(rendererContext.cell.value / 10, suffix: '/min') : Text('-'),
           ),
-          '_id': TrinaCell(value: dive.id),
+          '_id': TrinaCell(value: dive.id), // Hidden field for navigation
         },
       );
     }).toList();
     return TrinaGrid(
-      key: ValueKey((prefs.dateTimeFormat, dives)),
+      key: ValueKey((prefs.dateTimeFormat, dives)), // ensure reload when date format change
       columns: columns,
       rows: rows,
       mode: .selectWithOneTap,
