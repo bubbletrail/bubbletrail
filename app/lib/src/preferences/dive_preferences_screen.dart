@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 
 import 'preferences_bloc.dart';
 import '../common/screen_scaffold.dart';
@@ -14,9 +15,10 @@ class DivePreferencesScreen extends StatelessWidget {
       title: const Text('Dive preferences'),
       body: BlocBuilder<PreferencesBloc, PreferencesState>(
         builder: (context, state) {
-          final prefs = state.preferences;
-          prefs.gfLow = prefs.gfLow.clamp(0.1, 1.0);
-          prefs.gfHigh = prefs.gfHigh.clamp(prefs.gfLow, 1.0);
+          final prefs = state.preferences.rebuild((prefs) {
+            prefs.gfLow = prefs.gfLow.clamp(0.1, 1.0);
+            prefs.gfHigh = prefs.gfHigh.clamp(prefs.gfLow, 1.0);
+          });
           return ListView(
             padding: const .all(16),
             children: [
