@@ -378,7 +378,12 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
       // no downloaded dive or no logs in dive
     }
 
-    // Sort dives by time; number them; insert.
+    // Load default cylinders for assignment
+    final defaultBackgas = await _store.cylinders.getDefaultForBackgas();
+    final defaultDeepDeco = await _store.cylinders.getDefaultForDeepDeco();
+    final defaultShallowDeco = await _store.cylinders.getDefaultForShallowDeco();
+
+    // Sort dives by time; number them; assign default cylinders; insert.
 
     final downloaded = state.downloadedDives;
     downloaded.sort((a, b) => a.start.seconds.compareTo(b.start.seconds));
@@ -387,6 +392,20 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     for (final d in downloaded) {
       d.number = nextID;
       nextID++;
+
+      // Assign default cylinders based on O2 content
+      for (final cyl in d.cylinders) {
+        if (cyl.cylinderId.isEmpty) {
+          final o2Percent = cyl.oxygen * 100;
+          if (o2Percent > 60 && defaultShallowDeco != null) {
+            cyl.cylinderId = defaultShallowDeco.id;
+          } else if (o2Percent >= 40 && defaultDeepDeco != null) {
+            cyl.cylinderId = defaultDeepDeco.id;
+          } else if (defaultBackgas != null) {
+            cyl.cylinderId = defaultBackgas.id;
+          }
+        }
+      }
     }
 
     await _store.dives.insertAll(downloaded);

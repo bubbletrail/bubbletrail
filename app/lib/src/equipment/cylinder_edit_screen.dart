@@ -34,6 +34,11 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
   // Track if we're editing in imperial mode
   late bool _isImperialMode;
 
+  // Default cylinder flags
+  bool _defaultForBackgas = false;
+  bool _defaultForDeepDeco = false;
+  bool _defaultForShallowDeco = false;
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +46,10 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
     _originalCylinder = state.cylinder;
     _isNew = state.isNew;
     _descriptionController = TextEditingController(text: _originalCylinder.description);
+
+    _defaultForBackgas = _originalCylinder.defaultForBackgas;
+    _defaultForDeepDeco = _originalCylinder.defaultForDeepDeco;
+    _defaultForShallowDeco = _originalCylinder.defaultForShallowDeco;
 
     _isImperialMode = _originalCylinder.hasVolumeCuft();
 
@@ -77,6 +86,9 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
       workingPressureBar: _workpressure,
       volumeCuft: _isImperialMode ? _sizeCuft : null,
       workingPressurePsi: _isImperialMode ? _workpressurePsi : null,
+      defaultForBackgas: _defaultForBackgas,
+      defaultForDeepDeco: _defaultForDeepDeco,
+      defaultForShallowDeco: _defaultForShallowDeco,
     );
 
     context.read<CylinderDetailsBloc>().add(CylinderDetailsEvent.update(updatedCylinder));
@@ -108,7 +120,10 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
         actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes')],
         body: Padding(
           padding: const .all(16.0),
-          child: Column(spacing: 16, children: [_descriptionCard(), platformIsMobile ? _verticalCards(context) : _horisontalCards(context)]),
+          child: Column(
+            spacing: 16,
+            children: [_descriptionCard(), platformIsMobile ? _verticalCards(context) : _horisontalCards(context), _defaultsCard(context)],
+          ),
         ),
       ),
     );
@@ -249,6 +264,44 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
       _volumeLController.text = formatDisplayValue(_size);
       _isImperialMode = true;
     });
+  }
+
+  Card _defaultsCard(BuildContext context) {
+    return Card(
+      margin: .zero,
+      child: Padding(
+        padding: const .all(8.0),
+        child: Column(
+          crossAxisAlignment: .start,
+          children: [
+            Text('Default for imports', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text('Use this cylinder when importing dives without cylinder type info', style: Theme.of(context).textTheme.bodySmall),
+            CheckboxListTile(
+              title: const Text('Backgas (<40% O\u2082)'),
+              value: _defaultForBackgas,
+              onChanged: (v) => setState(() => _defaultForBackgas = v ?? false),
+              controlAffinity: .leading,
+              contentPadding: .zero,
+            ),
+            CheckboxListTile(
+              title: const Text('Deep deco (40-60% O\u2082)'),
+              value: _defaultForDeepDeco,
+              onChanged: (v) => setState(() => _defaultForDeepDeco = v ?? false),
+              controlAffinity: .leading,
+              contentPadding: .zero,
+            ),
+            CheckboxListTile(
+              title: const Text('Shallow deco (>60% O\u2082)'),
+              value: _defaultForShallowDeco,
+              onChanged: (v) => setState(() => _defaultForShallowDeco = v ?? false),
+              controlAffinity: .leading,
+              contentPadding: .zero,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

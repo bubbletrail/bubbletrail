@@ -109,8 +109,38 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
   Future<void> _onUpdateCylinderDetails(_UpdateCylinderDetails event, Emitter<CylinderDetailsState> emit) async {
     try {
       final store = await StorageProvider.store;
-      await store.cylinders.update(event.cylinder);
-      add(_LoadCylinderDetails(event.cylinder.id));
+      final cylinder = event.cylinder;
+
+      // Ensure only one cylinder has each default flag
+      if (cylinder.defaultForBackgas || cylinder.defaultForDeepDeco || cylinder.defaultForShallowDeco) {
+        final allCylinders = await store.cylinders.getAll();
+        for (final other in allCylinders) {
+          if (other.id == cylinder.id) continue;
+
+          var needsUpdate = false;
+          var updated = other;
+
+          if (cylinder.defaultForBackgas && other.defaultForBackgas) {
+            updated = updated.rebuild((b) => b.defaultForBackgas = false);
+            needsUpdate = true;
+          }
+          if (cylinder.defaultForDeepDeco && other.defaultForDeepDeco) {
+            updated = updated.rebuild((b) => b.defaultForDeepDeco = false);
+            needsUpdate = true;
+          }
+          if (cylinder.defaultForShallowDeco && other.defaultForShallowDeco) {
+            updated = updated.rebuild((b) => b.defaultForShallowDeco = false);
+            needsUpdate = true;
+          }
+
+          if (needsUpdate) {
+            await store.cylinders.update(updated);
+          }
+        }
+      }
+
+      await store.cylinders.update(cylinder);
+      add(_LoadCylinderDetails(cylinder.id));
     } catch (e) {
       _log.warning('failed to update cylinder', e);
       emit(CylinderDetailsError('Failed to update cylinder: $e'));

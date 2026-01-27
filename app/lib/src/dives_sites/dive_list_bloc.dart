@@ -228,6 +228,11 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     final newSites = importedDoc.sites.where((s) => !existingSiteUuids.contains(s.id)).toList();
     await _store.sites.updateAll(newSites);
 
+    // Load default cylinders for assignment
+    final defaultBackgas = await _store.cylinders.getDefaultForBackgas();
+    final defaultDeepDeco = await _store.cylinders.getDefaultForDeepDeco();
+    final defaultShallowDeco = await _store.cylinders.getDefaultForShallowDeco();
+
     for (final dive in importedDoc.dives) {
       // Process cylinders
       for (final cyl in dive.cylinders) {
@@ -239,6 +244,18 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
             c.hasDescription() ? c.description : null,
           );
           cyl.cylinderId = cr.id;
+        }
+
+        // If still no cylinder assigned, apply default based on O2 content
+        if (cyl.cylinderId.isEmpty) {
+          final o2Percent = cyl.oxygen * 100;
+          if (o2Percent > 60 && defaultShallowDeco != null) {
+            cyl.cylinderId = defaultShallowDeco.id;
+          } else if (o2Percent >= 40 && defaultDeepDeco != null) {
+            cyl.cylinderId = defaultDeepDeco.id;
+          } else if (defaultBackgas != null) {
+            cyl.cylinderId = defaultBackgas.id;
+          }
         }
       }
 

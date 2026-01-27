@@ -40,6 +40,10 @@ message Cylinder {
   string description = 5;
 
   // Imperial values (set when entered in imperial units for exact round-trip)
-  optional double volume_cuft = 6; // Gas capacity in cuft at working pressure
-  optional double working_pressure_psi = 7; // Working pressure in PSI
+  double volume_cuft = 6; // Gas capacity in cuft at working pressure
+  double working_pressure_psi = 7; // Working pressure in PSI
+
+  bool default_for_backgas = 8;
+  bool default_for_deep_deco = 9;
+  bool default_for_shallow_deco = 10;
 }
