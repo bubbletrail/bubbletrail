@@ -7,13 +7,15 @@ import 'package:path_provider/path_provider.dart';
 final _log = Logger('storage_provider.dart');
 
 class StorageProvider {
-  static Future<String> get storePath async => '${(await getApplicationDocumentsDirectory()).path}/db';
+  static final instance = StorageProvider._();
+  StorageProvider._();
 
-  static Future<Store> store = () async {
+  late final Store store;
+
+  Future<void> init() async {
     _log.fine('init storage');
-    final dir = await storePath;
-    final store = Store(dir);
+    final dir = '${(await getApplicationDocumentsDirectory()).path}/db';
+    store = Store(dir);
     await store.init();
-    return store;
-  }();
+  }
 }

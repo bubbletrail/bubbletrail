@@ -89,6 +89,7 @@ class _DeleteAndClose extends DiveDetailsEvent {
 }
 
 class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
+  final _store = StorageProvider.instance.store;
   StreamSubscription? _storageSubscription;
 
   DiveDetailsBloc() : super(const DiveDetailsInitial()) {
@@ -96,8 +97,7 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
     on<DiveDetailsEvent>((event, emit) async {
       switch (event) {
         case _NewDive():
-          final s = await StorageProvider.store;
-          final n = await s.dives.nextDiveNo;
+          final n = await _store.dives.nextDiveNo;
           final t = Timestamp.fromDateTime(DateTime.now());
           emit(DiveDetailsLoaded(Dive(number: n, start: t)..freeze()));
         case _LoadDive():
@@ -105,13 +105,11 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
         case _Close():
           emit(DiveDetailsClosed());
         case _SaveAndClose():
-          final s = await StorageProvider.store;
-          await s.dives.update(event.dive);
+          await _store.dives.update(event.dive);
           _log.fine('saved dive #${event.dive.number}');
           emit(DiveDetailsClosed());
         case _DeleteAndClose():
-          final s = await StorageProvider.store;
-          await s.dives.delete(event.diveID);
+          await _store.dives.delete(event.diveID);
           _log.fine('deleted dive ${event.diveID}');
           emit(DiveDetailsClosed());
       }
@@ -119,14 +117,13 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
   }
 
   Future<void> _onLoadDive(_LoadDive event, Emitter<DiveDetailsState> emit) async {
-    final s = await StorageProvider.store;
-    final dive = await s.diveById(event.diveId);
+    final dive = await _store.diveById(event.diveId);
     if (dive == null) {
       emit(DiveDetailsClosed());
       return;
     }
 
-    _storageSubscription ??= s.dives.changes.listen((_) {
+    _storageSubscription ??= _store.dives.changes.listen((_) {
       // Reload the dive when storage changes. Use the dive ID from the
       // current state, because the dive we track may have changed since the
       // bloc was created.
@@ -139,14 +136,14 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
 
     Dive? nextDive;
     Dive? prevDive;
-    final allDives = await s.dives.getAll();
+    final allDives = await _store.dives.getAll();
     final curIdx = allDives.indexWhere((d) => d.id == event.diveId);
     if (curIdx > 0) prevDive = allDives[curIdx - 1];
     if (curIdx < allDives.length - 1) nextDive = allDives[curIdx + 1];
 
     Site? site;
     if (dive.siteId.isNotEmpty) {
-      site = await s.sites.getById(dive.siteId);
+      site = await _store.sites.getById(dive.siteId);
     }
     if (site != null) {
       _log.fine('loaded site ${site.name}');

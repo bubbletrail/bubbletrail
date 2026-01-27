@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:btstore/btstore.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
@@ -85,6 +85,7 @@ class _DeleteAndClose extends SiteDetailsEvent {
 }
 
 class SiteDetailsBloc extends Bloc<SiteDetailsEvent, SiteDetailsState> {
+  final _store = StorageProvider.instance.store;
   StreamSubscription? _storageSubscription;
 
   SiteDetailsBloc() : super(const SiteDetailsInitial()) {
@@ -98,13 +99,11 @@ class SiteDetailsBloc extends Bloc<SiteDetailsEvent, SiteDetailsState> {
         case _Close():
           emit(SiteDetailsClosed());
         case _SaveAndClose():
-          final s = await StorageProvider.store;
-          await s.sites.update(event.site);
+          await _store.sites.update(event.site);
           _log.fine('saved ${event.site.name}');
           emit(SiteDetailsClosed());
         case _DeleteAndClose():
-          final s = await StorageProvider.store;
-          await s.deleteSite(event.siteID);
+          await _store.deleteSite(event.siteID);
           _log.fine('deleted ${event.siteID}');
           emit(SiteDetailsClosed());
       }
@@ -112,14 +111,13 @@ class SiteDetailsBloc extends Bloc<SiteDetailsEvent, SiteDetailsState> {
   }
 
   Future<void> _onLoadSite(_LoadSite event, Emitter<SiteDetailsState> emit) async {
-    final s = await StorageProvider.store;
-    final site = await s.sites.getById(event.siteId);
+    final site = await _store.sites.getById(event.siteId);
     if (site == null) {
       emit(SiteDetailsClosed());
       return;
     }
 
-    _storageSubscription ??= s.sites.changes.listen((_) {
+    _storageSubscription ??= _store.sites.changes.listen((_) {
       // Reload the site when storage changes
       add(_LoadSite(event.siteId));
     });

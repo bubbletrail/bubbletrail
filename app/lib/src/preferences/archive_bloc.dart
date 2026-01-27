@@ -93,6 +93,8 @@ class _ExportSsrf extends ArchiveEvent {
 }
 
 class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
+  final _store = StorageProvider.instance.store;
+
   ArchiveBloc() : super(const ArchiveState()) {
     on<ArchiveEvent>((event, emit) async {
       switch (event) {
@@ -113,13 +115,12 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
   Future<void> _onExport(Emitter<ArchiveState> emit) async {
     emit(state.copyWith(working: true, error: null));
     try {
-      final store = await StorageProvider.store;
       final tempDir = await getTemporaryDirectory();
       final filename = 'bubbletrail_${DateFormat('yyyy-MM-dd_HHmmss').format(DateTime.now())}.$backupFileExtension';
       final zipFile = File('${tempDir.path}/$filename');
 
       final provider = ZipExportProvider(zipFile: zipFile);
-      await store.exportTo(provider);
+      await _store.exportTo(provider);
 
       _log.info('export ready at ${zipFile.path}');
       emit(state.copyWith(working: false, exportReadyPath: zipFile.path, exportReadyFilename: filename));
@@ -157,12 +158,11 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
   Future<void> _onImport(_ImportArchive event, Emitter<ArchiveState> emit) async {
     emit(state.copyWith(working: true, error: null));
     try {
-      final store = await StorageProvider.store;
       final zipFile = File(event.zipPath);
 
       final provider = ZipImportProvider(zipFile: zipFile);
       await provider.init();
-      await store.importFrom(provider);
+      await _store.importFrom(provider);
 
       _log.info('import complete');
       emit(state.copyWith(working: false, importComplete: true));
@@ -175,19 +175,18 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
   Future<void> _onExportSsrf(Emitter<ArchiveState> emit) async {
     emit(state.copyWith(working: true, error: null));
     try {
-      final store = await StorageProvider.store;
       final tempDir = await getTemporaryDirectory();
       final filename = 'bubbletrail_${DateFormat('yyyy-MM-dd_HHmmss').format(DateTime.now())}.ssrf';
       final ssrfFile = File('${tempDir.path}/$filename');
 
       // Get all sites
-      final sites = await store.sites.getAll();
+      final sites = await _store.sites.getAll();
 
       // Get all dives with full data (including logs/samples)
-      final overviewDives = await store.dives.getAll();
+      final overviewDives = await _store.dives.getAll();
       final dives = <Dive>[];
       for (final d in overviewDives) {
-        final fullDive = await store.diveById(d.id);
+        final fullDive = await _store.diveById(d.id);
         if (fullDive != null) {
           dives.add(fullDive);
         }

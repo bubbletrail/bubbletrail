@@ -93,7 +93,7 @@ class _ImportDives extends DiveListEvent {
 }
 
 class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
-  late final Store _store;
+  final _store = StorageProvider.instance.store;
   StreamSubscription? _divesStorageSub;
   StreamSubscription? _sitesStorageSub;
 
@@ -107,16 +107,13 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       }
     }, transformer: sequential());
 
-    StorageProvider.store.then((value) {
-      _store = value;
-      _divesStorageSub = _store.dives.changes.listen((event) {
-        add(_LoadAll());
-      });
-      _sitesStorageSub = _store.sites.changes.listen((event) {
-        add(_LoadAll());
-      });
+    _divesStorageSub = _store.dives.changes.listen((event) {
       add(_LoadAll());
     });
+    _sitesStorageSub = _store.sites.changes.listen((event) {
+      add(_LoadAll());
+    });
+    add(_LoadAll());
   }
 
   Future<void> _onLoadDives(Emitter<DiveListState> emit) async {

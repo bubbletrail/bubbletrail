@@ -51,6 +51,7 @@ class _LoadedCylinders extends CylinderListEvent {
 }
 
 class CylinderListBloc extends Bloc<CylinderListEvent, CylinderListState> {
+  final _store = StorageProvider.instance.store;
   StreamSubscription? _cylindersSub;
 
   CylinderListBloc() : super(const CylinderListInitial()) {
@@ -60,12 +61,11 @@ class CylinderListBloc extends Bloc<CylinderListEvent, CylinderListState> {
   }
 
   Future<void> _onInit(_Init event, Emitter<CylinderListState> emit) async {
-    final store = await StorageProvider.store;
-    _cylindersSub = store.cylinders.changes.listen((cylinders) async {
-      final cylinders = await store.cylinders.getAll();
+    _cylindersSub = _store.cylinders.changes.listen((cylinders) async {
+      final cylinders = await _store.cylinders.getAll();
       add(_LoadedCylinders(cylinders));
     });
-    final cylinders = await store.cylinders.getAll();
+    final cylinders = await _store.cylinders.getAll();
     emit(CylinderListLoaded(cylinders));
   }
 

@@ -174,8 +174,7 @@ class PreferencesScreen extends StatelessWidget {
     if (confirmed != true || !context.mounted) return;
 
     PreferencesStore.instance.syncProvider = .none;
-    final store = await StorageProvider.store;
-    await store.reset();
+    await StorageProvider.instance.store.reset();
   }
 }
 

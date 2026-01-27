@@ -92,6 +92,8 @@ class _DeleteAndClose extends EquipmentDetailsEvent {
 }
 
 class EquipmentDetailsBloc extends Bloc<EquipmentDetailsEvent, EquipmentDetailsState> {
+  final _store = StorageProvider.instance.store;
+
   EquipmentDetailsBloc() : super(const EquipmentDetailsInitial()) {
     on<EquipmentDetailsEvent>((event, emit) async {
       switch (event) {
@@ -109,8 +111,7 @@ class EquipmentDetailsBloc extends Bloc<EquipmentDetailsEvent, EquipmentDetailsS
 
   Future<void> _onLoadEquipmentDetails(_Load event, Emitter<EquipmentDetailsState> emit) async {
     try {
-      final store = await StorageProvider.store;
-      final equipment = await store.equipment.getById(event.equipmentId);
+      final equipment = await _store.equipment.getById(event.equipmentId);
       if (equipment == null) {
         emit(const EquipmentDetailsError('Equipment not found'));
         return;
@@ -124,8 +125,7 @@ class EquipmentDetailsBloc extends Bloc<EquipmentDetailsEvent, EquipmentDetailsS
 
   Future<void> _onUpdateEquipmentDetails(_UpdateAndClose event, Emitter<EquipmentDetailsState> emit) async {
     try {
-      final store = await StorageProvider.store;
-      await store.equipment.update(event.equipment);
+      await _store.equipment.update(event.equipment);
       emit(EquipmentDetailsClosed());
     } catch (e) {
       _log.warning('failed to update equipment', e);
@@ -135,8 +135,7 @@ class EquipmentDetailsBloc extends Bloc<EquipmentDetailsEvent, EquipmentDetailsS
 
   Future<void> _onDeleteEquipment(_DeleteAndClose event, Emitter<EquipmentDetailsState> emit) async {
     try {
-      final store = await StorageProvider.store;
-      await store.equipment.delete(event.equipmentId);
+      await _store.equipment.delete(event.equipmentId);
       emit(EquipmentDetailsClosed());
     } catch (e) {
       _log.warning('failed to delete equipment', e);

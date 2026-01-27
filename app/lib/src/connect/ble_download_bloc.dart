@@ -170,7 +170,7 @@ class BleDownloadState extends Equatable {
 
 class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
   final BleScanBloc _scanBloc;
-  late final Store _store;
+  final _store = StorageProvider.instance.store;
   StreamSubscription<BluetoothConnectionState>? _connectionSubscription;
   StreamSubscription? _storeSubscription;
 
@@ -179,12 +179,9 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
 
     on<BleDownloadEvent>(_onEvent, transformer: sequential());
 
-    StorageProvider.store.then((store) async {
-      _store = store;
+    unawaited(_processDiveListState());
+    _storeSubscription = _store.changes.listen((_) async {
       await _processDiveListState();
-      _storeSubscription = _store.changes.listen((_) async {
-        await _processDiveListState();
-      });
     });
   }
 

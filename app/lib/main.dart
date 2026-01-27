@@ -46,6 +46,7 @@ import 'src/preferences/sync_bloc.dart';
 import 'src/preferences/sync_settings_screen.dart';
 import 'src/preferences/unit_preferences_screen.dart';
 import 'src/preferences/window_preferences.dart';
+import 'src/providers/storage_provider.dart';
 import 'src/services/licenses.dart';
 import 'src/services/log_buffer.dart';
 
@@ -54,6 +55,7 @@ void main() async {
   _initLogging();
   registerAdditionalLicenses();
   await PreferencesStore.instance.init();
+  await StorageProvider.instance.init();
   await WindowPreferences.initialize();
   if (platformIsMobile) {
     unawaited(SystemChrome.setPreferredOrientations([.portraitUp]));
