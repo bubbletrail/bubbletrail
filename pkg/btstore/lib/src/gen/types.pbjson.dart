@@ -116,28 +116,35 @@ const Cylinder$json = {
       '10': 'workingPressureBar'
     },
     {'1': 'description', '3': 5, '4': 1, '5': 9, '10': 'description'},
-    {
-      '1': 'volume_cuft',
-      '3': 6,
-      '4': 1,
-      '5': 1,
-      '9': 0,
-      '10': 'volumeCuft',
-      '17': true
-    },
+    {'1': 'volume_cuft', '3': 6, '4': 1, '5': 1, '10': 'volumeCuft'},
     {
       '1': 'working_pressure_psi',
       '3': 7,
       '4': 1,
       '5': 1,
-      '9': 1,
-      '10': 'workingPressurePsi',
-      '17': true
+      '10': 'workingPressurePsi'
     },
-  ],
-  '8': [
-    {'1': '_volume_cuft'},
-    {'1': '_working_pressure_psi'},
+    {
+      '1': 'default_for_backgas',
+      '3': 8,
+      '4': 1,
+      '5': 8,
+      '10': 'defaultForBackgas'
+    },
+    {
+      '1': 'default_for_deep_deco',
+      '3': 9,
+      '4': 1,
+      '5': 8,
+      '10': 'defaultForDeepDeco'
+    },
+    {
+      '1': 'default_for_shallow_deco',
+      '3': 10,
+      '4': 1,
+      '5': 8,
+      '10': 'defaultForShallowDeco'
+    },
   ],
 };
 
@@ -146,6 +153,8 @@ final $typed_data.Uint8List cylinderDescriptor = $convert.base64Decode(
     'CghDeWxpbmRlchIOCgJpZBgBIAEoCVICaWQSJQoEbWV0YRgCIAEoCzIRLmJ0c3RvcmUuTWV0YW'
     'RhdGFSBG1ldGESGQoIdm9sdW1lX2wYAyABKAFSB3ZvbHVtZUwSMAoUd29ya2luZ19wcmVzc3Vy'
     'ZV9iYXIYBCABKAFSEndvcmtpbmdQcmVzc3VyZUJhchIgCgtkZXNjcmlwdGlvbhgFIAEoCVILZG'
-    'VzY3JpcHRpb24SJAoLdm9sdW1lX2N1ZnQYBiABKAFIAFIKdm9sdW1lQ3VmdIgBARI1ChR3b3Jr'
-    'aW5nX3ByZXNzdXJlX3BzaRgHIAEoAUgBUhJ3b3JraW5nUHJlc3N1cmVQc2mIAQFCDgoMX3ZvbH'
-    'VtZV9jdWZ0QhcKFV93b3JraW5nX3ByZXNzdXJlX3BzaQ==');
+    'VzY3JpcHRpb24SHwoLdm9sdW1lX2N1ZnQYBiABKAFSCnZvbHVtZUN1ZnQSMAoUd29ya2luZ19w'
+    'cmVzc3VyZV9wc2kYByABKAFSEndvcmtpbmdQcmVzc3VyZVBzaRIuChNkZWZhdWx0X2Zvcl9iYW'
+    'NrZ2FzGAggASgIUhFkZWZhdWx0Rm9yQmFja2dhcxIxChVkZWZhdWx0X2Zvcl9kZWVwX2RlY28Y'
+    'CSABKAhSEmRlZmF1bHRGb3JEZWVwRGVjbxI3ChhkZWZhdWx0X2Zvcl9zaGFsbG93X2RlY28YCi'
+    'ABKAhSFWRlZmF1bHRGb3JTaGFsbG93RGVjbw==');

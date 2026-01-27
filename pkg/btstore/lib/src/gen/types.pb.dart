@@ -291,6 +291,9 @@ class Cylinder extends $pb.GeneratedMessage {
     $core.String? description,
     $core.double? volumeCuft,
     $core.double? workingPressurePsi,
+    $core.bool? defaultForBackgas,
+    $core.bool? defaultForDeepDeco,
+    $core.bool? defaultForShallowDeco,
   }) {
     final result = create();
     if (id != null) result.id = id;
@@ -302,6 +305,11 @@ class Cylinder extends $pb.GeneratedMessage {
     if (volumeCuft != null) result.volumeCuft = volumeCuft;
     if (workingPressurePsi != null)
       result.workingPressurePsi = workingPressurePsi;
+    if (defaultForBackgas != null) result.defaultForBackgas = defaultForBackgas;
+    if (defaultForDeepDeco != null)
+      result.defaultForDeepDeco = defaultForDeepDeco;
+    if (defaultForShallowDeco != null)
+      result.defaultForShallowDeco = defaultForShallowDeco;
     return result;
   }
 
@@ -326,6 +334,9 @@ class Cylinder extends $pb.GeneratedMessage {
     ..aOS(5, _omitFieldNames ? '' : 'description')
     ..aD(6, _omitFieldNames ? '' : 'volumeCuft')
     ..aD(7, _omitFieldNames ? '' : 'workingPressurePsi')
+    ..aOB(8, _omitFieldNames ? '' : 'defaultForBackgas')
+    ..aOB(9, _omitFieldNames ? '' : 'defaultForDeepDeco')
+    ..aOB(10, _omitFieldNames ? '' : 'defaultForShallowDeco')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -411,6 +422,33 @@ class Cylinder extends $pb.GeneratedMessage {
   $core.bool hasWorkingPressurePsi() => $_has(6);
   @$pb.TagNumber(7)
   void clearWorkingPressurePsi() => $_clearField(7);
+
+  @$pb.TagNumber(8)
+  $core.bool get defaultForBackgas => $_getBF(7);
+  @$pb.TagNumber(8)
+  set defaultForBackgas($core.bool value) => $_setBool(7, value);
+  @$pb.TagNumber(8)
+  $core.bool hasDefaultForBackgas() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearDefaultForBackgas() => $_clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.bool get defaultForDeepDeco => $_getBF(8);
+  @$pb.TagNumber(9)
+  set defaultForDeepDeco($core.bool value) => $_setBool(8, value);
+  @$pb.TagNumber(9)
+  $core.bool hasDefaultForDeepDeco() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearDefaultForDeepDeco() => $_clearField(9);
+
+  @$pb.TagNumber(10)
+  $core.bool get defaultForShallowDeco => $_getBF(9);
+  @$pb.TagNumber(10)
+  set defaultForShallowDeco($core.bool value) => $_setBool(9, value);
+  @$pb.TagNumber(10)
+  $core.bool hasDefaultForShallowDeco() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearDefaultForShallowDeco() => $_clearField(10);
 }
 
 const $core.bool _omitFieldNames =

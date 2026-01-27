@@ -58,4 +58,19 @@ class CylinderStore extends EntityStore<Cylinder, InternalCylinderList> {
     final c = Cylinder(volumeL: size, workingPressureBar: workpressure, description: description);
     return await update(c);
   }
+
+  Future<Cylinder?> getDefaultForBackgas() async {
+    final all = await getAll();
+    return all.firstWhereOrNull((c) => c.defaultForBackgas);
+  }
+
+  Future<Cylinder?> getDefaultForDeepDeco() async {
+    final all = await getAll();
+    return all.firstWhereOrNull((c) => c.defaultForDeepDeco);
+  }
+
+  Future<Cylinder?> getDefaultForShallowDeco() async {
+    final all = await getAll();
+    return all.firstWhereOrNull((c) => c.defaultForShallowDeco);
+  }
 }

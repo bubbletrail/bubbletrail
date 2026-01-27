@@ -14,6 +14,9 @@ class CylinderTile extends StatelessWidget {
   final double sac;
   final double workingPressurePsi;
   final double volumeCuft;
+  final bool defaultForBackgas;
+  final bool defaultForDeepDeco;
+  final bool defaultForShallowDeco;
 
   final Widget? trailing;
   final void Function()? onTap;
@@ -31,6 +34,9 @@ class CylinderTile extends StatelessWidget {
     this.sac = 0,
     this.workingPressurePsi = 0,
     this.volumeCuft = 0,
+    this.defaultForBackgas = false,
+    this.defaultForDeepDeco = false,
+    this.defaultForShallowDeco = false,
     this.trailing,
     this.onTap,
     this.contentPadding,
@@ -61,12 +67,35 @@ class CylinderTile extends StatelessWidget {
       );
     }
 
+    final defaults = <Widget>[];
+    if (defaultForBackgas) defaults.add(_DefaultBadge(label: 'Backgas'));
+    if (defaultForDeepDeco) defaults.add(_DefaultBadge(label: 'Deep deco'));
+    if (defaultForShallowDeco) defaults.add(_DefaultBadge(label: 'Shallow deco'));
+
     return ListTile(
       contentPadding: contentPadding,
-      title: Padding(padding: const .only(left: 8.0, bottom: 8.0), child: Text(desc)),
+      title: Padding(
+        padding: const .only(left: 8.0, bottom: 8.0),
+        child: Row(spacing: 8, children: [Text(desc), if (defaults.isNotEmpty) ...defaults]),
+      ),
       subtitle: Wrap(spacing: 8, runSpacing: 8, children: details),
       trailing: trailing,
       onTap: onTap,
+    );
+  }
+}
+
+class _DefaultBadge extends StatelessWidget {
+  final String label;
+
+  const _DefaultBadge({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const .symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer, borderRadius: BorderRadius.circular(4)),
+      child: Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onPrimaryContainer)),
     );
   }
 }
