@@ -76,12 +76,7 @@ class CylinderTile extends StatelessWidget {
       contentPadding: contentPadding,
       title: Padding(
         padding: const .only(left: 8.0, bottom: 8.0),
-        child: Row(
-          children: [
-            Text(desc),
-            if (defaults.isNotEmpty) ...[const SizedBox(width: 8), ...defaults],
-          ],
-        ),
+        child: Row(spacing: 8, children: [Text(desc), if (defaults.isNotEmpty) ...defaults]),
       ),
       subtitle: Wrap(spacing: 8, runSpacing: 8, children: details),
       trailing: trailing,
