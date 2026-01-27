@@ -40,6 +40,7 @@ dependencies:
   path_provider: ^2.1.5
   protobuf: ^6.0.0
   shared_preferences: ^2.3.4
+  stretch_wrap: ^0.1.1
   trina_grid: ^2.1.1
   uuid: ^4.5.2
   wakelock_plus: ^1.4.0

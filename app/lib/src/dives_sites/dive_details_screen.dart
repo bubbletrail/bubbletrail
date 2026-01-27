@@ -5,6 +5,7 @@ import 'package:flutter/material.dart' hide DataColumn;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:stretch_wrap/stretch_wrap.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
@@ -125,10 +126,7 @@ class _DiveDetails extends StatelessWidget {
         Card(
           child: Padding(padding: const .all(16.0), child: Text(dive.notes)),
         ),
-      _WidthResponsive(
-        narrow: Column(crossAxisAlignment: .stretch, spacing: 8, children: datacolumns),
-        wide: Wrap(alignment: .start, crossAxisAlignment: .start, spacing: 8, runSpacing: 8, children: datacolumns),
-      ),
+      StretchWrap(spacing: 8, runSpacing: 8, children: datacolumns.map((e) => Stretch(child: e)).toList()),
       if (platformIsMobile)
         Wrap(
           spacing: 16,

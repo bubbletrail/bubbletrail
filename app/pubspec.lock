@@ -1169,6 +1169,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  stretch_wrap:
+    dependency: "direct main"
+    description:
+      name: stretch_wrap
+      sha256: f2abf779e76c0d5426b9ced1bf64811b64e5eb5b006c299362581155ca5f7eb1
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.1"
   string_scanner:
     dependency: transitive
     description:
