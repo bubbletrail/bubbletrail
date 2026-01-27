@@ -160,8 +160,8 @@ class DateTimeText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final prefs = context.watch<PreferencesStore>();
-    return Text(formatDateTime(prefs, dateTime), style: style);
+    final (dateFormat, timeFormat) = context.select<PreferencesStore, (DateFormatPref, TimeFormatPref)>((p) => (p.dateFormat, p.timeFormat));
+    return Text('${formatDate(dateFormat, dateTime)} ${formatTime(timeFormat, dateTime)}', style: style);
   }
 }
 
@@ -173,8 +173,8 @@ class TimeText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final prefs = context.watch<PreferencesStore>();
-    return Text(formatTime(prefs.timeFormat, dateTime), style: style);
+    final timeFormat = context.select<PreferencesStore, TimeFormatPref>((p) => p.timeFormat);
+    return Text(formatTime(timeFormat, dateTime), style: style);
   }
 }
 
@@ -186,8 +186,8 @@ class DateText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final prefs = context.watch<PreferencesStore>();
-    return Text(formatDate(prefs.dateFormat, dateTime), style: style);
+    final dateFormat = context.select<PreferencesStore, DateFormatPref>((p) => p.dateFormat);
+    return Text(formatDate(dateFormat, dateTime), style: style);
   }
 }
 
@@ -199,7 +199,7 @@ class DepthText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = context.watch<PreferencesStore>().depthUnit;
+    final unit = context.select<PreferencesStore, DepthUnit>((p) => p.depthUnit);
     return Text(prefix + formatDepth(unit, depth));
   }
 }
@@ -211,7 +211,7 @@ class TemperatureText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = context.watch<PreferencesStore>().temperatureUnit;
+    final unit = context.select<PreferencesStore, TemperatureUnit>((p) => p.temperatureUnit);
     return Text(formatTemperature(unit, temperature));
   }
 }
@@ -224,7 +224,7 @@ class PressureText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = context.watch<PreferencesStore>().pressureUnit;
+    final unit = context.select<PreferencesStore, PressureUnit>((p) => p.pressureUnit);
     return IconText(icon, formatPressure(unit, pressure));
   }
 }
@@ -238,7 +238,7 @@ class VolumeText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = context.watch<PreferencesStore>().volumeUnit;
+    final unit = context.select<PreferencesStore, VolumeUnit>((p) => p.volumeUnit);
     return IconText(icon, formatVolume(unit, volume) + suffix);
   }
 }
@@ -251,7 +251,7 @@ class WeightText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = context.watch<PreferencesStore>().weightUnit;
+    final unit = context.select<PreferencesStore, WeightUnit>((p) => p.weightUnit);
     return Text(formatWeight(unit, weight), style: style);
   }
 }
@@ -297,7 +297,7 @@ class DecoStatusText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = context.watch<PreferencesStore>().depthUnit;
+    final unit = context.select<PreferencesStore, DepthUnit>((p) => p.depthUnit);
     switch (status.type) {
       case .DECO_STOP_TYPE_DECO_STOP:
         return Text('Deco ${formatMinutes(status.time)} @ ${formatDepth(unit, status.depth)}');

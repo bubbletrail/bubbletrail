@@ -10,6 +10,7 @@ import '../common/common.dart';
 import '../preferences/preferences_store.dart';
 import 'dive_list_item_card.dart';
 
+/// Breakpoint width for switching between card (narrow) and table (wide) layouts.
 const double _narrowLayoutBreakpoint = 600;
 
 class DiveTable extends StatelessWidget {

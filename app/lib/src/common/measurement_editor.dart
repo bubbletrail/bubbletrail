@@ -65,11 +65,13 @@ class _MeasurementEditorState<T extends Enum> extends State<MeasurementEditor<T>
   void _onUnitChanged(T? newUnit) {
     if (newUnit == null || newUnit == _selectedUnit) return;
 
+    // Get current display value
     final currentText = _controller.text;
     final currentDisplayValue = double.tryParse(currentText);
 
     setState(() {
       if (currentDisplayValue != null) {
+        // Convert current display value to metric, then to new unit
         final metricValue = widget.toMetric(currentDisplayValue, _selectedUnit);
         final newDisplayValue = widget.fromMetric(metricValue, newUnit);
         _controller.text = formatDisplayValue(newDisplayValue);
@@ -108,8 +110,11 @@ class _MeasurementEditorState<T extends Enum> extends State<MeasurementEditor<T>
     );
   }
 
+  /// Get the current metric value
   double? get metricValue => _metricValue;
 }
+
+// Convenience constructors for common measurement types
 
 class PressureEditor extends StatelessWidget {
   final String label;
