@@ -47,6 +47,10 @@ extension DiveExtensions on Dive {
     double prevDepth = 0.0;
     double prevTime = 0.0;
 
+    // CNS and OTU accumulators
+    double totalCns = 0.0;
+    double totalOtu = 0.0;
+
     if (this.logs.isNotEmpty) {
       // Calculate depths etc based on samples.
       final dl = this.logs.first;
@@ -78,11 +82,30 @@ extension DiveExtensions on Dive {
         }
 
         // For the relevant cylinder
+        var thisSegFO2 = 0.21;
         try {
           final cylIdx = spans.firstWhere((s) => s.end >= sample.time).idx;
           final cur = perCylinderDepth[cylIdx] ?? (duration: 0, totDepth: 0);
           perCylinderDepth[cylIdx] = (duration: cur.duration + sampleDuration, totDepth: cur.totDepth + sampleDepth * sampleDuration);
+
+          if (this.cylinders.isNotEmpty && cylIdx < this.cylinders.length && sampleDuration > 0) {
+            final cyl = this.cylinders[cylIdx];
+            thisSegFO2 = cyl.oxygen > 0 ? cyl.oxygen : 0.21;
+          }
         } catch (StateError) {}
+
+        // Calculate CNS and OTU for this sample segment
+        final ppo2 = (1.0 + sampleDepth / 10.0) * thisSegFO2;
+        final durationMinutes = sampleDuration / 60.0;
+
+        // CNS accumulation
+        final limit = _cnsLimitMinutes(ppo2);
+        if (limit != null && limit.isFinite) {
+          totalCns += (durationMinutes / limit) * 100.0;
+        }
+
+        // OTU accumulation
+        totalOtu += _calculateOtu(ppo2, durationMinutes);
       }
 
       // Update cylinder used gas volumes now that we know pressures
@@ -114,19 +137,67 @@ extension DiveExtensions on Dive {
           this.cylinders[e.key] = cyl;
         }
 
-        // Update CNS percentage
-        if (dl.samples.isNotEmpty && dl.samples.last.cns > 0) {
-          this.cns = (100 * dl.samples.last.cns).round();
+        // Update CNS
+        if (totalCns > 0) {
+          this.cns = totalCns.round();
         } else {
           this.clearCns();
+        }
+
+        // Update OTU
+        if (totalOtu > 0) {
+          this.otu = totalOtu.round();
+        } else {
+          this.clearOtu();
         }
       }
     } else {
       this.clearCns();
+      this.clearOtu();
     }
 
     this.duration = duration.round();
     this.maxDepth = maxDepth;
     this.meanDepth = totDepth / duration;
   }
+}
+
+// NOAA CNS oxygen toxicity exposure limits.
+// Returns the maximum exposure time in minutes for a given ppO2.
+// Returns null if ppO2 is below 0.5 (no CNS toxicity concern).
+double? _cnsLimitMinutes(double ppo2) {
+  // NOAA CNS limits table
+  const limits = [
+    (ppo2: 0.50, minutes: double.infinity),
+    (ppo2: 0.60, minutes: 720.0),
+    (ppo2: 0.70, minutes: 570.0),
+    (ppo2: 0.80, minutes: 450.0),
+    (ppo2: 0.90, minutes: 360.0),
+    (ppo2: 1.00, minutes: 300.0),
+    (ppo2: 1.10, minutes: 240.0),
+    (ppo2: 1.20, minutes: 210.0),
+    (ppo2: 1.30, minutes: 180.0),
+    (ppo2: 1.40, minutes: 150.0),
+    (ppo2: 1.50, minutes: 120.0),
+    (ppo2: 1.60, minutes: 45.0),
+  ];
+
+  if (ppo2 < 0.5) return null;
+  if (ppo2 >= 1.6) return 45.0;
+
+  // Find the bracketing values and interpolate
+  for (var i = 0; i < limits.length - 1; i++) {
+    if (ppo2 >= limits[i].ppo2 && ppo2 < limits[i + 1].ppo2) {
+      final t = (ppo2 - limits[i].ppo2) / (limits[i + 1].ppo2 - limits[i].ppo2);
+      return limits[i].minutes + t * (limits[i + 1].minutes - limits[i].minutes);
+    }
+  }
+  return limits.last.minutes;
+}
+
+// Calculate OTU for a given ppO2 and time in minutes.
+// Uses the REPEX formula: OTU = t × ((ppO2 - 0.5) / 0.5)^0.833
+double _calculateOtu(double ppo2, double minutes) {
+  if (ppo2 <= 0.5 || minutes <= 0) return 0.0;
+  return minutes * pow((ppo2 - 0.5) / 0.5, 0.833);
 }
