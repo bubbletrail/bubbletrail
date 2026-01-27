@@ -90,8 +90,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     });
 
     _preferencesSub = store.preferences.changes.listen(_newPreferences);
-    final preferences = store.preferences.current;
-    _newPreferences(preferences);
+    _newPreferences(store.preferences.current);
 
     add(const _StartSyncing());
   }
