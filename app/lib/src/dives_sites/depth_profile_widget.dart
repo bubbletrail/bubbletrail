@@ -3,16 +3,17 @@ import 'package:btstore/btstore.dart';
 import 'package:collection/collection.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../common/common.dart';
+import '../preferences/preferences_store.dart';
 import 'tissue_calculator.dart';
 
 class DepthProfile extends StatefulWidget {
   final Dive dive;
-  final Preferences preferences;
   final Log log;
 
-  DepthProfile({super.key, required this.dive, required this.preferences}) : log = dive.logs.firstOrNull ?? Log();
+  DepthProfile({super.key, required this.dive}) : log = dive.logs.firstOrNull ?? Log();
 
   @override
   State<DepthProfile> createState() => _DepthProfileState();
@@ -31,9 +32,33 @@ class _DepthProfileState extends State<DepthProfile> {
   final _pressureData = <int, ({List<FlSpot> spots, double minPressure, double maxPressure})>{};
   final _gasSwitches = <({double timeMinutes, String gasName})>[];
 
+  DepthUnit? _lastDepthUnit;
+  double? _lastGfLow;
+  double? _lastGfHigh;
+
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final prefs = context.watch<PreferencesStore>();
+    final needsRebuild = _lastDepthUnit != prefs.depthUnit || _lastGfLow != prefs.gfLow || _lastGfHigh != prefs.gfHigh;
+
+    if (needsRebuild) {
+      _lastDepthUnit = prefs.depthUnit;
+      _lastGfLow = prefs.gfLow;
+      _lastGfHigh = prefs.gfHigh;
+      _buildData(prefs);
+    }
+  }
+
+  void _buildData(PreferencesStore prefs) {
+    samplesWithDepth.clear();
+    _depthSpots.clear();
+    _tempSpots.clear();
+    _ceilingSpots.clear();
+    _buhlmannCeilingSpots.clear();
+    _buhlmann.clear();
+    _pressureData.clear();
+    _gasSwitches.clear();
 
     // Filter out samples without depth data
     samplesWithDepth.addAll(widget.log.samples.where((s) => s.hasDepth()));
@@ -43,7 +68,9 @@ class _DepthProfileState extends State<DepthProfile> {
       samplesWithDepth.removeRange(lastNonZeroIdx + 2, samplesWithDepth.length);
     }
 
-    final depthUnit = widget.preferences.depthUnit;
+    if (samplesWithDepth.isEmpty) return;
+
+    final depthUnit = prefs.depthUnit;
     final depthMult = depthUnit == .feet ? 3.28 : 1.0;
 
     // Depth data
@@ -77,7 +104,7 @@ class _DepthProfileState extends State<DepthProfile> {
     }
 
     // Buhlmann calculated ceiling & surfGF
-    _calculateBuhlmann();
+    _calculateBuhlmann(prefs.gfLow, prefs.gfHigh);
     _buhlmannCeilingSpots.addAll(_buhlmann.map((e) => FlSpot(e.time / 60, depthMult * -e.ceiling)));
 
     // Pressure data - find all tank indices used
@@ -333,12 +360,12 @@ class _DepthProfileState extends State<DepthProfile> {
     );
   }
 
-  void _calculateBuhlmann() {
+  void _calculateBuhlmann(double gfLow, double gfHigh) {
     if (samplesWithDepth.isEmpty) return;
 
     final config = buhlmann.BuhlmannConfig(
-      gfLow: widget.preferences.gfLow,
-      gfHigh: widget.preferences.gfHigh,
+      gfLow: gfLow,
+      gfHigh: gfHigh,
       surfacePressure: widget.log.hasAtmosphericPressure() ? widget.log.atmosphericPressure : buhlmann.atmPressure,
     );
 

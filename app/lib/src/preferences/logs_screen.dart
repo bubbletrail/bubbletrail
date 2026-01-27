@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
+import 'package:provider/provider.dart';
 
-import 'preferences_bloc.dart';
 import '../common/common.dart';
 import '../services/log_buffer.dart';
+import 'preferences_store.dart';
 
 class LogsScreen extends StatefulWidget {
   const LogsScreen({super.key});
@@ -44,7 +44,7 @@ class _LogsScreenState extends State<LogsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final prefs = context.watch<PreferencesBloc>().state.preferences;
+    final timeFormat = context.select<PreferencesStore, TimeFormatPref>((p) => p.timeFormat);
     final filtered = _filteredRecords;
     return ScreenScaffold(
       title: const Text('Logs'),
@@ -71,7 +71,7 @@ class _LogsScreenState extends State<LogsScreen> {
           onPressed: _records.isEmpty
               ? null
               : () {
-                  final text = _records.map((r) => formatLogLine(prefs.timeFormat, r)).join('\n');
+                  final text = _records.map((r) => formatLogLine(timeFormat, r)).join('\n');
                   Clipboard.setData(ClipboardData(text: text));
                   ScaffoldMessenger.of(
                     context,
@@ -92,7 +92,7 @@ class _LogsScreenState extends State<LogsScreen> {
               itemCount: filtered.length,
               itemBuilder: (context, index) {
                 final record = filtered[index];
-                return _LogEntryTile(record: record, timeFormat: prefs.timeFormat);
+                return _LogEntryTile(record: record, timeFormat: timeFormat);
               },
             ),
     );

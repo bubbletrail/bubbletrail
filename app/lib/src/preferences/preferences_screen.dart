@@ -6,13 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
+import 'package:provider/provider.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
+import '../providers/storage_provider.dart';
 import 'archive_bloc.dart';
 import '../dives_sites/dive_list_bloc.dart';
 import '../equipment/equipment_list_bloc.dart';
-import 'preferences_bloc.dart';
+import 'preferences_store.dart';
 import 'sync_bloc.dart';
 import '../common/common.dart';
 import '../services/log_buffer.dart';
@@ -25,9 +27,8 @@ class PreferencesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<SyncBloc, SyncState>(
       builder: (context, syncState) {
-        return BlocBuilder<PreferencesBloc, PreferencesState>(
-          builder: (context, prefsState) {
-            final prefs = prefsState.preferences;
+        return Consumer<PreferencesStore>(
+          builder: (context, prefs, _) {
             return ScreenScaffold(
               title: const Text('Preferences'),
               body: ListView(
@@ -70,7 +71,7 @@ class PreferencesScreen extends StatelessWidget {
                         ],
                         selected: {prefs.themeMode},
                         onSelectionChanged: (value) {
-                          context.read<PreferencesBloc>().add(PreferencesEvent.updateThemeMode(value.first));
+                          PreferencesStore.instance.themeMode = value.first;
                         },
                       ),
                       Wrap(
@@ -172,7 +173,9 @@ class PreferencesScreen extends StatelessWidget {
     );
     if (confirmed != true || !context.mounted) return;
 
-    context.read<PreferencesBloc>().add(PreferencesEvent.resetDatabase());
+    PreferencesStore.instance.syncProvider = .none;
+    final store = await StorageProvider.store;
+    await store.reset();
   }
 }
 
@@ -229,7 +232,7 @@ class _LogPreviewState extends State<_LogPreview> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final prefs = context.watch<PreferencesBloc>().state.preferences;
+    final prefs = context.watch<PreferencesStore>();
     final recentLogs = _records.length > _maxLines ? _records.sublist(_records.length - _maxLines) : _records;
 
     return InkWell(

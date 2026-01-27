@@ -22,12 +22,7 @@ abstract class _$DiveListLoadedCWProxy {
   /// ```dart
   /// DiveListLoaded(...).copyWith(id: 12, name: "My name")
   /// ```
-  DiveListLoaded call({
-    List<Dive> dives,
-    List<Site> sites,
-    Set<String> tags,
-    Set<String> buddies,
-  });
+  DiveListLoaded call({List<Dive> dives, List<Site> sites, Set<String> tags, Set<String> buddies});
 }
 
 /// Callable proxy for `copyWith` functionality.

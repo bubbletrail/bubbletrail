@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
+import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'src/app_metadata.dart';
@@ -39,8 +40,8 @@ import 'src/equipment/equipment_screen.dart';
 import 'src/preferences/archive_bloc.dart';
 import 'src/preferences/dive_preferences_screen.dart';
 import 'src/preferences/logs_screen.dart';
-import 'src/preferences/preferences_bloc.dart';
 import 'src/preferences/preferences_screen.dart';
+import 'src/preferences/preferences_store.dart';
 import 'src/preferences/sync_bloc.dart';
 import 'src/preferences/sync_settings_screen.dart';
 import 'src/preferences/unit_preferences_screen.dart';
@@ -52,6 +53,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _initLogging();
   registerAdditionalLicenses();
+  await PreferencesStore.instance.init();
   await WindowPreferences.initialize();
   if (platformIsMobile) {
     unawaited(SystemChrome.setPreferredOrientations([.portraitUp]));
@@ -93,7 +95,6 @@ class _MyAppState extends State<MyApp> with WindowListener {
   late final BleScanBloc _bleScanBloc;
   late final BleDownloadBloc _bleDownloadBloc;
   late final GoRouter _router;
-  final _preferencesBloc = PreferencesBloc();
 
   @override
   void initState() {
@@ -405,20 +406,20 @@ class _MyAppState extends State<MyApp> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+    return MultiProvider(
       providers: [
+        ChangeNotifierProvider.value(value: PreferencesStore.instance),
         BlocProvider.value(value: _syncBloc),
         BlocProvider.value(value: _archiveBloc),
         BlocProvider.value(value: _diveListBloc),
         BlocProvider.value(value: _cylinderListBloc),
         BlocProvider.value(value: _equipmentListBloc),
-        BlocProvider.value(value: _preferencesBloc),
         BlocProvider.value(value: _bleScanBloc),
         BlocProvider.value(value: _bleDownloadBloc),
       ],
-      child: BlocBuilder<PreferencesBloc, PreferencesState>(
-        builder: (context, state) {
-          final themeMode = state.preferences.themeMode;
+      child: Consumer<PreferencesStore>(
+        builder: (context, prefs, _) {
+          final themeMode = prefs.themeMode;
           return MaterialApp.router(
             title: 'Bubbletrail',
             theme: AppTheme.lightTheme,

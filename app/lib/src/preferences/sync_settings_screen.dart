@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
-import 'preferences_bloc.dart';
 import '../common/common.dart';
+import 'preferences_store.dart';
 import 'preferences_widgets.dart';
 
 class SyncSettingsScreen extends StatelessWidget {
@@ -12,15 +12,14 @@ class SyncSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenScaffold(
       title: const Text('Syncing'),
-      body: BlocBuilder<PreferencesBloc, PreferencesState>(
-        builder: (context, state) {
-          final prefs = state.preferences;
+      body: Consumer<PreferencesStore>(
+        builder: (context, prefs, _) {
           return ListView(
             padding: const .all(16),
             children: [
-              _SyncProviderTile(prefs: prefs),
+              _SyncProviderTile(syncProvider: prefs.syncProvider),
               if (prefs.syncProvider == .bubbletrail || prefs.syncProvider == .s3)
-                _S3ConfigSection(prefs: prefs, isBubbletrail: prefs.syncProvider == .bubbletrail),
+                _S3ConfigSection(s3Config: prefs.s3Config, isBubbletrail: prefs.syncProvider == .bubbletrail),
             ],
           );
         },
@@ -30,9 +29,9 @@ class SyncSettingsScreen extends StatelessWidget {
 }
 
 class _SyncProviderTile extends StatelessWidget {
-  final Preferences prefs;
+  final SyncProviderKind syncProvider;
 
-  const _SyncProviderTile({required this.prefs});
+  const _SyncProviderTile({required this.syncProvider});
 
   @override
   Widget build(BuildContext context) {
@@ -42,10 +41,10 @@ class _SyncProviderTile extends StatelessWidget {
       title: 'Sync provider',
       trailing: DropdownButton<SyncProviderKind>(
         dropdownColor: Theme.of(context).colorScheme.primaryContainer,
-        value: prefs.syncProvider,
+        value: syncProvider,
         items: [for (final provider in availableProviders) DropdownMenuItem<SyncProviderKind>(value: provider, child: Text(_syncProviderLabel(provider)))],
         onChanged: (value) {
-          context.read<PreferencesBloc>().add(PreferencesEvent.updateSyncProvider(value!));
+          PreferencesStore.instance.syncProvider = value!;
         },
       ),
     );
@@ -61,10 +60,10 @@ class _SyncProviderTile extends StatelessWidget {
 }
 
 class _S3ConfigSection extends StatefulWidget {
-  final Preferences prefs;
+  final S3Config s3Config;
   final bool isBubbletrail;
 
-  const _S3ConfigSection({required this.prefs, this.isBubbletrail = false});
+  const _S3ConfigSection({required this.s3Config, this.isBubbletrail = false});
 
   @override
   State<_S3ConfigSection> createState() => _S3ConfigSectionState();
@@ -84,12 +83,12 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
   @override
   void initState() {
     super.initState();
-    _endpointController = TextEditingController(text: widget.prefs.s3Config.endpoint);
-    _bucketController = TextEditingController(text: widget.prefs.s3Config.bucket);
-    _accessKeyController = TextEditingController(text: widget.prefs.s3Config.accessKey);
-    _secretKeyController = TextEditingController(text: widget.prefs.s3Config.secretKey);
-    _regionController = TextEditingController(text: widget.prefs.s3Config.region);
-    _vaultKeyController = TextEditingController(text: widget.prefs.s3Config.vaultKey);
+    _endpointController = TextEditingController(text: widget.s3Config.endpoint);
+    _bucketController = TextEditingController(text: widget.s3Config.bucket);
+    _accessKeyController = TextEditingController(text: widget.s3Config.accessKey);
+    _secretKeyController = TextEditingController(text: widget.s3Config.secretKey);
+    _regionController = TextEditingController(text: widget.s3Config.region);
+    _vaultKeyController = TextEditingController(text: widget.s3Config.vaultKey);
   }
 
   @override
@@ -112,7 +111,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
       region: widget.isBubbletrail ? 'eu' : _regionController.text.trim(),
       vaultKey: _vaultKeyController.text.trim(),
     );
-    context.read<PreferencesBloc>().add(PreferencesEvent.updateS3Config(config));
+    PreferencesStore.instance.s3Config = config;
   }
 
   @override

@@ -1,10 +1,10 @@
 import 'package:btstore/btstore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
+import 'package:provider/provider.dart';
 
-import '../preferences/preferences_bloc.dart';
+import '../preferences/preferences_store.dart';
 import 'common.dart';
 
 export '../preferences/preferences.dart';
@@ -24,8 +24,8 @@ String formatTime(TimeFormatPref pref, DateTime time) {
   return DateFormat(pref.format).format(time);
 }
 
-String formatDateTime(Preferences pref, DateTime dateTime) {
-  return '${formatDate(pref.dateFormat, dateTime)} ${formatTime(pref.timeFormat, dateTime)}';
+String formatDateTime(PreferencesStore prefs, DateTime dateTime) {
+  return '${formatDate(prefs.dateFormat, dateTime)} ${formatTime(prefs.timeFormat, dateTime)}';
 }
 
 String formatLogTimestamp(TimeFormatPref pref, DateTime time) {
@@ -160,8 +160,8 @@ class DateTimeText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final prefs = context.watch<PreferencesBloc>().state.preferences;
-    return Text(formatDateTime(prefs, dateTime), style: style);
+    final (dateFormat, timeFormat) = context.select<PreferencesStore, (DateFormatPref, TimeFormatPref)>((p) => (p.dateFormat, p.timeFormat));
+    return Text('${formatDate(dateFormat, dateTime)} ${formatTime(timeFormat, dateTime)}', style: style);
   }
 }
 
@@ -173,8 +173,8 @@ class TimeText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final prefs = context.watch<PreferencesBloc>().state.preferences;
-    return Text(formatTime(prefs.timeFormat, dateTime), style: style);
+    final timeFormat = context.select<PreferencesStore, TimeFormatPref>((p) => p.timeFormat);
+    return Text(formatTime(timeFormat, dateTime), style: style);
   }
 }
 
@@ -186,8 +186,8 @@ class DateText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final prefs = context.watch<PreferencesBloc>().state.preferences;
-    return Text(formatDate(prefs.dateFormat, dateTime), style: style);
+    final dateFormat = context.select<PreferencesStore, DateFormatPref>((p) => p.dateFormat);
+    return Text(formatDate(dateFormat, dateTime), style: style);
   }
 }
 
@@ -199,7 +199,7 @@ class DepthText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = context.watch<PreferencesBloc>().state.preferences.depthUnit;
+    final unit = context.select<PreferencesStore, DepthUnit>((p) => p.depthUnit);
     return Text(prefix + formatDepth(unit, depth));
   }
 }
@@ -211,7 +211,7 @@ class TemperatureText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = context.watch<PreferencesBloc>().state.preferences.temperatureUnit;
+    final unit = context.select<PreferencesStore, TemperatureUnit>((p) => p.temperatureUnit);
     return Text(formatTemperature(unit, temperature));
   }
 }
@@ -224,7 +224,7 @@ class PressureText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = context.watch<PreferencesBloc>().state.preferences.pressureUnit;
+    final unit = context.select<PreferencesStore, PressureUnit>((p) => p.pressureUnit);
     return IconText(icon, formatPressure(unit, pressure));
   }
 }
@@ -238,7 +238,7 @@ class VolumeText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = context.watch<PreferencesBloc>().state.preferences.volumeUnit;
+    final unit = context.select<PreferencesStore, VolumeUnit>((p) => p.volumeUnit);
     return IconText(icon, formatVolume(unit, volume) + suffix);
   }
 }
@@ -251,7 +251,7 @@ class WeightText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = context.watch<PreferencesBloc>().state.preferences.weightUnit;
+    final unit = context.select<PreferencesStore, WeightUnit>((p) => p.weightUnit);
     return Text(formatWeight(unit, weight), style: style);
   }
 }
@@ -297,7 +297,7 @@ class DecoStatusText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = context.watch<PreferencesBloc>().state.preferences.depthUnit;
+    final unit = context.select<PreferencesStore, DepthUnit>((p) => p.depthUnit);
     switch (status.type) {
       case .DECO_STOP_TYPE_DECO_STOP:
         return Text('Deco ${formatMinutes(status.time)} @ ${formatDepth(unit, status.depth)}');

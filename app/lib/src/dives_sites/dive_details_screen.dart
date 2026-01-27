@@ -10,7 +10,6 @@ import 'package:stretch_wrap/stretch_wrap.dart';
 import '../app_metadata.dart';
 import '../app_routes.dart';
 import '../common/common.dart';
-import '../preferences/preferences_bloc.dart';
 import 'depth_profile_widget.dart';
 import 'dive_details_bloc.dart';
 import 'site_map.dart';
@@ -280,11 +279,7 @@ class _ProfileCard extends StatelessWidget {
                 child: _AspectMaxHeight(
                   aspectRatio: 2.5,
                   maxHeight: 250,
-                  child: BlocBuilder<PreferencesBloc, PreferencesState>(
-                    builder: (context, state) {
-                      return DepthProfile(key: ValueKey((dive, state.preferences)), dive: dive, preferences: state.preferences);
-                    },
-                  ),
+                  child: DepthProfile(key: ValueKey(dive), dive: dive),
                 ),
               ),
               Positioned(

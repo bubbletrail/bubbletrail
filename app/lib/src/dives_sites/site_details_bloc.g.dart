@@ -51,6 +51,5 @@ extension $SiteDetailsLoadedCopyWith on SiteDetailsLoaded {
   /// Returns a callable class used to build a new instance with modified fields.
   /// Example: `instanceOfSiteDetailsLoaded.copyWith(...)` or `instanceOfSiteDetailsLoaded.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
-  _$SiteDetailsLoadedCWProxy get copyWith =>
-      _$SiteDetailsLoadedCWProxyImpl(this);
+  _$SiteDetailsLoadedCWProxy get copyWith => _$SiteDetailsLoadedCWProxyImpl(this);
 }
