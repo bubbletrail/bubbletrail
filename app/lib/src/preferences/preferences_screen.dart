@@ -113,13 +113,42 @@ class PreferencesScreen extends StatelessWidget {
                   const SizedBox(height: 24),
                   _LogPreview(onTap: () => context.goNamed(AppRouteName.logs)),
                   const SizedBox(height: 24),
-                  Text(
-                    'Bubbletrail $appVer ($gitVer)',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
-                  ),
-                  DateTimeText(
-                    buildTime,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
+                  Row(
+                    children: [
+                      Column(
+                        crossAxisAlignment: .start,
+                        children: [
+                          Text(
+                            'Bubbletrail $appVer ($gitVer)',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
+                          ),
+                          DateTimeText(
+                            buildTime,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
+                          ),
+                        ],
+                      ),
+                      Spacer(),
+                      TextButton(
+                        onPressed: () => showLicensePage(
+                          context: context,
+                          applicationName: 'Bubbletrail',
+                          applicationVersion: '$appVer ($gitVer)',
+                          applicationIcon: Padding(
+                            padding: .symmetric(vertical: 8),
+                            child: Container(
+                              decoration: BoxDecoration(borderRadius: .circular(8)),
+                              clipBehavior: .antiAlias,
+                              child: Image.asset('assets/icons/app-icon.png', width: 64),
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          'Open source licenses',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
