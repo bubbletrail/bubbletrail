@@ -5,7 +5,6 @@ import 'package:btstore/btstore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../providers/storage_provider.dart';
-import 'preferences_storage.dart';
 
 class PreferencesState {
   final Preferences preferences;
@@ -54,12 +53,15 @@ class PreferencesBloc extends Bloc<PreferencesEvent, PreferencesState> {
 
   void _scheduleSave() {
     _saveTimer?.cancel();
-    _saveTimer = Timer(Duration(seconds: 1), () async => await PreferencesStorage.save(state.preferences));
+    _saveTimer = Timer(Duration(seconds: 1), () async {
+      final s = await StorageProvider.store;
+      await s.preferences.save(state.preferences);
+    });
   }
 
   Future<void> _onLoad(Emitter<PreferencesState> emit) async {
-    final preferences = await PreferencesStorage.load();
-    emit(PreferencesState(preferences));
+    final s = await StorageProvider.store;
+    emit(PreferencesState(s.preferences.current));
   }
 
   void _onUpdate(_Update event, Emitter<PreferencesState> emit) {

@@ -9,7 +9,6 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../providers/s3_provider.dart';
 import '../providers/storage_provider.dart';
-import 'preferences_storage.dart';
 
 final _log = Logger('sync_bloc.dart');
 
@@ -90,8 +89,8 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       _syncDebounceTimer = Timer(Duration(seconds: 60), () => add(SyncEvent.startSyncing()));
     });
 
-    _preferencesSub = PreferencesStorage.changes.listen(_newPreferences);
-    final preferences = await PreferencesStorage.load();
+    _preferencesSub = store.preferences.changes.listen(_newPreferences);
+    final preferences = store.preferences.current;
     _newPreferences(preferences);
 
     add(const _StartSyncing());
