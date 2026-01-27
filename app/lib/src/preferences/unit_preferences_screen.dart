@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
-import 'preferences_bloc.dart';
 import '../common/screen_scaffold.dart';
 import 'preferences.dart';
+import 'preferences_store.dart';
 import 'preferences_widgets.dart';
 
 class UnitPreferencessScreen extends StatelessWidget {
@@ -13,9 +13,8 @@ class UnitPreferencessScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenScaffold(
       title: const Text('Units'),
-      body: BlocBuilder<PreferencesBloc, PreferencesState>(
-        builder: (context, state) {
-          final prefs = state.preferences;
+      body: Consumer<PreferencesStore>(
+        builder: (context, prefs, _) {
           return ListView(
             padding: const .all(16),
             children: [
@@ -28,7 +27,7 @@ class UnitPreferencessScreen extends StatelessWidget {
                   ],
                   selected: {prefs.depthUnit},
                   onSelectionChanged: (value) {
-                    context.read<PreferencesBloc>().add(PreferencesEvent.updateDepthUnit(value.first));
+                    PreferencesStore.instance.depthUnit = value.first;
                   },
                 ),
               ),
@@ -41,7 +40,7 @@ class UnitPreferencessScreen extends StatelessWidget {
                   ],
                   selected: {prefs.pressureUnit},
                   onSelectionChanged: (value) {
-                    context.read<PreferencesBloc>().add(PreferencesEvent.updatePressureUnit(value.first));
+                    PreferencesStore.instance.pressureUnit = value.first;
                   },
                 ),
               ),
@@ -54,7 +53,7 @@ class UnitPreferencessScreen extends StatelessWidget {
                   ],
                   selected: {prefs.temperatureUnit},
                   onSelectionChanged: (value) {
-                    context.read<PreferencesBloc>().add(PreferencesEvent.updateTemperatureUnit(value.first));
+                    PreferencesStore.instance.temperatureUnit = value.first;
                   },
                 ),
               ),
@@ -67,7 +66,7 @@ class UnitPreferencessScreen extends StatelessWidget {
                   ],
                   selected: {prefs.volumeUnit},
                   onSelectionChanged: (value) {
-                    context.read<PreferencesBloc>().add(PreferencesEvent.updateVolumeUnit(value.first));
+                    PreferencesStore.instance.volumeUnit = value.first;
                   },
                 ),
               ),
@@ -80,7 +79,7 @@ class UnitPreferencessScreen extends StatelessWidget {
                   ],
                   selected: {prefs.weightUnit},
                   onSelectionChanged: (value) {
-                    context.read<PreferencesBloc>().add(PreferencesEvent.updateWeightUnit(value.first));
+                    PreferencesStore.instance.weightUnit = value.first;
                   },
                 ),
               ),
@@ -95,7 +94,7 @@ class UnitPreferencessScreen extends StatelessWidget {
                   ],
                   selected: {prefs.dateFormat},
                   onSelectionChanged: (value) {
-                    context.read<PreferencesBloc>().add(PreferencesEvent.updateDateFormat(value.first));
+                    PreferencesStore.instance.dateFormat = value.first;
                   },
                 ),
               ),
@@ -108,7 +107,7 @@ class UnitPreferencessScreen extends StatelessWidget {
                   ],
                   selected: {prefs.timeFormat},
                   onSelectionChanged: (value) {
-                    context.read<PreferencesBloc>().add(PreferencesEvent.updateTimeFormat(value.first));
+                    PreferencesStore.instance.timeFormat = value.first;
                   },
                 ),
               ),

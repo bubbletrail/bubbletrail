@@ -1,38 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
-import '../preferences/preferences_bloc.dart';
+import '../preferences/preferences_store.dart';
 import 'common.dart';
 
-/// A text field for editing measurements with a unit dropdown.
-/// Values are always stored internally in metric/base units.
-/// The display converts to/from the selected unit on the fly.
 class MeasurementEditor<T extends Enum> extends StatefulWidget {
-  /// Label for the text field
   final String label;
-
-  /// Initial value in base/metric units (null if empty)
   final double? initialValue;
-
-  /// List of available units for the dropdown
   final List<T> units;
-
-  /// Returns the display label for a unit (e.g., "bar", "psi")
   final String Function(T unit) unitLabel;
-
-  /// Converts a value from metric to the display unit
   final double Function(double value, T unit) fromMetric;
-
-  /// Converts a value from the display unit to metric
   final double Function(double value, T unit) toMetric;
-
-  /// Called when the value changes (value is in metric units, null if empty/invalid)
   final ValueChanged<double?>? onChanged;
-
-  /// Returns the preferred unit from preferences
-  final T Function(Preferences prefs) getPreferredUnit;
-
-  /// Hint text for the field
+  final T Function(PreferencesStore prefs) getPreferredUnit;
   final String? hintText;
 
   const MeasurementEditor({
@@ -61,10 +41,8 @@ class _MeasurementEditorState<T extends Enum> extends State<MeasurementEditor<T>
   void initState() {
     super.initState();
     _metricValue = widget.initialValue;
-    // Get the preferred unit from preferences
-    final prefs = context.read<PreferencesBloc>().state.preferences;
+    final prefs = context.read<PreferencesStore>();
     _selectedUnit = widget.getPreferredUnit(prefs);
-    // Initialize the text field with the converted value
     _controller = TextEditingController(text: _metricValue != null ? formatDisplayValue(widget.fromMetric(_metricValue!, _selectedUnit)) : '');
   }
 
@@ -87,13 +65,11 @@ class _MeasurementEditorState<T extends Enum> extends State<MeasurementEditor<T>
   void _onUnitChanged(T? newUnit) {
     if (newUnit == null || newUnit == _selectedUnit) return;
 
-    // Get current display value
     final currentText = _controller.text;
     final currentDisplayValue = double.tryParse(currentText);
 
     setState(() {
       if (currentDisplayValue != null) {
-        // Convert current display value to metric, then to new unit
         final metricValue = widget.toMetric(currentDisplayValue, _selectedUnit);
         final newDisplayValue = widget.fromMetric(metricValue, newUnit);
         _controller.text = formatDisplayValue(newDisplayValue);
@@ -132,11 +108,8 @@ class _MeasurementEditorState<T extends Enum> extends State<MeasurementEditor<T>
     );
   }
 
-  /// Get the current metric value
   double? get metricValue => _metricValue;
 }
-
-// Convenience constructors for common measurement types
 
 class PressureEditor extends StatelessWidget {
   final String label;

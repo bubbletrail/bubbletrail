@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
+import 'package:provider/provider.dart';
 
-import 'preferences_bloc.dart';
 import '../common/common.dart';
 import '../services/log_buffer.dart';
+import 'preferences_store.dart';
 
 class LogsScreen extends StatefulWidget {
   const LogsScreen({super.key});
@@ -44,7 +44,7 @@ class _LogsScreenState extends State<LogsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final prefs = context.watch<PreferencesBloc>().state.preferences;
+    final prefs = context.watch<PreferencesStore>();
     final filtered = _filteredRecords;
     return ScreenScaffold(
       title: const Text('Logs'),

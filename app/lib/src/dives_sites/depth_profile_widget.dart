@@ -3,16 +3,17 @@ import 'package:btstore/btstore.dart';
 import 'package:collection/collection.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../common/common.dart';
+import '../preferences/preferences_store.dart';
 import 'tissue_calculator.dart';
 
 class DepthProfile extends StatefulWidget {
   final Dive dive;
-  final Preferences preferences;
   final Log log;
 
-  DepthProfile({super.key, required this.dive, required this.preferences}) : log = dive.logs.firstOrNull ?? Log();
+  DepthProfile({super.key, required this.dive}) : log = dive.logs.firstOrNull ?? Log();
 
   @override
   State<DepthProfile> createState() => _DepthProfileState();
@@ -31,28 +32,50 @@ class _DepthProfileState extends State<DepthProfile> {
   final _pressureData = <int, ({List<FlSpot> spots, double minPressure, double maxPressure})>{};
   final _gasSwitches = <({double timeMinutes, String gasName})>[];
 
-  @override
-  void initState() {
-    super.initState();
+  DepthUnit? _lastDepthUnit;
+  double? _lastGfLow;
+  double? _lastGfHigh;
 
-    // Filter out samples without depth data
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final prefs = context.watch<PreferencesStore>();
+    final needsRebuild = _lastDepthUnit != prefs.depthUnit || _lastGfLow != prefs.gfLow || _lastGfHigh != prefs.gfHigh;
+
+    if (needsRebuild) {
+      _lastDepthUnit = prefs.depthUnit;
+      _lastGfLow = prefs.gfLow;
+      _lastGfHigh = prefs.gfHigh;
+      _buildData(prefs);
+    }
+  }
+
+  void _buildData(PreferencesStore prefs) {
+    samplesWithDepth.clear();
+    _depthSpots.clear();
+    _tempSpots.clear();
+    _ceilingSpots.clear();
+    _buhlmannCeilingSpots.clear();
+    _buhlmann.clear();
+    _pressureData.clear();
+    _gasSwitches.clear();
+
     samplesWithDepth.addAll(widget.log.samples.where((s) => s.hasDepth()));
     final lastNonZeroIdx = samplesWithDepth.lastIndexWhere((s) => s.depth != 0);
     if (lastNonZeroIdx < samplesWithDepth.length - 2) {
-      // Trim tail of zero samples
       samplesWithDepth.removeRange(lastNonZeroIdx + 2, samplesWithDepth.length);
     }
 
-    final depthUnit = widget.preferences.depthUnit;
+    if (samplesWithDepth.isEmpty) return;
+
+    final depthUnit = prefs.depthUnit;
     final depthMult = depthUnit == .feet ? 3.28 : 1.0;
 
-    // Depth data
     final maxDepth = depthMult * -samplesWithDepth.map((s) => s.depth).reduce((a, b) => a > b ? a : b);
     _chartMaxDepth = ((maxDepth ~/ 3) - 1).toDouble() * 3;
     _maxTime = samplesWithDepth.map((s) => s.time).reduce((a, b) => a > b ? a : b) / 60;
     _depthSpots.addAll(samplesWithDepth.map((sample) => FlSpot(sample.time / 60, depthMult * -sample.depth)));
 
-    // Temperature data - normalize to depth range, step-style
     final samplesWithTemp = samplesWithDepth.where((s) => s.hasTemperature() && s.temperature != 0).toList();
     double minTemp = 0, maxTemp = 0;
     if (samplesWithTemp.isNotEmpty) {
@@ -69,18 +92,15 @@ class _DepthProfileState extends State<DepthProfile> {
       }
     }
 
-    // Deco ceiling (from dive computer)
     for (final sample in samplesWithDepth) {
       final hasCeiling = sample.deco.type == .DECO_STOP_TYPE_DECO_STOP && sample.deco.depth > 0;
       final ceilingDepth = hasCeiling ? sample.deco.depth : -1.0;
       _ceilingSpots.add(FlSpot(sample.time / 60, depthMult * -ceilingDepth));
     }
 
-    // Buhlmann calculated ceiling & surfGF
-    _calculateBuhlmann();
+    _calculateBuhlmann(prefs);
     _buhlmannCeilingSpots.addAll(_buhlmann.map((e) => FlSpot(e.time / 60, depthMult * -e.ceiling)));
 
-    // Pressure data - find all tank indices used
     final tankIndices = <int>{};
     for (final sample in samplesWithDepth) {
       for (final p in sample.pressures) {
@@ -88,7 +108,6 @@ class _DepthProfileState extends State<DepthProfile> {
       }
     }
 
-    // Build pressure spots for each tank, normalized to depth range, step-style
     for (final tankIndex in tankIndices) {
       final samplesWithPressure = samplesWithDepth.where((s) => s.pressures.any((p) => p.tankIndex == tankIndex && p.pressure > 0)).toList();
       if (samplesWithPressure.isEmpty) continue;
@@ -115,14 +134,10 @@ class _DepthProfileState extends State<DepthProfile> {
     }
 
     if (widget.dive.cylinders.length > 1) {
-      // Find gas switches
       for (final event in widget.dive.events) {
         if (event.type == .SAMPLE_EVENT_TYPE_GAS_CHANGE) {
           if (event.value >= widget.dive.cylinders.length) continue;
           if (event.time > samplesWithDepth.first.time && event.value != 0 && _gasSwitches.isEmpty) {
-            // We're switching to a non-default gas, without having switched
-            // to the default gas, so for illustrative purposes we add a
-            // synthetic switch at the first sample.
             _gasSwitches.add((timeMinutes: 0, gasName: formatGasFraction(widget.dive.cylinders.first.oxygen, widget.dive.cylinders.first.helium)));
           }
           final cyl = widget.dive.cylinders[event.value];
@@ -149,10 +164,8 @@ class _DepthProfileState extends State<DepthProfile> {
     final ceilingColor = Colors.red;
     final buhlmannCeilingColor = Colors.deepPurple;
 
-    // Build line bars
     final lineBars = <LineChartBarData>[];
 
-    // Buhlmann calculated ceiling - dashed purple line
     if (_buhlmannCeilingSpots.isNotEmpty) {
       lineBars.add(
         LineChartBarData(
@@ -166,7 +179,6 @@ class _DepthProfileState extends State<DepthProfile> {
       );
     }
 
-    // Deco ceiling (from dive computer) - solid red line
     if (_ceilingSpots.isNotEmpty) {
       lineBars.add(
         LineChartBarData(
@@ -179,7 +191,6 @@ class _DepthProfileState extends State<DepthProfile> {
       );
     }
 
-    // Depth line (main) - track its index for touch handling
     final depthLineIndex = lineBars.length;
     lineBars.add(
       LineChartBarData(
@@ -191,12 +202,10 @@ class _DepthProfileState extends State<DepthProfile> {
       ),
     );
 
-    // Temperature line
     if (_tempSpots.isNotEmpty) {
       lineBars.add(LineChartBarData(spots: _tempSpots, color: tempColor, barWidth: 1, dotData: const FlDotData(show: false), dashArray: [4, 2]));
     }
 
-    // Pressure lines
     var pressureColorIdx = 0;
     for (final entry in _pressureData.entries) {
       lineBars.add(
@@ -214,7 +223,6 @@ class _DepthProfileState extends State<DepthProfile> {
     final buhlmann = _buhlmann.firstWhereOrNull((s) => s.time == _displaySample?.time);
     return Stack(
       children: [
-        // Top info line
         if (_displaySample != null)
           Padding(
             padding: const .only(top: 8, left: 48),
@@ -232,8 +240,6 @@ class _DepthProfileState extends State<DepthProfile> {
               ],
             ),
           ),
-
-        // Chart
         LineChart(
           LineChartData(
             backgroundColor: Colors.transparent,
@@ -267,12 +273,11 @@ class _DepthProfileState extends State<DepthProfile> {
             ),
             borderData: FlBorderData(show: true, border: Border.all(color: borderColor)),
             minX: 0,
-            maxX: _maxTime + 0.5, // minutes
+            maxX: _maxTime + 0.5,
             minY: _chartMaxDepth,
             maxY: 0,
             lineBarsData: lineBars,
             extraLinesData: ExtraLinesData(
-              // gas switches
               verticalLines: [
                 for (final gs in _gasSwitches)
                   VerticalLine(
@@ -304,13 +309,11 @@ class _DepthProfileState extends State<DepthProfile> {
                   return;
                 }
 
-                // Find the time from the depth line spot
                 final depthSpot = resp.lineBarSpots!.where((s) => s.barIndex == depthLineIndex).firstOrNull;
                 if (depthSpot == null) return;
                 final time = depthSpot.x;
                 final timeSeconds = (time * 60).toInt();
 
-                // Find the sample closest to this time
                 final sample = _findClosestSample(samplesWithDepth, timeSeconds);
                 if (sample == null) return;
 
@@ -320,7 +323,7 @@ class _DepthProfileState extends State<DepthProfile> {
               },
               touchTooltipData: LineTouchTooltipData(getTooltipItems: (touchedSpots) => [for (var i = 0; i < touchedSpots.length; i++) null]),
               getTouchedSpotIndicator: (barData, spotIndexes) => spotIndexes.map((idx) {
-                if (barData.barWidth < 2) return null; // hack to identify depth line
+                if (barData.barWidth < 2) return null;
                 return TouchedSpotIndicatorData(FlLine(color: Theme.of(context).colorScheme.secondary, strokeWidth: 1), FlDotData());
               }).toList(),
               getTouchLineStart: (barData, spotIndex) => 0,
@@ -333,12 +336,12 @@ class _DepthProfileState extends State<DepthProfile> {
     );
   }
 
-  void _calculateBuhlmann() {
+  void _calculateBuhlmann(PreferencesStore prefs) {
     if (samplesWithDepth.isEmpty) return;
 
     final config = buhlmann.BuhlmannConfig(
-      gfLow: widget.preferences.gfLow,
-      gfHigh: widget.preferences.gfHigh,
+      gfLow: prefs.gfLow,
+      gfHigh: prefs.gfHigh,
       surfacePressure: widget.log.hasAtmosphericPressure() ? widget.log.atmosphericPressure : buhlmann.atmPressure,
     );
 
@@ -374,17 +377,11 @@ class _DepthProfileState extends State<DepthProfile> {
     return res;
   }
 
-  /// Builds step-style graph spots from samples.
-  /// For each pair of consecutive samples, adds a synthetic point just before
-  /// the second sample at the first sample's Y value to create a step effect.
-  /// Optimization: skips synthetic points when samples are close together
-  /// (less than 4 samples apart) as the step wouldn't be visible anyway.
   List<FlSpot> _buildStepSpots(List<LogSample> samples, double Function(LogSample) getX, double Function(LogSample) getY, double maxTime) {
     if (samples.isEmpty) return [];
     if (samples.length == 1) {
       final x = getX(samples.first);
       final y = getY(samples.first);
-      // Extend single point to end of dive
       if (maxTime > x) {
         return [FlSpot(x, y), FlSpot(maxTime, y)];
       }
@@ -392,35 +389,28 @@ class _DepthProfileState extends State<DepthProfile> {
     }
 
     final spots = <FlSpot>[];
-    const minSampleGap = 4; // Don't add synthetic points if gap is smaller than this
+    const minSampleGap = 4;
 
     for (var i = 0; i < samples.length; i++) {
       final sample = samples[i];
       final x = getX(sample);
       final y = getY(sample);
 
-      // Add the actual sample point
       spots.add(FlSpot(x, y));
 
-      // If there's a next sample, potentially add a synthetic step point
       if (i < samples.length - 1) {
         final nextSample = samples[i + 1];
         final nextX = getX(nextSample);
 
-        // Calculate time gap in terms of approximate sample count
-        // Assuming ~1 sample per second on average
         final timeGap = nextSample.time - sample.time;
 
-        // Only add synthetic point if gap is large enough to be visible
         if (timeGap >= minSampleGap) {
-          // Add synthetic point just before the next sample, at current Y
-          final syntheticX = nextX - 0.01; // Tiny offset before next point
+          final syntheticX = nextX - 0.01;
           spots.add(FlSpot(syntheticX, y));
         }
       }
     }
 
-    // Extend the last value to the end of the dive
     final lastY = getY(samples.last);
     final lastX = getX(samples.last);
     if (maxTime > lastX) {

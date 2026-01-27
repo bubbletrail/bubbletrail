@@ -1,10 +1,10 @@
 import 'package:btstore/btstore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
+import 'package:provider/provider.dart';
 
-import '../preferences/preferences_bloc.dart';
+import '../preferences/preferences_store.dart';
 import 'common.dart';
 
 export '../preferences/preferences.dart';
@@ -24,8 +24,8 @@ String formatTime(TimeFormatPref pref, DateTime time) {
   return DateFormat(pref.format).format(time);
 }
 
-String formatDateTime(Preferences pref, DateTime dateTime) {
-  return '${formatDate(pref.dateFormat, dateTime)} ${formatTime(pref.timeFormat, dateTime)}';
+String formatDateTime(PreferencesStore prefs, DateTime dateTime) {
+  return '${formatDate(prefs.dateFormat, dateTime)} ${formatTime(prefs.timeFormat, dateTime)}';
 }
 
 String formatLogTimestamp(TimeFormatPref pref, DateTime time) {
@@ -160,7 +160,7 @@ class DateTimeText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final prefs = context.watch<PreferencesBloc>().state.preferences;
+    final prefs = context.watch<PreferencesStore>();
     return Text(formatDateTime(prefs, dateTime), style: style);
   }
 }
@@ -173,7 +173,7 @@ class TimeText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final prefs = context.watch<PreferencesBloc>().state.preferences;
+    final prefs = context.watch<PreferencesStore>();
     return Text(formatTime(prefs.timeFormat, dateTime), style: style);
   }
 }
@@ -186,7 +186,7 @@ class DateText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final prefs = context.watch<PreferencesBloc>().state.preferences;
+    final prefs = context.watch<PreferencesStore>();
     return Text(formatDate(prefs.dateFormat, dateTime), style: style);
   }
 }
@@ -199,7 +199,7 @@ class DepthText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = context.watch<PreferencesBloc>().state.preferences.depthUnit;
+    final unit = context.watch<PreferencesStore>().depthUnit;
     return Text(prefix + formatDepth(unit, depth));
   }
 }
@@ -211,7 +211,7 @@ class TemperatureText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = context.watch<PreferencesBloc>().state.preferences.temperatureUnit;
+    final unit = context.watch<PreferencesStore>().temperatureUnit;
     return Text(formatTemperature(unit, temperature));
   }
 }
@@ -224,7 +224,7 @@ class PressureText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = context.watch<PreferencesBloc>().state.preferences.pressureUnit;
+    final unit = context.watch<PreferencesStore>().pressureUnit;
     return IconText(icon, formatPressure(unit, pressure));
   }
 }
@@ -238,7 +238,7 @@ class VolumeText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = context.watch<PreferencesBloc>().state.preferences.volumeUnit;
+    final unit = context.watch<PreferencesStore>().volumeUnit;
     return IconText(icon, formatVolume(unit, volume) + suffix);
   }
 }
@@ -251,7 +251,7 @@ class WeightText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = context.watch<PreferencesBloc>().state.preferences.weightUnit;
+    final unit = context.watch<PreferencesStore>().weightUnit;
     return Text(formatWeight(unit, weight), style: style);
   }
 }
@@ -297,7 +297,7 @@ class DecoStatusText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unit = context.watch<PreferencesBloc>().state.preferences.depthUnit;
+    final unit = context.watch<PreferencesStore>().depthUnit;
     switch (status.type) {
       case .DECO_STOP_TYPE_DECO_STOP:
         return Text('Deco ${formatMinutes(status.time)} @ ${formatDepth(unit, status.depth)}');

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:btstore/btstore.dart';
@@ -10,7 +11,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import '../providers/s3_provider.dart';
 import '../providers/storage_provider.dart';
 import 'preferences.dart';
-import 'preferences_storage.dart';
+import 'preferences_store.dart';
 
 final _log = Logger('sync_bloc.dart');
 
@@ -61,7 +62,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   SyncProvider? _syncProvider;
   S3Config? _syncConfig;
   Timer? _syncDebounceTimer;
-  StreamSubscription? _preferencesSub;
+  VoidCallback? _preferencesListener;
 
   SyncBloc() : super(SyncState()) {
     on<SyncEvent>((event, emit) async {
@@ -78,7 +79,8 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     add(const _InitStore());
   }
 
-  void _newPreferences(Preferences prefs) {
+  void _onPreferencesChanged() {
+    final prefs = PreferencesStore.instance;
     add(_UpdateSyncConfig(provider: prefs.syncProvider, s3Config: prefs.s3Config));
   }
 
@@ -91,9 +93,9 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       _syncDebounceTimer = Timer(Duration(seconds: 60), () => add(SyncEvent.startSyncing()));
     });
 
-    _preferencesSub = PreferencesStorage.changes.listen(_newPreferences);
-    final preferences = await PreferencesStorage.load();
-    _newPreferences(preferences);
+    _preferencesListener = _onPreferencesChanged;
+    PreferencesStore.instance.addListener(_preferencesListener!);
+    _onPreferencesChanged();
 
     add(const _StartSyncing());
   }
@@ -147,7 +149,9 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
 
   @override
   Future<void> close() {
-    _preferencesSub?.cancel();
+    if (_preferencesListener != null) {
+      PreferencesStore.instance.removeListener(_preferencesListener!);
+    }
     return super.close();
   }
 }
