@@ -138,7 +138,7 @@ class BleScanState extends Equatable {
 
 // Bloc
 class BleScanBloc extends Bloc<BleScanEvent, BleScanState> {
-  late final Store _store;
+  final _store = StorageProvider.instance.store;
   StreamSubscription<BluetoothAdapterState>? _adapterStateSubscription;
   StreamSubscription<List<ScanResult>>? _scanSubscription;
   StreamSubscription<bool>? _scanStatusSubscription;
@@ -149,11 +149,10 @@ class BleScanBloc extends Bloc<BleScanEvent, BleScanState> {
 
     dcDescriptorIterate().then((comps) => add(_LoadedSupportedComputers(comps)));
 
-    StorageProvider.store.then((store) async {
-      _store = store;
+    unawaited(() async {
       final computers = await _store.computers.getAll();
       add(_LoadedRememberedComputers(computers));
-    });
+    }());
 
     add(const _Started());
   }

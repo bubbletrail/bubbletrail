@@ -65,7 +65,7 @@ class _LoadedEquipment extends EquipmentListEvent {
 
 class EquipmentListBloc extends Bloc<EquipmentListEvent, EquipmentListState> {
   StreamSubscription? _equipmentSub;
-  late Store _store;
+  final Store _store = StorageProvider.instance.store;
 
   EquipmentListBloc() : super(const EquipmentListInitial()) {
     on<_Init>(_onInit);
@@ -75,7 +75,6 @@ class EquipmentListBloc extends Bloc<EquipmentListEvent, EquipmentListState> {
   }
 
   Future<void> _onInit(_Init event, Emitter<EquipmentListState> emit) async {
-    _store = await StorageProvider.store;
     _equipmentSub = _store.equipment.changes.listen((_) async {
       final equipment = await _store.equipment.getAll();
       add(_LoadedEquipment(equipment));

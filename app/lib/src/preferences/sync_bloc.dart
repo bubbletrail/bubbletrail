@@ -59,6 +59,8 @@ class _UpdateSyncConfig extends SyncEvent {
 }
 
 class SyncBloc extends Bloc<SyncEvent, SyncState> {
+  final _store = StorageProvider.instance.store;
+
   SyncProvider? _syncProvider;
   S3Config? _syncConfig;
   Timer? _syncDebounceTimer;
@@ -87,8 +89,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   Future<void> _onInitStore(Emitter<SyncState> emit) async {
     _log.fine('init');
 
-    final store = await StorageProvider.store;
-    store.changes.listen((_) {
+    _store.changes.listen((_) {
       _syncDebounceTimer?.cancel();
       _syncDebounceTimer = Timer(Duration(seconds: 60), () => add(SyncEvent.startSyncing()));
     });
@@ -134,8 +135,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       await WakelockPlus.enable();
 
       _log.info('start syncing');
-      final s = await StorageProvider.store;
-      await s.syncWith(_syncProvider!);
+      await _store.syncWith(_syncProvider!);
 
       _log.info('completed syncing');
       emit(state.copyWith(lastSynced: .now(), syncing: false, lastSyncSuccess: true));

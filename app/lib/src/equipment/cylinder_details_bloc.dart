@@ -78,6 +78,8 @@ class _UpdateCylinderDetails extends CylinderDetailsEvent {
 }
 
 class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsState> {
+  final _store = StorageProvider.instance.store;
+
   CylinderDetailsBloc() : super(const CylinderDetailsInitial()) {
     on<CylinderDetailsEvent>((event, emit) async {
       switch (event) {
@@ -93,8 +95,7 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
 
   Future<void> _onLoadCylinderDetails(_LoadCylinderDetails event, Emitter<CylinderDetailsState> emit) async {
     try {
-      final store = await StorageProvider.store;
-      final cylinder = await store.cylinders.getById(event.cylinderId);
+      final cylinder = await _store.cylinders.getById(event.cylinderId);
       if (cylinder == null) {
         emit(const CylinderDetailsError('Cylinder not found'));
         return;
@@ -108,12 +109,11 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
 
   Future<void> _onUpdateCylinderDetails(_UpdateCylinderDetails event, Emitter<CylinderDetailsState> emit) async {
     try {
-      final store = await StorageProvider.store;
       final cylinder = event.cylinder;
 
       // Ensure only one cylinder has each default flag
       if (cylinder.defaultForBackgas || cylinder.defaultForDeepDeco || cylinder.defaultForShallowDeco) {
-        final allCylinders = await store.cylinders.getAll();
+        final allCylinders = await _store.cylinders.getAll();
         for (final other in allCylinders) {
           if (other.id == cylinder.id) continue;
 
@@ -134,12 +134,12 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
           }
 
           if (needsUpdate) {
-            await store.cylinders.update(updated);
+            await _store.cylinders.update(updated);
           }
         }
       }
 
-      await store.cylinders.update(cylinder);
+      await _store.cylinders.update(cylinder);
       add(_LoadCylinderDetails(cylinder.id));
     } catch (e) {
       _log.warning('failed to update cylinder', e);
