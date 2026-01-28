@@ -1,18 +1,19 @@
 import 'dart:math';
 
+import 'package:btproto/btproto.dart';
 import 'package:chips_input_autocomplete/chips_input_autocomplete.dart';
 import 'package:collection/collection.dart';
-import 'package:btstore/btstore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart' as proto;
 
+import '../services/store/store.dart';
+import '../common/common.dart';
 import '../equipment/cylinder_list_bloc.dart';
 import '../equipment/equipment_list_bloc.dart';
 import 'dive_details_bloc.dart';
 import 'dive_list_bloc.dart';
-import '../common/common.dart';
 
 class DiveEditScreen extends StatefulWidget {
   const DiveEditScreen({super.key});

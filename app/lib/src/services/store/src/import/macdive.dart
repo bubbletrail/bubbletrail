@@ -1,9 +1,10 @@
+import 'package:btproto/btproto.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
-import '../gen/gen.dart';
 import 'container.dart';
+import '../ext/ext.dart';
 
 // Import equipment from MacDive CSV export.
 //

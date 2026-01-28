@@ -1,4 +1,4 @@
-import 'package:btstore/btstore.dart' hide Container;
+import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 
 import 'common.dart';

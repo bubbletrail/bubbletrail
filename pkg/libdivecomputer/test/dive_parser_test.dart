@@ -1,7 +1,7 @@
 import 'dart:ffi' as ffi;
 import 'dart:io';
 
-import 'package:btstore/btstore.dart';
+import 'package:btproto/btproto.dart';
 import 'package:ffi/ffi.dart';
 import 'package:libdivecomputer/libdivecomputer.dart';
 import 'package:libdivecomputer/libdivecomputer_bindings_generated.dart' as bindings;

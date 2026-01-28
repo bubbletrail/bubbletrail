@@ -104,17 +104,17 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  btproto:
+    dependency: "direct main"
+    description:
+      path: "../pkg/btproto"
+      relative: true
+    source: path
+    version: "1.0.0"
   btsparkle:
     dependency: "direct main"
     description:
       path: "../pkg/btsparkle"
-      relative: true
-    source: path
-    version: "1.0.0"
-  btstore:
-    dependency: "direct main"
-    description:
-      path: "../pkg/btstore"
       relative: true
     source: path
     version: "1.0.0"
@@ -295,7 +295,7 @@ packages:
     source: hosted
     version: "0.3.5+1"
   crypto:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: crypto
       sha256: c8ea0233063ba03258fbcf2ca4d6dadfefe14f02fab57702265467a19f27fadf
@@ -725,7 +725,7 @@ packages:
     source: hosted
     version: "0.11.1"
   meta:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: meta
       sha256: "23f08335362185a5ea2ad3a4e597f1375e78bce8a040df5c600c8d3552ef2394"

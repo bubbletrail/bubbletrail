@@ -1,4 +1,5 @@
-import 'package:btstore/btstore.dart';
+import 'package:btproto/btproto.dart';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

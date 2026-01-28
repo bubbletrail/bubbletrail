@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:btproto/btproto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:protobuf/protobuf.dart';
 import 'package:uuid/uuid.dart';
 
-import '../gen/gen.dart';
+import '../ext/ext.dart';
 import '../sync/syncprovider.dart';
 import 'fileio.dart';
 
@@ -20,7 +21,7 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
   final String entityName;
   final Logger log;
 
-  Map<String, T> _entities = {};
+  final _entities = <String, T>{};
   Timer? _saveTimer;
 
   EntityStore(this.path, {required this.syncKey, required this.entityName, required this.log});

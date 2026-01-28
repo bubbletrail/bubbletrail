@@ -1,14 +1,13 @@
+import 'package:btproto/btproto.dart';
 import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
 
-import '../../btstore.dart';
-import '../gen/internal.pb.dart';
 import 'entity_store.dart';
 
 final _log = Logger('cylinder_store.dart');
 
 class CylinderStore extends EntityStore<Cylinder, InternalCylinderList> {
-  CylinderStore(String path) : super(path, syncKey: 'cylinders', entityName: 'cylinders', log: _log);
+  CylinderStore(super.path) : super(syncKey: 'cylinders', entityName: 'cylinders', log: _log);
 
   @override
   String getId(Cylinder entity) => entity.id;

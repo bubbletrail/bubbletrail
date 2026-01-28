@@ -1,6 +1,7 @@
 import 'dart:math';
 
-import 'gen.dart';
+import 'package:btproto/btproto.dart';
+import 'ext.dart';
 
 extension DiveExtensions on Dive {
   void recalculateMetadata() {
@@ -8,10 +9,10 @@ extension DiveExtensions on Dive {
 
     // We want to update only cylinder that don't already have pressure data
     // (it may have been manually edited).
-    final updateTankIndexes = Set<int>();
-    for (final (idx, cyl) in this.cylinders.indexed) {
+    final updateTankIndexes = <int>{};
+    for (final (idx, cyl) in cylinders.indexed) {
       if (!cyl.hasBeginPressure() || !cyl.hasEndPressure()) {
-        this.cylinders[idx] = cyl.deepCopy(); // make sure it's writable
+        cylinders[idx] = cyl.deepCopy(); // make sure it's writable
         updateTankIndexes.add(idx); // mark for update
       }
     }
@@ -24,10 +25,10 @@ extension DiveExtensions on Dive {
     var idx = 0;
 
     // For every gas switch we end the previous span and open a new one.
-    for (final event in this.events) {
+    for (final event in events) {
       if (event.type != SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE) continue;
       var newIdx = event.value;
-      if (newIdx > this.cylinders.length) newIdx = this.cylinders.length - 1;
+      if (newIdx > cylinders.length) newIdx = cylinders.length - 1;
       if (idx != newIdx) {
         spans.add((start: t, end: event.time, idx: idx));
         t = event.time;
@@ -47,20 +48,20 @@ extension DiveExtensions on Dive {
     double prevDepth = 0.0;
     double prevTime = 0.0;
 
-    if (this.logs.isNotEmpty) {
+    if (logs.isNotEmpty) {
       // Calculate depths etc based on samples.
-      final dl = this.logs.first;
+      final dl = logs.first;
       for (final sample in dl.samples) {
         // Temperature bounds
         if (sample.hasTemperature()) {
-          if (!this.hasMaxTemp() || sample.temperature > this.maxTemp) this.maxTemp = sample.temperature;
-          if (!this.hasMinTemp() || sample.temperature < this.minTemp) this.minTemp = sample.temperature;
+          if (!hasMaxTemp() || sample.temperature > maxTemp) maxTemp = sample.temperature;
+          if (!hasMinTemp() || sample.temperature < minTemp) minTemp = sample.temperature;
         }
 
         // Collect and update tank pressures as required
         for (final pressure in sample.pressures) {
           if (updateTankIndexes.contains(pressure.tankIndex)) {
-            final t = this.cylinders[pressure.tankIndex];
+            final t = cylinders[pressure.tankIndex];
             if (!t.hasBeginPressure()) t.beginPressure = pressure.pressure;
             t.endPressure = pressure.pressure;
           }
@@ -82,22 +83,22 @@ extension DiveExtensions on Dive {
           final cylIdx = spans.firstWhere((s) => s.end >= sample.time).idx;
           final cur = perCylinderDepth[cylIdx] ?? (duration: 0, totDepth: 0);
           perCylinderDepth[cylIdx] = (duration: cur.duration + sampleDuration, totDepth: cur.totDepth + sampleDepth * sampleDuration);
-        } catch (StateError) {}
+        } on StateError catch (_) {}
       }
 
       // Update cylinder used gas volumes now that we know pressures
-      for (var (idx, cyl) in this.cylinders.indexed) {
+      for (var (idx, cyl) in cylinders.indexed) {
         if (cyl.isFrozen) cyl = cyl.deepCopy();
         cyl.usedVolume = cyl.cylinder.volumeL * (cyl.beginPressure - cyl.endPressure);
-        this.cylinders[idx] = cyl;
+        cylinders[idx] = cyl;
       }
 
       // Calculate total dive SAC based on the sum of all cylinders
-      final totVolume = this.cylinders.fold(0.0, (tot, cyl) => tot + cyl.usedVolume);
+      final totVolume = cylinders.fold(0.0, (tot, cyl) => tot + cyl.usedVolume);
       if (totVolume > 0 && !dl.isSynthetic) {
-        this.sac = totVolume / (1.0 + meanDepth / 10.0) / (duration / 60);
+        sac = totVolume / (1.0 + meanDepth / 10.0) / (duration / 60);
       } else {
-        this.clearSac();
+        clearSac();
       }
 
       if (!dl.isSynthetic) {
@@ -106,27 +107,27 @@ extension DiveExtensions on Dive {
           final avgDepth = e.value.totDepth / e.value.duration;
           final avgATA = 1.0 + avgDepth / 10.0;
           final durationMin = e.value.duration / 60.0;
-          var cyl = this.cylinders[e.key];
+          var cyl = cylinders[e.key];
 
           if (cyl.isFrozen) cyl = cyl.deepCopy();
           cyl.usedVolume = cyl.cylinder.volumeL * (cyl.beginPressure - cyl.endPressure);
           cyl.sac = cyl.usedVolume / avgATA / durationMin;
-          this.cylinders[e.key] = cyl;
+          cylinders[e.key] = cyl;
         }
 
         // Update CNS percentage
         if (dl.samples.isNotEmpty && dl.samples.last.cns > 0) {
-          this.cns = (100 * dl.samples.last.cns).round();
+          cns = (100 * dl.samples.last.cns).round();
         } else {
-          this.clearCns();
+          clearCns();
         }
       }
     } else {
-      this.clearCns();
+      clearCns();
     }
 
     this.duration = duration.round();
     this.maxDepth = maxDepth;
-    this.meanDepth = totDepth / duration;
+    meanDepth = totDepth / duration;
   }
 }

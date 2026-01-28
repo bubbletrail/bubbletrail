@@ -3,7 +3,7 @@ import 'dart:ffi' as ffi;
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:btstore/btstore.dart';
+import 'package:btproto/btproto.dart';
 import 'package:ffi/ffi.dart';
 import 'package:logging/logging.dart';
 

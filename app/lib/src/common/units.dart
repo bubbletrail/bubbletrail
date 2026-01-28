@@ -1,4 +1,4 @@
-import 'package:btstore/btstore.dart';
+import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';

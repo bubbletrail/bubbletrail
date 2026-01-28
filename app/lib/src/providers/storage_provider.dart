@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:btstore/btstore.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
+
+import '../services/store/store.dart';
 
 final _log = Logger('storage_provider.dart');
 

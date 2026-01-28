@@ -20,7 +20,7 @@ jobs:
 
       - name: Run tests
         run: |
-          for f in pkg/btstore pkg/btbuhlmann app ; do
+          for f in pkg/btbuhlmann app ; do
             pushd $f
             flutter pub get
             flutter analyze --fatal-infos

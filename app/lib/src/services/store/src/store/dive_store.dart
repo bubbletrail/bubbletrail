@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:btproto/btproto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:glob/glob.dart';
 import 'package:glob/list_local_fs.dart';
@@ -10,18 +11,18 @@ import 'package:logging/logging.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../btstore.dart';
-import '../gen/internal.pb.dart';
+import '../ext/ext.dart';
+import '../sync/syncprovider.dart';
 import 'fileio.dart';
 
 final _log = Logger('dive_store.dart');
 
 class DiveStore with ChangeNotifier {
   final String pathPrefix;
-  Map<String, Dive> _dives = {};
-  Set<String> _tags = {};
-  Set<String> _buddies = {};
-  Set<String> _dirty = {};
+  final _dives = <String, Dive>{};
+  final _tags = <String>{};
+  final _buddies = <String>{};
+  final _dirty = <String>{};
   Timer? _saveTimer;
 
   DiveStore(this.pathPrefix);
@@ -259,7 +260,7 @@ class DiveStore with ChangeNotifier {
 
       // If it's newer, replace our dive.
       if (cur == null || dive.meta.isAfter(cur.meta)) {
-        _log.fine('updating dive ${id} from provider');
+        _log.fine('updating dive $id from provider');
         _dives[id] = dive;
         _scheduleSave(id);
         notifyListeners();

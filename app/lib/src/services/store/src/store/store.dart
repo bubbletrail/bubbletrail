@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:btproto/btproto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:glob/glob.dart';
 import 'package:glob/list_local_fs.dart';
@@ -9,7 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 
 import '../archive/archiveprovider.dart';
-import '../gen/gen.dart';
+import '../ext/ext.dart';
 import '../sync/syncprovider.dart';
 import 'computer_store.dart';
 import 'cylinder_store.dart';

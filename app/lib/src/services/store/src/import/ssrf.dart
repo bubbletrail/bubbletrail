@@ -1,10 +1,11 @@
+import 'package:btproto/btproto.dart';
 import 'package:collection/collection.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
-import '../gen/gen.dart';
 import 'container.dart';
+import '../ext/ext.dart';
 
 extension SsrfXml on Container {
   static Container fromXml(XmlElement elem) {
@@ -210,7 +211,7 @@ extension DiveXml on Dive {
 }
 
 extension ComputerDiveXml on Log {
-  /// Parse a Log from an SSRF <divecomputer> XML element.
+  // Parse a Log from an SSRF <divecomputer> XML element.
   static Log fromXml(XmlElement elem) {
     final depth = elem.getElement('depth');
     final temperature = elem.getElement('temperature');
@@ -281,7 +282,7 @@ extension ComputerDiveXml on Log {
     return log;
   }
 
-  /// Convert a Log to an SSRF <divecomputer> XML element.
+  // Convert a Log to an SSRF <divecomputer> XML element.
   XmlElement toSsrfXml() {
     final builder = XmlBuilder();
     builder.element(
