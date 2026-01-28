@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:minio/minio.dart';
 
-import '../btstore/btstore.dart';
+import '../services/store/store.dart';
 import 'encryption_provider.dart';
 
 final _log = Logger('s3_provider.dart');

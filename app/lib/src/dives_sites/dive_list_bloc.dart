@@ -11,7 +11,7 @@ import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
-import '../btstore/btstore.dart';
+import '../services/store/store.dart';
 import '../providers/storage_provider.dart';
 import 'tissue_calculator.dart';
 

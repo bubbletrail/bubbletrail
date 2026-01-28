@@ -6,7 +6,7 @@ import 'package:glob/list_local_fs.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../btstore/btstore.dart';
+import '../services/store/store.dart';
 
 final _log = Logger('zip_archive_provider.dart');
 

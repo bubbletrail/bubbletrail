@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../btstore/btstore.dart';
+import '../services/store/store.dart';
 import '../providers/storage_provider.dart';
 
 abstract class EquipmentListState extends Equatable {

@@ -12,7 +12,7 @@ import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../app_metadata.dart';
-import '../btstore/btstore.dart';
+import '../services/store/store.dart';
 import '../providers/storage_provider.dart';
 import '../providers/zip_archive_provider.dart';
 

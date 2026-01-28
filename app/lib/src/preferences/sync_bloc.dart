@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-import '../btstore/btstore.dart';
+import '../services/store/store.dart';
 import '../providers/s3_provider.dart';
 import '../providers/storage_provider.dart';
 import 'preferences.dart';

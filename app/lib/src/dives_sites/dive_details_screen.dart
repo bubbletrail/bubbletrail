@@ -9,7 +9,7 @@ import 'package:stretch_wrap/stretch_wrap.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
-import '../btstore/btstore.dart';
+import '../services/store/store.dart';
 import '../common/common.dart';
 import 'depth_profile_widget.dart';
 import 'dive_details_bloc.dart';
