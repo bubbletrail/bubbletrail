@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:glob/glob.dart';
 import 'package:glob/list_local_fs.dart';
 import 'package:intl/intl.dart';
@@ -18,7 +19,7 @@ import 'site_store.dart';
 
 final _log = Logger('store.dart');
 
-class Store {
+class Store with ChangeNotifier {
   final String path;
 
   final ComputerStore computers;
@@ -27,26 +28,17 @@ class Store {
   final EquipmentStore equipment;
   final SiteStore sites;
 
-  final _changes = StreamController<void>.broadcast();
-  Timer? _changesTimer;
-  Stream<void> get changes => _changes.stream;
-
   Store(this.path)
     : cylinders = CylinderStore('$path/cylinders.binpb'),
       dives = DiveStore('$path/dives'),
       equipment = EquipmentStore('$path/equipment.binpb'),
       sites = SiteStore('$path/sites.binpb'),
       computers = ComputerStore('$path/computers.binpb') {
-    computers.changes.listen((_) => _scheduleChange());
-    cylinders.changes.listen((_) => _scheduleChange());
-    dives.changes.listen((_) => _scheduleChange());
-    equipment.changes.listen((_) => _scheduleChange());
-    sites.changes.listen((_) => _scheduleChange());
-  }
-
-  void _scheduleChange() {
-    _changesTimer?.cancel();
-    _changesTimer = Timer(Duration(seconds: 5), () => _changes.add(null));
+    computers.addListener(notifyListeners);
+    cylinders.addListener(notifyListeners);
+    dives.addListener(notifyListeners);
+    equipment.addListener(notifyListeners);
+    sites.addListener(notifyListeners);
   }
 
   Future<void> init() async {

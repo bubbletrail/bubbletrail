@@ -65,6 +65,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   S3Config? _syncConfig;
   Timer? _syncDebounceTimer;
   VoidCallback? _preferencesListener;
+  VoidCallback? _storeListener;
 
   SyncBloc() : super(SyncState()) {
     on<SyncEvent>((event, emit) async {
@@ -89,10 +90,11 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   Future<void> _onInitStore(Emitter<SyncState> emit) async {
     _log.fine('init');
 
-    _store.changes.listen((_) {
+    _storeListener = () {
       _syncDebounceTimer?.cancel();
       _syncDebounceTimer = Timer(Duration(seconds: 60), () => add(SyncEvent.startSyncing()));
-    });
+    };
+    _store.addListener(_storeListener!);
 
     _preferencesListener = _onPreferencesChanged;
     PreferencesStore.instance.addListener(_preferencesListener!);
@@ -149,6 +151,9 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
 
   @override
   Future<void> close() {
+    if (_storeListener != null) {
+      _store.removeListener(_storeListener!);
+    }
     if (_preferencesListener != null) {
       PreferencesStore.instance.removeListener(_preferencesListener!);
     }

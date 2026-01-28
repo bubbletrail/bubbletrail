@@ -1,7 +1,6 @@
-import 'dart:async';
-
 import 'package:btstore/btstore.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../providers/storage_provider.dart';
@@ -52,7 +51,7 @@ class _LoadedCylinders extends CylinderListEvent {
 
 class CylinderListBloc extends Bloc<CylinderListEvent, CylinderListState> {
   final _store = StorageProvider.instance.store;
-  StreamSubscription? _cylindersSub;
+  VoidCallback? _cylindersListener;
 
   CylinderListBloc() : super(const CylinderListInitial()) {
     on<_Init>(_onInit);
@@ -61,10 +60,11 @@ class CylinderListBloc extends Bloc<CylinderListEvent, CylinderListState> {
   }
 
   Future<void> _onInit(_Init event, Emitter<CylinderListState> emit) async {
-    _cylindersSub = _store.cylinders.changes.listen((cylinders) async {
+    _cylindersListener = () async {
       final cylinders = await _store.cylinders.getAll();
       add(_LoadedCylinders(cylinders));
-    });
+    };
+    _store.cylinders.addListener(_cylindersListener!);
     final cylinders = await _store.cylinders.getAll();
     emit(CylinderListLoaded(cylinders));
   }
@@ -75,7 +75,9 @@ class CylinderListBloc extends Bloc<CylinderListEvent, CylinderListState> {
 
   @override
   Future<void> close() {
-    _cylindersSub?.cancel();
+    if (_cylindersListener != null) {
+      _store.cylinders.removeListener(_cylindersListener!);
+    }
     return super.close();
   }
 }

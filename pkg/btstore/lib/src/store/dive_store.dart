@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:glob/glob.dart';
 import 'package:glob/list_local_fs.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
-import 'package:meta/meta.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 
@@ -16,17 +16,13 @@ import 'fileio.dart';
 
 final _log = Logger('dive_store.dart');
 
-class DiveStore {
+class DiveStore with ChangeNotifier {
   final String pathPrefix;
   Map<String, Dive> _dives = {};
   Set<String> _tags = {};
   Set<String> _buddies = {};
   Set<String> _dirty = {};
-  bool _notify = false;
   Timer? _saveTimer;
-  final _changes = StreamController<void>.broadcast();
-
-  Stream<void> get changes => _changes.stream;
 
   DiveStore(this.pathPrefix);
 
@@ -65,7 +61,8 @@ class DiveStore {
       _tags.addAll(dive.tags);
       _buddies.addAll(dive.buddies);
     }
-    _scheduleSave(null, notify: true);
+    _scheduleSave(null);
+    notifyListeners();
   }
 
   Future<void> update(Dive dive) async {
@@ -80,7 +77,8 @@ class DiveStore {
     _dives[dive.id] = dive;
     _tags.addAll(dive.tags);
     _buddies.addAll(dive.buddies);
-    _scheduleSave(dive.id, notify: true);
+    _scheduleSave(dive.id);
+    notifyListeners();
   }
 
   Future<void> delete(String id) async {
@@ -90,7 +88,8 @@ class DiveStore {
         dive.clearSyncedEtag();
       });
     }
-    _scheduleSave(id, notify: true);
+    _scheduleSave(id);
+    notifyListeners();
   }
 
   @internal
@@ -147,7 +146,7 @@ class DiveStore {
       }
     }
     _rebuildTags();
-    _changes.add(null);
+    notifyListeners();
   }
 
   void _rebuildTags() {
@@ -182,9 +181,8 @@ class DiveStore {
     }
   }
 
-  void _scheduleSave(String? id, {required bool notify}) {
+  void _scheduleSave(String? id) {
     if (id != null) _dirty.add(id);
-    if (notify) _notify = true;
     _saveTimer?.cancel();
     _saveTimer = Timer(Duration(seconds: 1), _save);
   }
@@ -219,10 +217,6 @@ class DiveStore {
 
       _log.info('saved ${_dirty.length} dives');
       _dirty.clear();
-      if (_notify) {
-        _notify = false;
-        _changes.add(null);
-      }
     } catch (e) {
       _log.warning('failed to save dives', e);
     }
@@ -267,7 +261,8 @@ class DiveStore {
       if (cur == null || dive.meta.isAfter(cur.meta)) {
         _log.fine('updating dive ${id} from provider');
         _dives[id] = dive;
-        _scheduleSave(id, notify: true);
+        _scheduleSave(id);
+        notifyListeners();
       }
     }
 
@@ -284,7 +279,7 @@ class DiveStore {
       _dives[dive.id] = dive.rebuild((dive) {
         dive.syncedEtag = etag;
       });
-      _scheduleSave(dive.id, notify: false);
+      _scheduleSave(dive.id);
     }
 
     _rebuildTags();
