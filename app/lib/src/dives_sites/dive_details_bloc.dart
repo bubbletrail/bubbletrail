@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:ui';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
@@ -90,7 +90,7 @@ class _DeleteAndClose extends DiveDetailsEvent {
 
 class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
   final _store = StorageProvider.instance.store;
-  StreamSubscription? _storageSubscription;
+  VoidCallback? _storageListener;
 
   DiveDetailsBloc() : super(const DiveDetailsInitial()) {
     _log.fine('init');
@@ -123,14 +123,17 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
       return;
     }
 
-    _storageSubscription ??= _store.dives.changes.listen((_) {
-      // Reload the dive when storage changes. Use the dive ID from the
-      // current state, because the dive we track may have changed since the
-      // bloc was created.
-      final s = state;
-      if (s is! DiveDetailsLoaded) return;
-      add(_LoadDive(s.dive.id));
-    });
+    if (_storageListener == null) {
+      _storageListener = () {
+        // Reload the dive when storage changes. Use the dive ID from the
+        // current state, because the dive we track may have changed since the
+        // bloc was created.
+        final s = state;
+        if (s is! DiveDetailsLoaded) return;
+        add(_LoadDive(s.dive.id));
+      };
+      _store.dives.addListener(_storageListener!);
+    }
 
     _log.fine('loaded dive #${dive.number} (${dive.id})');
 
@@ -154,7 +157,9 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
   @override
   Future<void> close() {
     _log.fine('close');
-    _storageSubscription?.cancel();
+    if (_storageListener != null) {
+      _store.dives.removeListener(_storageListener!);
+    }
     return super.close();
   }
 }

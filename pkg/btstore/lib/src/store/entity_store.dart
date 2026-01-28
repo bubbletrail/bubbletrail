@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:protobuf/protobuf.dart';
@@ -14,7 +15,7 @@ import 'fileio.dart';
 //
 // Subclasses must implement the abstract methods to provide entity-specific
 // access to ID and metadata fields, as well as list wrapper creation.
-abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMessage> {
+abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMessage> with ChangeNotifier {
   final String path;
   final String syncKey;
   final String entityName;
@@ -22,10 +23,6 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
 
   Map<String, T> _entities = {};
   Timer? _saveTimer;
-  bool _notify = false;
-  final _changes = StreamController<void>.broadcast();
-
-  Stream<void> get changes => _changes.stream;
 
   EntityStore(this.path, {required this.syncKey, required this.entityName, required this.log});
 
@@ -67,15 +64,17 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
   Future<T> update(T entity) async {
     entity = _prepareInsert(entity);
     _entities[getId(entity)] = entity;
-    _scheduleSave(notify: true);
+    _scheduleSave();
+    notifyListeners();
     return entity;
   }
 
   Future<void> delete(String id) async {
     if (_entities.containsKey(id)) {
       _entities[id] = rebuildDeleted(_entities[id]!);
+      notifyListeners();
+      _scheduleSave();
     }
-    _scheduleSave(notify: true);
   }
 
   Future<T?> getById(String id) async {
@@ -108,7 +107,7 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
     } catch (e) {
       log.warning('failed to load $entityName', e);
     }
-    _changes.add(null);
+    notifyListeners();
   }
 
   T _prepareInsert(T entity) {
@@ -118,8 +117,7 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
     return rebuildEntity(entity, id: id, meta: meta);
   }
 
-  void _scheduleSave({required bool notify}) {
-    if (notify) _notify = true;
+  void _scheduleSave() {
     _saveTimer?.cancel();
     _saveTimer = Timer(Duration(seconds: 1), _save);
   }
@@ -130,10 +128,6 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
       vals.sort(compare);
       final list = createList(vals);
       await atomicWriteProto(path, list);
-      if (_notify) {
-        _notify = false;
-        _changes.add(null);
-      }
       log.info('saved ${_entities.length} $entityName');
     } catch (e) {
       log.warning('failed to save $entityName', e);
@@ -177,6 +171,9 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
     final bs = list.writeToBuffer();
     await provider.putObject(syncKey, bs);
 
-    if (changed) _scheduleSave(notify: true);
+    if (changed) {
+      _scheduleSave();
+      notifyListeners();
+    }
   }
 }

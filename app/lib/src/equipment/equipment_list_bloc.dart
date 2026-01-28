@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:btstore/btstore.dart';
@@ -64,8 +63,8 @@ class _LoadedEquipment extends EquipmentListEvent {
 }
 
 class EquipmentListBloc extends Bloc<EquipmentListEvent, EquipmentListState> {
-  StreamSubscription? _equipmentSub;
   final Store _store = StorageProvider.instance.store;
+  VoidCallback? _equipmentListener;
 
   EquipmentListBloc() : super(const EquipmentListInitial()) {
     on<_Init>(_onInit);
@@ -75,10 +74,11 @@ class EquipmentListBloc extends Bloc<EquipmentListEvent, EquipmentListState> {
   }
 
   Future<void> _onInit(_Init event, Emitter<EquipmentListState> emit) async {
-    _equipmentSub = _store.equipment.changes.listen((_) async {
+    _equipmentListener = () async {
       final equipment = await _store.equipment.getAll();
       add(_LoadedEquipment(equipment));
-    });
+    };
+    _store.equipment.addListener(_equipmentListener!);
     final equipment = await _store.equipment.getAll();
     emit(EquipmentListLoaded(equipment));
   }
@@ -111,7 +111,9 @@ class EquipmentListBloc extends Bloc<EquipmentListEvent, EquipmentListState> {
 
   @override
   Future<void> close() {
-    _equipmentSub?.cancel();
+    if (_equipmentListener != null) {
+      _store.equipment.removeListener(_equipmentListener!);
+    }
     return super.close();
   }
 }

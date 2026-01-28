@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:btstore/btstore.dart';
@@ -172,7 +173,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
   final BleScanBloc _scanBloc;
   final _store = StorageProvider.instance.store;
   StreamSubscription<BluetoothConnectionState>? _connectionSubscription;
-  StreamSubscription? _storeSubscription;
+  late final VoidCallback _storeListener;
 
   BleDownloadBloc(this._scanBloc) : super(const BleDownloadState()) {
     _log.fine('starting');
@@ -180,9 +181,10 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     on<BleDownloadEvent>(_onEvent, transformer: sequential());
 
     unawaited(_processDiveListState());
-    _storeSubscription = _store.changes.listen((_) async {
+    _storeListener = () async {
       await _processDiveListState();
-    });
+    };
+    _store.addListener(_storeListener);
   }
 
   Future<void> _processDiveListState() async {
@@ -427,7 +429,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
   @override
   Future<void> close() {
     _connectionSubscription?.cancel();
-    _storeSubscription?.cancel();
+    _store.removeListener(_storeListener);
     return super.close();
   }
 }

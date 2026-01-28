@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:ui';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:btstore/btstore.dart';
@@ -86,7 +86,7 @@ class _DeleteAndClose extends SiteDetailsEvent {
 
 class SiteDetailsBloc extends Bloc<SiteDetailsEvent, SiteDetailsState> {
   final _store = StorageProvider.instance.store;
-  StreamSubscription? _storageSubscription;
+  VoidCallback? _storageListener;
 
   SiteDetailsBloc() : super(const SiteDetailsInitial()) {
     _log.fine('init');
@@ -117,10 +117,13 @@ class SiteDetailsBloc extends Bloc<SiteDetailsEvent, SiteDetailsState> {
       return;
     }
 
-    _storageSubscription ??= _store.sites.changes.listen((_) {
-      // Reload the site when storage changes
-      add(_LoadSite(event.siteId));
-    });
+    if (_storageListener == null) {
+      _storageListener = () {
+        // Reload the site when storage changes
+        add(_LoadSite(event.siteId));
+      };
+      _store.sites.addListener(_storageListener!);
+    }
 
     _log.fine('loaded ${site.name}');
     emit(SiteDetailsLoaded(site));
@@ -129,7 +132,9 @@ class SiteDetailsBloc extends Bloc<SiteDetailsEvent, SiteDetailsState> {
   @override
   Future<void> close() {
     _log.fine('close');
-    _storageSubscription?.cancel();
+    if (_storageListener != null) {
+      _store.sites.removeListener(_storageListener!);
+    }
     return super.close();
   }
 }
