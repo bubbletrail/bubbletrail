@@ -22,10 +22,10 @@ jobs:
         run: |
           for f in pkg/btstore pkg/btbuhlmann app ; do
             pushd $f
-            dart pub get
-            dart analyze --fatal-infos
+            flutter pub get
+            flutter analyze --fatal-infos
             dart format --output=none --set-exit-if-changed $(find . -name \*.dart -not -name \*.g.dart -not -name \*.pb\*.dart)
-            dart test
+            flutter test
             popd
           done
 
