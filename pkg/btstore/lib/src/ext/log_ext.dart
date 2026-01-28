@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:convert/convert.dart';
 
-import 'package:btmodels/btmodels.dart';
+import 'package:btproto/btproto.dart';
 
 extension LogExtensions on Log {
   bool get isSynthetic => model == 'Bubbletrail';

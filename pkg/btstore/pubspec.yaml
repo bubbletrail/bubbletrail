@@ -7,7 +7,7 @@ environment:
   sdk: ^3.10.4
 
 dependencies:
-  btmodels: {path: ../btmodels}
+  btproto: {path: ../btproto}
   collection: ^1.18.0
   crypto: ^3.0.7
   flutter:

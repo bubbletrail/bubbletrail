@@ -1,4 +1,4 @@
-name: btmodels
+name: btproto
 description: "Types for dive data"
 version: 1.0.0
 publish_to: 'none'

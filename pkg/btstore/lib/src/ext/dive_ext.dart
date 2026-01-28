@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:btmodels/btmodels.dart';
+import 'package:btproto/btproto.dart';
 import 'ext.dart';
 
 extension DiveExtensions on Dive {

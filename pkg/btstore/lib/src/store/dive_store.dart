@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:btmodels/btmodels.dart';
+import 'package:btproto/btproto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:glob/glob.dart';
 import 'package:glob/list_local_fs.dart';

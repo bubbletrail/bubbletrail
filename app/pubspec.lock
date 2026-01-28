@@ -104,10 +104,10 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
-  btmodels:
+  btproto:
     dependency: transitive
     description:
-      path: "../pkg/btmodels"
+      path: "../pkg/btproto"
       relative: true
     source: path
     version: "1.0.0"

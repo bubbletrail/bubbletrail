@@ -1,4 +1,4 @@
-import 'package:btmodels/btmodels.dart';
+import 'package:btproto/btproto.dart';
 import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';

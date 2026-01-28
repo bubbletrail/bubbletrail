@@ -1,4 +1,4 @@
-import 'package:btmodels/btmodels.dart';
+import 'package:btproto/btproto.dart';
 
 class Container {
   final List<Dive> dives;

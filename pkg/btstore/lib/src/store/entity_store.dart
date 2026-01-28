@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:btmodels/btmodels.dart';
+import 'package:btproto/btproto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:protobuf/protobuf.dart';

@@ -41,10 +41,10 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
-  btmodels:
+  btproto:
     dependency: "direct main"
     description:
-      path: "../btmodels"
+      path: "../btproto"
       relative: true
     source: path
     version: "1.0.0"

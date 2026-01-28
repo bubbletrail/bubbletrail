@@ -1,4 +1,4 @@
-import 'package:btmodels/btmodels.dart';
+import 'package:btproto/btproto.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
