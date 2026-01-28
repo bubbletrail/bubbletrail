@@ -104,6 +104,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  btmodels:
+    dependency: transitive
+    description:
+      path: "../pkg/btmodels"
+      relative: true
+    source: path
+    version: "1.0.0"
   btsparkle:
     dependency: "direct main"
     description:

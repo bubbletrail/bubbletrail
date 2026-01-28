@@ -1,6 +1,6 @@
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 
-import 'gen.dart';
+import 'package:btmodels/btmodels.dart';
 
 Metadata newMetadata() {
   final dt = Timestamp.fromDateTime(DateTime.now());

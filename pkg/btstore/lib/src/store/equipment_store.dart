@@ -1,9 +1,8 @@
+import 'package:btmodels/btmodels.dart';
 import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 
-import '../gen/gen.dart';
-import '../gen/internal.pb.dart';
 import 'entity_store.dart';
 
 final _log = Logger('equipment_store.dart');

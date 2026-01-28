@@ -7,7 +7,7 @@ environment:
   sdk: ^3.10.4
 
 dependencies:
-  btstore: {path: ../btstore}
+  btmodels: {path: ../btmodels}
   code_assets: ^1.0.0
   ffi: ^2.1.4
   glob: ^2.1.3

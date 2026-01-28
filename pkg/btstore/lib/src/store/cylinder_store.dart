@@ -1,8 +1,7 @@
+import 'package:btmodels/btmodels.dart';
 import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
 
-import '../../btstore.dart';
-import '../gen/internal.pb.dart';
 import 'entity_store.dart';
 
 final _log = Logger('cylinder_store.dart');

@@ -1,7 +1,7 @@
 import 'dart:ffi' as ffi;
 import 'dart:typed_data';
 
-import 'package:btstore/btstore.dart';
+import 'package:btmodels/btmodels.dart';
 import 'package:ffi/ffi.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 
@@ -171,7 +171,6 @@ Log parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {Uint8List? fingerpr
   // --- Samples ---
   _parseSamples(parser, log);
 
-  log.setUniqueID();
   return log;
 }
 

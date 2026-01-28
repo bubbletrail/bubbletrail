@@ -1,8 +1,9 @@
+import 'package:btmodels/btmodels.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
-import '../gen/gen.dart';
+import '../ext/ext.dart';
 import 'container.dart';
 
 const double _kelvinOffset = 273.15;

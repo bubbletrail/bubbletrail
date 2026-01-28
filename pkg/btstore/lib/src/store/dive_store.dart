@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:btmodels/btmodels.dart';
 import 'package:flutter/foundation.dart';
 import 'package:glob/glob.dart';
 import 'package:glob/list_local_fs.dart';
@@ -10,8 +11,8 @@ import 'package:logging/logging.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../btstore.dart';
-import '../gen/internal.pb.dart';
+import '../ext/ext.dart';
+import '../sync/syncprovider.dart';
 import 'fileio.dart';
 
 final _log = Logger('dive_store.dart');

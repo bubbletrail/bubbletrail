@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:btmodels/btmodels.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:protobuf/protobuf.dart';
 import 'package:uuid/uuid.dart';
 
-import '../gen/gen.dart';
+import '../ext/ext.dart';
 import '../sync/syncprovider.dart';
 import 'fileio.dart';
 

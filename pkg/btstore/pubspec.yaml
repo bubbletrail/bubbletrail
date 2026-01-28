@@ -1,5 +1,5 @@
 name: btstore
-description: "Types and storage for dive data"
+description: "Storage for dive data"
 version: 1.0.0
 publish_to: 'none'
 
@@ -7,6 +7,7 @@ environment:
   sdk: ^3.10.4
 
 dependencies:
+  btmodels: {path: ../btmodels}
   collection: ^1.18.0
   crypto: ^3.0.7
   flutter:

@@ -1,6 +1,7 @@
 import 'dart:math';
 
-import 'gen.dart';
+import 'package:btmodels/btmodels.dart';
+import 'ext.dart';
 
 extension DiveExtensions on Dive {
   void recalculateMetadata() {

@@ -1,8 +1,7 @@
+import 'package:btmodels/btmodels.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
-import '../gen/gen.dart';
-import '../gen/internal.pb.dart';
 import '../sync/syncprovider.dart';
 import 'entity_store.dart';
 

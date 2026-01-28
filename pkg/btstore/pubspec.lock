@@ -41,6 +41,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  btmodels:
+    dependency: "direct main"
+    description:
+      path: "../btmodels"
+      relative: true
+    source: path
+    version: "1.0.0"
   build:
     dependency: transitive
     description:
