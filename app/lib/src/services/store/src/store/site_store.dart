@@ -8,9 +8,9 @@ import 'entity_store.dart';
 final _log = Logger('site_store.dart');
 
 class SiteStore extends EntityStore<Site, InternalSiteList> {
-  Set<String> _tags = {};
+  final _tags = <String>{};
 
-  SiteStore(String path) : super(path, syncKey: 'sites', entityName: 'sites', log: _log);
+  SiteStore(super.path) : super(syncKey: 'sites', entityName: 'sites', log: _log);
 
   Set<String> get tags => _tags;
 
@@ -56,10 +56,10 @@ class SiteStore extends EntityStore<Site, InternalSiteList> {
   }
 
   @override
-  Future<Site> update(Site site) async {
-    await super.update(site);
-    _tags.addAll(site.tags);
-    return site;
+  Future<Site> update(Site entity) async {
+    await super.update(entity);
+    _tags.addAll(entity.tags);
+    return entity;
   }
 
   @override

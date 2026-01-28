@@ -19,10 +19,10 @@ final _log = Logger('dive_store.dart');
 
 class DiveStore with ChangeNotifier {
   final String pathPrefix;
-  Map<String, Dive> _dives = {};
-  Set<String> _tags = {};
-  Set<String> _buddies = {};
-  Set<String> _dirty = {};
+  final _dives = <String, Dive>{};
+  final _tags = <String>{};
+  final _buddies = <String>{};
+  final _dirty = <String>{};
   Timer? _saveTimer;
 
   DiveStore(this.pathPrefix);
@@ -260,7 +260,7 @@ class DiveStore with ChangeNotifier {
 
       // If it's newer, replace our dive.
       if (cur == null || dive.meta.isAfter(cur.meta)) {
-        _log.fine('updating dive ${id} from provider');
+        _log.fine('updating dive $id from provider');
         _dives[id] = dive;
         _scheduleSave(id);
         notifyListeners();

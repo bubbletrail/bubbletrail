@@ -11,12 +11,12 @@ extension MetadataExtension on Metadata {
   bool get isDeleted => hasDeletedAt();
 
   bool isAfter(Metadata other) {
-    return this.updatedAt.toDateTime().isAfter(other.updatedAt.toDateTime()) ||
-        (this.deletedAt.toDateTime().isAfter(other.deletedAt.toDateTime()) && this.deletedAt.toDateTime().isAfter(other.updatedAt.toDateTime()));
+    return updatedAt.toDateTime().isAfter(other.updatedAt.toDateTime()) ||
+        (deletedAt.toDateTime().isAfter(other.deletedAt.toDateTime()) && deletedAt.toDateTime().isAfter(other.updatedAt.toDateTime()));
   }
 
   Metadata rebuildUpdated() {
-    return this.rebuild((meta) {
+    return rebuild((meta) {
       meta.updatedAt = .fromDateTime(DateTime.now());
       if (!meta.hasCreatedAt()) meta.createdAt = meta.updatedAt;
       meta.clearDeletedAt();
@@ -24,7 +24,7 @@ extension MetadataExtension on Metadata {
   }
 
   Metadata rebuildDeleted() {
-    return this.rebuild((meta) {
+    return rebuild((meta) {
       meta.deletedAt = .fromDateTime(DateTime.now());
       if (!meta.hasCreatedAt()) meta.deletedAt = meta.updatedAt;
     });

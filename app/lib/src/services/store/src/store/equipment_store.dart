@@ -8,7 +8,7 @@ import 'entity_store.dart';
 final _log = Logger('equipment_store.dart');
 
 class EquipmentStore extends EntityStore<Equipment, InternalEquipmentList> {
-  EquipmentStore(String path) : super(path, syncKey: 'equipments', entityName: 'equipments', log: _log);
+  EquipmentStore(super.path) : super(syncKey: 'equipments', entityName: 'equipments', log: _log);
 
   @override
   String getId(Equipment entity) => entity.id;
@@ -63,9 +63,7 @@ class EquipmentStore extends EntityStore<Equipment, InternalEquipmentList> {
     Timestamp? lastService,
   }) async {
     var eq = await findByProperties(type: type, manufacturer: manufacturer, name: name, serial: serial);
-    if (eq == null) {
-      eq = Equipment(type: type, manufacturer: manufacturer, name: name, serial: serial)..freeze();
-    }
+    eq ??= Equipment(type: type, manufacturer: manufacturer, name: name, serial: serial)..freeze();
     eq = eq.rebuild((eq) {
       if (weight != null) eq.weight = weight;
       if (purchaseDate != null) eq.purchaseDate = purchaseDate;

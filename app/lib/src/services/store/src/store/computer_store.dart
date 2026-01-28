@@ -8,7 +8,7 @@ import 'entity_store.dart';
 final _log = Logger('computer_store.dart');
 
 class ComputerStore extends EntityStore<Computer, InternalComputerList> {
-  ComputerStore(String path) : super(path, syncKey: 'computers', entityName: 'computers', log: _log);
+  ComputerStore(super.path) : super(syncKey: 'computers', entityName: 'computers', log: _log);
 
   @override
   String getId(Computer entity) => entity.remoteId;
@@ -62,9 +62,7 @@ class ComputerStore extends EntityStore<Computer, InternalComputerList> {
     DateTime? lastLogDate,
   }) async {
     var computer = await getById(remoteId);
-    if (computer == null) {
-      computer = Computer(remoteId: remoteId, meta: newMetadata())..freeze();
-    }
+    computer ??= Computer(remoteId: remoteId, meta: newMetadata())..freeze();
     computer = computer.rebuild((b) {
       if (advertisedName != null) b.advertisedName = advertisedName;
       if (vendor != null) b.vendor = vendor;

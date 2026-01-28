@@ -21,7 +21,7 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
   final String entityName;
   final Logger log;
 
-  Map<String, T> _entities = {};
+  final _entities = <String, T>{};
   Timer? _saveTimer;
 
   EntityStore(this.path, {required this.syncKey, required this.entityName, required this.log});

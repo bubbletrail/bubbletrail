@@ -211,7 +211,7 @@ extension DiveXml on Dive {
 }
 
 extension ComputerDiveXml on Log {
-  /// Parse a Log from an SSRF <divecomputer> XML element.
+  // Parse a Log from an SSRF <divecomputer> XML element.
   static Log fromXml(XmlElement elem) {
     final depth = elem.getElement('depth');
     final temperature = elem.getElement('temperature');
@@ -282,7 +282,7 @@ extension ComputerDiveXml on Log {
     return log;
   }
 
-  /// Convert a Log to an SSRF <divecomputer> XML element.
+  // Convert a Log to an SSRF <divecomputer> XML element.
   XmlElement toSsrfXml() {
     final builder = XmlBuilder();
     builder.element(

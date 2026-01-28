@@ -7,7 +7,7 @@ import 'entity_store.dart';
 final _log = Logger('cylinder_store.dart');
 
 class CylinderStore extends EntityStore<Cylinder, InternalCylinderList> {
-  CylinderStore(String path) : super(path, syncKey: 'cylinders', entityName: 'cylinders', log: _log);
+  CylinderStore(super.path) : super(syncKey: 'cylinders', entityName: 'cylinders', log: _log);
 
   @override
   String getId(Cylinder entity) => entity.id;

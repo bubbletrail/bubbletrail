@@ -10,19 +10,19 @@ extension LogExtensions on Log {
   bool get isSynthetic => model == 'Bubbletrail';
 
   void setUniqueID() {
-    if (this.hasUniqueID()) return;
+    if (hasUniqueID()) return;
     // Calculate a unique yet repeatable dive ID, if we have all the
     // information required. Any given dive computer identified by model &
     // serial should only have one dive starting at a given point in time.
-    if (this.hasModel() && this.hasSerial() && this.hasDateTime()) {
-      final unique = 'DC${this.model}/${this.serial}@${this.dateTime.seconds}';
+    if (hasModel() && hasSerial() && hasDateTime()) {
+      final unique = 'DC$model/$serial@${dateTime.seconds}';
       final hash = sha256.convert(utf8.encode(unique)).bytes;
       // Compress to a 128 bit hash by xor:ing the two halves
       final trunc = Uint8List(16);
       for (var i = 0; i < 16; i++) {
         trunc[i] = hash[i] ^ hash[i + 16];
       }
-      this.uniqueID = hex.encode(trunc);
+      uniqueID = hex.encode(trunc);
     }
   }
 
@@ -52,6 +52,8 @@ extension LogExtensions on Log {
               worst = sample.deco;
               continue;
             }
+          case DecoStopType.DECO_STOP_TYPE_UNSPECIFIED:
+            break;
         }
       }
     }
