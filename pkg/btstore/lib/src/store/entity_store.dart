@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
-import 'package:meta/meta.dart';
 import 'package:protobuf/protobuf.dart';
 import 'package:uuid/uuid.dart';
 
