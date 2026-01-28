@@ -1,5 +1,6 @@
 import 'package:btbuhlmann/btbuhlmann.dart' as buhlmann;
-import 'package:btstore/btstore.dart';
+import 'package:btproto/btproto.dart';
+
 import 'package:collection/collection.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';

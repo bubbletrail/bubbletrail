@@ -105,7 +105,7 @@ packages:
     source: path
     version: "1.0.0"
   btproto:
-    dependency: transitive
+    dependency: "direct main"
     description:
       path: "../pkg/btproto"
       relative: true
@@ -115,13 +115,6 @@ packages:
     dependency: "direct main"
     description:
       path: "../pkg/btsparkle"
-      relative: true
-    source: path
-    version: "1.0.0"
-  btstore:
-    dependency: "direct main"
-    description:
-      path: "../pkg/btstore"
       relative: true
     source: path
     version: "1.0.0"

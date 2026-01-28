@@ -1,7 +1,8 @@
 import 'dart:ui';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:btstore/btstore.dart';
+import 'package:btproto/btproto.dart';
+
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

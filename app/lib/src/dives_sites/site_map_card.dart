@@ -1,4 +1,4 @@
-import 'package:btstore/btstore.dart' hide Container;
+import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';

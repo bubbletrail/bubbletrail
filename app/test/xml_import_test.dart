@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:btstore/btstore.dart';
+import 'package:bubbletrail/src/btstore/btstore.dart';
 import 'package:test/test.dart';
 import 'package:xml/xml.dart';
 

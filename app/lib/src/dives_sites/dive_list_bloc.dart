@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:btbuhlmann/btbuhlmann.dart' as buhlmann;
+import 'package:btproto/btproto.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:btstore/btstore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +11,7 @@ import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
+import '../btstore/btstore.dart';
 import '../providers/storage_provider.dart';
 import 'tissue_calculator.dart';
 

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:btstore/btstore.dart';
+import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart' hide DataColumn;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +9,7 @@ import 'package:stretch_wrap/stretch_wrap.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
+import '../btstore/btstore.dart';
 import '../common/common.dart';
 import 'depth_profile_widget.dart';
 import 'dive_details_bloc.dart';

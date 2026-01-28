@@ -1,6 +1,7 @@
 import 'dart:io';
 
-import 'package:btstore/btstore.dart';
+import 'package:btproto/btproto.dart';
+import 'package:bubbletrail/src/btstore/btstore.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart' as proto;
 import 'package:test/test.dart';
 import 'package:xml/xml.dart';

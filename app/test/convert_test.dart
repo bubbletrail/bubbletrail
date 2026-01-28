@@ -1,4 +1,5 @@
-import 'package:btstore/btstore.dart';
+import 'package:btproto/btproto.dart';
+
 import 'package:test/test.dart';
 import 'package:bubbletrail/src/connect/dc_convert.dart';
 

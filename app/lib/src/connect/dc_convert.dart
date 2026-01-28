@@ -1,4 +1,6 @@
-import 'package:btstore/btstore.dart';
+import 'package:btproto/btproto.dart';
+
+import '../btstore/btstore.dart';
 
 // Converts a Log from a dive computer into a Dive.
 //
