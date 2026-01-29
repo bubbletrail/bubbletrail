@@ -5,12 +5,13 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
-	"encoding/hex"
+	"encoding/base32"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -60,26 +61,20 @@ func (c *Client) CreateUser(ctx context.Context, email string, quota int) (Minio
 	log := slog.With("email", email, "bucket", bucketName)
 
 	accessKey := email
-	secretKey, err := generateSecretKey()
-	if err != nil {
-		log.Error("failed to generate secret key", "error", err)
-		return MinioUserResult{}, errInternal
-	}
+	secretKey := generateSecretKey()
 
 	// Create the new, private, bucket in the minio instance.
-	err = c.minioClient.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
-	if err != nil {
+	if err := c.minioClient.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{}); err != nil {
 		log.Error("failed to create bucket", "error", err)
 		return MinioUserResult{}, errInternal
 	}
 
 	// Set bucket quota if configured.
 	if quota > 0 {
-		err = c.adminClient.SetBucketQuota(ctx, bucketName, &madmin.BucketQuota{
+		if err := c.adminClient.SetBucketQuota(ctx, bucketName, &madmin.BucketQuota{
 			Quota: uint64(quota),
 			Type:  madmin.HardQuota,
-		})
-		if err != nil {
+		}); err != nil {
 			log.Error("failed to set bucket quota", "error", err)
 			// continue anyway
 		}
@@ -209,16 +204,15 @@ func hashEmail(email string) string {
 	h := sha256.Sum256([]byte(email))
 	user, _, _ := strings.Cut(email, "@")
 	user = regexp.MustCompile(`[^0-9a-z]`).ReplaceAllLiteralString(user, "")
-	return user + "-" + hex.EncodeToString(h[:4])
+	return user + "-" + strings.ToLower(dashedString(base32.HexEncoding.WithPadding(base32.NoPadding).EncodeToString(h[:])[:8], 4))
 }
 
-// generateSecretKey generates a random 32-character secret key.
-func generateSecretKey() (string, error) {
+// generateSecretKey generates a random 18-character (~90 bits) secret key.
+func generateSecretKey() string {
 	bytes := make([]byte, 12)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(bytes), nil
+	rand.Read(bytes) //nolint:errcheck
+	rnd := base32.HexEncoding.WithPadding(base32.NoPadding).EncodeToString(bytes)
+	return dashedString(rnd[:18], 6)
 }
 
 // createBucketPolicy creates an IAM policy that grants read-write access to a specific bucket.
@@ -242,4 +236,13 @@ func createBucketPolicy(bucketName string) map[string]any {
 			},
 		},
 	}
+}
+
+func dashedString(s string, intv int) string {
+	runes := []rune(s)
+	var parts []string
+	for chunk := range slices.Chunk(runes, intv) {
+		parts = append(parts, string(chunk))
+	}
+	return strings.Join(parts, "-")
 }
