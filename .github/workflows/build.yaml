@@ -251,6 +251,7 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           path: packages
+          merge-multiple: true
 
       - name: Create GitHub releases and push binaries
         run: |
