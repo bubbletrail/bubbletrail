@@ -104,7 +104,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   }
 
   Future<void> _onUpdateConfig(_UpdateSyncConfig event) async {
-    if (event.provider == .none) {
+    if (event.provider == .none || !event.s3Config.isConfigured) {
       _syncProvider = null;
       _syncConfig = null;
       return;
