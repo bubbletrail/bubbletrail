@@ -14,8 +14,9 @@ class StorageProvider {
   late final Store store;
 
   Future<void> init() async {
-    _log.fine('init storage');
-    final dir = '${(await getApplicationDocumentsDirectory()).path}/db';
+    // Use forward slashes for cross-platform compatibility (glob package uses them)
+    final dir = '${(await getApplicationDocumentsDirectory()).path}/db'.replaceAll('\\', '/');
+    _log.fine('init storage at $dir');
     store = Store(dir);
     await store.init();
   }

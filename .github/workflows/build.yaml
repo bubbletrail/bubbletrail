@@ -164,6 +164,72 @@ jobs:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
 
 
+  build-windows:
+    name: Build for Windows
+    runs-on: windows-latest
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/release' || github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/jb/windows')
+    environment: release
+    needs:
+      - test
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - uses: ./.github/actions/build-info
+
+      - name: Build Windows executable
+        shell: bash
+        run: |
+          cd app
+          flutter pub get
+          flutter build windows \
+              --release --no-pub \
+              --build-number="$BUILD_NUMBER" \
+              --build-name="$MARKET_VERSION" \
+              --dart-define=AZURE_MAPS_SUBSCRIPTION_KEY="$AZURE_MAPS_SUBSCRIPTION_KEY" \
+              --dart-define=BUILD="$BUILD_NUMBER" \
+              --dart-define=BUILDSECONDS="$SOURCE_DATE_EPOCH" \
+              --dart-define=GITSHA="$GIT_SHA" \
+              --dart-define=MARKETINGVERSION="$MARKET_VERSION"
+        env:
+          AZURE_MAPS_SUBSCRIPTION_KEY: ${{ secrets.AZURE_MAPS_SUBSCRIPTION_KEY }}
+
+      - name: Sign files with Trusted Signing
+        uses: azure/trusted-signing-action@v0.5.1
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TRUSTED_SIGNING_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_TRUSTED_SIGNING_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_TRUSTED_SIGNING_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_TRUSTED_SIGNING_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.AZURE_TRUSTED_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ secrets.AZURE_TRUSTED_SIGNING_PROFILE }}
+          files-folder: ${{ github.workspace }}\app\build\windows\x64\runner\Release
+          files-folder-filter: exe
+          files-folder-recurse: true
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+
+      - name: Package Windows build
+        shell: pwsh
+        run: |
+          cd app
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath "bubbletrail-windows-$env:MARKET_VERSION-$env:BUILD_NUMBER.zip"
+
+      - name: Save artifacts (Windows)
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: app/bubbletrail*.zip
+          retention-days: 1
+
   build-android:
     name: Build for Android (Play Store)
     runs-on: ubuntu-latest
@@ -237,6 +303,7 @@ jobs:
       contents: write
     needs:
       - build-macos
+      - build-windows
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository

@@ -106,6 +106,10 @@ flutter_launcher_icons:
   macos:
     generate: true
     image_path: "../assets/icon-1024.png"
+  windows:
+    generate: true
+    image_path: "../assets/icon-1024.png"
+    icon_size: 48
 
 flutter_native_splash:
   color: "#01403A"

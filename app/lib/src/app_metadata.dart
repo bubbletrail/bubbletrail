@@ -13,3 +13,7 @@ const backupFileExtension = 'btz';
 
 final platformIsMobile = Platform.isIOS || Platform.isAndroid;
 final platformIsDesktop = !platformIsMobile;
+final platformIsWindows = Platform.isWindows;
+
+/// Connect feature (dive computer download) is only available on mobile platforms
+final platformSupportsConnect = platformIsMobile;

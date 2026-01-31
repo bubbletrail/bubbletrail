@@ -1,6 +1,52 @@
-# Text files use LF line endings in this repository
-*   text=auto
+# Force Unix line endings (LF) for all text files
+* text=auto eol=lf
+
+# Explicitly mark certain file types as text
+*.dart text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.c text eol=lf
+*.h text eol=lf
+*.cpp text eol=lf
+*.hpp text eol=lf
+*.swift text eol=lf
+*.kt text eol=lf
+*.java text eol=lf
+*.xml text eol=lf
+*.plist text eol=lf
+*.gradle text eol=lf
+*.properties text eol=lf
+*.sh text eol=lf
+*.bat text eol=lf
+*.ps1 text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+
+# Binary files - don't modify
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.icns binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.jar binary
+*.so binary
+*.dll binary
+*.dylib binary
+*.exe binary
+*.binpb binary
 
 # The import libdivecomputer files are in effect generated
 pkg/libdivecomputer/libdivecomputer-*/**    -diff linguist-generated
-

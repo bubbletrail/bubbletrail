@@ -57,6 +57,11 @@ add_subdirectory("runner")
 # them to the application.
 include(flutter/generated_plugins.cmake)
 
+# Link RuntimeObject.lib for WinRT support (required by flutter_blue_plus_winrt)
+if(TARGET flutter_blue_plus_winrt_plugin)
+  target_link_libraries(flutter_blue_plus_winrt_plugin PRIVATE RuntimeObject.lib)
+endif()
+
 
 # === Installation ===
 # Support files are copied into place next to the executable, so that it can

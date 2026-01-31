@@ -94,8 +94,8 @@ class _MyAppState extends State<MyApp> with WindowListener {
   late final DiveListBloc _diveListBloc;
   late final CylinderListBloc _cylinderListBloc;
   late final EquipmentListBloc _equipmentListBloc;
-  late final BleScanBloc _bleScanBloc;
-  late final BleDownloadBloc _bleDownloadBloc;
+  BleScanBloc? _bleScanBloc;
+  BleDownloadBloc? _bleDownloadBloc;
   late final GoRouter _router;
 
   @override
@@ -106,8 +106,10 @@ class _MyAppState extends State<MyApp> with WindowListener {
     _diveListBloc = DiveListBloc();
     _cylinderListBloc = CylinderListBloc();
     _equipmentListBloc = EquipmentListBloc();
-    _bleScanBloc = BleScanBloc();
-    _bleDownloadBloc = BleDownloadBloc(_bleScanBloc);
+    if (platformSupportsConnect) {
+      _bleScanBloc = BleScanBloc();
+      _bleDownloadBloc = BleDownloadBloc(_bleScanBloc!);
+    }
     _setupFileHandler();
     if (WindowPreferences.isSupported) {
       windowManager.addListener(this);
@@ -133,12 +135,12 @@ class _MyAppState extends State<MyApp> with WindowListener {
         StatefulShellRoute.indexedStack(
           builder: (BuildContext context, GoRouterState state, StatefulNavigationShell shell) {
             final appBarTheme = Theme.of(context).appBarTheme;
-            const destinations = [
+            final destinations = [
               (icon: Icons.water_outlined, label: 'Dives'),
               (icon: Icons.location_on_outlined, label: 'Sites'),
               (icon: Icons.inventory_2_outlined, label: 'Equipment'),
               (icon: Icons.settings, label: 'Preferences'),
-              (icon: Icons.bluetooth, label: 'Connect'),
+              if (platformSupportsConnect) (icon: Icons.bluetooth, label: 'Connect'),
             ];
 
             final cs = Theme.of(context).colorScheme;
@@ -356,9 +358,10 @@ class _MyAppState extends State<MyApp> with WindowListener {
                 ),
               ],
             ),
-            StatefulShellBranch(
-              routes: <RouteBase>[GoRoute(path: AppRoutePath.connect, name: AppRouteName.connect, builder: (context, state) => ConnectScreen())],
-            ),
+            if (platformSupportsConnect)
+              StatefulShellBranch(
+                routes: <RouteBase>[GoRoute(path: AppRoutePath.connect, name: AppRouteName.connect, builder: (context, state) => ConnectScreen())],
+              ),
           ],
         ),
         if (platformIsMobile) profileDetailRoute,
@@ -416,8 +419,8 @@ class _MyAppState extends State<MyApp> with WindowListener {
         BlocProvider.value(value: _diveListBloc),
         BlocProvider.value(value: _cylinderListBloc),
         BlocProvider.value(value: _equipmentListBloc),
-        BlocProvider.value(value: _bleScanBloc),
-        BlocProvider.value(value: _bleDownloadBloc),
+        if (_bleScanBloc != null) BlocProvider.value(value: _bleScanBloc!),
+        if (_bleDownloadBloc != null) BlocProvider.value(value: _bleDownloadBloc!),
       ],
       child: Consumer<PreferencesStore>(
         builder: (context, prefs, _) {
