@@ -26,7 +26,7 @@ class AppTheme {
   static const transitions = PageTransitionsTheme(
     builders: <TargetPlatform, PageTransitionsBuilder>{
       .android: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
-      .iOS: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
+      .iOS: CupertinoPageTransitionsBuilder(),
       .linux: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
       .macOS: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
       .windows: FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
