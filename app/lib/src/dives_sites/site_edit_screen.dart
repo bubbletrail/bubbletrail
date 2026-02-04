@@ -40,7 +40,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
     _originalSite = state.site;
     _isNew = _originalSite.id.isEmpty;
     _nameController = TextEditingController(text: _originalSite.name);
-    _countryCode = normalizeCountry(_originalSite.country);
+    _countryCode = _originalSite.country;
     _locationController = TextEditingController(text: _originalSite.location);
     _bodyOfWaterController = TextEditingController(text: _originalSite.bodyOfWater);
     _difficultyController = TextEditingController(text: _originalSite.difficulty);
@@ -113,7 +113,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
   }
 
   Future<void> _selectCountry() async {
-    final result = await showCountryPickerDialog(context: context, selectedCode: isCountryCode(_countryCode) ? _countryCode : null, noneOption: 'No country');
+    final result = await showCountryPickerDialog(context: context, selectedCode: _countryCode, noneOption: 'No country');
 
     if (result != null) {
       setState(() {
@@ -159,7 +159,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
                     decoration: const InputDecoration(labelText: 'Country', border: OutlineInputBorder()),
                     child: Row(
                       children: [
-                        if (_countryCode.isNotEmpty && isCountryCode(_countryCode)) ...[CountryFlag(code: _countryCode), const SizedBox(width: 12)],
+                        CountryFlag(code: _countryCode),
                         Expanded(
                           child: Text(
                             _countryCode.isEmpty ? 'Select country' : countryDisplayName(_countryCode),

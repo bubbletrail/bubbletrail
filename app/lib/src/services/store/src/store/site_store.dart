@@ -78,7 +78,7 @@ class SiteStore extends EntityStore<Site, InternalSiteList> {
     await super.init();
     for (final site in await getAll()) {
       // normalize country name to country code, if possible
-      final nc = normalizeCountry(site.country);
+      final nc = matchCountryCode(site.country) ?? site.country;
       if (nc != site.country) {
         final rs = site.rebuild((site) {
           site.country = nc;
