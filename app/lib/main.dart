@@ -163,7 +163,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                     bottomNavigationBar: NavigationBar(
                       backgroundColor: Colors.transparent,
                       selectedIndex: shell.currentIndex,
-                      onDestinationSelected: (n) => shell.goBranch(n),
+                      onDestinationSelected: (n) => shell.goBranch(n, initialLocation: n == shell.currentIndex),
                       destinations: [for (final d in destinations) NavigationDestination(icon: Icon(d.icon), label: d.label)],
                     ),
                   ),
@@ -179,7 +179,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                     backgroundColor: Colors.transparent,
                     labelType: .all,
                     selectedIndex: shell.currentIndex,
-                    onDestinationSelected: (n) => shell.goBranch(n),
+                    onDestinationSelected: (n) => shell.goBranch(n, initialLocation: n == shell.currentIndex),
                     leading: SizedBox(height: (appBarTheme.toolbarHeight ?? 48) - 8),
                     destinations: [for (final d in destinations) NavigationRailDestination(icon: Icon(d.icon), label: Text(d.label))],
                   ),
