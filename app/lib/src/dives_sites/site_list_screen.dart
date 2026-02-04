@@ -1,5 +1,5 @@
+import 'package:btcountries/btcountries.dart';
 import 'package:btproto/btproto.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -7,8 +7,8 @@ import 'package:trina_grid/trina_grid.dart';
 
 import '../app_routes.dart';
 import '../app_theme.dart';
-import 'dive_list_bloc.dart';
 import '../common/common.dart';
+import 'dive_list_bloc.dart';
 import 'site_grouping.dart';
 import 'site_list_item_card.dart';
 
@@ -54,12 +54,16 @@ class SiteListScreen extends StatelessWidget {
     final hierarchy = SiteHierarchy(sites);
     final theme = Theme.of(context);
 
-    return ListView(
-      padding: const .symmetric(vertical: 8),
-      children: [
-        for (final country in hierarchy.countries)
-          _CountryExpansionTile(country: country, hierarchy: hierarchy, diveCountBySiteId: diveCountBySiteId, theme: theme),
-      ],
+    return Theme(
+      // remove divider lines above & below ExpansionTiles
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ListView(
+        padding: const .symmetric(vertical: 8),
+        children: [
+          for (final country in hierarchy.countries)
+            _CountryExpansionTile(country: country, hierarchy: hierarchy, diveCountBySiteId: diveCountBySiteId, theme: theme),
+        ],
+      ),
     );
   }
 
@@ -114,7 +118,7 @@ class SiteListScreen extends StatelessWidget {
   }
 }
 
-class _CountryExpansionTile extends StatefulWidget {
+class _CountryExpansionTile extends StatelessWidget {
   final String country;
   final SiteHierarchy hierarchy;
   final Map<String, int> diveCountBySiteId;
@@ -123,79 +127,29 @@ class _CountryExpansionTile extends StatefulWidget {
   const _CountryExpansionTile({required this.country, required this.hierarchy, required this.diveCountBySiteId, required this.theme});
 
   @override
-  State<_CountryExpansionTile> createState() => _CountryExpansionTileState();
-}
-
-class _CountryExpansionTileState extends State<_CountryExpansionTile> {
-  bool _isExpanded = false;
-
-  @override
   Widget build(BuildContext context) {
-    final locations = widget.hierarchy.locationsFor(widget.country);
-    final displayName = SiteHierarchy.countryDisplayNameFor(widget.country);
-    final flagAsset = SiteHierarchy.countryFlagAssetFor(widget.country);
+    final locations = hierarchy.locationsFor(country);
+    final displayName = SiteHierarchy.countryDisplayNameFor(country);
+    final flagAsset = SiteHierarchy.countryFlagAssetFor(country);
 
     // Calculate aggregate dive count for the country
     int countryDiveCount = 0;
     for (final location in locations) {
-      for (final site in widget.hierarchy.sitesFor(widget.country, location)) {
-        countryDiveCount += widget.diveCountBySiteId[site.id] ?? 0;
+      for (final site in hierarchy.sitesFor(country, location)) {
+        countryDiveCount += diveCountBySiteId[site.id] ?? 0;
       }
     }
 
     final children = [
       for (final location in locations)
-        _LocationExpansionTile(
-          country: widget.country,
-          location: location,
-          hierarchy: widget.hierarchy,
-          diveCountBySiteId: widget.diveCountBySiteId,
-          theme: widget.theme,
-        ),
+        _LocationExpansionTile(country: country, location: location, hierarchy: hierarchy, diveCountBySiteId: diveCountBySiteId, theme: theme),
     ];
 
     return ExpansionTile(
-      leading: flagAsset != null ? CountryFlag(code: widget.country, size: 32) : const Icon(Icons.public),
+      leading: flagAsset != null ? CountryFlag(code: country, size: 32) : const Icon(Icons.public),
       title: Text(displayName, style: const TextStyle(fontWeight: .bold)),
-      subtitle: Text('$countryDiveCount ${countryDiveCount == 1 ? 'dive' : 'dives'}', style: widget.theme.textTheme.bodySmall),
-      onExpansionChanged: (expanded) => setState(() => _isExpanded = expanded),
-      children: [
-        if (_isExpanded && flagAsset != null)
-          Stack(
-            children: [
-              Positioned.fill(child: _TiledFlagBackground(flagAsset: flagAsset)),
-              Column(children: children),
-            ],
-          )
-        else
-          ...children,
-      ],
-    );
-  }
-}
-
-class _TiledFlagBackground extends StatelessWidget {
-  final String flagAsset;
-
-  const _TiledFlagBackground({required this.flagAsset});
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRect(
-      child: Opacity(
-        opacity: 0.08,
-        child: Transform.rotate(
-          angle: -0.15, // Slight angle in radians (~8.5 degrees)
-          child: OverflowBox(
-            maxWidth: double.infinity,
-            maxHeight: double.infinity,
-            child: ImageFiltered(
-              imageFilter: ColorFilter.mode(Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5), BlendMode.srcATop),
-              child: Wrap(spacing: 20, runSpacing: 20, children: List.generate(50, (_) => Image.asset(flagAsset, width: 80, height: 60, fit: .cover))),
-            ),
-          ),
-        ),
-      ),
+      subtitle: Text('$countryDiveCount ${countryDiveCount == 1 ? 'dive' : 'dives'}', style: theme.textTheme.bodySmall),
+      children: children,
     );
   }
 }
@@ -223,7 +177,7 @@ class _LocationExpansionTile extends StatelessWidget {
     return Padding(
       padding: const .only(left: 16),
       child: ExpansionTile(
-        leading: const Icon(Icons.place_outlined, size: 20),
+        leading: const Icon(Icons.map_outlined, size: 20),
         title: Text(displayName),
         subtitle: Text('$locationDiveCount ${locationDiveCount == 1 ? 'dive' : 'dives'}', style: theme.textTheme.bodySmall),
         children: [

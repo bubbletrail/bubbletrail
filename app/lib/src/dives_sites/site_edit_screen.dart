@@ -1,6 +1,6 @@
-import 'package:chips_input_autocomplete/chips_input_autocomplete.dart';
+import 'package:btcountries/btcountries.dart';
 import 'package:btproto/btproto.dart';
-
+import 'package:chips_input_autocomplete/chips_input_autocomplete.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -115,9 +115,9 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
   Future<void> _selectCountry() async {
     final result = await showCountryPickerDialog(context: context, selectedCode: isCountryCode(_countryCode) ? _countryCode : null, noneOption: 'No country');
 
-    if (!result.cancelled) {
+    if (result != null) {
       setState(() {
-        _countryCode = result.value ?? '';
+        _countryCode = result;
       });
     }
   }

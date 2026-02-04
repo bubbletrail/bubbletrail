@@ -11,6 +11,7 @@ environment:
 dependencies:
   bloc_concurrency: ^0.3.0
   btbuhlmann: {path: ../pkg/btbuhlmann}
+  btcountries: {path: ../pkg/btcountries}
   btproto: {path: ../pkg/btproto}
   btsparkle: {path: ../pkg/btsparkle}
   chips_input_autocomplete: ^1.2.2
@@ -67,7 +68,6 @@ flutter:
 
   assets:
     - assets/icons/
-    - assets/flags/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

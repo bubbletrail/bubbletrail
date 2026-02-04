@@ -1,7 +1,6 @@
+import 'package:btcountries/btcountries.dart';
 import 'package:btproto/btproto.dart';
 import 'package:collection/collection.dart';
-
-import '../common/countries.dart';
 
 class SiteHierarchy {
   // Keyed by raw country value (code or legacy freetext)

@@ -1,8 +1,8 @@
+import 'package:btcountries/btcountries.dart';
 import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 
 import '../dives_sites/site_grouping.dart';
-import 'country_picker.dart';
 import 'dialogs.dart';
 
 /// Shows a hierarchical dialog for selecting a dive site.

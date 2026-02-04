@@ -1,30 +1,21 @@
 import 'package:flutter/material.dart';
 
 import 'countries.dart';
-import 'dialogs.dart';
+import 'country_flag.dart';
 
-/// Shows a searchable dialog for selecting a country.
-/// Returns a [SelectionResult] with the selected country code, or cancelled.
-Future<SelectionResult<String>> showCountryPickerDialog({required BuildContext context, String? selectedCode, String? noneOption}) async {
-  const cancelledSentinel = Object();
-
-  final result = await showDialog<Object?>(
+// Shows a searchable dialog for selecting a country.
+Future<String?> showCountryPickerDialog({required BuildContext context, String? selectedCode, String? noneOption}) async {
+  return await showDialog<String?>(
     context: context,
-    builder: (dialogContext) => _CountryPickerDialog(selectedCode: selectedCode, noneOption: noneOption, cancelledSentinel: cancelledSentinel),
+    builder: (dialogContext) => _CountryPickerDialog(selectedCode: selectedCode, noneOption: noneOption),
   );
-
-  if (identical(result, cancelledSentinel)) {
-    return const SelectionResult.cancelled();
-  }
-  return .selected(result as String?);
 }
 
 class _CountryPickerDialog extends StatefulWidget {
   final String? selectedCode;
   final String? noneOption;
-  final Object cancelledSentinel;
 
-  const _CountryPickerDialog({required this.selectedCode, required this.noneOption, required this.cancelledSentinel});
+  const _CountryPickerDialog({required this.selectedCode, required this.noneOption});
 
   @override
   State<_CountryPickerDialog> createState() => _CountryPickerDialogState();
@@ -87,7 +78,7 @@ class _CountryPickerDialogState extends State<_CountryPickerDialog> {
                   final country = _filteredCountries[widget.noneOption != null ? index - 1 : index];
                   final isSelected = widget.selectedCode?.toUpperCase() == country.code;
                   return ListTile(
-                    leading: _CountryFlag(code: country.code, size: 24),
+                    leading: CountryFlag(code: country.code, size: 24),
                     title: Text(country.name),
                     trailing: Text(country.code, style: TextStyle(color: Theme.of(context).hintColor)),
                     selected: isSelected,
@@ -99,40 +90,7 @@ class _CountryPickerDialogState extends State<_CountryPickerDialog> {
           ],
         ),
       ),
-      actions: [TextButton(onPressed: () => Navigator.of(context).pop(widget.cancelledSentinel), child: const Text('Cancel'))],
-    );
-  }
-}
-
-/// A widget that displays a country flag image.
-class CountryFlag extends StatelessWidget {
-  final String code;
-  final double size;
-
-  const CountryFlag({super.key, required this.code, this.size = 24});
-
-  @override
-  Widget build(BuildContext context) => _CountryFlag(code: code, size: size);
-}
-
-class _CountryFlag extends StatelessWidget {
-  final String code;
-  final double size;
-
-  const _CountryFlag({required this.code, this.size = 24});
-
-  @override
-  Widget build(BuildContext context) {
-    final asset = countryFlagAsset(code);
-    if (asset == null) {
-      return SizedBox(width: size, height: size * 0.75, child: const Icon(Icons.flag_outlined));
-    }
-    return Image.asset(
-      asset,
-      width: size,
-      height: size * 0.75,
-      fit: .cover,
-      errorBuilder: (context, error, stack) => Icon(Icons.flag_outlined, size: size),
+      actions: [TextButton(onPressed: () => Navigator.of(context).pop(null), child: const Text('Cancel'))],
     );
   }
 }
