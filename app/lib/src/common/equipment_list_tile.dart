@@ -13,7 +13,13 @@ class EquipmentListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: EquipmentIcons.icon(EquipmentIcons.forType(equipment.type), color: Theme.of(context).colorScheme.onSurface, size: 32),
-      title: Text(equipmentTitle(equipment), style: Theme.of(context).textTheme.bodyMedium),
+      title: Row(
+        spacing: 8,
+        children: [
+          Flexible(child: Text(equipmentTitle(equipment), style: Theme.of(context).textTheme.bodyMedium)),
+          if (equipment.defaultForNewDives) _DefaultBadge(),
+        ],
+      ),
       subtitle: equipmentSubtitle(equipment) != null
           ? Text(equipmentSubtitleText(equipment), style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).hintColor))
           : null,
@@ -23,6 +29,9 @@ class EquipmentListTile extends StatelessWidget {
   }
 
   static String equipmentTitle(Equipment item) {
+    if (item.manufacturer.isNotEmpty && item.name.isNotEmpty) {
+      return '${item.manufacturer} ${item.name}';
+    }
     if (item.name.isNotEmpty) {
       return item.name;
     }
@@ -46,9 +55,19 @@ class EquipmentListTile extends StatelessWidget {
     if (item.type.isNotEmpty && item.name.isNotEmpty) {
       parts.add(item.type);
     }
-    if (item.manufacturer.isNotEmpty && item.name.isNotEmpty) {
-      parts.add(item.manufacturer);
-    }
     return parts.join(' \u2022 ');
+  }
+}
+
+class _DefaultBadge extends StatelessWidget {
+  const _DefaultBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const .symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer, borderRadius: .circular(4)),
+      child: Text('Default', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onPrimaryContainer)),
+    );
   }
 }

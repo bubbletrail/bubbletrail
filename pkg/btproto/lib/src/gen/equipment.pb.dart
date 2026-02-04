@@ -34,6 +34,7 @@ class Equipment extends $pb.GeneratedMessage {
     $core.double? purchasePrice,
     $core.String? shop,
     $1.Timestamp? warrantyUntil,
+    $core.bool? defaultForNewDives,
   }) {
     final result = create();
     if (id != null) result.id = id;
@@ -48,6 +49,8 @@ class Equipment extends $pb.GeneratedMessage {
     if (purchasePrice != null) result.purchasePrice = purchasePrice;
     if (shop != null) result.shop = shop;
     if (warrantyUntil != null) result.warrantyUntil = warrantyUntil;
+    if (defaultForNewDives != null)
+      result.defaultForNewDives = defaultForNewDives;
     return result;
   }
 
@@ -80,6 +83,7 @@ class Equipment extends $pb.GeneratedMessage {
     ..aOS(11, _omitFieldNames ? '' : 'shop')
     ..aOM<$1.Timestamp>(12, _omitFieldNames ? '' : 'warrantyUntil',
         subBuilder: $1.Timestamp.create)
+    ..aOB(13, _omitFieldNames ? '' : 'defaultForNewDives')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -215,6 +219,15 @@ class Equipment extends $pb.GeneratedMessage {
   void clearWarrantyUntil() => $_clearField(12);
   @$pb.TagNumber(12)
   $1.Timestamp ensureWarrantyUntil() => $_ensure(11);
+
+  @$pb.TagNumber(13)
+  $core.bool get defaultForNewDives => $_getBF(12);
+  @$pb.TagNumber(13)
+  set defaultForNewDives($core.bool value) => $_setBool(12, value);
+  @$pb.TagNumber(13)
+  $core.bool hasDefaultForNewDives() => $_has(12);
+  @$pb.TagNumber(13)
+  void clearDefaultForNewDives() => $_clearField(13);
 }
 
 const $core.bool _omitFieldNames =

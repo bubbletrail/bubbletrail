@@ -382,6 +382,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     final defaultBackgas = await _store.cylinders.getDefaultForBackgas();
     final defaultDeepDeco = await _store.cylinders.getDefaultForDeepDeco();
     final defaultShallowDeco = await _store.cylinders.getDefaultForShallowDeco();
+    final defaultEquipment = await _store.equipment.getDefaultsForNewDives();
 
     // Sort dives by time; number them; assign default cylinders; insert.
 
@@ -405,6 +406,10 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
             cyl.cylinderId = defaultBackgas.id;
           }
         }
+      }
+
+      if (defaultEquipment.isNotEmpty) {
+        d.equipment.addAll(defaultEquipment);
       }
     }
 

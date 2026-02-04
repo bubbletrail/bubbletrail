@@ -100,7 +100,8 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
         case _NewDive():
           final n = await _store.dives.nextDiveNo;
           final t = Timestamp.fromDateTime(DateTime.now());
-          emit(DiveDetailsLoaded(Dive(number: n, start: t)..freeze()));
+          final defaultEquipment = await _store.equipment.getDefaultsForNewDives();
+          emit(DiveDetailsLoaded(Dive(number: n, start: t, equipment: defaultEquipment)..freeze()));
         case _LoadDive():
           await _onLoadDive(event, emit);
         case _Close():

@@ -59,6 +59,13 @@ const Equipment$json = {
       '6': '.google.protobuf.Timestamp',
       '10': 'warrantyUntil'
     },
+    {
+      '1': 'default_for_new_dives',
+      '3': 13,
+      '4': 1,
+      '5': 8,
+      '10': 'defaultForNewDives'
+    },
   ],
 };
 
@@ -71,4 +78,5 @@ final $typed_data.Uint8List equipmentDescriptor = $convert.base64Decode(
     'cHJvdG9idWYuVGltZXN0YW1wUgtsYXN0U2VydmljZRI/Cg1wdXJjaGFzZV9kYXRlGAkgASgLMh'
     'ouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIMcHVyY2hhc2VEYXRlEiUKDnB1cmNoYXNlX3By'
     'aWNlGAogASgBUg1wdXJjaGFzZVByaWNlEhIKBHNob3AYCyABKAlSBHNob3ASQQoOd2FycmFudH'
-    'lfdW50aWwYDCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUg13YXJyYW50eVVudGls');
+    'lfdW50aWwYDCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUg13YXJyYW50eVVudGls'
+    'EjEKFWRlZmF1bHRfZm9yX25ld19kaXZlcxgNIAEoCFISZGVmYXVsdEZvck5ld0RpdmVz');

@@ -30,6 +30,7 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
   DateTime? _purchaseDate;
   DateTime? _lastService;
   DateTime? _warrantyUntil;
+  bool _defaultForNewDives = false;
 
   static const _equipmentTypes = [
     'BCD',
@@ -68,6 +69,7 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
     _purchaseDate = _originalEquipment.hasPurchaseDate() ? _originalEquipment.purchaseDate.toDateTime() : null;
     _lastService = _originalEquipment.hasLastService() ? _originalEquipment.lastService.toDateTime() : null;
     _warrantyUntil = _originalEquipment.hasWarrantyUntil() ? _originalEquipment.warrantyUntil.toDateTime() : null;
+    _defaultForNewDives = _originalEquipment.defaultForNewDives;
   }
 
   @override
@@ -101,6 +103,7 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
       shop: shop.isEmpty ? null : shop,
       warrantyUntil: _warrantyUntil != null ? proto.Timestamp.fromDateTime(_warrantyUntil!) : null,
       lastService: _lastService != null ? proto.Timestamp.fromDateTime(_lastService!) : null,
+      defaultForNewDives: _defaultForNewDives,
     );
 
     context.read<EquipmentDetailsBloc>().add(EquipmentDetailsEvent.updateAndClose(updatedEquipment));
@@ -227,6 +230,11 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
                   ],
                 ),
                 _buildDateField('Last Service', _lastService, _selectLastService, () => setState(() => _lastService = null)),
+                SwitchListTile(
+                  title: const Text('Add to new dives by default'),
+                  value: _defaultForNewDives,
+                  onChanged: (v) => setState(() => _defaultForNewDives = v),
+                ),
               ],
             ),
           ),
