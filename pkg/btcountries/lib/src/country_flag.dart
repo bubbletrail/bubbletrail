@@ -19,7 +19,7 @@ class _CountryFlag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final asset = countryFlagAsset(code);
+    final asset = _countryFlagAsset(code);
     if (asset == null) {
       return SizedBox(width: size, height: size * 0.75, child: const Icon(Icons.public));
     }
@@ -35,4 +35,14 @@ class _CountryFlag extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Get the flag asset path for a country code.
+/// Returns null if not a valid code.
+String? _countryFlagAsset(String codeOrName) {
+  final upper = codeOrName.toUpperCase();
+  if (byCode.containsKey(upper)) {
+    return 'assets/flags/${upper.toLowerCase()}.png';
+  }
+  return null;
 }

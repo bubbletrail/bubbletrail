@@ -261,8 +261,8 @@ const countries = <Country>[
 ];
 
 // Maps for quick lookup
-final _byCode = {for (final c in countries) c.code: c};
-final _byNameLower = {for (final c in countries) c.name.toLowerCase(): c};
+final byCode = {for (final c in countries) c.code: c};
+final byNameLower = {for (final c in countries) c.name.toLowerCase(): c};
 
 // Alternative names/spellings that map to standard codes
 const _aliases = <String, String>{
@@ -337,14 +337,14 @@ const _aliases = <String, String>{
 };
 
 /// Look up a country by its ISO code
-Country? countryByCode(String code) => _byCode[code.toUpperCase()];
+Country? countryByCode(String code) => byCode[code.toUpperCase()];
 
 /// Get the display name for a country code or freetext value.
 /// If it's a valid code, returns the country name.
 /// Otherwise returns the input as-is (for legacy freetext values).
 String countryDisplayName(String codeOrName) {
   if (codeOrName.isEmpty) return '';
-  final country = _byCode[codeOrName.toUpperCase()];
+  final country = byCode[codeOrName.toUpperCase()];
   if (country != null) return country.name;
   return codeOrName;
 }
@@ -358,10 +358,10 @@ String? matchCountryCode(String input) {
   final lower = input.toLowerCase();
 
   // Direct code match
-  if (_byCode.containsKey(upper)) return upper;
+  if (byCode.containsKey(upper)) return upper;
 
   // Exact name match
-  final byName = _byNameLower[lower];
+  final byName = byNameLower[lower];
   if (byName != null) return byName.code;
 
   // Alias match
@@ -369,26 +369,5 @@ String? matchCountryCode(String input) {
   if (alias != null) return alias;
 
   // No match
-  return null;
-}
-
-/// Normalize a country value: if it matches a known country, return the code.
-/// Otherwise return the original value (for legacy freetext).
-String normalizeCountry(String input) {
-  if (input.isEmpty) return '';
-  final code = matchCountryCode(input);
-  return code ?? input;
-}
-
-/// Check if a value is a valid ISO country code
-bool isCountryCode(String value) => _byCode.containsKey(value.toUpperCase());
-
-/// Get the flag asset path for a country code.
-/// Returns null if not a valid code.
-String? countryFlagAsset(String codeOrName) {
-  final upper = codeOrName.toUpperCase();
-  if (_byCode.containsKey(upper)) {
-    return 'assets/flags/${upper.toLowerCase()}.png';
-  }
   return null;
 }
