@@ -72,7 +72,7 @@ class _CountryPickerDialogState extends State<_CountryPickerDialog> {
                       leading: const Icon(Icons.close),
                       title: Text(widget.noneOption!),
                       selected: widget.selectedCode == null,
-                      onTap: () => Navigator.of(context).pop(null),
+                      onTap: () => Navigator.of(context).pop(''),
                     );
                   }
                   final country = _filteredCountries[widget.noneOption != null ? index - 1 : index];

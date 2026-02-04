@@ -5,7 +5,7 @@ class CountryFlag extends StatelessWidget {
   final String code;
   final double size;
 
-  const CountryFlag({super.key, required this.code, this.size = 24});
+  const CountryFlag({super.key, required this.code, this.size = 32});
 
   @override
   Widget build(BuildContext context) => _CountryFlag(code: code, size: size);
@@ -23,12 +23,16 @@ class _CountryFlag extends StatelessWidget {
     if (asset == null) {
       return SizedBox(width: size, height: size * 0.75, child: const Icon(Icons.public));
     }
-    return Image(
-      image: AssetImage(asset, package: 'btcountries'),
-      width: size,
-      height: size * 0.75,
-      fit: .contain,
-      errorBuilder: (context, error, stack) => Icon(Icons.flag_outlined, size: size),
+    return Container(
+      decoration: BoxDecoration(borderRadius: .circular(4)),
+      clipBehavior: .antiAlias,
+      child: Image(
+        image: AssetImage(asset, package: 'btcountries'),
+        width: size,
+        height: size * 0.75,
+        fit: .contain,
+        errorBuilder: (context, error, stack) => Icon(Icons.flag_outlined, size: size),
+      ),
     );
   }
 }

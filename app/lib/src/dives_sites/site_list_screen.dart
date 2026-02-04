@@ -10,7 +10,6 @@ import '../app_theme.dart';
 import '../common/common.dart';
 import 'dive_list_bloc.dart';
 import 'site_grouping.dart';
-import 'site_list_item_card.dart';
 
 /// Breakpoint width for switching between card (narrow) and table (wide) layouts.
 const double _narrowLayoutBreakpoint = 600;
@@ -132,7 +131,6 @@ class _CountryExpansionTile extends StatelessWidget {
     final displayName = SiteHierarchy.countryDisplayNameFor(country);
     final flagAsset = SiteHierarchy.countryFlagAssetFor(country);
 
-    // Calculate aggregate dive count for the country
     int countryDiveCount = 0;
     for (final location in locations) {
       for (final site in hierarchy.sitesFor(country, location)) {
@@ -140,16 +138,17 @@ class _CountryExpansionTile extends StatelessWidget {
       }
     }
 
-    final children = [
-      for (final location in locations)
-        _LocationExpansionTile(country: country, location: location, hierarchy: hierarchy, diveCountBySiteId: diveCountBySiteId, theme: theme),
-    ];
-
     return ExpansionTile(
-      leading: flagAsset != null ? CountryFlag(code: country, size: 32) : const Icon(Icons.public),
-      title: Text(displayName, style: const TextStyle(fontWeight: .bold)),
-      subtitle: Text('$countryDiveCount ${countryDiveCount == 1 ? 'dive' : 'dives'}', style: theme.textTheme.bodySmall),
-      children: children,
+      leading: flagAsset != null ? CountryFlag(code: country) : const Icon(Icons.public),
+      title: Text(displayName),
+      subtitle: Text('$countryDiveCount ${countryDiveCount == 1 ? 'dive' : 'dives'}'),
+      children: [
+        for (final location in locations)
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: _LocationExpansionTile(country: country, location: location, hierarchy: hierarchy, diveCountBySiteId: diveCountBySiteId, theme: theme),
+          ),
+      ],
     );
   }
 }
@@ -174,20 +173,23 @@ class _LocationExpansionTile extends StatelessWidget {
       locationDiveCount += diveCountBySiteId[site.id] ?? 0;
     }
 
-    return Padding(
-      padding: const .only(left: 16),
-      child: ExpansionTile(
-        leading: const Icon(Icons.map_outlined, size: 20),
-        title: Text(displayName),
-        subtitle: Text('$locationDiveCount ${locationDiveCount == 1 ? 'dive' : 'dives'}', style: theme.textTheme.bodySmall),
-        children: [
-          for (final site in sites)
-            Padding(
-              padding: const .only(left: 16),
-              child: SiteListItemCard(site: site, diveCount: diveCountBySiteId[site.id] ?? 0),
+    return ExpansionTile(
+      leading: const Icon(Icons.map_outlined),
+      title: Text(displayName),
+      subtitle: Text('$locationDiveCount ${locationDiveCount == 1 ? 'dive' : 'dives'}'),
+      children: [
+        for (final site in sites)
+          Padding(
+            padding: const .only(left: 16),
+            child: ListTile(
+              leading: const Icon(Icons.place_outlined),
+              title: Text(site.name),
+              subtitle: Text('${diveCountBySiteId[site.id]} ${diveCountBySiteId[site.id] == 1 ? 'dive' : 'dives'}'),
+              trailing: Icon(Icons.chevron_right),
+              onTap: () => context.goNamed(AppRouteName.sitesDetails, pathParameters: {'siteID': site.id}),
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 }

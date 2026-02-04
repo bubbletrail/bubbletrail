@@ -5,10 +5,7 @@ import 'package:flutter/material.dart';
 import '../dives_sites/site_grouping.dart';
 import 'dialogs.dart';
 
-/// Shows a hierarchical dialog for selecting a dive site.
-///
-/// Sites are grouped by country, then by location. The dialog auto-expands
-/// to show the currently selected site if one is provided.
+// Shows a hierarchical dialog for selecting a dive site.
 Future<SelectionResult<Site>> showHierarchicalSiteSelectionDialog({
   required BuildContext context,
   required List<Site> sites,
@@ -110,7 +107,7 @@ class _HierarchicalSiteSelectionDialogState extends State<_HierarchicalSiteSelec
                   ],
                 )
               : Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
-          title: Text(displayName, style: const TextStyle(fontWeight: .bold)),
+          title: Text(displayName),
           onTap: () {
             setState(() {
               if (isExpanded) {
@@ -140,9 +137,8 @@ class _HierarchicalSiteSelectionDialogState extends State<_HierarchicalSiteSelec
       crossAxisAlignment: .start,
       children: [
         ListTile(
-          leading: Icon(isExpanded ? Icons.expand_less : Icons.expand_more, size: 20),
-          title: Text(displayName, style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
-          dense: true,
+          leading: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
+          title: Text(displayName),
           onTap: () {
             setState(() {
               if (isExpanded) {
@@ -166,7 +162,7 @@ class _HierarchicalSiteSelectionDialogState extends State<_HierarchicalSiteSelec
     final isSelected = widget.selectedSite?.id == site.id;
 
     return ListTile(
-      leading: Icon(Icons.location_on_outlined, size: 20, color: isSelected ? theme.colorScheme.primary : null),
+      leading: Icon(Icons.location_on_outlined, color: isSelected ? theme.colorScheme.primary : null),
       title: Text(site.name),
       selected: isSelected,
       dense: true,
