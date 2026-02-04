@@ -21,24 +21,37 @@ class EquipmentListScreen extends StatelessWidget {
           }
 
           if (state is EquipmentListLoaded) {
-            final equipment = state.equipment;
+            final equipment = state.visibleEquipment;
+            final hasArchived = state.equipment.any((e) => e.archived);
 
-            if (equipment.isEmpty) {
+            if (state.equipment.isEmpty) {
               return const EmptyStateWidget(message: 'No equipment yet. Tap + to add one.', icon: Icons.inventory_2_outlined);
             }
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: equipment.length,
-              itemBuilder: (context, index) {
-                final item = equipment[index];
-                return Card(
-                  child: EquipmentListTile(
-                    equipment: item,
-                    onTap: (item) => context.goNamed(AppRouteName.equipmentDetails, pathParameters: {'equipmentID': item.id}),
+            return Column(
+              children: [
+                if (hasArchived)
+                  SwitchListTile(
+                    title: const Text('Show archived'),
+                    value: state.showArchived,
+                    onChanged: (_) => context.read<EquipmentListBloc>().add(EquipmentListEvent.toggleShowArchived()),
                   ),
-                );
-              },
+                Expanded(
+                  child: ListView.builder(
+                    padding: const .all(16),
+                    itemCount: equipment.length,
+                    itemBuilder: (context, index) {
+                      final item = equipment[index];
+                      return Card(
+                        child: EquipmentListTile(
+                          equipment: item,
+                          onTap: (item) => context.goNamed(AppRouteName.equipmentDetails, pathParameters: {'equipmentID': item.id}),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             );
           }
 

@@ -35,6 +35,7 @@ class Equipment extends $pb.GeneratedMessage {
     $core.String? shop,
     $1.Timestamp? warrantyUntil,
     $core.bool? defaultForNewDives,
+    $core.bool? archived,
   }) {
     final result = create();
     if (id != null) result.id = id;
@@ -51,6 +52,7 @@ class Equipment extends $pb.GeneratedMessage {
     if (warrantyUntil != null) result.warrantyUntil = warrantyUntil;
     if (defaultForNewDives != null)
       result.defaultForNewDives = defaultForNewDives;
+    if (archived != null) result.archived = archived;
     return result;
   }
 
@@ -84,6 +86,7 @@ class Equipment extends $pb.GeneratedMessage {
     ..aOM<$1.Timestamp>(12, _omitFieldNames ? '' : 'warrantyUntil',
         subBuilder: $1.Timestamp.create)
     ..aOB(13, _omitFieldNames ? '' : 'defaultForNewDives')
+    ..aOB(14, _omitFieldNames ? '' : 'archived')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -228,6 +231,15 @@ class Equipment extends $pb.GeneratedMessage {
   $core.bool hasDefaultForNewDives() => $_has(12);
   @$pb.TagNumber(13)
   void clearDefaultForNewDives() => $_clearField(13);
+
+  @$pb.TagNumber(14)
+  $core.bool get archived => $_getBF(13);
+  @$pb.TagNumber(14)
+  set archived($core.bool value) => $_setBool(13, value);
+  @$pb.TagNumber(14)
+  $core.bool hasArchived() => $_has(13);
+  @$pb.TagNumber(14)
+  void clearArchived() => $_clearField(14);
 }
 
 const $core.bool _omitFieldNames =

@@ -25,17 +25,21 @@ class EquipmentListLoading extends EquipmentListState {
 
 class EquipmentListLoaded extends EquipmentListState {
   final List<Equipment> equipment;
+  final bool showArchived;
 
-  const EquipmentListLoaded(this.equipment);
+  const EquipmentListLoaded(this.equipment, {this.showArchived = false});
+
+  List<Equipment> get visibleEquipment => showArchived ? equipment : equipment.where((e) => !e.archived).toList();
 
   @override
-  List<Object?> get props => [equipment];
+  List<Object?> get props => [equipment, showArchived];
 }
 
 abstract class EquipmentListEvent extends Equatable {
   const EquipmentListEvent();
 
   const factory EquipmentListEvent.importEquipment(String filePath) = _ImportEquipment;
+  const factory EquipmentListEvent.toggleShowArchived() = _ToggleShowArchived;
 
   @override
   List<Object?> get props => [];
@@ -63,6 +67,10 @@ class _LoadedEquipment extends EquipmentListEvent {
   List<Object?> get props => [equipment];
 }
 
+class _ToggleShowArchived extends EquipmentListEvent {
+  const _ToggleShowArchived();
+}
+
 class EquipmentListBloc extends Bloc<EquipmentListEvent, EquipmentListState> {
   final Store _store = StorageProvider.instance.store;
   VoidCallback? _equipmentListener;
@@ -71,6 +79,7 @@ class EquipmentListBloc extends Bloc<EquipmentListEvent, EquipmentListState> {
     on<_Init>(_onInit);
     on<_LoadedEquipment>(_onLoadedEquipment);
     on<_ImportEquipment>(_onImportEquipment);
+    on<_ToggleShowArchived>(_onToggleShowArchived);
     add(const _Init());
   }
 
@@ -85,7 +94,16 @@ class EquipmentListBloc extends Bloc<EquipmentListEvent, EquipmentListState> {
   }
 
   Future<void> _onLoadedEquipment(_LoadedEquipment event, Emitter<EquipmentListState> emit) async {
-    emit(EquipmentListLoaded(event.equipment));
+    final currentState = state;
+    final showArchived = currentState is EquipmentListLoaded ? currentState.showArchived : false;
+    emit(EquipmentListLoaded(event.equipment, showArchived: showArchived));
+  }
+
+  Future<void> _onToggleShowArchived(_ToggleShowArchived event, Emitter<EquipmentListState> emit) async {
+    final currentState = state;
+    if (currentState is EquipmentListLoaded) {
+      emit(EquipmentListLoaded(currentState.equipment, showArchived: !currentState.showArchived));
+    }
   }
 
   Future<void> _onImportEquipment(_ImportEquipment event, Emitter<EquipmentListState> emit) async {

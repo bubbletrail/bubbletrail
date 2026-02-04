@@ -11,13 +11,15 @@ class EquipmentListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return ListTile(
-      leading: EquipmentIcons.icon(EquipmentIcons.forType(equipment.type), color: Theme.of(context).colorScheme.onSurface, size: 32),
+      leading: EquipmentIcons.icon(EquipmentIcons.forType(equipment.type), color: cs.onSurface, size: 32),
       title: Row(
         spacing: 8,
         children: [
           Flexible(child: Text(equipmentTitle(equipment), style: Theme.of(context).textTheme.bodyMedium)),
-          if (equipment.defaultForNewDives) _DefaultBadge(),
+          if (equipment.defaultForNewDives) TextBadge(label: 'Default', backgroundColor: cs.primaryContainer, textColor: cs.onPrimaryContainer),
+          if (equipment.archived) TextBadge(label: 'Archived', backgroundColor: cs.surfaceContainerHighest, textColor: cs.onSurfaceVariant),
         ],
       ),
       subtitle: equipmentSubtitle(equipment) != null
@@ -56,18 +58,5 @@ class EquipmentListTile extends StatelessWidget {
       parts.add(item.type);
     }
     return parts.join(' \u2022 ');
-  }
-}
-
-class _DefaultBadge extends StatelessWidget {
-  const _DefaultBadge();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const .symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer, borderRadius: .circular(4)),
-      child: Text('Default', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onPrimaryContainer)),
-    );
   }
 }

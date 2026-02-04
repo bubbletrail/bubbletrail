@@ -21,4 +21,5 @@ message Equipment {
   string shop = 11;
   google.protobuf.Timestamp warranty_until = 12;
   bool default_for_new_dives = 13;
+  bool archived = 14;
 }

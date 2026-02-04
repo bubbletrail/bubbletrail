@@ -77,6 +77,6 @@ class EquipmentStore extends EntityStore<Equipment, InternalEquipmentList> {
 
   Future<List<Equipment>> getDefaultsForNewDives() async {
     final all = await getAll();
-    return all.where((e) => e.defaultForNewDives).toList();
+    return all.where((e) => e.defaultForNewDives && !e.archived).toList();
   }
 }

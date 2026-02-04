@@ -1,3 +1,4 @@
+export 'badge.dart';
 export 'colors.dart';
 export 'cylinder_tile.dart';
 export 'data_card_column.dart';

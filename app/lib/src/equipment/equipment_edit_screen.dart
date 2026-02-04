@@ -31,6 +31,7 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
   DateTime? _lastService;
   DateTime? _warrantyUntil;
   bool _defaultForNewDives = false;
+  bool _archived = false;
 
   static const _equipmentTypes = [
     'BCD',
@@ -70,6 +71,7 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
     _lastService = _originalEquipment.hasLastService() ? _originalEquipment.lastService.toDateTime() : null;
     _warrantyUntil = _originalEquipment.hasWarrantyUntil() ? _originalEquipment.warrantyUntil.toDateTime() : null;
     _defaultForNewDives = _originalEquipment.defaultForNewDives;
+    _archived = _originalEquipment.archived;
   }
 
   @override
@@ -104,6 +106,7 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
       warrantyUntil: _warrantyUntil != null ? proto.Timestamp.fromDateTime(_warrantyUntil!) : null,
       lastService: _lastService != null ? proto.Timestamp.fromDateTime(_lastService!) : null,
       defaultForNewDives: _defaultForNewDives,
+      archived: _archived,
     );
 
     context.read<EquipmentDetailsBloc>().add(EquipmentDetailsEvent.updateAndClose(updatedEquipment));
@@ -233,8 +236,9 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
                 SwitchListTile(
                   title: const Text('Add to new dives by default'),
                   value: _defaultForNewDives,
-                  onChanged: (v) => setState(() => _defaultForNewDives = v),
+                  onChanged: _archived ? null : (v) => setState(() => _defaultForNewDives = v),
                 ),
+                SwitchListTile(title: const Text('Archived'), value: _archived, onChanged: _defaultForNewDives ? null : (v) => setState(() => _archived = v)),
               ],
             ),
           ),
