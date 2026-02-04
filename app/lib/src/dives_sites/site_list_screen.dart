@@ -165,7 +165,6 @@ class _LocationExpansionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final sites = hierarchy.sitesFor(country, location);
 
-    // Calculate aggregate dive count for the location
     int locationDiveCount = 0;
     for (final site in sites) {
       locationDiveCount += diveCountBySiteId[site.id] ?? 0;
