@@ -150,14 +150,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       return;
     }
 
-    final result = await showSelectionDialog<Site>(
-      context: context,
-      title: 'Select dive site',
-      items: _availableSites,
-      selectedItem: _selectedSite,
-      noneOption: 'No site',
-      itemBuilder: (site) => ListTile(leading: const Icon(Icons.location_on_outlined), title: Text(site.name)),
-    );
+    final result = await showHierarchicalSiteSelectionDialog(context: context, sites: _availableSites, selectedSite: _selectedSite, noneOption: 'No site');
 
     if (!result.cancelled) {
       setState(() {

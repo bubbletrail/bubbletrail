@@ -23,7 +23,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
   late final Site _originalSite;
   late final bool _isNew;
   late final TextEditingController _nameController;
-  late final TextEditingController _countryController;
+  late String _countryCode;
   late final TextEditingController _locationController;
   late final TextEditingController _bodyOfWaterController;
   late final TextEditingController _difficultyController;
@@ -40,7 +40,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
     _originalSite = state.site;
     _isNew = _originalSite.id.isEmpty;
     _nameController = TextEditingController(text: _originalSite.name);
-    _countryController = TextEditingController(text: _originalSite.country);
+    _countryCode = normalizeCountry(_originalSite.country);
     _locationController = TextEditingController(text: _originalSite.location);
     _bodyOfWaterController = TextEditingController(text: _originalSite.bodyOfWater);
     _difficultyController = TextEditingController(text: _originalSite.difficulty);
@@ -56,7 +56,6 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
   @override
   void dispose() {
     _nameController.dispose();
-    _countryController.dispose();
     _locationController.dispose();
     _bodyOfWaterController.dispose();
     _difficultyController.dispose();
@@ -90,7 +89,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
       id: _originalSite.id,
       name: name,
       position: position,
-      country: _countryController.text.trim(),
+      country: _countryCode,
       location: _locationController.text.trim(),
       bodyOfWater: _bodyOfWaterController.text.trim(),
       difficulty: _difficultyController.text.trim(),
@@ -111,6 +110,16 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
       _latController.text = point.latitude.toStringAsFixed(6);
       _lonController.text = point.longitude.toStringAsFixed(6);
     });
+  }
+
+  Future<void> _selectCountry() async {
+    final result = await showCountryPickerDialog(context: context, selectedCode: isCountryCode(_countryCode) ? _countryCode : null, noneOption: 'No country');
+
+    if (!result.cancelled) {
+      setState(() {
+        _countryCode = result.value ?? '';
+      });
+    }
   }
 
   @override
@@ -144,10 +153,23 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
                   decoration: const InputDecoration(labelText: 'Name *', border: OutlineInputBorder()),
                   textCapitalization: .words,
                 ),
-                TextField(
-                  controller: _countryController,
-                  decoration: const InputDecoration(labelText: 'Country', border: OutlineInputBorder()),
-                  textCapitalization: .words,
+                InkWell(
+                  onTap: _selectCountry,
+                  child: InputDecorator(
+                    decoration: const InputDecoration(labelText: 'Country', border: OutlineInputBorder()),
+                    child: Row(
+                      children: [
+                        if (_countryCode.isNotEmpty && isCountryCode(_countryCode)) ...[CountryFlag(code: _countryCode), const SizedBox(width: 12)],
+                        Expanded(
+                          child: Text(
+                            _countryCode.isEmpty ? 'Select country' : countryDisplayName(_countryCode),
+                            style: _countryCode.isEmpty ? TextStyle(color: Theme.of(context).hintColor) : null,
+                          ),
+                        ),
+                        const Icon(Icons.arrow_drop_down),
+                      ],
+                    ),
+                  ),
                 ),
                 TextField(
                   controller: _locationController,
