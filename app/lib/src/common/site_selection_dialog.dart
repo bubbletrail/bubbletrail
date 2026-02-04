@@ -26,39 +26,15 @@ Future<SelectionResult<Site>> showHierarchicalSiteSelectionDialog({
   return .selected(result as Site?);
 }
 
-class _HierarchicalSiteSelectionDialog extends StatefulWidget {
+class _HierarchicalSiteSelectionDialog extends StatelessWidget {
   final List<Site> sites;
   final Site? selectedSite;
   final String? noneOption;
   final Object cancelledSentinel;
+  final SiteHierarchy _hierarchy;
 
-  const _HierarchicalSiteSelectionDialog({required this.sites, required this.selectedSite, required this.noneOption, required this.cancelledSentinel});
-
-  @override
-  State<_HierarchicalSiteSelectionDialog> createState() => _HierarchicalSiteSelectionDialogState();
-}
-
-class _HierarchicalSiteSelectionDialogState extends State<_HierarchicalSiteSelectionDialog> {
-  late final SiteHierarchy _hierarchy;
-  late final Set<String> _expandedCountries;
-  late final Set<(String, String)> _expandedLocations;
-
-  @override
-  void initState() {
-    super.initState();
-    _hierarchy = SiteHierarchy(widget.sites);
-    _expandedCountries = {};
-    _expandedLocations = {};
-
-    // Auto-expand to show currently selected site
-    if (widget.selectedSite != null) {
-      final found = _hierarchy.findSite(widget.selectedSite!);
-      if (found != null) {
-        _expandedCountries.add(found.$1);
-        _expandedLocations.add(found);
-      }
-    }
-  }
+  _HierarchicalSiteSelectionDialog({required this.sites, required this.selectedSite, required this.noneOption, required this.cancelledSentinel})
+    : _hierarchy = SiteHierarchy(sites);
 
   @override
   Widget build(BuildContext context) {
@@ -69,103 +45,58 @@ class _HierarchicalSiteSelectionDialogState extends State<_HierarchicalSiteSelec
       title: const Text('Select dive site'),
       content: SizedBox(
         width: .maxFinite,
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            if (widget.noneOption != null)
-              ListTile(
-                leading: const Icon(Icons.close),
-                title: Text(widget.noneOption!),
-                selected: widget.selectedSite == null,
-                onTap: () => Navigator.of(context).pop(null),
-              ),
-            ...countries.map((country) => _buildCountryTile(country, theme)),
-          ],
+        child: Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              if (noneOption != null)
+                ListTile(
+                  leading: const Icon(Icons.close),
+                  title: Text(noneOption!),
+                  selected: selectedSite == null,
+                  onTap: () => Navigator.of(context).pop(null),
+                ),
+              ...countries.map((country) => _buildCountryTile(context, country, theme)),
+            ],
+          ),
         ),
       ),
-      actions: [TextButton(onPressed: () => Navigator.of(context).pop(widget.cancelledSentinel), child: const Text('Cancel'))],
+      actions: [TextButton(onPressed: () => Navigator.of(context).pop(cancelledSentinel), child: const Text('Cancel'))],
     );
   }
 
-  Widget _buildCountryTile(String country, ThemeData theme) {
-    final isExpanded = _expandedCountries.contains(country);
+  Widget _buildCountryTile(BuildContext context, String country, ThemeData theme) {
     final locations = _hierarchy.locationsFor(country);
     final displayName = SiteHierarchy.countryDisplayNameFor(country);
-    final flagAsset = SiteHierarchy.countryFlagAssetFor(country);
 
-    return Column(
-      crossAxisAlignment: .start,
-      children: [
-        ListTile(
-          leading: flagAsset != null
-              ? Row(
-                  mainAxisSize: .min,
-                  children: [
-                    Icon(isExpanded ? Icons.expand_less : Icons.expand_more, size: 20),
-                    const SizedBox(width: 4),
-                    CountryFlag(code: country, size: 24),
-                  ],
-                )
-              : Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
-          title: Text(displayName),
-          onTap: () {
-            setState(() {
-              if (isExpanded) {
-                _expandedCountries.remove(country);
-              } else {
-                _expandedCountries.add(country);
-              }
-            });
-          },
-        ),
-        if (isExpanded)
-          Padding(
-            padding: const .only(left: 16),
-            child: Column(children: locations.map((location) => _buildLocationTile(country, location, theme)).toList()),
-          ),
-      ],
+    return ExpansionTile(
+      leading: CountryFlag(code: country),
+      title: Text(displayName),
+      initiallyExpanded: selectedSite?.country == country,
+      children: locations
+          .map((location) => Padding(padding: const EdgeInsets.only(left: 16.0), child: _buildLocationTile(context, country, location, theme)))
+          .toList(),
     );
   }
 
-  Widget _buildLocationTile(String country, String location, ThemeData theme) {
-    final key = (country, location);
-    final isExpanded = _expandedLocations.contains(key);
+  Widget _buildLocationTile(BuildContext context, String country, String location, ThemeData theme) {
     final sites = _hierarchy.sitesFor(country, location);
     final displayName = SiteHierarchy.locationDisplayNameFor(location);
 
-    return Column(
-      crossAxisAlignment: .start,
-      children: [
-        ListTile(
-          leading: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
-          title: Text(displayName),
-          onTap: () {
-            setState(() {
-              if (isExpanded) {
-                _expandedLocations.remove(key);
-              } else {
-                _expandedLocations.add(key);
-              }
-            });
-          },
-        ),
-        if (isExpanded)
-          Padding(
-            padding: const .only(left: 16),
-            child: Column(children: sites.map((site) => _buildSiteTile(site, theme)).toList()),
-          ),
-      ],
+    return ExpansionTile(
+      leading: Icon(Icons.map_outlined),
+      title: Text(displayName),
+      initiallyExpanded: selectedSite?.country == country && selectedSite?.location == location,
+      children: sites.map((site) => Padding(padding: const EdgeInsets.only(left: 16.0), child: _buildSiteTile(context, site, theme))).toList(),
     );
   }
 
-  Widget _buildSiteTile(Site site, ThemeData theme) {
-    final isSelected = widget.selectedSite?.id == site.id;
-
+  Widget _buildSiteTile(BuildContext context, Site site, ThemeData theme) {
     return ListTile(
-      leading: Icon(Icons.location_on_outlined, color: isSelected ? theme.colorScheme.primary : null),
+      leading: Icon(Icons.location_on_outlined),
       title: Text(site.name),
-      selected: isSelected,
-      dense: true,
+      selected: selectedSite?.id == site.id,
       onTap: () => Navigator.of(context).pop(site),
     );
   }
