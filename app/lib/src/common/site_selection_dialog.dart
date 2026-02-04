@@ -6,7 +6,7 @@ import '../dives_sites/site_grouping.dart';
 import 'dialogs.dart';
 
 // Shows a hierarchical dialog for selecting a dive site.
-Future<SelectionResult<Site>> showHierarchicalSiteSelectionDialog({
+Future<SelectionResult<Site>> showSiteSelectionDialog({
   required BuildContext context,
   required List<Site> sites,
   Site? selectedSite,
@@ -16,24 +16,23 @@ Future<SelectionResult<Site>> showHierarchicalSiteSelectionDialog({
 
   final result = await showDialog<Object?>(
     context: context,
-    builder: (dialogContext) =>
-        _HierarchicalSiteSelectionDialog(sites: sites, selectedSite: selectedSite, noneOption: noneOption, cancelledSentinel: cancelledSentinel),
+    builder: (dialogContext) => _SiteSelectionDialog(sites: sites, selectedSite: selectedSite, noneOption: noneOption, cancelledSentinel: cancelledSentinel),
   );
 
-  if (identical(result, cancelledSentinel)) {
+  if (identical(result, cancelledSentinel) || result == null) {
     return const SelectionResult.cancelled();
   }
   return .selected(result as Site?);
 }
 
-class _HierarchicalSiteSelectionDialog extends StatelessWidget {
+class _SiteSelectionDialog extends StatelessWidget {
   final List<Site> sites;
   final Site? selectedSite;
   final String? noneOption;
   final Object cancelledSentinel;
   final SiteHierarchy _hierarchy;
 
-  _HierarchicalSiteSelectionDialog({required this.sites, required this.selectedSite, required this.noneOption, required this.cancelledSentinel})
+  _SiteSelectionDialog({required this.sites, required this.selectedSite, required this.noneOption, required this.cancelledSentinel})
     : _hierarchy = SiteHierarchy(sites);
 
   @override
@@ -68,7 +67,7 @@ class _HierarchicalSiteSelectionDialog extends StatelessWidget {
 
   Widget _buildCountryTile(BuildContext context, String country, ThemeData theme) {
     final locations = _hierarchy.locationsFor(country);
-    final displayName = SiteHierarchy.countryDisplayNameFor(country);
+    final displayName = countryDisplayName(country);
 
     return ExpansionTile(
       leading: CountryFlag(code: country),
@@ -82,11 +81,10 @@ class _HierarchicalSiteSelectionDialog extends StatelessWidget {
 
   Widget _buildLocationTile(BuildContext context, String country, String location, ThemeData theme) {
     final sites = _hierarchy.sitesFor(country, location);
-    final displayName = SiteHierarchy.locationDisplayNameFor(location);
 
     return ExpansionTile(
       leading: Icon(Icons.map_outlined),
-      title: Text(displayName),
+      title: Text(location),
       initiallyExpanded: selectedSite?.country == country && selectedSite?.location == location,
       children: sites.map((site) => Padding(padding: const EdgeInsets.only(left: 16.0), child: _buildSiteTile(context, site, theme))).toList(),
     );

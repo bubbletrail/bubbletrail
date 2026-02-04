@@ -9,7 +9,7 @@ import '../app_routes.dart';
 import '../app_theme.dart';
 import '../common/common.dart';
 import 'dive_list_bloc.dart';
-import 'site_grouping.dart';
+import '../common/site_grouping.dart';
 
 /// Breakpoint width for switching between card (narrow) and table (wide) layouts.
 const double _narrowLayoutBreakpoint = 600;
@@ -128,8 +128,7 @@ class _CountryExpansionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locations = hierarchy.locationsFor(country);
-    final displayName = SiteHierarchy.countryDisplayNameFor(country);
-    final flagAsset = SiteHierarchy.countryFlagAssetFor(country);
+    final displayName = countryDisplayName(country);
 
     int countryDiveCount = 0;
     for (final location in locations) {
@@ -139,7 +138,7 @@ class _CountryExpansionTile extends StatelessWidget {
     }
 
     return ExpansionTile(
-      leading: flagAsset != null ? CountryFlag(code: country) : const Icon(Icons.public),
+      leading: CountryFlag(code: country),
       title: Text(displayName),
       subtitle: Text('$countryDiveCount ${countryDiveCount == 1 ? 'dive' : 'dives'}'),
       children: [
@@ -165,7 +164,6 @@ class _LocationExpansionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sites = hierarchy.sitesFor(country, location);
-    final displayName = SiteHierarchy.locationDisplayNameFor(location);
 
     // Calculate aggregate dive count for the location
     int locationDiveCount = 0;
@@ -175,7 +173,7 @@ class _LocationExpansionTile extends StatelessWidget {
 
     return ExpansionTile(
       leading: const Icon(Icons.map_outlined),
-      title: Text(displayName),
+      title: Text(location),
       subtitle: Text('$locationDiveCount ${locationDiveCount == 1 ? 'dive' : 'dives'}'),
       children: [
         for (final site in sites)
