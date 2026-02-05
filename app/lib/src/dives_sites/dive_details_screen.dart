@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:btcountries/btcountries.dart';
 import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart' hide DataColumn;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -386,7 +387,7 @@ class _SiteCard extends StatelessWidget {
                 runSpacing: 8,
                 crossAxisAlignment: .center,
                 children: [
-                  if (site.hasCountry()) LabeledChip(label: 'Country', child: Text(site.country)),
+                  if (site.hasCountry()) LabeledChip(label: 'Country', child: Text(countryDisplayName(site.country))),
                   if (site.hasCountry()) LabeledChip(label: 'Location', child: Text(site.location)),
                   if (site.bodyOfWater.isNotEmpty) LabeledChip(label: 'Body of water', child: Text(site.bodyOfWater)),
                   if (site.hasPosition())

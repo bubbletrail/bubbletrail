@@ -1,3 +1,4 @@
+import 'package:btcountries/btcountries.dart';
 import 'package:btproto/btproto.dart';
 
 import 'package:flutter/material.dart';
@@ -68,7 +69,7 @@ class SiteDetailsScreen extends StatelessWidget {
                       padding: const .all(16.0),
                       child: DataCardColumn(
                         children: [
-                          if (site.country.isNotEmpty) ColumnRow(label: 'Country', child: Text(site.country)),
+                          if (site.country.isNotEmpty) ColumnRow(label: 'Country', child: Text(countryDisplayName(site.country))),
                           if (site.location.isNotEmpty) ColumnRow(label: 'Location', child: Text(site.location)),
                           if (site.bodyOfWater.isNotEmpty) ColumnRow(label: 'Body of Water', child: Text(site.bodyOfWater)),
                           if (site.hasPosition())

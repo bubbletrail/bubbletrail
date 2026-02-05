@@ -96,6 +96,313 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
   }
 
   @override
+  Widget build(BuildContext context) {
+    final canEditDepthDuration = dive.logs.isEmpty || dive.logs.first.isSynthetic;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          _saveAndPop();
+        }
+      },
+      child: ScreenScaffold(
+        title: Text('Edit dive #${dive.number}'),
+        actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes')],
+        body: SingleChildScrollView(
+          padding: const .all(16.0),
+          child: Column(
+            crossAxisAlignment: .start,
+            spacing: 16,
+            children: [
+              Row(
+                spacing: 16,
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: _selectDate,
+                      child: InputDecorator(
+                        decoration: const InputDecoration(labelText: 'Date', border: OutlineInputBorder(), suffixIcon: Icon(Icons.calendar_today)),
+                        child: DateText(_selectedDateTime),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: InkWell(
+                      onTap: _selectTime,
+                      child: InputDecorator(
+                        decoration: const InputDecoration(labelText: 'Time', border: OutlineInputBorder(), suffixIcon: Icon(Icons.access_time)),
+                        child: TimeText(_selectedDateTime),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (canEditDepthDuration)
+                Row(
+                  spacing: 16,
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: _selectDuration,
+                        child: InputDecorator(
+                          decoration: const InputDecoration(labelText: 'Duration', border: OutlineInputBorder(), suffixIcon: Icon(Icons.timer)),
+                          child: Text(_durationFormatted),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: DepthEditor(
+                        label: 'Max depth',
+                        initialValue: _maxDepth,
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() {
+                              _maxDepth = val;
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              Builder(
+                builder: (context) {
+                  return InkWell(
+                    onTap: _selectSite,
+                    child: InputDecorator(
+                      decoration: const InputDecoration(labelText: 'Dive site', border: OutlineInputBorder(), suffixIcon: Icon(Icons.location_on_outlined)),
+                      child: Text(
+                        _selectedSite?.name ?? 'No site selected',
+                        style: _selectedSite == null ? TextStyle(color: Theme.of(context).hintColor) : null,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              // Cylinders section
+              Column(
+                crossAxisAlignment: .start,
+                children: [
+                  Row(
+                    mainAxisAlignment: .spaceBetween,
+                    children: [
+                      Text('Cylinders', style: Theme.of(context).textTheme.titleMedium),
+                      IconButton(icon: const Icon(Icons.add), onPressed: _addCylinder, tooltip: 'Add cylinder'),
+                    ],
+                  ),
+                  if (_cylinders.isEmpty)
+                    Padding(
+                      padding: const .symmetric(vertical: 8),
+                      child: Text('No cylinders. Tap + to add one.', style: TextStyle(color: Theme.of(context).hintColor)),
+                    )
+                  else
+                    ...List.generate(_cylinders.length, (index) {
+                      final cyl = _cylinders[index];
+                      final gasChangesForCyl = _gasChanges.where((gc) => gc.cylinderIndex == index).toList();
+
+                      return Card(
+                        margin: const .only(bottom: 8),
+                        child: Padding(
+                          padding: const .all(12),
+                          child: Column(
+                            crossAxisAlignment: .start,
+                            children: [
+                              CylinderTile(
+                                index: index,
+                                description: cyl.cylinder?.description ?? 'Cylinder ${index + 1}',
+                                oxygenPct: cyl.oxygen,
+                                heliumPct: cyl.helium,
+                                beginPressure: cyl.beginPressure ?? 0,
+                                endPressure: cyl.endPressure ?? 0,
+                                trailing: Row(
+                                  mainAxisSize: .min,
+                                  children: [
+                                    IconButton(icon: const Icon(Icons.edit, size: 18), onPressed: () => _editCylinderGas(index), tooltip: 'Edit gas mix'),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline, size: 18),
+                                      onPressed: () => _removeCylinder(index),
+                                      tooltip: 'Remove cylinder',
+                                    ),
+                                  ],
+                                ),
+                                contentPadding: .zero,
+                              ),
+                              const SizedBox(height: 8),
+                              Text('Gas changes:', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: .bold)),
+                              ...gasChangesForCyl.map((gc) {
+                                final gcIndex = _gasChanges.indexOf(gc);
+                                return Padding(
+                                  padding: const .only(left: 8, top: 4),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          gc.timeSeconds == 0 ? '• Start of dive' : '• ${gc.timeFormatted} switch to this cylinder',
+                                          style: Theme.of(context).textTheme.bodySmall,
+                                        ),
+                                      ),
+                                      InkWell(onTap: () => _removeGasChange(gcIndex), child: const Icon(Icons.close, size: 14)),
+                                    ],
+                                  ),
+                                );
+                              }),
+                              const SizedBox(height: 4),
+                              TextButton.icon(
+                                onPressed: () => _addGasChange(index),
+                                icon: const Icon(Icons.add, size: 14),
+                                label: const Text('Add gas change'),
+                                style: TextButton.styleFrom(padding: .zero, minimumSize: const Size(0, 32)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                ],
+              ),
+              // Weight systems section
+              Column(
+                crossAxisAlignment: .start,
+                children: [
+                  Row(
+                    mainAxisAlignment: .spaceBetween,
+                    children: [
+                      Text('Weight Systems', style: Theme.of(context).textTheme.titleMedium),
+                      IconButton(icon: const Icon(Icons.add), onPressed: _addWeightsystem, tooltip: 'Add weight'),
+                    ],
+                  ),
+                  if (_weightsystems.isEmpty)
+                    Padding(
+                      padding: const .symmetric(vertical: 8),
+                      child: Text('No weight systems. Tap + to add one.', style: TextStyle(color: Theme.of(context).hintColor)),
+                    )
+                  else
+                    ...List.generate(_weightsystems.length, (index) {
+                      final ws = _weightsystems[index];
+                      return Card(
+                        margin: const .only(bottom: 8),
+                        child: Padding(
+                          padding: const .all(12),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: .start,
+                                  children: [
+                                    Text(ws.description.isNotEmpty ? ws.description : 'Weight ${index + 1}', style: Theme.of(context).textTheme.titleSmall),
+                                    if (ws.weight != null) WeightText(ws.weight!, style: Theme.of(context).textTheme.bodySmall),
+                                  ],
+                                ),
+                              ),
+                              IconButton(icon: const Icon(Icons.edit, size: 18), onPressed: () => _editWeightsystem(index), tooltip: 'Edit'),
+                              IconButton(icon: const Icon(Icons.delete_outline, size: 18), onPressed: () => _removeWeightsystem(index), tooltip: 'Remove'),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                ],
+              ),
+              // Equipment section
+              Column(
+                crossAxisAlignment: .start,
+                children: [
+                  Row(
+                    mainAxisAlignment: .spaceBetween,
+                    children: [
+                      Text('Equipment', style: Theme.of(context).textTheme.titleMedium),
+                      IconButton(icon: const Icon(Icons.edit), onPressed: _selectEquipment, tooltip: 'Select equipment'),
+                    ],
+                  ),
+                  if (_selectedEquipment.isEmpty)
+                    Padding(
+                      padding: const .symmetric(vertical: 8),
+                      child: Text('No equipment selected', style: TextStyle(color: Theme.of(context).hintColor)),
+                    )
+                  else
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: _selectedEquipment
+                          .map(
+                            (e) => Chip(
+                              avatar: EquipmentIcons.icon(EquipmentIcons.forType(e.type), color: Theme.of(context).colorScheme.primary),
+                              label: Text(EquipmentListTile.equipmentTitle(e)),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: .start,
+                children: [
+                  Text('Rating', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: .generate(5, (index) {
+                      final starValue = index + 1;
+                      return IconButton(
+                        icon: Icon(_rating != null && starValue <= _rating! ? Icons.star : Icons.star_border, color: Colors.amber, size: 28),
+                        onPressed: () {
+                          setState(() {
+                            _rating = starValue == _rating ? null : starValue;
+                          });
+                        },
+                      );
+                    }),
+                  ),
+                ],
+              ),
+              Builder(
+                builder: (context) {
+                  return ChipsInputAutocomplete(
+                    controller: _tagsController,
+                    options: _availableTags,
+                    initialChips: dive.tags.toList(),
+                    decorationTextField: const InputDecoration(labelText: 'Tags', border: OutlineInputBorder()),
+                    addChipOnSelection: true,
+                    placeChipsSectionAbove: false,
+                    paddingInsideWidgetContainer: .zero,
+                    secondaryTheme: true,
+                  );
+                },
+              ),
+              TextField(
+                controller: _divemasterController,
+                decoration: const InputDecoration(labelText: 'Divemaster', border: OutlineInputBorder()),
+                textCapitalization: .words,
+              ),
+              Builder(
+                builder: (context) {
+                  return ChipsInputAutocomplete(
+                    controller: _buddiesController,
+                    options: _availableBuddies,
+                    initialChips: dive.buddies.toList(),
+                    decorationTextField: const InputDecoration(labelText: 'Buddies', border: OutlineInputBorder()),
+                    addChipOnSelection: true,
+                    placeChipsSectionAbove: false,
+                    paddingInsideWidgetContainer: .zero,
+                    secondaryTheme: true,
+                    createCharacters: [','],
+                  );
+                },
+              ),
+              TextField(
+                controller: _notesController,
+                decoration: const InputDecoration(labelText: 'Notes', border: OutlineInputBorder()),
+                maxLines: 6,
+                autocorrect: true,
+                textCapitalization: .sentences,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
   void dispose() {
     _divemasterController.dispose();
     _notesController.dispose();
@@ -475,313 +782,6 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
 
   void _cancel() {
     context.pop();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final canEditDepthDuration = dive.logs.isEmpty || dive.logs.first.isSynthetic;
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) {
-          _saveAndPop();
-        }
-      },
-      child: ScreenScaffold(
-        title: Text('Edit dive #${dive.number}'),
-        actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes')],
-        body: SingleChildScrollView(
-          padding: const .all(16.0),
-          child: Column(
-            crossAxisAlignment: .start,
-            spacing: 16,
-            children: [
-              Row(
-                spacing: 16,
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: _selectDate,
-                      child: InputDecorator(
-                        decoration: const InputDecoration(labelText: 'Date', border: OutlineInputBorder(), suffixIcon: Icon(Icons.calendar_today)),
-                        child: DateText(_selectedDateTime),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: InkWell(
-                      onTap: _selectTime,
-                      child: InputDecorator(
-                        decoration: const InputDecoration(labelText: 'Time', border: OutlineInputBorder(), suffixIcon: Icon(Icons.access_time)),
-                        child: TimeText(_selectedDateTime),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              if (canEditDepthDuration)
-                Row(
-                  spacing: 16,
-                  children: [
-                    Expanded(
-                      child: InkWell(
-                        onTap: _selectDuration,
-                        child: InputDecorator(
-                          decoration: const InputDecoration(labelText: 'Duration', border: OutlineInputBorder(), suffixIcon: Icon(Icons.timer)),
-                          child: Text(_durationFormatted),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: DepthEditor(
-                        label: 'Max depth',
-                        initialValue: _maxDepth,
-                        onChanged: (val) {
-                          if (val != null) {
-                            setState(() {
-                              _maxDepth = val;
-                            });
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              Builder(
-                builder: (context) {
-                  return InkWell(
-                    onTap: _selectSite,
-                    child: InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Dive site', border: OutlineInputBorder(), suffixIcon: Icon(Icons.location_on_outlined)),
-                      child: Text(
-                        _selectedSite?.name ?? 'No site selected',
-                        style: _selectedSite == null ? TextStyle(color: Theme.of(context).hintColor) : null,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              // Cylinders section
-              Column(
-                crossAxisAlignment: .start,
-                children: [
-                  Row(
-                    mainAxisAlignment: .spaceBetween,
-                    children: [
-                      Text('Cylinders', style: Theme.of(context).textTheme.titleMedium),
-                      IconButton(icon: const Icon(Icons.add), onPressed: _addCylinder, tooltip: 'Add cylinder'),
-                    ],
-                  ),
-                  if (_cylinders.isEmpty)
-                    Padding(
-                      padding: const .symmetric(vertical: 8),
-                      child: Text('No cylinders. Tap + to add one.', style: TextStyle(color: Theme.of(context).hintColor)),
-                    )
-                  else
-                    ...List.generate(_cylinders.length, (index) {
-                      final cyl = _cylinders[index];
-                      final gasChangesForCyl = _gasChanges.where((gc) => gc.cylinderIndex == index).toList();
-
-                      return Card(
-                        margin: const .only(bottom: 8),
-                        child: Padding(
-                          padding: const .all(12),
-                          child: Column(
-                            crossAxisAlignment: .start,
-                            children: [
-                              CylinderTile(
-                                index: index,
-                                description: cyl.cylinder?.description ?? 'Cylinder ${index + 1}',
-                                oxygenPct: cyl.oxygen,
-                                heliumPct: cyl.helium,
-                                beginPressure: cyl.beginPressure ?? 0,
-                                endPressure: cyl.endPressure ?? 0,
-                                trailing: Row(
-                                  mainAxisSize: .min,
-                                  children: [
-                                    IconButton(icon: const Icon(Icons.edit, size: 18), onPressed: () => _editCylinderGas(index), tooltip: 'Edit gas mix'),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete_outline, size: 18),
-                                      onPressed: () => _removeCylinder(index),
-                                      tooltip: 'Remove cylinder',
-                                    ),
-                                  ],
-                                ),
-                                contentPadding: .zero,
-                              ),
-                              const SizedBox(height: 8),
-                              Text('Gas changes:', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: .bold)),
-                              ...gasChangesForCyl.map((gc) {
-                                final gcIndex = _gasChanges.indexOf(gc);
-                                return Padding(
-                                  padding: const .only(left: 8, top: 4),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          gc.timeSeconds == 0 ? '• Start of dive' : '• ${gc.timeFormatted} switch to this cylinder',
-                                          style: Theme.of(context).textTheme.bodySmall,
-                                        ),
-                                      ),
-                                      InkWell(onTap: () => _removeGasChange(gcIndex), child: const Icon(Icons.close, size: 14)),
-                                    ],
-                                  ),
-                                );
-                              }),
-                              const SizedBox(height: 4),
-                              TextButton.icon(
-                                onPressed: () => _addGasChange(index),
-                                icon: const Icon(Icons.add, size: 14),
-                                label: const Text('Add gas change'),
-                                style: TextButton.styleFrom(padding: .zero, minimumSize: const Size(0, 32)),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }),
-                ],
-              ),
-              // Weight systems section
-              Column(
-                crossAxisAlignment: .start,
-                children: [
-                  Row(
-                    mainAxisAlignment: .spaceBetween,
-                    children: [
-                      Text('Weight Systems', style: Theme.of(context).textTheme.titleMedium),
-                      IconButton(icon: const Icon(Icons.add), onPressed: _addWeightsystem, tooltip: 'Add weight'),
-                    ],
-                  ),
-                  if (_weightsystems.isEmpty)
-                    Padding(
-                      padding: const .symmetric(vertical: 8),
-                      child: Text('No weight systems. Tap + to add one.', style: TextStyle(color: Theme.of(context).hintColor)),
-                    )
-                  else
-                    ...List.generate(_weightsystems.length, (index) {
-                      final ws = _weightsystems[index];
-                      return Card(
-                        margin: const .only(bottom: 8),
-                        child: Padding(
-                          padding: const .all(12),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: .start,
-                                  children: [
-                                    Text(ws.description.isNotEmpty ? ws.description : 'Weight ${index + 1}', style: Theme.of(context).textTheme.titleSmall),
-                                    if (ws.weight != null) WeightText(ws.weight!, style: Theme.of(context).textTheme.bodySmall),
-                                  ],
-                                ),
-                              ),
-                              IconButton(icon: const Icon(Icons.edit, size: 18), onPressed: () => _editWeightsystem(index), tooltip: 'Edit'),
-                              IconButton(icon: const Icon(Icons.delete_outline, size: 18), onPressed: () => _removeWeightsystem(index), tooltip: 'Remove'),
-                            ],
-                          ),
-                        ),
-                      );
-                    }),
-                ],
-              ),
-              // Equipment section
-              Column(
-                crossAxisAlignment: .start,
-                children: [
-                  Row(
-                    mainAxisAlignment: .spaceBetween,
-                    children: [
-                      Text('Equipment', style: Theme.of(context).textTheme.titleMedium),
-                      IconButton(icon: const Icon(Icons.edit), onPressed: _selectEquipment, tooltip: 'Select equipment'),
-                    ],
-                  ),
-                  if (_selectedEquipment.isEmpty)
-                    Padding(
-                      padding: const .symmetric(vertical: 8),
-                      child: Text('No equipment selected', style: TextStyle(color: Theme.of(context).hintColor)),
-                    )
-                  else
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
-                      children: _selectedEquipment
-                          .map(
-                            (e) => Chip(
-                              avatar: EquipmentIcons.icon(EquipmentIcons.forType(e.type), color: Theme.of(context).colorScheme.primary),
-                              label: Text(EquipmentListTile.equipmentTitle(e)),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: .start,
-                children: [
-                  Text('Rating', style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: .generate(5, (index) {
-                      final starValue = index + 1;
-                      return IconButton(
-                        icon: Icon(_rating != null && starValue <= _rating! ? Icons.star : Icons.star_border, color: Colors.amber, size: 28),
-                        onPressed: () {
-                          setState(() {
-                            _rating = starValue == _rating ? null : starValue;
-                          });
-                        },
-                      );
-                    }),
-                  ),
-                ],
-              ),
-              Builder(
-                builder: (context) {
-                  return ChipsInputAutocomplete(
-                    controller: _tagsController,
-                    options: _availableTags,
-                    initialChips: dive.tags.toList(),
-                    decorationTextField: const InputDecoration(labelText: 'Tags', border: OutlineInputBorder()),
-                    addChipOnSelection: true,
-                    placeChipsSectionAbove: false,
-                    paddingInsideWidgetContainer: .zero,
-                    secondaryTheme: true,
-                  );
-                },
-              ),
-              TextField(
-                controller: _divemasterController,
-                decoration: const InputDecoration(labelText: 'Divemaster', border: OutlineInputBorder()),
-                textCapitalization: .words,
-              ),
-              Builder(
-                builder: (context) {
-                  return ChipsInputAutocomplete(
-                    controller: _buddiesController,
-                    options: _availableBuddies,
-                    initialChips: dive.buddies.toList(),
-                    decorationTextField: const InputDecoration(labelText: 'Buddies', border: OutlineInputBorder()),
-                    addChipOnSelection: true,
-                    placeChipsSectionAbove: false,
-                    paddingInsideWidgetContainer: .zero,
-                    secondaryTheme: true,
-                    createCharacters: [','],
-                  );
-                },
-              ),
-              TextField(
-                controller: _notesController,
-                decoration: const InputDecoration(labelText: 'Notes', border: OutlineInputBorder()),
-                maxLines: 6,
-                autocorrect: true,
-                textCapitalization: .sentences,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
 

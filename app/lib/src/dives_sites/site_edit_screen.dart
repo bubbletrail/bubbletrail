@@ -153,37 +153,56 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
                   decoration: const InputDecoration(labelText: 'Name *', border: OutlineInputBorder()),
                   textCapitalization: .words,
                 ),
-                InkWell(
-                  onTap: _selectCountry,
-                  child: InputDecorator(
-                    decoration: const InputDecoration(labelText: 'Country', border: OutlineInputBorder()),
-                    child: Row(
-                      children: [
-                        CountryFlag(code: _countryCode),
-                        Expanded(
-                          child: Text(
-                            _countryCode.isEmpty ? 'Select country' : countryDisplayName(_countryCode),
-                            style: _countryCode.isEmpty ? TextStyle(color: Theme.of(context).hintColor) : null,
+                Row(
+                  spacing: 16,
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: _selectCountry,
+                        child: InputDecorator(
+                          decoration: const InputDecoration(labelText: 'Country', border: OutlineInputBorder()),
+                          child: Row(
+                            spacing: 8,
+                            children: [
+                              CountryFlag(code: _countryCode),
+                              Expanded(
+                                child: Text(
+                                  _countryCode.isEmpty ? 'Select country' : countryDisplayName(_countryCode),
+                                  style: _countryCode.isEmpty ? TextStyle(color: Theme.of(context).hintColor) : null,
+                                ),
+                              ),
+                              const Icon(Icons.arrow_drop_down),
+                            ],
                           ),
                         ),
-                        const Icon(Icons.arrow_drop_down),
-                      ],
+                      ),
                     ),
-                  ),
+                    Expanded(
+                      child: TextField(
+                        controller: _locationController,
+                        decoration: const InputDecoration(labelText: 'Location', border: OutlineInputBorder()),
+                        textCapitalization: .words,
+                      ),
+                    ),
+                  ],
                 ),
-                TextField(
-                  controller: _locationController,
-                  decoration: const InputDecoration(labelText: 'Location', border: OutlineInputBorder()),
-                  textCapitalization: .words,
-                ),
-                TextField(
-                  controller: _bodyOfWaterController,
-                  decoration: const InputDecoration(labelText: 'Body of water', border: OutlineInputBorder()),
-                  textCapitalization: .words,
-                ),
-                TextField(
-                  controller: _difficultyController,
-                  decoration: const InputDecoration(labelText: 'Difficulty', border: OutlineInputBorder()),
+                Row(
+                  spacing: 16,
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _bodyOfWaterController,
+                        decoration: const InputDecoration(labelText: 'Body of water', border: OutlineInputBorder()),
+                        textCapitalization: .words,
+                      ),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _difficultyController,
+                        decoration: const InputDecoration(labelText: 'Difficulty', border: OutlineInputBorder()),
+                      ),
+                    ),
+                  ],
                 ),
                 Builder(
                   builder: (context) {
@@ -208,6 +227,13 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
                   maxLines: 4,
                   textCapitalization: .sentences,
                 ),
+                AspectRatio(
+                  aspectRatio: 2,
+                  child: ClipRRect(
+                    borderRadius: .circular(12),
+                    child: SiteMap(position: _markerPosition ?? LatLng(0, 0), onTap: _onMapTap, alwaysCenterPosition: false),
+                  ),
+                ),
                 Row(
                   spacing: 16,
                   children: [
@@ -226,13 +252,6 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
                       ),
                     ),
                   ],
-                ),
-                AspectRatio(
-                  aspectRatio: 2,
-                  child: ClipRRect(
-                    borderRadius: .circular(12),
-                    child: SiteMap(position: _markerPosition ?? LatLng(0, 0), onTap: _onMapTap, alwaysCenterPosition: false),
-                  ),
                 ),
               ],
             ),
