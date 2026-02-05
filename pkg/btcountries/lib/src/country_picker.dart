@@ -4,8 +4,8 @@ import 'countries.dart';
 import 'country_flag.dart';
 
 // Shows a searchable dialog for selecting a country.
-Future<String?> showCountryPickerDialog({required BuildContext context, String? selectedCode, String? noneOption}) async {
-  return await showDialog<String?>(
+Future<String?> showCountryPickerDialog({required BuildContext context, String? selectedCode, String? noneOption}) {
+  return showDialog<String?>(
     context: context,
     builder: (dialogContext) => _CountryPickerDialog(selectedCode: selectedCode, noneOption: noneOption),
   );

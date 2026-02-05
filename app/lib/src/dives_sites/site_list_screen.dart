@@ -79,7 +79,7 @@ class SiteListScreen extends StatelessWidget {
     // Sort by country > location > name for logical grouping
     final sortedSites = List<Site>.from(sites)
       ..sort((a, b) {
-        final countryCompare = (a.country.isEmpty ? 'zzz' : a.country).compareTo(b.country.isEmpty ? 'zzz' : b.country);
+        final countryCompare = countryDisplayName(a.country.isEmpty ? 'zzz' : a.country).compareTo(countryDisplayName(b.country.isEmpty ? 'zzz' : b.country));
         if (countryCompare != 0) return countryCompare;
         final locationCompare = (a.location.isEmpty ? 'zzz' : a.location).compareTo(b.location.isEmpty ? 'zzz' : b.location);
         if (locationCompare != 0) return locationCompare;
@@ -181,8 +181,8 @@ class _LocationExpansionTile extends StatelessWidget {
             child: ListTile(
               leading: const Icon(Icons.place_outlined),
               title: Text(site.name),
-              subtitle: Text('${diveCountBySiteId[site.id]} ${diveCountBySiteId[site.id] == 1 ? 'dive' : 'dives'}'),
-              trailing: Icon(Icons.chevron_right),
+              subtitle: Text('${diveCountBySiteId[site.id] ?? 0} ${diveCountBySiteId[site.id] == 1 ? 'dive' : 'dives'}'),
+              trailing: const Icon(Icons.chevron_right),
               onTap: () => context.goNamed(AppRouteName.sitesDetails, pathParameters: {'siteID': site.id}),
             ),
           ),

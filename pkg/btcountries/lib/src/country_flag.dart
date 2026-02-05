@@ -5,17 +5,7 @@ class CountryFlag extends StatelessWidget {
   final String code;
   final double size;
 
-  const CountryFlag({super.key, required this.code, this.size = 32});
-
-  @override
-  Widget build(BuildContext context) => _CountryFlag(code: code, size: size);
-}
-
-class _CountryFlag extends StatelessWidget {
-  final String code;
-  final double size;
-
-  const _CountryFlag({required this.code, this.size = 24});
+  const CountryFlag({required this.code, this.size = 32});
 
   @override
   Widget build(BuildContext context) {

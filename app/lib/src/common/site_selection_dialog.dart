@@ -2,8 +2,7 @@ import 'package:btcountries/btcountries.dart';
 import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 
-import 'dialogs.dart';
-import 'site_grouping.dart';
+import 'common.dart';
 
 // Shows a hierarchical dialog for selecting a dive site.
 Future<SelectionResult<Site>> showSiteSelectionDialog({
@@ -33,7 +32,6 @@ class _SiteSelectionDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final countries = _hierarchy.countries;
-    final theme = Theme.of(context);
 
     return AlertDialog(
       title: const Text('Select dive site'),
@@ -51,7 +49,7 @@ class _SiteSelectionDialog extends StatelessWidget {
                   selected: selectedSite == null,
                   onTap: () => Navigator.of(context).pop(SelectionResult<Site>.none()),
                 ),
-              ...countries.map((country) => _buildCountryTile(context, country, theme)),
+              ...countries.map((country) => _buildCountryTile(context, country)),
             ],
           ),
         ),
@@ -60,7 +58,7 @@ class _SiteSelectionDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildCountryTile(BuildContext context, String country, ThemeData theme) {
+  Widget _buildCountryTile(BuildContext context, String country) {
     final locations = _hierarchy.locationsFor(country);
     final displayName = countryDisplayName(country);
 
@@ -69,25 +67,25 @@ class _SiteSelectionDialog extends StatelessWidget {
       title: Text(displayName),
       initiallyExpanded: selectedSite?.country == country,
       children: locations
-          .map((location) => Padding(padding: const EdgeInsets.only(left: 16.0), child: _buildLocationTile(context, country, location, theme)))
+          .map((location) => Padding(padding: const EdgeInsets.only(left: 16.0), child: _buildLocationTile(context, country, location)))
           .toList(),
     );
   }
 
-  Widget _buildLocationTile(BuildContext context, String country, String location, ThemeData theme) {
+  Widget _buildLocationTile(BuildContext context, String country, String location) {
     final sites = _hierarchy.sitesFor(country, location);
 
     return ExpansionTile(
-      leading: Icon(Icons.map_outlined),
+      leading: const Icon(Icons.map_outlined),
       title: Text(location),
       initiallyExpanded: selectedSite?.country == country && selectedSite?.location == location,
-      children: sites.map((site) => Padding(padding: const EdgeInsets.only(left: 16.0), child: _buildSiteTile(context, site, theme))).toList(),
+      children: sites.map((site) => Padding(padding: const EdgeInsets.only(left: 16.0), child: _buildSiteTile(context, site))).toList(),
     );
   }
 
-  Widget _buildSiteTile(BuildContext context, Site site, ThemeData theme) {
+  Widget _buildSiteTile(BuildContext context, Site site) {
     return ListTile(
-      leading: Icon(Icons.location_on_outlined),
+      leading: const Icon(Icons.location_on_outlined),
       title: Text(site.name),
       selected: selectedSite?.id == site.id,
       onTap: () => Navigator.of(context).pop(SelectionResult.selected(site)),
