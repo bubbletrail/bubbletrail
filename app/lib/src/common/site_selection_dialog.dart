@@ -2,8 +2,8 @@ import 'package:btcountries/btcountries.dart';
 import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 
-import 'site_grouping.dart';
 import 'dialogs.dart';
+import 'site_grouping.dart';
 
 // Shows a hierarchical dialog for selecting a dive site.
 Future<SelectionResult<Site>> showSiteSelectionDialog({
@@ -12,28 +12,23 @@ Future<SelectionResult<Site>> showSiteSelectionDialog({
   Site? selectedSite,
   String? noneOption,
 }) async {
-  const cancelledSentinel = Object();
-
-  final result = await showDialog<Object?>(
+  final res = await showDialog<SelectionResult<Site>>(
     context: context,
-    builder: (dialogContext) => _SiteSelectionDialog(sites: sites, selectedSite: selectedSite, noneOption: noneOption, cancelledSentinel: cancelledSentinel),
+    builder: (dialogContext) => _SiteSelectionDialog(sites: sites, selectedSite: selectedSite, noneOption: noneOption),
   );
-
-  if (identical(result, cancelledSentinel) || result == null) {
-    return const SelectionResult.cancelled();
+  if (res == null) {
+    return SelectionResult<Site>.cancelled();
   }
-  return .selected(result as Site?);
+  return res;
 }
 
 class _SiteSelectionDialog extends StatelessWidget {
   final List<Site> sites;
   final Site? selectedSite;
   final String? noneOption;
-  final Object cancelledSentinel;
   final SiteHierarchy _hierarchy;
 
-  _SiteSelectionDialog({required this.sites, required this.selectedSite, required this.noneOption, required this.cancelledSentinel})
-    : _hierarchy = SiteHierarchy(sites);
+  _SiteSelectionDialog({required this.sites, required this.selectedSite, required this.noneOption}) : _hierarchy = SiteHierarchy(sites);
 
   @override
   Widget build(BuildContext context) {
@@ -54,14 +49,14 @@ class _SiteSelectionDialog extends StatelessWidget {
                   leading: const Icon(Icons.close),
                   title: Text(noneOption!),
                   selected: selectedSite == null,
-                  onTap: () => Navigator.of(context).pop(null),
+                  onTap: () => Navigator.of(context).pop(SelectionResult<Site>.none()),
                 ),
               ...countries.map((country) => _buildCountryTile(context, country, theme)),
             ],
           ),
         ),
       ),
-      actions: [TextButton(onPressed: () => Navigator.of(context).pop(cancelledSentinel), child: const Text('Cancel'))],
+      actions: [TextButton(onPressed: () => Navigator.of(context).pop(SelectionResult<Site>.cancelled()), child: const Text('Cancel'))],
     );
   }
 
@@ -95,7 +90,7 @@ class _SiteSelectionDialog extends StatelessWidget {
       leading: Icon(Icons.location_on_outlined),
       title: Text(site.name),
       selected: selectedSite?.id == site.id,
-      onTap: () => Navigator.of(context).pop(site),
+      onTap: () => Navigator.of(context).pop(SelectionResult.selected(site)),
     );
   }
 }

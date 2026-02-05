@@ -6,6 +6,7 @@ class SelectionResult<T> {
   final bool cancelled;
 
   const SelectionResult.cancelled() : value = null, cancelled = true;
+  const SelectionResult.none() : value = null, cancelled = false;
   const SelectionResult.selected(this.value) : cancelled = false;
 }
 
