@@ -1,6 +1,6 @@
-import 'package:chips_input_autocomplete/chips_input_autocomplete.dart';
+import 'package:btcountries/btcountries.dart';
 import 'package:btproto/btproto.dart';
-
+import 'package:chips_input_autocomplete/chips_input_autocomplete.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -23,7 +23,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
   late final Site _originalSite;
   late final bool _isNew;
   late final TextEditingController _nameController;
-  late final TextEditingController _countryController;
+  late String _countryCode;
   late final TextEditingController _locationController;
   late final TextEditingController _bodyOfWaterController;
   late final TextEditingController _difficultyController;
@@ -40,7 +40,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
     _originalSite = state.site;
     _isNew = _originalSite.id.isEmpty;
     _nameController = TextEditingController(text: _originalSite.name);
-    _countryController = TextEditingController(text: _originalSite.country);
+    _countryCode = _originalSite.country;
     _locationController = TextEditingController(text: _originalSite.location);
     _bodyOfWaterController = TextEditingController(text: _originalSite.bodyOfWater);
     _difficultyController = TextEditingController(text: _originalSite.difficulty);
@@ -56,7 +56,6 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
   @override
   void dispose() {
     _nameController.dispose();
-    _countryController.dispose();
     _locationController.dispose();
     _bodyOfWaterController.dispose();
     _difficultyController.dispose();
@@ -90,7 +89,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
       id: _originalSite.id,
       name: name,
       position: position,
-      country: _countryController.text.trim(),
+      country: _countryCode,
       location: _locationController.text.trim(),
       bodyOfWater: _bodyOfWaterController.text.trim(),
       difficulty: _difficultyController.text.trim(),
@@ -111,6 +110,16 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
       _latController.text = point.latitude.toStringAsFixed(6);
       _lonController.text = point.longitude.toStringAsFixed(6);
     });
+  }
+
+  Future<void> _selectCountry() async {
+    final result = await showCountryPickerDialog(context: context, selectedCode: _countryCode, noneOption: 'No country');
+
+    if (result != null) {
+      setState(() {
+        _countryCode = result;
+      });
+    }
   }
 
   @override
@@ -144,24 +153,56 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
                   decoration: const InputDecoration(labelText: 'Name *', border: OutlineInputBorder()),
                   textCapitalization: .words,
                 ),
-                TextField(
-                  controller: _countryController,
-                  decoration: const InputDecoration(labelText: 'Country', border: OutlineInputBorder()),
-                  textCapitalization: .words,
+                Row(
+                  spacing: 16,
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: _selectCountry,
+                        child: InputDecorator(
+                          decoration: const InputDecoration(labelText: 'Country', border: OutlineInputBorder()),
+                          child: Row(
+                            spacing: 8,
+                            children: [
+                              CountryFlag(code: _countryCode),
+                              Expanded(
+                                child: Text(
+                                  _countryCode.isEmpty ? 'Select country' : countryDisplayName(_countryCode),
+                                  style: _countryCode.isEmpty ? TextStyle(color: Theme.of(context).hintColor) : null,
+                                ),
+                              ),
+                              const Icon(Icons.arrow_drop_down),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _locationController,
+                        decoration: const InputDecoration(labelText: 'Location', border: OutlineInputBorder()),
+                        textCapitalization: .words,
+                      ),
+                    ),
+                  ],
                 ),
-                TextField(
-                  controller: _locationController,
-                  decoration: const InputDecoration(labelText: 'Location', border: OutlineInputBorder()),
-                  textCapitalization: .words,
-                ),
-                TextField(
-                  controller: _bodyOfWaterController,
-                  decoration: const InputDecoration(labelText: 'Body of water', border: OutlineInputBorder()),
-                  textCapitalization: .words,
-                ),
-                TextField(
-                  controller: _difficultyController,
-                  decoration: const InputDecoration(labelText: 'Difficulty', border: OutlineInputBorder()),
+                Row(
+                  spacing: 16,
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _bodyOfWaterController,
+                        decoration: const InputDecoration(labelText: 'Body of water', border: OutlineInputBorder()),
+                        textCapitalization: .words,
+                      ),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _difficultyController,
+                        decoration: const InputDecoration(labelText: 'Difficulty', border: OutlineInputBorder()),
+                      ),
+                    ),
+                  ],
                 ),
                 Builder(
                   builder: (context) {
@@ -186,6 +227,13 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
                   maxLines: 4,
                   textCapitalization: .sentences,
                 ),
+                AspectRatio(
+                  aspectRatio: 2,
+                  child: ClipRRect(
+                    borderRadius: .circular(12),
+                    child: SiteMap(position: _markerPosition ?? LatLng(0, 0), onTap: _onMapTap, alwaysCenterPosition: false),
+                  ),
+                ),
                 Row(
                   spacing: 16,
                   children: [
@@ -204,13 +252,6 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
                       ),
                     ),
                   ],
-                ),
-                AspectRatio(
-                  aspectRatio: 2,
-                  child: ClipRRect(
-                    borderRadius: .circular(12),
-                    child: SiteMap(position: _markerPosition ?? LatLng(0, 0), onTap: _onMapTap, alwaysCenterPosition: false),
-                  ),
                 ),
               ],
             ),

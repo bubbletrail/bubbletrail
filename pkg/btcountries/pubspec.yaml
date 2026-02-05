@@ -1,0 +1,17 @@
+name: btcountries
+description: "Countries of the world"
+version: 1.0.0
+publish_to: 'none'
+
+environment:
+  sdk: ^3.10.7
+
+dependencies:
+  flutter: {sdk: flutter}
+
+dev_dependencies:
+  test: ^1.26.3
+
+flutter:
+  assets:
+    - assets/flags/

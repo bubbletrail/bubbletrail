@@ -1,3 +1,4 @@
+import 'package:btcountries/btcountries.dart';
 import 'package:btproto/btproto.dart';
 
 import 'package:flutter/material.dart';
@@ -22,7 +23,7 @@ class DiveListItemCard extends StatelessWidget {
     final maxDepth = dive.hasMaxDepth() ? dive.maxDepth : 0.0;
     String? siteName;
     if (site != null) {
-      final parts = [if (site!.hasLocation()) site!.location, if (site!.hasCountry()) site!.country];
+      final parts = [if (site!.hasLocation()) site!.location, if (site!.hasCountry()) countryDisplayName(site!.country)];
       if (parts.isNotEmpty) {
         siteName = '${site!.name} (${parts.join(', ')})';
       } else {

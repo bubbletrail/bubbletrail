@@ -104,6 +104,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  btcountries:
+    dependency: "direct main"
+    description:
+      path: "../pkg/btcountries"
+      relative: true
+    source: path
+    version: "1.0.0"
   btproto:
     dependency: "direct main"
     description:

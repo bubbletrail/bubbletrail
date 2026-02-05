@@ -1,5 +1,5 @@
+import 'package:btcountries/btcountries.dart';
 import 'package:btproto/btproto.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -7,9 +7,8 @@ import 'package:trina_grid/trina_grid.dart';
 
 import '../app_routes.dart';
 import '../app_theme.dart';
-import 'dive_list_bloc.dart';
 import '../common/common.dart';
-import 'site_list_item_card.dart';
+import 'dive_list_bloc.dart';
 
 /// Breakpoint width for switching between card (narrow) and table (wide) layouts.
 const double _narrowLayoutBreakpoint = 600;
@@ -50,14 +49,19 @@ class SiteListScreen extends StatelessWidget {
   }
 
   Widget _buildCardList(BuildContext context, List<Site> sites, Map<String, int> diveCountBySiteId) {
-    return ListView.builder(
-      padding: const .symmetric(vertical: 8),
-      itemCount: sites.length,
-      itemBuilder: (context, index) {
-        final site = sites[index];
-        final diveCount = diveCountBySiteId[site.id] ?? 0;
-        return SiteListItemCard(site: site, diveCount: diveCount);
-      },
+    final hierarchy = SiteHierarchy(sites);
+    final theme = Theme.of(context);
+
+    return Theme(
+      // remove divider lines above & below ExpansionTiles
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ListView(
+        padding: const .symmetric(vertical: 8),
+        children: [
+          for (final country in hierarchy.countries)
+            _CountryExpansionTile(country: country, hierarchy: hierarchy, diveCountBySiteId: diveCountBySiteId, theme: theme),
+        ],
+      ),
     );
   }
 
@@ -71,12 +75,22 @@ class SiteListScreen extends StatelessWidget {
       TrinaColumn(title: '# Dives', field: 'diveCount', type: .number(), width: 80, readOnly: true),
     ];
 
-    final rows = sites.map((site) {
+    // Sort by country > location > name for logical grouping
+    final sortedSites = List<Site>.from(sites)
+      ..sort((a, b) {
+        final countryCompare = countryDisplayName(a.country.isEmpty ? 'zzz' : a.country).compareTo(countryDisplayName(b.country.isEmpty ? 'zzz' : b.country));
+        if (countryCompare != 0) return countryCompare;
+        final locationCompare = (a.location.isEmpty ? 'zzz' : a.location).compareTo(b.location.isEmpty ? 'zzz' : b.location);
+        if (locationCompare != 0) return locationCompare;
+        return a.name.compareTo(b.name);
+      });
+
+    final rows = sortedSites.map((site) {
       final diveCount = diveCountBySiteId[site.id] ?? 0;
       return TrinaRow(
         cells: {
           'name': TrinaCell(value: site.name),
-          'country': TrinaCell(value: site.country.isEmpty ? '-' : site.country),
+          'country': TrinaCell(value: site.country.isEmpty ? '-' : countryDisplayName(site.country)),
           'location': TrinaCell(value: site.location.isEmpty ? '-' : site.location),
           'bodyOfWater': TrinaCell(value: site.bodyOfWater.isEmpty ? '-' : site.bodyOfWater),
           'difficulty': TrinaCell(value: site.difficulty.isEmpty ? '-' : site.difficulty),
@@ -98,6 +112,80 @@ class SiteListScreen extends StatelessWidget {
         }
       },
       configuration: AppTheme.trinaGridConfiguration(context),
+    );
+  }
+}
+
+class _CountryExpansionTile extends StatelessWidget {
+  final String country;
+  final SiteHierarchy hierarchy;
+  final Map<String, int> diveCountBySiteId;
+  final ThemeData theme;
+
+  const _CountryExpansionTile({required this.country, required this.hierarchy, required this.diveCountBySiteId, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    final locations = hierarchy.locationsFor(country);
+    final displayName = countryDisplayName(country);
+
+    int countryDiveCount = 0;
+    for (final location in locations) {
+      for (final site in hierarchy.sitesFor(country, location)) {
+        countryDiveCount += diveCountBySiteId[site.id] ?? 0;
+      }
+    }
+
+    return ExpansionTile(
+      leading: CountryFlag(code: country),
+      title: Text(displayName),
+      subtitle: Text('$countryDiveCount ${countryDiveCount == 1 ? 'dive' : 'dives'}'),
+      children: [
+        for (final location in locations)
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: _LocationExpansionTile(country: country, location: location, hierarchy: hierarchy, diveCountBySiteId: diveCountBySiteId, theme: theme),
+          ),
+      ],
+    );
+  }
+}
+
+class _LocationExpansionTile extends StatelessWidget {
+  final String country;
+  final String location;
+  final SiteHierarchy hierarchy;
+  final Map<String, int> diveCountBySiteId;
+  final ThemeData theme;
+
+  const _LocationExpansionTile({required this.country, required this.location, required this.hierarchy, required this.diveCountBySiteId, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    final sites = hierarchy.sitesFor(country, location);
+
+    int locationDiveCount = 0;
+    for (final site in sites) {
+      locationDiveCount += diveCountBySiteId[site.id] ?? 0;
+    }
+
+    return ExpansionTile(
+      leading: const Icon(Icons.map_outlined),
+      title: Text(location),
+      subtitle: Text('$locationDiveCount ${locationDiveCount == 1 ? 'dive' : 'dives'}'),
+      children: [
+        for (final site in sites)
+          Padding(
+            padding: const .only(left: 16),
+            child: ListTile(
+              leading: const Icon(Icons.place_outlined),
+              title: Text(site.name),
+              subtitle: Text('${diveCountBySiteId[site.id] ?? 0} ${diveCountBySiteId[site.id] == 1 ? 'dive' : 'dives'}'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.goNamed(AppRouteName.sitesDetails, pathParameters: {'siteID': site.id}),
+            ),
+          ),
+      ],
     );
   }
 }

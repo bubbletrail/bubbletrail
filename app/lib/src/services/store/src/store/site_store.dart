@@ -1,3 +1,4 @@
+import 'package:btcountries/btcountries.dart';
 import 'package:btproto/btproto.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
@@ -76,6 +77,16 @@ class SiteStore extends EntityStore<Site, InternalSiteList> {
     _tags.clear();
     await super.init();
     for (final site in await getAll()) {
+      // normalize country name to country code, if possible
+      final nc = matchCountryCode(site.country) ?? site.country;
+      if (nc != site.country) {
+        final rs = site.rebuild((site) {
+          site.country = nc;
+        });
+        await update(rs);
+      }
+
+      // remember the tags
       _tags.addAll(site.tags);
     }
   }

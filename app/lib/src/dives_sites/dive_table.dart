@@ -1,3 +1,4 @@
+import 'package:btcountries/btcountries.dart';
 import 'package:btproto/btproto.dart';
 
 import 'package:flutter/material.dart';
@@ -78,7 +79,7 @@ class DiveTable extends StatelessWidget {
           'start': TrinaCell(value: dive.start.toDateTime()),
           'maxDepth': TrinaCell(value: dive.maxDepth * 10, renderer: (rendererContext) => DepthText(rendererContext.cell.value / 10)),
           'duration': TrinaCell(value: dive.duration, renderer: (rendererContext) => DurationText(rendererContext.cell.value)),
-          'country': TrinaCell(value: site?.country ?? ''),
+          'country': TrinaCell(value: countryDisplayName(site?.country ?? '')),
           'location': TrinaCell(value: site?.location ?? ''),
           'site': TrinaCell(value: site?.name ?? ''),
           'sac': TrinaCell(
