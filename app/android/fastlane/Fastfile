@@ -4,7 +4,7 @@ platform :android do
   lane :deploy do
     upload_to_play_store(
       aab: 'app-release.aab',
-      track: 'beta',
+      track: 'alpha',
     )
   end
 end
