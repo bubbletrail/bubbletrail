@@ -386,7 +386,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
 
     // Sort dives by time; number them; assign default cylinders; insert.
 
-    final downloaded = state.downloadedDives;
+    final downloaded = List<Dive>.from(state.downloadedDives);
     downloaded.sort((a, b) => a.start.seconds.compareTo(b.start.seconds));
 
     var nextID = await _store.dives.nextDiveNo;
