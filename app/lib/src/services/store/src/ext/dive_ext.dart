@@ -86,6 +86,10 @@ extension DiveExtensions on Dive {
         } on StateError catch (_) {}
       }
 
+      this.duration = max(duration.round(), 1);
+      this.maxDepth = maxDepth;
+      meanDepth = totDepth / this.duration;
+
       // Update cylinder used gas volumes now that we know pressures
       for (var (idx, cyl) in cylinders.indexed) {
         if (cyl.isFrozen) cyl = cyl.deepCopy();
@@ -125,9 +129,5 @@ extension DiveExtensions on Dive {
     } else {
       clearCns();
     }
-
-    this.duration = max(duration.round(), 1);
-    this.maxDepth = maxDepth;
-    meanDepth = totDepth / this.duration;
   }
 }
