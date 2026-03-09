@@ -12,7 +12,7 @@ export '../preferences/preferences.dart';
 const litersToCuft = 0.0353147;
 const kgToLbs = 2.20462;
 const barToPsi = 14.504;
-const metersToFeet = 3.28;
+const metersToFeet = 3.28084;
 
 // Date and time formatting
 

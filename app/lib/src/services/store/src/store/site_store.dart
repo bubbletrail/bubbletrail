@@ -58,9 +58,9 @@ class SiteStore extends EntityStore<Site, InternalSiteList> {
 
   @override
   Future<Site> update(Site entity) async {
-    await super.update(entity);
+    final ret = await super.update(entity);
     _tags.addAll(entity.tags);
-    return entity;
+    return ret;
   }
 
   @override

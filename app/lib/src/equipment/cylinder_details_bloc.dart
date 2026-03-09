@@ -140,8 +140,8 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
         }
       }
 
-      await _store.cylinders.update(cylinder);
-      add(_LoadCylinderDetails(cylinder.id));
+      final upd = await _store.cylinders.update(cylinder);
+      add(_LoadCylinderDetails(upd.id));
     } catch (e) {
       _log.warning('failed to update cylinder', e);
       emit(CylinderDetailsError('Failed to update cylinder: $e'));

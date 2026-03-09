@@ -801,8 +801,8 @@ class _EditableDiveCylinder {
     return _EditableDiveCylinder(
       cylinderId: dc.cylinderId,
       cylinder: dc.hasCylinder() ? dc.cylinder : null,
-      oxygen: (dc.oxygen * 100).toInt(),
-      helium: (dc.helium * 100).toInt(),
+      oxygen: (dc.oxygen * 100).round(),
+      helium: (dc.helium * 100).round(),
       beginPressure: dc.beginPressure,
       endPressure: dc.endPressure,
     );

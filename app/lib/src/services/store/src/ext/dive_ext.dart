@@ -86,9 +86,10 @@ extension DiveExtensions on Dive {
         } on StateError catch (_) {}
       }
 
-      this.duration = max(duration.round(), 1);
+      duration = max(duration, 1.0);
+      this.duration = duration.round();
       this.maxDepth = maxDepth;
-      meanDepth = totDepth / this.duration;
+      meanDepth = totDepth / duration;
 
       // Update cylinder used gas volumes now that we know pressures
       for (var (idx, cyl) in cylinders.indexed) {
