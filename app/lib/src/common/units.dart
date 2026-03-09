@@ -72,7 +72,7 @@ int convertDepth(DepthUnit unit, num depth) {
     case .meters:
       return depth.round();
     case .feet:
-      return (depth * 3.28).round();
+      return (depth * metersToFeet).round();
   }
 }
 
@@ -90,7 +90,7 @@ String formatPressure(PressureUnit unit, num pressure) {
     case .bar:
       return '${pressure.toStringAsFixed(0)} ${unit.label}';
     case .psi:
-      return '${(pressure * 14.504).toStringAsFixed(0)} ${unit.label}';
+      return '${(pressure * barToPsi).toStringAsFixed(0)} ${unit.label}';
   }
 }
 
@@ -99,7 +99,7 @@ String formatVolume(VolumeUnit unit, num volume) {
     case .liters:
       return '${formatDisplayValue(volume)} ${unit.label}';
     case .cuft:
-      final val = volume * 0.0353;
+      final val = volume * litersToCuft;
       return '${formatDisplayValue(val)} ${unit.label}';
   }
 }
@@ -109,7 +109,7 @@ String formatWeight(WeightUnit unit, num weight) {
     case .kg:
       return '${weight.toStringAsFixed(1)} ${unit.label}';
     case .lb:
-      return '${(weight * 2.205).toStringAsFixed(1)} ${unit.label}';
+      return '${(weight * kgToLbs).toStringAsFixed(1)} ${unit.label}';
   }
 }
 
