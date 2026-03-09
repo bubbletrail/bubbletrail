@@ -76,7 +76,7 @@ class BuhlmannDeco {
   // First decompression stop depth encountered (for GF interpolation).
   double _firstStopDepth;
 
-  BuhlmannDeco({BuhlmannConfig? config, TissueState? tissues}) : config = config ?? BuhlmannConfig(), tissues = tissues ?? TissueState(), _firstStopDepth = 3 {
+  BuhlmannDeco({BuhlmannConfig? config, TissueState? tissues}) : config = config ?? BuhlmannConfig(), tissues = tissues ?? TissueState(), _firstStopDepth = 0 {
     if (tissues == null) {
       _initializeSurfaceEquilibrium();
     }
@@ -149,7 +149,7 @@ class BuhlmannDeco {
     for (var i = 0; i < 16; i++) {
       final gf = _gfLimitAtDepth(depth);
       depth = ceilingDepth(gf: gf);
-      final newGF = _gfLimitAtDepth(depth).round();
+      final newGF = _gfLimitAtDepth(depth);
       if ((newGF - gf).abs() < 0.01) break;
     }
 
