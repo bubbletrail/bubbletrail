@@ -74,6 +74,10 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
   @override
   void dispose() {
     _descriptionController.dispose();
+    _volumeLController.dispose();
+    _volumeCuftController.dispose();
+    _pressureBarController.dispose();
+    _pressurePsiController.dispose();
     super.dispose();
   }
 
