@@ -316,7 +316,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     }
 
     // Create BLE characteristics wrapper for the download
-    final ble = BleCharacteristics(read: charPair.rx.onValueReceived, write: charPair.rx.write);
+    final ble = BleCharacteristics(read: charPair.rx.onValueReceived, write: charPair.tx.write);
 
     // Start the download and process events
     final dir = await getApplicationSupportDirectory();

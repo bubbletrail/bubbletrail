@@ -114,7 +114,7 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
   }
 
   void _cancel() {
-    context.pop();
+    context.read<EquipmentDetailsBloc>().add(EquipmentDetailsEvent.close());
   }
 
   Future<void> _selectPurchaseDate() async {

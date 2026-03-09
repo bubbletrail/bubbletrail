@@ -17,7 +17,7 @@ class SiteDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final diveListState = context.read<DiveListBloc>().state;
+    final diveListState = context.select<DiveListBloc, DiveListState>((b) => b.state);
     if (diveListState is! DiveListLoaded) {
       // Can't happen
       return Placeholder();

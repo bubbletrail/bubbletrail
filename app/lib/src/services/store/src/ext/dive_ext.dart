@@ -28,7 +28,7 @@ extension DiveExtensions on Dive {
     for (final event in events) {
       if (event.type != SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE) continue;
       var newIdx = event.value;
-      if (newIdx > cylinders.length) newIdx = cylinders.length - 1;
+      if (newIdx >= cylinders.length) newIdx = cylinders.length - 1;
       if (idx != newIdx) {
         spans.add((start: t, end: event.time, idx: idx));
         t = event.time;
@@ -126,8 +126,8 @@ extension DiveExtensions on Dive {
       clearCns();
     }
 
-    this.duration = duration.round();
+    this.duration = max(duration.round(), 1);
     this.maxDepth = maxDepth;
-    meanDepth = totDepth / duration;
+    meanDepth = totDepth / this.duration;
   }
 }

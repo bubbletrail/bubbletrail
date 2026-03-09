@@ -1,6 +1,5 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:btproto/btproto.dart';
-
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
@@ -59,6 +58,7 @@ sealed class EquipmentDetailsEvent extends Equatable {
   const factory EquipmentDetailsEvent.newEquipment() = _New;
   const factory EquipmentDetailsEvent.updateAndClose(Equipment equipment) = _UpdateAndClose;
   const factory EquipmentDetailsEvent.deleteAndClosed(String equipmentId) = _DeleteAndClose;
+  const factory EquipmentDetailsEvent.close() = _Close;
 }
 
 class _Load extends EquipmentDetailsEvent {
@@ -92,6 +92,13 @@ class _DeleteAndClose extends EquipmentDetailsEvent {
   List<Object?> get props => [equipmentId];
 }
 
+class _Close extends EquipmentDetailsEvent {
+  const _Close();
+
+  @override
+  List<Object?> get props => [];
+}
+
 class EquipmentDetailsBloc extends Bloc<EquipmentDetailsEvent, EquipmentDetailsState> {
   final _store = StorageProvider.instance.store;
 
@@ -106,6 +113,8 @@ class EquipmentDetailsBloc extends Bloc<EquipmentDetailsEvent, EquipmentDetailsS
           await _onUpdateEquipmentDetails(event, emit);
         case _DeleteAndClose():
           await _onDeleteEquipment(event, emit);
+        case _Close():
+          emit(EquipmentDetailsClosed());
       }
     }, transformer: sequential());
   }

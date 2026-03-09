@@ -44,7 +44,7 @@ class EncryptionProvider {
   }
 
   Future<Uint8List> encrypt(Uint8List data) async {
-    final nonce = List<int>.generate(12, (_) => SecureRandom.fast.nextInt(256));
+    final nonce = List<int>.generate(12, (_) => SecureRandom.defaultRandom.nextInt(256));
     final sb = await _cipher.encrypt(data, secretKey: _boxKey, nonce: nonce);
     return sb.concatenation();
   }

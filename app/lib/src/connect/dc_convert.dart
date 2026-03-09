@@ -49,7 +49,7 @@ Dive convertDcDive(Log dl) {
   // Make sure every gas mix has a tank
   for (final (idx, gm) in dl.gasMixes.indexed) {
     if (gasMixtoCylinderIdx.containsKey(idx)) continue;
-    final foundIdx = dive.cylinders.indexOf((dc) => dc.oxygen == gm.oxygen && dc.helium == gm.helium);
+    final foundIdx = dive.cylinders.indexWhere((dc) => dc.oxygen == gm.oxygen && dc.helium == gm.helium);
     if (foundIdx >= 0) {
       gasMixtoCylinderIdx[idx] = foundIdx;
     } else {

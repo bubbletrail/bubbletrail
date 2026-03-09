@@ -26,7 +26,7 @@ extension MetadataExtension on Metadata {
   Metadata rebuildDeleted() {
     return rebuild((meta) {
       meta.deletedAt = .fromDateTime(DateTime.now());
-      if (!meta.hasCreatedAt()) meta.deletedAt = meta.updatedAt;
+      if (!meta.hasCreatedAt()) meta.createdAt = meta.updatedAt;
     });
   }
 }

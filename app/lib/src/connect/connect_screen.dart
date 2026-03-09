@@ -121,7 +121,7 @@ class ConnectScreen extends StatelessWidget {
                 ),
                 ..._buildScannedDevicesList(context, scanState.scannedComputers.map((c) => c.$1)),
               ],
-              if ((scanState.isScanning || scanState.scannedOther.isNotEmpty) & scanState.scannedComputers.isEmpty) ...[
+              if ((scanState.isScanning || scanState.scannedOther.isNotEmpty) && scanState.scannedComputers.isEmpty) ...[
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Opacity(opacity: 0.7, child: Text('Make sure your dive computer is in Bluetooth communication mode')),

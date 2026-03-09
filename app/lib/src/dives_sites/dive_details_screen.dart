@@ -310,7 +310,7 @@ class _Temps extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (dive.hasMinTemp() && dive.hasMaxDepth() && dive.minTemp != dive.maxTemp) {
+    if (dive.hasMinTemp() && dive.hasMaxTemp() && dive.minTemp != dive.maxTemp) {
       return ColumnRow(
         label: 'Temp',
         child: Row(

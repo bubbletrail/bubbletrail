@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
@@ -13,8 +14,11 @@ import '../providers/storage_provider.dart';
 import 'preferences.dart';
 import 'preferences_store.dart';
 
+part 'sync_bloc.g.dart';
+
 final _log = Logger('sync_bloc.dart');
 
+@CopyWith(copyWithNull: true)
 class SyncState extends Equatable {
   final DateTime? lastSynced;
   final bool syncing;
@@ -22,10 +26,6 @@ class SyncState extends Equatable {
   final bool? lastSyncSuccess;
 
   const SyncState({this.lastSynced, this.syncing = false, this.error, this.lastSyncSuccess});
-
-  SyncState copyWith({DateTime? lastSynced, bool? syncing, String? error, bool? lastSyncSuccess}) {
-    return SyncState(lastSynced: lastSynced ?? this.lastSynced, syncing: syncing ?? this.syncing, error: error, lastSyncSuccess: lastSyncSuccess);
-  }
 
   @override
   List<Object?> get props => [lastSynced, syncing, error, lastSyncSuccess];
@@ -131,7 +131,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       return;
     }
 
-    emit(state.copyWith(syncing: true, error: null, lastSyncSuccess: null));
+    emit(state.copyWith(syncing: true).copyWithNull(error: true, lastSyncSuccess: true));
 
     try {
       await WakelockPlus.enable();
@@ -151,6 +151,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
 
   @override
   Future<void> close() {
+    _syncDebounceTimer?.cancel();
     if (_storeListener != null) {
       _store.removeListener(_storeListener!);
     }
