@@ -24,6 +24,7 @@ jobs:
 
   test:
     name: Run tests (app)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
