@@ -1,7 +1,6 @@
 on:
     - pull_request
     - push
-    - workflow_dispatch
 
 name: Build app
 
@@ -13,7 +12,7 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     steps:
       - id: release
         uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4
@@ -24,7 +23,8 @@ jobs:
       version: ${{ steps.release.outputs.version }}
 
   test:
-    name: Run tests
+    name: Run tests (app)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
@@ -35,7 +35,7 @@ jobs:
         with:
           channel: stable
 
-      - name: Run tests (app)
+      - name: Run tests
         run: |
           for f in pkg/btbuhlmann pkg/btcountries app ; do
             pushd $f
@@ -46,21 +46,10 @@ jobs:
             popd
           done
 
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
-        with:
-          go-version: stable
-
-      - name: Run tests (server)
-        run: |
-          pushd srv
-          go build
-          go test ./...
-
   build-macos:
     name: Build for macOS
     runs-on: macos-26
     environment: release
-    if: needs.release-please.outputs.release-created
     needs:
       - test
       - release-please
@@ -98,10 +87,12 @@ jobs:
       ## Now create and publish the appcast
 
       - name: install rclone
+        if: needs.release-please.outputs.release-created
         run: |
           curl https://rclone.org/install.sh | sudo bash
 
       - name: rclone download
+        if: needs.release-please.outputs.release-created
         run: |
           rclone sync minio:updates updates
         env:
@@ -114,10 +105,12 @@ jobs:
           RCLONE_CONFIG_MINIO_ACL: ${{ secrets.RCLONE_CONFIG_MINIO_ACL }}
 
       - name: Copy new package
+        if: needs.release-please.outputs.release-created
         run: |
           cp app/bubbletrail*zip updates
 
       - name: Generate appcast
+        if: needs.release-please.outputs.release-created
         run: |
           echo "$SPARKLE_PRIVATE_KEY" | \
             ./app/macos/Pods/Sparkle/bin/generate_appcast \
@@ -126,6 +119,7 @@ jobs:
           SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
 
       - name: rclone upload
+        if: needs.release-please.outputs.release-created
         run: |
           rclone sync  -v --no-update-modtime updates minio:updates
         env:
@@ -141,7 +135,6 @@ jobs:
     name: Build for iOS (Appstore)
     runs-on: macos-26
     environment: release
-    if: needs.release-please.outputs.release-created
     needs:
       - test
       - release-please
@@ -173,6 +166,7 @@ jobs:
           AZURE_MAPS_SUBSCRIPTION_KEY: ${{ secrets.AZURE_MAPS_SUBSCRIPTION_KEY }}
 
       - name: Push to AppStore
+        if: needs.release-please.outputs.release-created
         run: |
             security create-keychain -p $MATCH_KEYCHAIN_PASSWORD $MATCH_KEYCHAIN_NAME
             security unlock-keychain -p $MATCH_KEYCHAIN_PASSWORD $MATCH_KEYCHAIN_NAME
@@ -196,7 +190,6 @@ jobs:
     name: Build for Windows
     runs-on: windows-latest
     environment: release
-    if: needs.release-please.outputs.release-created
     needs:
       - test
       - release-please
@@ -261,7 +254,6 @@ jobs:
     name: Build for Android (Play Store)
     runs-on: ubuntu-latest
     environment: release
-    if: needs.release-please.outputs.release-created
     needs:
       - test
       - release-please
@@ -307,12 +299,14 @@ jobs:
           path: app/bubbletrail*.aab
 
       - uses: ruby/setup-ruby@c4e5b1316158f92e3d49443a9d58b31d25ac0f8f # v1
+        if: needs.release-please.outputs.release-created
         with:
           ruby-version: 3.3.8
           bundler-cache: true
           working-directory: app/android
 
       - name: Push to Google Play
+        if: needs.release-please.outputs.release-created
         shell: bash
         run: |
           cd app/android
@@ -368,9 +362,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
   build-server:
-    name: Build admin server
+    name: Build & test admin server
     runs-on: ubuntu-latest
-    if: needs.release-please.outputs.release-created
     permissions:
       packages: write
     needs:
@@ -384,18 +377,36 @@ jobs:
         with:
           go-version: stable
 
+      - name: Run tests
+        run: |
+          pushd srv
+          go test ./...
+
       - uses: ko-build/setup-ko@d006021bd0c28d1ce33a07e7943d48b079944c8d # v0.9
 
       - name: Log in to GHCR
+        if: needs.release-please.outputs.release-created
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & push
+      - name: Build without push
+        if: "!needs.release-please.outputs.release-created"
         run: |
           pushd srv
-          ko build --bare --sbom=none -t latest -t "${{ github.run_number }}" .
+          ko build --bare --sbom=none --push=false .
+        env:
+          KO_DOCKER_REPO: ghcr.io/${{ github.repository }}-admin-srv
+
+      - name: Build & push
+        if: needs.release-please.outputs.release-created
+        run: |
+          pushd srv
+          ko build --bare --sbom=none \
+            -t latest \
+            -t "${{ needs.release-please.outputs.version }}" \
+            -t "${{ github.run_number }}" .
         env:
           KO_DOCKER_REPO: ghcr.io/${{ github.repository }}-admin-srv
