@@ -23,7 +23,7 @@ jobs:
       version: ${{ steps.release.outputs.version }}
 
   test:
-    name: Run tests
+    name: Run tests (app)
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
@@ -361,7 +361,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
   build-server:
-    name: Build admin server
+    name: Build & test admin server
     runs-on: ubuntu-latest
     permissions:
       packages: write
