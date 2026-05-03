@@ -5,7 +5,23 @@ on:
 
 name: Build app
 
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
 jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          release-type: simple
+    outputs:
+      release-created: ${{ steps.release.outputs.release_created }}
+      version: ${{ steps.release.outputs.version }}
+
   test:
     name: Run tests
     runs-on: ubuntu-latest
@@ -32,10 +48,11 @@ jobs:
   build-macos:
     name: Build for macOS (direct)
     runs-on: macos-26
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/release' || github.ref == 'refs/heads/beta')
+    if: needs.release-please.outputs.release-created
     environment: release
     needs:
       - test
+      - release-please
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -114,10 +131,11 @@ jobs:
   build-ios:
     name: Build for iOS (Appstore)
     runs-on: macos-26
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/release' || github.ref == 'refs/heads/beta')
+    if: needs.release-please.outputs.release-created
     environment: release
     needs:
       - test
+      - release-please
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -143,12 +161,12 @@ jobs:
             flutter build ipa \
                 --release --no-pub --no-codesign \
                 --build-number="$BUILD_NUMBER" \
-                --build-name="$MARKET_VERSION" \
+                --build-name="${{ needs.release-please.outputs.version }}" \
                 --dart-define=AZURE_MAPS_SUBSCRIPTION_KEY="$AZURE_MAPS_SUBSCRIPTION_KEY" \
                 --dart-define=BUILD="$BUILD_NUMBER" \
                 --dart-define=BUILDSECONDS="$SOURCE_DATE_EPOCH" \
                 --dart-define=GITSHA="$GIT_SHA" \
-                --dart-define=MARKETINGVERSION="$MARKET_VERSION"
+                --dart-define=MARKETINGVERSION="${{ needs.release-please.outputs.version }}"
 
             cd ios
             fastlane push
@@ -167,10 +185,11 @@ jobs:
   build-windows:
     name: Build for Windows
     runs-on: windows-latest
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/release' || github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/jb/windows')
+    if: needs.release-please.outputs.release-created
     environment: release
     needs:
       - test
+      - release-please
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -192,12 +211,12 @@ jobs:
           flutter build windows \
               --release --no-pub \
               --build-number="$BUILD_NUMBER" \
-              --build-name="$MARKET_VERSION" \
+              --build-name="${{ needs.release-please.outputs.version }}" \
               --dart-define=AZURE_MAPS_SUBSCRIPTION_KEY="$AZURE_MAPS_SUBSCRIPTION_KEY" \
               --dart-define=BUILD="$BUILD_NUMBER" \
               --dart-define=BUILDSECONDS="$SOURCE_DATE_EPOCH" \
               --dart-define=GITSHA="$GIT_SHA" \
-              --dart-define=MARKETINGVERSION="$MARKET_VERSION"
+              --dart-define=MARKETINGVERSION="${{ needs.release-please.outputs.version }}"
         env:
           AZURE_MAPS_SUBSCRIPTION_KEY: ${{ secrets.AZURE_MAPS_SUBSCRIPTION_KEY }}
 
@@ -221,7 +240,7 @@ jobs:
         shell: pwsh
         run: |
           cd app
-          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath "bubbletrail-windows-$env:MARKET_VERSION-$env:BUILD_NUMBER.zip"
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath "bubbletrail-windows-$${{ needs.release-please.outputs.version }}-$env:BUILD_NUMBER.zip"
 
       - name: Save artifacts (Windows)
         uses: actions/upload-artifact@v4
@@ -233,10 +252,11 @@ jobs:
   build-android:
     name: Build for Android (Play Store)
     runs-on: ubuntu-latest
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/release' || github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/jb/android')
+    if: needs.release-please.outputs.release-created
     environment: release
     needs:
       - test
+      - release-please
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -261,15 +281,15 @@ jobs:
             flutter build appbundle \
                 --release --no-pub \
                 --build-number="$BUILD_NUMBER" \
-                --build-name="$MARKET_VERSION" \
+                --build-name="${{ needs.release-please.outputs.version }}" \
                 --dart-define=AZURE_MAPS_SUBSCRIPTION_KEY="$AZURE_MAPS_SUBSCRIPTION_KEY" \
                 --dart-define=BUILD="$BUILD_NUMBER" \
                 --dart-define=BUILDSECONDS="$SOURCE_DATE_EPOCH" \
                 --dart-define=GITSHA="$GIT_SHA" \
-                --dart-define=MARKETINGVERSION="$MARKET_VERSION"
+                --dart-define=MARKETINGVERSION="${{ needs.release-please.outputs.version }}"
 
             mv build/app/outputs/bundle/release/app-release.aab \
-              bubbletrail-android-$MARKET_VERSION-$BUILD_NUMBER.aab
+              bubbletrail-android-${{ needs.release-please.outputs.version }}-$BUILD_NUMBER.aab
         env:
           ANDROID_KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
           ANDROID_UPLOAD_KEYSTORE: ${{ secrets.ANDROID_UPLOAD_KEYSTORE }}
@@ -290,7 +310,7 @@ jobs:
         shell: bash
         run: |
           cd app/android
-          mv ../bubbletrail-android-$MARKET_VERSION-$BUILD_NUMBER.aab app-release.aab
+          mv ../bubbletrail-android-${{ needs.release-please.outputs.version }}-$BUILD_NUMBER.aab app-release.aab
           echo "$GOOGLE_PLAY_API_KEY_JSON" > fastlane/apikey.json
           bundle exec fastlane deploy
         env:
@@ -298,12 +318,13 @@ jobs:
 
   publish-release:
     name: Publish GitHub release
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/release'
+    if: needs.release-please.outputs.release-created
     permissions:
       contents: write
     needs:
       - build-macos
       - build-windows
+      - release-please
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
@@ -325,19 +346,60 @@ jobs:
           export GH_PROMPT_DISABLED=1
 
           # If a release does not yet exist, create one
-          if ! gh release view --json name "$MARKET_VERSION" >/dev/null 2>&1 ; then
-            gh release create "$MARKET_VERSION" \
+          if ! gh release view --json name "${{ needs.release-please.outputs.version }}" >/dev/null 2>&1 ; then
+            gh release create "${{ needs.release-please.outputs.version }}" \
               --draft \
               --generate-notes \
               --target ${{ github.sha }} \
-              --title "$MARKET_VERSION"
+              --title "${{ needs.release-please.outputs.version }}"
           fi
 
           # Upload packages to the release
-          gh release upload --clobber "$MARKET_VERSION" \
+          gh release upload --clobber "${{ needs.release-please.outputs.version }}" \
             packages/*.zip
 
           # Once packages are uploaded, publish the release
-          gh release edit "$MARKET_VERSION" --draft=false
+          gh release edit "${{ needs.release-please.outputs.version }}" --draft=false
         env:
           GH_TOKEN: ${{ github.token }}
+
+  build-server:
+    name: Build admin server
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    needs:
+      - release-please
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - uses: ko-build/setup-ko@v0.6
+
+      - name: Build & test
+        run: |
+          pushd srv
+          go build
+          go test ./...
+
+      - name: Log in to GHCR
+        if: needs.release-please.outputs.release-created
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push
+        if: needs.release-please.outputs.release-created
+        run: |
+          pushd srv
+          ko build --bare --sbom=none -t latest -t "${{ github.run_number }}" .
+        env:
+          KO_DOCKER_REPO: ghcr.io/${{ github.repository }}-admin-srv
