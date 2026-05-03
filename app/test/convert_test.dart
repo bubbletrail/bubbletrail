@@ -23,9 +23,9 @@ void main() {
       expect(d.cylinders.length, 3);
       expect(d.cylinders[2].oxygen, 0.99);
 
-      expect(d.events.length, 3);
-      expect(d.events[2].time, 30);
-      expect(d.events[2].value, 2); // cylinder index for 99%
+      expect(d.events.length, 2);
+      expect(d.events[1].time, 30);
+      expect(d.events[1].value, 2); // cylinder index for 99%
     });
   });
 }

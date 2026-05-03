@@ -59,15 +59,17 @@ Dive convertDcDive(Log dl) {
   }
 
   // Collect events, synthesize gas switch events
+  var currentCylinderIdx = 0;
   for (final sample in dl.samples) {
     for (final event in sample.events) {
       if (event.type != SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE) dive.events.add(event);
     }
-    if (sample.hasGasMixIndex()) {
+    if (sample.hasGasMixIndex() && sample.gasMixIndex != currentCylinderIdx) {
       // Add a gas switch event. The value is the cylinder index.
       dive.events.add(
         SampleEvent(type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, time: sample.time.toInt(), value: gasMixtoCylinderIdx[sample.gasMixIndex]),
       );
+      currentCylinderIdx = sample.gasMixIndex;
     }
   }
 
