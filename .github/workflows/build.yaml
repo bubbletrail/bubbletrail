@@ -25,12 +25,14 @@ jobs:
           if [ "$VER" == "" ]; then
             # ver was empty, use the latest release version instead
             VER=$(gh release view --repo ${{ github.repository }} --json tagName --jq .tagName)
+            VER="${VER#v}"
           fi
           echo "version=$VER" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ github.token }}
     outputs:
       release-created: ${{ steps.release.outputs.release_created }}
+      tag-name: ${{ steps.release.outputs.tag_name }}
       version: ${{ steps.fixup.outputs.version }}
 
   test:
@@ -350,25 +352,13 @@ jobs:
           path: packages
           merge-multiple: true
 
-      - name: Create GitHub releases and push binaries
+      - name: Push binaries to GitHub release
         run: |
           export GH_PROMPT_DISABLED=1
 
-          # If a release does not yet exist, create one
-          if ! gh release view --json name "${{ needs.release-please.outputs.version }}" >/dev/null 2>&1 ; then
-            gh release create "${{ needs.release-please.outputs.version }}" \
-              --draft \
-              --generate-notes \
-              --target ${{ github.sha }} \
-              --title "${{ needs.release-please.outputs.version }}"
-          fi
-
           # Upload packages to the release
-          gh release upload --clobber "${{ needs.release-please.outputs.version }}" \
+          gh release upload --clobber "${{ needs.release-please.outputs.tag-name }}" \
             packages/*.zip
-
-          # Once packages are uploaded, publish the release
-          gh release edit "${{ needs.release-please.outputs.version }}" --draft=false
         env:
           GH_TOKEN: ${{ github.token }}
 
