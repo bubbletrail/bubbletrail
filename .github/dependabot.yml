@@ -1,0 +1,66 @@
+version: 2
+enable-beta-ecosystems: true
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/srv"
+    allow:
+      - dependency-type: direct
+    schedule:
+      interval: "monthly"
+    labels:
+      - touches/dependencies
+    cooldown:
+      default-days: 14
+    groups:
+      gomod:
+        applies-to: version-updates
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pub"
+    directories:
+      - "/app"
+      - "/pkg/*"
+    schedule:
+      interval: "monthly"
+    labels:
+      - touches/dependencies
+    cooldown:
+      default-days: 14
+    groups:
+      app:
+        applies-to: version-updates
+        patterns:
+          - "*"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels:
+      - touches/dependencies
+    cooldown:
+      default-days: 14
+    groups:
+      actions:
+        applies-to: version-updates
+        patterns:
+          - "*"
+
+  - package-ecosystem: "bundler"
+    directory: "/app/ios"
+    schedule:
+      interval: "monthly"
+    ignore:
+      - dependency-name: "*"
+    labels:
+      - touches/dependencies
+
+  - package-ecosystem: "bundler"
+    directory: "/app/android"
+    schedule:
+      interval: "monthly"
+    ignore:
+      - dependency-name: "*"
+    labels:
+      - touches/dependencies
