@@ -50,6 +50,7 @@ jobs:
     name: Build for macOS
     runs-on: macos-26
     environment: release
+    if: needs.release-please.outputs.release-created
     needs:
       - test
       - release-please
@@ -89,12 +90,10 @@ jobs:
       ## Now create and publish the appcast
 
       - name: install rclone
-        if: needs.release-please.outputs.release-created
         run: |
           curl https://rclone.org/install.sh | sudo bash
 
       - name: rclone download
-        if: needs.release-please.outputs.release-created
         run: |
           rclone sync minio:updates updates
         env:
@@ -107,12 +106,10 @@ jobs:
           RCLONE_CONFIG_MINIO_ACL: ${{ secrets.RCLONE_CONFIG_MINIO_ACL }}
 
       - name: Copy new package
-        if: needs.release-please.outputs.release-created
         run: |
           cp app/bubbletrail*zip updates
 
       - name: Generate appcast
-        if: needs.release-please.outputs.release-created
         run: |
           echo "$SPARKLE_PRIVATE_KEY" | \
             ./app/macos/Pods/Sparkle/bin/generate_appcast \
@@ -121,7 +118,6 @@ jobs:
           SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
 
       - name: rclone upload
-        if: needs.release-please.outputs.release-created
         run: |
           rclone sync  -v --no-update-modtime updates minio:updates
         env:
@@ -137,6 +133,7 @@ jobs:
     name: Build for iOS (Appstore)
     runs-on: macos-26
     environment: release
+    if: needs.release-please.outputs.release-created
     needs:
       - test
       - release-please
@@ -170,7 +167,6 @@ jobs:
           AZURE_MAPS_SUBSCRIPTION_KEY: ${{ secrets.AZURE_MAPS_SUBSCRIPTION_KEY }}
 
       - name: Push to AppStore
-        if: needs.release-please.outputs.release-created
         run: |
             security create-keychain -p $MATCH_KEYCHAIN_PASSWORD $MATCH_KEYCHAIN_NAME
             security unlock-keychain -p $MATCH_KEYCHAIN_PASSWORD $MATCH_KEYCHAIN_NAME
@@ -194,6 +190,7 @@ jobs:
     name: Build for Windows
     runs-on: windows-latest
     environment: release
+    if: needs.release-please.outputs.release-created
     needs:
       - test
       - release-please
@@ -260,6 +257,7 @@ jobs:
     name: Build for Android (Play Store)
     runs-on: ubuntu-latest
     environment: release
+    if: needs.release-please.outputs.release-created
     needs:
       - test
       - release-please
@@ -307,14 +305,12 @@ jobs:
           path: app/bubbletrail*.aab
 
       - uses: ruby/setup-ruby@v1
-        if: needs.release-please.outputs.release-created
         with:
           ruby-version: 3.3.8
           bundler-cache: true
           working-directory: app/android
 
       - name: Push to Google Play
-        if: needs.release-please.outputs.release-created
         shell: bash
         run: |
           cd app/android
