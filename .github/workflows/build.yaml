@@ -373,7 +373,6 @@ jobs:
   build-server:
     name: Build admin server
     runs-on: ubuntu-latest
-    if: needs.release-please.outputs.release-created
     permissions:
       packages: write
     needs:
@@ -390,6 +389,7 @@ jobs:
       - uses: ko-build/setup-ko@d006021bd0c28d1ce33a07e7943d48b079944c8d # v0.9
 
       - name: Log in to GHCR
+        if: needs.release-please.outputs.release-created
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: ghcr.io
@@ -399,6 +399,10 @@ jobs:
       - name: Build & push
         run: |
           pushd srv
-          ko build --bare --sbom=none -t latest -t "${{ github.run_number }}" .
+          ko build --bare --sbom=none \
+            --push=${{ needs.release-please.outputs.release-created }} \
+            -t latest \
+            -t "${{ needs.release-please.outputs.version }}" \
+            -t "${{ github.run_number }}" .
         env:
           KO_DOCKER_REPO: ghcr.io/${{ github.repository }}-admin-srv
