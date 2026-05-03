@@ -252,7 +252,7 @@ jobs:
         shell: pwsh
         run: |
           cd app
-          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath "bubbletrail-windows-$${{ needs.release-please.outputs.version }}-$env:BUILD_NUMBER.zip"
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath "bubbletrail-windows-${{ needs.release-please.outputs.version }}-$env:BUILD_NUMBER.zip"
 
       - name: Save artifacts (Windows)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
