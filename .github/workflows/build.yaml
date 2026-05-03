@@ -47,7 +47,7 @@ jobs:
           done
 
   build-macos:
-    name: Build for macOS (direct)
+    name: Build for macOS
     runs-on: macos-26
     environment: release
     needs:
