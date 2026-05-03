@@ -5,8 +5,8 @@ name: Pull request checks
 
 permissions:
   contents: read
-  issues: write
-  pull-requests: write
+  issues: read
+  pull-requests: read
 
 jobs:
 
@@ -92,6 +92,7 @@ jobs:
               --dart-define=GITSHA="$GIT_SHA" \
               --dart-define=MARKETINGVERSION="0.0.1"
 
+
   build-server:
     name: Build & test admin server
     runs-on: ubuntu-latest
@@ -107,12 +108,3 @@ jobs:
         run: |
           pushd srv
           go test ./...
-
-  validate-pr-title:
-    name: Validate PR title
-    runs-on: ubuntu-latest
-    steps:
-      - name: PR Conventional Commit Validation
-        uses: ytanikin/pr-conventional-commits@639145d78959c53c43112365837e3abd21ed67c1 # 1.5.2
-        with:
-         task_types: '["feat","fix","docs","refactor","chore","build"]'
