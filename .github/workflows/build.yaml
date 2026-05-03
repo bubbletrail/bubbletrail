@@ -391,11 +391,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build without push
+        if: "!needs.release-please.outputs.release-created"
+        run: |
+          pushd srv
+          ko build --bare --sbom=none --push=false .
+        env:
+          KO_DOCKER_REPO: ghcr.io/${{ github.repository }}-admin-srv
+
       - name: Build & push
+        if: needs.release-please.outputs.release-created
         run: |
           pushd srv
           ko build --bare --sbom=none \
-            --push=${{ needs.release-please.outputs.release-created }} \
             -t latest \
             -t "${{ needs.release-please.outputs.version }}" \
             -t "${{ github.run_number }}" .
