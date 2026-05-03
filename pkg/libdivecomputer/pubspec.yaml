@@ -9,7 +9,7 @@ environment:
 dependencies:
   btproto: {path: ../btproto}
   code_assets: ^1.0.0
-  ffi: ^2.1.4
+  ffi: ^2.2.0
   glob: ^2.1.3
   hooks: ^1.0.0
   logging: ^1.3.0
