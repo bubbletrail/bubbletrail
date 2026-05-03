@@ -13,6 +13,7 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
     steps:
       - id: release
         uses: googleapis/release-please-action@v4
