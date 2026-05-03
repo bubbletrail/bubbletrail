@@ -1,6 +1,7 @@
 on:
-    - pull_request
-    - push
+  push:
+    branches:
+      - main
 
 name: Build app
 
@@ -12,19 +13,28 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    if: github.repository == 'bubbletrail/bubbletrail'
     steps:
       - id: release
         uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4
         with:
           release-type: simple
+      - id: fixup
+        run: |
+          VER=${{ steps.release.outputs.version }}
+          if [ "$VER" == "" ]; then
+            # ver was empty, use the latest release version instead
+            VER=$(gh release view --repo ${{ github.repository }} --json tagName --jq .tagName)
+          fi
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
     outputs:
       release-created: ${{ steps.release.outputs.release_created }}
-      version: ${{ steps.release.outputs.version }}
+      version: ${{ steps.fixup.outputs.version }}
 
   test:
     name: Run tests (app)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
@@ -76,6 +86,7 @@ jobs:
           AZURE_MAPS_SUBSCRIPTION_KEY: ${{ secrets.AZURE_MAPS_SUBSCRIPTION_KEY }}
           DEVELOPER_ID_APPLICATION_CERT: ${{ secrets.DEVELOPER_ID_APPLICATION_CERT }}
           MAC_APP_DISTRIBUTION_CERT: ${{ secrets.MAC_APP_DISTRIBUTION_CERT }}
+          MARKET_VERSION: ${{ needs.release-please.outputs.version }}
 
       - name: Save artifacts (macOS)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -385,23 +396,13 @@ jobs:
       - uses: ko-build/setup-ko@d006021bd0c28d1ce33a07e7943d48b079944c8d # v0.9
 
       - name: Log in to GHCR
-        if: needs.release-please.outputs.release-created
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build without push
-        if: "!needs.release-please.outputs.release-created"
-        run: |
-          pushd srv
-          ko build --bare --sbom=none --push=false .
-        env:
-          KO_DOCKER_REPO: ghcr.io/${{ github.repository }}-admin-srv
-
       - name: Build & push
-        if: needs.release-please.outputs.release-created
         run: |
           pushd srv
           ko build --bare --sbom=none \
