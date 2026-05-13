@@ -19,6 +19,9 @@ abstract class AppRouteName {
   static const equipmentList = 'equipment-list';
   static const equipmentDetails = 'equipment-details';
   static const equipmentNew = 'new-equipment';
+  static const certifications = 'certifications';
+  static const certificationsDetails = 'certification-details';
+  static const certificationsNew = 'new-certification';
 
   static const preferences = 'preferences';
   static const units = 'units';
@@ -51,6 +54,9 @@ abstract class AppRoutePath {
   static const equipmentList = 'other';
   static const equipmentDetails = ':equipmentID';
   static const equipmentNew = 'new';
+  static const certifications = 'certifications';
+  static const certificationsDetails = ':certificationID';
+  static const certificationsNew = 'new';
 
   static const preferences = '/preferences';
   static const units = 'units';

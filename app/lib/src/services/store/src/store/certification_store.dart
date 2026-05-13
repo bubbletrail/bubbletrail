@@ -35,5 +35,17 @@ class CertificationStore extends EntityStore<Certification, InternalCertificatio
   InternalCertificationList listFromBuffer(List<int> bytes) => InternalCertificationList.fromBuffer(bytes);
 
   @override
-  int compare(Certification a, Certification b) => '${a.agency} ${a.certificationName}'.compareTo('${b.agency} ${b.certificationName}');
+  int compare(Certification a, Certification b) {
+    // Granted-date descending first; certs without a granted date sort below
+    // those that have one. Fall back to agency + name for stable ordering.
+    if (a.hasGranted() && b.hasGranted()) {
+      final c = b.granted.toDateTime().compareTo(a.granted.toDateTime());
+      if (c != 0) return c;
+    } else if (a.hasGranted()) {
+      return -1;
+    } else if (b.hasGranted()) {
+      return 1;
+    }
+    return '${a.agency} ${a.certificationName}'.compareTo('${b.agency} ${b.certificationName}');
+  }
 }
