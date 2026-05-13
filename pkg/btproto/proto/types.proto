@@ -47,3 +47,25 @@ message Cylinder {
   bool default_for_deep_deco = 9;
   bool default_for_shallow_deco = 10;
 }
+
+message Certification {
+  string id = 1;
+  Metadata meta = 2;
+
+  string agency = 3;
+  string certification_name = 4;
+  string certification_number = 5;
+  string instructor_name = 6;
+  string instructor_number = 7;
+
+  google.protobuf.Timestamp granted = 8;
+  google.protobuf.Timestamp expires = 9;
+
+  string card_front_id = 10;
+  string card_back_id = 11;
+}
+
+message Photo {
+  string id = 1;
+  Metadata meta = 2;
+}

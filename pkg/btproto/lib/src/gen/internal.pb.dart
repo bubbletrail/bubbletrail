@@ -267,6 +267,105 @@ class InternalEquipmentList extends $pb.GeneratedMessage {
   $pb.PbList<$4.Equipment> get equipments => $_getList(0);
 }
 
+class InternalCertificationList extends $pb.GeneratedMessage {
+  factory InternalCertificationList({
+    $core.Iterable<$0.Certification>? certifications,
+  }) {
+    final result = create();
+    if (certifications != null) result.certifications.addAll(certifications);
+    return result;
+  }
+
+  InternalCertificationList._();
+
+  factory InternalCertificationList.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory InternalCertificationList.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'InternalCertificationList',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
+      createEmptyInstance: create)
+    ..pPM<$0.Certification>(1, _omitFieldNames ? '' : 'certifications',
+        subBuilder: $0.Certification.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  InternalCertificationList clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  InternalCertificationList copyWith(
+          void Function(InternalCertificationList) updates) =>
+      super.copyWith((message) => updates(message as InternalCertificationList))
+          as InternalCertificationList;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static InternalCertificationList create() => InternalCertificationList._();
+  @$core.override
+  InternalCertificationList createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static InternalCertificationList getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<InternalCertificationList>(create);
+  static InternalCertificationList? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$0.Certification> get certifications => $_getList(0);
+}
+
+class InternalPhotoList extends $pb.GeneratedMessage {
+  factory InternalPhotoList({
+    $core.Iterable<$0.Photo>? photos,
+  }) {
+    final result = create();
+    if (photos != null) result.photos.addAll(photos);
+    return result;
+  }
+
+  InternalPhotoList._();
+
+  factory InternalPhotoList.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory InternalPhotoList.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'InternalPhotoList',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
+      createEmptyInstance: create)
+    ..pPM<$0.Photo>(1, _omitFieldNames ? '' : 'photos',
+        subBuilder: $0.Photo.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  InternalPhotoList clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  InternalPhotoList copyWith(void Function(InternalPhotoList) updates) =>
+      super.copyWith((message) => updates(message as InternalPhotoList))
+          as InternalPhotoList;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static InternalPhotoList create() => InternalPhotoList._();
+  @$core.override
+  InternalPhotoList createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static InternalPhotoList getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<InternalPhotoList>(create);
+  static InternalPhotoList? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$0.Photo> get photos => $_getList(0);
+}
+
 const $core.bool _omitFieldNames =
     $core.bool.fromEnvironment('protobuf.omit_field_names');
 const $core.bool _omitMessageNames =

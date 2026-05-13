@@ -106,3 +106,44 @@ const InternalEquipmentList$json = {
 final $typed_data.Uint8List internalEquipmentListDescriptor = $convert.base64Decode(
     'ChVJbnRlcm5hbEVxdWlwbWVudExpc3QSMgoKZXF1aXBtZW50cxgBIAMoCzISLmJ0c3RvcmUuRX'
     'F1aXBtZW50UgplcXVpcG1lbnRz');
+
+@$core.Deprecated('Use internalCertificationListDescriptor instead')
+const InternalCertificationList$json = {
+  '1': 'InternalCertificationList',
+  '2': [
+    {
+      '1': 'certifications',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.btstore.Certification',
+      '10': 'certifications'
+    },
+  ],
+};
+
+/// Descriptor for `InternalCertificationList`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List internalCertificationListDescriptor =
+    $convert.base64Decode(
+        'ChlJbnRlcm5hbENlcnRpZmljYXRpb25MaXN0Ej4KDmNlcnRpZmljYXRpb25zGAEgAygLMhYuYn'
+        'RzdG9yZS5DZXJ0aWZpY2F0aW9uUg5jZXJ0aWZpY2F0aW9ucw==');
+
+@$core.Deprecated('Use internalPhotoListDescriptor instead')
+const InternalPhotoList$json = {
+  '1': 'InternalPhotoList',
+  '2': [
+    {
+      '1': 'photos',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.btstore.Photo',
+      '10': 'photos'
+    },
+  ],
+};
+
+/// Descriptor for `InternalPhotoList`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List internalPhotoListDescriptor = $convert.base64Decode(
+    'ChFJbnRlcm5hbFBob3RvTGlzdBImCgZwaG90b3MYASADKAsyDi5idHN0b3JlLlBob3RvUgZwaG'
+    '90b3M=');

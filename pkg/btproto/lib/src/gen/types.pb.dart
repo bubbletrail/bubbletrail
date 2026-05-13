@@ -451,6 +451,258 @@ class Cylinder extends $pb.GeneratedMessage {
   void clearDefaultForShallowDeco() => $_clearField(10);
 }
 
+class Certification extends $pb.GeneratedMessage {
+  factory Certification({
+    $core.String? id,
+    Metadata? meta,
+    $core.String? agency,
+    $core.String? certificationName,
+    $core.String? certificationNumber,
+    $core.String? instructorName,
+    $core.String? instructorNumber,
+    $0.Timestamp? granted,
+    $0.Timestamp? expires,
+    $core.String? cardFrontId,
+    $core.String? cardBackId,
+  }) {
+    final result = create();
+    if (id != null) result.id = id;
+    if (meta != null) result.meta = meta;
+    if (agency != null) result.agency = agency;
+    if (certificationName != null) result.certificationName = certificationName;
+    if (certificationNumber != null)
+      result.certificationNumber = certificationNumber;
+    if (instructorName != null) result.instructorName = instructorName;
+    if (instructorNumber != null) result.instructorNumber = instructorNumber;
+    if (granted != null) result.granted = granted;
+    if (expires != null) result.expires = expires;
+    if (cardFrontId != null) result.cardFrontId = cardFrontId;
+    if (cardBackId != null) result.cardBackId = cardBackId;
+    return result;
+  }
+
+  Certification._();
+
+  factory Certification.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory Certification.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Certification',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'id')
+    ..aOM<Metadata>(2, _omitFieldNames ? '' : 'meta',
+        subBuilder: Metadata.create)
+    ..aOS(3, _omitFieldNames ? '' : 'agency')
+    ..aOS(4, _omitFieldNames ? '' : 'certificationName')
+    ..aOS(5, _omitFieldNames ? '' : 'certificationNumber')
+    ..aOS(6, _omitFieldNames ? '' : 'instructorName')
+    ..aOS(7, _omitFieldNames ? '' : 'instructorNumber')
+    ..aOM<$0.Timestamp>(8, _omitFieldNames ? '' : 'granted',
+        subBuilder: $0.Timestamp.create)
+    ..aOM<$0.Timestamp>(9, _omitFieldNames ? '' : 'expires',
+        subBuilder: $0.Timestamp.create)
+    ..aOS(10, _omitFieldNames ? '' : 'cardFrontId')
+    ..aOS(11, _omitFieldNames ? '' : 'cardBackId')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Certification clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Certification copyWith(void Function(Certification) updates) =>
+      super.copyWith((message) => updates(message as Certification))
+          as Certification;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static Certification create() => Certification._();
+  @$core.override
+  Certification createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static Certification getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Certification>(create);
+  static Certification? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get id => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set id($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  Metadata get meta => $_getN(1);
+  @$pb.TagNumber(2)
+  set meta(Metadata value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMeta() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMeta() => $_clearField(2);
+  @$pb.TagNumber(2)
+  Metadata ensureMeta() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  $core.String get agency => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set agency($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasAgency() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearAgency() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get certificationName => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set certificationName($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasCertificationName() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearCertificationName() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get certificationNumber => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set certificationNumber($core.String value) => $_setString(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasCertificationNumber() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearCertificationNumber() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get instructorName => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set instructorName($core.String value) => $_setString(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasInstructorName() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearInstructorName() => $_clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.String get instructorNumber => $_getSZ(6);
+  @$pb.TagNumber(7)
+  set instructorNumber($core.String value) => $_setString(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasInstructorNumber() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearInstructorNumber() => $_clearField(7);
+
+  @$pb.TagNumber(8)
+  $0.Timestamp get granted => $_getN(7);
+  @$pb.TagNumber(8)
+  set granted($0.Timestamp value) => $_setField(8, value);
+  @$pb.TagNumber(8)
+  $core.bool hasGranted() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearGranted() => $_clearField(8);
+  @$pb.TagNumber(8)
+  $0.Timestamp ensureGranted() => $_ensure(7);
+
+  @$pb.TagNumber(9)
+  $0.Timestamp get expires => $_getN(8);
+  @$pb.TagNumber(9)
+  set expires($0.Timestamp value) => $_setField(9, value);
+  @$pb.TagNumber(9)
+  $core.bool hasExpires() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearExpires() => $_clearField(9);
+  @$pb.TagNumber(9)
+  $0.Timestamp ensureExpires() => $_ensure(8);
+
+  @$pb.TagNumber(10)
+  $core.String get cardFrontId => $_getSZ(9);
+  @$pb.TagNumber(10)
+  set cardFrontId($core.String value) => $_setString(9, value);
+  @$pb.TagNumber(10)
+  $core.bool hasCardFrontId() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearCardFrontId() => $_clearField(10);
+
+  @$pb.TagNumber(11)
+  $core.String get cardBackId => $_getSZ(10);
+  @$pb.TagNumber(11)
+  set cardBackId($core.String value) => $_setString(10, value);
+  @$pb.TagNumber(11)
+  $core.bool hasCardBackId() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearCardBackId() => $_clearField(11);
+}
+
+class Photo extends $pb.GeneratedMessage {
+  factory Photo({
+    $core.String? id,
+    Metadata? meta,
+  }) {
+    final result = create();
+    if (id != null) result.id = id;
+    if (meta != null) result.meta = meta;
+    return result;
+  }
+
+  Photo._();
+
+  factory Photo.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory Photo.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Photo',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'id')
+    ..aOM<Metadata>(2, _omitFieldNames ? '' : 'meta',
+        subBuilder: Metadata.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Photo clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Photo copyWith(void Function(Photo) updates) =>
+      super.copyWith((message) => updates(message as Photo)) as Photo;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static Photo create() => Photo._();
+  @$core.override
+  Photo createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static Photo getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Photo>(create);
+  static Photo? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get id => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set id($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  Metadata get meta => $_getN(1);
+  @$pb.TagNumber(2)
+  set meta(Metadata value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMeta() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMeta() => $_clearField(2);
+  @$pb.TagNumber(2)
+  Metadata ensureMeta() => $_ensure(1);
+}
+
 const $core.bool _omitFieldNames =
     $core.bool.fromEnvironment('protobuf.omit_field_names');
 const $core.bool _omitMessageNames =
