@@ -1,4 +1,5 @@
 import 'package:btproto/btproto.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../app_routes.dart';
 import '../common/common.dart';
+import '../providers/storage_provider.dart';
 import 'certification_list_bloc.dart';
 
 class CertificationListScreen extends StatelessWidget {
@@ -35,6 +37,7 @@ class CertificationListScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final cert = certs[index];
                 return Card(
+                  clipBehavior: Clip.antiAlias,
                   child: CertificationTile(
                     certification: cert,
                     trailing: const Icon(Icons.chevron_right, size: 16),
@@ -91,20 +94,35 @@ class CertificationTile extends StatelessWidget {
       }
     }
 
-    return ListTile(
-      title: Padding(
-        padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+    return InkWell(
+      onTap: onTap,
+      child: IntrinsicHeight(
         child: Row(
-          spacing: 8,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Flexible(child: Text(title)),
-            ...badges,
+            if (cert.cardFrontId.isNotEmpty)
+              AspectRatio(aspectRatio: 16 / 10, child: _FrontThumbnail(photoId: cert.cardFrontId)),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(spacing: 8, children: [Flexible(child: Text(title)), ...badges]),
+                    if (details.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Wrap(spacing: 8, runSpacing: 8, children: details),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            if (trailing != null) Padding(padding: const EdgeInsets.only(right: 8), child: Center(child: trailing)),
           ],
         ),
       ),
-      subtitle: details.isEmpty ? null : Wrap(spacing: 8, runSpacing: 8, children: details),
-      trailing: trailing,
-      onTap: onTap,
     );
   }
 
@@ -115,5 +133,55 @@ class CertificationTile extends StatelessWidget {
     if (name.isNotEmpty) return name;
     if (agency.isNotEmpty) return agency;
     return 'Certification #${cert.id}';
+  }
+}
+
+class _FrontThumbnail extends StatefulWidget {
+  final String photoId;
+
+  const _FrontThumbnail({required this.photoId});
+
+  @override
+  State<_FrontThumbnail> createState() => _FrontThumbnailState();
+}
+
+class _FrontThumbnailState extends State<_FrontThumbnail> {
+  Uint8List? _bytes;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void didUpdateWidget(_FrontThumbnail old) {
+    super.didUpdateWidget(old);
+    if (old.photoId != widget.photoId) {
+      _bytes = null;
+      _load();
+    }
+  }
+
+  Future<void> _load() async {
+    final data = await StorageProvider.instance.store.photos.readData(widget.photoId);
+    if (!mounted) return;
+    setState(() => _bytes = data);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    // DecorationImage rather than Image.memory: the latter reports the photo's
+    // natural pixel size as its intrinsic dimensions, which makes the
+    // enclosing IntrinsicHeight blow the row up to the original photo size.
+    // DecorationImage paints into whatever box the parent provides without
+    // contributing to intrinsic sizing.
+    if (_bytes != null) {
+      return DecoratedBox(
+        decoration: BoxDecoration(image: DecorationImage(image: MemoryImage(_bytes!), fit: BoxFit.cover)),
+      );
+    }
+    return Container(color: cs.surfaceContainerHighest, child: Icon(Icons.image_outlined, size: 20, color: cs.onSurfaceVariant));
   }
 }
