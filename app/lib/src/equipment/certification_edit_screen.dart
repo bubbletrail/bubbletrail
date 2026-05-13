@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:btproto/btproto.dart';
 import 'package:flutter/foundation.dart';
@@ -433,19 +434,23 @@ class _PhotoCard extends StatelessWidget {
             ),
             AspectRatio(
               aspectRatio: _cardAspectRatio,
-              child: InkWell(
-                // Only the empty placeholder is tap-to-pick. When a photo is
-                // present, replacement happens via the explicit Replace button
-                // so an accidental tap doesn't blow the picker open.
-                onTap: _hasContent ? null : onPick,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerHighest,
-                    border: Border.all(color: cs.outline),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: ClipRRect(borderRadius: BorderRadius.circular(8), child: _buildPreview(context)),
-                ),
+              child: Builder(
+                builder: (context) {
+                  return InkWell(
+                    // Empty placeholder: tap to pick. Filled: tap to view
+                    // full-screen. Replacement is the explicit Replace button
+                    // so an accidental tap doesn't blow the picker open.
+                    onTap: _hasContent ? () => _viewFullscreen(context) : onPick,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerHighest,
+                        border: Border.all(color: cs.outline),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: ClipRRect(borderRadius: BorderRadius.circular(8), child: _buildPreview(context)),
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -469,6 +474,62 @@ class _PhotoCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text('Tap to add photo', style: TextStyle(color: Theme.of(context).hintColor)),
         ],
+      ),
+    );
+  }
+
+  Future<void> _viewFullscreen(BuildContext context) async {
+    Uint8List? bytes = newBytes;
+    if (bytes == null && !cleared && photoId.isNotEmpty) {
+      bytes = await StorageProvider.instance.store.photos.readData(photoId);
+    }
+    if (bytes == null || !context.mounted) return;
+    // rootNavigator pushes above the StatefulShell, so the nav rail / bottom
+    // bar gets covered by the fullscreen viewer.
+    await Navigator.of(context, rootNavigator: true).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierColor: Colors.black,
+        pageBuilder: (_, _, _) => _FullscreenPhoto(bytes: bytes!, label: label),
+      ),
+    );
+  }
+}
+
+class _FullscreenPhoto extends StatelessWidget {
+  final Uint8List bytes;
+  final String label;
+
+  const _FullscreenPhoto({required this.bytes, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    // macOS uses fullSizeContentView so the Flutter surface extends under the
+    // title bar / traffic lights, and the title bar height is reported neither
+    // via MediaQuery.padding (so SafeArea is a no-op) nor viewPadding. Hard
+    // code the standard ~28px clearance on macOS; other platforms get their
+    // real viewPadding.
+    final basePadding = MediaQuery.of(context).viewPadding;
+    final padding = Platform.isMacOS ? basePadding.copyWith(top: basePadding.top + 28) : basePadding;
+    return Container(
+      color: Colors.black,
+      child: Padding(
+        padding: padding,
+        child: Column(
+          children: [
+            AppBar(
+              backgroundColor: Colors.transparent,
+              foregroundColor: Colors.white,
+              title: Text(label),
+              leading: IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop()),
+            ),
+            Expanded(
+              child: Center(
+                child: InteractiveViewer(minScale: 1.0, maxScale: 6.0, child: Image.memory(bytes, fit: BoxFit.contain)),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
