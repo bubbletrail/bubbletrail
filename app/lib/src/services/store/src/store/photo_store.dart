@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:btproto/btproto.dart';
 import 'package:logging/logging.dart';
@@ -20,6 +21,14 @@ final _log = Logger('photo_store.dart');
 // the metadata says deleted), since the bytes themselves never change.
 class PhotoStore extends EntityStore<Photo, InternalPhotoList> {
   final String _dir;
+
+  // Bounded in-memory cache of decoded+resized PNG bytes, used by list views
+  // so they don't re-read and re-decode the full-resolution blob from disk on
+  // every rebuild. Keyed by photo ID; entries are evicted in insertion order
+  // (oldest-first) once the limit is hit, and on blob deletion.
+  static const _thumbnailMaxEdge = 400;
+  static const _thumbnailCacheLimit = 50;
+  final _thumbnailCache = <String, Uint8List>{};
 
   PhotoStore(String dir) : _dir = dir, super('$dir/index.binpb', syncKey: 'photos', entityName: 'photos', log: _log);
 
@@ -77,6 +86,50 @@ class PhotoStore extends EntityStore<Photo, InternalPhotoList> {
     }
   }
 
+  // Return a small in-memory cached thumbnail for list rendering. Falls back
+  // to the full blob bytes if decoding fails, so callers always get something
+  // paintable when the blob is readable.
+  Future<Uint8List?> readThumbnail(String id) async {
+    final cached = _thumbnailCache.remove(id);
+    if (cached != null) {
+      // Reinsert to mark as most-recently-used.
+      _thumbnailCache[id] = cached;
+      return cached;
+    }
+    final bytes = await readData(id);
+    if (bytes == null) return null;
+    try {
+      final thumb = await _generateThumbnail(bytes);
+      _thumbnailCache[id] = thumb;
+      while (_thumbnailCache.length > _thumbnailCacheLimit) {
+        _thumbnailCache.remove(_thumbnailCache.keys.first);
+      }
+      return thumb;
+    } catch (e) {
+      _log.warning('failed to generate thumbnail for photo $id', e);
+      return bytes;
+    }
+  }
+
+  Future<Uint8List> _generateThumbnail(Uint8List bytes) async {
+    // targetWidth alone preserves aspect ratio; the decoder produces the
+    // resized bitmap directly, so the full-resolution image is never held
+    // in memory.
+    final codec = await ui.instantiateImageCodec(bytes, targetWidth: _thumbnailMaxEdge);
+    try {
+      final frame = await codec.getNextFrame();
+      try {
+        final byteData = await frame.image.toByteData(format: ui.ImageByteFormat.png);
+        if (byteData == null) throw StateError('toByteData returned null');
+        return byteData.buffer.asUint8List();
+      } finally {
+        frame.image.dispose();
+      }
+    } finally {
+      codec.dispose();
+    }
+  }
+
   @override
   Future<void> delete(String id) async {
     await super.delete(id);
@@ -84,6 +137,7 @@ class PhotoStore extends EntityStore<Photo, InternalPhotoList> {
   }
 
   Future<void> _deleteLocalBlob(String id) async {
+    _thumbnailCache.remove(id);
     try {
       await File(_blobPath(id)).delete();
     } on PathNotFoundException {

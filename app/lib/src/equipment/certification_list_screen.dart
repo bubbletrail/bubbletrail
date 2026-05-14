@@ -174,7 +174,7 @@ class _FrontThumbnailState extends State<_FrontThumbnail> {
   }
 
   Future<void> _load() async {
-    final data = await StorageProvider.instance.store.photos.readData(widget.photoId);
+    final data = await StorageProvider.instance.store.photos.readThumbnail(widget.photoId);
     if (!mounted) return;
     setState(() => _bytes = data);
   }
