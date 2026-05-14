@@ -158,3 +158,80 @@ final $typed_data.Uint8List cylinderDescriptor = $convert.base64Decode(
     'NrZ2FzGAggASgIUhFkZWZhdWx0Rm9yQmFja2dhcxIxChVkZWZhdWx0X2Zvcl9kZWVwX2RlY28Y'
     'CSABKAhSEmRlZmF1bHRGb3JEZWVwRGVjbxI3ChhkZWZhdWx0X2Zvcl9zaGFsbG93X2RlY28YCi'
     'ABKAhSFWRlZmF1bHRGb3JTaGFsbG93RGVjbw==');
+
+@$core.Deprecated('Use certificationDescriptor instead')
+const Certification$json = {
+  '1': 'Certification',
+  '2': [
+    {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
+    {
+      '1': 'meta',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.btstore.Metadata',
+      '10': 'meta'
+    },
+    {'1': 'agency', '3': 3, '4': 1, '5': 9, '10': 'agency'},
+    {'1': 'name', '3': 4, '4': 1, '5': 9, '10': 'name'},
+    {'1': 'number', '3': 5, '4': 1, '5': 9, '10': 'number'},
+    {'1': 'instructor_name', '3': 6, '4': 1, '5': 9, '10': 'instructorName'},
+    {
+      '1': 'instructor_number',
+      '3': 7,
+      '4': 1,
+      '5': 9,
+      '10': 'instructorNumber'
+    },
+    {
+      '1': 'granted',
+      '3': 8,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Timestamp',
+      '10': 'granted'
+    },
+    {
+      '1': 'expires',
+      '3': 9,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Timestamp',
+      '10': 'expires'
+    },
+    {'1': 'card_front_id', '3': 10, '4': 1, '5': 9, '10': 'cardFrontId'},
+    {'1': 'card_back_id', '3': 11, '4': 1, '5': 9, '10': 'cardBackId'},
+  ],
+};
+
+/// Descriptor for `Certification`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List certificationDescriptor = $convert.base64Decode(
+    'Cg1DZXJ0aWZpY2F0aW9uEg4KAmlkGAEgASgJUgJpZBIlCgRtZXRhGAIgASgLMhEuYnRzdG9yZS'
+    '5NZXRhZGF0YVIEbWV0YRIWCgZhZ2VuY3kYAyABKAlSBmFnZW5jeRISCgRuYW1lGAQgASgJUgRu'
+    'YW1lEhYKBm51bWJlchgFIAEoCVIGbnVtYmVyEicKD2luc3RydWN0b3JfbmFtZRgGIAEoCVIOaW'
+    '5zdHJ1Y3Rvck5hbWUSKwoRaW5zdHJ1Y3Rvcl9udW1iZXIYByABKAlSEGluc3RydWN0b3JOdW1i'
+    'ZXISNAoHZ3JhbnRlZBgIIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSB2dyYW50ZW'
+    'QSNAoHZXhwaXJlcxgJIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSB2V4cGlyZXMS'
+    'IgoNY2FyZF9mcm9udF9pZBgKIAEoCVILY2FyZEZyb250SWQSIAoMY2FyZF9iYWNrX2lkGAsgAS'
+    'gJUgpjYXJkQmFja0lk');
+
+@$core.Deprecated('Use photoDescriptor instead')
+const Photo$json = {
+  '1': 'Photo',
+  '2': [
+    {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
+    {
+      '1': 'meta',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.btstore.Metadata',
+      '10': 'meta'
+    },
+  ],
+};
+
+/// Descriptor for `Photo`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List photoDescriptor = $convert.base64Decode(
+    'CgVQaG90bxIOCgJpZBgBIAEoCVICaWQSJQoEbWV0YRgCIAEoCzIRLmJ0c3RvcmUuTWV0YWRhdG'
+    'FSBG1ldGE=');

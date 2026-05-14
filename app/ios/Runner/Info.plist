@@ -71,8 +71,10 @@
 		<true/>
 		<key>NSBluetoothAlwaysUsageDescription</key>
 		<string>Connecting to dive computers</string>
+		<key>NSCameraUsageDescription</key>
+		<string>Taking photos of certification cards</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>Adding photos to dive logs</string>
+		<string>Selecting photos of certification cards and dive logs</string>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
 		<key>UILaunchStoryboardName</key>

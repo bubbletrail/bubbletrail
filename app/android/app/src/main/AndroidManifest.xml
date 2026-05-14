@@ -51,6 +51,11 @@
      Set android:required="true" if bluetooth is necessary -->
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
 
+    <!-- Camera is optional: used for taking photos of certification cards.
+         image_picker delegates to the system camera app, so no CAMERA permission is needed. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+
     <!-- New Bluetooth permissions in Android 12
 https://developer.android.com/about/versions/12/features/bluetooth-permissions -->
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN"

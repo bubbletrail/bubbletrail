@@ -28,3 +28,11 @@ message InternalComputerList {
 message InternalEquipmentList {
   repeated Equipment equipments = 1;
 }
+
+message InternalCertificationList {
+  repeated Certification certifications = 1;
+}
+
+message InternalPhotoList {
+  repeated Photo photos = 1;
+}

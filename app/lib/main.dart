@@ -28,6 +28,10 @@ import 'src/dives_sites/site_details_bloc.dart';
 import 'src/dives_sites/site_details_screen.dart';
 import 'src/dives_sites/site_edit_screen.dart';
 import 'src/dives_sites/site_list_screen.dart';
+import 'src/equipment/certification_details_bloc.dart';
+import 'src/equipment/certification_edit_screen.dart';
+import 'src/equipment/certification_list_bloc.dart';
+import 'src/equipment/certification_list_screen.dart';
 import 'src/equipment/cylinder_details_bloc.dart';
 import 'src/equipment/cylinder_edit_screen.dart';
 import 'src/equipment/cylinder_list_bloc.dart';
@@ -94,6 +98,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
   late final DiveListBloc _diveListBloc;
   late final CylinderListBloc _cylinderListBloc;
   late final EquipmentListBloc _equipmentListBloc;
+  late final CertificationListBloc _certificationListBloc;
   BleScanBloc? _bleScanBloc;
   BleDownloadBloc? _bleDownloadBloc;
   late final GoRouter _router;
@@ -106,6 +111,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
     _diveListBloc = DiveListBloc();
     _cylinderListBloc = CylinderListBloc();
     _equipmentListBloc = EquipmentListBloc();
+    _certificationListBloc = CertificationListBloc();
     if (platformSupportsConnect) {
       _bleScanBloc = BleScanBloc();
       _bleDownloadBloc = BleDownloadBloc(_bleScanBloc!);
@@ -339,6 +345,29 @@ class _MyAppState extends State<MyApp> with WindowListener {
                         ),
                       ],
                     ),
+                    GoRoute(
+                      path: AppRoutePath.certifications,
+                      name: AppRouteName.certifications,
+                      builder: (context, state) => const CertificationListScreen(),
+                      routes: <RouteBase>[
+                        GoRoute(
+                          path: AppRoutePath.certificationsNew,
+                          name: AppRouteName.certificationsNew,
+                          builder: (context, state) => BlocProvider(
+                            create: (context) => CertificationDetailsBloc()..add(const CertificationDetailsEvent.newCertification()),
+                            child: DetailsAvailable<CertificationDetailsBloc, CertificationDetailsState>(child: const CertificationEditScreen()),
+                          ),
+                        ),
+                        GoRoute(
+                          path: AppRoutePath.certificationsDetails,
+                          name: AppRouteName.certificationsDetails,
+                          builder: (context, state) => BlocProvider(
+                            create: (context) => CertificationDetailsBloc()..add(CertificationDetailsEvent.load(state.pathParameters['certificationID']!)),
+                            child: DetailsAvailable<CertificationDetailsBloc, CertificationDetailsState>(child: const CertificationEditScreen()),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ],
@@ -419,6 +448,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
         BlocProvider.value(value: _diveListBloc),
         BlocProvider.value(value: _cylinderListBloc),
         BlocProvider.value(value: _equipmentListBloc),
+        BlocProvider.value(value: _certificationListBloc),
         if (_bleScanBloc != null) BlocProvider.value(value: _bleScanBloc!),
         if (_bleDownloadBloc != null) BlocProvider.value(value: _bleDownloadBloc!),
       ],

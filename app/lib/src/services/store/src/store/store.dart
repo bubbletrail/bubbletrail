@@ -12,10 +12,12 @@ import 'package:logging/logging.dart';
 import '../archive/archiveprovider.dart';
 import '../ext/ext.dart';
 import '../sync/syncprovider.dart';
+import 'certification_store.dart';
 import 'computer_store.dart';
 import 'cylinder_store.dart';
 import 'dive_store.dart';
 import 'equipment_store.dart';
+import 'photo_store.dart';
 import 'site_store.dart';
 
 final _log = Logger('store.dart');
@@ -23,30 +25,38 @@ final _log = Logger('store.dart');
 class Store with ChangeNotifier {
   final String path;
 
+  final CertificationStore certifications;
   final ComputerStore computers;
   final CylinderStore cylinders;
   final DiveStore dives;
   final EquipmentStore equipment;
+  final PhotoStore photos;
   final SiteStore sites;
 
   Store(this.path)
-    : cylinders = CylinderStore('$path/cylinders.binpb'),
+    : certifications = CertificationStore('$path/certifications.binpb'),
+      cylinders = CylinderStore('$path/cylinders.binpb'),
       dives = DiveStore('$path/dives'),
       equipment = EquipmentStore('$path/equipment.binpb'),
+      photos = PhotoStore('$path/photos'),
       sites = SiteStore('$path/sites.binpb'),
       computers = ComputerStore('$path/computers.binpb') {
+    certifications.addListener(notifyListeners);
     computers.addListener(notifyListeners);
     cylinders.addListener(notifyListeners);
     dives.addListener(notifyListeners);
     equipment.addListener(notifyListeners);
+    photos.addListener(notifyListeners);
     sites.addListener(notifyListeners);
   }
 
   Future<void> init() async {
+    await certifications.init();
     await computers.init();
     await cylinders.init();
     await dives.init();
     await equipment.init();
+    await photos.init();
     await sites.init();
   }
 
@@ -67,6 +77,18 @@ class Store with ChangeNotifier {
   Set<String> get tags => sites.tags.union(dives.tags);
 
   Future<void> syncWith(SyncProvider provider) async {
+    // Photos sync before certifications so that any certifications pulled in
+    // later already have their referenced blobs available locally.
+    try {
+      await photos.syncWith(provider);
+    } catch (e) {
+      _log.warning('failed to sync photos', e);
+    }
+    try {
+      await certifications.syncWith(provider);
+    } catch (e) {
+      _log.warning('failed to sync certifications', e);
+    }
     try {
       await computers.syncWith(provider);
     } catch (e) {

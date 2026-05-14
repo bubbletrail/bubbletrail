@@ -120,14 +120,14 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
   Future<void> _selectPurchaseDate() async {
     final date = await showDatePicker(context: context, initialDate: _purchaseDate ?? DateTime.now(), firstDate: DateTime(1990), lastDate: DateTime.now());
     if (date != null) {
-      setState(() => _purchaseDate = date);
+      setState(() => _purchaseDate = _asUtcDate(date));
     }
   }
 
   Future<void> _selectLastService() async {
     final date = await showDatePicker(context: context, initialDate: _lastService ?? DateTime.now(), firstDate: DateTime(1990), lastDate: DateTime.now());
     if (date != null) {
-      setState(() => _lastService = date);
+      setState(() => _lastService = _asUtcDate(date));
     }
   }
 
@@ -139,9 +139,14 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
       lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
     );
     if (date != null) {
-      setState(() => _warrantyUntil = date);
+      setState(() => _warrantyUntil = _asUtcDate(date));
     }
   }
+
+  // showDatePicker returns midnight in local time; we store calendar dates as
+  // UTC midnight so the displayed Y/M/D matches the user's selection regardless
+  // of timezone (proto Timestamp.fromDateTime / toDateTime go via UTC).
+  DateTime _asUtcDate(DateTime d) => DateTime.utc(d.year, d.month, d.day);
 
   PopupMenuButton<String> _popupMenuActions() {
     return PopupMenuButton<String>(
