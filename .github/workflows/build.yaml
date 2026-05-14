@@ -61,7 +61,6 @@ jobs:
   build-macos:
     name: Build for macOS
     runs-on: macos-26
-    environment: release
     needs:
       - test
       - release-please
@@ -147,7 +146,6 @@ jobs:
   build-ios:
     name: Build for iOS (Appstore)
     runs-on: macos-26
-    environment: release
     needs:
       - test
       - release-please
@@ -202,7 +200,6 @@ jobs:
   build-windows:
     name: Build for Windows
     runs-on: windows-latest
-    environment: release
     needs:
       - test
       - release-please
@@ -266,7 +263,6 @@ jobs:
   build-android:
     name: Build for Android (Play Store)
     runs-on: ubuntu-latest
-    environment: release
     needs:
       - test
       - release-please
