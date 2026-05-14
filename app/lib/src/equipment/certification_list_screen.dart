@@ -101,7 +101,10 @@ class CertificationTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (cert.cardFrontId.isNotEmpty)
-              AspectRatio(aspectRatio: 16 / 10, child: _FrontThumbnail(photoId: cert.cardFrontId)),
+              AspectRatio(
+                aspectRatio: 16 / 10,
+                child: _FrontThumbnail(photoId: cert.cardFrontId),
+              ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -110,16 +113,23 @@ class CertificationTile extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Row(spacing: 8, children: [Flexible(child: Text(title)), ...badges]),
-                    if (details.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Wrap(spacing: 8, runSpacing: 8, children: details),
-                    ],
+                    Row(
+                      spacing: 8,
+                      children: [
+                        Flexible(child: Text(title)),
+                        ...badges,
+                      ],
+                    ),
+                    if (details.isNotEmpty) ...[const SizedBox(height: 8), Wrap(spacing: 8, runSpacing: 8, children: details)],
                   ],
                 ),
               ),
             ),
-            if (trailing != null) Padding(padding: const EdgeInsets.only(right: 8), child: Center(child: trailing)),
+            if (trailing != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Center(child: trailing),
+              ),
           ],
         ),
       ),
@@ -179,9 +189,14 @@ class _FrontThumbnailState extends State<_FrontThumbnail> {
     // contributing to intrinsic sizing.
     if (_bytes != null) {
       return DecoratedBox(
-        decoration: BoxDecoration(image: DecorationImage(image: MemoryImage(_bytes!), fit: BoxFit.cover)),
+        decoration: BoxDecoration(
+          image: DecorationImage(image: MemoryImage(_bytes!), fit: BoxFit.cover),
+        ),
       );
     }
-    return Container(color: cs.surfaceContainerHighest, child: Icon(Icons.image_outlined, size: 20, color: cs.onSurfaceVariant));
+    return Container(
+      color: cs.surfaceContainerHighest,
+      child: Icon(Icons.image_outlined, size: 20, color: cs.onSurfaceVariant),
+    );
   }
 }
