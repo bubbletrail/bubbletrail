@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.16.0](https://github.com/bubbletrail/bubbletrail/compare/v0.15.2...v0.16.0) (2026-05-14)
+
+
+### Features
+
+* certificate handling, with photos ([#67](https://github.com/bubbletrail/bubbletrail/issues/67)) ([df3b74c](https://github.com/bubbletrail/bubbletrail/commit/df3b74c60cae1281c18f9396a944d26935df8ce1))
+
+
+### Bug Fixes
+
+* windows archive name ([ff72c54](https://github.com/bubbletrail/bubbletrail/commit/ff72c54286548ffd1c1c5b1745002143109d94fc))
+
 ## [0.15.2](https://github.com/bubbletrail/bubbletrail/compare/0.15.1...v0.15.2) (2026-05-03)
 
 
