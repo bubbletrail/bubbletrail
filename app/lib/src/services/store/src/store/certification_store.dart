@@ -46,6 +46,6 @@ class CertificationStore extends EntityStore<Certification, InternalCertificatio
     } else if (b.hasGranted()) {
       return 1;
     }
-    return '${a.agency} ${a.certificationName}'.compareTo('${b.agency} ${b.certificationName}');
+    return '${a.agency} ${a.name}'.compareTo('${b.agency} ${b.name}');
   }
 }

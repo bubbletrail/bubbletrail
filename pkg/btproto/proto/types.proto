@@ -53,8 +53,8 @@ message Certification {
   Metadata meta = 2;
 
   string agency = 3;
-  string certification_name = 4;
-  string certification_number = 5;
+  string name = 4;
+  string number = 5;
   string instructor_name = 6;
   string instructor_number = 7;
 

@@ -66,8 +66,8 @@ class _CertificationEditScreenState extends State<CertificationEditScreen> {
     _isNew = state.isNew;
 
     _agencyController = TextEditingController(text: _original.agency);
-    _nameController = TextEditingController(text: _original.certificationName);
-    _numberController = TextEditingController(text: _original.certificationNumber);
+    _nameController = TextEditingController(text: _original.name);
+    _numberController = TextEditingController(text: _original.number);
     _instructorNameController = TextEditingController(text: _original.instructorName);
     _instructorNumberController = TextEditingController(text: _original.instructorNumber);
 
@@ -99,8 +99,8 @@ class _CertificationEditScreenState extends State<CertificationEditScreen> {
 
     final updated = _original.rebuild((b) {
       b.agency = _agencyController.text.trim();
-      b.certificationName = _nameController.text.trim();
-      b.certificationNumber = _numberController.text.trim();
+      b.name = _nameController.text.trim();
+      b.number = _numberController.text.trim();
 
       final instructorName = _instructorNameController.text.trim();
       final instructorNumber = _instructorNumberController.text.trim();

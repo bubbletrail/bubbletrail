@@ -456,8 +456,8 @@ class Certification extends $pb.GeneratedMessage {
     $core.String? id,
     Metadata? meta,
     $core.String? agency,
-    $core.String? certificationName,
-    $core.String? certificationNumber,
+    $core.String? name,
+    $core.String? number,
     $core.String? instructorName,
     $core.String? instructorNumber,
     $0.Timestamp? granted,
@@ -469,9 +469,8 @@ class Certification extends $pb.GeneratedMessage {
     if (id != null) result.id = id;
     if (meta != null) result.meta = meta;
     if (agency != null) result.agency = agency;
-    if (certificationName != null) result.certificationName = certificationName;
-    if (certificationNumber != null)
-      result.certificationNumber = certificationNumber;
+    if (name != null) result.name = name;
+    if (number != null) result.number = number;
     if (instructorName != null) result.instructorName = instructorName;
     if (instructorNumber != null) result.instructorNumber = instructorNumber;
     if (granted != null) result.granted = granted;
@@ -498,8 +497,8 @@ class Certification extends $pb.GeneratedMessage {
     ..aOM<Metadata>(2, _omitFieldNames ? '' : 'meta',
         subBuilder: Metadata.create)
     ..aOS(3, _omitFieldNames ? '' : 'agency')
-    ..aOS(4, _omitFieldNames ? '' : 'certificationName')
-    ..aOS(5, _omitFieldNames ? '' : 'certificationNumber')
+    ..aOS(4, _omitFieldNames ? '' : 'name')
+    ..aOS(5, _omitFieldNames ? '' : 'number')
     ..aOS(6, _omitFieldNames ? '' : 'instructorName')
     ..aOS(7, _omitFieldNames ? '' : 'instructorNumber')
     ..aOM<$0.Timestamp>(8, _omitFieldNames ? '' : 'granted',
@@ -559,22 +558,22 @@ class Certification extends $pb.GeneratedMessage {
   void clearAgency() => $_clearField(3);
 
   @$pb.TagNumber(4)
-  $core.String get certificationName => $_getSZ(3);
+  $core.String get name => $_getSZ(3);
   @$pb.TagNumber(4)
-  set certificationName($core.String value) => $_setString(3, value);
+  set name($core.String value) => $_setString(3, value);
   @$pb.TagNumber(4)
-  $core.bool hasCertificationName() => $_has(3);
+  $core.bool hasName() => $_has(3);
   @$pb.TagNumber(4)
-  void clearCertificationName() => $_clearField(4);
+  void clearName() => $_clearField(4);
 
   @$pb.TagNumber(5)
-  $core.String get certificationNumber => $_getSZ(4);
+  $core.String get number => $_getSZ(4);
   @$pb.TagNumber(5)
-  set certificationNumber($core.String value) => $_setString(4, value);
+  set number($core.String value) => $_setString(4, value);
   @$pb.TagNumber(5)
-  $core.bool hasCertificationNumber() => $_has(4);
+  $core.bool hasNumber() => $_has(4);
   @$pb.TagNumber(5)
-  void clearCertificationNumber() => $_clearField(5);
+  void clearNumber() => $_clearField(5);
 
   @$pb.TagNumber(6)
   $core.String get instructorName => $_getSZ(5);

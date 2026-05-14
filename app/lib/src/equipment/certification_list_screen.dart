@@ -70,8 +70,8 @@ class CertificationTile extends StatelessWidget {
     final title = _title(cert);
     final details = <Widget>[];
 
-    if (cert.certificationNumber.isNotEmpty) {
-      details.add(LabeledChip(label: 'Number', child: Text(cert.certificationNumber)));
+    if (cert.number.isNotEmpty) {
+      details.add(LabeledChip(label: 'Number', child: Text(cert.number)));
     }
     if (cert.hasGranted()) {
       details.add(LabeledChip(label: 'Granted', child: Text(DateFormat.yMMMd().format(cert.granted.toDateTime()))));
@@ -138,7 +138,7 @@ class CertificationTile extends StatelessWidget {
 
   static String _title(Certification cert) {
     final agency = cert.agency.trim();
-    final name = cert.certificationName.trim();
+    final name = cert.name.trim();
     if (agency.isNotEmpty && name.isNotEmpty) return '$agency – $name';
     if (name.isNotEmpty) return name;
     if (agency.isNotEmpty) return agency;

@@ -173,20 +173,8 @@ const Certification$json = {
       '10': 'meta'
     },
     {'1': 'agency', '3': 3, '4': 1, '5': 9, '10': 'agency'},
-    {
-      '1': 'certification_name',
-      '3': 4,
-      '4': 1,
-      '5': 9,
-      '10': 'certificationName'
-    },
-    {
-      '1': 'certification_number',
-      '3': 5,
-      '4': 1,
-      '5': 9,
-      '10': 'certificationNumber'
-    },
+    {'1': 'name', '3': 4, '4': 1, '5': 9, '10': 'name'},
+    {'1': 'number', '3': 5, '4': 1, '5': 9, '10': 'number'},
     {'1': 'instructor_name', '3': 6, '4': 1, '5': 9, '10': 'instructorName'},
     {
       '1': 'instructor_number',
@@ -219,14 +207,13 @@ const Certification$json = {
 /// Descriptor for `Certification`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List certificationDescriptor = $convert.base64Decode(
     'Cg1DZXJ0aWZpY2F0aW9uEg4KAmlkGAEgASgJUgJpZBIlCgRtZXRhGAIgASgLMhEuYnRzdG9yZS'
-    '5NZXRhZGF0YVIEbWV0YRIWCgZhZ2VuY3kYAyABKAlSBmFnZW5jeRItChJjZXJ0aWZpY2F0aW9u'
-    'X25hbWUYBCABKAlSEWNlcnRpZmljYXRpb25OYW1lEjEKFGNlcnRpZmljYXRpb25fbnVtYmVyGA'
-    'UgASgJUhNjZXJ0aWZpY2F0aW9uTnVtYmVyEicKD2luc3RydWN0b3JfbmFtZRgGIAEoCVIOaW5z'
-    'dHJ1Y3Rvck5hbWUSKwoRaW5zdHJ1Y3Rvcl9udW1iZXIYByABKAlSEGluc3RydWN0b3JOdW1iZX'
-    'ISNAoHZ3JhbnRlZBgIIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSB2dyYW50ZWQS'
-    'NAoHZXhwaXJlcxgJIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSB2V4cGlyZXMSIg'
-    'oNY2FyZF9mcm9udF9pZBgKIAEoCVILY2FyZEZyb250SWQSIAoMY2FyZF9iYWNrX2lkGAsgASgJ'
-    'UgpjYXJkQmFja0lk');
+    '5NZXRhZGF0YVIEbWV0YRIWCgZhZ2VuY3kYAyABKAlSBmFnZW5jeRISCgRuYW1lGAQgASgJUgRu'
+    'YW1lEhYKBm51bWJlchgFIAEoCVIGbnVtYmVyEicKD2luc3RydWN0b3JfbmFtZRgGIAEoCVIOaW'
+    '5zdHJ1Y3Rvck5hbWUSKwoRaW5zdHJ1Y3Rvcl9udW1iZXIYByABKAlSEGluc3RydWN0b3JOdW1i'
+    'ZXISNAoHZ3JhbnRlZBgIIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSB2dyYW50ZW'
+    'QSNAoHZXhwaXJlcxgJIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSB2V4cGlyZXMS'
+    'IgoNY2FyZF9mcm9udF9pZBgKIAEoCVILY2FyZEZyb250SWQSIAoMY2FyZF9iYWNrX2lkGAsgAS'
+    'gJUgpjYXJkQmFja0lk');
 
 @$core.Deprecated('Use photoDescriptor instead')
 const Photo$json = {
