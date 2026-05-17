@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   calver:
+    name: Set version
     runs-on: ubuntu-latest
     if: github.repository == 'bubbletrail/bubbletrail'
     steps:
@@ -315,7 +316,7 @@ jobs:
 
   publish-release:
     name: Publish GitHub release
-    if: needs.calver.outputs.release
+    if: needs.calver.outputs.release && github.ref == 'refs/heads/release'
     permissions:
       contents: write
     needs:
