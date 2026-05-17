@@ -16,14 +16,13 @@ jobs:
     steps:
       - id: calver
         uses: docker://ghcr.io/calmh/calver:latest
-      - id: buildnumber
-        run: |
+      - run: |
           echo "VERSION=${{ steps.calver.outputs.version }}" >> "$GITHUB_ENV"
           echo "BUILD_NUMBER=${{ github.run_number }}" >> "$GITHUB_ENV"
       - id: isrelease
         if: github.repository_owner == 'bubbletrail' && github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release')
         run: |
-          echo release=1 >> "$GITHUB_OUTPUT"
+          echo release=true >> "$GITHUB_OUTPUT"
     outputs:
       version: ${{ steps.calver.outputs.version }}
       release: ${{ steps.isrelease.outputs.release }}
