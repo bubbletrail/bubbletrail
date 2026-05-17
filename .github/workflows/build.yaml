@@ -53,7 +53,7 @@ jobs:
           done
 
   build-macos:
-    name: Build for macOS (${{ needs.calver.outputs.version}} ${{ github.env.BUILD_NUMBER }})
+    name: Build for macOS (${{ needs.calver.outputs.version}} ${{ github.run_number }})
     runs-on: macos-26
     needs:
       - test
@@ -138,7 +138,7 @@ jobs:
           RCLONE_CONFIG_MINIO_ACL: ${{ secrets.RCLONE_CONFIG_MINIO_ACL }}
 
   build-ios:
-    name: Build for iOS (Appstore) (${{ needs.calver.outputs.version}} ${{ github.env.BUILD_NUMBER }})
+    name: Build for iOS (Appstore) (${{ needs.calver.outputs.version}} ${{ github.run_number }})
     runs-on: macos-26
     needs:
       - test
@@ -192,7 +192,7 @@ jobs:
 
 
   build-windows:
-    name: Build for Windows (${{ needs.calver.outputs.version}} ${{ github.env.BUILD_NUMBER }})
+    name: Build for Windows (${{ needs.calver.outputs.version}} ${{ github.run_number }})
     runs-on: windows-latest
     needs:
       - test
@@ -255,7 +255,7 @@ jobs:
           retention-days: 1
 
   build-android:
-    name: Build for Android (Play Store) (${{ needs.calver.outputs.version}} ${{ github.env.BUILD_NUMBER }})
+    name: Build for Android (Play Store) (${{ needs.calver.outputs.version}} ${{ github.run_number }})
     runs-on: ubuntu-latest
     needs:
       - test
@@ -320,7 +320,7 @@ jobs:
           GOOGLE_PLAY_API_KEY_JSON: ${{ secrets.GOOGLE_PLAY_API_KEY_JSON }}
 
   publish-release:
-    name: Publish GitHub release (${{ needs.calver.outputs.version}} ${{ github.env.BUILD_NUMBER }})
+    name: Publish GitHub release (${{ needs.calver.outputs.version}} ${{ github.run_number }})
     if: needs.calver.outputs.release && github.ref == 'refs/heads/release'
     permissions:
       contents: write
@@ -358,7 +358,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
   build-server:
-    name: Build & test admin server (${{ needs.calver.outputs.version}} ${{ github.env.BUILD_NUMBER }})
+    name: Build & test admin server (${{ needs.calver.outputs.version}} ${{ github.run_number }})
     runs-on: ubuntu-latest
     permissions:
       packages: write
