@@ -328,8 +328,6 @@ jobs:
       - build-macos
       - build-windows
       - calver
-    env:
-      BUILD_NUMBER: ${{ github.run_number }}
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
