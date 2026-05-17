@@ -5,13 +5,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:trina_grid/trina_grid.dart';
 
+import '../app_metadata.dart';
 import '../app_routes.dart';
 import '../app_theme.dart';
 import '../common/common.dart';
 import 'dive_list_bloc.dart';
-
-/// Breakpoint width for switching between card (narrow) and table (wide) layouts.
-const double _narrowLayoutBreakpoint = 600;
 
 class SiteListScreen extends StatelessWidget {
   const SiteListScreen({super.key});
@@ -36,7 +34,7 @@ class SiteListScreen extends StatelessWidget {
 
             return LayoutBuilder(
               builder: (context, constraints) {
-                final isNarrow = constraints.maxWidth < _narrowLayoutBreakpoint;
+                final isNarrow = constraints.maxWidth < narrowLayoutBreakpoint;
                 return isNarrow ? _buildCardList(context, sites, state.diveCountBySiteId) : _buildTrinaGrid(context, sites, state.diveCountBySiteId);
               },
             );

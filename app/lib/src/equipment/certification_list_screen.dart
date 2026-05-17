@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
+import '../app_metadata.dart';
 import '../app_routes.dart';
 import '../common/common.dart';
 import '../providers/storage_provider.dart';
@@ -68,20 +68,6 @@ class CertificationTile extends StatelessWidget {
     final cert = certification;
 
     final title = _title(cert);
-    final details = <Widget>[];
-
-    if (cert.number.isNotEmpty) {
-      details.add(LabeledChip(label: 'Number', child: Text(cert.number)));
-    }
-    if (cert.hasGranted()) {
-      details.add(LabeledChip(label: 'Granted', child: Text(DateFormat.yMMMd().format(cert.granted.toDateTime()))));
-    }
-    if (cert.hasExpires()) {
-      details.add(LabeledChip(label: 'Expires', child: Text(DateFormat.yMMMd().format(cert.expires.toDateTime()))));
-    }
-    if (cert.instructorName.isNotEmpty) {
-      details.add(LabeledChip(label: 'Instructor', child: Text(cert.instructorName)));
-    }
 
     final badges = <Widget>[];
     if (cert.hasExpires()) {
@@ -89,7 +75,7 @@ class CertificationTile extends StatelessWidget {
       final now = DateTime.now();
       if (expiry.isBefore(now)) {
         badges.add(TextBadge(label: 'Expired', backgroundColor: cs.errorContainer, textColor: cs.onErrorContainer));
-      } else if (expiry.isBefore(now.add(const Duration(days: 60)))) {
+      } else if (expiry.isBefore(now.add(const Duration(days: 90)))) {
         badges.add(TextBadge(label: 'Expiring', backgroundColor: cs.tertiaryContainer, textColor: cs.onTertiaryContainer));
       }
     }
@@ -102,7 +88,7 @@ class CertificationTile extends StatelessWidget {
           children: [
             if (cert.cardFrontId.isNotEmpty)
               AspectRatio(
-                aspectRatio: 16 / 10,
+                aspectRatio: certificationCardAspectRatio,
                 child: _FrontThumbnail(photoId: cert.cardFrontId),
               ),
             Expanded(
@@ -120,7 +106,6 @@ class CertificationTile extends StatelessWidget {
                         ...badges,
                       ],
                     ),
-                    if (details.isNotEmpty) ...[const SizedBox(height: 8), Wrap(spacing: 8, runSpacing: 8, children: details)],
                   ],
                 ),
               ),
@@ -139,7 +124,7 @@ class CertificationTile extends StatelessWidget {
   static String _title(Certification cert) {
     final agency = cert.agency.trim();
     final name = cert.name.trim();
-    if (agency.isNotEmpty && name.isNotEmpty) return '$agency – $name';
+    if (agency.isNotEmpty && name.isNotEmpty) return '$name ($agency)';
     if (name.isNotEmpty) return name;
     if (agency.isNotEmpty) return agency;
     return 'Certification #${cert.id}';

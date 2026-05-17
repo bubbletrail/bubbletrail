@@ -17,3 +17,6 @@ final platformIsWindows = Platform.isWindows;
 
 /// Connect feature (dive computer download) is only available on mobile platforms
 final platformSupportsConnect = platformIsMobile;
+
+const narrowLayoutBreakpoint = 600;
+const certificationCardAspectRatio = 16 / 10;

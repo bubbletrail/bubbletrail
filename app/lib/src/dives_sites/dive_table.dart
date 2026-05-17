@@ -6,14 +6,12 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:trina_grid/trina_grid.dart';
 
+import '../app_metadata.dart';
 import '../app_routes.dart';
 import '../app_theme.dart';
 import '../common/common.dart';
 import '../preferences/preferences_store.dart';
 import 'dive_list_item_card.dart';
-
-/// Breakpoint width for switching between card (narrow) and table (wide) layouts.
-const double _narrowLayoutBreakpoint = 600;
 
 class DiveTable extends StatelessWidget {
   final List<Dive> dives;
@@ -35,7 +33,7 @@ class DiveTable extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isNarrow = constraints.maxWidth < _narrowLayoutBreakpoint;
+        final isNarrow = constraints.maxWidth < narrowLayoutBreakpoint;
         return isNarrow ? _buildCardList(context) : _buildTrinaGrid(context);
       },
     );

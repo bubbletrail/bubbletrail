@@ -21,6 +21,7 @@ abstract class AppRouteName {
   static const equipmentNew = 'new-equipment';
   static const certifications = 'certifications';
   static const certificationsDetails = 'certification-details';
+  static const certificationsDetailsEdit = 'certification-edit';
   static const certificationsNew = 'new-certification';
 
   static const preferences = 'preferences';
@@ -56,6 +57,7 @@ abstract class AppRoutePath {
   static const equipmentNew = 'new';
   static const certifications = 'certifications';
   static const certificationsDetails = ':certificationID';
+  static const certificationsDetailsEdit = 'edit';
   static const certificationsNew = 'new';
 
   static const preferences = '/preferences';

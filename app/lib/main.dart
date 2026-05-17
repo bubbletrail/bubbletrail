@@ -29,6 +29,7 @@ import 'src/dives_sites/site_details_screen.dart';
 import 'src/dives_sites/site_edit_screen.dart';
 import 'src/dives_sites/site_list_screen.dart';
 import 'src/equipment/certification_details_bloc.dart';
+import 'src/equipment/certification_details_screen.dart';
 import 'src/equipment/certification_edit_screen.dart';
 import 'src/equipment/certification_list_bloc.dart';
 import 'src/equipment/certification_list_screen.dart';
@@ -363,8 +364,18 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           name: AppRouteName.certificationsDetails,
                           builder: (context, state) => BlocProvider(
                             create: (context) => CertificationDetailsBloc()..add(CertificationDetailsEvent.load(state.pathParameters['certificationID']!)),
-                            child: DetailsAvailable<CertificationDetailsBloc, CertificationDetailsState>(child: const CertificationEditScreen()),
+                            child: DetailsAvailable<CertificationDetailsBloc, CertificationDetailsState>(child: const CertificationDetailsScreen()),
                           ),
+                          routes: [
+                            GoRoute(
+                              path: AppRoutePath.certificationsDetailsEdit,
+                              name: AppRouteName.certificationsDetailsEdit,
+                              builder: (context, state) => BlocProvider(
+                                create: (context) => CertificationDetailsBloc()..add(CertificationDetailsEvent.load(state.pathParameters['certificationID']!)),
+                                child: DetailsAvailable<CertificationDetailsBloc, CertificationDetailsState>(child: const CertificationEditScreen()),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
