@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.1](https://github.com/bubbletrail/bubbletrail/compare/v0.16.0...v0.16.1) (2026-05-17)
+
+
+### Bug Fixes
+
+* improve certifications list & view ([#69](https://github.com/bubbletrail/bubbletrail/issues/69)) ([3c3eb6d](https://github.com/bubbletrail/bubbletrail/commit/3c3eb6d161cb3a877197da596af69c9e7ecdd2c1))
+
 ## [0.16.0](https://github.com/bubbletrail/bubbletrail/compare/v0.15.2...v0.16.0) (2026-05-14)
 
 
