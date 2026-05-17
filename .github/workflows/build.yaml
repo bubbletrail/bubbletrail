@@ -8,6 +8,9 @@ permissions:
   issues: write
   pull-requests: write
 
+env:
+  BUILD_NUMBER: ${{ github.run_number }}
+
 jobs:
   calver:
     name: Set version
@@ -55,8 +58,6 @@ jobs:
     needs:
       - test
       - calver
-    env:
-      BUILD_NUMBER: ${{ github.run_number }}
     steps:
       - name: Clone repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -142,8 +143,6 @@ jobs:
     needs:
       - test
       - calver
-    env:
-      BUILD_NUMBER: ${{ github.run_number }}
     steps:
       - name: Clone repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -198,8 +197,6 @@ jobs:
     needs:
       - test
       - calver
-    env:
-      BUILD_NUMBER: ${{ github.run_number }}
     steps:
       - name: Clone repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -263,8 +260,6 @@ jobs:
     needs:
       - test
       - calver
-    env:
-      BUILD_NUMBER: ${{ github.run_number }}
     steps:
       - name: Clone repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
