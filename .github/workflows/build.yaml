@@ -353,7 +353,7 @@ jobs:
               --generate-notes
 
           gh release upload "$tag" packages/*.zip
-          gh release edit "$VERSION" --draft=false
+          gh release edit "$tag" --draft=false
         env:
           GH_TOKEN: ${{ github.token }}
 
