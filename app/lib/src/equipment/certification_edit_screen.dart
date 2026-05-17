@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:btproto/btproto.dart';
 import 'package:flutter/foundation.dart';
@@ -13,16 +12,10 @@ import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart' as 
 
 import '../app_metadata.dart';
 import '../common/common.dart';
-import '../providers/storage_provider.dart';
 import 'certification_details_bloc.dart';
+import 'certification_photo_widgets.dart';
 
 final _log = Logger('certification_edit_screen.dart');
-
-// Standard credit card aspect ratio is ~1.586:1, but we use 16:10 (1.6:1) as
-// a close-enough visual approximation that lines up with common layouts.
-const _cardAspectRatio = 16 / 10;
-
-const double _narrowLayoutBreakpoint = 600;
 
 class CertificationEditScreen extends StatefulWidget {
   const CertificationEditScreen({super.key});
@@ -272,7 +265,7 @@ class _CertificationEditScreenState extends State<CertificationEditScreen> {
           ],
           body: LayoutBuilder(
             builder: (context, constraints) {
-              final isNarrow = constraints.maxWidth < _narrowLayoutBreakpoint;
+              final isNarrow = constraints.maxWidth < narrowLayoutBreakpoint;
               final instructorName = TextField(
                 controller: _instructorNameController,
                 decoration: const InputDecoration(labelText: 'Instructor Name', border: OutlineInputBorder()),
@@ -433,7 +426,7 @@ class _PhotoCard extends StatelessWidget {
               ],
             ),
             AspectRatio(
-              aspectRatio: _cardAspectRatio,
+              aspectRatio: certificationCardAspectRatio,
               child: Builder(
                 builder: (context) {
                   return InkWell(
@@ -464,7 +457,7 @@ class _PhotoCard extends StatelessWidget {
       return Image.memory(newBytes!, fit: BoxFit.cover);
     }
     if (!cleared && photoId.isNotEmpty) {
-      return _StoredPhoto(photoId: photoId);
+      return StoredPhoto(photoId: photoId);
     }
     return Center(
       child: Column(
@@ -479,105 +472,6 @@ class _PhotoCard extends StatelessWidget {
   }
 
   Future<void> _viewFullscreen(BuildContext context) async {
-    Uint8List? bytes = newBytes;
-    if (bytes == null && !cleared && photoId.isNotEmpty) {
-      bytes = await StorageProvider.instance.store.photos.readData(photoId);
-    }
-    if (bytes == null || !context.mounted) return;
-    // rootNavigator pushes above the StatefulShell, so the nav rail / bottom
-    // bar gets covered by the fullscreen viewer.
-    await Navigator.of(context, rootNavigator: true).push(
-      PageRouteBuilder(
-        opaque: false,
-        barrierColor: Colors.black,
-        pageBuilder: (_, _, _) => _FullscreenPhoto(bytes: bytes!, label: label),
-      ),
-    );
-  }
-}
-
-class _FullscreenPhoto extends StatelessWidget {
-  final Uint8List bytes;
-  final String label;
-
-  const _FullscreenPhoto({required this.bytes, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    // macOS uses fullSizeContentView so the Flutter surface extends under the
-    // title bar / traffic lights, and the title bar height is reported neither
-    // via MediaQuery.padding (so SafeArea is a no-op) nor viewPadding. Hard
-    // code the standard ~28px clearance on macOS; other platforms get their
-    // real viewPadding.
-    final basePadding = MediaQuery.of(context).viewPadding;
-    final padding = Platform.isMacOS ? basePadding.copyWith(top: basePadding.top + 28) : basePadding;
-    return Container(
-      color: Colors.black,
-      child: Padding(
-        padding: padding,
-        child: Column(
-          children: [
-            AppBar(
-              backgroundColor: Colors.transparent,
-              foregroundColor: Colors.white,
-              title: Text(label),
-              leading: IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop()),
-            ),
-            Expanded(
-              child: Center(
-                child: InteractiveViewer(minScale: 1.0, maxScale: 6.0, child: Image.memory(bytes, fit: BoxFit.contain)),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StoredPhoto extends StatefulWidget {
-  final String photoId;
-
-  const _StoredPhoto({required this.photoId});
-
-  @override
-  State<_StoredPhoto> createState() => _StoredPhotoState();
-}
-
-class _StoredPhotoState extends State<_StoredPhoto> {
-  Uint8List? _bytes;
-  bool _loading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    final data = await StorageProvider.instance.store.photos.readData(widget.photoId);
-    if (!mounted) return;
-    setState(() {
-      _bytes = data;
-      _loading = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_loading) return const Center(child: CircularProgressIndicator());
-    if (_bytes == null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.broken_image_outlined, size: 40, color: Theme.of(context).hintColor),
-            const SizedBox(height: 4),
-            Text('Photo not yet downloaded', style: TextStyle(color: Theme.of(context).hintColor)),
-          ],
-        ),
-      );
-    }
-    return Image.memory(_bytes!, fit: BoxFit.cover);
+    await showFullscreenPhoto(context, label: label, bytes: newBytes, photoId: cleared ? null : photoId);
   }
 }

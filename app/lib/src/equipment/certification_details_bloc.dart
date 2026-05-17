@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:btproto/btproto.dart';
@@ -110,6 +111,7 @@ class _Close extends CertificationDetailsEvent {
 
 class CertificationDetailsBloc extends Bloc<CertificationDetailsEvent, CertificationDetailsState> {
   final _store = StorageProvider.instance.store;
+  VoidCallback? _storageListener;
 
   CertificationDetailsBloc() : super(const CertificationDetailsInitial()) {
     on<CertificationDetailsEvent>((event, emit) async {
@@ -135,10 +137,24 @@ class CertificationDetailsBloc extends Bloc<CertificationDetailsEvent, Certifica
         emit(const CertificationDetailsError('Certification not found'));
         return;
       }
+      // Subscribe to storage changes so that edits made in a sub-route are
+      // reflected when we pop back to the details view.
+      if (_storageListener == null) {
+        _storageListener = () => add(_Load(event.certificationId));
+        _store.certifications.addListener(_storageListener!);
+      }
       emit(CertificationDetailsLoaded(cert, false));
     } catch (e) {
       emit(CertificationDetailsError('Failed to load certification details: $e'));
     }
+  }
+
+  @override
+  Future<void> close() {
+    if (_storageListener != null) {
+      _store.certifications.removeListener(_storageListener!);
+    }
+    return super.close();
   }
 
   Future<void> _onUpdateAndClose(_UpdateAndClose event, Emitter<CertificationDetailsState> emit) async {
