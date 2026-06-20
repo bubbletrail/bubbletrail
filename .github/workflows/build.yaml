@@ -126,9 +126,8 @@ jobs:
       - name: Generate appcast
         if: needs.calver.outputs.release
         run: |
-          echo "$SPARKLE_PRIVATE_KEY" | \
-            ./app/macos/Pods/Sparkle/bin/generate_appcast \
-            --ed-key-file - updates
+          cmd=$(find . -type f -name generate_appcast)
+          echo "$SPARKLE_PRIVATE_KEY" | $cmd --ed-key-file - updates
         env:
           SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
 
