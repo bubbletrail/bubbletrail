@@ -53,8 +53,8 @@ class _SyncProviderTile extends StatelessWidget {
   String _syncProviderLabel(SyncProviderKind provider) {
     return switch (provider) {
       .none => 'Off',
-      .bubbletrail => 'Bubbletrail',
-      .s3 => 'S3',
+      .bubbletrail => 'Bubbletrail S3',
+      .s3 => 'Generic S3',
     };
   }
 }
