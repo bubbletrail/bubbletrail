@@ -106,6 +106,10 @@ class _DiveDetails extends StatelessWidget {
             )
             .toList() +
         [
+          if (dive.equipment.isNotEmpty)
+            Card(
+              child: Padding(padding: const .all(8.0), child: _equipmentTable(context)),
+            ),
           if (site != null)
             ConstrainedBox(
               constraints: .loose(.fromWidth(600)),
@@ -213,14 +217,28 @@ class _DiveDetails extends StatelessWidget {
 
   Widget _weightsTable() {
     return DataCardColumn(
-      children:
-          dive.weightsystems.indexed.map((entry) {
-            final idx = entry.$1;
-            final ws = entry.$2;
-            final desc = ws.description.isNotEmpty ? ws.description : 'Weight ${idx + 1}';
-            return ColumnRow(label: desc, child: WeightText(ws.weight));
-          }).toList() +
-          dive.equipment.map((eq) => ColumnRow(label: eq.type, child: Text([eq.manufacturer, eq.name].join(' ').trim()))).toList(),
+      children: dive.weightsystems.indexed.map((entry) {
+        final idx = entry.$1;
+        final ws = entry.$2;
+        final desc = ws.description.isNotEmpty ? ws.description : 'Weight ${idx + 1}';
+        return ColumnRow(label: desc, child: WeightText(ws.weight));
+      }).toList(),
+    );
+  }
+
+  Widget _equipmentTable(BuildContext context) {
+    final pc = Theme.of(context).colorScheme.primary;
+    return Wrap(
+      spacing: 8,
+      runSpacing: platformIsDesktop ? 8 : 0,
+      children: dive.equipment
+          .map(
+            (e) => Chip(
+              avatar: EquipmentIcons.icon(EquipmentIcons.forType(e.type), color: pc),
+              label: Text(EquipmentListTile.equipmentTitle(e)),
+            ),
+          )
+          .toList(),
     );
   }
 
