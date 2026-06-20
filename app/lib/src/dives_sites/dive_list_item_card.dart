@@ -78,8 +78,6 @@ class DiveListItemCard extends StatelessWidget {
                       theme: theme,
                     ),
                   ],
-                  const Spacer(),
-                  TimeText(_startDateTime, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],
               ),
             ],
