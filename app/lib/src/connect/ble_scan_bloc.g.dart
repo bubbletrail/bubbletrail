@@ -13,7 +13,9 @@ abstract class _$BleScanStateCWProxy {
 
   BleScanState rememberedComputers(List<Computer> rememberedComputers);
 
-  BleScanState scannedComputers(List<(ScanResult, List<ComputerDescriptor>)> scannedComputers);
+  BleScanState scannedComputers(
+    List<(ScanResult, List<ComputerDescriptor>)> scannedComputers,
+  );
 
   BleScanState scannedOther(List<ScanResult> scannedOther);
 
@@ -50,25 +52,33 @@ class _$BleScanStateCWProxyImpl implements _$BleScanStateCWProxy {
   final BleScanState _value;
 
   @override
-  BleScanState adapterState(BluetoothAdapterState adapterState) => call(adapterState: adapterState);
+  BleScanState adapterState(BluetoothAdapterState adapterState) =>
+      call(adapterState: adapterState);
 
   @override
-  BleScanState supportedComputers(List<ComputerDescriptor> supportedComputers) => call(supportedComputers: supportedComputers);
+  BleScanState supportedComputers(
+    List<ComputerDescriptor> supportedComputers,
+  ) => call(supportedComputers: supportedComputers);
 
   @override
-  BleScanState rememberedComputers(List<Computer> rememberedComputers) => call(rememberedComputers: rememberedComputers);
+  BleScanState rememberedComputers(List<Computer> rememberedComputers) =>
+      call(rememberedComputers: rememberedComputers);
 
   @override
-  BleScanState scannedComputers(List<(ScanResult, List<ComputerDescriptor>)> scannedComputers) => call(scannedComputers: scannedComputers);
+  BleScanState scannedComputers(
+    List<(ScanResult, List<ComputerDescriptor>)> scannedComputers,
+  ) => call(scannedComputers: scannedComputers);
 
   @override
-  BleScanState scannedOther(List<ScanResult> scannedOther) => call(scannedOther: scannedOther);
+  BleScanState scannedOther(List<ScanResult> scannedOther) =>
+      call(scannedOther: scannedOther);
 
   @override
   BleScanState isScanning(bool isScanning) => call(isScanning: isScanning);
 
   @override
-  BleScanState showAllDevices(bool showAllDevices) => call(showAllDevices: showAllDevices);
+  BleScanState showAllDevices(bool showAllDevices) =>
+      call(showAllDevices: showAllDevices);
 
   @override
   BleScanState error(String? error) => call(error: error);
@@ -92,31 +102,42 @@ class _$BleScanStateCWProxyImpl implements _$BleScanStateCWProxy {
     Object? error = const $CopyWithPlaceholder(),
   }) {
     return BleScanState(
-      adapterState: adapterState == const $CopyWithPlaceholder() || adapterState == null
+      adapterState:
+          adapterState == const $CopyWithPlaceholder() || adapterState == null
           ? _value.adapterState
           // ignore: cast_nullable_to_non_nullable
           : adapterState as BluetoothAdapterState,
-      supportedComputers: supportedComputers == const $CopyWithPlaceholder() || supportedComputers == null
+      supportedComputers:
+          supportedComputers == const $CopyWithPlaceholder() ||
+              supportedComputers == null
           ? _value.supportedComputers
           // ignore: cast_nullable_to_non_nullable
           : supportedComputers as List<ComputerDescriptor>,
-      rememberedComputers: rememberedComputers == const $CopyWithPlaceholder() || rememberedComputers == null
+      rememberedComputers:
+          rememberedComputers == const $CopyWithPlaceholder() ||
+              rememberedComputers == null
           ? _value.rememberedComputers
           // ignore: cast_nullable_to_non_nullable
           : rememberedComputers as List<Computer>,
-      scannedComputers: scannedComputers == const $CopyWithPlaceholder() || scannedComputers == null
+      scannedComputers:
+          scannedComputers == const $CopyWithPlaceholder() ||
+              scannedComputers == null
           ? _value.scannedComputers
           // ignore: cast_nullable_to_non_nullable
           : scannedComputers as List<(ScanResult, List<ComputerDescriptor>)>,
-      scannedOther: scannedOther == const $CopyWithPlaceholder() || scannedOther == null
+      scannedOther:
+          scannedOther == const $CopyWithPlaceholder() || scannedOther == null
           ? _value.scannedOther
           // ignore: cast_nullable_to_non_nullable
           : scannedOther as List<ScanResult>,
-      isScanning: isScanning == const $CopyWithPlaceholder() || isScanning == null
+      isScanning:
+          isScanning == const $CopyWithPlaceholder() || isScanning == null
           ? _value.isScanning
           // ignore: cast_nullable_to_non_nullable
           : isScanning as bool,
-      showAllDevices: showAllDevices == const $CopyWithPlaceholder() || showAllDevices == null
+      showAllDevices:
+          showAllDevices == const $CopyWithPlaceholder() ||
+              showAllDevices == null
           ? _value.showAllDevices
           // ignore: cast_nullable_to_non_nullable
           : showAllDevices as bool,

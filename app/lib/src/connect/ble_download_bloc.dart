@@ -242,7 +242,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     });
 
     try {
-      await device.connect(license: License.free, timeout: const Duration(seconds: 15));
+      await device.connect(license: License.nonprofit, timeout: const Duration(seconds: 15));
       emit(state.copyWith(connectedDevice: device, isDiscoveringServices: true));
       final services = await device.discoverServices();
       add(_ServicesDiscovered(services));

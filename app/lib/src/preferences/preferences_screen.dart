@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:btsparkle/btsparkle.dart';
 import 'package:file_picker/file_picker.dart';
@@ -290,7 +291,9 @@ class _ImportExportButtons extends StatelessWidget {
   Future<void> _showSaveDialog(BuildContext context, ArchiveState state) async {
     final archiveBloc = context.read<ArchiveBloc>();
 
-    final result = await FilePicker.platform.saveFile(
+    final bytes = await File(state.exportReadyPath!).readAsBytes();
+    final result = await FilePicker.saveFile(
+      bytes: bytes,
       dialogTitle: 'Export backup',
       fileName: state.exportReadyFilename ?? 'bubbletrail.$backupFileExtension',
       type: FileType.custom,
@@ -304,7 +307,7 @@ class _ImportExportButtons extends StatelessWidget {
   }
 
   Future<void> _importBackup(BuildContext context) async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: [backupFileExtension]);
+    final result = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: [backupFileExtension]);
     if (result == null || result.files.single.path == null) return;
 
     if (!context.mounted) return;
@@ -325,7 +328,7 @@ class _ImportExportButtons extends StatelessWidget {
   }
 
   Future<void> _importDives(BuildContext context) async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['ssrf', 'xml']);
+    final result = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: ['ssrf', 'xml']);
     if (result == null || result.files.single.path == null) return;
     if (!context.mounted) return;
 
@@ -334,7 +337,7 @@ class _ImportExportButtons extends StatelessWidget {
   }
 
   Future<void> _importEquipment(BuildContext context) async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['csv']);
+    final result = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: ['csv']);
     if (result == null || result.files.single.path == null) return;
     if (!context.mounted) return;
 

@@ -22,7 +22,12 @@ abstract class _$DiveDetailsLoadedCWProxy {
   /// ```dart
   /// DiveDetailsLoaded(...).copyWith(id: 12, name: "My name")
   /// ```
-  DiveDetailsLoaded call({Dive dive, Site? site, Dive? nextDive, Dive? prevDive});
+  DiveDetailsLoaded call({
+    Dive dive,
+    Site? site,
+    Dive? nextDive,
+    Dive? prevDive,
+  });
 }
 
 /// Callable proxy for `copyWith` functionality.
@@ -83,5 +88,6 @@ extension $DiveDetailsLoadedCopyWith on DiveDetailsLoaded {
   /// Returns a callable class used to build a new instance with modified fields.
   /// Example: `instanceOfDiveDetailsLoaded.copyWith(...)` or `instanceOfDiveDetailsLoaded.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
-  _$DiveDetailsLoadedCWProxy get copyWith => _$DiveDetailsLoadedCWProxyImpl(this);
+  _$DiveDetailsLoadedCWProxy get copyWith =>
+      _$DiveDetailsLoadedCWProxyImpl(this);
 }
