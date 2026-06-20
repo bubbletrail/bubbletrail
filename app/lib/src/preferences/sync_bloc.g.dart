@@ -22,7 +22,12 @@ abstract class _$SyncStateCWProxy {
   /// ```dart
   /// SyncState(...).copyWith(id: 12, name: "My name")
   /// ```
-  SyncState call({DateTime? lastSynced, bool syncing, String? error, bool? lastSyncSuccess});
+  SyncState call({
+    DateTime? lastSynced,
+    bool syncing,
+    String? error,
+    bool? lastSyncSuccess,
+  });
 }
 
 /// Callable proxy for `copyWith` functionality.
@@ -42,7 +47,8 @@ class _$SyncStateCWProxyImpl implements _$SyncStateCWProxy {
   SyncState error(String? error) => call(error: error);
 
   @override
-  SyncState lastSyncSuccess(bool? lastSyncSuccess) => call(lastSyncSuccess: lastSyncSuccess);
+  SyncState lastSyncSuccess(bool? lastSyncSuccess) =>
+      call(lastSyncSuccess: lastSyncSuccess);
 
   @override
   /// Creates a new instance with the provided field values.
@@ -92,7 +98,11 @@ extension $SyncStateCopyWith on SyncState {
   /// ```dart
   /// SyncState(...).copyWithNull(firstField: true, secondField: true)
   /// ```
-  SyncState copyWithNull({bool lastSynced = false, bool error = false, bool lastSyncSuccess = false}) {
+  SyncState copyWithNull({
+    bool lastSynced = false,
+    bool error = false,
+    bool lastSyncSuccess = false,
+  }) {
     return SyncState(
       lastSynced: lastSynced == true ? null : this.lastSynced,
       syncing: syncing,

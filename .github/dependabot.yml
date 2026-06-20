@@ -20,7 +20,6 @@ updates:
   - package-ecosystem: "pub"
     directories:
       - "/app"
-      - "/pkg/*"
     schedule:
       interval: "monthly"
     labels:
