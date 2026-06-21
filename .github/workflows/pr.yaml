@@ -35,15 +35,15 @@ jobs:
 
       - name: Build for Android
         run: |
-            cd app
-            flutter build appbundle \
-                --debug --no-pub \
-                --build-number="$BUILD_NUMBER" \
-                --build-name="0.0.1" \
-                --dart-define=BUILD="$BUILD_NUMBER" \
-                --dart-define=BUILDSECONDS="$SOURCE_DATE_EPOCH" \
-                --dart-define=GITSHA="$GIT_SHA" \
-                --dart-define=MARKETINGVERSION="0.0.1"
+          cd app
+          flutter build appbundle \
+              --debug --no-pub \
+              --build-number="100" \
+              --build-name="0.0.1" \
+              --dart-define=BUILD="100" \
+              --dart-define=BUILDSECONDS="0" \
+              --dart-define=GITSHA="aaaaaa" \
+              --dart-define=MARKETINGVERSION="0.0.1"
 
   build-ios:
     name: Build for iOS & macOS
@@ -68,20 +68,20 @@ jobs:
 
             flutter build ipa \
                 --release --no-pub --no-codesign \
-                --build-number="$BUILD_NUMBER" \
+                --build-number="100" \
                 --build-name="0.0.1" \
-                --dart-define=BUILD="$BUILD_NUMBER" \
-                --dart-define=BUILDSECONDS="$SOURCE_DATE_EPOCH" \
-                --dart-define=GITSHA="$GIT_SHA" \
+                --dart-define=BUILD="100" \
+                --dart-define=BUILDSECONDS="0" \
+                --dart-define=GITSHA="aaaaaa" \
                 --dart-define=MARKETINGVERSION="0.0.1"
 
             flutter build macos \
                 --release --no-pub \
-                --build-number="$BUILD_NUMBER" \
+                --build-number="100" \
                 --build-name="0.0.1" \
-                --dart-define=BUILD="$BUILD_NUMBER" \
-                --dart-define=BUILDSECONDS="$SOURCE_DATE_EPOCH" \
-                --dart-define=GITSHA="$GIT_SHA" \
+                --dart-define=BUILD="100" \
+                --dart-define=BUILDSECONDS="0" \
+                --dart-define=GITSHA="aaaaaa" \
                 --dart-define=MARKETINGVERSION="0.0.1"
 
   build-windows:
@@ -107,11 +107,11 @@ jobs:
           flutter pub get
           flutter build windows \
               --release --no-pub \
-              --build-number="$BUILD_NUMBER" \
+              --build-number="100" \
               --build-name="0.0.1" \
-              --dart-define=BUILD="$BUILD_NUMBER" \
-              --dart-define=BUILDSECONDS="$SOURCE_DATE_EPOCH" \
-              --dart-define=GITSHA="$GIT_SHA" \
+              --dart-define=BUILD="100" \
+              --dart-define=BUILDSECONDS="0" \
+              --dart-define=GITSHA="aaaaaa" \
               --dart-define=MARKETINGVERSION="0.0.1"
 
 
@@ -129,4 +129,5 @@ jobs:
       - name: Run tests
         run: |
           pushd srv
+          go build
           go test ./...
