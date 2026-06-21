@@ -1,5 +1,5 @@
 on:
-  pull_request:
+  push:
 
 name: Pull request checks
 
