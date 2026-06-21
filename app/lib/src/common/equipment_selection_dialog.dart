@@ -35,7 +35,7 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
 
   List<Equipment> get _selectedEquipment => widget.allEquipment.where((e) => _selectedIds.contains(e.id)).toList();
 
-  List<Equipment> get _availableEquipment => widget.allEquipment.where((e) => !_selectedIds.contains(e.id)).toList();
+  List<Equipment> get _availableEquipment => widget.allEquipment.where((e) => !e.archived && !_selectedIds.contains(e.id)).toList();
 
   void _toggleEquipment(Equipment equipment) {
     setState(() {
