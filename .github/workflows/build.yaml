@@ -126,7 +126,7 @@ jobs:
       - name: Generate appcast
         if: needs.calver.outputs.release
         run: |
-          cmd=$(find . -type f -name generate_appcast)
+          cmd=$(find ./app/build -type f -name generate_appcast | head -1)
           echo "$SPARKLE_PRIVATE_KEY" | $cmd --ed-key-file - updates
         env:
           SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
