@@ -11,7 +11,7 @@ permissions:
 jobs:
 
   test:
-    name: Run tests (app)
+    name: Run tests (app) & build for Android
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
@@ -33,8 +33,20 @@ jobs:
             popd
           done
 
+      - name: Build for Android
+        run: |
+            cd app
+            flutter build appbundle \
+                --debug --no-pub \
+                --build-number="$BUILD_NUMBER" \
+                --build-name="0.0.1" \
+                --dart-define=BUILD="$BUILD_NUMBER" \
+                --dart-define=BUILDSECONDS="$SOURCE_DATE_EPOCH" \
+                --dart-define=GITSHA="$GIT_SHA" \
+                --dart-define=MARKETINGVERSION="0.0.1"
+
   build-ios:
-    name: Build for iOS
+    name: Build for iOS & macOS
     runs-on: macos-26
     needs:
       - test
@@ -53,8 +65,18 @@ jobs:
         run: |
             cd app
             flutter pub get
+
             flutter build ipa \
                 --release --no-pub --no-codesign \
+                --build-number="$BUILD_NUMBER" \
+                --build-name="0.0.1" \
+                --dart-define=BUILD="$BUILD_NUMBER" \
+                --dart-define=BUILDSECONDS="$SOURCE_DATE_EPOCH" \
+                --dart-define=GITSHA="$GIT_SHA" \
+                --dart-define=MARKETINGVERSION="0.0.1"
+
+            flutter build macos \
+                --release --no-pub \
                 --build-number="$BUILD_NUMBER" \
                 --build-name="0.0.1" \
                 --dart-define=BUILD="$BUILD_NUMBER" \
