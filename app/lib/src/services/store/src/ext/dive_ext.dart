@@ -106,7 +106,7 @@ extension DiveExtensions on Dive {
         clearSac();
       }
 
-      if (!dl.isSynthetic) {
+      if (!dl.isSynthetic && cylinders.isNotEmpty) {
         // Calculate per cylinder SAC
         for (final e in perCylinderDepth.entries) {
           final avgDepth = e.value.totDepth / e.value.duration;

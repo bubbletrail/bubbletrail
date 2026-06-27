@@ -9,8 +9,12 @@ import 'package:native_toolchain_c/native_toolchain_c.dart';
 
 void main(List<String> args) async {
   await build(args, (input, output) async {
+    if (!input.config.buildCodeAssets) {
+      // Don't build any other asset types.
+      return;
+    }
     final os = input.config.code.targetOS;
-    
+
     if (os == OS.windows) {
       print('libdivecomputer: Skipping build on Window');
       return;
