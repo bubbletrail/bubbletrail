@@ -39,7 +39,8 @@ dynamic _dig(Map<String, dynamic>? m, List<String> path) {
 class _ProfileSample {
   final DateTime time;
   final Map<String, dynamic> data;
-  _ProfileSample(this.time, this.data);
+  final double? temperature;
+  _ProfileSample(this.time, this.data, this.temperature);
 }
 
 // Accumulates begin/end pressure for a cylinder across the profile.
@@ -99,6 +100,7 @@ extension _SuuntoDive on Dive {
     double? atmosphericBar;
     Position? position;
 
+    double? temperature;
     for (final raw in samples) {
       final s = _asMap(raw);
       if (s == null) continue;
@@ -106,10 +108,16 @@ extension _SuuntoDive on Dive {
       final timeStr = _asString(s['TimeISO8601']);
       final time = timeStr != null ? DateTime.tryParse(timeStr) : null;
 
+      // Temperature lives in its own (surface-pressure) samples, separate from
+      // the depth samples. Track the most recent reading so each depth sample
+      // picks up the closest temperature seen prior to it.
+      final sampleTemp = _kelvinToCelsius(_asNum(s['Temperature']));
+      if (sampleTemp != null) temperature = sampleTemp;
+
       // Depth profile sample.
       final depth = _asNum(s['Depth']);
       if (depth != null && time != null) {
-        profile.add(_ProfileSample(time, s));
+        profile.add(_ProfileSample(time, s, temperature));
 
         // Track which cylinders are actually used and their pressure range.
         for (final c in _asList(s['Cylinders']) ?? const []) {
@@ -175,7 +183,7 @@ extension _SuuntoDive on Dive {
     for (final ps in profile) {
       final s = ps.data;
       final time = start != null ? ps.time.difference(start).inMilliseconds / 1000.0 : 0.0;
-      final sample = LogSample(time: time, depth: _asNum(s['Depth'])!.toDouble());
+      final sample = LogSample(time: time, depth: _asNum(s['Depth'])!.toDouble(), temperature: ps.temperature);
 
       for (final c in _asList(s['Cylinders']) ?? const []) {
         final cm = _asMap(c);

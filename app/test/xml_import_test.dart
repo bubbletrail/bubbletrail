@@ -158,6 +158,26 @@ void main() {
       expect(withPressure.first.pressures.first.tankIndex, 0);
     });
 
+    test('tracks the closest prior temperature for each sample', () {
+      final samples = importJsonString(scubaFile.readAsStringSync()).dives.single.logs.single.samples;
+
+      // The first depth sample precedes the first temperature reading, so it
+      // has no temperature to inherit.
+      expect(samples.first.hasTemperature(), isFalse);
+
+      final withTemp = samples.where((s) => s.hasTemperature()).toList();
+      expect(withTemp, isNotEmpty);
+
+      // Temperature must vary across the dive (the bug froze it at the first
+      // reading), and stay within the recorded 280.77-281.15 K range (~7.6-8 C).
+      final values = withTemp.map((s) => s.temperature).toSet();
+      expect(values.length, greaterThan(1));
+      const kelvinOffset = 273.15;
+      for (final t in values) {
+        expect(t, inInclusiveRange(280.77 - kelvinOffset, 281.15 - kelvinOffset));
+      }
+    });
+
     test('imports the GPS position from the dive route origin', () {
       final dive = importJsonString(scubaFile.readAsStringSync()).dives.single;
       final position = dive.logs.single.position;
