@@ -89,7 +89,14 @@ extension _SuuntoDive on Dive {
     }
 
     final notes = _asString(header['Notes']);
-    final model = _asString(device?['Name']);
+    final model = (String? m) {
+      switch (m) {
+        case 'Vaasa':
+          return 'Suunto Nautic';
+        default:
+          return m;
+      }
+    }(_asString(device?['Name']));
     final serial = _asString(device?['SerialNumber']);
 
     // First pass over samples: collect the depth profile, cylinder usage, gas
