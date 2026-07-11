@@ -97,7 +97,7 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
       list.freeze();
       for (var entity in entitiesFromList(list)) {
         if (!hasId(entity)) {
-          entity = rebuildEntity(entity, id: Uuid().v4().toString());
+          entity = rebuildEntity(entity, id: Uuid().v7().toString());
           log.warning('setting ID on $entityName that didn\'t have one');
         }
         _entities[getId(entity)] = entity;
@@ -112,7 +112,7 @@ abstract class EntityStore<T extends GeneratedMessage, TList extends GeneratedMe
 
   T _prepareInsert(T entity) {
     if (!entity.isFrozen) entity.freeze();
-    final id = hasId(entity) ? null : Uuid().v4().toString();
+    final id = hasId(entity) ? null : Uuid().v7().toString();
     final meta = getMeta(entity).rebuildUpdated();
     return rebuildEntity(entity, id: id, meta: meta);
   }

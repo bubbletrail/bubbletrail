@@ -186,7 +186,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
             } else {
               d.clearStartTissues();
             }
-            d.endTissues = tissueStateToProto(endTissues, diveEnd, Uuid().v4().toString());
+            d.endTissues = tissueStateToProto(endTissues, diveEnd, Uuid().v7().toString());
             d.endSurfGf = surfGF;
           });
           await _store.dives.update(updatedDive);

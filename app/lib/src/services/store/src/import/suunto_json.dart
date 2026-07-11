@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:btproto/btproto.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:uuid/uuid.dart';
@@ -149,14 +151,21 @@ extension _SuuntoDive on Dive {
       // Atmospheric pressure from the first surface-pressure reading (Pa).
       atmosphericBar ??= _pascalToBarConvert(_asNum(s['SurfacePressure']));
 
-      // GPS fix from the dive route origin (already in degrees, unlike the raw
-      // Latitude/Longitude samples which are in radians).
       if (position == null) {
+        // GPS fix from the dive route origin.
         final origin = _asMap(s['DiveRouteOrigin']);
         final lat = _asNum(origin?['Latitude'])?.toDouble();
         final lon = _asNum(origin?['Longitude'])?.toDouble();
         if (lat != null && lon != null) {
           position = Position(latitude: lat, longitude: lon, altitude: _asNum(origin?['Altitude'])?.toDouble());
+        }
+      }
+      if (position == null) {
+        // GPS fix from first sample with position; lat/long are in radians.
+        final lat = _asNum(s['Latitude'])?.toDouble();
+        final lon = _asNum(s['Longitude'])?.toDouble();
+        if (lat != null && lon != null) {
+          position = Position(latitude: lat * 180 / pi, longitude: lon * 180 / pi, altitude: _asNum(s['GPSAltitude'])?.toDouble());
         }
       }
 
@@ -248,7 +257,7 @@ extension _SuuntoDive on Dive {
 
     // Assemble the dive. Suunto JSON has no human dive number, so leave it 0.
     final dive = Dive(
-      id: const Uuid().v4(),
+      id: const Uuid().v7(),
       start: start != null ? Timestamp.fromDateTime(start) : null,
       duration: diveTime?.toInt(),
       maxDepth: maxDepth,

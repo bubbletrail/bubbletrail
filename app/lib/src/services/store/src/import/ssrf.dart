@@ -61,7 +61,7 @@ extension SsrfXml on Container {
 extension DiveXml on Dive {
   static Dive fromXml(XmlElement elem) {
     // Dive ID or generate new UUID if not present
-    final diveID = _ensureUUID(elem.getAttribute('uuid')) ?? const Uuid().v4();
+    final diveID = _ensureUUID(elem.getAttribute('uuid')) ?? const Uuid().v7();
 
     // Parse tags
     final tagsStr = elem.getAttribute('tags');
