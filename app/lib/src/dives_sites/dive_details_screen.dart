@@ -113,7 +113,7 @@ class _DiveDetails extends StatelessWidget {
           if (site != null)
             ConstrainedBox(
               constraints: .loose(.fromWidth(600)),
-              child: _SiteCard(site: site!),
+              child: _SiteCard(site: site!, dive: dive),
             ),
         ];
 
@@ -352,11 +352,22 @@ class _Temps extends StatelessWidget {
 
 class _SiteCard extends StatelessWidget {
   final Site site;
+  final Dive dive;
 
-  const _SiteCard({required this.site});
+  const _SiteCard({required this.site, required this.dive});
 
   @override
   Widget build(BuildContext context) {
+    LatLng? divePos;
+    if (dive.logs.firstOrNull?.hasPosition() == true) {
+      final p = dive.logs.first.position;
+      divePos = LatLng(p.latitude, p.longitude);
+    }
+    LatLng? sitePos;
+    if (site.hasPosition()) {
+      final p = site.position;
+      sitePos = LatLng(p.latitude, p.longitude);
+    }
     return Card(
       elevation: 2,
       clipBehavior: .antiAlias,
@@ -377,12 +388,14 @@ class _SiteCard extends StatelessWidget {
               ),
             ),
             // Map preview (only if position exists)
-            if (site.hasPosition())
+            if (sitePos != null || divePos != null)
               Stack(
                 children: [
                   SizedBox(
                     height: 150,
-                    child: IgnorePointer(child: SiteMap(position: LatLng(site.position.latitude, site.position.longitude))),
+                    child: IgnorePointer(
+                      child: SiteMap(sitePosition: sitePos, divePosition: divePos),
+                    ),
                   ),
                   Positioned(
                     top: 8,

@@ -29,7 +29,7 @@ class SiteMapCard extends StatelessWidget {
         height: height,
         child: Stack(
           children: [
-            IgnorePointer(child: SiteMap(position: LatLng(site.position.latitude, site.position.longitude))),
+            IgnorePointer(child: SiteMap(sitePosition: LatLng(site.position.latitude, site.position.longitude))),
             if (showFullscreenButton)
               Positioned(
                 top: 8,
