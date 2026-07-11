@@ -128,7 +128,7 @@ void main() {
       expect(dive.logs, hasLength(1));
       final log = dive.logs.single;
 
-      expect(log.model, 'Vaasa');
+      expect(log.model, 'Suunto Nautic');
       expect(log.serial, '254410000460');
       expect(log.samples, hasLength(293));
       expect(log.diveMode, DiveMode.DIVE_MODE_OPENCIRCUIT);
