@@ -8,16 +8,31 @@ class SiteMap extends StatefulWidget {
   final LatLng? sitePosition;
   final void Function(TapPosition, LatLng)? onTap;
   final bool alwaysCenterPosition;
-  final LatLng? divePosition;
+  final LatLng? startPosition;
+  final LatLng? endPosition;
 
   LatLng get centerPos {
-    if (sitePosition == null && divePosition == null) return LatLng(0, 0);
-    if (sitePosition == null && divePosition != null) return divePosition!;
-    if (sitePosition != null && divePosition == null) return sitePosition!;
-    return LatLng((sitePosition!.latitude + divePosition!.latitude) / 2, (sitePosition!.longitude + divePosition!.longitude) / 2);
+    if (sitePosition == null && startPosition == null && endPosition == null) return LatLng(0, 0);
+    double tlat = 0, tlon = 0, n = 0;
+    if (sitePosition != null) {
+      tlat += sitePosition!.latitude;
+      tlon += sitePosition!.longitude;
+      n += 1;
+    }
+    if (startPosition != null) {
+      tlat += startPosition!.latitude;
+      tlon += startPosition!.longitude;
+      n += 1;
+    }
+    if (endPosition != null) {
+      tlat += endPosition!.latitude;
+      tlon += endPosition!.longitude;
+      n += 1;
+    }
+    return LatLng(tlat / n, tlon / n);
   }
 
-  const SiteMap({super.key, this.sitePosition, this.onTap, this.alwaysCenterPosition = true, this.divePosition});
+  const SiteMap({super.key, this.sitePosition, this.startPosition, this.endPosition, this.onTap, this.alwaysCenterPosition = true});
 
   @override
   State<SiteMap> createState() => _SiteMapState();
@@ -66,13 +81,21 @@ class _SiteMapState extends State<SiteMap> {
                 alignment: Alignment.topCenter, // point is at bottom center
                 child: Icon(Icons.location_on, size: 28, color: Colors.redAccent),
               ),
-            if (widget.divePosition != null)
+            if (widget.startPosition != null)
               Marker(
-                point: widget.divePosition!,
+                point: widget.startPosition!,
                 width: 32,
                 height: 32,
                 alignment: Alignment.topCenter, // point is at bottom center
-                child: Icon(Icons.scuba_diving, size: 28, color: Colors.blueAccent),
+                child: Icon(Icons.arrow_drop_down, size: 28, color: Colors.blueAccent),
+              ),
+            if (widget.endPosition != null)
+              Marker(
+                point: widget.endPosition!,
+                width: 32,
+                height: 32,
+                alignment: Alignment.topCenter, // point is at bottom center
+                child: Icon(Icons.arrow_drop_up, size: 28, color: Colors.blueAccent),
               ),
           ],
         ),

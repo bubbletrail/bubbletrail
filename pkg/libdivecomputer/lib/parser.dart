@@ -118,7 +118,7 @@ Log parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {Uint8List? fingerpr
   // --- Location ---
   final locationPtr = calloc<dc.dc_location_t>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_LOCATION, locationPtr.cast())) {
-    log.position = Position(
+    log.startPosition = Position(
       latitude: locationPtr.ref.latitude,
       longitude: locationPtr.ref.longitude,
       altitude: locationPtr.ref.altitude != 0 ? locationPtr.ref.altitude : null,

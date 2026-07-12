@@ -358,10 +358,15 @@ class _SiteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    LatLng? divePos;
+    LatLng? startPos;
+    LatLng? endPos;
     if (dive.logs.firstOrNull?.hasStartPosition() == true) {
       final p = dive.logs.first.startPosition;
-      divePos = LatLng(p.latitude, p.longitude);
+      startPos = LatLng(p.latitude, p.longitude);
+    }
+    if (dive.logs.firstOrNull?.hasEndPosition() == true) {
+      final p = dive.logs.first.endPosition;
+      endPos = LatLng(p.latitude, p.longitude);
     }
     LatLng? sitePos;
     if (site.hasPosition()) {
@@ -388,13 +393,13 @@ class _SiteCard extends StatelessWidget {
               ),
             ),
             // Map preview (only if position exists)
-            if (sitePos != null || divePos != null)
+            if (sitePos != null || startPos != null || endPos != null)
               Stack(
                 children: [
                   SizedBox(
                     height: 150,
                     child: IgnorePointer(
-                      child: SiteMap(sitePosition: sitePos, divePosition: divePos),
+                      child: SiteMap(sitePosition: sitePos, startPosition: startPos, endPosition: endPos),
                     ),
                   ),
                   Positioned(
