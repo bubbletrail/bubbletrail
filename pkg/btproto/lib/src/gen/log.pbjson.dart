@@ -236,12 +236,20 @@ const Log$json = {
       '10': 'decoModel'
     },
     {
-      '1': 'position',
+      '1': 'start_position',
       '3': 14,
       '4': 1,
       '5': 11,
       '6': '.btstore.Position',
-      '10': 'position'
+      '10': 'startPosition'
+    },
+    {
+      '1': 'end_position',
+      '3': 20,
+      '4': 1,
+      '5': 11,
+      '6': '.btstore.Position',
+      '10': 'endPosition'
     },
     {
       '1': 'gas_mixes',
@@ -283,11 +291,13 @@ final $typed_data.Uint8List logDescriptor = $convert.base64Decode(
     'aW5pdHkYCiABKAsyES5idHN0b3JlLlNhbGluaXR5UghzYWxpbml0eRIxChRhdG1vc3BoZXJpY1'
     '9wcmVzc3VyZRgLIAEoAVITYXRtb3NwaGVyaWNQcmVzc3VyZRIuCglkaXZlX21vZGUYDCABKA4y'
     'ES5idHN0b3JlLkRpdmVNb2RlUghkaXZlTW9kZRIxCgpkZWNvX21vZGVsGA0gASgLMhIuYnRzdG'
-    '9yZS5EZWNvTW9kZWxSCWRlY29Nb2RlbBItCghwb3NpdGlvbhgOIAEoCzIRLmJ0c3RvcmUuUG9z'
-    'aXRpb25SCHBvc2l0aW9uEiwKCWdhc19taXhlcxgPIAMoCzIPLmJ0c3RvcmUuR2FzTWl4UghnYX'
-    'NNaXhlcxIjCgV0YW5rcxgQIAMoCzINLmJ0c3RvcmUuVGFua1IFdGFua3MSLAoHc2FtcGxlcxgR'
-    'IAMoCzISLmJ0c3RvcmUuTG9nU2FtcGxlUgdzYW1wbGVzEicKD2xkY19maW5nZXJwcmludBgSIA'
-    'EoDFIObGRjRmluZ2VycHJpbnQSGgoIdW5pcXVlSUQYEyABKAlSCHVuaXF1ZUlE');
+    '9yZS5EZWNvTW9kZWxSCWRlY29Nb2RlbBI4Cg5zdGFydF9wb3NpdGlvbhgOIAEoCzIRLmJ0c3Rv'
+    'cmUuUG9zaXRpb25SDXN0YXJ0UG9zaXRpb24SNAoMZW5kX3Bvc2l0aW9uGBQgASgLMhEuYnRzdG'
+    '9yZS5Qb3NpdGlvblILZW5kUG9zaXRpb24SLAoJZ2FzX21peGVzGA8gAygLMg8uYnRzdG9yZS5H'
+    'YXNNaXhSCGdhc01peGVzEiMKBXRhbmtzGBAgAygLMg0uYnRzdG9yZS5UYW5rUgV0YW5rcxIsCg'
+    'dzYW1wbGVzGBEgAygLMhIuYnRzdG9yZS5Mb2dTYW1wbGVSB3NhbXBsZXMSJwoPbGRjX2Zpbmdl'
+    'cnByaW50GBIgASgMUg5sZGNGaW5nZXJwcmludBIaCgh1bmlxdWVJRBgTIAEoCVIIdW5pcXVlSU'
+    'Q=');
 
 @$core.Deprecated('Use logSampleDescriptor instead')
 const LogSample$json = {

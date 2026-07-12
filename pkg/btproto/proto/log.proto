@@ -23,7 +23,8 @@ message Log {
   double atmospheric_pressure = 11; // Bar
   DiveMode dive_mode = 12;
   DecoModel deco_model = 13;
-  Position position = 14;
+  Position start_position = 14;
+  Position end_position = 20;
 
   // Gas and tank data
   repeated GasMix gas_mixes = 15;

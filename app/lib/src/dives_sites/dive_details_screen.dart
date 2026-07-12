@@ -359,8 +359,8 @@ class _SiteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LatLng? divePos;
-    if (dive.logs.firstOrNull?.hasPosition() == true) {
-      final p = dive.logs.first.position;
+    if (dive.logs.firstOrNull?.hasStartPosition() == true) {
+      final p = dive.logs.first.startPosition;
       divePos = LatLng(p.latitude, p.longitude);
     }
     LatLng? sitePos;
