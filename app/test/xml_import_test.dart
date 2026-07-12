@@ -180,11 +180,9 @@ void main() {
 
     test('imports the GPS position from the dive route origin', () {
       final dive = importJsonString(scubaFile.readAsStringSync()).dives.single;
-      final position = dive.logs.single.position;
-
-      // DiveRouteOrigin is in degrees (unlike the radian Latitude/Longitude samples).
-      expect(position.latitude, closeTo(48.26, 0.01));
-      expect(position.longitude, closeTo(7.787, 0.01));
+      final startPosition = dive.logs.single.startPosition;
+      expect(startPosition.latitude, closeTo(48.26, 0.01));
+      expect(startPosition.longitude, closeTo(7.787, 0.01));
     });
 
     test('imports a shallow session without tank data', () {

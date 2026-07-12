@@ -39,12 +39,13 @@ class Log extends $pb.GeneratedMessage {
     $core.double? atmosphericPressure,
     DiveMode? diveMode,
     DecoModel? decoModel,
-    $1.Position? position,
+    $1.Position? startPosition,
     $core.Iterable<GasMix>? gasMixes,
     $core.Iterable<Tank>? tanks,
     $core.Iterable<LogSample>? samples,
     $core.List<$core.int>? ldcFingerprint,
     $core.String? uniqueID,
+    $1.Position? endPosition,
   }) {
     final result = create();
     if (model != null) result.model = model;
@@ -62,12 +63,13 @@ class Log extends $pb.GeneratedMessage {
       result.atmosphericPressure = atmosphericPressure;
     if (diveMode != null) result.diveMode = diveMode;
     if (decoModel != null) result.decoModel = decoModel;
-    if (position != null) result.position = position;
+    if (startPosition != null) result.startPosition = startPosition;
     if (gasMixes != null) result.gasMixes.addAll(gasMixes);
     if (tanks != null) result.tanks.addAll(tanks);
     if (samples != null) result.samples.addAll(samples);
     if (ldcFingerprint != null) result.ldcFingerprint = ldcFingerprint;
     if (uniqueID != null) result.uniqueID = uniqueID;
+    if (endPosition != null) result.endPosition = endPosition;
     return result;
   }
 
@@ -101,7 +103,7 @@ class Log extends $pb.GeneratedMessage {
         enumValues: DiveMode.values)
     ..aOM<DecoModel>(13, _omitFieldNames ? '' : 'decoModel',
         subBuilder: DecoModel.create)
-    ..aOM<$1.Position>(14, _omitFieldNames ? '' : 'position',
+    ..aOM<$1.Position>(14, _omitFieldNames ? '' : 'startPosition',
         subBuilder: $1.Position.create)
     ..pPM<GasMix>(15, _omitFieldNames ? '' : 'gasMixes',
         subBuilder: GasMix.create)
@@ -111,6 +113,8 @@ class Log extends $pb.GeneratedMessage {
     ..a<$core.List<$core.int>>(
         18, _omitFieldNames ? '' : 'ldcFingerprint', $pb.PbFieldType.OY)
     ..aOS(19, _omitFieldNames ? '' : 'uniqueID', protoName: 'uniqueID')
+    ..aOM<$1.Position>(20, _omitFieldNames ? '' : 'endPosition',
+        subBuilder: $1.Position.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -257,15 +261,15 @@ class Log extends $pb.GeneratedMessage {
   DecoModel ensureDecoModel() => $_ensure(12);
 
   @$pb.TagNumber(14)
-  $1.Position get position => $_getN(13);
+  $1.Position get startPosition => $_getN(13);
   @$pb.TagNumber(14)
-  set position($1.Position value) => $_setField(14, value);
+  set startPosition($1.Position value) => $_setField(14, value);
   @$pb.TagNumber(14)
-  $core.bool hasPosition() => $_has(13);
+  $core.bool hasStartPosition() => $_has(13);
   @$pb.TagNumber(14)
-  void clearPosition() => $_clearField(14);
+  void clearStartPosition() => $_clearField(14);
   @$pb.TagNumber(14)
-  $1.Position ensurePosition() => $_ensure(13);
+  $1.Position ensureStartPosition() => $_ensure(13);
 
   /// Gas and tank data
   @$pb.TagNumber(15)
@@ -297,6 +301,17 @@ class Log extends $pb.GeneratedMessage {
   $core.bool hasUniqueID() => $_has(18);
   @$pb.TagNumber(19)
   void clearUniqueID() => $_clearField(19);
+
+  @$pb.TagNumber(20)
+  $1.Position get endPosition => $_getN(19);
+  @$pb.TagNumber(20)
+  set endPosition($1.Position value) => $_setField(20, value);
+  @$pb.TagNumber(20)
+  $core.bool hasEndPosition() => $_has(19);
+  @$pb.TagNumber(20)
+  void clearEndPosition() => $_clearField(20);
+  @$pb.TagNumber(20)
+  $1.Position ensureEndPosition() => $_ensure(19);
 }
 
 /// A single sample point in the dive profile.

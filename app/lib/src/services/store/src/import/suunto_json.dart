@@ -107,7 +107,8 @@ extension _SuuntoDive on Dive {
     final gasSwitches = <({DateTime time, int gas})>[];
     final cylinderUsage = <int, _CylinderUsage>{};
     double? atmosphericBar;
-    Position? position;
+    Position? startPosition;
+    Position? endPosition;
 
     double? temperature;
     for (final raw in samples) {
@@ -151,22 +152,25 @@ extension _SuuntoDive on Dive {
       // Atmospheric pressure from the first surface-pressure reading (Pa).
       atmosphericBar ??= _pascalToBarConvert(_asNum(s['SurfacePressure']));
 
-      if (position == null) {
+      if (startPosition == null) {
         // GPS fix from the dive route origin.
         final origin = _asMap(s['DiveRouteOrigin']);
         final lat = _asNum(origin?['Latitude'])?.toDouble();
         final lon = _asNum(origin?['Longitude'])?.toDouble();
         if (lat != null && lon != null) {
-          position = Position(latitude: lat, longitude: lon, altitude: _asNum(origin?['Altitude'])?.toDouble());
+          startPosition = Position(latitude: lat, longitude: lon, altitude: _asNum(origin?['Altitude'])?.toDouble());
         }
       }
-      if (position == null) {
-        // GPS fix from first sample with position; lat/long are in radians.
-        final lat = _asNum(s['Latitude'])?.toDouble();
-        final lon = _asNum(s['Longitude'])?.toDouble();
-        if (lat != null && lon != null) {
-          position = Position(latitude: lat * 180 / pi, longitude: lon * 180 / pi, altitude: _asNum(s['GPSAltitude'])?.toDouble());
-        }
+
+      // GPS fix from first sample with position; lat/long are in radians.
+      // Set start position to the first one we see, keep updating the end
+      // position to track the last position we see.
+      final lat = _asNum(s['Latitude'])?.toDouble();
+      final lon = _asNum(s['Longitude'])?.toDouble();
+      if (lat != null && lon != null) {
+        final pos = Position(latitude: lat * 180 / pi, longitude: lon * 180 / pi, altitude: _asNum(s['GPSAltitude'])?.toDouble());
+        startPosition ??= pos;
+        endPosition = pos;
       }
 
       // Gas switch events.
@@ -244,7 +248,8 @@ extension _SuuntoDive on Dive {
       maxTemperature: maxTemp,
       diveTime: diveTime?.toInt(),
       atmosphericPressure: atmosphericBar,
-      position: position,
+      startPosition: startPosition,
+      endPosition: endPosition,
     );
     if (cylinders.isNotEmpty) {
       log.diveMode = DiveMode.DIVE_MODE_OPENCIRCUIT;
