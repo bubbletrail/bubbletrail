@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
-import 'package:xml/xml.dart';
 
 import '../services/store/store.dart';
 import '../providers/storage_provider.dart';
@@ -187,7 +186,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
             } else {
               d.clearStartTissues();
             }
-            d.endTissues = tissueStateToProto(endTissues, diveEnd, Uuid().v4().toString());
+            d.endTissues = tissueStateToProto(endTissues, diveEnd, Uuid().v7().toString());
             d.endSurfGf = surfGF;
           });
           await _store.dives.update(updatedDive);
@@ -213,15 +212,24 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
 
     // Read the import file
     final importedDoc = await compute((path) async {
-      final xmlData = await File(path).readAsString();
-      final doc = XmlDocument.parse(xmlData);
-      return importXml(doc);
+      final data = await File(path).readAsString();
+      return importString(data);
     }, event.filePath);
 
     // Merge dive sites: only add new ones (check by uuid)
     final existingSiteUuids = currentState.sites.map((s) => s.id).toSet();
     final newSites = importedDoc.sites.where((s) => !existingSiteUuids.contains(s.id)).toList();
     await _store.sites.updateAll(newSites);
+
+    // Assign dive numbers to imported dives that don't carry one (e.g. Suunto
+    // JSON has no dive number field). Formats that do provide a number (UDDF,
+    // MacDive) keep theirs. Numbering is chronological, like Bluetooth downloads.
+    final unnumbered = importedDoc.dives.where((d) => d.number == 0).toList()..sort((a, b) => a.start.seconds.compareTo(b.start.seconds));
+    var nextNumber = await _store.dives.nextDiveNo;
+    for (final dive in unnumbered) {
+      dive.number = nextNumber;
+      nextNumber++;
+    }
 
     // Load default cylinders for assignment
     final defaultBackgas = await _store.cylinders.getDefaultForBackgas();

@@ -328,7 +328,7 @@ class _ImportExportButtons extends StatelessWidget {
   }
 
   Future<void> _importDives(BuildContext context) async {
-    final result = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: ['ssrf', 'xml']);
+    final result = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: ['ssrf', 'xml', 'json']);
     if (result == null || result.files.single.path == null) return;
     if (!context.mounted) return;
 

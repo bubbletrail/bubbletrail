@@ -36,7 +36,7 @@ class FullscreenMapScreen extends StatelessWidget {
 
           return ScreenScaffold(
             title: Text(state.site.name),
-            body: SiteMap(position: LatLng(state.site.position.latitude, state.site.position.longitude)),
+            body: SiteMap(sitePosition: LatLng(state.site.position.latitude, state.site.position.longitude)),
           );
         },
       ),

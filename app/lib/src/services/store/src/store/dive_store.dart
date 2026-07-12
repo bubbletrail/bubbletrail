@@ -36,7 +36,7 @@ class DiveStore with ChangeNotifier {
       dive = dive.rebuild((dive) {
         dive.clearSyncedEtag();
         if (!dive.hasId()) {
-          dive.id = Uuid().v4().toString();
+          dive.id = Uuid().v7().toString();
         }
         dive.meta = dive.meta.rebuild((meta) {
           meta.updatedAt = Timestamp.fromDateTime(DateTime.now());
@@ -70,7 +70,7 @@ class DiveStore with ChangeNotifier {
     if (!dive.isFrozen) dive.freeze();
     dive = dive.rebuild((dive) {
       if (dive.id.isEmpty) {
-        dive.id = Uuid().v4().toString();
+        dive.id = Uuid().v7().toString();
       }
       dive.meta = dive.meta.rebuildUpdated();
       dive.clearSyncedEtag();

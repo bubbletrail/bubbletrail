@@ -63,7 +63,7 @@ List<Equipment> importMacDiveEquipmentCsv(String csv) {
 
     equipment.add(
       Equipment(
-        id: const Uuid().v4(),
+        id: const Uuid().v7(),
         type: type,
         manufacturer: manufacturer,
         name: name,

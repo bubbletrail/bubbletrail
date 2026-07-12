@@ -231,7 +231,7 @@ class _SiteEditScreenState extends State<SiteEditScreen> {
                   aspectRatio: 2,
                   child: ClipRRect(
                     borderRadius: .circular(12),
-                    child: SiteMap(position: _markerPosition ?? LatLng(0, 0), onTap: _onMapTap, alwaysCenterPosition: false),
+                    child: SiteMap(sitePosition: _markerPosition ?? LatLng(0, 0), onTap: _onMapTap, alwaysCenterPosition: false),
                   ),
                 ),
                 Row(

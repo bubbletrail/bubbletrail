@@ -69,7 +69,7 @@ class PhotoStore extends EntityStore<Photo, InternalPhotoList> {
   // written before the metadata is updated so a partial failure leaves an
   // orphan blob (cleaned up on next sync) rather than dangling metadata.
   Future<Photo> create(Uint8List data) async {
-    final id = const Uuid().v4();
+    final id = const Uuid().v7();
     await Directory(_dir).create(recursive: true);
     await atomicWrite(_blobPath(id), data);
     return await update(Photo(id: id));
