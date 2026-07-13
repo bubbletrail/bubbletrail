@@ -115,10 +115,13 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
 
   Future<void> _onLoadDives(Emitter<DiveListState> emit) async {
     var dives = await _store.dives.getAll();
-    final sites = await _store.sites.getAll();
+    var sites = await _store.sites.getAll();
 
     // Calculate tissues for dives that are missing them
     dives = await _calculateMissingTissues(dives);
+
+    // Derive positions for sites that don't have one from their dives
+    sites = await _calculateMissingSitePositions(sites, dives);
 
     final currentState = state;
     if (currentState is DiveListLoaded) {
@@ -204,6 +207,50 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     // Return updated dive list
     if (updatedDives.isEmpty) return dives;
     return dives.map((d) => updatedDives[d.id] ?? d).toList();
+  }
+
+  // Derive and persist a position for any site that doesn't have one, by
+  // averaging the start and end positions of the dives tagged to that site.
+  Future<List<Site>> _calculateMissingSitePositions(List<Site> sites, List<Dive> dives) async {
+    final updatedSites = <String, Site>{};
+
+    for (final site in sites) {
+      if (site.hasPosition()) continue;
+
+      // Accumulate all available dive positions for this site. List dives have
+      // their logs cleared, so load the full dive to reach the log positions.
+      var latSum = 0.0, lonSum = 0.0, altSum = 0.0;
+      var count = 0, altCount = 0;
+
+      for (final dive in dives.where((d) => d.hasSiteId() && d.siteId == site.id)) {
+        final fullDive = await _store.diveById(dive.id);
+        if (fullDive == null) continue;
+        for (final log in fullDive.logs) {
+          for (final pos in [if (log.hasStartPosition()) log.startPosition, if (log.hasEndPosition()) log.endPosition]) {
+            latSum += pos.latitude;
+            lonSum += pos.longitude;
+            count++;
+            if (pos.hasAltitude()) {
+              altSum += pos.altitude;
+              altCount++;
+            }
+          }
+        }
+      }
+
+      if (count == 0) continue;
+
+      _log.fine('derive position for site ${site.id} from $count dive positions');
+      final updatedSite = site.rebuild((s) {
+        s.position = Position(latitude: latSum / count, longitude: lonSum / count, altitude: altCount > 0 ? altSum / altCount : null);
+      });
+      await _store.sites.update(updatedSite);
+      updatedSites[site.id] = updatedSite;
+    }
+
+    // Return updated site list
+    if (updatedSites.isEmpty) return sites;
+    return sites.map((s) => updatedSites[s.id] ?? s).toList();
   }
 
   Future<void> _onImportDives(_ImportDives event, Emitter<DiveListState> emit) async {
