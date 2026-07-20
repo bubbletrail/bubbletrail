@@ -13,6 +13,7 @@ import '../app_metadata.dart';
 import '../app_routes.dart';
 import '../services/store/store.dart';
 import '../common/common.dart';
+import '../equipment/cylinder_list_bloc.dart';
 import 'depth_profile_widget.dart';
 import 'dive_details_bloc.dart';
 import 'dive_list_bloc.dart';
@@ -98,16 +99,31 @@ class _DiveDetails extends StatelessWidget {
   }
 
   List<Widget> _buildAllSections(BuildContext context) {
+    // Non-editable info cards.
+    final infoCards = (<Widget?>[_depthsTable(), _physioTable()])
+        .where((w) => w != null)
+        .map<Widget>(
+          (t) => Card(
+            child: Padding(padding: const .all(16.0), child: t),
+          ),
+        )
+        .toList();
+
+    // Cylinders (gases): one tappable card each, or an "add" affordance.
+    final gasCards = dive.cylinders.isEmpty
+        ? [_addDataCard(context, label: 'Add gases', icon: Icons.gas_meter_outlined, onTap: () => _editGases(context))]
+        : _cylindersTables().map<Widget>((t) => _tappableDataCard(context, onTap: () => _editGases(context), child: t)).toList();
+
+    // Weights: a tappable card, or an "add" affordance.
+    final weightCard = dive.weightsystems.isEmpty
+        ? _addDataCard(context, label: 'Add weights', icon: Icons.fitness_center, onTap: () => _editWeights(context))
+        : _tappableDataCard(context, onTap: () => _editWeights(context), child: _weightsTable());
+
     final datacolumns =
-        (<Widget?>[_depthsTable(), _physioTable()] + _cylindersTables() + [if (dive.weightsystems.isNotEmpty) _weightsTable()])
-            .where((w) => w != null)
-            .map<Widget>(
-              (t) => Card(
-                child: Padding(padding: const .all(16.0), child: t),
-              ),
-            )
-            .toList() +
+        infoCards +
+        gasCards +
         [
+          weightCard,
           if (dive.equipment.isNotEmpty)
             Card(
               child: Padding(padding: const .all(8.0), child: _equipmentTable(context)),
@@ -308,6 +324,92 @@ class _DiveDetails extends StatelessWidget {
     if (result == null || !context.mounted || result == dive.notes) return;
 
     final updated = dive.rebuild((d) => d.notes = result);
+    context.read<DiveDetailsBloc>().add(DiveDetailsEvent.save(updated));
+  }
+
+  // Wraps a data column in a tappable card, matching the non-editable cards.
+  Widget _tappableDataCard(BuildContext context, {required VoidCallback onTap, required Widget child}) {
+    return Card(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: .circular(12),
+        child: Padding(padding: const .all(16.0), child: child),
+      ),
+    );
+  }
+
+  // An empty-state card inviting the user to add data.
+  Widget _addDataCard(BuildContext context, {required String label, required IconData icon, required VoidCallback onTap}) {
+    return Card(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: .circular(12),
+        child: Padding(
+          padding: const .all(16.0),
+          child: Row(
+            spacing: 8,
+            children: [
+              Icon(icon, size: 18, color: Theme.of(context).hintColor),
+              Text(label, style: TextStyle(color: Theme.of(context).hintColor)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _editWeights(BuildContext context) async {
+    final result = await showWeightsEditor(context: context, weights: dive.weightsystems);
+    if (result == null || !context.mounted) return;
+    if (ListEquality<Weightsystem>().equals(result, dive.weightsystems.toList())) return;
+
+    final updated = dive.rebuild((d) {
+      d.weightsystems.clear();
+      d.weightsystems.addAll(result);
+    });
+    context.read<DiveDetailsBloc>().add(DiveDetailsEvent.save(updated));
+  }
+
+  Future<void> _editGases(BuildContext context) async {
+    final cylinderState = context.read<CylinderListBloc>().state;
+    final available = cylinderState is CylinderListLoaded ? cylinderState.cylinders : <Cylinder>[];
+
+    final result = await showCylindersEditor(context: context, cylinders: dive.cylinders.toList(), availableCylinders: available);
+    if (result == null || !context.mounted) return;
+
+    final newCylinders = result.map((e) => e.cylinder).toList();
+    if (ListEquality<DiveCylinder>().equals(newCylinders, dive.cylinders.toList())) return;
+
+    // Map old cylinder index -> new index, so gas-change events keep pointing
+    // at the right cylinder. Events for removed cylinders are dropped.
+    final remap = <int, int>{};
+    for (final (index, edit) in result.indexed) {
+      if (edit.originalIndex != null) remap[edit.originalIndex!] = index;
+    }
+
+    final updated = dive.rebuild((d) {
+      d.cylinders.clear();
+      d.cylinders.addAll(newCylinders);
+
+      final events = <SampleEvent>[];
+      for (final event in d.events) {
+        if (event.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE) {
+          final newIndex = remap[event.value];
+          if (newIndex == null) continue;
+          events.add(event.rebuild((e) => e.value = newIndex));
+        } else {
+          events.add(event);
+        }
+      }
+      d.events.clear();
+      d.events.addAll(events);
+
+      // Gas mix affects the calculated metrics and deco, so recompute.
+      d.clearStartTissues();
+      d.clearEndTissues();
+      d.clearEndSurfGf();
+      d.recalculateMetadata();
+    });
     context.read<DiveDetailsBloc>().add(DiveDetailsEvent.save(updated));
   }
 
