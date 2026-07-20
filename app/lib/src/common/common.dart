@@ -1,3 +1,4 @@
+export 'adaptive_modal.dart';
 export 'badge.dart';
 export 'chips_editor.dart';
 export 'colors.dart';

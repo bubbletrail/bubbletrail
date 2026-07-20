@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../app_metadata.dart';
+import 'adaptive_modal.dart';
 
 // Shows an editor for a set of string values (tags, buddies, ...). On mobile
 // this is a bottom sheet, on desktop a modal dialog. Existing values can be
@@ -15,30 +15,15 @@ Future<List<String>?> showChipsEditor({
   TextCapitalization textCapitalization = TextCapitalization.none,
   List<String> createCharacters = const [],
 }) {
-  final editor = _ChipsEditor(
-    title: title,
-    addLabel: addLabel,
-    selectedValues: selectedValues,
-    availableValues: availableValues,
-    textCapitalization: textCapitalization,
-    createCharacters: createCharacters,
-  );
-  if (platformIsMobile) {
-    return showModalBottomSheet<List<String>>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (context) => Padding(
-        // Lift the sheet above the on-screen keyboard when the text field is focused.
-        padding: .only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-        child: editor,
-      ),
-    );
-  }
-  return showDialog<List<String>>(
+  return showAdaptiveModal<List<String>>(
     context: context,
-    builder: (context) => Dialog(
-      child: ConstrainedBox(constraints: const .tightFor(width: 480), child: editor),
+    builder: (context) => _ChipsEditor(
+      title: title,
+      addLabel: addLabel,
+      selectedValues: selectedValues,
+      availableValues: availableValues,
+      textCapitalization: textCapitalization,
+      createCharacters: createCharacters,
     ),
   );
 }

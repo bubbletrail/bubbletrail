@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../app_metadata.dart';
+import 'adaptive_modal.dart';
 
 // Shows an editor for a single piece of text. On mobile this is a bottom
 // sheet, on desktop a modal dialog. Returns the trimmed new value, or null if
@@ -13,24 +13,9 @@ Future<String?> showTextEditor({
   int maxLines = 1,
   TextCapitalization textCapitalization = TextCapitalization.none,
 }) {
-  final editor = _TextEditor(title: title, initialValue: initialValue, label: label, maxLines: maxLines, textCapitalization: textCapitalization);
-  if (platformIsMobile) {
-    return showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (context) => Padding(
-        // Lift the sheet above the on-screen keyboard while typing.
-        padding: .only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-        child: editor,
-      ),
-    );
-  }
-  return showDialog<String>(
+  return showAdaptiveModal<String>(
     context: context,
-    builder: (context) => Dialog(
-      child: ConstrainedBox(constraints: const .tightFor(width: 480), child: editor),
-    ),
+    builder: (context) => _TextEditor(title: title, initialValue: initialValue, label: label, maxLines: maxLines, textCapitalization: textCapitalization),
   );
 }
 

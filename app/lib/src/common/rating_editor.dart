@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../app_metadata.dart';
+import 'adaptive_modal.dart';
 
 // Shows an editor for a dive's rating. On mobile this is a bottom sheet, on
 // desktop a modal dialog. Returns the selected rating (0 meaning no rating),
 // or null if the user cancelled.
 Future<int?> showRatingEditor({required BuildContext context, required int rating}) {
-  final editor = _RatingEditor(rating: rating);
-  if (platformIsMobile) {
-    return showModalBottomSheet<int>(context: context, showDragHandle: true, builder: (context) => editor);
-  }
-  return showDialog<int>(
+  return showAdaptiveModal<int>(
     context: context,
-    builder: (context) => Dialog(
-      child: ConstrainedBox(constraints: const .tightFor(width: 480), child: editor),
-    ),
+    builder: (context) => _RatingEditor(rating: rating),
   );
 }
 
