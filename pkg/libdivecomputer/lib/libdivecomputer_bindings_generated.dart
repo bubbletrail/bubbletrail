@@ -1083,7 +1083,8 @@ enum dc_sample_type_t {
   DC_SAMPLE_PPO2(10),
   DC_SAMPLE_CNS(11),
   DC_SAMPLE_DECO(12),
-  DC_SAMPLE_GASMIX(13);
+  DC_SAMPLE_GASMIX(13),
+  DC_SAMPLE_LOCATION(14);
 
   final int value;
   const dc_sample_type_t(this.value);
@@ -1103,6 +1104,7 @@ enum dc_sample_type_t {
     11 => DC_SAMPLE_CNS,
     12 => DC_SAMPLE_DECO,
     13 => DC_SAMPLE_GASMIX,
+    14 => DC_SAMPLE_LOCATION,
     _ => throw ArgumentError("Unknown value for dc_sample_type_t: $value"),
   };
 }
@@ -1526,6 +1528,8 @@ final class dc_sample_value_t extends ffi.Union {
   /// Gas mix index
   @ffi.UnsignedInt()
   external int gasmix;
+
+  external dc_location_t location;
 }
 
 final class UnnamedStruct2 extends ffi.Struct {

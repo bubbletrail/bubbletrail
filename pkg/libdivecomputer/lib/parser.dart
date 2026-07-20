@@ -188,10 +188,17 @@ bool _getFieldIndexed(ffi.Pointer<dc.dc_parser_t> parser, dc.dc_field_type_t typ
 Log? _currentDive;
 LogSample? _currentSample;
 
+// Per-sample GPS location tracking. The first location sample becomes the
+// dive's start position and the last becomes the end position.
+Position? _firstSampleLocation;
+Position? _lastSampleLocation;
+
 /// Parse samples from the parser.
 void _parseSamples(ffi.Pointer<dc.dc_parser_t> parser, Log dive) {
   _currentDive = dive;
   _currentSample = null;
+  _firstSampleLocation = null;
+  _lastSampleLocation = null;
 
   final callback = ffi.NativeCallable<dc.dc_sample_callback_tFunction>.isolateLocal(_sampleCallback);
 
@@ -204,8 +211,19 @@ void _parseSamples(ffi.Pointer<dc.dc_parser_t> parser, Log dive) {
     dive.samples.add(_currentSample!);
   }
 
+  // Per-sample GPS location overrides the dive-level location: the first
+  // sample's location is the dive start, the last sample's the dive end.
+  if (_firstSampleLocation != null) {
+    dive.startPosition = _firstSampleLocation!;
+  }
+  if (_lastSampleLocation != null) {
+    dive.endPosition = _lastSampleLocation!;
+  }
+
   _currentDive = null;
   _currentSample = null;
+  _firstSampleLocation = null;
+  _lastSampleLocation = null;
 }
 
 /// Sample callback for dc_parser_samples_foreach.
@@ -279,6 +297,12 @@ void _sampleCallback(int typeValue, ffi.Pointer<dc.dc_sample_value_t> value, ffi
 
     case dc.dc_sample_type_t.DC_SAMPLE_GASMIX:
       _currentSample?.gasMixIndex = value.ref.gasmix;
+
+    case dc.dc_sample_type_t.DC_SAMPLE_LOCATION:
+      final loc = value.ref.location;
+      final position = Position(latitude: loc.latitude, longitude: loc.longitude, altitude: loc.altitude != 0 ? loc.altitude : null);
+      _firstSampleLocation ??= position;
+      _lastSampleLocation = position;
   }
 }
 
