@@ -185,33 +185,41 @@ class _DiveDetails extends StatelessWidget {
     );
   }
 
+  // Dispatches a save of the current dive with [update] applied.
+  void _save(BuildContext context, void Function(Dive) update) {
+    context.read<DiveDetailsBloc>().add(DiveDetailsEvent.save(dive.rebuild(update)));
+  }
+
+  // Wraps [child] in a chip-sized tappable region, used for the editable
+  // summary chips (site, buddies, tags, ...).
+  Widget _tappableChip({required VoidCallback onTap, required Widget child}) {
+    return InkWell(onTap: onTap, borderRadius: .circular(8), child: child);
+  }
+
   // A tappable placeholder chip shown when a field is empty.
-  Widget _addChip(BuildContext context, {required String label, required IconData icon, required VoidCallback onTap}) {
-    return InkWell(
+  Widget _addChip({required String label, required IconData icon, required VoidCallback onTap}) {
+    return _tappableChip(
       onTap: onTap,
-      borderRadius: .circular(8),
       child: Chip(avatar: Icon(icon, size: 18), label: Text(label), visualDensity: .compact, materialTapTargetSize: .shrinkWrap),
     );
   }
 
   Widget _siteSection(BuildContext context) {
     if (site == null) {
-      return _addChip(context, label: 'Add site', icon: Icons.location_on_outlined, onTap: () => _editSite(context));
+      return _addChip(label: 'Add site', icon: Icons.location_on_outlined, onTap: () => _editSite(context));
     }
-    return InkWell(
+    return _tappableChip(
       onTap: () => _editSite(context),
-      borderRadius: .circular(8),
       child: LabeledChip(label: 'Location', child: Text(site!.name)),
     );
   }
 
   Widget _buddiesSection(BuildContext context) {
     if (dive.buddies.isEmpty) {
-      return _addChip(context, label: 'Add buddies', icon: Icons.group_outlined, onTap: () => _editBuddies(context));
+      return _addChip(label: 'Add buddies', icon: Icons.group_outlined, onTap: () => _editBuddies(context));
     }
-    return InkWell(
+    return _tappableChip(
       onTap: () => _editBuddies(context),
-      borderRadius: .circular(8),
       child: Wrap(
         spacing: 8,
         runSpacing: 4,
@@ -222,11 +230,10 @@ class _DiveDetails extends StatelessWidget {
 
   Widget _divemasterSection(BuildContext context) {
     if (dive.divemaster.isEmpty) {
-      return _addChip(context, label: 'Add divemaster', icon: Icons.person_outline, onTap: () => _editDivemaster(context));
+      return _addChip(label: 'Add divemaster', icon: Icons.person_outline, onTap: () => _editDivemaster(context));
     }
-    return InkWell(
+    return _tappableChip(
       onTap: () => _editDivemaster(context),
-      borderRadius: .circular(8),
       child: LabeledChip(label: 'Divemaster', child: Text(dive.divemaster)),
     );
   }
@@ -244,8 +251,7 @@ class _DiveDetails extends StatelessWidget {
     final newSiteId = res.value?.id ?? '';
     if (newSiteId == dive.siteId) return;
 
-    final updated = dive.rebuild((d) => d.siteId = newSiteId);
-    context.read<DiveDetailsBloc>().add(DiveDetailsEvent.save(updated));
+    _save(context, (d) => d.siteId = newSiteId);
   }
 
   Future<void> _editBuddies(BuildContext context) async {
@@ -264,19 +270,17 @@ class _DiveDetails extends StatelessWidget {
     if (result == null || !context.mounted) return;
     if (SetEquality<String>().equals(result.toSet(), dive.buddies.toSet())) return;
 
-    final updated = dive.rebuild((d) {
+    _save(context, (d) {
       d.buddies.clear();
       d.buddies.addAll(result);
     });
-    context.read<DiveDetailsBloc>().add(DiveDetailsEvent.save(updated));
   }
 
   Future<void> _editDivemaster(BuildContext context) async {
     final result = await showTextEditor(context: context, title: 'Divemaster', label: 'Name', initialValue: dive.divemaster, textCapitalization: .words);
     if (result == null || !context.mounted || result == dive.divemaster) return;
 
-    final updated = dive.rebuild((d) => d.divemaster = result);
-    context.read<DiveDetailsBloc>().add(DiveDetailsEvent.save(updated));
+    _save(context, (d) => d.divemaster = result);
   }
 
   Widget _notesCard(BuildContext context) {
@@ -305,8 +309,7 @@ class _DiveDetails extends StatelessWidget {
     final result = await showTextEditor(context: context, title: 'Notes', initialValue: dive.notes, maxLines: 6, textCapitalization: .sentences);
     if (result == null || !context.mounted || result == dive.notes) return;
 
-    final updated = dive.rebuild((d) => d.notes = result);
-    context.read<DiveDetailsBloc>().add(DiveDetailsEvent.save(updated));
+    _save(context, (d) => d.notes = result);
   }
 
   // Wraps a data column in a tappable card, matching the non-editable cards.
@@ -358,34 +361,32 @@ class _DiveDetails extends StatelessWidget {
     final depthDurationChanged = canEditDepthDuration && (result.durationSeconds != dive.duration || result.maxDepth != dive.maxDepth);
     if (!startChanged && !depthDurationChanged) return;
 
-    final updated = dive.rebuild((d) {
+    _save(context, (d) {
       d.start = Timestamp.fromDateTime(result.start);
       if (canEditDepthDuration) {
         // Regenerate the synthetic profile from the new duration/depth.
         d.logs.clear();
         d.logs.add(syntheticLog(result.start, result.durationSeconds, result.maxDepth));
       }
-      d.clearStartTissues();
-      d.clearEndTissues();
-      d.clearEndSurfGf();
-      d.recalculateMetadata();
+      d.invalidateComputed();
     });
-    context.read<DiveDetailsBloc>().add(DiveDetailsEvent.save(updated));
   }
 
   Future<void> _editEquipment(BuildContext context) async {
     final equipmentState = context.read<EquipmentListBloc>().state;
-    final available = equipmentState is EquipmentListLoaded ? equipmentState.visibleEquipment : <Equipment>[];
+    final visible = equipmentState is EquipmentListLoaded ? equipmentState.visibleEquipment : <Equipment>[];
+    // Include equipment already on the dive even if it's since been archived, so
+    // it stays selectable and isn't silently dropped on save.
+    final available = [...visible, ...dive.equipment.where((e) => !visible.any((v) => v.id == e.id))];
 
     final result = await showEquipmentSelectionDialog(context: context, allEquipment: available, selectedEquipment: dive.equipment.toList());
     if (result == null || !context.mounted) return;
     if (ListEquality<Equipment>().equals(result, dive.equipment.toList())) return;
 
-    final updated = dive.rebuild((d) {
+    _save(context, (d) {
       d.equipment.clear();
       d.equipment.addAll(result);
     });
-    context.read<DiveDetailsBloc>().add(DiveDetailsEvent.save(updated));
   }
 
   Future<void> _editWeights(BuildContext context) async {
@@ -393,11 +394,10 @@ class _DiveDetails extends StatelessWidget {
     if (result == null || !context.mounted) return;
     if (ListEquality<Weightsystem>().equals(result, dive.weightsystems.toList())) return;
 
-    final updated = dive.rebuild((d) {
+    _save(context, (d) {
       d.weightsystems.clear();
       d.weightsystems.addAll(result);
     });
-    context.read<DiveDetailsBloc>().add(DiveDetailsEvent.save(updated));
   }
 
   Future<void> _editGases(BuildContext context) async {
@@ -418,7 +418,7 @@ class _DiveDetails extends StatelessWidget {
     final gasChangesChanged = !ListEquality<SampleEvent>().equals(result.gasChangeEvents, existingGasChanges);
     if (!cylindersChanged && !gasChangesChanged) return;
 
-    final updated = dive.rebuild((d) {
+    _save(context, (d) {
       d.cylinders.clear();
       d.cylinders.addAll(result.cylinders);
 
@@ -430,21 +430,17 @@ class _DiveDetails extends StatelessWidget {
         ..addAll(result.gasChangeEvents);
 
       // Gas mix and switches affect the calculated metrics and deco, so recompute.
-      d.clearStartTissues();
-      d.clearEndTissues();
-      d.clearEndSurfGf();
-      d.recalculateMetadata();
+      d.invalidateComputed();
     });
-    context.read<DiveDetailsBloc>().add(DiveDetailsEvent.save(updated));
   }
 
   Widget _tagsSection(BuildContext context) {
-    return InkWell(
+    if (dive.tags.isEmpty) {
+      return _addChip(label: 'Add tags', icon: Icons.add, onTap: () => _editTags(context));
+    }
+    return _tappableChip(
       onTap: () => _editTags(context),
-      borderRadius: .circular(8),
-      child: dive.tags.isEmpty
-          ? Chip(avatar: const Icon(Icons.add, size: 18), label: const Text('Add tags'), visualDensity: .compact, materialTapTargetSize: .shrinkWrap)
-          : TagsList(tags: dive.tags, secondaryTags: site?.tags.where((t) => !dive.tags.contains(t)).toList(), prefix: '#'),
+      child: TagsList(tags: dive.tags, secondaryTags: site?.tags.where((t) => !dive.tags.contains(t)).toList(), prefix: '#'),
     );
   }
 
@@ -458,20 +454,19 @@ class _DiveDetails extends StatelessWidget {
     // Only persist if the set of tags actually changed.
     if (SetEquality<String>().equals(result.toSet(), dive.tags.toSet())) return;
 
-    final updated = dive.rebuild((d) {
+    _save(context, (d) {
       d.tags.clear();
       d.tags.addAll(result);
     });
-    context.read<DiveDetailsBloc>().add(DiveDetailsEvent.save(updated));
   }
 
   Widget _ratingSection(BuildContext context) {
-    return InkWell(
+    if (dive.rating == 0) {
+      return _addChip(label: 'Add rating', icon: Icons.star_border, onTap: () => _editRating(context));
+    }
+    return _tappableChip(
       onTap: () => _editRating(context),
-      borderRadius: .circular(8),
-      child: dive.rating == 0
-          ? Chip(avatar: const Icon(Icons.star_border, size: 18), label: const Text('Add rating'), visualDensity: .compact, materialTapTargetSize: .shrinkWrap)
-          : Text('★' * dive.rating, style: const TextStyle(color: Colors.amber)),
+      child: Text('★' * dive.rating, style: const TextStyle(color: Colors.amber)),
     );
   }
 
@@ -480,14 +475,13 @@ class _DiveDetails extends StatelessWidget {
     final result = await showRatingEditor(context: context, rating: current);
     if (result == null || !context.mounted || result == current) return;
 
-    final updated = dive.rebuild((d) {
+    _save(context, (d) {
       if (result == 0) {
         d.clearRating();
       } else {
         d.rating = result;
       }
     });
-    context.read<DiveDetailsBloc>().add(DiveDetailsEvent.save(updated));
   }
 
   List<Widget> _cylindersTables() {
