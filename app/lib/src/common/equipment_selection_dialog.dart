@@ -1,6 +1,7 @@
 import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 
+import '../app_metadata.dart';
 import 'common.dart';
 
 Future<List<Equipment>?> showEquipmentSelectionDialog({
@@ -8,6 +9,16 @@ Future<List<Equipment>?> showEquipmentSelectionDialog({
   required List<Equipment> allEquipment,
   required List<Equipment> selectedEquipment,
 }) {
+  // Present as a bottom sheet on mobile (the narrow, checklist layout) and a
+  // dialog on desktop (which also offers the wide drag-and-drop layout).
+  if (platformIsMobile) {
+    return showModalBottomSheet<List<Equipment>>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) => _EquipmentSelectionDialog(allEquipment: allEquipment, selectedEquipment: selectedEquipment),
+    );
+  }
   return showDialog<List<Equipment>>(
     context: context,
     builder: (dialogContext) => _EquipmentSelectionDialog(allEquipment: allEquipment, selectedEquipment: selectedEquipment),
@@ -35,7 +46,7 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
 
   List<Equipment> get _selectedEquipment => widget.allEquipment.where((e) => _selectedIds.contains(e.id)).toList();
 
-  List<Equipment> get _availableEquipment => widget.allEquipment.where((e) => !e.archived && !_selectedIds.contains(e.id)).toList();
+  List<Equipment> get _availableEquipment => widget.allEquipment.where((e) => !_selectedIds.contains(e.id)).toList();
 
   void _toggleEquipment(Equipment equipment) {
     setState(() {
@@ -69,6 +80,10 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    // On mobile we're hosted in a bottom sheet, so render sheet content.
+    if (platformIsMobile) {
+      return _buildSheetLayout();
+    }
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 600;
@@ -78,6 +93,54 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
           return _buildNarrowLayout();
         }
       },
+    );
+  }
+
+  Widget _buildSheetLayout() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 16,
+          children: [
+            Text('Select equipment', style: Theme.of(context).textTheme.titleMedium),
+            if (widget.allEquipment.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(child: Text('No equipment available')),
+              )
+            else
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: widget.allEquipment.length,
+                  itemBuilder: (context, index) {
+                    final equipment = widget.allEquipment[index];
+                    final isSelected = _selectedIds.contains(equipment.id);
+                    return CheckboxListTile(
+                      value: isSelected,
+                      onChanged: (_) => _toggleEquipment(equipment),
+                      secondary: EquipmentIcons.icon(EquipmentIcons.forType(equipment.type), color: Theme.of(context).colorScheme.onSurface, size: 32),
+                      title: Text(EquipmentListTile.equipmentTitle(equipment)),
+                      subtitle: EquipmentListTile.equipmentSubtitle(equipment),
+                      contentPadding: EdgeInsets.zero,
+                    );
+                  },
+                ),
+              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              spacing: 8,
+              children: [
+                TextButton(onPressed: _cancel, child: const Text('Cancel')),
+                FilledButton(onPressed: _confirm, child: const Text('Done')),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 

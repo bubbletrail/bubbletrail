@@ -15,6 +15,7 @@ import '../app_routes.dart';
 import '../services/store/store.dart';
 import '../common/common.dart';
 import '../equipment/cylinder_list_bloc.dart';
+import '../equipment/equipment_list_bloc.dart';
 import 'depth_profile_widget.dart';
 import 'dive_details_bloc.dart';
 import 'dive_list_bloc.dart';
@@ -121,15 +122,17 @@ class _DiveDetails extends StatelessWidget {
         ? _addDataCard(context, label: 'Add weights', icon: Icons.fitness_center, onTap: () => _editWeights(context))
         : _tappableDataCard(context, onTap: () => _editWeights(context), child: _weightsTable());
 
+    // Equipment: a tappable card, or an "add" affordance when none is set.
+    final equipmentCard = dive.equipment.isEmpty
+        ? _addDataCard(context, label: 'Add equipment', icon: Icons.inventory_2_outlined, onTap: () => _editEquipment(context))
+        : _tappableDataCard(context, onTap: () => _editEquipment(context), child: _equipmentTable(context));
+
     final datacolumns =
         infoCards +
         gasCards +
         [
           weightCard,
-          if (dive.equipment.isNotEmpty)
-            Card(
-              child: Padding(padding: const .all(8.0), child: _equipmentTable(context)),
-            ),
+          equipmentCard,
           if (site != null)
             ConstrainedBox(
               constraints: .loose(.fromWidth(600)),
@@ -389,6 +392,21 @@ class _DiveDetails extends StatelessWidget {
       d.clearEndTissues();
       d.clearEndSurfGf();
       d.recalculateMetadata();
+    });
+    context.read<DiveDetailsBloc>().add(DiveDetailsEvent.save(updated));
+  }
+
+  Future<void> _editEquipment(BuildContext context) async {
+    final equipmentState = context.read<EquipmentListBloc>().state;
+    final available = equipmentState is EquipmentListLoaded ? equipmentState.visibleEquipment : <Equipment>[];
+
+    final result = await showEquipmentSelectionDialog(context: context, allEquipment: available, selectedEquipment: dive.equipment.toList());
+    if (result == null || !context.mounted) return;
+    if (ListEquality<Equipment>().equals(result, dive.equipment.toList())) return;
+
+    final updated = dive.rebuild((d) {
+      d.equipment.clear();
+      d.equipment.addAll(result);
     });
     context.read<DiveDetailsBloc>().add(DiveDetailsEvent.save(updated));
   }
