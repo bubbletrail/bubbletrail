@@ -1,40 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// A widget that displays an error state with an icon, title, and message.
-///
-/// Used for showing error states in list screens and other places where
-/// data loading may fail.
-class ErrorStateWidget extends StatelessWidget {
-  final String title;
-  final String message;
-  final VoidCallback? onRetry;
-
-  const ErrorStateWidget({super.key, required this.title, required this.message, this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const .all(16),
-        child: Column(
-          mainAxisAlignment: .center,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
-            const SizedBox(height: 16),
-            Text(title, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Text(message, style: Theme.of(context).textTheme.bodyMedium, textAlign: .center),
-            if (onRetry != null) ...[
-              const SizedBox(height: 16),
-              FilledButton.icon(onPressed: onRetry, icon: const Icon(Icons.sync), label: const Text('Retry')),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 /// A widget that displays an empty state with an optional icon and action.
 ///
 /// Used for showing empty states in list screens when there's no data yet.
