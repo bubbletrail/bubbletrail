@@ -8,6 +8,7 @@ Future<List<Equipment>?> showEquipmentSelectionDialog({
   required BuildContext context,
   required List<Equipment> allEquipment,
   required List<Equipment> selectedEquipment,
+  ValueChanged<Set<String>>? onSetAsDefault,
 }) {
   // Present as a bottom sheet on mobile (the narrow, checklist layout) and a
   // dialog on desktop (which also offers the wide drag-and-drop layout).
@@ -16,20 +17,23 @@ Future<List<Equipment>?> showEquipmentSelectionDialog({
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (context) => _EquipmentSelectionDialog(allEquipment: allEquipment, selectedEquipment: selectedEquipment),
+      builder: (context) => _EquipmentSelectionDialog(allEquipment: allEquipment, selectedEquipment: selectedEquipment, onSetAsDefault: onSetAsDefault),
     );
   }
   return showDialog<List<Equipment>>(
     context: context,
-    builder: (dialogContext) => _EquipmentSelectionDialog(allEquipment: allEquipment, selectedEquipment: selectedEquipment),
+    builder: (dialogContext) => _EquipmentSelectionDialog(allEquipment: allEquipment, selectedEquipment: selectedEquipment, onSetAsDefault: onSetAsDefault),
   );
 }
 
 class _EquipmentSelectionDialog extends StatefulWidget {
   final List<Equipment> allEquipment;
   final List<Equipment> selectedEquipment;
+  // Called with the selected ids when the user asks to make the current
+  // selection the default set for new dives. Absent hides that action.
+  final ValueChanged<Set<String>>? onSetAsDefault;
 
-  const _EquipmentSelectionDialog({required this.allEquipment, required this.selectedEquipment});
+  const _EquipmentSelectionDialog({required this.allEquipment, required this.selectedEquipment, this.onSetAsDefault});
 
   @override
   State<_EquipmentSelectionDialog> createState() => _EquipmentSelectionDialogState();
@@ -76,6 +80,31 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
 
   void _cancel() {
     Navigator.of(context).pop();
+  }
+
+  // Equipment flagged as default for new dives.
+  Iterable<Equipment> get _defaultEquipment => widget.allEquipment.where((e) => e.defaultForNewDives && !e.archived);
+
+  void _addDefaults() {
+    setState(() {
+      _selectedIds.addAll(_defaultEquipment.map((e) => e.id));
+    });
+  }
+
+  void _setAsDefault() {
+    widget.onSetAsDefault?.call(_selectedIds.toSet());
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Default equipment updated')));
+  }
+
+  // The secondary actions shared by every layout: pull in the default set, and
+  // (when supported) promote the current selection to be the default.
+  List<Widget> _defaultActionButtons() {
+    return [
+      if (_defaultEquipment.isNotEmpty)
+        TextButton.icon(onPressed: _addDefaults, icon: const Icon(Icons.playlist_add), label: const Text('Add defaults')),
+      if (widget.onSetAsDefault != null)
+        TextButton.icon(onPressed: _setAsDefault, icon: const Icon(Icons.push_pin_outlined), label: const Text('Set as default')),
+    ];
   }
 
   @override
@@ -130,10 +159,13 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
                   },
                 ),
               ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            Wrap(
+              alignment: WrapAlignment.end,
               spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
+                ..._defaultActionButtons(),
                 TextButton(onPressed: _cancel, child: const Text('Cancel')),
                 FilledButton(onPressed: _confirm, child: const Text('Done')),
               ],
@@ -168,6 +200,7 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
               ),
       ),
       actions: [
+        ..._defaultActionButtons(),
         TextButton(onPressed: _cancel, child: const Text('Cancel')),
         TextButton(onPressed: _confirm, child: const Text('Done')),
       ],
@@ -220,8 +253,8 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 spacing: 8,
                 children: [
-                  Text('Drag or tap items to move'),
-                  Spacer(),
+                  ..._defaultActionButtons(),
+                  const Spacer(),
                   TextButton(onPressed: _cancel, child: const Text('Cancel')),
                   FilledButton(onPressed: _confirm, child: const Text('Done')),
                 ],
