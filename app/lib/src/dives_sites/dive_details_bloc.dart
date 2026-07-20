@@ -1,18 +1,16 @@
 import 'dart:ui';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:btproto/btproto.dart';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
+import 'package:uuid/uuid.dart';
 
 import '../common/details_state.dart';
 import '../providers/storage_provider.dart';
-
-part 'dive_details_bloc.g.dart';
 
 final _log = Logger('dive_details_bloc.dart');
 
@@ -27,7 +25,6 @@ class DiveDetailsInitial extends DiveDetailsState {
   const DiveDetailsInitial();
 }
 
-@CopyWith()
 class DiveDetailsLoaded extends DiveDetailsState {
   final Dive dive;
   final Site? site;
@@ -58,8 +55,7 @@ sealed class DiveDetailsEvent extends Equatable {
 
   const factory DiveDetailsEvent.newDive() = _NewDive;
   const factory DiveDetailsEvent.loadDive(String diveId) = _LoadDive;
-  const factory DiveDetailsEvent.close() = _Close;
-  const factory DiveDetailsEvent.saveAndClose(Dive dive) = _SaveAndClose;
+  const factory DiveDetailsEvent.save(Dive dive) = _Save;
   const factory DiveDetailsEvent.deleteAndClose(String diveID) = _DeleteAndClose;
 }
 
@@ -73,14 +69,10 @@ class _LoadDive extends DiveDetailsEvent {
   const _LoadDive(this.diveId);
 }
 
-class _Close extends DiveDetailsEvent {
-  const _Close();
-}
-
-class _SaveAndClose extends DiveDetailsEvent {
+class _Save extends DiveDetailsEvent {
   final Dive dive;
 
-  const _SaveAndClose(this.dive);
+  const _Save(this.dive);
 }
 
 class _DeleteAndClose extends DiveDetailsEvent {
@@ -101,15 +93,19 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
           final n = await _store.dives.nextDiveNo;
           final t = Timestamp.fromDateTime(DateTime.now());
           final defaultEquipment = await _store.equipment.getDefaultsForNewDives();
-          emit(DiveDetailsLoaded(Dive(number: n, start: t, equipment: defaultEquipment)..freeze()));
+          // Give the dive a stable id up front so inline edits can save it, but
+          // don't persist until the first edit — an untouched new dive that's
+          // navigated away from leaves nothing behind.
+          emit(DiveDetailsLoaded(Dive(id: Uuid().v7(), number: n, start: t, equipment: defaultEquipment)..freeze()));
         case _LoadDive():
           await _onLoadDive(event, emit);
-        case _Close():
-          emit(DiveDetailsClosed());
-        case _SaveAndClose():
+        case _Save():
+          // Persist without closing, then reload so the view updates in place
+          // (and the storage listener is registered for a first-time save of a
+          // newly created dive).
           await _store.dives.update(event.dive);
           _log.fine('saved dive #${event.dive.number}');
-          emit(DiveDetailsClosed());
+          await _onLoadDive(_LoadDive(event.dive.id), emit);
         case _DeleteAndClose():
           await _store.dives.delete(event.diveID);
           _log.fine('deleted dive ${event.diveID}');

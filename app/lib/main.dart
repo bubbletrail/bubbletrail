@@ -19,7 +19,6 @@ import 'src/connect/ble_scan_bloc.dart';
 import 'src/connect/connect_screen.dart';
 import 'src/dives_sites/dive_details_bloc.dart';
 import 'src/dives_sites/dive_details_screen.dart';
-import 'src/dives_sites/dive_edit_screen.dart';
 import 'src/dives_sites/dive_list_bloc.dart';
 import 'src/dives_sites/dive_list_screen.dart';
 import 'src/dives_sites/fullscreen_map_screen.dart';
@@ -209,7 +208,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       builder: (context, state) {
                         return BlocProvider(
                           create: (_) => DiveDetailsBloc()..add(DiveDetailsEvent.newDive()),
-                          child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const DiveEditScreen()),
+                          child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const DiveDetailsScreen()),
                         );
                       },
                     ),
@@ -222,18 +221,6 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const DiveDetailsScreen()),
                         );
                       },
-                      routes: [
-                        GoRoute(
-                          path: AppRoutePath.divesDetailsEdit,
-                          name: AppRouteName.divesDetailsEdit,
-                          builder: (context, state) {
-                            return BlocProvider(
-                              create: (_) => DiveDetailsBloc()..add(DiveDetailsEvent.loadDive(state.pathParameters['diveID']!)),
-                              child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const DiveEditScreen()),
-                            );
-                          },
-                        ),
-                      ],
                     ),
                   ],
                 ),

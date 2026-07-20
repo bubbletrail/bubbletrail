@@ -4,6 +4,16 @@ import 'package:btproto/btproto.dart';
 import 'ext.dart';
 
 extension DiveExtensions on Dive {
+  // Drop the cached decompression state and recompute everything derived from
+  // the samples/gases. Call after editing anything that affects the profile
+  // (start time, depth/duration, cylinders or gas switches).
+  void invalidateComputed() {
+    clearStartTissues();
+    clearEndTissues();
+    clearEndSurfGf();
+    recalculateMetadata();
+  }
+
   void recalculateMetadata() {
     // Process samples, calculating depths, durations, etc.
 

@@ -2,18 +2,23 @@ import 'dart:convert';
 
 import 'package:btcountries/btcountries.dart';
 import 'package:btproto/btproto.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart' hide DataColumn;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:stretch_wrap/stretch_wrap.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
 import '../services/store/store.dart';
 import '../common/common.dart';
+import '../equipment/cylinder_list_bloc.dart';
+import '../equipment/equipment_list_bloc.dart';
 import 'depth_profile_widget.dart';
 import 'dive_details_bloc.dart';
+import 'dive_list_bloc.dart';
 import 'site_map.dart';
 
 class DiveDetailsScreen extends StatelessWidget {
@@ -74,14 +79,6 @@ class _DiveDetails extends StatelessWidget {
                   : null,
               tooltip: nextDive != null ? 'Dive #${nextDive?.number}' : null,
             ),
-            if (platformIsDesktop)
-              IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () {
-                  context.goNamed(AppRouteName.divesDetailsEdit, pathParameters: {'diveID': dive.id});
-                },
-                tooltip: 'Edit dive',
-              ),
             if (platformIsDesktop) _popupMenuActions(context),
           ],
           body: SingleChildScrollView(
@@ -96,20 +93,38 @@ class _DiveDetails extends StatelessWidget {
   }
 
   List<Widget> _buildAllSections(BuildContext context) {
+    // The depths/times card is editable; the physio card is not.
+    final depthsCard = _tappableDataCard(context, onTap: () => _editBasics(context), child: _depthsTable());
+    final physioTable = _physioTable();
+    final infoCards = <Widget>[
+      depthsCard,
+      if (physioTable != null)
+        Card(
+          child: Padding(padding: const .all(16.0), child: physioTable),
+        ),
+    ];
+
+    // Cylinders (gases): one tappable card each, or an "add" affordance.
+    final gasCards = dive.cylinders.isEmpty
+        ? [_addDataCard(context, label: 'Add gases', icon: Icons.gas_meter_outlined, onTap: () => _editGases(context))]
+        : _cylindersTables().map<Widget>((t) => _tappableDataCard(context, onTap: () => _editGases(context), child: t)).toList();
+
+    // Weights: a tappable card, or an "add" affordance.
+    final weightCard = dive.weightsystems.isEmpty
+        ? _addDataCard(context, label: 'Add weights', icon: Icons.fitness_center, onTap: () => _editWeights(context))
+        : _tappableDataCard(context, onTap: () => _editWeights(context), child: _weightsTable());
+
+    // Equipment: a tappable card, or an "add" affordance when none is set.
+    final equipmentCard = dive.equipment.isEmpty
+        ? _addDataCard(context, label: 'Add equipment', icon: Icons.inventory_2_outlined, onTap: () => _editEquipment(context))
+        : _tappableDataCard(context, onTap: () => _editEquipment(context), child: _equipmentTable(context));
+
     final datacolumns =
-        (<Widget?>[_depthsTable(), _physioTable()] + _cylindersTables() + [if (dive.weightsystems.isNotEmpty) _weightsTable()])
-            .where((w) => w != null)
-            .map<Widget>(
-              (t) => Card(
-                child: Padding(padding: const .all(16.0), child: t),
-              ),
-            )
-            .toList() +
+        infoCards +
+        gasCards +
         [
-          if (dive.equipment.isNotEmpty)
-            Card(
-              child: Padding(padding: const .all(8.0), child: _equipmentTable(context)),
-            ),
+          weightCard,
+          equipmentCard,
           if (site != null)
             ConstrainedBox(
               constraints: .loose(.fromWidth(600)),
@@ -123,31 +138,13 @@ class _DiveDetails extends StatelessWidget {
           crossAxisAlignment: .start,
           children: [
             if (dive.logs.isNotEmpty && dive.logs[0].samples.isNotEmpty) _ProfileCard(dive: dive, site: site),
-            _buddiesTagsEtc(),
+            _buddiesTagsEtc(context),
           ],
         ),
       ),
-      if (dive.notes.isNotEmpty)
-        Card(
-          child: Padding(padding: const .all(16.0), child: Text(dive.notes)),
-        ),
+      _notesCard(context),
       StretchWrap(spacing: 8, runSpacing: 8, children: datacolumns.map((e) => Stretch(child: e)).toList()),
-      if (platformIsMobile)
-        Wrap(
-          spacing: 16,
-          runSpacing: 8,
-          alignment: .spaceBetween,
-          children: [
-            OutlinedButton.icon(
-              icon: const Icon(Icons.edit),
-              label: Text('Edit dive'),
-              onPressed: () {
-                context.goNamed(AppRouteName.divesDetailsEdit, pathParameters: {'diveID': dive.id});
-              },
-            ),
-            if (platformIsMobile) _popupMenuActions(context),
-          ],
-        ),
+      if (platformIsMobile) Align(alignment: .centerRight, child: _popupMenuActions(context)),
     ];
   }
 
@@ -179,23 +176,318 @@ class _DiveDetails extends StatelessWidget {
     );
   }
 
-  Wrap _buddiesTagsEtc() {
+  Wrap _buddiesTagsEtc(BuildContext context) {
     return Wrap(
       crossAxisAlignment: .center,
       runSpacing: 8,
       spacing: 24,
-      children: [
-        if (site != null) LabeledChip(label: 'Location', child: Text(site!.name)),
-        Wrap(
-          spacing: 8,
-          runSpacing: 4,
-          children: dive.buddies.map<Widget>((b) => LabeledChip(label: 'Buddy', child: Text(b))).toList(),
-        ),
-        TagsList(tags: dive.tags, secondaryTags: site?.tags.where((t) => !dive.tags.contains(t)).toList(), prefix: '#'),
-        Text('★' * dive.rating),
-        if (dive.divemaster.isNotEmpty) LabeledChip(label: 'Divemaster', child: Text(dive.divemaster)),
-      ],
+      children: [_siteSection(context), _buddiesSection(context), _tagsSection(context), _ratingSection(context), _divemasterSection(context)],
     );
+  }
+
+  // Dispatches a save of the current dive with [update] applied.
+  void _save(BuildContext context, void Function(Dive) update) {
+    context.read<DiveDetailsBloc>().add(DiveDetailsEvent.save(dive.rebuild(update)));
+  }
+
+  // Wraps [child] in a chip-sized tappable region, used for the editable
+  // summary chips (site, buddies, tags, ...).
+  Widget _tappableChip({required VoidCallback onTap, required Widget child}) {
+    return InkWell(onTap: onTap, borderRadius: .circular(8), child: child);
+  }
+
+  // A tappable placeholder chip shown when a field is empty.
+  Widget _addChip({required String label, required IconData icon, required VoidCallback onTap}) {
+    return _tappableChip(
+      onTap: onTap,
+      child: Chip(avatar: Icon(icon, size: 18), label: Text(label), visualDensity: .compact, materialTapTargetSize: .shrinkWrap),
+    );
+  }
+
+  Widget _siteSection(BuildContext context) {
+    if (site == null) {
+      return _addChip(label: 'Add site', icon: Icons.location_on_outlined, onTap: () => _editSite(context));
+    }
+    return _tappableChip(
+      onTap: () => _editSite(context),
+      child: LabeledChip(label: 'Location', child: Text(site!.name)),
+    );
+  }
+
+  Widget _buddiesSection(BuildContext context) {
+    if (dive.buddies.isEmpty) {
+      return _addChip(label: 'Add buddies', icon: Icons.group_outlined, onTap: () => _editBuddies(context));
+    }
+    return _tappableChip(
+      onTap: () => _editBuddies(context),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 4,
+        children: dive.buddies.map<Widget>((b) => LabeledChip(label: 'Buddy', child: Text(b))).toList(),
+      ),
+    );
+  }
+
+  Widget _divemasterSection(BuildContext context) {
+    if (dive.divemaster.isEmpty) {
+      return _addChip(label: 'Add divemaster', icon: Icons.person_outline, onTap: () => _editDivemaster(context));
+    }
+    return _tappableChip(
+      onTap: () => _editDivemaster(context),
+      child: LabeledChip(label: 'Divemaster', child: Text(dive.divemaster)),
+    );
+  }
+
+  Future<void> _editSite(BuildContext context) async {
+    final listState = context.read<DiveListBloc>().state;
+    if (listState is! DiveListLoaded || listState.sites.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No dive sites available')));
+      return;
+    }
+
+    final res = await showSiteSelectionDialog(context: context, sites: listState.sites, selectedSite: site, noneOption: 'No site');
+    if (res.cancelled || !context.mounted) return;
+
+    final newSiteId = res.value?.id ?? '';
+    if (newSiteId == dive.siteId) return;
+
+    _save(context, (d) => d.siteId = newSiteId);
+  }
+
+  Future<void> _editBuddies(BuildContext context) async {
+    final listState = context.read<DiveListBloc>().state;
+    final available = listState is DiveListLoaded ? listState.buddies : <String>{};
+
+    final result = await showChipsEditor(
+      context: context,
+      title: 'Buddies',
+      addLabel: 'Add buddy',
+      selectedValues: dive.buddies,
+      availableValues: available,
+      textCapitalization: .words,
+      createCharacters: const [','],
+    );
+    if (result == null || !context.mounted) return;
+    if (SetEquality<String>().equals(result.toSet(), dive.buddies.toSet())) return;
+
+    _save(context, (d) {
+      d.buddies.clear();
+      d.buddies.addAll(result);
+    });
+  }
+
+  Future<void> _editDivemaster(BuildContext context) async {
+    final result = await showTextEditor(context: context, title: 'Divemaster', label: 'Name', initialValue: dive.divemaster, textCapitalization: .words);
+    if (result == null || !context.mounted || result == dive.divemaster) return;
+
+    _save(context, (d) => d.divemaster = result);
+  }
+
+  Widget _notesCard(BuildContext context) {
+    final hasNotes = dive.notes.isNotEmpty;
+    return Card(
+      child: InkWell(
+        onTap: () => _editNotes(context),
+        borderRadius: .circular(12),
+        child: Padding(
+          padding: const .all(16.0),
+          child: hasNotes
+              ? Text(dive.notes)
+              : Row(
+                  spacing: 8,
+                  children: [
+                    Icon(Icons.notes_outlined, size: 18, color: Theme.of(context).hintColor),
+                    Text('Add notes', style: TextStyle(color: Theme.of(context).hintColor)),
+                  ],
+                ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _editNotes(BuildContext context) async {
+    final result = await showTextEditor(context: context, title: 'Notes', initialValue: dive.notes, maxLines: 6, textCapitalization: .sentences);
+    if (result == null || !context.mounted || result == dive.notes) return;
+
+    _save(context, (d) => d.notes = result);
+  }
+
+  // Wraps a data column in a tappable card, matching the non-editable cards.
+  Widget _tappableDataCard(BuildContext context, {required VoidCallback onTap, required Widget child}) {
+    return Card(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: .circular(12),
+        child: Padding(padding: const .all(16.0), child: child),
+      ),
+    );
+  }
+
+  // An empty-state card inviting the user to add data.
+  Widget _addDataCard(BuildContext context, {required String label, required IconData icon, required VoidCallback onTap}) {
+    return Card(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: .circular(12),
+        child: Padding(
+          padding: const .all(16.0),
+          child: Row(
+            spacing: 8,
+            children: [
+              Icon(icon, size: 18, color: Theme.of(context).hintColor),
+              Text(label, style: TextStyle(color: Theme.of(context).hintColor)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _editBasics(BuildContext context) async {
+    // Depth and duration can only be edited when there's no real computer
+    // profile; otherwise they're derived from the samples.
+    final canEditDepthDuration = dive.logs.isEmpty || dive.logs.first.isSynthetic;
+
+    final result = await showDiveBasicsEditor(
+      context: context,
+      start: dive.start.toDateTime(),
+      durationSeconds: dive.duration,
+      maxDepth: dive.maxDepth,
+      canEditDepthDuration: canEditDepthDuration,
+    );
+    if (result == null || !context.mounted) return;
+
+    final startChanged = result.start != dive.start.toDateTime();
+    final depthDurationChanged = canEditDepthDuration && (result.durationSeconds != dive.duration || result.maxDepth != dive.maxDepth);
+    if (!startChanged && !depthDurationChanged) return;
+
+    _save(context, (d) {
+      d.start = Timestamp.fromDateTime(result.start);
+      if (canEditDepthDuration) {
+        // Regenerate the synthetic profile from the new duration/depth.
+        d.logs.clear();
+        d.logs.add(syntheticLog(result.start, result.durationSeconds, result.maxDepth));
+      }
+      d.invalidateComputed();
+    });
+  }
+
+  Future<void> _editEquipment(BuildContext context) async {
+    final equipmentBloc = context.read<EquipmentListBloc>();
+    final equipmentState = equipmentBloc.state;
+    final visible = equipmentState is EquipmentListLoaded ? equipmentState.visibleEquipment : <Equipment>[];
+    // Include equipment already on the dive even if it's since been archived, so
+    // it stays selectable and isn't silently dropped on save.
+    final available = [...visible, ...dive.equipment.where((e) => !visible.any((v) => v.id == e.id))];
+
+    final result = await showEquipmentSelectionDialog(
+      context: context,
+      allEquipment: available,
+      selectedEquipment: dive.equipment.toList(),
+      onSetAsDefault: (ids) => equipmentBloc.add(EquipmentListEvent.setDefaults(ids)),
+    );
+    if (result == null || !context.mounted) return;
+    if (ListEquality<Equipment>().equals(result, dive.equipment.toList())) return;
+
+    _save(context, (d) {
+      d.equipment.clear();
+      d.equipment.addAll(result);
+    });
+  }
+
+  Future<void> _editWeights(BuildContext context) async {
+    final result = await showWeightsEditor(context: context, weights: dive.weightsystems);
+    if (result == null || !context.mounted) return;
+    if (ListEquality<Weightsystem>().equals(result, dive.weightsystems.toList())) return;
+
+    _save(context, (d) {
+      d.weightsystems.clear();
+      d.weightsystems.addAll(result);
+    });
+  }
+
+  Future<void> _editGases(BuildContext context) async {
+    final cylinderState = context.read<CylinderListBloc>().state;
+    final available = cylinderState is CylinderListLoaded ? cylinderState.cylinders : <Cylinder>[];
+    final existingGasChanges = dive.events.where((e) => e.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE).toList();
+
+    final result = await showCylindersEditor(
+      context: context,
+      cylinders: dive.cylinders.toList(),
+      availableCylinders: available,
+      durationSeconds: dive.duration,
+      gasChangeEvents: existingGasChanges,
+    );
+    if (result == null || !context.mounted) return;
+
+    final cylindersChanged = !ListEquality<DiveCylinder>().equals(result.cylinders, dive.cylinders.toList());
+    final gasChangesChanged = !ListEquality<SampleEvent>().equals(result.gasChangeEvents, existingGasChanges);
+    if (!cylindersChanged && !gasChangesChanged) return;
+
+    _save(context, (d) {
+      d.cylinders.clear();
+      d.cylinders.addAll(result.cylinders);
+
+      // Replace the gas-change events, preserving any other event types.
+      final others = d.events.where((e) => e.type != SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE).toList();
+      d.events
+        ..clear()
+        ..addAll(others)
+        ..addAll(result.gasChangeEvents);
+
+      // Gas mix and switches affect the calculated metrics and deco, so recompute.
+      d.invalidateComputed();
+    });
+  }
+
+  Widget _tagsSection(BuildContext context) {
+    if (dive.tags.isEmpty) {
+      return _addChip(label: 'Add tags', icon: Icons.add, onTap: () => _editTags(context));
+    }
+    return _tappableChip(
+      onTap: () => _editTags(context),
+      child: TagsList(tags: dive.tags, secondaryTags: site?.tags.where((t) => !dive.tags.contains(t)).toList(), prefix: '#'),
+    );
+  }
+
+  Future<void> _editTags(BuildContext context) async {
+    final listState = context.read<DiveListBloc>().state;
+    final availableTags = listState is DiveListLoaded ? listState.tags : <String>{};
+
+    final result = await showTagsEditor(context: context, selectedTags: dive.tags, availableTags: availableTags);
+    if (result == null || !context.mounted) return;
+
+    // Only persist if the set of tags actually changed.
+    if (SetEquality<String>().equals(result.toSet(), dive.tags.toSet())) return;
+
+    _save(context, (d) {
+      d.tags.clear();
+      d.tags.addAll(result);
+    });
+  }
+
+  Widget _ratingSection(BuildContext context) {
+    if (dive.rating == 0) {
+      return _addChip(label: 'Add rating', icon: Icons.star_border, onTap: () => _editRating(context));
+    }
+    return _tappableChip(
+      onTap: () => _editRating(context),
+      child: Text('★' * dive.rating, style: const TextStyle(color: Colors.amber)),
+    );
+  }
+
+  Future<void> _editRating(BuildContext context) async {
+    final current = dive.hasRating() ? dive.rating : 0;
+    final result = await showRatingEditor(context: context, rating: current);
+    if (result == null || !context.mounted || result == current) return;
+
+    _save(context, (d) {
+      if (result == 0) {
+        d.clearRating();
+      } else {
+        d.rating = result;
+      }
+    });
   }
 
   List<Widget> _cylindersTables() {
