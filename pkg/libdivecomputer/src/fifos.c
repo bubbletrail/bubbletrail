@@ -20,11 +20,11 @@
 #include "fifos.h"
 
 // libdivecomputer private headers
-#include "../libdivecomputer-0.9.0/src/common-private.h"
-#include "../libdivecomputer-0.9.0/src/context-private.h"
-#include "../libdivecomputer-0.9.0/src/iostream-private.h"
-#include "../libdivecomputer-0.9.0/src/platform.h"
-#include "../libdivecomputer-0.9.0/src/timer.h"
+#include "../libdivecomputer-git/src/common-private.h"
+#include "../libdivecomputer-git/src/context-private.h"
+#include "../libdivecomputer-git/src/iostream-private.h"
+#include "../libdivecomputer-git/src/platform.h"
+#include "../libdivecomputer-git/src/timer.h"
 
 static dc_status_t dc_fifos_set_timeout (dc_iostream_t *iostream, int timeout);
 static dc_status_t dc_fifos_set_break (dc_iostream_t *iostream, unsigned int value);
