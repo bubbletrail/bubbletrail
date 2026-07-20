@@ -7,6 +7,7 @@ import 'package:flutter/material.dart' hide DataColumn;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 import 'package:stretch_wrap/stretch_wrap.dart';
 
 import '../app_metadata.dart';
@@ -99,15 +100,16 @@ class _DiveDetails extends StatelessWidget {
   }
 
   List<Widget> _buildAllSections(BuildContext context) {
-    // Non-editable info cards.
-    final infoCards = (<Widget?>[_depthsTable(), _physioTable()])
-        .where((w) => w != null)
-        .map<Widget>(
-          (t) => Card(
-            child: Padding(padding: const .all(16.0), child: t),
-          ),
-        )
-        .toList();
+    // The depths/times card is editable; the physio card is not.
+    final depthsCard = _tappableDataCard(context, onTap: () => _editBasics(context), child: _depthsTable());
+    final physioTable = _physioTable();
+    final infoCards = <Widget>[
+      depthsCard,
+      if (physioTable != null)
+        Card(
+          child: Padding(padding: const .all(16.0), child: physioTable),
+        ),
+    ];
 
     // Cylinders (gases): one tappable card each, or an "add" affordance.
     final gasCards = dive.cylinders.isEmpty
@@ -356,6 +358,39 @@ class _DiveDetails extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _editBasics(BuildContext context) async {
+    // Depth and duration can only be edited when there's no real computer
+    // profile; otherwise they're derived from the samples.
+    final canEditDepthDuration = dive.logs.isEmpty || dive.logs.first.isSynthetic;
+
+    final result = await showDiveBasicsEditor(
+      context: context,
+      start: dive.start.toDateTime(),
+      durationSeconds: dive.duration,
+      maxDepth: dive.maxDepth,
+      canEditDepthDuration: canEditDepthDuration,
+    );
+    if (result == null || !context.mounted) return;
+
+    final startChanged = result.start != dive.start.toDateTime();
+    final depthDurationChanged = canEditDepthDuration && (result.durationSeconds != dive.duration || result.maxDepth != dive.maxDepth);
+    if (!startChanged && !depthDurationChanged) return;
+
+    final updated = dive.rebuild((d) {
+      d.start = Timestamp.fromDateTime(result.start);
+      if (canEditDepthDuration) {
+        // Regenerate the synthetic profile from the new duration/depth.
+        d.logs.clear();
+        d.logs.add(syntheticLog(result.start, result.durationSeconds, result.maxDepth));
+      }
+      d.clearStartTissues();
+      d.clearEndTissues();
+      d.clearEndSurfGf();
+      d.recalculateMetadata();
+    });
+    context.read<DiveDetailsBloc>().add(DiveDetailsEvent.save(updated));
   }
 
   Future<void> _editWeights(BuildContext context) async {

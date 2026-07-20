@@ -1,10 +1,47 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:convert/convert.dart';
 
 import 'package:btproto/btproto.dart';
+import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
+
+// Builds a synthetic depth profile for a manually entered dive, described only
+// by its start, duration and max depth. The profile is a simple descent /
+// bottom / two-stage ascent, marked synthetic via the model name so it can be
+// regenerated when those values are edited.
+Log syntheticLog(DateTime start, int durationSeconds, double maxDepth) {
+  final samples = <LogSample>[];
+
+  // We descend at 18 m/min
+  final t0 = (maxDepth / 18 * 60).roundToDouble();
+  // We ascend to half depth at 9 m/min
+  final t2 = (maxDepth / 2 / 9 * 60).roundToDouble();
+  // We ascend from there to the surface at 3 m/min
+  final t3 = (maxDepth / 2 / 3 * 60).roundToDouble();
+  // The bottom time is what remains, but at least zero. If this was a very
+  // odd bounce dive we might overshoot the actual duration in the graph,
+  // but whatever.
+  final t1 = max(0.0, durationSeconds - t0 - t2 - t3);
+
+  samples.add(LogSample(time: 0, depth: 0));
+  samples.add(LogSample(time: 5, depth: 0.1));
+  samples.add(LogSample(time: t0, depth: maxDepth));
+  samples.add(LogSample(time: t0 + t1, depth: maxDepth));
+  samples.add(LogSample(time: t0 + t1 + t2, depth: maxDepth / 2));
+  samples.add(LogSample(time: t0 + t1 + t2 + t3, depth: 0.1));
+  samples.add(LogSample(time: t0 + t1 + t2 + t3 + 5, depth: 0));
+
+  return Log(
+    model: 'Bubbletrail', //marks the log as synthetic
+    dateTime: Timestamp.fromDateTime(start),
+    diveTime: durationSeconds,
+    maxDepth: maxDepth,
+    samples: samples,
+  );
+}
 
 extension LogExtensions on Log {
   bool get isSynthetic => model == 'Bubbletrail';

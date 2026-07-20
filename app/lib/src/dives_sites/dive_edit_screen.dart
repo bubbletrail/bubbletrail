@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:btproto/btproto.dart';
 import 'package:chips_input_autocomplete/chips_input_autocomplete.dart';
 import 'package:collection/collection.dart';
@@ -726,7 +724,7 @@ class _DiveEditScreenState extends State<DiveEditScreen> {
       if (dive.logs.isEmpty || dive.logs.first.isSynthetic) {
         // Manual dive, we should (re)create a log
         dive.logs.clear();
-        dive.logs.add(_manualLog(_selectedDateTime, _durationSeconds, _maxDepth));
+        dive.logs.add(syntheticLog(_selectedDateTime, _durationSeconds, _maxDepth));
       }
 
       if (_rating != null) {
@@ -854,35 +852,4 @@ class _EditableWeightsystem {
   Weightsystem toWeightsystem() {
     return Weightsystem(description: description, weight: weight);
   }
-}
-
-Log _manualLog(DateTime start, int durationSeconds, double maxDepth) {
-  final samples = <LogSample>[];
-
-  // We descend at 18 m/min
-  final t0 = (maxDepth / 18 * 60).roundToDouble();
-  // We ascend to half depth at 9 m/min
-  final t2 = (maxDepth / 2 / 9 * 60).roundToDouble();
-  // We ascend from there to the surface at 3 m/min
-  final t3 = (maxDepth / 2 / 3 * 60).roundToDouble();
-  // The bottom time is what remains, but at least zero. If this was a very
-  // odd bounce dive we might overshoot the actual duration in the graph,
-  // but whatever.
-  final t1 = max(0.0, durationSeconds - t0 - t2 - t3);
-
-  samples.add(LogSample(time: 0, depth: 0));
-  samples.add(LogSample(time: 5, depth: 0.1));
-  samples.add(LogSample(time: t0, depth: maxDepth));
-  samples.add(LogSample(time: t0 + t1, depth: maxDepth));
-  samples.add(LogSample(time: t0 + t1 + t2, depth: maxDepth / 2));
-  samples.add(LogSample(time: t0 + t1 + t2 + t3, depth: 0.1));
-  samples.add(LogSample(time: t0 + t1 + t2 + t3 + 5, depth: 0));
-
-  return Log(
-    model: 'Bubbletrail', //marks the log as synthetic
-    dateTime: proto.Timestamp.fromDateTime(start),
-    diveTime: durationSeconds,
-    maxDepth: maxDepth,
-    samples: samples,
-  );
 }
