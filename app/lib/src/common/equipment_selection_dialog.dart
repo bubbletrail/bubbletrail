@@ -100,8 +100,7 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
   // (when supported) promote the current selection to be the default.
   List<Widget> _defaultActionButtons() {
     return [
-      if (_defaultEquipment.isNotEmpty)
-        TextButton.icon(onPressed: _addDefaults, icon: const Icon(Icons.playlist_add), label: const Text('Add defaults')),
+      if (_defaultEquipment.isNotEmpty) TextButton.icon(onPressed: _addDefaults, icon: const Icon(Icons.playlist_add), label: const Text('Add defaults')),
       if (widget.onSetAsDefault != null)
         TextButton.icon(onPressed: _setAsDefault, icon: const Icon(Icons.push_pin_outlined), label: const Text('Set as default')),
     ];
