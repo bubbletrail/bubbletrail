@@ -426,38 +426,33 @@ class _DiveDetails extends StatelessWidget {
   Future<void> _editGases(BuildContext context) async {
     final cylinderState = context.read<CylinderListBloc>().state;
     final available = cylinderState is CylinderListLoaded ? cylinderState.cylinders : <Cylinder>[];
+    final existingGasChanges = dive.events.where((e) => e.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE).toList();
 
-    final result = await showCylindersEditor(context: context, cylinders: dive.cylinders.toList(), availableCylinders: available);
+    final result = await showCylindersEditor(
+      context: context,
+      cylinders: dive.cylinders.toList(),
+      availableCylinders: available,
+      durationSeconds: dive.duration,
+      gasChangeEvents: existingGasChanges,
+    );
     if (result == null || !context.mounted) return;
 
-    final newCylinders = result.map((e) => e.cylinder).toList();
-    if (ListEquality<DiveCylinder>().equals(newCylinders, dive.cylinders.toList())) return;
-
-    // Map old cylinder index -> new index, so gas-change events keep pointing
-    // at the right cylinder. Events for removed cylinders are dropped.
-    final remap = <int, int>{};
-    for (final (index, edit) in result.indexed) {
-      if (edit.originalIndex != null) remap[edit.originalIndex!] = index;
-    }
+    final cylindersChanged = !ListEquality<DiveCylinder>().equals(result.cylinders, dive.cylinders.toList());
+    final gasChangesChanged = !ListEquality<SampleEvent>().equals(result.gasChangeEvents, existingGasChanges);
+    if (!cylindersChanged && !gasChangesChanged) return;
 
     final updated = dive.rebuild((d) {
       d.cylinders.clear();
-      d.cylinders.addAll(newCylinders);
+      d.cylinders.addAll(result.cylinders);
 
-      final events = <SampleEvent>[];
-      for (final event in d.events) {
-        if (event.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE) {
-          final newIndex = remap[event.value];
-          if (newIndex == null) continue;
-          events.add(event.rebuild((e) => e.value = newIndex));
-        } else {
-          events.add(event);
-        }
-      }
-      d.events.clear();
-      d.events.addAll(events);
+      // Replace the gas-change events, preserving any other event types.
+      final others = d.events.where((e) => e.type != SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE).toList();
+      d.events
+        ..clear()
+        ..addAll(others)
+        ..addAll(result.gasChangeEvents);
 
-      // Gas mix affects the calculated metrics and deco, so recompute.
+      // Gas mix and switches affect the calculated metrics and deco, so recompute.
       d.clearStartTissues();
       d.clearEndTissues();
       d.clearEndSurfGf();

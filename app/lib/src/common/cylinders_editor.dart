@@ -1,30 +1,36 @@
 import 'package:btproto/btproto.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import 'adaptive_modal.dart';
+import 'duration_picker.dart';
 import 'measurement_editor.dart';
 
-// A cylinder as returned by the editor. [originalIndex] is the position the
-// cylinder held in the original list (null if newly added), which lets the
-// caller remap gas-change events that reference cylinders by index.
-class DiveCylinderEdit {
-  final DiveCylinder cylinder;
-  final int? originalIndex;
+// The result of editing a dive's cylinders: the cylinders themselves plus the
+// gas-change events (already renumbered to the new cylinder indices, sorted by
+// time). Any non-gas-change events are the caller's responsibility to keep.
+class CylindersEdit {
+  final List<DiveCylinder> cylinders;
+  final List<SampleEvent> gasChangeEvents;
 
-  const DiveCylinderEdit({required this.cylinder, required this.originalIndex});
+  const CylindersEdit({required this.cylinders, required this.gasChangeEvents});
 }
 
-// Shows an editor for a dive's cylinders and gas mixes. On mobile this is a
-// bottom sheet, on desktop a modal dialog. Returns the updated list of
-// cylinders, or null if the user cancelled.
-Future<List<DiveCylinderEdit>?> showCylindersEditor({
+// Shows an editor for a dive's cylinders, gas mixes and gas switches. On mobile
+// this is a bottom sheet, on desktop a modal dialog. [durationSeconds] bounds
+// the gas-change times. Returns the updated cylinders/events, or null if
+// cancelled.
+Future<CylindersEdit?> showCylindersEditor({
   required BuildContext context,
   required List<DiveCylinder> cylinders,
   required List<Cylinder> availableCylinders,
+  required int durationSeconds,
+  required List<SampleEvent> gasChangeEvents,
 }) {
-  return showAdaptiveModal<List<DiveCylinderEdit>>(
+  return showAdaptiveModal<CylindersEdit>(
     context: context,
-    builder: (context) => _CylindersEditor(cylinders: cylinders, availableCylinders: availableCylinders),
+    builder: (context) =>
+        _CylindersEditor(cylinders: cylinders, availableCylinders: availableCylinders, durationSeconds: durationSeconds, gasChangeEvents: gasChangeEvents),
   );
 }
 
@@ -36,6 +42,8 @@ class _CylinderRow {
   final TextEditingController helium;
   double? beginPressure;
   double? endPressure;
+  // Times (seconds into the dive) at which the dive switches to this cylinder.
+  final List<int> switchTimes = [];
 
   _CylinderRow({
     required this.originalIndex,
@@ -53,17 +61,14 @@ class _CylinderRow {
     helium.dispose();
   }
 
-  DiveCylinderEdit toEdit() {
-    return DiveCylinderEdit(
-      cylinder: DiveCylinder(
-        cylinderId: cylinderId,
-        cylinder: cylinder,
-        oxygen: (int.tryParse(oxygen.text) ?? 0) / 100,
-        helium: (int.tryParse(helium.text) ?? 0) / 100,
-        beginPressure: beginPressure,
-        endPressure: endPressure,
-      ),
-      originalIndex: originalIndex,
+  DiveCylinder toCylinder() {
+    return DiveCylinder(
+      cylinderId: cylinderId,
+      cylinder: cylinder,
+      oxygen: (int.tryParse(oxygen.text) ?? 0) / 100,
+      helium: (int.tryParse(helium.text) ?? 0) / 100,
+      beginPressure: beginPressure,
+      endPressure: endPressure,
     );
   }
 }
@@ -71,8 +76,10 @@ class _CylinderRow {
 class _CylindersEditor extends StatefulWidget {
   final List<DiveCylinder> cylinders;
   final List<Cylinder> availableCylinders;
+  final int durationSeconds;
+  final List<SampleEvent> gasChangeEvents;
 
-  const _CylindersEditor({required this.cylinders, required this.availableCylinders});
+  const _CylindersEditor({required this.cylinders, required this.availableCylinders, required this.durationSeconds, required this.gasChangeEvents});
 
   @override
   State<_CylindersEditor> createState() => _CylindersEditorState();
@@ -97,6 +104,14 @@ class _CylindersEditorState extends State<_CylindersEditor> {
           ),
         )
         .toList();
+
+    // Attach existing gas switches to their cylinder rows by original index.
+    for (final event in widget.gasChangeEvents) {
+      _rows.firstWhereOrNull((r) => r.originalIndex == event.value)?.switchTimes.add(event.time);
+    }
+    for (final row in _rows) {
+      row.switchTimes.sort();
+    }
   }
 
   @override
@@ -116,7 +131,32 @@ class _CylindersEditorState extends State<_CylindersEditor> {
 
   void _remove(int index) => setState(() => _rows.removeAt(index).dispose());
 
-  List<DiveCylinderEdit> _result() => _rows.map((r) => r.toEdit()).toList();
+  Future<void> _addGasChange(_CylinderRow row) async {
+    final maxSeconds = widget.durationSeconds > 0 ? widget.durationSeconds : 7200;
+    final result = await showDialog<int>(
+      context: context,
+      builder: (context) => DurationPickerDialog(initialSeconds: 0, maxSeconds: maxSeconds, title: 'Gas change time'),
+    );
+    if (result != null) {
+      setState(() {
+        row.switchTimes
+          ..add(result)
+          ..sort();
+      });
+    }
+  }
+
+  CylindersEdit _result() {
+    final cylinders = _rows.map((r) => r.toCylinder()).toList();
+    final events = <SampleEvent>[];
+    for (final (index, row) in _rows.indexed) {
+      for (final time in row.switchTimes) {
+        events.add(SampleEvent(type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, time: time, value: index));
+      }
+    }
+    events.sort((a, b) => a.time.compareTo(b.time));
+    return CylindersEdit(cylinders: cylinders, gasChangeEvents: events);
+  }
 
   // The type options for a row: the globally available cylinders, plus the
   // row's own cylinder if it's no longer in that list.
@@ -126,6 +166,12 @@ class _CylindersEditorState extends State<_CylindersEditor> {
       options.insert(0, row.cylinder!);
     }
     return options;
+  }
+
+  static String _formatTime(int seconds) {
+    final minutes = seconds ~/ 60;
+    final secs = seconds % 60;
+    return '$minutes:${secs.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -198,6 +244,12 @@ class _CylindersEditorState extends State<_CylindersEditor> {
                               ),
                               PressureEditor(label: 'Start pressure', initialValue: row.beginPressure, onChanged: (value) => row.beginPressure = value),
                               PressureEditor(label: 'End pressure', initialValue: row.endPressure, onChanged: (value) => row.endPressure = value),
+                              _GasChanges(
+                                row: row,
+                                formatTime: _formatTime,
+                                onAdd: () => _addGasChange(row),
+                                onRemove: (i) => setState(() => row.switchTimes.removeAt(i)),
+                              ),
                             ],
                           ),
                         ),
@@ -224,6 +276,45 @@ class _CylindersEditorState extends State<_CylindersEditor> {
           ],
         ),
       ),
+    );
+  }
+}
+
+// The gas-switch list for a single cylinder: each time the dive switches to it,
+// plus a control to add another.
+class _GasChanges extends StatelessWidget {
+  final _CylinderRow row;
+  final String Function(int) formatTime;
+  final VoidCallback onAdd;
+  final ValueChanged<int> onRemove;
+
+  const _GasChanges({required this.row, required this.formatTime, required this.onAdd, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: .start,
+      children: [
+        Text('Gas changes', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: .bold)),
+        for (final (i, time) in row.switchTimes.indexed)
+          Padding(
+            padding: const .only(left: 8, top: 4),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(time == 0 ? '• Start of dive' : '• ${formatTime(time)} switch to this cylinder', style: Theme.of(context).textTheme.bodySmall),
+                ),
+                InkWell(onTap: () => onRemove(i), child: const Icon(Icons.close, size: 14)),
+              ],
+            ),
+          ),
+        TextButton.icon(
+          onPressed: onAdd,
+          icon: const Icon(Icons.add, size: 14),
+          label: const Text('Add gas change'),
+          style: TextButton.styleFrom(padding: .zero, minimumSize: const Size(0, 32)),
+        ),
+      ],
     );
   }
 }
