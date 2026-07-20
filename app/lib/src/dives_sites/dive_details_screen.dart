@@ -79,14 +79,6 @@ class _DiveDetails extends StatelessWidget {
                   : null,
               tooltip: nextDive != null ? 'Dive #${nextDive?.number}' : null,
             ),
-            if (platformIsDesktop)
-              IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () {
-                  context.goNamed(AppRouteName.divesDetailsEdit, pathParameters: {'diveID': dive.id});
-                },
-                tooltip: 'Edit dive',
-              ),
             if (platformIsDesktop) _popupMenuActions(context),
           ],
           body: SingleChildScrollView(
@@ -152,22 +144,7 @@ class _DiveDetails extends StatelessWidget {
       ),
       _notesCard(context),
       StretchWrap(spacing: 8, runSpacing: 8, children: datacolumns.map((e) => Stretch(child: e)).toList()),
-      if (platformIsMobile)
-        Wrap(
-          spacing: 16,
-          runSpacing: 8,
-          alignment: .spaceBetween,
-          children: [
-            OutlinedButton.icon(
-              icon: const Icon(Icons.edit),
-              label: Text('Edit dive'),
-              onPressed: () {
-                context.goNamed(AppRouteName.divesDetailsEdit, pathParameters: {'diveID': dive.id});
-              },
-            ),
-            if (platformIsMobile) _popupMenuActions(context),
-          ],
-        ),
+      if (platformIsMobile) Align(alignment: .centerRight, child: _popupMenuActions(context)),
     ];
   }
 

@@ -8,6 +8,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
+import 'package:uuid/uuid.dart';
 
 import '../common/details_state.dart';
 import '../providers/storage_provider.dart';
@@ -108,16 +109,21 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
           final n = await _store.dives.nextDiveNo;
           final t = Timestamp.fromDateTime(DateTime.now());
           final defaultEquipment = await _store.equipment.getDefaultsForNewDives();
-          emit(DiveDetailsLoaded(Dive(number: n, start: t, equipment: defaultEquipment)..freeze()));
+          // Give the dive a stable id up front so inline edits can save it, but
+          // don't persist until the first edit — an untouched new dive that's
+          // navigated away from leaves nothing behind.
+          emit(DiveDetailsLoaded(Dive(id: Uuid().v7(), number: n, start: t, equipment: defaultEquipment)..freeze()));
         case _LoadDive():
           await _onLoadDive(event, emit);
         case _Close():
           emit(DiveDetailsClosed());
         case _Save():
-          // Persist without closing; the storage listener reloads the dive so
-          // the view updates in place.
+          // Persist without closing, then reload so the view updates in place
+          // (and the storage listener is registered for a first-time save of a
+          // newly created dive).
           await _store.dives.update(event.dive);
           _log.fine('saved dive #${event.dive.number}');
+          await _onLoadDive(_LoadDive(event.dive.id), emit);
         case _SaveAndClose():
           await _store.dives.update(event.dive);
           _log.fine('saved dive #${event.dive.number}');
