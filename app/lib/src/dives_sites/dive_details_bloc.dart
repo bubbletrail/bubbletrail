@@ -59,6 +59,7 @@ sealed class DiveDetailsEvent extends Equatable {
   const factory DiveDetailsEvent.newDive() = _NewDive;
   const factory DiveDetailsEvent.loadDive(String diveId) = _LoadDive;
   const factory DiveDetailsEvent.close() = _Close;
+  const factory DiveDetailsEvent.save(Dive dive) = _Save;
   const factory DiveDetailsEvent.saveAndClose(Dive dive) = _SaveAndClose;
   const factory DiveDetailsEvent.deleteAndClose(String diveID) = _DeleteAndClose;
 }
@@ -75,6 +76,12 @@ class _LoadDive extends DiveDetailsEvent {
 
 class _Close extends DiveDetailsEvent {
   const _Close();
+}
+
+class _Save extends DiveDetailsEvent {
+  final Dive dive;
+
+  const _Save(this.dive);
 }
 
 class _SaveAndClose extends DiveDetailsEvent {
@@ -106,6 +113,11 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
           await _onLoadDive(event, emit);
         case _Close():
           emit(DiveDetailsClosed());
+        case _Save():
+          // Persist without closing; the storage listener reloads the dive so
+          // the view updates in place.
+          await _store.dives.update(event.dive);
+          _log.fine('saved dive #${event.dive.number}');
         case _SaveAndClose():
           await _store.dives.update(event.dive);
           _log.fine('saved dive #${event.dive.number}');
