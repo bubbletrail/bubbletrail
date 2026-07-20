@@ -9,21 +9,21 @@ headers:
   entry-points:
     - 'src/libdivecomputer.h'
     - 'src/fifos.h'
-    - 'libdivecomputer-0.9.0/include/libdivecomputer/context.h'
-    - 'libdivecomputer-0.9.0/include/libdivecomputer/descriptor.h'
-    - 'libdivecomputer-0.9.0/include/libdivecomputer/iterator.h'
-    - 'libdivecomputer-0.9.0/include/libdivecomputer/iostream.h'
-    - 'libdivecomputer-0.9.0/include/libdivecomputer/device.h'
-    - 'libdivecomputer-0.9.0/include/libdivecomputer/parser.h'
+    - 'libdivecomputer-git/include/libdivecomputer/context.h'
+    - 'libdivecomputer-git/include/libdivecomputer/descriptor.h'
+    - 'libdivecomputer-git/include/libdivecomputer/iterator.h'
+    - 'libdivecomputer-git/include/libdivecomputer/iostream.h'
+    - 'libdivecomputer-git/include/libdivecomputer/device.h'
+    - 'libdivecomputer-git/include/libdivecomputer/parser.h'
   include-directives:
     - 'src/libdivecomputer.h'
     - 'src/fifos.h'
-    - 'libdivecomputer-0.9.0/include/libdivecomputer/context.h'
-    - 'libdivecomputer-0.9.0/include/libdivecomputer/descriptor.h'
-    - 'libdivecomputer-0.9.0/include/libdivecomputer/iterator.h'
-    - 'libdivecomputer-0.9.0/include/libdivecomputer/iostream.h'
-    - 'libdivecomputer-0.9.0/include/libdivecomputer/device.h'
-    - 'libdivecomputer-0.9.0/include/libdivecomputer/parser.h'
+    - 'libdivecomputer-git/include/libdivecomputer/context.h'
+    - 'libdivecomputer-git/include/libdivecomputer/descriptor.h'
+    - 'libdivecomputer-git/include/libdivecomputer/iterator.h'
+    - 'libdivecomputer-git/include/libdivecomputer/iostream.h'
+    - 'libdivecomputer-git/include/libdivecomputer/device.h'
+    - 'libdivecomputer-git/include/libdivecomputer/parser.h'
 ffi-native:
 preamble: |
   // ignore_for_file: always_specify_types
