@@ -25,7 +25,6 @@ import 'src/dives_sites/fullscreen_map_screen.dart';
 import 'src/dives_sites/fullscreen_profile_screen.dart';
 import 'src/dives_sites/site_details_bloc.dart';
 import 'src/dives_sites/site_details_screen.dart';
-import 'src/dives_sites/site_edit_screen.dart';
 import 'src/dives_sites/site_list_screen.dart';
 import 'src/equipment/certification_details_bloc.dart';
 import 'src/equipment/certification_details_screen.dart';
@@ -250,7 +249,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       builder: (context, state) {
                         return BlocProvider(
                           create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.newSite()),
-                          child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const SiteEditScreen()),
+                          child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const SiteDetailsScreen()),
                         );
                       },
                     ),
@@ -263,18 +262,6 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const SiteDetailsScreen()),
                         );
                       },
-                      routes: [
-                        GoRoute(
-                          path: AppRoutePath.sitesDetailsEdit,
-                          name: AppRouteName.sitesDetailsEdit,
-                          builder: (context, state) {
-                            return BlocProvider(
-                              create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.loadSite(state.pathParameters['siteID']!)),
-                              child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const SiteEditScreen()),
-                            );
-                          },
-                        ),
-                      ],
                     ),
                   ],
                 ),
