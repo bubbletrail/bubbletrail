@@ -3,6 +3,7 @@ import 'package:btproto/btproto.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
+import '../../../../common/timezone.dart';
 import '../sync/syncprovider.dart';
 import 'entity_store.dart';
 
@@ -58,6 +59,19 @@ class SiteStore extends EntityStore<Site, InternalSiteList> {
 
   @override
   Future<Site> update(Site entity) async {
+    // Keep the derived timezone in sync with the position. Doing it here means
+    // every path that saves a site (inline editor, import, set-from-dives) gets
+    // a correct zone without having to remember to derive it.
+    final zone = timeZoneForPosition(entity.hasPosition() ? entity.position : null);
+    if (zone != entity.timezone) {
+      entity = entity.rebuild((s) {
+        if (zone.isEmpty) {
+          s.clearTimezone();
+        } else {
+          s.timezone = zone;
+        }
+      });
+    }
     final ret = await super.update(entity);
     _tags.addAll(entity.tags);
     return ret;

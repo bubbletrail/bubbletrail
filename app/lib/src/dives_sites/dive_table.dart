@@ -59,7 +59,7 @@ class DiveTable extends StatelessWidget {
         title: 'Start',
         field: 'start',
         type: .dateTime(format: prefs.dateTimeFormat),
-        width: 120,
+        width: 170,
         readOnly: true,
       ),
       TrinaColumn(title: 'Max depth', field: 'maxDepth', type: .number(), width: 80, readOnly: true),
@@ -71,10 +71,20 @@ class DiveTable extends StatelessWidget {
     ];
     final rows = dives.map((dive) {
       final site = _getSite(dive);
+      final siteTz = site != null ? siteTimeZone(site) : null;
+      // Keep the UTC instant as the cell value so sorting stays chronological,
+      // and render it in the site's local zone (with zone abbreviation).
+      final startUtc = dive.start.toDateTime();
       return TrinaRow(
         cells: {
           'number': TrinaCell(value: dive.number),
-          'start': TrinaCell(value: dive.start.toDateTime()),
+          // The dateTime column keeps the DateTime value for sorting; the
+          // renderer captures the instant directly (the cell's own value is
+          // normalised to a formatted string by the column type).
+          'start': TrinaCell(
+            value: startUtc,
+            renderer: (_) => DateTimeText(startUtc, timezone: siteTz),
+          ),
           'maxDepth': TrinaCell(value: dive.maxDepth * 10, renderer: (rendererContext) => DepthText(rendererContext.cell.value / 10)),
           'duration': TrinaCell(value: dive.duration, renderer: (rendererContext) => DurationText(rendererContext.cell.value)),
           'country': TrinaCell(value: countryDisplayName(site?.country ?? '')),

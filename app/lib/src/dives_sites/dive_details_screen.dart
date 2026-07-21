@@ -351,6 +351,7 @@ class _DiveDetails extends StatelessWidget {
     final result = await showDiveBasicsEditor(
       context: context,
       start: dive.start.toDateTime(),
+      timezone: site != null ? siteTimeZone(site!) : null,
       durationSeconds: dive.duration,
       maxDepth: dive.maxDepth,
       canEditDepthDuration: canEditDepthDuration,
@@ -561,7 +562,10 @@ class _DiveDetails extends StatelessWidget {
   Widget _depthsTable() {
     return DataCardColumn(
       children: [
-        ColumnRow(label: 'Start', child: DateTimeText(dive.start.toDateTime())),
+        ColumnRow(
+          label: 'Start',
+          child: DateTimeText(dive.start.toDateTime(), timezone: site != null ? siteTimeZone(site!) : null),
+        ),
         ColumnRow(label: 'Duration', child: DurationText(dive.duration)),
         ColumnRow(label: 'Max depth', child: DepthText(dive.maxDepth)),
         ColumnRow(label: 'Mean depth', child: DepthText(dive.meanDepth)),

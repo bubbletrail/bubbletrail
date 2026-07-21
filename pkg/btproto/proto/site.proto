@@ -18,4 +18,9 @@ message Site {
   string difficulty = 8;
   repeated string tags = 9;
   string notes = 10;
+
+  // IANA timezone name (e.g. "Europe/Stockholm"), derived automatically from
+  // the position. Dive timestamps are stored in UTC and displayed/edited in
+  // this zone. Empty when the site has no position.
+  string timezone = 11;
 }

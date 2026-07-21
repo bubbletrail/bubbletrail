@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_routes.dart';
+import '../common/timezone.dart';
 import '../common/units.dart';
 
 /// A card widget for displaying a dive in a mobile-friendly list layout.
@@ -47,7 +48,11 @@ class DiveListItemCard extends StatelessWidget {
                 mainAxisAlignment: .spaceBetween,
                 children: [
                   Text('Dive #${dive.number}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: .bold)),
-                  DateTimeText(_startDateTime, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                  DateTimeText(
+                    _startDateTime,
+                    timezone: site != null ? siteTimeZone(site!) : null,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
