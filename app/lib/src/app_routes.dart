@@ -8,7 +8,6 @@ abstract class AppRouteName {
   static const sites = 'sites';
   static const sitesDetailsMap = 'site-map';
   static const sitesDetails = 'site-details';
-  static const sitesDetailsEdit = 'site-edit';
   static const sitesNew = 'new-site';
 
   static const equipment = 'equipment';
@@ -41,7 +40,6 @@ abstract class AppRoutePath {
 
   static const sites = '/sites';
   static const sitesDetails = ':siteID';
-  static const sitesDetailsEdit = 'edit';
   static const sitesNew = 'new';
 
   static const sitesDetailsMap = '/sites/:siteID/map';
