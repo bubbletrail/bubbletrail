@@ -56,6 +56,7 @@ import 'src/services/log_buffer.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _initLogging();
+  initialiseTimeZones();
   registerAdditionalLicenses();
   await PreferencesStore.instance.init();
   await StorageProvider.instance.init();

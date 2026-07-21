@@ -152,42 +152,57 @@ class DurationText extends StatelessWidget {
   }
 }
 
+// Displays a date and time. When [timezone] (an IANA name) is given, [dateTime]
+// is assumed to be a UTC instant and is converted into that zone, with the zone
+// abbreviation (e.g. "CEST") appended; otherwise it's shown as-is.
 class DateTimeText extends StatelessWidget {
   final DateTime dateTime;
+  final String? timezone;
   final TextStyle? style;
 
-  const DateTimeText(this.dateTime, {super.key, this.style});
+  const DateTimeText(this.dateTime, {super.key, this.timezone, this.style});
 
   @override
   Widget build(BuildContext context) {
     final (dateFormat, timeFormat) = context.select<PreferencesStore, (DateFormatPref, TimeFormatPref)>((p) => (p.dateFormat, p.timeFormat));
-    return Text('${formatDate(dateFormat, dateTime)} ${formatTime(timeFormat, dateTime)}', style: style);
+    final zoned = inZone(dateTime, timezone);
+    final local = zoned ?? dateTime;
+    final suffix = zoned != null ? ' ${zoned.timeZoneName}' : '';
+    return Text('${formatDate(dateFormat, local)} ${formatTime(timeFormat, local)}$suffix', style: style);
   }
 }
 
 class TimeText extends StatelessWidget {
   final DateTime dateTime;
+  final String? timezone;
   final TextStyle? style;
 
-  const TimeText(this.dateTime, {super.key, this.style});
+  const TimeText(this.dateTime, {super.key, this.timezone, this.style});
 
   @override
   Widget build(BuildContext context) {
     final timeFormat = context.select<PreferencesStore, TimeFormatPref>((p) => p.timeFormat);
-    return Text(formatTime(timeFormat, dateTime), style: style);
+    final zoned = inZone(dateTime, timezone);
+    final local = zoned ?? dateTime;
+    final suffix = zoned != null ? ' ${zoned.timeZoneName}' : '';
+    return Text('${formatTime(timeFormat, local)}$suffix', style: style);
   }
 }
 
 class DateText extends StatelessWidget {
   final DateTime dateTime;
+  final String? timezone;
   final TextStyle? style;
 
-  const DateText(this.dateTime, {super.key, this.style});
+  const DateText(this.dateTime, {super.key, this.timezone, this.style});
 
   @override
   Widget build(BuildContext context) {
     final dateFormat = context.select<PreferencesStore, DateFormatPref>((p) => p.dateFormat);
-    return Text(formatDate(dateFormat, dateTime), style: style);
+    // Convert into the zone too: near midnight the local calendar date can
+    // differ from the UTC one.
+    final local = inZone(dateTime, timezone) ?? dateTime;
+    return Text(formatDate(dateFormat, local), style: style);
   }
 }
 

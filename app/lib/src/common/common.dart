@@ -25,5 +25,6 @@ export 'state_widgets.dart';
 export 'tags_editor.dart';
 export 'tags_list.dart';
 export 'text_editor.dart';
+export 'timezone.dart';
 export 'weights_editor.dart';
 export 'units.dart';

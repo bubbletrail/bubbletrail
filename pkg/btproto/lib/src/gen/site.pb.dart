@@ -31,6 +31,7 @@ class Site extends $pb.GeneratedMessage {
     $core.String? difficulty,
     $core.Iterable<$core.String>? tags,
     $core.String? notes,
+    $core.String? timezone,
   }) {
     final result = create();
     if (id != null) result.id = id;
@@ -43,6 +44,7 @@ class Site extends $pb.GeneratedMessage {
     if (difficulty != null) result.difficulty = difficulty;
     if (tags != null) result.tags.addAll(tags);
     if (notes != null) result.notes = notes;
+    if (timezone != null) result.timezone = timezone;
     return result;
   }
 
@@ -71,6 +73,7 @@ class Site extends $pb.GeneratedMessage {
     ..aOS(8, _omitFieldNames ? '' : 'difficulty')
     ..pPS(9, _omitFieldNames ? '' : 'tags')
     ..aOS(10, _omitFieldNames ? '' : 'notes')
+    ..aOS(11, _omitFieldNames ? '' : 'timezone')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -178,6 +181,18 @@ class Site extends $pb.GeneratedMessage {
   $core.bool hasNotes() => $_has(9);
   @$pb.TagNumber(10)
   void clearNotes() => $_clearField(10);
+
+  /// IANA timezone name (e.g. "Europe/Stockholm"), derived automatically from
+  /// the position. Dive timestamps are stored in UTC and displayed/edited in
+  /// this zone. Empty when the site has no position.
+  @$pb.TagNumber(11)
+  $core.String get timezone => $_getSZ(10);
+  @$pb.TagNumber(11)
+  set timezone($core.String value) => $_setString(10, value);
+  @$pb.TagNumber(11)
+  $core.bool hasTimezone() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearTimezone() => $_clearField(11);
 }
 
 const $core.bool _omitFieldNames =

@@ -844,6 +844,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.14.0"
+  lat_lng_to_timezone:
+    dependency: "direct main"
+    description:
+      name: lat_lng_to_timezone
+      sha256: "149db00299362dd756271fd9c936e533618811214c130ca77ebfa3ccdfc6a593"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   latlong2:
     dependency: "direct main"
     description:
@@ -1432,6 +1440,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.4.0"
+  timezone:
+    dependency: "direct main"
+    description:
+      name: timezone
+      sha256: "981d1020d6ef8fe1e7b3de5054e5b25579ae7c403d7734adc508ffc47668e9cb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.11.1"
   trina_grid:
     dependency: "direct main"
     description:
