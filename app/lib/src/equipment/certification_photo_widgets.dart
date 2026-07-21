@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -77,6 +78,9 @@ class FullscreenPhoto extends StatefulWidget {
 }
 
 class _FullscreenPhotoState extends State<FullscreenPhoto> {
+  bool _barVisible = true;
+  Timer? _hideTimer;
+
   @override
   void initState() {
     super.initState();
@@ -86,14 +90,29 @@ class _FullscreenPhotoState extends State<FullscreenPhoto> {
     if (platformIsMobile) {
       SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
     }
+    _scheduleHide();
   }
 
   @override
   void dispose() {
+    _hideTimer?.cancel();
     if (platformIsMobile) {
       SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     }
     super.dispose();
+  }
+
+  void _scheduleHide() {
+    _hideTimer?.cancel();
+    _hideTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _barVisible = false);
+    });
+  }
+
+  // Any tap reveals the bar and restarts the auto-hide countdown.
+  void _revealBar() {
+    setState(() => _barVisible = true);
+    _scheduleHide();
   }
 
   @override
@@ -104,26 +123,45 @@ class _FullscreenPhotoState extends State<FullscreenPhoto> {
     // code the standard ~28px clearance on macOS; other platforms get their
     // real viewPadding.
     final basePadding = MediaQuery.of(context).viewPadding;
-    final padding = Platform.isMacOS ? basePadding.copyWith(top: basePadding.top + 28) : basePadding;
+    final padding = Platform.isMacOS ? basePadding.copyWith(top: basePadding.top + 28) : EdgeInsets.zero;
     return Container(
       color: Colors.black,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: InteractiveViewer(minScale: 1.0, maxScale: 6.0, child: Image.memory(widget.bytes, fit: BoxFit.contain)),
-          ),
-          Positioned(
-            top: padding.top,
-            left: padding.left,
-            right: padding.right,
-            child: AppBar(
-              backgroundColor: Colors.transparent,
-              foregroundColor: Colors.white,
-              title: Text(widget.label),
-              leading: IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop()),
+      // Behaviour: opaque so taps on the black letterbox area (not just the
+      // image) also reveal the bar.
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _revealBar,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: InteractiveViewer(minScale: 1.0, maxScale: 6.0, child: Image.memory(widget.bytes, fit: BoxFit.contain)),
             ),
-          ),
-        ],
+            Positioned(
+              top: padding.top,
+              left: padding.left,
+              right: padding.right,
+              // Fade and shrink upwards; IgnorePointer while hidden so the close
+              // button doesn't swallow the reveal tap.
+              child: IgnorePointer(
+                ignoring: !_barVisible,
+                child: AnimatedSlide(
+                  duration: const Duration(milliseconds: 250),
+                  offset: _barVisible ? Offset.zero : const Offset(0, -1),
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 250),
+                    opacity: _barVisible ? 1.0 : 0.0,
+                    child: AppBar(
+                      backgroundColor: Colors.grey.shade800.withAlpha(128),
+                      foregroundColor: Colors.white,
+                      title: Text(widget.label),
+                      leading: IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop()),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
