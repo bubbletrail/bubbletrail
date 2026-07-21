@@ -351,7 +351,7 @@ class _DiveDetails extends StatelessWidget {
     final result = await showDiveBasicsEditor(
       context: context,
       start: dive.start.toDateTime(),
-      timezone: site != null ? siteTimeZone(site!) : null,
+      timezone: siteTimeZone(site),
       durationSeconds: dive.duration,
       maxDepth: dive.maxDepth,
       canEditDepthDuration: canEditDepthDuration,
@@ -564,7 +564,7 @@ class _DiveDetails extends StatelessWidget {
       children: [
         ColumnRow(
           label: 'Start',
-          child: DateTimeText(dive.start.toDateTime(), timezone: site != null ? siteTimeZone(site!) : null),
+          child: DateTimeText(dive.start.toDateTime(), timezone: siteTimeZone(site)),
         ),
         ColumnRow(label: 'Duration', child: DurationText(dive.duration)),
         ColumnRow(label: 'Max depth', child: DepthText(dive.maxDepth)),

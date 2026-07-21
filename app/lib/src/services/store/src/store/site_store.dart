@@ -59,18 +59,16 @@ class SiteStore extends EntityStore<Site, InternalSiteList> {
 
   @override
   Future<Site> update(Site entity) async {
-    // Keep the derived timezone in sync with the position. Doing it here means
-    // every path that saves a site (inline editor, import, set-from-dives) gets
-    // a correct zone without having to remember to derive it.
-    final zone = timeZoneForPosition(entity.hasPosition() ? entity.position : null);
-    if (zone != entity.timezone) {
-      entity = entity.rebuild((s) {
-        if (zone.isEmpty) {
-          s.clearTimezone();
-        } else {
-          s.timezone = zone;
-        }
-      });
+    // Derive the timezone from the position when the site doesn't already have
+    // one. Doing it here means every path that saves a site (inline editor,
+    // import, set-from-dives) gets a zone without having to remember to derive
+    // it. Once a zone name is set it's authoritative and never recalculated, so
+    // an explicit or manually-corrected zone survives later position edits.
+    if (entity.timezone.isEmpty) {
+      final zone = timeZoneForPosition(entity.hasPosition() ? entity.position : null);
+      if (zone.isNotEmpty) {
+        entity = entity.rebuild((s) => s.timezone = zone);
+      }
     }
     final ret = await super.update(entity);
     _tags.addAll(entity.tags);

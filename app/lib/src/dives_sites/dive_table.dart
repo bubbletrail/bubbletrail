@@ -71,7 +71,7 @@ class DiveTable extends StatelessWidget {
     ];
     final rows = dives.map((dive) {
       final site = _getSite(dive);
-      final siteTz = site != null ? siteTimeZone(site) : null;
+      final siteTz = siteTimeZone(site);
       // Keep the UTC instant as the cell value so sorting stays chronological,
       // and render it in the site's local zone (with zone abbreviation).
       final startUtc = dive.start.toDateTime();

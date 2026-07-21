@@ -14,9 +14,10 @@ import 'package:timezone/timezone.dart' as tz;
 void initialiseTimeZones() => tzdata.initializeTimeZones();
 
 // The IANA timezone name for a site: the stored value if present, otherwise
-// derived from its position. Returns an empty string when the site has no
-// position (in which case timestamps are shown as UTC).
-String siteTimeZone(Site site) {
+// derived from its position. Returns an empty string when there is no site or
+// it has no position (in which case timestamps are shown as UTC).
+String siteTimeZone(Site? site) {
+  if (site == null) return '';
   if (site.timezone.isNotEmpty) return site.timezone;
   return timeZoneForPosition(site.hasPosition() ? site.position : null);
 }

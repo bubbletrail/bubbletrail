@@ -50,7 +50,7 @@ class DiveListItemCard extends StatelessWidget {
                   Text('Dive #${dive.number}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: .bold)),
                   DateTimeText(
                     _startDateTime,
-                    timezone: site != null ? siteTimeZone(site!) : null,
+                    timezone: siteTimeZone(site),
                     style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                 ],
