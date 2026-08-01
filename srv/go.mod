@@ -3,10 +3,10 @@ module bubbletrail.net/srv
 go 1.25.5
 
 require (
-	github.com/alecthomas/kong v1.15.0
+	github.com/alecthomas/kong v1.16.0
 	github.com/mailgun/mailgun-go/v4 v4.23.0
 	github.com/minio/madmin-go/v3 v3.0.110
-	github.com/minio/minio-go/v7 v7.2.0
+	github.com/minio/minio-go/v7 v7.2.1
 )
 
 require (
