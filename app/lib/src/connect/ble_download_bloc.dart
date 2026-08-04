@@ -320,13 +320,22 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
 
     // Start the download and process events
     final dir = await getApplicationSupportDirectory();
+
+    // Wake lock spans the whole operation; released in onDone below, which
+    // covers all termination paths. Keep enable and onDone adjacent so the
+    // pair is never split by a throwing await.
+    try {
+      await WakelockPlus.enable();
+    } catch (e) {
+      _log.warning('failed to enable wake lock', e);
+    }
+
     final sub = startDownload(ble: ble, computer: computer, fifoDirectory: dir.path, ldcFingerprint: ldcFingerprint, lastLogDate: lastLogDate).listen((
       event,
     ) async {
       switch (event) {
         case DownloadStarted():
           _log.info('download started');
-          await WakelockPlus.enable();
 
         case DownloadProgressEvent(:final progress):
           add(_Progress(progress));
@@ -344,12 +353,10 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
         case DownloadCompleted():
           _log.info('download completed');
           add(const _Completed());
-          await WakelockPlus.disable();
 
         case DownloadError(:final message):
           _log.warning('download error: $message');
           add(_Failed(message));
-          await WakelockPlus.disable();
 
         case DownloadWaiting():
           _log.info('waiting for user action on device');
@@ -359,6 +366,11 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
       add(_Failed('Download exception: $e'));
     });
     sub.onDone(() async {
+      try {
+        await WakelockPlus.disable();
+      } catch (e) {
+        _log.warning('failed to disable wake lock', e);
+      }
       try {
         await charPair.rx.setNotifyValue(false);
       } catch (_) {}
