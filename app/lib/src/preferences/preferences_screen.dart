@@ -21,6 +21,8 @@ import '../common/common.dart';
 import '../services/log_buffer.dart';
 import 'preferences_widgets.dart';
 
+final _log = Logger('preferences_screen.dart');
+
 class PreferencesScreen extends StatelessWidget {
   const PreferencesScreen({super.key});
 
@@ -290,19 +292,29 @@ class _LogLine extends StatelessWidget {
 class _ImportExportButtons extends StatelessWidget {
   Future<void> _showSaveDialog(BuildContext context, ArchiveState state) async {
     final archiveBloc = context.read<ArchiveBloc>();
+    final fileName = state.exportReadyFilename ?? 'bubbletrail.$backupFileExtension';
 
-    final bytes = await File(state.exportReadyPath!).readAsBytes();
-    final result = await FilePicker.saveFile(
-      bytes: bytes,
-      dialogTitle: 'Export backup',
-      fileName: state.exportReadyFilename ?? 'bubbletrail.$backupFileExtension',
-      type: FileType.custom,
-    );
+    try {
+      final bytes = await File(state.exportReadyPath!).readAsBytes();
+      // FileType.custom requires a non-empty extension list, otherwise
+      // file_picker throws before showing the dialog.
+      final extension = fileName.split('.').last;
+      final result = await FilePicker.saveFile(
+        bytes: bytes,
+        dialogTitle: 'Export backup',
+        fileName: fileName,
+        type: FileType.custom,
+        allowedExtensions: [extension],
+      );
 
-    if (result != null) {
-      archiveBloc.add(ArchiveEvent.exportComplete(result));
-    } else {
-      archiveBloc.add(ArchiveEvent.exportCancelled());
+      if (result != null) {
+        archiveBloc.add(ArchiveEvent.exportComplete(result));
+      } else {
+        archiveBloc.add(ArchiveEvent.exportCancelled());
+      }
+    } catch (e) {
+      _log.severe('failed to show save dialog', e);
+      archiveBloc.add(ArchiveEvent.exportFailed(e.toString()));
     }
   }
 

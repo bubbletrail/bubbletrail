@@ -59,6 +59,7 @@ sealed class ArchiveEvent extends Equatable {
   const factory ArchiveEvent.exportArchive() = _ExportArchive;
   const factory ArchiveEvent.exportComplete(String destinationPath) = _ExportComplete;
   const factory ArchiveEvent.exportCancelled() = _ExportCancelled;
+  const factory ArchiveEvent.exportFailed(String error) = _ExportFailed;
   const factory ArchiveEvent.importArchive(String zipPath) = _ImportArchive;
   const factory ArchiveEvent.exportSsrf() = _ExportSsrf;
 }
@@ -78,6 +79,15 @@ class _ExportComplete extends ArchiveEvent {
 
 class _ExportCancelled extends ArchiveEvent {
   const _ExportCancelled();
+}
+
+class _ExportFailed extends ArchiveEvent {
+  final String error;
+
+  const _ExportFailed(this.error);
+
+  @override
+  List<Object?> get props => [error];
 }
 
 class _ImportArchive extends ArchiveEvent {
@@ -105,6 +115,8 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
           await _onExportComplete(event, emit);
         case _ExportCancelled():
           await _onExportCancelled(emit);
+        case _ExportFailed():
+          await _onExportFailed(event, emit);
         case _ImportArchive():
           await _onImport(event, emit);
         case _ExportSsrf():
@@ -135,15 +147,23 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
     final exportPath = state.exportReadyPath;
     if (exportPath == null) return;
 
+    // The save dialog has already written the file to the chosen destination,
+    // so we only need to clean up our temporary copy.
     try {
-      await File(exportPath).copy(event.destinationPath);
       await File(exportPath).delete();
-      _log.info('exported to ${event.destinationPath}');
-      emit(state.copyWith(exportComplete: true));
-    } catch (e) {
-      _log.severe('failed to save export', e);
-      emit(state.copyWith(error: e.toString()));
+    } catch (_) {}
+    _log.info('exported to ${event.destinationPath}');
+    emit(state.copyWith(exportComplete: true));
+  }
+
+  Future<void> _onExportFailed(_ExportFailed event, Emitter<ArchiveState> emit) async {
+    final exportPath = state.exportReadyPath;
+    if (exportPath != null) {
+      try {
+        await File(exportPath).delete();
+      } catch (_) {}
     }
+    emit(ArchiveState(error: event.error));
   }
 
   Future<void> _onExportCancelled(Emitter<ArchiveState> emit) async {
