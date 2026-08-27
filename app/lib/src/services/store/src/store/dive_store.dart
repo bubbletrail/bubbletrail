@@ -82,6 +82,17 @@ class DiveStore with ChangeNotifier {
   }
 
   void _applyUpdate(Dive dive) {
+    // An update carries a fresh updatedAt and no deletedAt, so writing one for
+    // a dive that has since been deleted would silently bring it back. That
+    // happens for real: deleting a dive kicks off a reload, and work already in
+    // flight on the old dive list (the tissue recalculation) then writes back
+    // the dive we just deleted. Dropping the stale write is safe -- insertAll
+    // is the path that deliberately undeletes a dive.
+    if (_dives[dive.id]?.meta.isDeleted == true) {
+      _log.fine('ignoring update of deleted dive ${dive.id}');
+      return;
+    }
+
     if (!dive.isFrozen) dive.freeze();
     dive = dive.rebuild((dive) {
       if (dive.id.isEmpty) {

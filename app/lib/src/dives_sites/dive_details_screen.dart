@@ -148,6 +148,43 @@ class _DiveDetails extends StatelessWidget {
     ];
   }
 
+  // A dive that starts within this long of the previous one ending is offered
+  // up for merging; a longer surface interval means it really was a new dive.
+  static const _maxMergeGap = Duration(hours: 1);
+
+  // The dive immediately before this one in time. Not necessarily the one the
+  // navigation arrows reach, which follow the dive numbering.
+  Dive? _precedingDive(BuildContext context) {
+    final listState = context.read<DiveListBloc>().state;
+    if (listState is! DiveListLoaded) return null;
+
+    Dive? preceding;
+    for (final d in listState.dives) {
+      if (d.id == dive.id || d.start.seconds >= dive.start.seconds) continue;
+      if (preceding == null || d.start.seconds > preceding.start.seconds) preceding = d;
+    }
+    return preceding;
+  }
+
+  bool _canMergeInto(Dive preceding) {
+    final precedingEnd = preceding.start.toDateTime().add(Duration(seconds: preceding.duration));
+    return dive.start.toDateTime().difference(precedingEnd) <= _maxMergeGap;
+  }
+
+  Future<void> _mergeIntoPrevious(BuildContext context, Dive preceding) async {
+    final confirmed = await showConfirmationDialog(
+      context: context,
+      title: 'Merge into previous dive',
+      message:
+          'Dive #${dive.number} will be merged into dive #${preceding.number}, appending its profile to that dive. '
+          'Dive #${dive.number} is then deleted. Continue?',
+      confirmText: 'Merge',
+    );
+    if (!confirmed || !context.mounted) return;
+
+    context.read<DiveDetailsBloc>().add(DiveDetailsEvent.mergeIntoPrevious(preceding.id));
+  }
+
   PopupMenuButton<String> _popupMenuActions(BuildContext context) {
     return PopupMenuButton<String>(
       onSelected: (value) async {
@@ -156,6 +193,9 @@ class _DiveDetails extends StatelessWidget {
             context: context,
             builder: (context) => _RawDiveDataScreen(dive: dive),
           );
+        } else if (value == 'merge') {
+          final preceding = _precedingDive(context);
+          if (preceding != null) await _mergeIntoPrevious(context, preceding);
         } else if (value == 'delete') {
           final confirmed = await showConfirmationDialog(
             context: context,
@@ -169,10 +209,14 @@ class _DiveDetails extends StatelessWidget {
           }
         }
       },
-      itemBuilder: (context) => [
-        const PopupMenuItem(value: 'debug', child: Text('View raw data')),
-        const PopupMenuItem(value: 'delete', child: Text('Delete dive')),
-      ],
+      itemBuilder: (context) {
+        final preceding = _precedingDive(context);
+        return [
+          const PopupMenuItem(value: 'debug', child: Text('View raw data')),
+          PopupMenuItem(value: 'merge', enabled: preceding != null && _canMergeInto(preceding), child: const Text('Merge into previous dive')),
+          const PopupMenuItem(value: 'delete', child: Text('Delete dive')),
+        ];
+      },
     );
   }
 

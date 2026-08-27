@@ -11,6 +11,7 @@ import 'package:uuid/uuid.dart';
 
 import '../common/details_state.dart';
 import '../providers/storage_provider.dart';
+import '../services/store/store.dart';
 
 final _log = Logger('dive_details_bloc.dart');
 
@@ -57,6 +58,7 @@ sealed class DiveDetailsEvent extends Equatable {
   const factory DiveDetailsEvent.loadDive(String diveId) = _LoadDive;
   const factory DiveDetailsEvent.save(Dive dive) = _Save;
   const factory DiveDetailsEvent.deleteAndClose(String diveID) = _DeleteAndClose;
+  const factory DiveDetailsEvent.mergeIntoPrevious(String previousDiveID) = _MergeIntoPrevious;
 }
 
 class _NewDive extends DiveDetailsEvent {
@@ -79,6 +81,15 @@ class _DeleteAndClose extends DiveDetailsEvent {
   final String diveID;
 
   const _DeleteAndClose(this.diveID);
+}
+
+class _MergeIntoPrevious extends DiveDetailsEvent {
+  final String previousDiveID;
+
+  const _MergeIntoPrevious(this.previousDiveID);
+
+  @override
+  List<Object?> get props => [previousDiveID];
 }
 
 class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
@@ -110,14 +121,45 @@ class DiveDetailsBloc extends Bloc<DiveDetailsEvent, DiveDetailsState> {
           await _store.dives.delete(event.diveID);
           _log.fine('deleted dive ${event.diveID}');
           emit(DiveDetailsClosed());
+        case _MergeIntoPrevious():
+          await _onMergeIntoPrevious(event, emit);
       }
     }, transformer: sequential());
   }
 
+  // Fold the currently shown dive into the one before it: the profile and
+  // events move over, the current dive is deleted, and everything derived from
+  // the samples is recomputed. Leaves the previous dive on screen.
+  Future<void> _onMergeIntoPrevious(_MergeIntoPrevious event, Emitter<DiveDetailsState> emit) async {
+    final s = state;
+    if (s is! DiveDetailsLoaded) return;
+
+    final current = await _store.diveById(s.dive.id);
+    final previous = await _store.diveById(event.previousDiveID);
+    if (current == null || previous == null) {
+      _log.warning('cannot merge dive ${s.dive.id} into ${event.previousDiveID}: dive not found');
+      return;
+    }
+
+    final merged = previous.rebuild((d) {
+      d.appendDive(current);
+      d.invalidateComputed();
+    });
+    await _store.dives.update(merged);
+    await _store.dives.delete(current.id);
+    _log.info('merged dive #${current.number} into #${merged.number}');
+
+    await _onLoadDive(_LoadDive(merged.id), emit);
+  }
+
   Future<void> _onLoadDive(_LoadDive event, Emitter<DiveDetailsState> emit) async {
     final dive = await _store.diveById(event.diveId);
-    if (dive == null) {
-      emit(DiveDetailsClosed());
+    if (dive == null || dive.meta.isDeleted) {
+      // Only give up if the dive that went away is the one we're showing. A
+      // storage change can queue a reload for a dive we've since navigated
+      // away from (merging does exactly that), and that shouldn't close us.
+      final s = state;
+      if (s is! DiveDetailsLoaded || s.dive.id == event.diveId) emit(DiveDetailsClosed());
       return;
     }
 
