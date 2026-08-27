@@ -8,6 +8,18 @@ import 'encryption_provider.dart';
 
 final _log = Logger('s3_provider.dart');
 
+// S3 reports eTags as quoted strings, but not consistently: minio trims the
+// quotes for a single part upload and hands back the raw value from the
+// multipart completion response, and listings quote them. Normalise every eTag
+// on the way in, so one we stored can be compared with one we listed.
+String normaliseEtag(String eTag) {
+  final trimmed = eTag.trim();
+  if (trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"')) {
+    return trimmed.substring(1, trimmed.length - 1);
+  }
+  return trimmed;
+}
+
 class S3SyncProvider extends SyncProvider {
   final Minio _minio;
   final String _bucket;
@@ -42,11 +54,10 @@ class S3SyncProvider extends SyncProvider {
         final lastModified = obj.lastModified;
         if (lastModified == null) continue;
 
-        var eTag = obj.eTag;
+        final eTag = obj.eTag;
         if (eTag == null) continue;
-        eTag = eTag.replaceAll('"', '');
 
-        yield SyncObject(_relativeKey(key), lastModified, eTag);
+        yield SyncObject(_relativeKey(key), lastModified, normaliseEtag(eTag));
       }
     }
     _log.fine('listing complete');
@@ -64,7 +75,7 @@ class S3SyncProvider extends SyncProvider {
   Future<String> putObject(String key, Uint8List data) async {
     _log.fine('storing object $_bucket/$key');
     final enc = await _enc.encrypt(data);
-    return await _minio.putObject(_bucket, _fullKey(key), Stream.value(enc));
+    return normaliseEtag(await _minio.putObject(_bucket, _fullKey(key), Stream.value(enc)));
   }
 
   @override

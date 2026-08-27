@@ -267,7 +267,9 @@ class DiveStore with ChangeNotifier {
       seenEtags[id] = obj.eTag;
 
       final cur = _dives[id];
-      if (cur != null && cur.syncedEtag == obj.eTag) {
+      // A blank eTag is our "not synced" marker, so it never counts as a match
+      // however blank the other side is.
+      if (cur != null && cur.syncedEtag.isNotEmpty && cur.syncedEtag == obj.eTag) {
         // Identical, no change required
         continue;
       }
@@ -289,13 +291,24 @@ class DiveStore with ChangeNotifier {
         _dives[id] = dive;
         _scheduleSave(id);
         notifyListeners();
+      } else if (!cur.meta.isAfter(dive.meta)) {
+        // Neither side is newer, so this is our own dive coming back with a
+        // different eTag. That's the normal case, not an anomaly: objects are
+        // encrypted with a fresh nonce on every upload, so the same dive
+        // uploaded twice never has the same eTag. Adopt what's out there --
+        // otherwise the upload loop below pushes our copy straight back, the
+        // peer sees an eTag it doesn't recognise and pushes it back to us, and
+        // the two of us keep rewriting an unchanged dive forever.
+        _log.fine('adopting eTag for unchanged dive $id');
+        _dives[id] = cur.rebuild((d) => d.syncedEtag = obj.eTag);
+        _scheduleSave(id);
       }
     }
 
     // Upload all dives with mismatched eTags. This will include the dives
     // we didn't import above because they were older than what we had.
     for (final dive in _dives.values) {
-      if (seenEtags[dive.id] == dive.syncedEtag) continue;
+      if (dive.syncedEtag.isNotEmpty && seenEtags[dive.id] == dive.syncedEtag) continue;
       _log.fine('updating dive ${dive.id} in sync provider');
       final fullDive = await getById(dive.id);
       final data = fullDive!.rebuild((dive) {
@@ -309,6 +322,12 @@ class DiveStore with ChangeNotifier {
     }
 
     _rebuildTags();
+
+    // Flush now rather than on the debounce timer. The eTags we just recorded
+    // are what keeps the next sync quiet, and losing them to an app that's
+    // killed a second later means uploading everything again.
+    _saveTimer?.cancel();
+    await _save();
   }
 
   String _diveDir(Dive dive) => "$pathPrefix/${DateFormat('yyyy-MM').format(dive.meta.createdAt.toDateTime())}";
