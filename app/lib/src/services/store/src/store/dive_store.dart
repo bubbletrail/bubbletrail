@@ -67,6 +67,21 @@ class DiveStore with ChangeNotifier {
   }
 
   Future<void> update(Dive dive) async {
+    _applyUpdate(dive);
+    notifyListeners();
+  }
+
+  // Bulk variant of [update] that notifies listeners once for the whole batch,
+  // so mass edits don't trigger a reload per dive.
+  Future<void> updateAll(Iterable<Dive> dives) async {
+    if (dives.isEmpty) return;
+    for (final dive in dives) {
+      _applyUpdate(dive);
+    }
+    notifyListeners();
+  }
+
+  void _applyUpdate(Dive dive) {
     if (!dive.isFrozen) dive.freeze();
     dive = dive.rebuild((dive) {
       if (dive.id.isEmpty) {
@@ -79,7 +94,6 @@ class DiveStore with ChangeNotifier {
     _tags.addAll(dive.tags);
     _buddies.addAll(dive.buddies);
     _scheduleSave(dive.id);
-    notifyListeners();
   }
 
   Future<void> delete(String id) async {

@@ -104,6 +104,7 @@ class PreferencesScreen extends StatelessWidget {
                               icon: Icon(Icons.update_outlined),
                               label: Text('Check for updates'),
                             ),
+                          OutlinedButton.icon(onPressed: () => _renumberDives(context), icon: Icon(Icons.format_list_numbered), label: Text('Renumber dives')),
                           OutlinedButton.icon(
                             onPressed: () => _resetDatabase(context),
                             style: OutlinedButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
@@ -161,6 +162,20 @@ class PreferencesScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _renumberDives(BuildContext context) async {
+    final confirmed = await showConfirmationDialog(
+      context: context,
+      title: 'Renumber dives',
+      message: 'This will renumber all dives sequentially from 1, in chronological order, replacing any existing dive numbers. Continue?',
+      cancelText: 'Cancel',
+      confirmText: 'Renumber dives',
+    );
+    if (!confirmed || !context.mounted) return;
+
+    context.read<DiveListBloc>().add(const DiveListEvent.renumberDives());
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Renumbering dives...')));
   }
 
   Future<void> _resetDatabase(BuildContext context) async {
