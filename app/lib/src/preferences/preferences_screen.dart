@@ -314,10 +314,11 @@ class _ImportExportButtons extends StatelessWidget {
       // FileType.custom requires a non-empty extension list, otherwise
       // file_picker throws before showing the dialog.
       final extension = fileName.split('.').last;
+      final name = fileName.substring(0, fileName.length - extension.length - 1);
       final result = await FilePicker.saveFile(
         bytes: bytes,
         dialogTitle: 'Export backup',
-        fileName: fileName,
+        fileName: name,
         type: FileType.custom,
         allowedExtensions: [extension],
       );
