@@ -350,6 +350,7 @@ class _DiveDetails extends StatelessWidget {
 
     final result = await showDiveBasicsEditor(
       context: context,
+      number: dive.number,
       start: dive.start.toDateTime(),
       timezone: siteTimeZone(site),
       durationSeconds: dive.duration,
@@ -358,11 +359,13 @@ class _DiveDetails extends StatelessWidget {
     );
     if (result == null || !context.mounted) return;
 
+    final numberChanged = result.number != dive.number;
     final startChanged = result.start != dive.start.toDateTime();
     final depthDurationChanged = canEditDepthDuration && (result.durationSeconds != dive.duration || result.maxDepth != dive.maxDepth);
-    if (!startChanged && !depthDurationChanged) return;
+    if (!numberChanged && !startChanged && !depthDurationChanged) return;
 
     _save(context, (d) {
+      d.number = result.number;
       d.start = Timestamp.fromDateTime(result.start);
       if (canEditDepthDuration) {
         // Regenerate the synthetic profile from the new duration/depth.
@@ -562,6 +565,7 @@ class _DiveDetails extends StatelessWidget {
   Widget _depthsTable() {
     return DataCardColumn(
       children: [
+        ColumnRow(label: 'Number', child: Text('${dive.number}')),
         ColumnRow(
           label: 'Start',
           child: DateTimeText(dive.start.toDateTime(), timezone: siteTimeZone(site)),
