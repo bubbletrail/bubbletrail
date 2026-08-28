@@ -140,7 +140,7 @@ func (c *Client) DeleteUser(ctx context.Context, email string) error {
 	// Delete the user, purging any remaining data they own.
 	purgeData := 1
 	if err := c.admin.RemoveUser(ctx, admin.User{
-		ID:        email,
+		ID:        bucketName,
 		PurgeData: &purgeData,
 	}); err != nil && !errors.Is(err, admin.ErrNoSuchUser) {
 		log.ErrorContext(ctx, "failed to delete user", "error", err)
