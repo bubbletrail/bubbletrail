@@ -112,15 +112,15 @@ jobs:
       - name: rclone download
         if: needs.calver.outputs.release
         run: |
-          rclone sync minio:updates updates
+          rclone sync -v bubbletrail:updates updates
         env:
-          RCLONE_CONFIG_MINIO_TYPE: ${{ secrets.RCLONE_CONFIG_MINIO_TYPE }}
-          RCLONE_CONFIG_MINIO_PROVIDER: ${{ secrets.RCLONE_CONFIG_MINIO_PROVIDER }}
-          RCLONE_CONFIG_MINIO_ACCESS_KEY_ID: ${{ secrets.RCLONE_CONFIG_MINIO_ACCESS_KEY_ID }}
-          RCLONE_CONFIG_MINIO_SECRET_ACCESS_KEY: ${{ secrets.RCLONE_CONFIG_MINIO_SECRET_ACCESS_KEY }}
-          RCLONE_CONFIG_MINIO_REGION: ${{ secrets.RCLONE_CONFIG_MINIO_REGION }}
-          RCLONE_CONFIG_MINIO_ENDPOINT: ${{ secrets.RCLONE_CONFIG_MINIO_ENDPOINT }}
-          RCLONE_CONFIG_MINIO_ACL: ${{ secrets.RCLONE_CONFIG_MINIO_ACL }}
+          RCLONE_CONFIG_BUBBLETRAIL_TYPE: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_TYPE }}
+          RCLONE_CONFIG_BUBBLETRAIL_PROVIDER: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_PROVIDER }}
+          RCLONE_CONFIG_BUBBLETRAIL_ACCESS_KEY_ID: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_ACCESS_KEY_ID }}
+          RCLONE_CONFIG_BUBBLETRAIL_SECRET_ACCESS_KEY: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_SECRET_ACCESS_KEY }}
+          RCLONE_CONFIG_BUBBLETRAIL_REGION: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_REGION }}
+          RCLONE_CONFIG_BUBBLETRAIL_ENDPOINT: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_ENDPOINT }}
+          RCLONE_CONFIG_BUBBLETRAIL_ACL: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_ACL }}
 
       - name: Copy new package
         if: needs.calver.outputs.release
@@ -138,15 +138,15 @@ jobs:
       - name: rclone upload
         if: needs.calver.outputs.release
         run: |
-          rclone sync  -v --no-update-modtime updates minio:updates
+          rclone sync  -v --no-update-modtime updates bubbletrail:updates
         env:
-          RCLONE_CONFIG_MINIO_TYPE: ${{ secrets.RCLONE_CONFIG_MINIO_TYPE }}
-          RCLONE_CONFIG_MINIO_PROVIDER: ${{ secrets.RCLONE_CONFIG_MINIO_PROVIDER }}
-          RCLONE_CONFIG_MINIO_ACCESS_KEY_ID: ${{ secrets.RCLONE_CONFIG_MINIO_ACCESS_KEY_ID }}
-          RCLONE_CONFIG_MINIO_SECRET_ACCESS_KEY: ${{ secrets.RCLONE_CONFIG_MINIO_SECRET_ACCESS_KEY }}
-          RCLONE_CONFIG_MINIO_REGION: ${{ secrets.RCLONE_CONFIG_MINIO_REGION }}
-          RCLONE_CONFIG_MINIO_ENDPOINT: ${{ secrets.RCLONE_CONFIG_MINIO_ENDPOINT }}
-          RCLONE_CONFIG_MINIO_ACL: ${{ secrets.RCLONE_CONFIG_MINIO_ACL }}
+          RCLONE_CONFIG_BUBBLETRAIL_TYPE: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_TYPE }}
+          RCLONE_CONFIG_BUBBLETRAIL_PROVIDER: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_PROVIDER }}
+          RCLONE_CONFIG_BUBBLETRAIL_ACCESS_KEY_ID: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_ACCESS_KEY_ID }}
+          RCLONE_CONFIG_BUBBLETRAIL_SECRET_ACCESS_KEY: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_SECRET_ACCESS_KEY }}
+          RCLONE_CONFIG_BUBBLETRAIL_REGION: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_REGION }}
+          RCLONE_CONFIG_BUBBLETRAIL_ENDPOINT: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_ENDPOINT }}
+          RCLONE_CONFIG_BUBBLETRAIL_ACL: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_ACL }}
 
   build-ios:
     name: Build for iOS (Appstore) (${{ needs.calver.outputs.version}} ${{ github.run_number }})
