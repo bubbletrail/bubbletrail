@@ -79,12 +79,11 @@ func (c *Client) CreateUser(ctx context.Context, email string, quota int) (UserR
 	// Create the gateway user. Unlike with MinIO there is no separate policy
 	// to attach: the user owns their own bucket, and limiting them to a single
 	// bucket is what keeps them out of everything else.
-	maxBuckets := 1
 	if _, err := c.admin.CreateUser(ctx, admin.User{
 		ID:          bucketName,
-		DisplayName: email,
+		DisplayName: "Bubbletrail user",
 		Email:       email,
-		MaxBuckets:  &maxBuckets,
+		MaxBuckets:  new(1),
 		Keys: []admin.UserKeySpec{{
 			AccessKey: accessKey,
 			SecretKey: secretKey,
