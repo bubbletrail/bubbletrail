@@ -39,7 +39,7 @@ jobs:
         run: |
           cd app
           flutter build appbundle \
-              --debug --no-pub \
+              --release --no-pub \
               --build-number="100" \
               --build-name="0.0.1" \
               --dart-define=BUILD="100" \
