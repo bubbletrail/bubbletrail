@@ -76,7 +76,7 @@ sealed class DiveListEvent extends Equatable {
   List<Object?> get props => [];
 
   const factory DiveListEvent.importDives(String filePath) = _ImportDives;
-  const factory DiveListEvent.renumberDives() = _RenumberDives;
+  const factory DiveListEvent.renumberDives({required int startFrom}) = _RenumberDives;
 }
 
 class _LoadAll extends DiveListEvent {
@@ -93,7 +93,12 @@ class _ImportDives extends DiveListEvent {
 }
 
 class _RenumberDives extends DiveListEvent {
-  const _RenumberDives();
+  final int startFrom;
+
+  const _RenumberDives({required this.startFrom});
+
+  @override
+  List<Object?> get props => [startFrom];
 }
 
 class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
@@ -109,7 +114,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
         case _ImportDives():
           await _onImportDives(event, emit);
         case _RenumberDives():
-          await _onRenumberDives();
+          await _onRenumberDives(event.startFrom);
       }
     }, transformer: sequential());
 
@@ -343,8 +348,8 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     add(_LoadAll());
   }
 
-  // Renumber every dive sequentially from 1, in chronological order.
-  Future<void> _onRenumberDives() async {
+  // Renumber every dive sequentially from [startFrom], in chronological order.
+  Future<void> _onRenumberDives([int startFrom = 1]) async {
     final dives = await _store.dives.getAll();
     final chronological = List<Dive>.from(dives)
       ..sort((a, b) {
@@ -354,8 +359,9 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
 
     final renumbered = <Dive>[];
     for (final (idx, dive) in chronological.indexed) {
-      if (dive.number == idx + 1) continue;
-      renumbered.add(dive.rebuild((d) => d.number = idx + 1));
+      final newNumber = startFrom + idx;
+      if (dive.number == newNumber) continue;
+      renumbered.add(dive.rebuild((d) => d.number = newNumber));
     }
 
     if (renumbered.isEmpty) {

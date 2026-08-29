@@ -165,16 +165,50 @@ class PreferencesScreen extends StatelessWidget {
   }
 
   Future<void> _renumberDives(BuildContext context) async {
-    final confirmed = await showConfirmationDialog(
+    int startFrom = 1;
+    final confirmed = await showDialog<bool>(
       context: context,
-      title: 'Renumber dives',
-      message: 'This will renumber all dives sequentially from 1, in chronological order, replacing any existing dive numbers. Continue?',
-      cancelText: 'Cancel',
-      confirmText: 'Renumber dives',
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Renumber dives'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('This will renumber all dives sequentially, in chronological order, replacing any existing dive numbers.'),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Text('Start from:'),
+                  const SizedBox(width: 16),
+                  SizedBox(
+                    width: 80,
+                    child: TextFormField(
+                      initialValue: '1',
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(hintText: '1'),
+                      onChanged: (value) {
+                        final parsed = int.tryParse(value);
+                        if (parsed != null && parsed > 0) {
+                          startFrom = parsed;
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancel')),
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Renumber dives')),
+          ],
+        ),
+      ),
     );
-    if (!confirmed || !context.mounted) return;
+    if (!(confirmed ?? false) || !context.mounted) return;
 
-    context.read<DiveListBloc>().add(const DiveListEvent.renumberDives());
+    context.read<DiveListBloc>().add(DiveListEvent.renumberDives(startFrom: startFrom));
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Renumbering dives...')));
   }
 
