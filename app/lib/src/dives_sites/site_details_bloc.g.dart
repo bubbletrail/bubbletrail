@@ -29,7 +29,6 @@ class _$SiteDetailsLoadedCWProxyImpl implements _$SiteDetailsLoadedCWProxy {
   @override
   SiteDetailsLoaded site(Site site) => call(site: site);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `SiteDetailsLoaded(...).copyWith.fieldName(value)`.
   ///
@@ -37,6 +36,7 @@ class _$SiteDetailsLoadedCWProxyImpl implements _$SiteDetailsLoadedCWProxy {
   /// ```dart
   /// SiteDetailsLoaded(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   SiteDetailsLoaded call({Object? site = const $CopyWithPlaceholder()}) {
     return SiteDetailsLoaded(
       site == const $CopyWithPlaceholder() || site == null

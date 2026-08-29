@@ -50,7 +50,6 @@ class _$SyncStateCWProxyImpl implements _$SyncStateCWProxy {
   SyncState lastSyncSuccess(bool? lastSyncSuccess) =>
       call(lastSyncSuccess: lastSyncSuccess);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `SyncState(...).copyWith.fieldName(value)`.
   ///
@@ -58,6 +57,7 @@ class _$SyncStateCWProxyImpl implements _$SyncStateCWProxy {
   /// ```dart
   /// SyncState(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   SyncState call({
     Object? lastSynced = const $CopyWithPlaceholder(),
     Object? syncing = const $CopyWithPlaceholder(),

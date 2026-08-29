@@ -2,7 +2,7 @@ import Flutter
 import UIKit
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   private var pendingFileUrl: URL?
   private var methodChannel: FlutterMethodChannel?
 
@@ -10,10 +10,15 @@ import UIKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    let controller = window?.rootViewController as! FlutterViewController
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+
     methodChannel = FlutterMethodChannel(
       name: "app.bubbletrail.app/file_handler",
-      binaryMessenger: controller.binaryMessenger
+      binaryMessenger: engineBridge.applicationRegistrar.messenger()
     )
 
     methodChannel?.setMethodCallHandler { [weak self] (call, result) in
@@ -28,17 +33,11 @@ import UIKit
         result(FlutterMethodNotImplemented)
       }
     }
-
-    GeneratedPluginRegistrant.register(with: self)
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
-  override func application(
-    _ app: UIApplication,
-    open url: URL,
-    options: [UIApplication.OpenURLOptionsKey: Any] = [:]
-  ) -> Bool {
-    // Check if this is a file URL we can handle
+  // Copies a dive log file into the documents directory and hands it to Dart,
+  // or stores it for Dart to request on startup when deferred.
+  func handleFileUrl(_ url: URL, deferred: Bool = false) -> Bool {
     let ext = url.pathExtension.lowercased()
     if ext == "xml" || ext == "ssrf" || ext == "uddf" || ext == "json" {
       // Copy file to app's documents directory to ensure we have access
@@ -56,12 +55,12 @@ import UIKit
 
         try FileManager.default.copyItem(at: url, to: destinationUrl)
 
-        // Send to Flutter
-        if let channel = methodChannel {
-          channel.invokeMethod("fileReceived", arguments: destinationUrl.path)
-        } else {
-          // App not fully initialized yet, store for later
+        if deferred || methodChannel == nil {
+          // Dart is not listening yet, store for later
           pendingFileUrl = destinationUrl
+        } else {
+          // Send to Flutter
+          methodChannel?.invokeMethod("fileReceived", arguments: destinationUrl.path)
         }
         return true
       } catch {
@@ -70,6 +69,6 @@ import UIKit
       }
     }
 
-    return super.application(app, open: url, options: options)
+    return false
   }
 }

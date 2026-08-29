@@ -358,7 +358,9 @@ class _ImportExportButtons extends StatelessWidget {
       );
 
       if (result != null) {
-        archiveBloc.add(ArchiveEvent.exportComplete(result));
+        // file URIs map to a filesystem path; other schemes (content etc.) are kept as-is.
+        final destination = result.scheme == 'file' ? result.toFilePath() : result.toString();
+        archiveBloc.add(ArchiveEvent.exportComplete(destination));
       } else {
         archiveBloc.add(ArchiveEvent.exportCancelled());
       }
@@ -369,8 +371,8 @@ class _ImportExportButtons extends StatelessWidget {
   }
 
   Future<void> _importBackup(BuildContext context) async {
-    final result = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: [backupFileExtension]);
-    if (result == null || result.files.single.path == null) return;
+    final file = await FilePicker.pickFile(type: FileType.custom, allowedExtensions: [backupFileExtension]);
+    if (file == null || file.path == null) return;
 
     if (!context.mounted) return;
     final confirmed = await showDialog<bool>(
@@ -386,24 +388,24 @@ class _ImportExportButtons extends StatelessWidget {
     );
     if (confirmed != true || !context.mounted) return;
 
-    context.read<ArchiveBloc>().add(ArchiveEvent.importArchive(result.files.single.path!));
+    context.read<ArchiveBloc>().add(ArchiveEvent.importArchive(file.path!));
   }
 
   Future<void> _importDives(BuildContext context) async {
-    final result = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: ['ssrf', 'xml', 'json']);
-    if (result == null || result.files.single.path == null) return;
+    final file = await FilePicker.pickFile(type: FileType.custom, allowedExtensions: ['ssrf', 'xml', 'json']);
+    if (file == null || file.path == null) return;
     if (!context.mounted) return;
 
-    context.read<DiveListBloc>().add(DiveListEvent.importDives(result.files.single.path!));
+    context.read<DiveListBloc>().add(DiveListEvent.importDives(file.path!));
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Importing dives...')));
   }
 
   Future<void> _importEquipment(BuildContext context) async {
-    final result = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: ['csv']);
-    if (result == null || result.files.single.path == null) return;
+    final file = await FilePicker.pickFile(type: FileType.custom, allowedExtensions: ['csv']);
+    if (file == null || file.path == null) return;
     if (!context.mounted) return;
 
-    context.read<EquipmentListBloc>().add(EquipmentListEvent.importEquipment(result.files.single.path!));
+    context.read<EquipmentListBloc>().add(EquipmentListEvent.importEquipment(file.path!));
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Importing equipment...')));
   }
 

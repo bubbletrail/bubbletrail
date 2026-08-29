@@ -49,7 +49,6 @@ class _$DiveListLoadedCWProxyImpl implements _$DiveListLoadedCWProxy {
   @override
   DiveListLoaded buddies(Set<String> buddies) => call(buddies: buddies);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `DiveListLoaded(...).copyWith.fieldName(value)`.
   ///
@@ -57,6 +56,7 @@ class _$DiveListLoadedCWProxyImpl implements _$DiveListLoadedCWProxy {
   /// ```dart
   /// DiveListLoaded(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   DiveListLoaded call({
     Object? dives = const $CopyWithPlaceholder(),
     Object? sites = const $CopyWithPlaceholder(),
