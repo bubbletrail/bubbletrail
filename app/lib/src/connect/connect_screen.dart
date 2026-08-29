@@ -262,19 +262,11 @@ class ConnectScreen extends StatelessWidget {
                     children: [
                       const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
                       const SizedBox(width: 12),
-                      Text(
-                        downloadState.downloadProgress != null
-                            ? 'Downloading... ${downloadState.downloadProgress!.current} / ${downloadState.downloadProgress!.maximum}'
-                            : 'Downloading dives...',
-                      ),
+                      Expanded(child: Text(_downloadProgressLabel(downloadState))),
                     ],
                   ),
-                  if (downloadState.downloadProgress != null) ...[
-                    const SizedBox(height: 12),
-                    LinearProgressIndicator(value: downloadState.downloadProgress!.fraction),
-                    const SizedBox(height: 4),
-                    Text('${(downloadState.downloadProgress!.fraction * 100).toStringAsFixed(0)}%', style: Theme.of(context).textTheme.bodySmall),
-                  ],
+                  const SizedBox(height: 12),
+                  LinearProgressIndicator(value: downloadState.downloadProgress?.indeterminate == false ? downloadState.downloadProgress!.fraction : null),
                 ],
               ),
             )
@@ -386,6 +378,16 @@ class ConnectScreen extends StatelessWidget {
         actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Cancel'))],
       ),
     );
+  }
+
+  String _downloadProgressLabel(BleDownloadState downloadState) {
+    final dives = downloadState.downloadedDives.length;
+    final divesLabel = dives > 0 ? ', $dives dive${dives == 1 ? '' : 's'} downloaded' : '';
+    final progress = downloadState.downloadProgress;
+    if (progress == null || progress.indeterminate) {
+      return 'Downloading dives...$divesLabel';
+    }
+    return 'Downloading dives... ${(progress.fraction * 100).toStringAsFixed(0)}%$divesLabel';
   }
 
   String _getSignalStrengthLabel(int rssi) {
