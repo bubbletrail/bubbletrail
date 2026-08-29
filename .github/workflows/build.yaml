@@ -50,6 +50,8 @@ jobs:
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           channel: stable
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:"
 
       - name: Run tests
         run: |
@@ -78,6 +80,8 @@ jobs:
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           channel: stable
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:"
 
       - uses: ./.github/actions/build-info
 
@@ -164,6 +168,8 @@ jobs:
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           channel: stable
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:"
 
       - uses: ./.github/actions/build-info
 
@@ -220,6 +226,8 @@ jobs:
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           channel: stable
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:"
 
       - uses: ./.github/actions/build-info
 
@@ -285,6 +293,11 @@ jobs:
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           channel: stable
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
 
       - uses: ./.github/actions/build-info
 
