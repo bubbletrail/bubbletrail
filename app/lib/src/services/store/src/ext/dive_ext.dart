@@ -4,6 +4,93 @@ import 'package:btproto/btproto.dart';
 import 'ext.dart';
 
 extension DiveExtensions on Dive {
+  // Drop the cached decompression state and recompute everything derived from
+  // the samples/gases. Call after editing anything that affects the profile
+  // (start time, depth/duration, cylinders or gas switches).
+  void invalidateComputed() {
+    clearStartTissues();
+    clearEndTissues();
+    clearEndSurfGf();
+    recalculateMetadata();
+  }
+
+  // Absorb [later], a dive that turned out to be the continuation of this one:
+  // its profile samples and events are appended to ours, shifted to our time
+  // base, and its cylinders are matched up with ours so the appended gas
+  // switches keep pointing at the right cylinder. The caller recomputes the
+  // derived data (invalidateComputed) and disposes of the merged-away dive.
+  void appendDive(Dive later) {
+    // Sample times are relative to the dive start, so everything from the later
+    // dive shifts by the difference between the two starts. Never shift back
+    // into our own profile, which would leave the samples out of order.
+    final lastSampleTime = logs.firstOrNull?.samples.lastOrNull?.time ?? 0.0;
+    final offset = max((later.start.seconds - start.seconds).toDouble(), lastSampleTime);
+
+    // Match the later dive's cylinders against ours, adding the ones we don't
+    // already have, and remember where each ended up for the event remapping.
+    final cylinderIdx = <int, int>{};
+    for (final (idx, cyl) in later.cylinders.indexed) {
+      var ourIdx = cylinders.indexWhere(
+        (c) => (c.cylinderId.isNotEmpty || cyl.cylinderId.isNotEmpty) ? c.cylinderId == cyl.cylinderId : (c.oxygen == cyl.oxygen && c.helium == cyl.helium),
+      );
+      if (ourIdx < 0) {
+        ourIdx = cylinders.length;
+        cylinders.add(cyl.deepCopy());
+      } else if (cyl.hasEndPressure()) {
+        // The same cylinder was breathed on into the later dive, so it's that
+        // dive's end pressure that counts.
+        var ours = cylinders[ourIdx];
+        if (ours.isFrozen) ours = ours.deepCopy();
+        ours.endPressure = cyl.endPressure;
+        cylinders[ourIdx] = ours;
+      }
+      cylinderIdx[idx] = ourIdx;
+    }
+
+    for (final event in later.events) {
+      final e = event.deepCopy();
+      e.time = (event.time + offset).round();
+      if (e.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE) e.value = cylinderIdx[event.value] ?? event.value;
+      events.add(e);
+    }
+
+    for (final (idx, laterLog) in later.logs.indexed) {
+      // Only the first log carries the profile; any further ones tag along
+      // unchanged.
+      if (idx > 0) {
+        logs.add(laterLog.deepCopy());
+        continue;
+      }
+
+      var l = logs.isNotEmpty ? logs.first : Log(model: laterLog.model, serial: laterLog.serial, dateTime: start);
+      if (l.isFrozen) l = l.deepCopy();
+      for (final sample in laterLog.samples) {
+        final s = sample.deepCopy();
+        s.time = sample.time + offset;
+        for (final event in s.events) {
+          event.time = (event.time + offset).round();
+        }
+        l.samples.add(s);
+      }
+      // A real computer profile appended to a synthetic one makes the whole
+      // thing real, so it's no longer ours to regenerate.
+      if (l.isSynthetic && !laterLog.isSynthetic) {
+        l.model = laterLog.model;
+        if (laterLog.hasSerial()) l.serial = laterLog.serial;
+      }
+      l.diveTime = (offset + laterLog.diveTime).round();
+      l.maxDepth = max(l.maxDepth, laterLog.maxDepth);
+      if (laterLog.hasEndPosition()) l.endPosition = laterLog.endPosition;
+      if (laterLog.hasMinTemperature() && (!l.hasMinTemperature() || laterLog.minTemperature < l.minTemperature)) l.minTemperature = laterLog.minTemperature;
+      if (laterLog.hasMaxTemperature() && (!l.hasMaxTemperature() || laterLog.maxTemperature > l.maxTemperature)) l.maxTemperature = laterLog.maxTemperature;
+      if (logs.isEmpty) {
+        logs.add(l);
+      } else {
+        logs[0] = l;
+      }
+    }
+  }
+
   void recalculateMetadata() {
     // Process samples, calculating depths, durations, etc.
 
@@ -106,7 +193,7 @@ extension DiveExtensions on Dive {
         clearSac();
       }
 
-      if (!dl.isSynthetic) {
+      if (!dl.isSynthetic && cylinders.isNotEmpty) {
         // Calculate per cylinder SAC
         for (final e in perCylinderDepth.entries) {
           final avgDepth = e.value.totDepth / e.value.duration;

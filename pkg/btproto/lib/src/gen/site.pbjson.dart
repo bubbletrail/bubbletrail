@@ -43,6 +43,7 @@ const Site$json = {
     {'1': 'difficulty', '3': 8, '4': 1, '5': 9, '10': 'difficulty'},
     {'1': 'tags', '3': 9, '4': 3, '5': 9, '10': 'tags'},
     {'1': 'notes', '3': 10, '4': 1, '5': 9, '10': 'notes'},
+    {'1': 'timezone', '3': 11, '4': 1, '5': 9, '10': 'timezone'},
   ],
 };
 
@@ -53,4 +54,4 @@ final $typed_data.Uint8List siteDescriptor = $convert.base64Decode(
     'b3NpdGlvblIIcG9zaXRpb24SGAoHY291bnRyeRgFIAEoCVIHY291bnRyeRIaCghsb2NhdGlvbh'
     'gGIAEoCVIIbG9jYXRpb24SIgoNYm9keV9vZl93YXRlchgHIAEoCVILYm9keU9mV2F0ZXISHgoK'
     'ZGlmZmljdWx0eRgIIAEoCVIKZGlmZmljdWx0eRISCgR0YWdzGAkgAygJUgR0YWdzEhQKBW5vdG'
-    'VzGAogASgJUgVub3Rlcw==');
+    'VzGAogASgJUgVub3RlcxIaCgh0aW1lem9uZRgLIAEoCVIIdGltZXpvbmU=');

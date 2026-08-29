@@ -9,15 +9,19 @@ import 'package:native_toolchain_c/native_toolchain_c.dart';
 
 void main(List<String> args) async {
   await build(args, (input, output) async {
+    if (!input.config.buildCodeAssets) {
+      // Don't build any other asset types.
+      return;
+    }
     final os = input.config.code.targetOS;
-    
+
     if (os == OS.windows) {
       print('libdivecomputer: Skipping build on Window');
       return;
     }
 
     final excludes = ['serial_win32.c', 'usbhid.c'];
-    final libdir = await Glob('libdivecomputer-*').list().map((s) => s.path).first;
+    final libdir = await Glob('libdivecomputer-git').list().map((s) => s.path).first;
     final libsources = await Glob('$libdir/src/*.c').list().where((f) => !excludes.contains(f.basename)).map((s) => s.path).toList();
     libsources.sort();
 
@@ -31,6 +35,7 @@ void main(List<String> args) async {
       configH.copySync('$libdir/config.h');
       defines['HAVE_CONFIG_H'] = '1';
     }
+    File('version.h').copySync('$libdir/include/libdivecomputer/version.h');
 
     final cbuilder = CBuilder.library(
       name: packageName,

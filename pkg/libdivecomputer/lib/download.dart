@@ -22,13 +22,25 @@ class BleCharacteristics {
 }
 
 /// Progress information during download.
+///
+/// libdivecomputer reports a raw (current, maximum) pair whose scale is
+/// device specific (byte counts, per-record units or file counts), and the
+/// maximum may be adjusted as the device reveals how much data it actually
+/// holds. Treat both values as opaque.
 class DownloadProgress {
   final int current;
   final int maximum;
 
   const DownloadProgress(this.current, this.maximum);
 
-  double get fraction => maximum > 0 ? current / maximum : 0;
+  /// The initial maximum used by libdivecomputer before a total is known.
+  static const int indeterminateMaximum = 0xFFFFFFFF;
+
+  /// Whether no meaningful total has been reported yet.
+  bool get indeterminate => maximum == 0 || maximum >= indeterminateMaximum;
+
+  /// Progress as a fraction in [0, 1], or 0 when no total is known.
+  double get fraction => indeterminate ? 0 : (current / maximum).clamp(0.0, 1.0);
 
   @override
   String toString() => '$current / $maximum';

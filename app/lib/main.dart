@@ -19,14 +19,12 @@ import 'src/connect/ble_scan_bloc.dart';
 import 'src/connect/connect_screen.dart';
 import 'src/dives_sites/dive_details_bloc.dart';
 import 'src/dives_sites/dive_details_screen.dart';
-import 'src/dives_sites/dive_edit_screen.dart';
 import 'src/dives_sites/dive_list_bloc.dart';
 import 'src/dives_sites/dive_list_screen.dart';
 import 'src/dives_sites/fullscreen_map_screen.dart';
 import 'src/dives_sites/fullscreen_profile_screen.dart';
 import 'src/dives_sites/site_details_bloc.dart';
 import 'src/dives_sites/site_details_screen.dart';
-import 'src/dives_sites/site_edit_screen.dart';
 import 'src/dives_sites/site_list_screen.dart';
 import 'src/equipment/certification_details_bloc.dart';
 import 'src/equipment/certification_details_screen.dart';
@@ -54,10 +52,12 @@ import 'src/preferences/window_preferences.dart';
 import 'src/providers/storage_provider.dart';
 import 'src/services/licenses.dart';
 import 'src/services/log_buffer.dart';
+import 'src/statistics/statistics_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _initLogging();
+  initialiseTimeZones();
   registerAdditionalLicenses();
   await PreferencesStore.instance.init();
   await StorageProvider.instance.init();
@@ -146,6 +146,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
               (icon: Icons.water_outlined, label: 'Dives'),
               (icon: Icons.location_on_outlined, label: 'Sites'),
               (icon: Icons.inventory_2_outlined, label: 'Equipment'),
+              (icon: Icons.insights_outlined, label: 'Statistics'),
               (icon: Icons.settings, label: 'Preferences'),
               if (platformSupportsConnect) (icon: Icons.bluetooth, label: 'Connect'),
             ];
@@ -209,7 +210,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       builder: (context, state) {
                         return BlocProvider(
                           create: (_) => DiveDetailsBloc()..add(DiveDetailsEvent.newDive()),
-                          child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const DiveEditScreen()),
+                          child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const DiveDetailsScreen()),
                         );
                       },
                     ),
@@ -222,18 +223,6 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const DiveDetailsScreen()),
                         );
                       },
-                      routes: [
-                        GoRoute(
-                          path: AppRoutePath.divesDetailsEdit,
-                          name: AppRouteName.divesDetailsEdit,
-                          builder: (context, state) {
-                            return BlocProvider(
-                              create: (_) => DiveDetailsBloc()..add(DiveDetailsEvent.loadDive(state.pathParameters['diveID']!)),
-                              child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const DiveEditScreen()),
-                            );
-                          },
-                        ),
-                      ],
                     ),
                   ],
                 ),
@@ -263,7 +252,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       builder: (context, state) {
                         return BlocProvider(
                           create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.newSite()),
-                          child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const SiteEditScreen()),
+                          child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const SiteDetailsScreen()),
                         );
                       },
                     ),
@@ -276,18 +265,6 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const SiteDetailsScreen()),
                         );
                       },
-                      routes: [
-                        GoRoute(
-                          path: AppRoutePath.sitesDetailsEdit,
-                          name: AppRouteName.sitesDetailsEdit,
-                          builder: (context, state) {
-                            return BlocProvider(
-                              create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.loadSite(state.pathParameters['siteID']!)),
-                              child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const SiteEditScreen()),
-                            );
-                          },
-                        ),
-                      ],
                     ),
                   ],
                 ),
@@ -382,6 +359,9 @@ class _MyAppState extends State<MyApp> with WindowListener {
                   ],
                 ),
               ],
+            ),
+            StatefulShellBranch(
+              routes: <RouteBase>[GoRoute(path: AppRoutePath.statistics, name: AppRouteName.statistics, builder: (context, state) => const StatisticsScreen())],
             ),
             StatefulShellBranch(
               routes: <RouteBase>[

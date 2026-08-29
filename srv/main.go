@@ -12,18 +12,18 @@ import (
 	"github.com/alecthomas/kong"
 
 	"bubbletrail.net/srv/internal/email"
-	"bubbletrail.net/srv/internal/minio"
+	"bubbletrail.net/srv/internal/rgw"
 )
 
 //go:embed static
 var staticFiles embed.FS
 
 var cli struct {
-	Endpoint       string `help:"MinIO endpoint" env:"MINIO_ENDPOINT" required:""`
-	AccessKey      string `help:"MinIO admin access key" env:"MINIO_ACCESS_KEY" required:""`
-	SecretKey      string `help:"MinIO admin secret key" env:"MINIO_SECRET_KEY" required:""`
-	UseSSL         bool   `help:"Use SSL for MinIO connection" env:"MINIO_USE_SSL" default:"true"`
-	BucketQuotaMiB int    `help:"Bucket quota in MiB (0 to disable)" env:"MINIO_BUCKET_QUOTA_MiB" default:"256"`
+	Endpoint       string `help:"Ceph object gateway base URL" env:"RGW_ENDPOINT" required:""`
+	AccessKey      string `help:"Gateway admin access key" env:"RGW_ACCESS_KEY" required:""`
+	SecretKey      string `help:"Gateway admin secret key" env:"RGW_SECRET_KEY" required:""`
+	Region         string `help:"Region used for request signing" env:"RGW_REGION" default:"us-east-1"`
+	BucketQuotaMiB int    `help:"Bucket quota in MiB (0 to disable)" env:"RGW_BUCKET_QUOTA_MiB" default:"256"`
 	AdminToken     string `help:"Bearer token for admin API endpoints" env:"ADMIN_TOKEN" required:""`
 	MailgunDomain  string `help:"Mailgun domain" env:"MAILGUN_DOMAIN" required:""`
 	MailgunAPIKey  string `help:"Mailgun API key" env:"MAILGUN_API_KEY" required:""`
@@ -37,15 +37,15 @@ type newUserRequest struct {
 func main() {
 	kong.Parse(&cli)
 
-	minioClient, err := minio.NewClient(cli.Endpoint, cli.AccessKey, cli.SecretKey, cli.UseSSL)
+	storageClient, err := rgw.NewClient(cli.Endpoint, cli.AccessKey, cli.SecretKey, cli.Region)
 	if err != nil {
-		slog.Error("failed to create minio client", "error", err)
+		slog.Error("failed to create storage client", "error", err)
 		os.Exit(1)
 	}
 
 	emailClient := email.NewClient(cli.MailgunDomain, cli.MailgunAPIKey, cli.MailgunFrom)
 
-	srv := server{minio: minioClient, email: emailClient, quotaMiB: cli.BucketQuotaMiB}
+	srv := server{storage: storageClient, email: emailClient, quotaMiB: cli.BucketQuotaMiB}
 	http.HandleFunc("POST /account/new", srv.newAccount)
 	http.HandleFunc("DELETE /account/{email}", srv.deleteAccount)
 
@@ -65,7 +65,7 @@ func main() {
 }
 
 type server struct {
-	minio    *minio.Client
+	storage  *rgw.Client
 	email    *email.Client
 	quotaMiB int
 }
@@ -82,7 +82,7 @@ func (s *server) newAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := s.minio.CreateUser(r.Context(), req.Email, s.quotaMiB<<20)
+	result, err := s.storage.CreateUser(r.Context(), req.Email, s.quotaMiB<<20)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -115,7 +115,7 @@ func (s *server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := s.minio.DeleteUser(r.Context(), email)
+	err := s.storage.DeleteUser(r.Context(), email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

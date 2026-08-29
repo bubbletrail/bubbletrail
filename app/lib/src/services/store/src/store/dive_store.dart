@@ -36,7 +36,7 @@ class DiveStore with ChangeNotifier {
       dive = dive.rebuild((dive) {
         dive.clearSyncedEtag();
         if (!dive.hasId()) {
-          dive.id = Uuid().v4().toString();
+          dive.id = Uuid().v7().toString();
         }
         dive.meta = dive.meta.rebuild((meta) {
           meta.updatedAt = Timestamp.fromDateTime(DateTime.now());
@@ -67,10 +67,36 @@ class DiveStore with ChangeNotifier {
   }
 
   Future<void> update(Dive dive) async {
+    _applyUpdate(dive);
+    notifyListeners();
+  }
+
+  // Bulk variant of [update] that notifies listeners once for the whole batch,
+  // so mass edits don't trigger a reload per dive.
+  Future<void> updateAll(Iterable<Dive> dives) async {
+    if (dives.isEmpty) return;
+    for (final dive in dives) {
+      _applyUpdate(dive);
+    }
+    notifyListeners();
+  }
+
+  void _applyUpdate(Dive dive) {
+    // An update carries a fresh updatedAt and no deletedAt, so writing one for
+    // a dive that has since been deleted would silently bring it back. That
+    // happens for real: deleting a dive kicks off a reload, and work already in
+    // flight on the old dive list (the tissue recalculation) then writes back
+    // the dive we just deleted. Dropping the stale write is safe -- insertAll
+    // is the path that deliberately undeletes a dive.
+    if (_dives[dive.id]?.meta.isDeleted == true) {
+      _log.fine('ignoring update of deleted dive ${dive.id}');
+      return;
+    }
+
     if (!dive.isFrozen) dive.freeze();
     dive = dive.rebuild((dive) {
       if (dive.id.isEmpty) {
-        dive.id = Uuid().v4().toString();
+        dive.id = Uuid().v7().toString();
       }
       dive.meta = dive.meta.rebuildUpdated();
       dive.clearSyncedEtag();
@@ -79,7 +105,6 @@ class DiveStore with ChangeNotifier {
     _tags.addAll(dive.tags);
     _buddies.addAll(dive.buddies);
     _scheduleSave(dive.id);
-    notifyListeners();
   }
 
   Future<void> delete(String id) async {
@@ -242,7 +267,9 @@ class DiveStore with ChangeNotifier {
       seenEtags[id] = obj.eTag;
 
       final cur = _dives[id];
-      if (cur != null && cur.syncedEtag == obj.eTag) {
+      // A blank eTag is our "not synced" marker, so it never counts as a match
+      // however blank the other side is.
+      if (cur != null && cur.syncedEtag.isNotEmpty && cur.syncedEtag == obj.eTag) {
         // Identical, no change required
         continue;
       }
@@ -264,13 +291,24 @@ class DiveStore with ChangeNotifier {
         _dives[id] = dive;
         _scheduleSave(id);
         notifyListeners();
+      } else if (!cur.meta.isAfter(dive.meta)) {
+        // Neither side is newer, so this is our own dive coming back with a
+        // different eTag. That's the normal case, not an anomaly: objects are
+        // encrypted with a fresh nonce on every upload, so the same dive
+        // uploaded twice never has the same eTag. Adopt what's out there --
+        // otherwise the upload loop below pushes our copy straight back, the
+        // peer sees an eTag it doesn't recognise and pushes it back to us, and
+        // the two of us keep rewriting an unchanged dive forever.
+        _log.fine('adopting eTag for unchanged dive $id');
+        _dives[id] = cur.rebuild((d) => d.syncedEtag = obj.eTag);
+        _scheduleSave(id);
       }
     }
 
     // Upload all dives with mismatched eTags. This will include the dives
     // we didn't import above because they were older than what we had.
     for (final dive in _dives.values) {
-      if (seenEtags[dive.id] == dive.syncedEtag) continue;
+      if (dive.syncedEtag.isNotEmpty && seenEtags[dive.id] == dive.syncedEtag) continue;
       _log.fine('updating dive ${dive.id} in sync provider');
       final fullDive = await getById(dive.id);
       final data = fullDive!.rebuild((dive) {
@@ -284,6 +322,12 @@ class DiveStore with ChangeNotifier {
     }
 
     _rebuildTags();
+
+    // Flush now rather than on the debounce timer. The eTags we just recorded
+    // are what keeps the next sync quiet, and losing them to an app that's
+    // killed a second later means uploading everything again.
+    _saveTimer?.cancel();
+    await _save();
   }
 
   String _diveDir(Dive dive) => "$pathPrefix/${DateFormat('yyyy-MM').format(dive.meta.createdAt.toDateTime())}";

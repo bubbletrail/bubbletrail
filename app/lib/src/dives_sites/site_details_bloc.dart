@@ -7,6 +7,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
+import 'package:uuid/uuid.dart';
 
 import '../common/details_state.dart';
 import '../providers/storage_provider.dart';
@@ -54,8 +55,7 @@ sealed class SiteDetailsEvent extends Equatable {
 
   const factory SiteDetailsEvent.newSite() = _NewSite;
   const factory SiteDetailsEvent.loadSite(String siteId) = _LoadSite;
-  const factory SiteDetailsEvent.close() = _Close;
-  const factory SiteDetailsEvent.saveAndClose(Site site) = _SaveAndClose;
+  const factory SiteDetailsEvent.save(Site site) = _Save;
   const factory SiteDetailsEvent.deleteAndClose(String siteID) = _DeleteAndClose;
 }
 
@@ -69,14 +69,10 @@ class _LoadSite extends SiteDetailsEvent {
   const _LoadSite(this.siteId);
 }
 
-class _Close extends SiteDetailsEvent {
-  const _Close();
-}
-
-class _SaveAndClose extends SiteDetailsEvent {
+class _Save extends SiteDetailsEvent {
   final Site site;
 
-  const _SaveAndClose(this.site);
+  const _Save(this.site);
 }
 
 class _DeleteAndClose extends SiteDetailsEvent {
@@ -94,15 +90,19 @@ class SiteDetailsBloc extends Bloc<SiteDetailsEvent, SiteDetailsState> {
     on<SiteDetailsEvent>((event, emit) async {
       switch (event) {
         case _NewSite():
-          emit(SiteDetailsLoaded(Site()..freeze()));
+          // Give the site a stable id up front so inline edits can save it, but
+          // don't persist until the first edit — an untouched new site that's
+          // navigated away from leaves nothing behind.
+          emit(SiteDetailsLoaded(Site(id: Uuid().v7())..freeze()));
         case _LoadSite():
           await _onLoadSite(event, emit);
-        case _Close():
-          emit(SiteDetailsClosed());
-        case _SaveAndClose():
+        case _Save():
+          // Persist without closing, then reload so the view updates in place
+          // (and the storage listener is registered for a first-time save of a
+          // newly created site).
           await _store.sites.update(event.site);
           _log.fine('saved ${event.site.name}');
-          emit(SiteDetailsClosed());
+          await _onLoadSite(_LoadSite(event.site.id), emit);
         case _DeleteAndClose():
           await _store.deleteSite(event.siteID);
           _log.fine('deleted ${event.siteID}');

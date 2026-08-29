@@ -40,6 +40,7 @@ abstract class EquipmentListEvent extends Equatable {
 
   const factory EquipmentListEvent.importEquipment(String filePath) = _ImportEquipment;
   const factory EquipmentListEvent.toggleShowArchived() = _ToggleShowArchived;
+  const factory EquipmentListEvent.setDefaults(Set<String> selectedIds) = _SetDefaults;
 
   @override
   List<Object?> get props => [];
@@ -71,6 +72,15 @@ class _ToggleShowArchived extends EquipmentListEvent {
   const _ToggleShowArchived();
 }
 
+class _SetDefaults extends EquipmentListEvent {
+  final Set<String> selectedIds;
+
+  const _SetDefaults(this.selectedIds);
+
+  @override
+  List<Object?> get props => [selectedIds];
+}
+
 class EquipmentListBloc extends Bloc<EquipmentListEvent, EquipmentListState> {
   final Store _store = StorageProvider.instance.store;
   VoidCallback? _equipmentListener;
@@ -80,6 +90,7 @@ class EquipmentListBloc extends Bloc<EquipmentListEvent, EquipmentListState> {
     on<_LoadedEquipment>(_onLoadedEquipment);
     on<_ImportEquipment>(_onImportEquipment);
     on<_ToggleShowArchived>(_onToggleShowArchived);
+    on<_SetDefaults>(_onSetDefaults);
     add(const _Init());
   }
 
@@ -103,6 +114,18 @@ class EquipmentListBloc extends Bloc<EquipmentListEvent, EquipmentListState> {
     final currentState = state;
     if (currentState is EquipmentListLoaded) {
       emit(EquipmentListLoaded(currentState.equipment, showArchived: !currentState.showArchived));
+    }
+  }
+
+  // Makes exactly the given equipment the default set for new dives: the flag
+  // is set on the selected equipment and cleared from everything else.
+  Future<void> _onSetDefaults(_SetDefaults event, Emitter<EquipmentListState> emit) async {
+    final all = await _store.equipment.getAll();
+    for (final eq in all) {
+      final shouldBeDefault = event.selectedIds.contains(eq.id);
+      if (eq.defaultForNewDives != shouldBeDefault) {
+        await _store.equipment.update(eq.rebuild((e) => e.defaultForNewDives = shouldBeDefault));
+      }
     }
   }
 

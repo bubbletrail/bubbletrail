@@ -161,51 +161,6 @@ class PressureEditor extends StatelessWidget {
   }
 }
 
-class VolumeEditor extends StatelessWidget {
-  final String label;
-  final double? initialValue;
-  final ValueChanged<double?>? onChanged;
-  final String? hintText;
-
-  const VolumeEditor({super.key, required this.label, this.initialValue, this.onChanged, this.hintText});
-
-  static double _fromMetric(double value, VolumeUnit unit) {
-    return switch (unit) {
-      .liters => value,
-      .cuft => value * litersToCuft,
-    };
-  }
-
-  static double _toMetric(double value, VolumeUnit unit) {
-    return switch (unit) {
-      .liters => value,
-      .cuft => value / litersToCuft,
-    };
-  }
-
-  static String _unitLabel(VolumeUnit unit) {
-    return switch (unit) {
-      .liters => 'L',
-      .cuft => 'cuft',
-    };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MeasurementEditor<VolumeUnit>(
-      label: label,
-      initialValue: initialValue,
-      units: VolumeUnit.values,
-      unitLabel: _unitLabel,
-      fromMetric: _fromMetric,
-      toMetric: _toMetric,
-      getPreferredUnit: (prefs) => prefs.volumeUnit,
-      onChanged: onChanged,
-      hintText: hintText,
-    );
-  }
-}
-
 class WeightEditor extends StatelessWidget {
   final String label;
   final double? initialValue;

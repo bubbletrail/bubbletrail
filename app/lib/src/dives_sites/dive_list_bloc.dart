@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
-import 'package:xml/xml.dart';
 
 import '../services/store/store.dart';
 import '../providers/storage_provider.dart';
@@ -77,6 +76,7 @@ sealed class DiveListEvent extends Equatable {
   List<Object?> get props => [];
 
   const factory DiveListEvent.importDives(String filePath) = _ImportDives;
+  const factory DiveListEvent.renumberDives({required int startFrom}) = _RenumberDives;
 }
 
 class _LoadAll extends DiveListEvent {
@@ -92,6 +92,15 @@ class _ImportDives extends DiveListEvent {
   List<Object?> get props => [filePath];
 }
 
+class _RenumberDives extends DiveListEvent {
+  final int startFrom;
+
+  const _RenumberDives({required this.startFrom});
+
+  @override
+  List<Object?> get props => [startFrom];
+}
+
 class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
   final _store = StorageProvider.instance.store;
   late final VoidCallback _divesListener;
@@ -104,6 +113,8 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
           await _onLoadDives(emit);
         case _ImportDives():
           await _onImportDives(event, emit);
+        case _RenumberDives():
+          await _onRenumberDives(event.startFrom);
       }
     }, transformer: sequential());
 
@@ -116,10 +127,13 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
 
   Future<void> _onLoadDives(Emitter<DiveListState> emit) async {
     var dives = await _store.dives.getAll();
-    final sites = await _store.sites.getAll();
+    var sites = await _store.sites.getAll();
 
     // Calculate tissues for dives that are missing them
     dives = await _calculateMissingTissues(dives);
+
+    // Derive positions for sites that don't have one from their dives
+    sites = await _calculateMissingSitePositions(sites, dives);
 
     final currentState = state;
     if (currentState is DiveListLoaded) {
@@ -187,7 +201,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
             } else {
               d.clearStartTissues();
             }
-            d.endTissues = tissueStateToProto(endTissues, diveEnd, Uuid().v4().toString());
+            d.endTissues = tissueStateToProto(endTissues, diveEnd, Uuid().v7().toString());
             d.endSurfGf = surfGF;
           });
           await _store.dives.update(updatedDive);
@@ -207,21 +221,74 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     return dives.map((d) => updatedDives[d.id] ?? d).toList();
   }
 
+  // Derive and persist a position for any site that doesn't have one, by
+  // averaging the start and end positions of the dives tagged to that site.
+  Future<List<Site>> _calculateMissingSitePositions(List<Site> sites, List<Dive> dives) async {
+    final updatedSites = <String, Site>{};
+
+    for (final site in sites) {
+      if (site.hasPosition()) continue;
+
+      // Accumulate all available dive positions for this site. List dives have
+      // their logs cleared, so load the full dive to reach the log positions.
+      var latSum = 0.0, lonSum = 0.0, altSum = 0.0;
+      var count = 0, altCount = 0;
+
+      for (final dive in dives.where((d) => d.hasSiteId() && d.siteId == site.id)) {
+        final fullDive = await _store.diveById(dive.id);
+        if (fullDive == null) continue;
+        for (final log in fullDive.logs) {
+          for (final pos in [if (log.hasStartPosition()) log.startPosition, if (log.hasEndPosition()) log.endPosition]) {
+            latSum += pos.latitude;
+            lonSum += pos.longitude;
+            count++;
+            if (pos.hasAltitude()) {
+              altSum += pos.altitude;
+              altCount++;
+            }
+          }
+        }
+      }
+
+      if (count == 0) continue;
+
+      _log.fine('derive position for site ${site.id} from $count dive positions');
+      final updatedSite = site.rebuild((s) {
+        s.position = Position(latitude: latSum / count, longitude: lonSum / count, altitude: altCount > 0 ? altSum / altCount : null);
+      });
+      await _store.sites.update(updatedSite);
+      updatedSites[site.id] = updatedSite;
+    }
+
+    // Return updated site list
+    if (updatedSites.isEmpty) return sites;
+    return sites.map((s) => updatedSites[s.id] ?? s).toList();
+  }
+
   Future<void> _onImportDives(_ImportDives event, Emitter<DiveListState> emit) async {
     final currentState = state as DiveListLoaded;
     emit(DiveListLoading());
 
     // Read the import file
     final importedDoc = await compute((path) async {
-      final xmlData = await File(path).readAsString();
-      final doc = XmlDocument.parse(xmlData);
-      return importXml(doc);
+      final data = await File(path).readAsString();
+      return importString(data);
     }, event.filePath);
 
     // Merge dive sites: only add new ones (check by uuid)
     final existingSiteUuids = currentState.sites.map((s) => s.id).toSet();
     final newSites = importedDoc.sites.where((s) => !existingSiteUuids.contains(s.id)).toList();
     await _store.sites.updateAll(newSites);
+
+    // Assign dive numbers to imported dives that don't carry one (e.g. Suunto
+    // JSON has no dive number field). Formats that do provide a number (UDDF,
+    // MacDive) keep theirs. Numbering is chronological, like Bluetooth downloads.
+    final unnumbered = importedDoc.dives.where((d) => d.number == 0).toList()..sort((a, b) => a.start.seconds.compareTo(b.start.seconds));
+    var nextNumber = await _store.dives.nextDiveNo;
+    for (final dive in unnumbered) {
+      dive.number = nextNumber;
+      nextNumber++;
+    }
 
     // Load default cylinders for assignment
     final defaultBackgas = await _store.cylinders.getDefaultForBackgas();
@@ -279,6 +346,31 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
 
     // Reload overview list after update
     add(_LoadAll());
+  }
+
+  // Renumber every dive sequentially from [startFrom], in chronological order.
+  Future<void> _onRenumberDives([int startFrom = 1]) async {
+    final dives = await _store.dives.getAll();
+    final chronological = List<Dive>.from(dives)
+      ..sort((a, b) {
+        final byStart = a.start.seconds.compareTo(b.start.seconds);
+        return byStart != 0 ? byStart : a.number.compareTo(b.number);
+      });
+
+    final renumbered = <Dive>[];
+    for (final (idx, dive) in chronological.indexed) {
+      final newNumber = startFrom + idx;
+      if (dive.number == newNumber) continue;
+      renumbered.add(dive.rebuild((d) => d.number = newNumber));
+    }
+
+    if (renumbered.isEmpty) {
+      _log.fine('renumbering: all ${dives.length} dives already numbered correctly');
+      return;
+    }
+
+    _log.info('renumbering ${renumbered.length} of ${dives.length} dives');
+    await _store.dives.updateAll(renumbered);
   }
 
   @override

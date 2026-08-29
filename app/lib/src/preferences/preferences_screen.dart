@@ -21,6 +21,8 @@ import '../common/common.dart';
 import '../services/log_buffer.dart';
 import 'preferences_widgets.dart';
 
+final _log = Logger('preferences_screen.dart');
+
 class PreferencesScreen extends StatelessWidget {
   const PreferencesScreen({super.key});
 
@@ -102,6 +104,7 @@ class PreferencesScreen extends StatelessWidget {
                               icon: Icon(Icons.update_outlined),
                               label: Text('Check for updates'),
                             ),
+                          OutlinedButton.icon(onPressed: () => _renumberDives(context), icon: Icon(Icons.format_list_numbered), label: Text('Renumber dives')),
                           OutlinedButton.icon(
                             onPressed: () => _resetDatabase(context),
                             style: OutlinedButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
@@ -159,6 +162,54 @@ class PreferencesScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _renumberDives(BuildContext context) async {
+    int startFrom = 1;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Renumber dives'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('This will renumber all dives sequentially, in chronological order, replacing any existing dive numbers.'),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Text('Start from:'),
+                  const SizedBox(width: 16),
+                  SizedBox(
+                    width: 80,
+                    child: TextFormField(
+                      initialValue: '1',
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(hintText: '1'),
+                      onChanged: (value) {
+                        final parsed = int.tryParse(value);
+                        if (parsed != null && parsed > 0) {
+                          startFrom = parsed;
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancel')),
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Renumber dives')),
+          ],
+        ),
+      ),
+    );
+    if (!(confirmed ?? false) || !context.mounted) return;
+
+    context.read<DiveListBloc>().add(DiveListEvent.renumberDives(startFrom: startFrom));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Renumbering dives...')));
   }
 
   Future<void> _resetDatabase(BuildContext context) async {
@@ -290,19 +341,30 @@ class _LogLine extends StatelessWidget {
 class _ImportExportButtons extends StatelessWidget {
   Future<void> _showSaveDialog(BuildContext context, ArchiveState state) async {
     final archiveBloc = context.read<ArchiveBloc>();
+    final fileName = state.exportReadyFilename ?? 'bubbletrail.$backupFileExtension';
 
-    final bytes = await File(state.exportReadyPath!).readAsBytes();
-    final result = await FilePicker.saveFile(
-      bytes: bytes,
-      dialogTitle: 'Export backup',
-      fileName: state.exportReadyFilename ?? 'bubbletrail.$backupFileExtension',
-      type: FileType.custom,
-    );
+    try {
+      final bytes = await File(state.exportReadyPath!).readAsBytes();
+      // FileType.custom requires a non-empty extension list, otherwise
+      // file_picker throws before showing the dialog.
+      final extension = fileName.split('.').last;
+      final name = fileName.substring(0, fileName.length - extension.length - 1);
+      final result = await FilePicker.saveFile(
+        bytes: bytes,
+        dialogTitle: 'Export backup',
+        fileName: name,
+        type: FileType.custom,
+        allowedExtensions: [extension],
+      );
 
-    if (result != null) {
-      archiveBloc.add(ArchiveEvent.exportComplete(result));
-    } else {
-      archiveBloc.add(ArchiveEvent.exportCancelled());
+      if (result != null) {
+        archiveBloc.add(ArchiveEvent.exportComplete(result));
+      } else {
+        archiveBloc.add(ArchiveEvent.exportCancelled());
+      }
+    } catch (e) {
+      _log.severe('failed to show save dialog', e);
+      archiveBloc.add(ArchiveEvent.exportFailed(e.toString()));
     }
   }
 
@@ -328,7 +390,7 @@ class _ImportExportButtons extends StatelessWidget {
   }
 
   Future<void> _importDives(BuildContext context) async {
-    final result = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: ['ssrf', 'xml']);
+    final result = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: ['ssrf', 'xml', 'json']);
     if (result == null || result.files.single.path == null) return;
     if (!context.mounted) return;
 

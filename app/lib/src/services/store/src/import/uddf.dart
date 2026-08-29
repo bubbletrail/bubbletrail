@@ -148,7 +148,7 @@ extension UddfXml on Container {
 
 extension _UddfSite on Site {
   static Site fromXml(XmlElement elem) {
-    final id = elem.getAttribute('id') ?? const Uuid().v4();
+    final id = elem.getAttribute('id') ?? const Uuid().v7();
     final name = _getElementText(elem, 'name') ?? '';
 
     final geography = elem.getElement('geography');
@@ -194,7 +194,7 @@ extension _UddfSite on Site {
 
 extension _UddfDive on Dive {
   static Dive fromXml(XmlElement elem, Map<String, _GasMix> gasMixes, Map<String, _Buddy> buddies, Map<String, Site> sitesById) {
-    final diveId = elem.getAttribute('id') ?? const Uuid().v4();
+    final diveId = elem.getAttribute('id') ?? const Uuid().v7();
 
     final infoBefore = elem.getElement('informationbeforedive');
     final infoAfter = elem.getElement('informationafterdive');

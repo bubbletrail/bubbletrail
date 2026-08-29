@@ -21,7 +21,7 @@ jobs:
     if: github.repository == 'bubbletrail/bubbletrail'
     steps:
       - name: Clone repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-tags: true
           fetch-depth: 0
@@ -42,7 +42,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
 
       - name: Set up Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
@@ -68,7 +70,9 @@ jobs:
       - calver
     steps:
       - name: Clone repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
 
       - name: Set up Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
@@ -108,15 +112,15 @@ jobs:
       - name: rclone download
         if: needs.calver.outputs.release
         run: |
-          rclone sync minio:updates updates
+          rclone sync -v bubbletrail:updates updates
         env:
-          RCLONE_CONFIG_MINIO_TYPE: ${{ secrets.RCLONE_CONFIG_MINIO_TYPE }}
-          RCLONE_CONFIG_MINIO_PROVIDER: ${{ secrets.RCLONE_CONFIG_MINIO_PROVIDER }}
-          RCLONE_CONFIG_MINIO_ACCESS_KEY_ID: ${{ secrets.RCLONE_CONFIG_MINIO_ACCESS_KEY_ID }}
-          RCLONE_CONFIG_MINIO_SECRET_ACCESS_KEY: ${{ secrets.RCLONE_CONFIG_MINIO_SECRET_ACCESS_KEY }}
-          RCLONE_CONFIG_MINIO_REGION: ${{ secrets.RCLONE_CONFIG_MINIO_REGION }}
-          RCLONE_CONFIG_MINIO_ENDPOINT: ${{ secrets.RCLONE_CONFIG_MINIO_ENDPOINT }}
-          RCLONE_CONFIG_MINIO_ACL: ${{ secrets.RCLONE_CONFIG_MINIO_ACL }}
+          RCLONE_CONFIG_BUBBLETRAIL_TYPE: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_TYPE }}
+          RCLONE_CONFIG_BUBBLETRAIL_PROVIDER: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_PROVIDER }}
+          RCLONE_CONFIG_BUBBLETRAIL_ACCESS_KEY_ID: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_ACCESS_KEY_ID }}
+          RCLONE_CONFIG_BUBBLETRAIL_SECRET_ACCESS_KEY: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_SECRET_ACCESS_KEY }}
+          RCLONE_CONFIG_BUBBLETRAIL_REGION: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_REGION }}
+          RCLONE_CONFIG_BUBBLETRAIL_ENDPOINT: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_ENDPOINT }}
+          RCLONE_CONFIG_BUBBLETRAIL_ACL: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_ACL }}
 
       - name: Copy new package
         if: needs.calver.outputs.release
@@ -134,15 +138,15 @@ jobs:
       - name: rclone upload
         if: needs.calver.outputs.release
         run: |
-          rclone sync  -v --no-update-modtime updates minio:updates
+          rclone sync  -v --no-update-modtime updates bubbletrail:updates
         env:
-          RCLONE_CONFIG_MINIO_TYPE: ${{ secrets.RCLONE_CONFIG_MINIO_TYPE }}
-          RCLONE_CONFIG_MINIO_PROVIDER: ${{ secrets.RCLONE_CONFIG_MINIO_PROVIDER }}
-          RCLONE_CONFIG_MINIO_ACCESS_KEY_ID: ${{ secrets.RCLONE_CONFIG_MINIO_ACCESS_KEY_ID }}
-          RCLONE_CONFIG_MINIO_SECRET_ACCESS_KEY: ${{ secrets.RCLONE_CONFIG_MINIO_SECRET_ACCESS_KEY }}
-          RCLONE_CONFIG_MINIO_REGION: ${{ secrets.RCLONE_CONFIG_MINIO_REGION }}
-          RCLONE_CONFIG_MINIO_ENDPOINT: ${{ secrets.RCLONE_CONFIG_MINIO_ENDPOINT }}
-          RCLONE_CONFIG_MINIO_ACL: ${{ secrets.RCLONE_CONFIG_MINIO_ACL }}
+          RCLONE_CONFIG_BUBBLETRAIL_TYPE: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_TYPE }}
+          RCLONE_CONFIG_BUBBLETRAIL_PROVIDER: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_PROVIDER }}
+          RCLONE_CONFIG_BUBBLETRAIL_ACCESS_KEY_ID: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_ACCESS_KEY_ID }}
+          RCLONE_CONFIG_BUBBLETRAIL_SECRET_ACCESS_KEY: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_SECRET_ACCESS_KEY }}
+          RCLONE_CONFIG_BUBBLETRAIL_REGION: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_REGION }}
+          RCLONE_CONFIG_BUBBLETRAIL_ENDPOINT: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_ENDPOINT }}
+          RCLONE_CONFIG_BUBBLETRAIL_ACL: ${{ secrets.RCLONE_CONFIG_BUBBLETRAIL_ACL }}
 
   build-ios:
     name: Build for iOS (Appstore) (${{ needs.calver.outputs.version}} ${{ github.run_number }})
@@ -152,7 +156,9 @@ jobs:
       - calver
     steps:
       - name: Clone repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
 
       - name: Set up Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
@@ -206,7 +212,9 @@ jobs:
       - calver
     steps:
       - name: Clone repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
 
       - name: Set up Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
@@ -269,7 +277,9 @@ jobs:
       - calver
     steps:
       - name: Clone repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
 
       - name: Set up Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
@@ -308,7 +318,7 @@ jobs:
           name: android
           path: app/bubbletrail*.aab
 
-      - uses: ruby/setup-ruby@afeafc3d1ab54a631816aba4c914a0081c12ff2f # v1
+      - uses: ruby/setup-ruby@003a5c4d8d6321bd302e38f6f0ec593f77f06600 # v1
         if: needs.calver.outputs.release
         with:
           ruby-version: 3.3.8
@@ -338,7 +348,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260 # v1
       - uses: ./.github/actions/build-info
@@ -374,9 +384,9 @@ jobs:
       - test
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: stable
 
@@ -385,10 +395,10 @@ jobs:
           pushd srv
           go test ./...
 
-      - uses: ko-build/setup-ko@d006021bd0c28d1ce33a07e7943d48b079944c8d # v0.9
+      - uses: ko-build/setup-ko@61b4d1d396f5b2e7d6bb6fefdce3dc38d1a13445 # v0.10
 
       - name: Log in to GHCR
-        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
