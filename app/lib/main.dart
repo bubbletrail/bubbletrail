@@ -52,6 +52,7 @@ import 'src/preferences/window_preferences.dart';
 import 'src/providers/storage_provider.dart';
 import 'src/services/licenses.dart';
 import 'src/services/log_buffer.dart';
+import 'src/statistics/statistics_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -145,6 +146,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
               (icon: Icons.water_outlined, label: 'Dives'),
               (icon: Icons.location_on_outlined, label: 'Sites'),
               (icon: Icons.inventory_2_outlined, label: 'Equipment'),
+              (icon: Icons.insights_outlined, label: 'Statistics'),
               (icon: Icons.settings, label: 'Preferences'),
               if (platformSupportsConnect) (icon: Icons.bluetooth, label: 'Connect'),
             ];
@@ -357,6 +359,9 @@ class _MyAppState extends State<MyApp> with WindowListener {
                   ],
                 ),
               ],
+            ),
+            StatefulShellBranch(
+              routes: <RouteBase>[GoRoute(path: AppRoutePath.statistics, name: AppRouteName.statistics, builder: (context, state) => const StatisticsScreen())],
             ),
             StatefulShellBranch(
               routes: <RouteBase>[

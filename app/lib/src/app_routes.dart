@@ -22,6 +22,8 @@ abstract class AppRouteName {
   static const certificationsDetailsEdit = 'certification-edit';
   static const certificationsNew = 'new-certification';
 
+  static const statistics = 'statistics';
+
   static const preferences = 'preferences';
   static const units = 'units';
   static const divePreferences = 'dive-preferences';
@@ -55,6 +57,8 @@ abstract class AppRoutePath {
   static const certificationsDetails = ':certificationID';
   static const certificationsDetailsEdit = 'edit';
   static const certificationsNew = 'new';
+
+  static const statistics = '/statistics';
 
   static const preferences = '/preferences';
   static const units = 'units';
