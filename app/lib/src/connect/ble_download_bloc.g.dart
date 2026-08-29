@@ -98,7 +98,6 @@ class _$BleDownloadStateCWProxyImpl implements _$BleDownloadStateCWProxy {
     ComputerDescriptor? autoStartDescriptor,
   ) => call(autoStartDescriptor: autoStartDescriptor);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `BleDownloadState(...).copyWith.fieldName(value)`.
   ///
@@ -106,6 +105,7 @@ class _$BleDownloadStateCWProxyImpl implements _$BleDownloadStateCWProxy {
   /// ```dart
   /// BleDownloadState(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   BleDownloadState call({
     Object? connectedDevice = const $CopyWithPlaceholder(),
     Object? connectionState = const $CopyWithPlaceholder(),

@@ -83,7 +83,6 @@ class _$BleScanStateCWProxyImpl implements _$BleScanStateCWProxy {
   @override
   BleScanState error(String? error) => call(error: error);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `BleScanState(...).copyWith.fieldName(value)`.
   ///
@@ -91,6 +90,7 @@ class _$BleScanStateCWProxyImpl implements _$BleScanStateCWProxy {
   /// ```dart
   /// BleScanState(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   BleScanState call({
     Object? adapterState = const $CopyWithPlaceholder(),
     Object? supportedComputers = const $CopyWithPlaceholder(),
