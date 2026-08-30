@@ -142,13 +142,18 @@ class _MyAppState extends State<MyApp> with WindowListener {
         StatefulShellRoute.indexedStack(
           builder: (BuildContext context, GoRouterState state, StatefulNavigationShell shell) {
             final appBarTheme = Theme.of(context).appBarTheme;
-            final destinations = [
-              (icon: Icons.water_outlined, label: 'Dives'),
-              (icon: Icons.location_on_outlined, label: 'Sites'),
-              (icon: Icons.inventory_2_outlined, label: 'Equipment'),
-              (icon: Icons.insights_outlined, label: 'Statistics'),
-              (icon: Icons.settings, label: 'Preferences'),
-              if (platformSupportsConnect) (icon: Icons.bluetooth, label: 'Connect'),
+
+            // The branch field must match the order of the StatefulShellBranches below: top level
+            // destinations first, then the destinations that live in the overflow menu on mobile.
+            final topDestinations = [
+              (icon: Icons.water_outlined, label: 'Dives', branch: 0),
+              (icon: Icons.location_on_outlined, label: 'Sites', branch: 1),
+              (icon: Icons.inventory_2_outlined, label: 'Equipment', branch: 2),
+              if (platformSupportsConnect) (icon: Icons.bluetooth, label: 'Connect', branch: 3),
+            ];
+            final menuDestinations = [
+              (icon: Icons.insights_outlined, label: 'Statistics', branch: topDestinations.length),
+              (icon: Icons.settings, label: 'Preferences', branch: topDestinations.length + 1),
             ];
 
             final cs = Theme.of(context).colorScheme;
@@ -162,6 +167,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
             );
 
             if (platformIsMobile) {
+              final menuIndex = topDestinations.length;
               return Container(
                 decoration: decoration,
                 child: SafeArea(
@@ -170,9 +176,18 @@ class _MyAppState extends State<MyApp> with WindowListener {
                     body: shell,
                     bottomNavigationBar: NavigationBar(
                       backgroundColor: Colors.transparent,
-                      selectedIndex: shell.currentIndex,
-                      onDestinationSelected: (n) => shell.goBranch(n, initialLocation: n == shell.currentIndex),
-                      destinations: [for (final d in destinations) NavigationDestination(icon: Icon(d.icon), label: d.label)],
+                      selectedIndex: shell.currentIndex < menuIndex ? shell.currentIndex : menuIndex,
+                      onDestinationSelected: (n) {
+                        if (n == menuIndex) {
+                          _showOverflowMenu(context, shell, menuDestinations);
+                          return;
+                        }
+                        shell.goBranch(n, initialLocation: n == shell.currentIndex);
+                      },
+                      destinations: [
+                        for (final d in topDestinations) NavigationDestination(icon: Icon(d.icon), label: d.label),
+                        const NavigationDestination(icon: Icon(Icons.more), label: 'More'),
+                      ],
                     ),
                   ),
                 ),
@@ -189,7 +204,9 @@ class _MyAppState extends State<MyApp> with WindowListener {
                     selectedIndex: shell.currentIndex,
                     onDestinationSelected: (n) => shell.goBranch(n, initialLocation: n == shell.currentIndex),
                     leading: SizedBox(height: (appBarTheme.toolbarHeight ?? 48) - 8),
-                    destinations: [for (final d in destinations) NavigationRailDestination(icon: Icon(d.icon), label: Text(d.label))],
+                    destinations: [
+                      for (final d in [...topDestinations, ...menuDestinations]) NavigationRailDestination(icon: Icon(d.icon), label: Text(d.label)),
+                    ],
                   ),
                   Expanded(child: shell),
                 ],
@@ -360,6 +377,10 @@ class _MyAppState extends State<MyApp> with WindowListener {
                 ),
               ],
             ),
+            if (platformSupportsConnect)
+              StatefulShellBranch(
+                routes: <RouteBase>[GoRoute(path: AppRoutePath.connect, name: AppRouteName.connect, builder: (context, state) => ConnectScreen())],
+              ),
             StatefulShellBranch(
               routes: <RouteBase>[GoRoute(path: AppRoutePath.statistics, name: AppRouteName.statistics, builder: (context, state) => const StatisticsScreen())],
             ),
@@ -378,10 +399,6 @@ class _MyAppState extends State<MyApp> with WindowListener {
                 ),
               ],
             ),
-            if (platformSupportsConnect)
-              StatefulShellBranch(
-                routes: <RouteBase>[GoRoute(path: AppRoutePath.connect, name: AppRouteName.connect, builder: (context, state) => ConnectScreen())],
-              ),
           ],
         ),
         if (platformIsMobile) profileDetailRoute,
@@ -408,6 +425,29 @@ class _MyAppState extends State<MyApp> with WindowListener {
 
   @override
   void onWindowUnmaximize() => WindowPreferences.save();
+
+  void _showOverflowMenu(BuildContext context, StatefulNavigationShell shell, List<({IconData icon, String label, int branch})> items) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final item in items)
+              ListTile(
+                leading: Icon(item.icon),
+                title: Text(item.label),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  shell.goBranch(item.branch, initialLocation: shell.currentIndex == item.branch);
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 
   void _setupFileHandler() {
     _channel.setMethodCallHandler((call) async {
