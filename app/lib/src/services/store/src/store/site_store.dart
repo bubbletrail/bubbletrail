@@ -67,7 +67,7 @@ class SiteStore extends EntityStore<Site, InternalSiteList> {
     if (entity.timezone.isEmpty) {
       final zone = timeZoneForPosition(entity.hasPosition() ? entity.position : null);
       if (zone.isNotEmpty) {
-        entity = entity.rebuild((s) => s.timezone = zone);
+        entity = entity.deepCopy()..timezone = zone;
       }
     }
     final ret = await super.update(entity);

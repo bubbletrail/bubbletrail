@@ -269,83 +269,90 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     final currentState = state as DiveListLoaded;
     emit(DiveListLoading());
 
-    // Read the import file
-    final importedDoc = await compute((path) async {
-      final data = await File(path).readAsString();
-      return importString(data);
-    }, event.filePath);
+    try {
+      // Read the import file
+      final importedDoc = await compute((path) async {
+        final data = await File(path).readAsString();
+        return importString(data);
+      }, event.filePath);
 
-    // Merge dive sites: only add new ones (check by uuid)
-    final existingSiteUuids = currentState.sites.map((s) => s.id).toSet();
-    final newSites = importedDoc.sites.where((s) => !existingSiteUuids.contains(s.id)).toList();
-    await _store.sites.updateAll(newSites);
+      // Merge dive sites: only add new ones (check by uuid)
+      final existingSiteUuids = currentState.sites.map((s) => s.id).toSet();
+      final newSites = importedDoc.sites.where((s) => !existingSiteUuids.contains(s.id)).toList();
+      await _store.sites.updateAll(newSites);
 
-    // Assign dive numbers to imported dives that don't carry one (e.g. Suunto
-    // JSON has no dive number field). Formats that do provide a number (UDDF,
-    // MacDive) keep theirs. Numbering is chronological, like Bluetooth downloads.
-    final unnumbered = importedDoc.dives.where((d) => d.number == 0).toList()..sort((a, b) => a.start.seconds.compareTo(b.start.seconds));
-    var nextNumber = await _store.dives.nextDiveNo;
-    for (final dive in unnumbered) {
-      dive.number = nextNumber;
-      nextNumber++;
-    }
+      // Assign dive numbers to imported dives that don't carry one (e.g. Suunto
+      // JSON has no dive number field). Formats that do provide a number (UDDF,
+      // MacDive) keep theirs. Numbering is chronological, like Bluetooth downloads.
+      final unnumbered = importedDoc.dives.where((d) => d.number == 0).toList()..sort((a, b) => a.start.seconds.compareTo(b.start.seconds));
+      var nextNumber = await _store.dives.nextDiveNo;
+      for (final dive in unnumbered) {
+        dive.number = nextNumber;
+        nextNumber++;
+      }
 
-    // Load default cylinders for assignment
-    final defaultBackgas = await _store.cylinders.getDefaultForBackgas();
-    final defaultDeepDeco = await _store.cylinders.getDefaultForDeepDeco();
-    final defaultShallowDeco = await _store.cylinders.getDefaultForShallowDeco();
+      // Load default cylinders for assignment
+      final defaultBackgas = await _store.cylinders.getDefaultForBackgas();
+      final defaultDeepDeco = await _store.cylinders.getDefaultForDeepDeco();
+      final defaultShallowDeco = await _store.cylinders.getDefaultForShallowDeco();
 
-    for (final dive in importedDoc.dives) {
-      // Process cylinders
-      for (final cyl in dive.cylinders) {
-        if (cyl.hasCylinder()) {
-          final c = cyl.cylinder;
-          final cr = await _store.cylinders.getOrCreate(
-            c.hasVolumeL() ? c.volumeL : null,
-            c.hasWorkingPressureBar() ? c.workingPressureBar : null,
-            c.hasDescription() ? c.description : null,
-          );
-          cyl.cylinderId = cr.id;
-        }
+      for (final dive in importedDoc.dives) {
+        // Process cylinders
+        for (final cyl in dive.cylinders) {
+          if (cyl.hasCylinder()) {
+            final c = cyl.cylinder;
+            final cr = await _store.cylinders.getOrCreate(
+              c.hasVolumeL() ? c.volumeL : null,
+              c.hasWorkingPressureBar() ? c.workingPressureBar : null,
+              c.hasDescription() ? c.description : null,
+            );
+            cyl.cylinderId = cr.id;
+          }
 
-        // If still no cylinder assigned, apply default based on O2 content
-        if (cyl.cylinderId.isEmpty) {
-          final o2Percent = cyl.oxygen * 100;
-          if (o2Percent > 60 && defaultShallowDeco != null) {
-            cyl.cylinderId = defaultShallowDeco.id;
-          } else if (o2Percent >= 40 && defaultDeepDeco != null) {
-            cyl.cylinderId = defaultDeepDeco.id;
-          } else if (defaultBackgas != null) {
-            cyl.cylinderId = defaultBackgas.id;
+          // If still no cylinder assigned, apply default based on O2 content
+          if (cyl.cylinderId.isEmpty) {
+            final o2Percent = cyl.oxygen * 100;
+            if (o2Percent > 60 && defaultShallowDeco != null) {
+              cyl.cylinderId = defaultShallowDeco.id;
+            } else if (o2Percent >= 40 && defaultDeepDeco != null) {
+              cyl.cylinderId = defaultDeepDeco.id;
+            } else if (defaultBackgas != null) {
+              cyl.cylinderId = defaultBackgas.id;
+            }
           }
         }
+
+        // Process equipment
+        for (final (idx, eq) in dive.equipment.indexed) {
+          final matched = await _store.equipment.getOrCreate(
+            type: eq.type,
+            manufacturer: eq.manufacturer,
+            name: eq.name,
+            serial: eq.serial,
+            weight: eq.hasWeight() ? eq.weight : null,
+            purchaseDate: eq.hasPurchaseDate() ? eq.purchaseDate : null,
+            purchasePrice: eq.hasPurchasePrice() ? eq.purchasePrice : null,
+            shop: eq.hasShop() ? eq.shop : null,
+            warrantyUntil: eq.hasWarrantyUntil() ? eq.warrantyUntil : null,
+            lastService: eq.hasLastService() ? eq.lastService : null,
+          );
+          dive.equipment[idx] = Equipment(id: matched.id);
+        }
+
+        dive.recalculateMetadata();
       }
 
-      // Process equipment
-      for (final (idx, eq) in dive.equipment.indexed) {
-        final matched = await _store.equipment.getOrCreate(
-          type: eq.type,
-          manufacturer: eq.manufacturer,
-          name: eq.name,
-          serial: eq.serial,
-          weight: eq.hasWeight() ? eq.weight : null,
-          purchaseDate: eq.hasPurchaseDate() ? eq.purchaseDate : null,
-          purchasePrice: eq.hasPurchasePrice() ? eq.purchasePrice : null,
-          shop: eq.hasShop() ? eq.shop : null,
-          warrantyUntil: eq.hasWarrantyUntil() ? eq.warrantyUntil : null,
-          lastService: eq.hasLastService() ? eq.lastService : null,
-        );
-        dive.equipment[idx] = Equipment(id: matched.id);
-      }
+      // Insert all imported dives
+      await _store.dives.insertAll(importedDoc.dives);
 
-      dive.recalculateMetadata();
+      // Reload overview list after update
+      add(_LoadAll());
+    } catch (e, st) {
+      // Whatever was persisted before the failure stays, but the app must not
+      // remain stuck on the loading state with no way to recover.
+      _log.severe('failed to import dives from ${event.filePath}', e, st);
+      add(_LoadAll());
     }
-
-    // Insert all imported dives
-    await _store.dives.insertAll(importedDoc.dives);
-
-    // Reload overview list after update
-    add(_LoadAll());
   }
 
   // Renumber every dive sequentially from [startFrom], in chronological order.

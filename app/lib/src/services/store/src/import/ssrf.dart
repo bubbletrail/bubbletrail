@@ -406,7 +406,7 @@ extension SiteXml on Site {
     Position? position;
 
     if (gpsStr != null) {
-      final parts = gpsStr.split(' ');
+      final parts = gpsStr.trim().split(RegExp(r'[,\s]+'));
       if (parts.length == 2) {
         final lat = double.tryParse(parts[0]);
         final lon = double.tryParse(parts[1]);
