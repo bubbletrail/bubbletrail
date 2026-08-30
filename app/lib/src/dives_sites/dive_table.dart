@@ -41,12 +41,16 @@ class DiveTable extends StatelessWidget {
 
   Widget _buildCardList(BuildContext context) {
     final sortedDives = List<Dive>.from(dives)..sort((a, b) => b.start.toDateTime().compareTo(a.start.toDateTime()));
+    final t = Theme.of(context).colorScheme;
     return ListView.builder(
       padding: const .symmetric(vertical: 8),
       itemCount: sortedDives.length,
       itemBuilder: (context, index) {
         final dive = sortedDives[index];
-        return DiveListItemCard(dive: dive, site: _getSite(dive), showSite: showSiteColumn);
+        return Container(
+          color: index % 2 == 0 ? t.surface : t.surfaceContainer,
+          child: DiveListItem(dive: dive, site: _getSite(dive), showSite: showSiteColumn),
+        );
       },
     );
   }

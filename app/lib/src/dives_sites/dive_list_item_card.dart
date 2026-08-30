@@ -8,13 +8,13 @@ import '../app_routes.dart';
 import '../common/timezone.dart';
 import '../common/units.dart';
 
-/// A card widget for displaying a dive in a mobile-friendly list layout.
-class DiveListItemCard extends StatelessWidget {
+// A widget for displaying a dive in a mobile-friendly list layout.
+class DiveListItem extends StatelessWidget {
   final Dive dive;
   final Site? site;
   final bool showSite;
 
-  const DiveListItemCard({super.key, required this.dive, this.site, this.showSite = true});
+  const DiveListItem({super.key, required this.dive, this.site, this.showSite = true});
 
   DateTime get _startDateTime => dive.start.toDateTime();
 
@@ -32,61 +32,58 @@ class DiveListItemCard extends StatelessWidget {
       }
     }
 
-    return Card(
-      child: InkWell(
-        onTap: () {
-          context.goNamed(AppRouteName.divesDetails, pathParameters: {'diveID': dive.id});
-        },
-        borderRadius: .circular(12),
-        child: Padding(
-          padding: const .all(12),
-          child: Column(
-            crossAxisAlignment: .start,
-            children: [
-              // Top row: Dive number and date
+    return InkWell(
+      onTap: () {
+        context.goNamed(AppRouteName.divesDetails, pathParameters: {'diveID': dive.id});
+      },
+      child: Padding(
+        padding: const .all(12),
+        child: Column(
+          crossAxisAlignment: .start,
+          children: [
+            // Top row: Dive number and date
+            Row(
+              mainAxisAlignment: .spaceBetween,
+              children: [
+                Text('Dive #${dive.number}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: .bold)),
+                DateTimeText(
+                  _startDateTime,
+                  timezone: siteTimeZone(site),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // Middle row: Site name (if shown)
+            if (showSite && siteName != null) ...[
               Row(
-                mainAxisAlignment: .spaceBetween,
                 children: [
-                  Text('Dive #${dive.number}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: .bold)),
-                  DateTimeText(
-                    _startDateTime,
-                    timezone: siteTimeZone(site),
-                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  Icon(Icons.location_on_outlined, size: 14, color: theme.colorScheme.primary),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(siteName, style: theme.textTheme.bodyMedium, overflow: .ellipsis),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              // Middle row: Site name (if shown)
-              if (showSite && siteName != null) ...[
-                Row(
-                  children: [
-                    Icon(Icons.location_on_outlined, size: 14, color: theme.colorScheme.primary),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(siteName, style: theme.textTheme.bodyMedium, overflow: .ellipsis),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-              ],
-              // Bottom row: Depth and duration
-              Row(
-                children: [
-                  _InfoChip(icon: Icons.arrow_downward, label: DepthText(maxDepth), theme: theme),
-                  const SizedBox(width: 12),
-                  _InfoChip(icon: Icons.timer, label: DurationText(dive.duration), theme: theme),
-                  if (dive.sac > 0) ...[
-                    const SizedBox(width: 12),
-                    _InfoChip(
-                      icon: Icons.speed,
-                      label: VolumeText(dive.sac, suffix: '/min'),
-                      theme: theme,
-                    ),
-                  ],
-                ],
-              ),
             ],
-          ),
+            // Bottom row: Depth and duration
+            Row(
+              children: [
+                _InfoChip(icon: Icons.arrow_downward, label: DepthText(maxDepth), theme: theme),
+                const SizedBox(width: 12),
+                _InfoChip(icon: Icons.timer, label: DurationText(dive.duration), theme: theme),
+                if (dive.sac > 0) ...[
+                  const SizedBox(width: 12),
+                  _InfoChip(
+                    icon: Icons.speed,
+                    label: VolumeText(dive.sac, suffix: '/min'),
+                    theme: theme,
+                  ),
+                ],
+              ],
+            ),
+          ],
         ),
       ),
     );
