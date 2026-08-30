@@ -167,8 +167,8 @@ class DateTimeText extends StatelessWidget {
     final (dateFormat, timeFormat) = context.select<PreferencesStore, (DateFormatPref, TimeFormatPref)>((p) => (p.dateFormat, p.timeFormat));
     final zoned = inZone(dateTime, timezone);
     final local = zoned ?? dateTime;
-    final suffix = zoned != null ? ' ${zoned.timeZoneName}' : '';
-    return Text('${formatDate(dateFormat, local)} ${formatTime(timeFormat, local)}$suffix', style: style);
+    // final suffix = zoned != null ? ' ${zoned.timeZoneName}' : '';
+    return Text('${formatDate(dateFormat, local)} ${formatTime(timeFormat, local)}', style: style);
   }
 }
 
