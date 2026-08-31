@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -48,17 +50,23 @@ class _Statistics extends StatelessWidget {
     final lifetime = _lifetimeStats();
 
     return ListView.builder(
-      // padding: const .all(16),
-      itemCount: years.length + 1,
+      itemCount: years.length + 2,
       itemBuilder: (context, index) {
         if (index == 0) {
+          return InfoSection(
+            title: 'Activity',
+            even: index % 2 == 0,
+            children: [_DiveHeatMap(dives: dives)],
+          );
+        }
+        if (index == 1) {
           return InfoSection(
             title: 'Lifetime',
             even: index % 2 == 0,
             children: [infoRow('Years diving', '${years.length}'), ..._statRows(context, prefs, lifetime)],
           );
         }
-        final (year, stats) = years[index - 1];
+        final (year, stats) = years[index - 2];
         return InfoSection(title: year.toString(), even: index % 2 == 0, children: _statRows(context, prefs, stats));
       },
     );
@@ -156,6 +164,99 @@ String _formatTotalTime(int seconds) {
   final restHours = hours % 24;
   if (minutes == 0) return '$days days, $restHours hours';
   return '$days days, $restHours hours, $minutes min';
+}
+
+// Months of the year, index zero being January.
+const _monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+// Dive activity heat map, contribution graph style: one row per year (latest
+// year first) and one square per month, colored by dive count along the
+// primary color scale. Months without dives are left blank.
+class _DiveHeatMap extends StatelessWidget {
+  final List<Dive> dives;
+
+  const _DiveHeatMap({required this.dives});
+
+  @override
+  Widget build(BuildContext context) {
+    final counts = <int, List<int>>{};
+    for (final dive in dives) {
+      if (!dive.hasStart()) continue;
+      final dt = dive.start.toDateTime();
+      counts.putIfAbsent(dt.year, () => List.filled(12, 0))[dt.month - 1]++;
+    }
+    if (counts.isEmpty) return const SizedBox.shrink();
+    final years = counts.keys.toList()..sort((a, b) => b.compareTo(a));
+    final maxCount = counts.values.expand((months) => months).reduce(max);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final theme = Theme.of(context);
+        final cs = theme.colorScheme;
+        const yearWidth = 36.0;
+        final cell = min((constraints.maxWidth - yearWidth) / 12, 24.0);
+        final labelStyle = theme.textTheme.labelSmall;
+
+        Widget slot(int year, int month) {
+          final count = counts[year]![month];
+          if (count == 0) {
+            return SizedBox(width: cell, height: cell);
+          }
+          // Square root scaling, so a couple of dives in an otherwise quiet
+          // log still get a clearly visible tint.
+          final intensity = sqrt(count / maxCount);
+          final color = Color.lerp(cs.primaryContainer, cs.primary, intensity)!;
+          return SizedBox(
+            width: cell,
+            height: cell,
+            child: Padding(
+              padding: const .all(2.0),
+              child: Tooltip(
+                message: '${_monthNames[month]} $year: ${count == 1 ? '1 dive' : '$count dives'}',
+                child: DecoratedBox(
+                  decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3)),
+                ),
+              ),
+            ),
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: .start,
+          children: [
+            Row(
+              children: [
+                const SizedBox(width: yearWidth),
+                for (var m = 0; m < 12; m++)
+                  SizedBox(
+                    width: cell,
+                    child: Center(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(_monthNames[m], style: labelStyle),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            for (final year in years)
+              Padding(
+                padding: const .symmetric(vertical: 1.0),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: yearWidth,
+                      child: Text('$year', style: labelStyle),
+                    ),
+                    for (var m = 0; m < 12; m++) slot(year, m),
+                  ],
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 class _Stats {
