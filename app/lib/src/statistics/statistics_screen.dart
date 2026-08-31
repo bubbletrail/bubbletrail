@@ -202,9 +202,7 @@ class _DiveHeatMap extends StatelessWidget {
           if (count == 0) {
             return SizedBox(width: cell, height: cell);
           }
-          // Square root scaling, so a couple of dives in an otherwise quiet
-          // log still get a clearly visible tint.
-          final intensity = sqrt(count / maxCount);
+          final intensity = count / maxCount;
           final color = Color.lerp(cs.primaryContainer, cs.primary, intensity)!;
           return SizedBox(
             width: cell,
