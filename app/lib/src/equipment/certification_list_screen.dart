@@ -40,7 +40,7 @@ class CertificationListScreen extends StatelessWidget {
                   clipBehavior: Clip.antiAlias,
                   child: CertificationTile(
                     certification: cert,
-                    trailing: const Icon(Icons.chevron_right, size: 16),
+                    trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.goNamed(AppRouteName.certificationsDetails, pathParameters: {'certificationID': cert.id}),
                   ),
                 );

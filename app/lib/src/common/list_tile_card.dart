@@ -15,7 +15,7 @@ class ListTileCard extends StatelessWidget {
         leading: icon != null ? Icon(icon, size: 28) : null,
         title: Text(title, style: Theme.of(context).textTheme.titleMedium),
         subtitle: subtitle != null ? Text(subtitle!) : null,
-        trailing: const Icon(Icons.chevron_right, size: 16),
+        trailing: const Icon(Icons.chevron_right),
         onTap: onTap,
       ),
     );

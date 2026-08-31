@@ -29,7 +29,8 @@ class EquipmentListLoaded extends EquipmentListState {
 
   const EquipmentListLoaded(this.equipment, {this.showArchived = false});
 
-  List<Equipment> get visibleEquipment => showArchived ? equipment : equipment.where((e) => !e.archived).toList();
+  List<Equipment> get visibleEquipment => showArchived ? equipment : activeEquipment;
+  List<Equipment> get activeEquipment => equipment.where((e) => !e.archived).toList();
 
   @override
   List<Object?> get props => [equipment, showArchived];

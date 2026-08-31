@@ -6,8 +6,9 @@ import 'common.dart';
 class EquipmentListTile extends StatelessWidget {
   final Equipment equipment;
   final void Function(Equipment) onTap;
+  final IconData? trailing;
 
-  const EquipmentListTile({super.key, required this.equipment, required this.onTap});
+  const EquipmentListTile({super.key, required this.equipment, required this.onTap, this.trailing});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,7 @@ class EquipmentListTile extends StatelessWidget {
       subtitle: equipmentSubtitle(equipment) != null
           ? Text(equipmentSubtitleText(equipment), style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).hintColor))
           : null,
-      trailing: Icon(Icons.drag_indicator, color: Theme.of(context).hintColor, size: 20),
+      trailing: trailing != null ? Icon(trailing, color: Theme.of(context).hintColor) : null,
       onTap: () => onTap(equipment),
     );
   }

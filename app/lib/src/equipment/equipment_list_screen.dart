@@ -46,6 +46,7 @@ class EquipmentListScreen extends StatelessWidget {
                         child: EquipmentListTile(
                           equipment: item,
                           onTap: (item) => context.goNamed(AppRouteName.equipmentDetails, pathParameters: {'equipmentID': item.id}),
+                          trailing: Icons.chevron_right,
                         ),
                       );
                     },

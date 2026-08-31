@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'adaptive_modal.dart';
 import 'duration_picker.dart';
+import 'info_card_row.dart';
 import 'measurement_editor.dart';
 
 // The result of editing a dive's cylinders: the cylinders themselves plus the
@@ -220,7 +221,7 @@ class _CylindersEditorState extends State<_CylindersEditor> {
                                       },
                                     ),
                                   ),
-                                  IconButton(icon: const Icon(Icons.delete_outline), onPressed: () => _remove(index), tooltip: 'Remove'),
+                                  IconButton(icon: const Icon(Icons.delete_outline), onPressed: () => _remove(index), tooltip: 'Remove cylinder'),
                                 ],
                               ),
                               Row(
@@ -297,20 +298,21 @@ class _GasChanges extends StatelessWidget {
       children: [
         Text('Gas changes', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: .bold)),
         for (final (i, time) in row.switchTimes.indexed)
-          Padding(
-            padding: const .only(left: 8, top: 4),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(time == 0 ? '• Start of dive' : '• ${formatTime(time)} switch to this cylinder', style: Theme.of(context).textTheme.bodySmall),
-                ),
-                InkWell(onTap: () => onRemove(i), child: const Icon(Icons.close, size: 14)),
-              ],
+          EvenOddContainer(
+            index: i,
+            child: Padding(
+              padding: const .all(8),
+              child: Row(
+                children: [
+                  Expanded(child: Text(time == 0 ? 'Start of dive' : '${formatTime(time)} switch to this cylinder')),
+                  IconButton(onPressed: () => onRemove(i), icon: const Icon(Icons.delete_outline), tooltip: 'Remove gas change'),
+                ],
+              ),
             ),
           ),
         TextButton.icon(
           onPressed: onAdd,
-          icon: const Icon(Icons.add, size: 14),
+          icon: const Icon(Icons.add),
           label: const Text('Add gas change'),
           style: TextButton.styleFrom(padding: .zero, minimumSize: const Size(0, 32)),
         ),

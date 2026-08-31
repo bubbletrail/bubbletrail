@@ -423,7 +423,7 @@ class _DiveDetails extends StatelessWidget {
   Future<void> _editEquipment(BuildContext context) async {
     final equipmentBloc = context.read<EquipmentListBloc>();
     final equipmentState = equipmentBloc.state;
-    final visible = equipmentState is EquipmentListLoaded ? equipmentState.visibleEquipment : <Equipment>[];
+    final visible = equipmentState is EquipmentListLoaded ? equipmentState.activeEquipment : <Equipment>[];
     // Include equipment already on the dive even if it's since been archived, so
     // it stays selectable and isn't silently dropped on save.
     final available = [...visible, ...dive.equipment.where((e) => !visible.any((v) => v.id == e.id))];

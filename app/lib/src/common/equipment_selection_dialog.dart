@@ -147,13 +147,13 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
                   itemBuilder: (context, index) {
                     final equipment = widget.allEquipment[index];
                     final isSelected = _selectedIds.contains(equipment.id);
-                    return CheckboxListTile(
-                      value: isSelected,
-                      onChanged: (_) => _toggleEquipment(equipment),
-                      secondary: EquipmentIcons.icon(EquipmentIcons.forType(equipment.type), color: Theme.of(context).colorScheme.onSurface, size: 32),
-                      title: Text(EquipmentListTile.equipmentTitle(equipment)),
-                      subtitle: EquipmentListTile.equipmentSubtitle(equipment),
-                      contentPadding: EdgeInsets.zero,
+                    return EvenOddContainer(
+                      index: index,
+                      child: EquipmentListTile(
+                        equipment: equipment,
+                        onTap: (_) => _toggleEquipment(equipment),
+                        trailing: isSelected ? Icons.check_box_rounded : Icons.check_box_outline_blank,
+                      ),
                     );
                   },
                 ),
@@ -334,17 +334,17 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
         borderRadius: BorderRadius.circular(8),
         child: SizedBox(
           width: 280,
-          child: EquipmentListTile(equipment: equipment, onTap: onTap),
+          child: EquipmentListTile(equipment: equipment, onTap: onTap, trailing: Icons.drag_indicator),
         ),
       ),
       childWhenDragging: Opacity(
         opacity: 0.5,
         child: Card(
-          child: EquipmentListTile(equipment: equipment, onTap: onTap),
+          child: EquipmentListTile(equipment: equipment, onTap: onTap, trailing: Icons.drag_indicator),
         ),
       ),
       child: Card(
-        child: EquipmentListTile(equipment: equipment, onTap: onTap),
+        child: EquipmentListTile(equipment: equipment, onTap: onTap, trailing: Icons.drag_indicator),
       ),
     );
   }

@@ -43,7 +43,7 @@ class CylinderListScreen extends StatelessWidget {
                     defaultForBackgas: cylinder.defaultForBackgas,
                     defaultForDeepDeco: cylinder.defaultForDeepDeco,
                     defaultForShallowDeco: cylinder.defaultForShallowDeco,
-                    trailing: const Icon(Icons.chevron_right, size: 16),
+                    trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.goNamed(AppRouteName.cylindersDetails, pathParameters: {'cylinderID': cylinder.id.toString()}),
                   ),
                 );

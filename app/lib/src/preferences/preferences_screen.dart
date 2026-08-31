@@ -45,7 +45,7 @@ class PreferencesScreen extends StatelessWidget {
                         runSpacing: 8,
                         children: [
                           FilledButton.icon(
-                            icon: const Icon(Icons.sync, size: 16),
+                            icon: const Icon(Icons.sync),
                             label: const Text('Sync now'),
                             onPressed: prefs.syncProvider == .none || !prefs.s3Config.isConfigured || syncState.syncing
                                 ? null

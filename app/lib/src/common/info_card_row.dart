@@ -28,9 +28,8 @@ class InfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      color: even ? cs.surface : cs.surfaceContainer,
+    return EvenOddContainer(
+      even: even,
       child: Padding(
         padding: const .all(12.0),
         child: Column(
@@ -86,4 +85,19 @@ Widget tagsRow(BuildContext context, List<String> tags, {List<String>? secondary
       ],
     ),
   );
+}
+
+class EvenOddContainer extends StatelessWidget {
+  final bool? even;
+  final int? index;
+  final Widget child;
+
+  const EvenOddContainer({super.key, this.even, this.index, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isEven = even ?? (index ?? 0) % 2 == 0;
+    return Container(color: isEven ? cs.surface : cs.surfaceContainer, child: child);
+  }
 }
