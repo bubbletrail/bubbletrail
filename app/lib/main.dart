@@ -168,6 +168,9 @@ class _MyAppState extends State<MyApp> with WindowListener {
 
             if (platformIsMobile) {
               final menuIndex = topDestinations.length;
+              // The menu item takes on the icon and label of the selected menu destination, only
+              // showing as "More" while another page is selected.
+              final selectedMenu = shell.currentIndex >= menuIndex ? menuDestinations[shell.currentIndex - menuIndex] : null;
               return Container(
                 decoration: decoration,
                 child: SafeArea(
@@ -186,7 +189,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       },
                       destinations: [
                         for (final d in topDestinations) NavigationDestination(icon: Icon(d.icon), label: d.label),
-                        const NavigationDestination(icon: Icon(Icons.more), label: 'More'),
+                        NavigationDestination(icon: Icon(selectedMenu?.icon ?? Icons.more), label: selectedMenu?.label ?? 'More'),
                       ],
                     ),
                   ),
