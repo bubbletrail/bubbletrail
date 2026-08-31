@@ -19,6 +19,33 @@ Widget infoCard(BuildContext context, String title, List<Widget> children) {
   );
 }
 
+class InfoSection extends StatelessWidget {
+  final String title;
+  final bool even;
+  final List<Widget> children;
+
+  const InfoSection({super.key, required this.title, this.even = true, required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      color: even ? cs.surface : cs.surfaceContainer,
+      child: Padding(
+        padding: const .all(12.0),
+        child: Column(
+          crossAxisAlignment: .start,
+          children: [
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            const Divider(),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 Widget infoRow(String label, String value) {
   return infoWidgetRow(label, Text(value));
 }

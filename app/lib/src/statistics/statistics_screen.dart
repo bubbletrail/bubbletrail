@@ -48,14 +48,18 @@ class _Statistics extends StatelessWidget {
     final lifetime = _lifetimeStats();
 
     return ListView.builder(
-      padding: const .all(16),
+      // padding: const .all(16),
       itemCount: years.length + 1,
       itemBuilder: (context, index) {
         if (index == 0) {
-          return infoCard(context, 'Lifetime', [infoRow('Years diving', '${years.length}'), ..._statRows(context, prefs, lifetime)]);
+          return InfoSection(
+            title: 'Lifetime',
+            even: index % 2 == 0,
+            children: [infoRow('Years diving', '${years.length}'), ..._statRows(context, prefs, lifetime)],
+          );
         }
         final (year, stats) = years[index - 1];
-        return infoCard(context, year.toString(), _statRows(context, prefs, stats));
+        return InfoSection(title: year.toString(), even: index % 2 == 0, children: _statRows(context, prefs, stats));
       },
     );
   }
