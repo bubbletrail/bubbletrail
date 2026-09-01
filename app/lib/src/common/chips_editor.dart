@@ -4,14 +4,17 @@ import 'adaptive_modal.dart';
 
 // Shows an editor for a set of string values (tags, buddies, ...). On mobile
 // this is a bottom sheet, on desktop a modal dialog. Existing values can be
-// toggled on/off and new ones entered via the text field. Returns the updated
-// list of selected values, or null if the user cancelled.
+// toggled on/off and new ones entered via the text field. Values in
+// [featuredValues], along with the currently selected ones, are shown at the
+// top; the rest are tucked away below a divider, collapsed until expanded.
+// Returns the updated list of selected values, or null if the user cancelled.
 Future<List<String>?> showChipsEditor({
   required BuildContext context,
   required String title,
   required String addLabel,
   required Iterable<String> selectedValues,
   required Iterable<String> availableValues,
+  Iterable<String>? featuredValues,
   TextCapitalization textCapitalization = TextCapitalization.none,
   List<String> createCharacters = const [],
 }) {
@@ -22,6 +25,7 @@ Future<List<String>?> showChipsEditor({
       addLabel: addLabel,
       selectedValues: selectedValues,
       availableValues: availableValues,
+      featuredValues: featuredValues,
       textCapitalization: textCapitalization,
       createCharacters: createCharacters,
     ),
@@ -34,6 +38,7 @@ class _ChipsEditor extends StatefulWidget {
     required this.addLabel,
     required this.selectedValues,
     required this.availableValues,
+    this.featuredValues,
     required this.textCapitalization,
     required this.createCharacters,
   });
@@ -42,6 +47,7 @@ class _ChipsEditor extends StatefulWidget {
   final String addLabel;
   final Iterable<String> selectedValues;
   final Iterable<String> availableValues;
+  final Iterable<String>? featuredValues;
   final TextCapitalization textCapitalization;
   // Characters that, when typed, commit the current text as a new value (e.g. ',').
   final List<String> createCharacters;
@@ -56,6 +62,7 @@ class _ChipsEditorState extends State<_ChipsEditor> {
   // globally and what's already selected, kept sorted for a stable order.
   late final List<String> _options;
   final _controller = TextEditingController();
+  bool _showOthers = false;
 
   @override
   void initState() {
@@ -114,27 +121,7 @@ class _ChipsEditorState extends State<_ChipsEditor> {
             if (_options.isNotEmpty)
               Flexible(
                 child: SingleChildScrollView(
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: _options
-                        .map(
-                          (value) => FilterChip(
-                            label: Text(value),
-                            selected: _selected.contains(value),
-                            onSelected: (sel) {
-                              setState(() {
-                                if (sel) {
-                                  _selected.add(value);
-                                } else {
-                                  _selected.remove(value);
-                                }
-                              });
-                            },
-                          ),
-                        )
-                        .toList(),
-                  ),
+                  child: Column(crossAxisAlignment: .start, spacing: 8, children: _chipSections()),
                 ),
               ),
             TextField(
@@ -159,6 +146,49 @@ class _ChipsEditorState extends State<_ChipsEditor> {
           ],
         ),
       ),
+    );
+  }
+
+  // The chip area: a single wrap when there is nothing to tuck away, otherwise
+  // the featured values (plus whatever is selected) with everyone else below a
+  // divider, collapsed until expanded. Selected values always stay in the top
+  // area so they remain visible without expanding anything.
+  List<Widget> _chipSections() {
+    if (widget.featuredValues == null) return [_chipsWrap(_options)];
+
+    final featured = {...widget.featuredValues!, ..._selected};
+    if (featured.isEmpty) return [_chipsWrap(_options)];
+    final others = _options.where((value) => !featured.contains(value)).toList();
+    if (others.isEmpty) return [_chipsWrap(_options)];
+
+    return [
+      _chipsWrap(_options.where(featured.contains).toList()),
+      TextButton.icon(
+        onPressed: () => setState(() => _showOthers = !_showOthers),
+        icon: Icon(_showOthers ? Icons.expand_less : Icons.expand_more),
+        label: Text('Others (${others.length})'),
+      ),
+      if (_showOthers) _chipsWrap(others),
+    ];
+  }
+
+  Wrap _chipsWrap(List<String> values) {
+    return Wrap(spacing: 8, runSpacing: 4, children: values.map((value) => _chip(value)).toList());
+  }
+
+  FilterChip _chip(String value) {
+    return FilterChip(
+      label: Text(value),
+      selected: _selected.contains(value),
+      onSelected: (sel) {
+        setState(() {
+          if (sel) {
+            _selected.add(value);
+          } else {
+            _selected.remove(value);
+          }
+        });
+      },
     );
   }
 }
