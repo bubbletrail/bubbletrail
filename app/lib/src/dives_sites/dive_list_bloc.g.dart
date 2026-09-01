@@ -15,6 +15,8 @@ abstract class _$DiveListLoadedCWProxy {
 
   DiveListLoaded buddies(Set<String> buddies);
 
+  DiveListLoaded activeBuddies(Set<String> activeBuddies);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `DiveListLoaded(...).copyWith.fieldName(value)`.
   ///
@@ -27,6 +29,7 @@ abstract class _$DiveListLoadedCWProxy {
     List<Site> sites,
     Set<String> tags,
     Set<String> buddies,
+    Set<String> activeBuddies,
   });
 }
 
@@ -49,6 +52,10 @@ class _$DiveListLoadedCWProxyImpl implements _$DiveListLoadedCWProxy {
   @override
   DiveListLoaded buddies(Set<String> buddies) => call(buddies: buddies);
 
+  @override
+  DiveListLoaded activeBuddies(Set<String> activeBuddies) =>
+      call(activeBuddies: activeBuddies);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `DiveListLoaded(...).copyWith.fieldName(value)`.
   ///
@@ -62,6 +69,7 @@ class _$DiveListLoadedCWProxyImpl implements _$DiveListLoadedCWProxy {
     Object? sites = const $CopyWithPlaceholder(),
     Object? tags = const $CopyWithPlaceholder(),
     Object? buddies = const $CopyWithPlaceholder(),
+    Object? activeBuddies = const $CopyWithPlaceholder(),
   }) {
     return DiveListLoaded(
       dives == const $CopyWithPlaceholder() || dives == null
@@ -80,6 +88,10 @@ class _$DiveListLoadedCWProxyImpl implements _$DiveListLoadedCWProxy {
           ? _value.buddies
           // ignore: cast_nullable_to_non_nullable
           : buddies as Set<String>,
+      activeBuddies == const $CopyWithPlaceholder() || activeBuddies == null
+          ? _value.activeBuddies
+          // ignore: cast_nullable_to_non_nullable
+          : activeBuddies as Set<String>,
     );
   }
 }

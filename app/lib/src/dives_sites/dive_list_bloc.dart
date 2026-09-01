@@ -39,6 +39,7 @@ class DiveListLoaded extends DiveListState {
   final List<Site> sites;
   final Set<String> tags;
   final Set<String> buddies;
+  final Set<String> activeBuddies;
 
   /// Index map for O(1) dive lookup by ID
   late final Map<String, Dive> divesById;
@@ -52,7 +53,7 @@ class DiveListLoaded extends DiveListState {
   /// Index map for O(1) dive count lookup by site UUID
   late final Map<String, int> diveCountBySiteId;
 
-  DiveListLoaded(this.dives, this.sites, this.tags, this.buddies) {
+  DiveListLoaded(this.dives, this.sites, this.tags, this.buddies, this.activeBuddies) {
     divesById = {for (final d in dives) d.id: d};
     diveIndexById = {for (var i = 0; i < dives.length; i++) dives[i].id: i};
     sitesByUuid = {for (final s in sites) s.id: s};
@@ -139,7 +140,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
     if (currentState is DiveListLoaded) {
       emit(currentState.copyWith(dives: dives, sites: sites, tags: _store.tags, buddies: _store.dives.buddies));
     } else {
-      emit(DiveListLoaded(dives, sites, _store.tags, _store.dives.buddies));
+      emit(DiveListLoaded(dives, sites, _store.tags, _store.dives.buddies, _store.dives.activeBuddies));
     }
   }
 

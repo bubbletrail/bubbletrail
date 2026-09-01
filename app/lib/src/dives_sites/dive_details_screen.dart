@@ -301,6 +301,7 @@ class _DiveDetails extends StatelessWidget {
   Future<void> _editBuddies(BuildContext context) async {
     final listState = context.read<DiveListBloc>().state;
     final available = listState is DiveListLoaded ? listState.buddies : <String>{};
+    final featured = listState is DiveListLoaded ? listState.activeBuddies : <String>{};
 
     final result = await showChipsEditor(
       context: context,
@@ -308,6 +309,7 @@ class _DiveDetails extends StatelessWidget {
       addLabel: 'Add buddy',
       selectedValues: dive.buddies,
       availableValues: available,
+      featuredValues: featured,
       textCapitalization: .words,
       createCharacters: const [','],
     );

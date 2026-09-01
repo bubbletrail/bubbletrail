@@ -22,6 +22,7 @@ class DiveStore with ChangeNotifier {
   final _dives = <String, Dive>{};
   final _tags = <String>{};
   final _buddies = <String>{};
+  final _activeBuddies = <String>{};
   final _dirty = <String>{};
   Timer? _saveTimer;
 
@@ -29,6 +30,7 @@ class DiveStore with ChangeNotifier {
 
   Set<String> get tags => _tags;
   Set<String> get buddies => _buddies;
+  Set<String> get activeBuddies => _activeBuddies;
 
   Future<void> insertAll(Iterable<Dive> dives) async {
     for (var dive in dives) {
@@ -62,6 +64,9 @@ class DiveStore with ChangeNotifier {
       _tags.addAll(dive.tags);
       _buddies.addAll(dive.buddies);
     }
+    _activeBuddies
+      ..clear()
+      ..addAll(dives.activeBuddies());
     _scheduleSave(null);
     notifyListeners();
   }
@@ -183,6 +188,9 @@ class DiveStore with ChangeNotifier {
       _buddies.addAll(dive.buddies);
       _tags.addAll(dive.tags);
     }
+    _activeBuddies
+      ..clear()
+      ..addAll(_dives.values.activeBuddies());
   }
 
   Future<Dive> _loadMeta(String path) async {
