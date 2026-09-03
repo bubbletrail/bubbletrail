@@ -2,6 +2,7 @@ abstract class AppRouteName {
   static const dives = 'dives';
   static const divesDetails = 'dive-details';
   static const divesNew = 'new-dive';
+  static const connect = 'connect';
 
   static const divesDetailsDepthProfile = 'dive-depth-profile';
 
@@ -29,14 +30,13 @@ abstract class AppRouteName {
   static const divePreferences = 'dive-preferences';
   static const syncing = 'syncing';
   static const logs = 'logs';
-
-  static const connect = 'connect';
 }
 
 abstract class AppRoutePath {
   static const dives = '/dives';
   static const divesDetails = ':diveID';
   static const divesNew = 'new';
+  static const connect = 'connect';
 
   static const divesDetailsDepthProfile = '/depth-profile/:diveID';
 
@@ -65,6 +65,4 @@ abstract class AppRoutePath {
   static const divePreferences = 'dive';
   static const syncing = 'syncing';
   static const logs = 'logs';
-
-  static const connect = '/connect';
 }

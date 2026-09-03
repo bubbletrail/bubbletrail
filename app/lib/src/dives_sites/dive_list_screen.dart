@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../app_metadata.dart';
 import '../app_routes.dart';
 import 'dive_list_bloc.dart';
 import '../common/common.dart';
@@ -12,10 +13,34 @@ class DiveListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenScaffold(
-      title: const Text('Dives'),
-      actions: [IconButton(icon: const Icon(Icons.add), tooltip: 'Add new dive', onPressed: () => context.goNamed(AppRouteName.divesNew))],
-      body: _body(),
+    return ScreenScaffold(title: const Text('Dives'), actions: [_addAction(context)], body: _body());
+  }
+
+  Widget _addAction(BuildContext context) {
+    if (!platformSupportsConnect) {
+      return IconButton(icon: const Icon(Icons.add), tooltip: 'Add new dive', onPressed: () => context.goNamed(AppRouteName.divesNew));
+    }
+
+    return PopupMenuButton<String>(
+      tooltip: 'Add new dive',
+      icon: const Icon(Icons.add),
+      onSelected: (value) {
+        if (value == 'download') {
+          context.goNamed(AppRouteName.connect);
+        } else if (value == 'manual') {
+          context.goNamed(AppRouteName.divesNew);
+        }
+      },
+      itemBuilder: (context) => [
+        const PopupMenuItem(
+          value: 'download',
+          child: Row(spacing: 12, children: [Icon(Icons.download), Text('Download from computer')]),
+        ),
+        const PopupMenuItem(
+          value: 'manual',
+          child: Row(spacing: 12, children: [Icon(Icons.edit), Text('Enter manually')]),
+        ),
+      ],
     );
   }
 
