@@ -56,14 +56,12 @@ class DiveListItem extends StatelessWidget {
             const SizedBox(height: 8),
             // Middle row: Site name (if shown)
             if (showSite && siteName != null) ...[
-              Row(
-                children: [
-                  Icon(Icons.location_on_outlined, size: 14, color: theme.colorScheme.primary),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(siteName, style: theme.textTheme.bodyMedium, overflow: .ellipsis),
-                  ),
-                ],
+              _InfoChip(
+                icon: Icons.location_on_outlined,
+                label: Expanded(
+                  child: Text(siteName, style: theme.textTheme.bodyMedium, overflow: .ellipsis),
+                ),
+                theme: theme,
               ),
               const SizedBox(height: 8),
             ],
@@ -72,7 +70,7 @@ class DiveListItem extends StatelessWidget {
               children: [
                 _InfoChip(icon: Icons.arrow_downward, label: DepthText(maxDepth), theme: theme),
                 const SizedBox(width: 12),
-                _InfoChip(icon: Icons.timer, label: DurationText(dive.duration), theme: theme),
+                _InfoChip(icon: Icons.timer_outlined, label: DurationText(dive.duration), theme: theme),
                 if (dive.sac > 0) ...[
                   const SizedBox(width: 12),
                   _InfoChip(
@@ -102,7 +100,7 @@ class _InfoChip extends StatelessWidget {
     return Row(
       mainAxisSize: .min,
       children: [
-        Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
+        Icon(icon, size: 14, color: theme.colorScheme.primary),
         const SizedBox(width: 4),
         label,
       ],
