@@ -149,7 +149,6 @@ class _MyAppState extends State<MyApp> with WindowListener {
               (icon: Icons.water_outlined, label: 'Dives', branch: 0),
               (icon: Icons.location_on_outlined, label: 'Sites', branch: 1),
               (icon: Icons.inventory_2_outlined, label: 'Equipment', branch: 2),
-              if (platformSupportsConnect) (icon: Icons.bluetooth, label: 'Connect', branch: 3),
             ];
             final menuDestinations = [
               (icon: Icons.insights_outlined, label: 'Statistics', branch: topDestinations.length),
@@ -234,6 +233,10 @@ class _MyAppState extends State<MyApp> with WindowListener {
                         );
                       },
                     ),
+                    // Must be declared before the parameterised dive details route,
+                    // which would otherwise match "connect" as a dive ID.
+                    if (platformSupportsConnect)
+                      GoRoute(path: AppRoutePath.connect, name: AppRouteName.connect, builder: (context, state) => const ConnectScreen()),
                     GoRoute(
                       path: AppRoutePath.divesDetails,
                       name: AppRouteName.divesDetails,
@@ -380,10 +383,6 @@ class _MyAppState extends State<MyApp> with WindowListener {
                 ),
               ],
             ),
-            if (platformSupportsConnect)
-              StatefulShellBranch(
-                routes: <RouteBase>[GoRoute(path: AppRoutePath.connect, name: AppRouteName.connect, builder: (context, state) => ConnectScreen())],
-              ),
             StatefulShellBranch(
               routes: <RouteBase>[GoRoute(path: AppRoutePath.statistics, name: AppRouteName.statistics, builder: (context, state) => const StatisticsScreen())],
             ),
