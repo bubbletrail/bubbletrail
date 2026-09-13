@@ -53,6 +53,7 @@ class _MeasurementEditorState<T extends Enum> extends State<MeasurementEditor<T>
   }
 
   void _onTextChanged(String text) {
+    text = text.replaceAll(',', '.');
     final parsed = double.tryParse(text);
     if (parsed != null) {
       _metricValue = widget.toMetric(parsed, _selectedUnit);
