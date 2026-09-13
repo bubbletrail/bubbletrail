@@ -45,6 +45,10 @@ class CylinderDetailsError extends CylinderDetailsState with DetailsErrorMixin {
   List<Object?> get props => [errorMessage];
 }
 
+class CylinderDetailsClosed extends CylinderDetailsState {
+  const CylinderDetailsClosed();
+}
+
 sealed class CylinderDetailsEvent extends Equatable {
   const CylinderDetailsEvent();
 
@@ -54,6 +58,7 @@ sealed class CylinderDetailsEvent extends Equatable {
   const factory CylinderDetailsEvent.load(String cylinderId) = _LoadCylinderDetails;
   const factory CylinderDetailsEvent.newCylinder() = _NewCylinder;
   const factory CylinderDetailsEvent.update(Cylinder cylinder) = _UpdateCylinderDetails;
+  const factory CylinderDetailsEvent.deleteAndClose(String cylinderID, String? replacementCylinderID) = _DeleteAndClose;
 }
 
 class _LoadCylinderDetails extends CylinderDetailsEvent {
@@ -78,6 +83,16 @@ class _UpdateCylinderDetails extends CylinderDetailsEvent {
   List<Object?> get props => [cylinder];
 }
 
+class _DeleteAndClose extends CylinderDetailsEvent {
+  final String cylinderID;
+  final String? replacementCylinderID;
+
+  const _DeleteAndClose(this.cylinderID, this.replacementCylinderID);
+
+  @override
+  List<Object?> get props => [cylinderID, replacementCylinderID];
+}
+
 class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsState> {
   final _store = StorageProvider.instance.store;
 
@@ -90,6 +105,10 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
           emit(CylinderDetailsLoaded(Cylinder(), true));
         case _UpdateCylinderDetails():
           await _onUpdateCylinderDetails(event, emit);
+        case _DeleteAndClose():
+          await _store.deleteCylinder(event.cylinderID, replacementID: event.replacementCylinderID);
+          _log.fine('deleted cylinder ${event.cylinderID} (replacement: ${event.replacementCylinderID})');
+          emit(const CylinderDetailsClosed());
       }
     }, transformer: sequential());
   }
