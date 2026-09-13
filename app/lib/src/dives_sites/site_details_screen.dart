@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:stretch_wrap/stretch_wrap.dart';
 
 import '../app_routes.dart';
 import '../common/common.dart';
@@ -46,9 +47,8 @@ class SiteDetailsScreen extends StatelessWidget {
           body: SingleChildScrollView(
             child: Padding(
               padding: const .all(8.0),
-              child: Wrap(
+              child: StretchWrap(
                 alignment: .start,
-                crossAxisAlignment: .start,
                 spacing: 8,
                 runSpacing: 8,
                 children: [
@@ -60,8 +60,8 @@ class SiteDetailsScreen extends StatelessWidget {
                       _tagsSection(context, site, diveListState),
                     ],
                   ),
-                  _detailsCard(context, site),
-                  _notesCard(context, site),
+                  Stretch(child: _detailsCard(context, site)),
+                  Stretch(child: _notesCard(context, site)),
                   if (dives.isNotEmpty)
                     AspectRatio(
                       aspectRatio: 2,
