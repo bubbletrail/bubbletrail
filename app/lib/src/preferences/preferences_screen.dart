@@ -392,7 +392,7 @@ class _ImportExportButtons extends StatelessWidget {
   }
 
   Future<void> _importDives(BuildContext context) async {
-    final file = await FilePicker.pickFile(type: FileType.custom, allowedExtensions: ['ssrf', 'xml', 'json']);
+    final file = await FilePicker.pickFile(type: FileType.custom, allowedExtensions: ['ssrf', 'uddf', 'xml', 'json']);
     if (file == null || file.path == null) return;
     if (!context.mounted) return;
 
@@ -442,6 +442,11 @@ class _ImportExportButtons extends StatelessWidget {
               icon: const Icon(Icons.file_download_outlined, size: 16),
               label: const Text('Export Subsurface file'),
               onPressed: state.working ? null : () => context.read<ArchiveBloc>().add(ArchiveEvent.exportSsrf()),
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.file_download_outlined, size: 16),
+              label: const Text('Export UDDF file'),
+              onPressed: state.working ? null : () => context.read<ArchiveBloc>().add(ArchiveEvent.exportUddf()),
             ),
             OutlinedButton.icon(
               icon: const Icon(Icons.file_upload_outlined, size: 16),
