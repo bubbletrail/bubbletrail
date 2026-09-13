@@ -5,7 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_metadata.dart';
+import '../dives_sites/dive_list_bloc.dart';
 import 'cylinder_details_bloc.dart';
+import 'cylinder_list_bloc.dart';
 import '../common/common.dart';
 
 class CylinderEditScreen extends StatefulWidget {
@@ -111,6 +113,55 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
     context.pop();
   }
 
+  int _diveUsageCount() {
+    final state = context.read<DiveListBloc>().state;
+    if (state is! DiveListLoaded) return 0;
+    return state.dives.where((d) => d.cylinders.any((c) => c.cylinderId == _originalCylinder.id)).length;
+  }
+
+  Future<void> _deleteCylinder() async {
+    final cylinderID = _originalCylinder.id;
+    final diveCount = _diveUsageCount();
+
+    String? replacementID;
+    var confirmed = false;
+    if (diveCount == 0) {
+      confirmed = await showConfirmationDialog(
+        context: context,
+        title: 'Delete cylinder',
+        message: 'Are you sure you want to delete this cylinder? This cannot be undone.',
+        confirmText: 'Delete',
+        isDestructive: true,
+      );
+    } else {
+      final cylState = context.read<CylinderListBloc>().state;
+      final replacements = cylState is CylinderListLoaded ? cylState.cylinders.where((c) => c.id != cylinderID).toList() : <Cylinder>[];
+      final choice = await showAdaptiveModal<_DeleteChoice>(
+        context: context,
+        builder: (context) => _DeleteCylinderDialog(diveCount: diveCount, replacementOptions: replacements),
+      );
+      if (choice != null) {
+        confirmed = true;
+        replacementID = choice.replacementCylinderID;
+      }
+    }
+
+    if (confirmed && mounted) {
+      context.read<CylinderDetailsBloc>().add(CylinderDetailsEvent.deleteAndClose(cylinderID, replacementID));
+    }
+  }
+
+  PopupMenuButton<String> _popupMenuActions() {
+    return PopupMenuButton<String>(
+      onSelected: (value) async {
+        if (value == 'delete') {
+          await _deleteCylinder();
+        }
+      },
+      itemBuilder: (context) => [const PopupMenuItem(value: 'delete', child: Text('Delete cylinder'))],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -120,14 +171,22 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
           _saveAndPop();
         }
       },
-      child: ScreenScaffold(
-        title: Text(_isNew ? 'New cylinder' : 'Edit cylinder'),
-        actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes')],
-        body: Padding(
-          padding: const .all(16.0),
-          child: Column(
-            spacing: 16,
-            children: [_descriptionCard(), platformIsMobile ? _verticalCards(context) : _horisontalCards(context), _defaultsCard(context)],
+      child: BlocListener<CylinderDetailsBloc, CylinderDetailsState>(
+        listener: (context, state) {
+          if (state is CylinderDetailsClosed) context.pop();
+        },
+        child: ScreenScaffold(
+          title: Text(_isNew ? 'New cylinder' : 'Edit cylinder'),
+          actions: [
+            if (!_isNew) _popupMenuActions(),
+            IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes'),
+          ],
+          body: Padding(
+            padding: const .all(16.0),
+            child: Column(
+              spacing: 16,
+              children: [_descriptionCard(), platformIsMobile ? _verticalCards(context) : _horisontalCards(context), _defaultsCard(context)],
+            ),
           ),
         ),
       ),
@@ -318,3 +377,94 @@ double barToPSI(double bar) => bar * barToPsi;
 double psiToBar(double psi) => psi / barToPsi;
 double lToCuft(double liters) => liters * litersToCuft;
 double cuftToL(double cuft) => cuft / litersToCuft;
+
+// The user's choice when deleting a cylinder that dives still use: replace it
+// with another cylinder, or leave those dives without a cylinder.
+class _DeleteChoice {
+  final String? replacementCylinderID;
+
+  const _DeleteChoice(this.replacementCylinderID);
+}
+
+class _DeleteCylinderDialog extends StatefulWidget {
+  final int diveCount;
+  final List<Cylinder> replacementOptions;
+
+  const _DeleteCylinderDialog({required this.diveCount, required this.replacementOptions});
+
+  @override
+  State<_DeleteCylinderDialog> createState() => _DeleteCylinderDialogState();
+}
+
+class _DeleteCylinderDialogState extends State<_DeleteCylinderDialog> {
+  bool _replace = false;
+  String? _replacementID;
+
+  @override
+  void initState() {
+    super.initState();
+    _replacementID = widget.replacementOptions.isEmpty ? null : widget.replacementOptions.first.id;
+  }
+
+  void _delete() {
+    Navigator.of(context).pop(_DeleteChoice(_replace ? _replacementID : null));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final canReplace = widget.replacementOptions.isNotEmpty;
+    return SafeArea(
+      child: Padding(
+        padding: const .all(16.0),
+        child: Column(
+          mainAxisSize: .min,
+          crossAxisAlignment: .stretch,
+          spacing: 16,
+          children: [
+            Text('Delete cylinder', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              widget.diveCount == 1
+                  ? '1 dive uses this cylinder. What should that dive use instead?'
+                  : '${widget.diveCount} dives use this cylinder. What should those dives use instead?',
+            ),
+            if (canReplace) ...[
+              RadioGroup<bool>(
+                groupValue: _replace,
+                onChanged: (v) => setState(() => _replace = v ?? false),
+                child: Column(
+                  crossAxisAlignment: .stretch,
+                  children: [
+                    RadioListTile<bool>(title: const Text('Leave dives without cylinder'), value: false, contentPadding: .zero),
+                    RadioListTile<bool>(title: const Text('Replace with another cylinder'), value: true, contentPadding: .zero),
+                  ],
+                ),
+              ),
+              if (_replace)
+                DropdownButtonFormField<String>(
+                  initialValue: _replacementID,
+                  decoration: const InputDecoration(labelText: 'Cylinder', border: OutlineInputBorder(), isDense: true),
+                  items: widget.replacementOptions.map((c) => DropdownMenuItem(value: c.id, child: Text(_cylinderLabel(c)))).toList(),
+                  onChanged: (id) => setState(() => _replacementID = id),
+                ),
+            ] else
+              Text('No other cylinders exist, so those dives will be left without a cylinder.', style: TextStyle(color: Theme.of(context).hintColor)),
+            Row(
+              mainAxisAlignment: .end,
+              spacing: 8,
+              children: [
+                TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+                TextButton(
+                  onPressed: _replace && _replacementID == null ? null : _delete,
+                  style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+                  child: const Text('Delete'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+String _cylinderLabel(Cylinder c) => c.description.isNotEmpty ? c.description : 'Cylinder ${c.id}';

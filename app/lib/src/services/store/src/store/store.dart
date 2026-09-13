@@ -214,6 +214,46 @@ class Store with ChangeNotifier {
     // Remove the site itself
     await sites.delete(siteID);
   }
+
+  // Delete the cylinder, after first dealing with the dives that use it. When
+  // [replacementID] is given, dives using the cylinder are switched to that
+  // cylinder; otherwise their cylinder is left unset (gas mix and pressures are
+  // kept, only the cylinder type reference is removed).
+  Future<void> deleteCylinder(String cylinderID, {String? replacementID}) async {
+    final replacement = replacementID == null ? null : await cylinders.getById(replacementID);
+
+    final updated = <Dive>[];
+    for (final dive in await dives.getAll()) {
+      if (!dive.cylinders.any((c) => c.cylinderId == cylinderID)) continue;
+
+      // Load the full dive so the embedded cylinder data is mapped in, then
+      // remap the affected cylinders and recompute the metrics (used volume,
+      // SAC) that depend on the cylinder size.
+      final full = await diveById(dive.id);
+      if (full == null) continue;
+      updated.add(
+        full.rebuild((d) {
+          for (final (idx, cyl) in d.cylinders.indexed) {
+            if (cyl.cylinderId != cylinderID) continue;
+            d.cylinders[idx] = cyl.rebuild((c) {
+              if (replacement != null) {
+                c.cylinderId = replacement.id;
+                c.cylinder = replacement;
+              } else {
+                c.clearCylinderId();
+                c.clearCylinder();
+              }
+            });
+          }
+          d.recalculateMetadata();
+        }),
+      );
+    }
+    await dives.updateAll(updated);
+
+    // Remove the cylinder itself
+    await cylinders.delete(cylinderID);
+  }
 }
 
 int compareSlices(List<String> a, List<String> b) {
