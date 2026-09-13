@@ -230,6 +230,7 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
   }
 
   void _didSetPressureBar(String s) {
+    s = s.replaceAll(',', '.');
     final val = double.tryParse(s) ?? 0;
     setState(() {
       _workpressure = val;
@@ -240,6 +241,7 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
   }
 
   void _didSetVolumeL(String s) {
+    s = s.replaceAll(',', '.');
     final val = double.tryParse(s) ?? 0;
     setState(() {
       _size = val;
@@ -250,6 +252,7 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
   }
 
   void _didSetPressurePsi(String s) {
+    s = s.replaceAll(',', '.');
     final val = double.tryParse(s) ?? 0;
     setState(() {
       _workpressurePsi = val;
@@ -262,6 +265,7 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
   }
 
   void _didSetVolumeCuft(String s) {
+    s = s.replaceAll(',', '.');
     final val = double.tryParse(s) ?? 0;
     setState(() {
       _sizeCuft = val;
