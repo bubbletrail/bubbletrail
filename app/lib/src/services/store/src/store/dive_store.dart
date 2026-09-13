@@ -135,11 +135,12 @@ class DiveStore with ChangeNotifier {
       dive = dive.rebuild((dive) {
         dive.logs.addAll(logs);
       });
+      dive = dive.rebuild((dive) {
+        dive.tags.sort((a, b) => a.compareTo(b));
+        dive.events.sort((a, b) => a.time.compareTo(b.time));
+      });
     }
-    dive = dive.rebuild((dive) {
-      dive.tags.sort((a, b) => a.compareTo(b));
-      dive.events.sort((a, b) => a.time.compareTo(b.time));
-    });
+    _dives[id] = dive;
     return dive;
   }
 
