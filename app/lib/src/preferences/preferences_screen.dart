@@ -61,7 +61,7 @@ class PreferencesScreen extends StatelessWidget {
                       if (prefs.syncProvider != .none && prefs.s3Config.isConfigured) SyncStatusTile(state: syncState),
                     ],
                   ),
-                  if (platformIsDesktop) _SectionColumn(title: 'Import & export', children: [_ImportExportButtons()]),
+                  _SectionColumn(title: 'Import & export', children: [_ImportExportButtons()]),
                   _SectionColumn(
                     title: 'Preferences',
                     children: [
@@ -339,6 +339,15 @@ class _LogLine extends StatelessWidget {
 }
 
 class _ImportExportButtons extends StatelessWidget {
+  // The mobile pickers filter on system-registered file types. App-specific
+  // extensions like "ssrf" and "btz" are not registered there, so matching
+  // files may be hidden in the picker. On mobile we therefore accept any
+  // file and rely on import format auto-detection instead. Desktop keeps
+  // the extension filter.
+  Future<PlatformFile?> _pickFile(List<String> extensions) {
+    return FilePicker.pickFile(type: platformIsMobile ? FileType.any : FileType.custom, allowedExtensions: platformIsMobile ? null : extensions);
+  }
+
   Future<void> _showSaveDialog(BuildContext context, ArchiveState state) async {
     final archiveBloc = context.read<ArchiveBloc>();
     final fileName = state.exportReadyFilename ?? 'bubbletrail.$backupFileExtension';
@@ -348,7 +357,11 @@ class _ImportExportButtons extends StatelessWidget {
       // FileType.custom requires a non-empty extension list, otherwise
       // file_picker throws before showing the dialog.
       final extension = fileName.split('.').last;
-      final name = fileName.substring(0, fileName.length - extension.length - 1);
+      // The mobile save flows (iOS document export, Android SAF) name the
+      // saved file from the fileName we pass, so it must include the
+      // extension. Desktop save panels derive the extension themselves and
+      // would end up with a doubled extension if we included it here.
+      final name = platformIsMobile ? fileName : fileName.substring(0, fileName.length - extension.length - 1);
       final result = await FilePicker.saveFile(
         bytes: bytes,
         dialogTitle: 'Export backup',
@@ -371,7 +384,7 @@ class _ImportExportButtons extends StatelessWidget {
   }
 
   Future<void> _importBackup(BuildContext context) async {
-    final file = await FilePicker.pickFile(type: FileType.custom, allowedExtensions: [backupFileExtension]);
+    final file = await _pickFile([backupFileExtension]);
     if (file == null || file.path == null) return;
 
     if (!context.mounted) return;
@@ -392,7 +405,7 @@ class _ImportExportButtons extends StatelessWidget {
   }
 
   Future<void> _importDives(BuildContext context) async {
-    final file = await FilePicker.pickFile(type: FileType.custom, allowedExtensions: ['ssrf', 'uddf', 'xml', 'json']);
+    final file = await _pickFile(['ssrf', 'xml', 'uddf', 'json']);
     if (file == null || file.path == null) return;
     if (!context.mounted) return;
 
@@ -401,7 +414,7 @@ class _ImportExportButtons extends StatelessWidget {
   }
 
   Future<void> _importEquipment(BuildContext context) async {
-    final file = await FilePicker.pickFile(type: FileType.custom, allowedExtensions: ['csv']);
+    final file = await _pickFile(['csv']);
     if (file == null || file.path == null) return;
     if (!context.mounted) return;
 

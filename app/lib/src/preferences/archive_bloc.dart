@@ -135,7 +135,9 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
   }
 
   Future<void> _onExport(Emitter<ArchiveState> emit) async {
-    emit(state.copyWith(working: true, error: null));
+    // Start from a clean state, so a stale exportReadyPath from a previous
+    // operation doesn't trigger the save dialog while this export runs.
+    emit(const ArchiveState(working: true));
     try {
       final tempDir = await getTemporaryDirectory();
       final filename = 'bubbletrail_${DateFormat('yyyy-MM-dd_HHmmss').format(DateTime.now())}.$backupFileExtension';
@@ -186,7 +188,8 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
   }
 
   Future<void> _onImport(_ImportArchive event, Emitter<ArchiveState> emit) async {
-    emit(state.copyWith(working: true, error: null));
+    // Start from a clean state; see _onExport.
+    emit(const ArchiveState(working: true));
     try {
       final zipFile = File(event.zipPath);
 
@@ -214,6 +217,8 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
   // staged in a temporary file for the save dialog.
   Future<void> _exportDiveLog(Emitter<ArchiveState> emit, String format, FutureOr<String> Function(Container) generate) async {
     emit(state.copyWith(working: true, error: null));
+    // Start from a clean state; see _onExport.
+    emit(const ArchiveState(working: true));
     try {
       final tempDir = await getTemporaryDirectory();
       final filename = 'bubbletrail_${DateFormat('yyyy-MM-dd_HHmmss').format(DateTime.now())}.$format';
