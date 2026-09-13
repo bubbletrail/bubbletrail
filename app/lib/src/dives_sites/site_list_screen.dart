@@ -54,6 +54,7 @@ class SiteListScreen extends StatelessWidget {
       // remove divider lines above & below ExpansionTiles
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ListView(
+        primary: true,
         padding: const .symmetric(vertical: 8),
         children: [
           for (final country in hierarchy.countries)
