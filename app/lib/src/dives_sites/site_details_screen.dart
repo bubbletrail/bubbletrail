@@ -65,7 +65,7 @@ class SiteDetailsScreen extends StatelessWidget {
                   if (dives.isNotEmpty)
                     AspectRatio(
                       aspectRatio: 2,
-                      child: DiveTable(dives: dives, sitesByUuid: diveListState.sitesByUuid, showSiteColumn: false),
+                      child: DiveTable(dives: dives, sitesByUuid: diveListState.sitesByUuid, showSiteColumn: false, primary: false),
                     ),
                 ],
               ),

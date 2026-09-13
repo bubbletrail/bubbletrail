@@ -18,7 +18,13 @@ class DiveTable extends StatelessWidget {
   final Map<String, Site> sitesByUuid;
   final bool showSiteColumn;
 
-  const DiveTable({super.key, required this.dives, required this.sitesByUuid, this.showSiteColumn = true});
+  // Whether the card list is the primary scroll view of the screen it
+  // appears on, making it the target of scroll-to-top gestures. The
+  // embedded table on the site details screen passes false, as it scrolls
+  // within another list.
+  final bool primary;
+
+  const DiveTable({super.key, required this.dives, required this.sitesByUuid, this.showSiteColumn = true, this.primary = true});
 
   Site? _getSite(Dive dive) {
     if (dive.siteId.isEmpty) return null;
@@ -42,6 +48,7 @@ class DiveTable extends StatelessWidget {
   Widget _buildCardList(BuildContext context) {
     final sortedDives = List<Dive>.from(dives)..sort((a, b) => b.start.toDateTime().compareTo(a.start.toDateTime()));
     return ListView.builder(
+      primary: primary,
       padding: const .symmetric(vertical: 8),
       itemCount: sortedDives.length,
       itemBuilder: (context, index) {

@@ -174,7 +174,14 @@ class _MyAppState extends State<MyApp> with WindowListener {
               return Container(
                 decoration: decoration,
                 child: SafeArea(
+                  // Only pad the sides and bottom. Letting the top inset pass through
+                  // makes each screen's app bar own it, which is what makes the iOS
+                  // tap-on-status-bar scroll-to-top gesture reach the screen's list.
+                  top: false,
                   child: Scaffold(
+                    // The shell has no scrollable of its own; staying non-primary keeps
+                    // status bar taps routed to the screen scaffolds instead of it.
+                    primary: false,
                     backgroundColor: Colors.transparent,
                     body: shell,
                     bottomNavigationBar: NavigationBar(
