@@ -457,6 +457,11 @@ class _ImportExportButtons extends StatelessWidget {
               onPressed: state.working ? null : () => context.read<ArchiveBloc>().add(ArchiveEvent.exportSsrf()),
             ),
             OutlinedButton.icon(
+              icon: const Icon(Icons.file_download_outlined, size: 16),
+              label: const Text('Export UDDF file'),
+              onPressed: state.working ? null : () => context.read<ArchiveBloc>().add(ArchiveEvent.exportUddf()),
+            ),
+            OutlinedButton.icon(
               icon: const Icon(Icons.file_upload_outlined, size: 16),
               label: const Text('Import database backup'),
               onPressed: state.working ? null : () => _importBackup(context),

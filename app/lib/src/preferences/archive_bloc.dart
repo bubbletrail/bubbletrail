@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -10,6 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:xml/xml.dart';
 
 import '../app_metadata.dart';
 import '../services/store/store.dart';
@@ -62,6 +64,7 @@ sealed class ArchiveEvent extends Equatable {
   const factory ArchiveEvent.exportFailed(String error) = _ExportFailed;
   const factory ArchiveEvent.importArchive(String zipPath) = _ImportArchive;
   const factory ArchiveEvent.exportSsrf() = _ExportSsrf;
+  const factory ArchiveEvent.exportUddf() = _ExportUddf;
 }
 
 class _ExportArchive extends ArchiveEvent {
@@ -103,6 +106,10 @@ class _ExportSsrf extends ArchiveEvent {
   const _ExportSsrf();
 }
 
+class _ExportUddf extends ArchiveEvent {
+  const _ExportUddf();
+}
+
 class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
   final _store = StorageProvider.instance.store;
 
@@ -121,6 +128,8 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
           await _onImport(event, emit);
         case _ExportSsrf():
           await _onExportSsrf(emit);
+        case _ExportUddf():
+          await _onExportUddf(emit);
       }
     }, transformer: sequential());
   }
@@ -197,12 +206,23 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
   }
 
   Future<void> _onExportSsrf(Emitter<ArchiveState> emit) async {
+    await _exportDiveLog(emit, 'ssrf', _subsurfaceXml);
+  }
+
+  Future<void> _onExportUddf(Emitter<ArchiveState> emit) async {
+    await _exportDiveLog(emit, 'uddf', _uddfXml);
+  }
+
+  // Export all dives and sites as a dive log file of the given format,
+  // staged in a temporary file for the save dialog.
+  Future<void> _exportDiveLog(Emitter<ArchiveState> emit, String format, FutureOr<String> Function(Container) generate) async {
+    emit(state.copyWith(working: true, error: null));
     // Start from a clean state; see _onExport.
     emit(const ArchiveState(working: true));
     try {
       final tempDir = await getTemporaryDirectory();
-      final filename = 'bubbletrail_${DateFormat('yyyy-MM-dd_HHmmss').format(DateTime.now())}.ssrf';
-      final ssrfFile = File('${tempDir.path}/$filename');
+      final filename = 'bubbletrail_${DateFormat('yyyy-MM-dd_HHmmss').format(DateTime.now())}.$format';
+      final logFile = File('${tempDir.path}/$filename');
 
       // Get all sites
       final sites = await _store.sites.getAll();
@@ -217,21 +237,20 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
         }
       }
 
-      final tempContainer = Container(dives: dives, sites: sites);
-      final xmlDoc = await compute(_subsurfaceXml, tempContainer);
+      final xml = await compute(generate, Container(dives: dives, sites: sites));
 
-      await ssrfFile.writeAsString(xmlDoc);
+      await logFile.writeAsString(xml);
 
-      _log.info('SSRF export ready at ${ssrfFile.path}');
-      emit(state.copyWith(working: false, exportReadyPath: ssrfFile.path, exportReadyFilename: filename));
+      _log.info('${format.toUpperCase()} export ready at ${logFile.path}');
+      emit(state.copyWith(working: false, exportReadyPath: logFile.path, exportReadyFilename: filename));
     } catch (e) {
-      _log.severe('SSRF export failed', e);
+      _log.severe('${format.toUpperCase()} export failed', e);
       emit(state.copyWith(working: false, error: e.toString()));
     }
   }
 }
 
-// Generate a Subsrurface XML document from the given container of dives &
+// Generate a Subsurface XML document from the given container of dives &
 // sites, using required remapping of IDs for Subsurface compatibility.
 Future<String> _subsurfaceXml(Container container) async {
   // Subsurface requires site IDs to be exactly 8 hex digits.
@@ -254,9 +273,18 @@ Future<String> _subsurfaceXml(Container container) async {
     return dive;
   }).toList();
 
-  // Create SSRF container and generate XML
+  // Create SSRF container and generate XML. Whitespace inside notes must be
+  // preserved: the pretty writer would otherwise collapse newlines.
   final ssrf = Container(dives: exportDives, sites: exportSites);
-  return ssrf.toXmlDocument().toXmlString(pretty: true);
+  return ssrf.toXmlDocument().toXmlString(
+    pretty: true,
+    preserveWhitespace: (node) => node is XmlElement && (node.name.local == 'notes' || node.name.local == 'para'),
+  );
+}
+
+// Generate a UDDF XML document from the given container of dives & sites.
+String _uddfXml(Container container) {
+  return container.toUddfString(version: appVer);
 }
 
 // Converts our site ID to a Subsurface-compatible 8 hex digit ID. Uses the
