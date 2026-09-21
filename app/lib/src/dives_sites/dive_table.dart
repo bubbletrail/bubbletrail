@@ -11,9 +11,13 @@ import '../app_routes.dart';
 import '../app_theme.dart';
 import '../common/common.dart';
 import '../preferences/preferences_store.dart';
+import 'dive_filters.dart';
 import 'dive_list_item_card.dart';
+import 'mobile_dive_filter_bar.dart';
 
-class DiveTable extends StatelessWidget {
+const _mobileFilterBarHeight = 64.0;
+
+class DiveTable extends StatefulWidget {
   final List<Dive> dives;
   final Map<String, Site> sitesByUuid;
   final bool showSiteColumn;
@@ -24,16 +28,38 @@ class DiveTable extends StatelessWidget {
   // within another list.
   final bool primary;
 
-  const DiveTable({super.key, required this.dives, required this.sitesByUuid, this.showSiteColumn = true, this.primary = true});
+  // Shows a collapsible year/country/tag filter bar above the mobile card
+  // list. Left off for embedded uses (e.g. the site details screen), where
+  // narrowing down by site-level criteria doesn't apply.
+  final bool enableFilters;
+
+  const DiveTable({super.key, required this.dives, required this.sitesByUuid, this.showSiteColumn = true, this.primary = true, this.enableFilters = false});
+
+  @override
+  State<DiveTable> createState() => _DiveTableState();
+}
+
+class _DiveTableState extends State<DiveTable> {
+  int? _filterYear;
+  String? _filterCountry;
+  String? _filterTag;
+
+  void _clearFilters() {
+    setState(() {
+      _filterYear = null;
+      _filterCountry = null;
+      _filterTag = null;
+    });
+  }
 
   Site? _getSite(Dive dive) {
     if (dive.siteId.isEmpty) return null;
-    return sitesByUuid[dive.siteId];
+    return widget.sitesByUuid[dive.siteId];
   }
 
   @override
   Widget build(BuildContext context) {
-    if (dives.isEmpty) {
+    if (widget.dives.isEmpty) {
       return const Center(child: Text('No dives to display'));
     }
 
@@ -46,18 +72,68 @@ class DiveTable extends StatelessWidget {
   }
 
   Widget _buildCardList(BuildContext context) {
-    final sortedDives = List<Dive>.from(dives)..sort((a, b) => b.start.toDateTime().compareTo(a.start.toDateTime()));
-    return ListView.builder(
-      primary: primary,
-      padding: const .symmetric(vertical: 8),
-      itemCount: sortedDives.length,
-      itemBuilder: (context, index) {
-        final dive = sortedDives[index];
-        return EvenOddContainer(
-          index: index,
-          child: DiveListItem(dive: dive, site: _getSite(dive), showSite: showSiteColumn),
-        );
-      },
+    if (!widget.enableFilters) {
+      final sortedDives = List<Dive>.from(widget.dives)..sort((a, b) => b.start.toDateTime().compareTo(a.start.toDateTime()));
+      return ListView.builder(
+        primary: widget.primary,
+        padding: const .symmetric(vertical: 8),
+        itemCount: sortedDives.length,
+        itemBuilder: (context, index) {
+          final dive = sortedDives[index];
+          return EvenOddContainer(
+            index: index,
+            child: DiveListItem(dive: dive, site: _getSite(dive), showSite: widget.showSiteColumn),
+          );
+        },
+      );
+    }
+
+    final filteredDives = filterDives(widget.dives, widget.sitesByUuid, year: _filterYear, country: _filterCountry, tag: _filterTag)
+      ..sort((a, b) => b.start.toDateTime().compareTo(a.start.toDateTime()));
+
+    return CustomScrollView(
+      primary: widget.primary,
+      slivers: [
+        SliverAppBar(
+          primary: false,
+          automaticallyImplyLeading: false,
+          toolbarHeight: 0,
+          floating: true,
+          snap: true,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(_mobileFilterBarHeight),
+            child: MobileDiveFilterBar(
+              selectedYear: _filterYear,
+              selectedCountry: _filterCountry,
+              selectedTag: _filterTag,
+              years: availableDiveYears(widget.dives),
+              countries: availableDiveCountries(widget.dives, widget.sitesByUuid),
+              tags: availableDiveTags(widget.dives, widget.sitesByUuid).toList()..sort(),
+              onYearChanged: (v) => setState(() => _filterYear = v),
+              onCountryChanged: (v) => setState(() => _filterCountry = v),
+              onTagChanged: (v) => setState(() => _filterTag = v),
+            ),
+          ),
+        ),
+        if (filteredDives.isEmpty)
+          SliverFillRemaining(
+            child: EmptyStateWidget(message: 'No dives match these filters.', actionLabel: 'Clear filters', onAction: _clearFilters),
+          )
+        else
+          SliverList.builder(
+            itemCount: filteredDives.length,
+            itemBuilder: (context, index) {
+              final dive = filteredDives[index];
+              return EvenOddContainer(
+                index: index,
+                child: DiveListItem(dive: dive, site: _getSite(dive), showSite: widget.showSiteColumn),
+              );
+            },
+          ),
+      ],
     );
   }
 
@@ -74,12 +150,12 @@ class DiveTable extends StatelessWidget {
       ),
       TrinaColumn(title: 'Max depth', field: 'maxDepth', type: .number(), width: 80, readOnly: true),
       TrinaColumn(title: 'Duration', field: 'duration', type: .number(), width: 80, readOnly: true),
-      if (showSiteColumn) TrinaColumn(title: 'Country', field: 'country', type: .text(), width: 120, readOnly: true),
-      if (showSiteColumn) TrinaColumn(title: 'Location', field: 'location', type: .text(), width: 120, readOnly: true),
-      if (showSiteColumn) TrinaColumn(title: 'Site', field: 'site', type: .text(), width: 120, readOnly: true),
+      if (widget.showSiteColumn) TrinaColumn(title: 'Country', field: 'country', type: .text(), width: 120, readOnly: true),
+      if (widget.showSiteColumn) TrinaColumn(title: 'Location', field: 'location', type: .text(), width: 120, readOnly: true),
+      if (widget.showSiteColumn) TrinaColumn(title: 'Site', field: 'site', type: .text(), width: 120, readOnly: true),
       TrinaColumn(title: 'SAC', field: 'sac', type: .number(), width: 80, readOnly: true),
     ];
-    final rows = dives.map((dive) {
+    final rows = widget.dives.map((dive) {
       final site = _getSite(dive);
       final siteTz = siteTimeZone(site);
       // Keep the UTC instant as the cell value so sorting stays chronological,
@@ -109,7 +185,7 @@ class DiveTable extends StatelessWidget {
       );
     }).toList();
     return TrinaGrid(
-      key: ValueKey((prefs.dateTimeFormat, dives)), // ensure reload when date format change
+      key: ValueKey((prefs.dateTimeFormat, widget.dives)), // ensure reload when date format change
       columns: columns,
       rows: rows,
       mode: .selectWithOneTap,
