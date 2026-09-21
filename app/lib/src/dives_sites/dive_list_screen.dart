@@ -58,7 +58,7 @@ class DiveListScreen extends StatelessWidget {
             return const EmptyStateWidget(message: 'No dives yet. Add your first dive!', icon: Icons.water_drop_outlined);
           }
 
-          return DiveTable(dives: dives, sitesByUuid: state.sitesByUuid, showSiteColumn: true);
+          return DiveTable(dives: dives, sitesByUuid: state.sitesByUuid, showSiteColumn: true, enableFilters: true);
         }
 
         return const Center(child: Text('Unknown state'));
