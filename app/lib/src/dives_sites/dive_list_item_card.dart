@@ -67,18 +67,21 @@ class DiveListItem extends StatelessWidget {
             ],
             // Bottom row: Depth and duration
             Row(
+              spacing: 12,
               children: [
                 _InfoChip(icon: Icons.arrow_downward, label: DepthText(maxDepth), theme: theme),
-                const SizedBox(width: 12),
                 _InfoChip(icon: Icons.timer_outlined, label: DurationText(dive.duration), theme: theme),
-                if (dive.sac > 0) ...[
-                  const SizedBox(width: 12),
+                if (dive.sac > 0)
                   _InfoChip(
                     icon: Icons.speed,
                     label: VolumeText(dive.sac, suffix: '/min'),
                     theme: theme,
                   ),
-                ],
+                _InfoChip(
+                  icon: null,
+                  label: Text('★' * dive.rating, style: TextStyle(color: theme.colorScheme.primary)),
+                  theme: theme,
+                ),
               ],
             ),
           ],
@@ -89,7 +92,7 @@ class DiveListItem extends StatelessWidget {
 }
 
 class _InfoChip extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
   final Widget label;
   final ThemeData theme;
 
@@ -100,7 +103,7 @@ class _InfoChip extends StatelessWidget {
     return Row(
       mainAxisSize: .min,
       children: [
-        Icon(icon, size: 14, color: theme.colorScheme.primary),
+        if (icon != null) Icon(icon, size: 14, color: theme.colorScheme.primary),
         const SizedBox(width: 4),
         label,
       ],
