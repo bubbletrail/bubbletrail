@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
+import '../common/no_fly.dart';
 import 'dive_list_bloc.dart';
 import '../common/common.dart';
 import 'dive_table.dart';
@@ -13,7 +14,7 @@ class DiveListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenScaffold(title: const Text('Dives'), actions: [_addAction(context)], body: _body());
+    return ScreenScaffold(title: const Text('Dives'), actions: [NoFlyIndicator(), _addAction(context)], body: _body());
   }
 
   Widget _addAction(BuildContext context) {
