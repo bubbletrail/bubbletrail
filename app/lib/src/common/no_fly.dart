@@ -57,7 +57,7 @@ class NoFlyIndicator extends StatelessWidget {
 }
 
 class _NoFlyIndicator extends StatelessWidget {
-  const _NoFlyIndicator({super.key, required this.waitHours, required this.curFlightGF, required this.waitFlightGF});
+  const _NoFlyIndicator({required this.waitHours, required this.curFlightGF, required this.waitFlightGF});
 
   final int waitHours;
   final int curFlightGF;
@@ -93,7 +93,7 @@ class _NoFlyIndicator extends StatelessWidget {
 }
 
 class _ClearToFlyIndicator extends StatelessWidget {
-  const _ClearToFlyIndicator({super.key, required this.gf});
+  const _ClearToFlyIndicator({required this.gf});
 
   final int gf;
 
