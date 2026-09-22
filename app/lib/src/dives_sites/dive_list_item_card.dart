@@ -77,6 +77,7 @@ class DiveListItem extends StatelessWidget {
                     label: VolumeText(dive.sac, suffix: '/min'),
                     theme: theme,
                   ),
+                Expanded(child: Container()),
                 _InfoChip(
                   icon: null,
                   label: Text('★' * dive.rating, style: TextStyle(color: theme.colorScheme.primary)),
