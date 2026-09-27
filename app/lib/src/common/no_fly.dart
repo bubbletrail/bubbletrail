@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:btbuhlmann/btbuhlmann.dart' as buhlmann;
@@ -8,11 +9,34 @@ import '../dives_sites/dive_list_bloc.dart';
 import '../dives_sites/tissue_calculator.dart';
 
 const desatGF = 5; // Below this, do not even show the indicator
-const cutoffGF = 30; // GF 30 seems quite safe
+const cutoffGF = 20; // GF 20 at flight level
 const flyPressure = 0.753; // 75.3 kPa at 8000 ft, lowest allowed cabin pressure
 
-class NoFlyIndicator extends StatelessWidget {
+class NoFlyIndicator extends StatefulWidget {
   const NoFlyIndicator({super.key});
+
+  @override
+  State<NoFlyIndicator> createState() => _NoFlyIndicatorState();
+}
+
+class _NoFlyIndicatorState extends State<NoFlyIndicator> {
+  late final Timer t;
+
+  @override
+  void initState() {
+    super.initState();
+    t = Timer.periodic(Duration(minutes: 5), (_) {
+      setState(() {
+        // no-fly status gets recalculated
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    t.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +130,7 @@ class _ClearToFlyIndicator extends StatelessWidget {
           builder: (context) {
             return AlertDialog(
               title: const Text('You can fly'),
-              content: Text('Your gradient factor at flight level will be $gf%, which is considered safe.'),
+              content: Text('Your gradient factor at flight level will be $gf%, which is likely safe.'),
               actions: <Widget>[
                 TextButton(
                   child: const Text('Got it'),
