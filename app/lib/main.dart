@@ -25,6 +25,7 @@ import 'src/dives_sites/fullscreen_map_screen.dart';
 import 'src/dives_sites/fullscreen_profile_screen.dart';
 import 'src/dives_sites/site_details_bloc.dart';
 import 'src/dives_sites/site_details_screen.dart';
+import 'src/dives_sites/site_list_bloc.dart';
 import 'src/dives_sites/site_list_screen.dart';
 import 'src/equipment/certification_details_bloc.dart';
 import 'src/equipment/certification_details_screen.dart';
@@ -97,6 +98,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
   late final SyncBloc _syncBloc;
   late final ArchiveBloc _archiveBloc;
   late final DiveListBloc _diveListBloc;
+  late final SiteListBloc _siteListBloc;
   late final CylinderListBloc _cylinderListBloc;
   late final EquipmentListBloc _equipmentListBloc;
   late final CertificationListBloc _certificationListBloc;
@@ -110,6 +112,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
     _syncBloc = SyncBloc();
     _archiveBloc = ArchiveBloc();
     _diveListBloc = DiveListBloc();
+    _siteListBloc = SiteListBloc();
     _cylinderListBloc = CylinderListBloc();
     _equipmentListBloc = EquipmentListBloc();
     _certificationListBloc = CertificationListBloc();
@@ -499,6 +502,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
         BlocProvider.value(value: _syncBloc),
         BlocProvider.value(value: _archiveBloc),
         BlocProvider.value(value: _diveListBloc),
+        BlocProvider.value(value: _siteListBloc),
         BlocProvider.value(value: _cylinderListBloc),
         BlocProvider.value(value: _equipmentListBloc),
         BlocProvider.value(value: _certificationListBloc),
