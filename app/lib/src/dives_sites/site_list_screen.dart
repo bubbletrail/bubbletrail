@@ -53,13 +53,15 @@ class SiteListScreen extends StatelessWidget {
     return Theme(
       // remove divider lines above & below ExpansionTiles
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-      child: ListView(
-        primary: true,
-        padding: const .symmetric(vertical: 8),
-        children: [
-          for (final country in hierarchy.countries)
-            _CountryExpansionTile(country: country, hierarchy: hierarchy, diveCountBySiteId: diveCountBySiteId, theme: theme),
-        ],
+      child: Material(
+        child: ListView(
+          primary: true,
+          padding: const .symmetric(vertical: 8),
+          children: [
+            for (final country in hierarchy.countries)
+              _CountryExpansionTile(country: country, hierarchy: hierarchy, diveCountBySiteId: diveCountBySiteId, theme: theme),
+          ],
+        ),
       ),
     );
   }
