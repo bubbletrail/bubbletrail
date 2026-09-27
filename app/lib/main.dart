@@ -130,6 +130,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
       name: AppRouteName.divesDetailsDepthProfile,
       builder: (context, state) {
         return BlocProvider(
+          key: ValueKey(state.matchedLocation),
           create: (_) => DiveDetailsBloc()..add(DiveDetailsEvent.loadDive(state.pathParameters['diveID']!)),
           child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const FullscreenProfileScreen()),
         );
@@ -235,6 +236,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       name: AppRouteName.divesNew,
                       builder: (context, state) {
                         return BlocProvider(
+                          key: ValueKey(state.matchedLocation),
                           create: (_) => DiveDetailsBloc()..add(DiveDetailsEvent.newDive()),
                           child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const DiveDetailsScreen()),
                         );
@@ -249,6 +251,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       name: AppRouteName.divesDetails,
                       builder: (context, state) {
                         return BlocProvider(
+                          key: ValueKey(state.matchedLocation),
                           create: (_) => DiveDetailsBloc()..add(DiveDetailsEvent.loadDive(state.pathParameters['diveID']!)),
                           child: DetailsAvailable<DiveDetailsBloc, DiveDetailsState>(child: const DiveDetailsScreen()),
                         );
@@ -262,6 +265,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                   name: AppRouteName.sitesDetailsMap,
                   builder: (context, state) {
                     return BlocProvider(
+                      key: ValueKey(state.matchedLocation),
                       create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.loadSite(state.pathParameters['siteID']!)),
                       child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const FullscreenMapScreen()),
                     );
@@ -281,6 +285,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       name: AppRouteName.sitesNew,
                       builder: (context, state) {
                         return BlocProvider(
+                          key: ValueKey(state.matchedLocation),
                           create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.newSite()),
                           child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const SiteDetailsScreen()),
                         );
@@ -291,6 +296,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       name: AppRouteName.sitesDetails,
                       builder: (context, state) {
                         return BlocProvider(
+                          key: ValueKey(state.matchedLocation),
                           create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.loadSite(state.pathParameters['siteID']!)),
                           child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const SiteDetailsScreen()),
                         );
@@ -316,6 +322,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           path: AppRoutePath.cylindersNew,
                           name: AppRouteName.cylindersNew,
                           builder: (context, state) => BlocProvider(
+                            key: ValueKey(state.matchedLocation),
                             create: (context) => CylinderDetailsBloc()..add(const CylinderDetailsEvent.newCylinder()),
                             child: DetailsAvailable<CylinderDetailsBloc, CylinderDetailsState>(child: CylinderEditScreen()),
                           ),
@@ -324,6 +331,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           path: AppRoutePath.cylindersDetails,
                           name: AppRouteName.cylindersDetails,
                           builder: (context, state) => BlocProvider(
+                            key: ValueKey(state.matchedLocation),
                             create: (context) => CylinderDetailsBloc()..add(CylinderDetailsEvent.load(state.pathParameters['cylinderID']!)),
                             child: DetailsAvailable<CylinderDetailsBloc, CylinderDetailsState>(child: CylinderEditScreen()),
                           ),
@@ -339,6 +347,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           path: AppRoutePath.equipmentNew,
                           name: AppRouteName.equipmentNew,
                           builder: (context, state) => BlocProvider(
+                            key: ValueKey(state.matchedLocation),
                             create: (context) => EquipmentDetailsBloc()..add(const EquipmentDetailsEvent.newEquipment()),
                             child: DetailsAvailable<EquipmentDetailsBloc, EquipmentDetailsState>(child: const EquipmentEditScreen()),
                           ),
@@ -347,6 +356,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           path: AppRoutePath.equipmentDetails,
                           name: AppRouteName.equipmentDetails,
                           builder: (context, state) => BlocProvider(
+                            key: ValueKey(state.matchedLocation),
                             create: (context) => EquipmentDetailsBloc()..add(EquipmentDetailsEvent.load(state.pathParameters['equipmentID']!)),
                             child: DetailsAvailable<EquipmentDetailsBloc, EquipmentDetailsState>(child: const EquipmentEditScreen()),
                           ),
@@ -362,6 +372,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           path: AppRoutePath.certificationsNew,
                           name: AppRouteName.certificationsNew,
                           builder: (context, state) => BlocProvider(
+                            key: ValueKey(state.matchedLocation),
                             create: (context) => CertificationDetailsBloc()..add(const CertificationDetailsEvent.newCertification()),
                             child: DetailsAvailable<CertificationDetailsBloc, CertificationDetailsState>(child: const CertificationEditScreen()),
                           ),
@@ -370,6 +381,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                           path: AppRoutePath.certificationsDetails,
                           name: AppRouteName.certificationsDetails,
                           builder: (context, state) => BlocProvider(
+                            key: ValueKey(state.matchedLocation),
                             create: (context) => CertificationDetailsBloc()..add(CertificationDetailsEvent.load(state.pathParameters['certificationID']!)),
                             child: DetailsAvailable<CertificationDetailsBloc, CertificationDetailsState>(child: const CertificationDetailsScreen()),
                           ),
@@ -378,6 +390,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                               path: AppRoutePath.certificationsDetailsEdit,
                               name: AppRouteName.certificationsDetailsEdit,
                               builder: (context, state) => BlocProvider(
+                                key: ValueKey(state.matchedLocation),
                                 create: (context) => CertificationDetailsBloc()..add(CertificationDetailsEvent.load(state.pathParameters['certificationID']!)),
                                 child: DetailsAvailable<CertificationDetailsBloc, CertificationDetailsState>(child: const CertificationEditScreen()),
                               ),
