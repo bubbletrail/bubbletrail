@@ -62,7 +62,12 @@ class AllSitesMap extends StatelessWidget {
             width: 32,
             height: 32,
             alignment: Alignment.topCenter, // point is at bottom center
-            child: Icon(Icons.location_on, size: 28, color: Colors.redAccent),
+            child: Tooltip(
+              triggerMode: .tap,
+              message: '${s.name},\n${s.location}, ${s.country}',
+              showDuration: Duration(seconds: 5),
+              child: Icon(Icons.location_on, size: 28, color: Colors.redAccent),
+            ),
           ),
         )
         .toList();
