@@ -122,7 +122,7 @@ class _SiteMapState extends State<_SiteMap> {
           ]
         : [
             // OSM layer
-            // TileLayer(urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', userAgentPackageName: 'app.bubbletrail.bubbletrail', maxZoom: 19),
+            TileLayer(urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', userAgentPackageName: 'app.bubbletrail.bubbletrail', maxZoom: 19),
           ];
 
     return FlutterMap(

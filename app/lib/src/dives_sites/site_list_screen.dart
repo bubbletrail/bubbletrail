@@ -10,65 +10,42 @@ import '../app_routes.dart';
 import '../app_theme.dart';
 import '../common/common.dart';
 import 'dive_list_bloc.dart';
-import 'site_list_bloc.dart';
-import 'site_map.dart';
 
 class SiteListScreen extends StatelessWidget {
   const SiteListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SiteListBloc, SiteListState>(
-      builder: (context, slState) {
-        return ScreenScaffold(
-          title: const Text('Dive Sites'),
-          actions: [
-            _switchViewAction(context, slState),
-            IconButton(icon: const Icon(Icons.add), tooltip: 'Add new dive site', onPressed: () => context.goNamed(AppRouteName.sitesNew)),
-          ],
-          body: BlocBuilder<DiveListBloc, DiveListState>(
-            builder: (context, state) {
-              if (state is DiveListInitial || state is DiveListLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
+    return ScreenScaffold(
+      title: const Text('Dive sites'),
+      actions: [
+        IconButton(icon: const Icon(Icons.map_outlined), tooltip: 'View as map', onPressed: () => context.goNamed(AppRouteName.sitesMap)),
+        IconButton(icon: const Icon(Icons.add), tooltip: 'Add new dive site', onPressed: () => context.goNamed(AppRouteName.sitesNew)),
+      ],
+      body: BlocBuilder<DiveListBloc, DiveListState>(
+        builder: (context, state) {
+          if (state is DiveListInitial || state is DiveListLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-              if (state is DiveListLoaded) {
-                final sites = state.sites;
+          if (state is DiveListLoaded) {
+            final sites = state.sites;
 
-                if (sites.isEmpty) {
-                  return const EmptyStateWidget(message: 'No dive sites yet.', icon: Icons.location_on_outlined);
-                }
+            if (sites.isEmpty) {
+              return const EmptyStateWidget(message: 'No dive sites yet.', icon: Icons.location_on_outlined);
+            }
 
-                if (slState.showAsMap) return AllSitesMap(sites: sites);
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final isNarrow = constraints.maxWidth < narrowLayoutBreakpoint;
+                return isNarrow ? _buildCardList(context, sites, state.diveCountBySiteId) : _buildTrinaGrid(context, sites, state.diveCountBySiteId);
+              },
+            );
+          }
 
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isNarrow = constraints.maxWidth < narrowLayoutBreakpoint;
-                    return isNarrow ? _buildCardList(context, sites, state.diveCountBySiteId) : _buildTrinaGrid(context, sites, state.diveCountBySiteId);
-                  },
-                );
-              }
-
-              return const Center(child: Text('Unknown state'));
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _switchViewAction(BuildContext context, SiteListState slState) {
-    if (!slState.showAsMap) {
-      return IconButton(
-        icon: const Icon(Icons.map_outlined),
-        tooltip: 'View as map',
-        onPressed: () => context.read<SiteListBloc>().add(SiteListEvent.showAsMap(true)),
-      );
-    }
-    return IconButton(
-      icon: const Icon(Icons.list_outlined),
-      tooltip: 'View as list',
-      onPressed: () => context.read<SiteListBloc>().add(SiteListEvent.showAsMap(false)),
+          return const Center(child: Text('Unknown state'));
+        },
+      ),
     );
   }
 
