@@ -593,7 +593,7 @@ class _DiveDetails extends StatelessWidget {
       children.add(
         ColumnRow(
           label: 'SAC',
-          child: VolumeText(dive.sac, suffix: '/min'),
+          child: VolumeText(dive.sac, suffix: '/min', precise: true),
         ),
       );
     }
@@ -838,7 +838,7 @@ class _CylinderColumn extends StatelessWidget {
       details.add(
         ColumnRow(
           label: 'SAC',
-          child: VolumeText(sac, suffix: '/min'),
+          child: VolumeText(sac, suffix: '/min', precise: true),
         ),
       );
     }

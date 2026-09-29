@@ -62,7 +62,7 @@ class CylinderTile extends StatelessWidget {
       details.add(
         LabeledChip(
           label: 'SAC',
-          child: VolumeText(sac, suffix: '/min'),
+          child: VolumeText(sac, suffix: '/min', precise: true),
         ),
       );
     }

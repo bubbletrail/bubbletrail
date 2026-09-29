@@ -178,7 +178,8 @@ class _DiveTableState extends State<DiveTable> {
           'site': TrinaCell(value: site?.name ?? ''),
           'sac': TrinaCell(
             value: dive.sac * 10,
-            renderer: (rendererContext) => rendererContext.cell.value != 0 ? VolumeText(rendererContext.cell.value / 10, suffix: '/min') : Text('-'),
+            renderer: (rendererContext) =>
+                rendererContext.cell.value != 0 ? VolumeText(rendererContext.cell.value / 10, suffix: '/min', precise: true) : Text('-'),
           ),
           '_id': TrinaCell(value: dive.id), // Hidden field for navigation
         },
