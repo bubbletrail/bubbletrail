@@ -26,6 +26,7 @@ import 'src/dives_sites/fullscreen_profile_screen.dart';
 import 'src/dives_sites/site_details_bloc.dart';
 import 'src/dives_sites/site_details_screen.dart';
 import 'src/dives_sites/site_list_screen.dart';
+import 'src/dives_sites/site_map_screen.dart';
 import 'src/equipment/certification_details_bloc.dart';
 import 'src/equipment/certification_details_screen.dart';
 import 'src/equipment/certification_edit_screen.dart';
@@ -291,6 +292,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                         );
                       },
                     ),
+                    GoRoute(path: AppRoutePath.sitesMap, name: AppRouteName.sitesMap, builder: (context, state) => const SiteMapScreen()),
                     GoRoute(
                       path: AppRoutePath.sitesDetails,
                       name: AppRouteName.sitesDetails,

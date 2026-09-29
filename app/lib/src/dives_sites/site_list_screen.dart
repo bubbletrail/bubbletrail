@@ -17,8 +17,11 @@ class SiteListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
-      title: const Text('Dive Sites'),
-      actions: [IconButton(icon: const Icon(Icons.add), tooltip: 'Add new dive site', onPressed: () => context.goNamed(AppRouteName.sitesNew))],
+      title: const Text('Dive sites'),
+      actions: [
+        IconButton(icon: const Icon(Icons.map_outlined), tooltip: 'View as map', onPressed: () => context.goNamed(AppRouteName.sitesMap)),
+        IconButton(icon: const Icon(Icons.add), tooltip: 'Add new dive site', onPressed: () => context.goNamed(AppRouteName.sitesNew)),
+      ],
       body: BlocBuilder<DiveListBloc, DiveListState>(
         builder: (context, state) {
           if (state is DiveListInitial || state is DiveListLoading) {
