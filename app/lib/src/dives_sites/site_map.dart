@@ -135,7 +135,7 @@ class _SiteMapState extends State<_SiteMap> {
       options: MapOptions(initialCenter: widget.centerPos, initialZoom: widget.initialZoom, minZoom: 3.0, maxZoom: 18.0, onTap: widget.onTap),
       children: [
         ...tiles,
-        MarkerLayer(markers: widget.markers),
+        MarkerLayer(markers: widget.markers, rotate: true),
       ],
     );
   }
