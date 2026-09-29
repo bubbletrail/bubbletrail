@@ -94,12 +94,14 @@ String formatPressure(PressureUnit unit, num pressure) {
   }
 }
 
-String formatVolume(VolumeUnit unit, num volume) {
+String formatVolume(VolumeUnit unit, num volume, {precise = false}) {
   switch (unit) {
     case .liters:
+      if (precise) return '${volume.toStringAsFixed(1)} ${unit.label}';
       return '${formatDisplayValue(volume)} ${unit.label}';
     case .cuft:
       final val = volume * litersToCuft;
+      if (precise) return '${val.toStringAsFixed(2)} ${unit.label}';
       return '${formatDisplayValue(val)} ${unit.label}';
   }
 }
@@ -248,13 +250,14 @@ class VolumeText extends StatelessWidget {
   final num volume;
   final IconData? icon;
   final String suffix;
+  final bool precise;
 
-  const VolumeText(this.volume, {this.icon, this.suffix = '', super.key});
+  const VolumeText(this.volume, {this.icon, this.suffix = '', super.key, this.precise = false});
 
   @override
   Widget build(BuildContext context) {
     final unit = context.select<PreferencesStore, VolumeUnit>((p) => p.volumeUnit);
-    return IconText(icon, formatVolume(unit, volume) + suffix);
+    return IconText(icon, formatVolume(unit, volume, precise: precise) + suffix);
   }
 }
 

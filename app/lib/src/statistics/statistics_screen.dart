@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../common/common.dart';
-import '../preferences/preferences_store.dart';
 import '../app_routes.dart';
+import '../common/common.dart';
 import '../dives_sites/dive_list_bloc.dart';
+import '../preferences/preferences_store.dart';
 
 class StatisticsScreen extends StatelessWidget {
   const StatisticsScreen({super.key});
@@ -81,6 +81,7 @@ class _Statistics extends StatelessWidget {
       if (stats.hasLongest) _diveRow(context, 'Longest dive', DurationText(stats.longestSeconds), stats.longestDive!),
       if (stats.hasWarmest) _diveRow(context, 'Warmest dive', Text(formatTemperature(prefs.temperatureUnit, stats.warmestTemp)), stats.warmestDive!),
       if (stats.hasColdest) _diveRow(context, 'Coldest dive', Text(formatTemperature(prefs.temperatureUnit, stats.coldestTemp)), stats.coldestDive!),
+      if (stats.hasSAC) infoRow('Average SAC', '${formatVolume(prefs.volumeUnit, stats.averageSAC, precise: true)}/min'),
     ];
   }
 
@@ -148,6 +149,10 @@ class _Statistics extends StatelessWidget {
         stats.coldestDive = dive;
         stats.hasColdest = true;
       }
+    }
+    if (dive.hasSac()) {
+      stats.sacTimesDuration += dive.sac * dive.duration;
+      stats.sacTotalDuration += dive.duration;
     }
   }
 }
@@ -275,5 +280,10 @@ class _Stats {
   double coldestTemp = 0;
   Dive? coldestDive;
 
+  double sacTimesDuration = 0;
+  double sacTotalDuration = 0;
+
   double get avgMaxDepth => maxDepthCount > 0 ? maxDepthSum / maxDepthCount : 0;
+  bool get hasSAC => sacTotalDuration > 0;
+  double get averageSAC => sacTimesDuration / sacTotalDuration;
 }

@@ -74,7 +74,7 @@ class DiveListItem extends StatelessWidget {
                 if (dive.sac > 0)
                   _InfoChip(
                     icon: Icons.speed,
-                    label: VolumeText(dive.sac, suffix: '/min'),
+                    label: VolumeText(dive.sac, suffix: '/min', precise: true),
                     theme: theme,
                   ),
                 Expanded(child: Container()),
