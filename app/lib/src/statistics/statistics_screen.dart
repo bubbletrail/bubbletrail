@@ -1,15 +1,14 @@
 import 'dart:math';
 
 import 'package:btproto/btproto.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../common/common.dart';
-import '../preferences/preferences_store.dart';
 import '../app_routes.dart';
+import '../common/common.dart';
 import '../dives_sites/dive_list_bloc.dart';
+import '../preferences/preferences_store.dart';
 
 class StatisticsScreen extends StatelessWidget {
   const StatisticsScreen({super.key});
