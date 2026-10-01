@@ -331,7 +331,7 @@ jobs:
           name: android
           path: app/bubbletrail*.aab
 
-      - uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1
+      - uses: ruby/setup-ruby@a0102e0972be65f351c307e2d64b9314a57c8073 # v1
         if: needs.calver.outputs.release
         with:
           ruby-version: 3.3.8
@@ -363,7 +363,7 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: dart-lang/setup-dart@7654d458321ee25acccccfdb86cd48bd95768ff1 # v1
+      - uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1
       - uses: ./.github/actions/build-info
 
       - name: Download packages
