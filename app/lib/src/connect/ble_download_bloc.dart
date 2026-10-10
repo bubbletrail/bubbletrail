@@ -293,7 +293,9 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
       return;
     }
 
-    _log.info('starting download from ${device.remoteId.str} (${device.platformName})');
+    _log.info(
+      'starting download from ${device.remoteId.str} (${device.platformName}) (svc:${charPair.serviceID}, rx:${charPair.rx.characteristicUuid}, tx:${charPair.tx.characteristicUuid})',
+    );
     emit(state.copyWith(isDownloading: true, downloadedDives: []).copyWithNull(downloadProgress: true, error: true, autoStartDescriptor: true));
 
     // If we have a remembered computer already, grab the fingerprint from there
@@ -453,10 +455,11 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
 }
 
 class BleCharacteristicPair {
+  final Guid serviceID;
   final BluetoothCharacteristic rx;
   final BluetoothCharacteristic tx;
 
-  BleCharacteristicPair({required this.rx, required this.tx});
+  BleCharacteristicPair({required this.serviceID, required this.rx, required this.tx});
 }
 
 BleCharacteristicPair? findBleCharacteristics(List<BluetoothService> services) {
@@ -474,7 +477,7 @@ BleCharacteristicPair? findBleCharacteristics(List<BluetoothService> services) {
     }
 
     if (rxChar != null && txChar != null) {
-      return BleCharacteristicPair(rx: rxChar, tx: txChar);
+      return BleCharacteristicPair(serviceID: service.serviceUuid, rx: rxChar, tx: txChar);
     }
   }
   return null;
