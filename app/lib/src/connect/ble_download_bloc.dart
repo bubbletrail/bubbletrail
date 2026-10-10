@@ -317,8 +317,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
       return;
     }
 
-    // Create BLE characteristics wrapper for the download
-    final ble = BleCharacteristics(read: charPair.rx.onValueReceived, write: charPair.tx.write);
+    final ble = BleCharacteristics(read: charPair.read, write: charPair.write);
 
     // Start the download and process events
     final dir = await getApplicationSupportDirectory();
@@ -460,6 +459,9 @@ class BleCharacteristicPair {
   final BluetoothCharacteristic tx;
 
   BleCharacteristicPair({required this.serviceID, required this.rx, required this.tx});
+
+  Stream<List<int>> get read => rx.onValueReceived;
+  Future<void> write(List<int> data) => tx.write(data, withoutResponse: tx.properties.writeWithoutResponse);
 }
 
 BleCharacteristicPair? findBleCharacteristics(List<BluetoothService> services) {
