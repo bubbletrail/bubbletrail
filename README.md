@@ -4,64 +4,32 @@
 
 > A dive log application for scuba divers
 
-## About
-
-Bubbletrail is a free, open-source dive log for recording and organising
-your scuba dives. It connects directly to dive computers over Bluetooth,
-imports logs from Subsurface and other programs, and displays dive profiles
-including depth, temperature, tank pressure, and calculated deco. Whether
-you're a recreational diver or into technical diving with multiple gas
-mixes, Bubbletrail keeps your dive history in one place.
-
-The app aims for a modern, intuitive interface and surfaces best-practice
-metrics like surface gradient factors (SurfGF) to help you understand your
-dives better.
-
 ## Rationale & goals
 
-Bubbletrail takes inspiration from existing apps and wouldn't exist without
-them. Nonetheless, the existing alternatives have flaws that were serious
-enough to motivate me to create this app. I mention the forebears here not
-with scorn but with the utmost respect for their creators:
+Bubbletrail is a personal project to create a dive log that *works for me*.
+Goals and aspirations include:
 
-- **MacDive**, which has been my primary dive log for a log time and would
-  continue to be so had it been maintained or, at least, open source so I
-  could attempt to maintain it myself.
+- Stable and well maintained. Bugs are fixed before features are added.
+  Values, measurements and results must be correct and technically sound.
 
-- **Subsurface**, which provides excellent tools for technical analysis of
-  dives and a fantastic dive planner, but unfortunately falls flat as a user
-  interface I want to use on my phone. Had I been more enamoured with C and
-  Qt I'd have made a serious attempt to contribute a better mobile
-  experience; alas, that's not me.
+- Open exchange of data. Supports import and export in open and common
+  formats to prevent any lock-in. You can migrate your existing log to
+  Bubbletrail, and then migrate to something better again the future.
 
-Hence, Bubbletrail. Bubbletrail should be:
+- Technically transparent and supports modern best practices. Shows all
+  values actually recorded by the dive computer. Computes decompression
+  status using Buhlmann ZHL-16C with configurable gradient factors for
+  post-dive analysis.
 
-- Well maintained, and work on the latest version of all popular platforms
-  (Windows, macOS, Linux, Android, and iOS);
+- Cross platform. The same app needs to run on mobile and desktop, on all
+  common operating systems. (But for me personally that means iOS and macOS;
+  Android and Windows seems to work but isn't tested.)
 
-- Free, open, and technically excellent like Subsurface; and
+- Data syncing with privacy. Can use a standard S3 object store for data
+  sync between devices, without exposing your personal data to the storage
+  operator.
 
-- Full-featured and with an attractive user interface, like MacDive.
-
-It isn't full-featured, yet. But it _is_ open source, written in a fashion
-that should have a fairly low threshold to contribution for other people,
-and I'm also building out functionality as we speak. We'll see if we get
-there!
-
-## Features
-
-- Connect to dive computers via Bluetooth LE using libdivecomputer
-- Import dives from Subsurface (`.ssrf` format), MacDive (`.xml`) and other
-  programs (`.uddf` format).
-- View dive profiles with depth, temperature, deco, and tank pressure charts
-- Built-in application of Buhlmann ZHL-16c to dive profiles, showing deco
-  and end SurfGF even your computer didn't calculate it
-- Manage dive sites with GPS coordinates, description, and tags
-- Support for technical diving (multiple gases, O2/He percentages)
-
-## Getting started
-
-See <https://bubbletrail.app/getting-started/>.
+- Organic development. Bubbletrail is not vibe coded.
 
 ## Building
 
