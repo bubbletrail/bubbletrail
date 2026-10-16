@@ -179,20 +179,13 @@ bool _getFieldIndexed(ffi.Pointer<dc.dc_parser_t> parser, dc.dc_field_type_t typ
 }
 
 /// Global state for sample callback (needed because NativeCallable can't capture closures).
-Log? _currentDive;
+Log? _currentLog;
 LogSample? _currentSample;
 
-// Per-sample GPS location tracking. The first location sample becomes the
-// dive's start position and the last becomes the end position.
-Position? _firstSampleLocation;
-Position? _lastSampleLocation;
-
 /// Parse samples from the parser.
-void _parseSamples(ffi.Pointer<dc.dc_parser_t> parser, Log dive) {
-  _currentDive = dive;
+void _parseSamples(ffi.Pointer<dc.dc_parser_t> parser, Log log) {
+  _currentLog = log;
   _currentSample = null;
-  _firstSampleLocation = null;
-  _lastSampleLocation = null;
 
   final callback = ffi.NativeCallable<dc.dc_sample_callback_tFunction>.isolateLocal(_sampleCallback);
 
@@ -202,27 +195,19 @@ void _parseSamples(ffi.Pointer<dc.dc_parser_t> parser, Log dive) {
 
   // Add the last sample if it has data
   if (_currentSample != null) {
-    dive.samples.add(_currentSample!);
+    log.samples.add(_currentSample!);
   }
 
-  // Per-sample GPS location overrides the dive-level location: the first
-  // sample's location is the dive start, the last sample's the dive end.
-  if (_firstSampleLocation != null) {
-    dive.startPosition = _firstSampleLocation!;
-  }
-  if (_lastSampleLocation != null) {
-    dive.endPosition = _lastSampleLocation!;
-  }
+  // Post-process samples for start and end location.
+  setSampleLocations(log);
 
-  _currentDive = null;
+  _currentLog = null;
   _currentSample = null;
-  _firstSampleLocation = null;
-  _lastSampleLocation = null;
 }
 
 /// Sample callback for dc_parser_samples_foreach.
 void _sampleCallback(int typeValue, ffi.Pointer<dc.dc_sample_value_t> value, ffi.Pointer<ffi.Void> userdata) {
-  final dive = _currentDive!;
+  final dive = _currentLog!;
   final type = dc.dc_sample_type_t.fromValue(typeValue);
 
   switch (type) {
@@ -294,9 +279,7 @@ void _sampleCallback(int typeValue, ffi.Pointer<dc.dc_sample_value_t> value, ffi
 
     case dc.dc_sample_type_t.DC_SAMPLE_LOCATION:
       final loc = value.ref.location;
-      final position = Position(latitude: loc.latitude, longitude: loc.longitude, altitude: loc.altitude != 0 ? loc.altitude : null);
-      _firstSampleLocation ??= position;
-      _lastSampleLocation = position;
+      _currentSample?.position = Position(latitude: loc.latitude, longitude: loc.longitude, altitude: loc.altitude != 0 ? loc.altitude : null);
   }
 }
 
@@ -391,4 +374,33 @@ SampleEventType _convertSampleEventType(dc.parser_sample_event_t dcValue) {
     dc.parser_sample_event_t.SAMPLE_EVENT_TISSUELEVEL => SampleEventType.SAMPLE_EVENT_TYPE_TISSUE_LEVEL,
     dc.parser_sample_event_t.SAMPLE_EVENT_GASCHANGE2 => SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE_2,
   };
+}
+
+void setSampleLocations(Log log) {
+  // The start location is the last sample with a depth of zero, before the
+  // dive starts. The end position is the first sample with a zero depth
+  // once there are no further samples with a depth, or the last sample with
+  // a position if there are no samples with position and zero depth.
+
+  final firstSubmerged = log.samples.indexWhere((sample) => sample.hasDepth() && sample.depth > 0);
+  final lastSubmerged = log.samples.lastIndexWhere((sample) => sample.hasDepth() && sample.depth > 0);
+  Position? start;
+  Position? end;
+  Position? lastPosition;
+
+  for (final (index, sample) in log.samples.indexed) {
+    if (!sample.hasPosition()) continue;
+    lastPosition = sample.position;
+    if (!sample.hasDepth() || sample.depth != 0) continue;
+    if (firstSubmerged < 0 || index < firstSubmerged) {
+      start = sample.position;
+    }
+    if (index > lastSubmerged) {
+      end ??= sample.position;
+    }
+  }
+
+  if (start != null) log.startPosition = start;
+  final endPosition = end ?? lastPosition;
+  if (endPosition != null) log.endPosition = endPosition;
 }
