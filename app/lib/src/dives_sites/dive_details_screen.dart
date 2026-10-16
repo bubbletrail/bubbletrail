@@ -491,12 +491,19 @@ class _DiveDetails extends StatelessWidget {
   }
 
   Widget _tagsSection(BuildContext context) {
-    if (dive.tags.isEmpty) {
-      return _addChip(label: 'Add tags', icon: Icons.add, onTap: () => _editTags(context));
-    }
-    return _tappableChip(
-      onTap: () => _editTags(context),
-      child: TagsList(tags: dive.tags, secondaryTags: site?.tags.where((t) => !dive.tags.contains(t)).toList(), prefix: '#'),
+    final secondary = site?.tags.where((t) => !dive.tags.contains(t)).toList();
+    return Row(
+      mainAxisSize: .min,
+      spacing: 6,
+      children: [
+        if (dive.tags.isEmpty) _addChip(label: 'Add tags', icon: Icons.add, onTap: () => _editTags(context)),
+        if (dive.tags.isNotEmpty)
+          _tappableChip(
+            onTap: () => _editTags(context),
+            child: TagsList(tags: dive.tags, prefix: '#'),
+          ),
+        if (secondary?.isNotEmpty == true) TagsList(tags: [], secondaryTags: secondary, prefix: '#'),
+      ],
     );
   }
 
