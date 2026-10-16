@@ -23,23 +23,23 @@ class SiteMap extends StatelessWidget {
           width: 32,
           height: 32,
           alignment: Alignment.topCenter, // point is at bottom center
-          child: Icon(Icons.location_on, size: 28, color: Colors.redAccent),
+          child: Icon(Icons.location_on, size: 32, color: Colors.redAccent),
         ),
       if (startPosition != null)
         Marker(
           point: startPosition!,
           width: 32,
           height: 32,
-          alignment: Alignment.topCenter, // point is at bottom center
-          child: Icon(Icons.arrow_drop_down, size: 28, color: Colors.blueAccent),
+          alignment: Alignment.center, // point is at center center
+          child: Icon(Icons.arrow_drop_down, size: 32, color: Colors.blueAccent),
         ),
       if (endPosition != null)
         Marker(
           point: endPosition!,
           width: 32,
           height: 32,
-          alignment: Alignment.topCenter, // point is at bottom center
-          child: Icon(Icons.arrow_drop_up, size: 28, color: Colors.blueAccent),
+          alignment: Alignment.center, // point is at center center
+          child: Icon(Icons.arrow_drop_up, size: 32, color: Colors.blueAccent),
         ),
     ];
     return _SiteMap(key: key, markers: markers, onTap: onTap, alwaysCenterPosition: alwaysCenterPosition);
