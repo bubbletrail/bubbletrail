@@ -7,14 +7,20 @@ import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
 
 import 'libdivecomputer_bindings_generated.dart' as dc;
 
+// Increment when Bubbletrail changes how libdivecomputer output is interpreted.
+const diveParsingVersion = 1;
+
 // --- Parser Functions ---
 
 /// Parses a dive from raw data using libdivecomputer.
 ///
 /// This function must be called from an isolate where FFI is available.
 /// The [parser] must be a valid dc_parser_t pointer created via dc_parser_new.
-Log parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {Uint8List? fingerprint, String? model, String? serial}) {
+Log parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {Uint8List? fingerprint, RawDiveData? rawData, String? model, String? serial}) {
   final log = Log();
+  if (rawData != null) {
+    log.rawData = rawData;
+  }
   if (fingerprint != null) {
     log.ldcFingerprint = fingerprint;
   }

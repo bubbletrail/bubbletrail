@@ -277,6 +277,14 @@ const Log$json = {
     },
     {'1': 'ldc_fingerprint', '3': 18, '4': 1, '5': 12, '10': 'ldcFingerprint'},
     {'1': 'uniqueID', '3': 19, '4': 1, '5': 9, '10': 'uniqueID'},
+    {
+      '1': 'raw_data',
+      '3': 21,
+      '4': 1,
+      '5': 11,
+      '6': '.btstore.RawDiveData',
+      '10': 'rawData'
+    },
   ],
 };
 
@@ -297,7 +305,67 @@ final $typed_data.Uint8List logDescriptor = $convert.base64Decode(
     'YXNNaXhSCGdhc01peGVzEiMKBXRhbmtzGBAgAygLMg0uYnRzdG9yZS5UYW5rUgV0YW5rcxIsCg'
     'dzYW1wbGVzGBEgAygLMhIuYnRzdG9yZS5Mb2dTYW1wbGVSB3NhbXBsZXMSJwoPbGRjX2Zpbmdl'
     'cnByaW50GBIgASgMUg5sZGNGaW5nZXJwcmludBIaCgh1bmlxdWVJRBgTIAEoCVIIdW5pcXVlSU'
-    'Q=');
+    'QSLwoIcmF3X2RhdGEYFSABKAsyFC5idHN0b3JlLlJhd0RpdmVEYXRhUgdyYXdEYXRh');
+
+@$core.Deprecated('Use rawDiveDataDescriptor instead')
+const RawDiveData$json = {
+  '1': 'RawDiveData',
+  '2': [
+    {'1': 'data', '3': 1, '4': 1, '5': 12, '10': 'data'},
+    {'1': 'parser_family', '3': 2, '4': 1, '5': 13, '10': 'parserFamily'},
+    {'1': 'device_model', '3': 3, '4': 1, '5': 13, '10': 'deviceModel'},
+    {'1': 'vendor', '3': 4, '4': 1, '5': 9, '10': 'vendor'},
+    {'1': 'product', '3': 5, '4': 1, '5': 9, '10': 'product'},
+    {
+      '1': 'device_time',
+      '3': 6,
+      '4': 1,
+      '5': 13,
+      '9': 0,
+      '10': 'deviceTime',
+      '17': true
+    },
+    {
+      '1': 'system_time',
+      '3': 7,
+      '4': 1,
+      '5': 3,
+      '9': 1,
+      '10': 'systemTime',
+      '17': true
+    },
+    {
+      '1': 'libdivecomputer_version',
+      '3': 8,
+      '4': 1,
+      '5': 9,
+      '10': 'libdivecomputerVersion'
+    },
+    {'1': 'parsing_version', '3': 9, '4': 1, '5': 13, '10': 'parsingVersion'},
+    {
+      '1': 'descriptor_model',
+      '3': 10,
+      '4': 1,
+      '5': 13,
+      '10': 'descriptorModel'
+    },
+  ],
+  '8': [
+    {'1': '_device_time'},
+    {'1': '_system_time'},
+  ],
+};
+
+/// Descriptor for `RawDiveData`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List rawDiveDataDescriptor = $convert.base64Decode(
+    'CgtSYXdEaXZlRGF0YRISCgRkYXRhGAEgASgMUgRkYXRhEiMKDXBhcnNlcl9mYW1pbHkYAiABKA'
+    '1SDHBhcnNlckZhbWlseRIhCgxkZXZpY2VfbW9kZWwYAyABKA1SC2RldmljZU1vZGVsEhYKBnZl'
+    'bmRvchgEIAEoCVIGdmVuZG9yEhgKB3Byb2R1Y3QYBSABKAlSB3Byb2R1Y3QSJAoLZGV2aWNlX3'
+    'RpbWUYBiABKA1IAFIKZGV2aWNlVGltZYgBARIkCgtzeXN0ZW1fdGltZRgHIAEoA0gBUgpzeXN0'
+    'ZW1UaW1liAEBEjcKF2xpYmRpdmVjb21wdXRlcl92ZXJzaW9uGAggASgJUhZsaWJkaXZlY29tcH'
+    'V0ZXJWZXJzaW9uEicKD3BhcnNpbmdfdmVyc2lvbhgJIAEoDVIOcGFyc2luZ1ZlcnNpb24SKQoQ'
+    'ZGVzY3JpcHRvcl9tb2RlbBgKIAEoDVIPZGVzY3JpcHRvck1vZGVsQg4KDF9kZXZpY2VfdGltZU'
+    'IOCgxfc3lzdGVtX3RpbWU=');
 
 @$core.Deprecated('Use logSampleDescriptor instead')
 const LogSample$json = {

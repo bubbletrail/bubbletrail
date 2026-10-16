@@ -39,7 +39,26 @@ void main() {
           expect(status, bindings.dc_status_t.DC_STATUS_SUCCESS, reason: 'Failed to create parser: $status');
 
           // Parse the dive
-          final dive = parseDiveFromParser(parser.value);
+          final dive = parseDiveFromParser(
+            parser.value,
+            rawData: RawDiveData(
+              data: diveData,
+              parserFamily: bindings.dc_descriptor_get_type(descriptor).value,
+              deviceModel: bindings.dc_descriptor_get_model(descriptor),
+              descriptorModel: bindings.dc_descriptor_get_model(descriptor),
+              vendor: 'Shearwater',
+              product: 'Perdix',
+              libdivecomputerVersion: bindings.dc_version(ffi.nullptr).cast<Utf8>().toDartString(),
+              parsingVersion: diveParsingVersion,
+            ),
+          );
+          expect(dive.rawData.data, diveData);
+          expect(Log.fromBuffer(dive.writeToBuffer()).rawData, dive.rawData);
+          expect(dive.rawData.vendor, 'Shearwater');
+          expect(dive.rawData.libdivecomputerVersion, startsWith(bindings.DC_VERSION));
+          expect(dive.rawData.libdivecomputerVersion, matches(RegExp(r'\([0-9a-f]{40,64}\)')));
+          expect(dive.rawData.hasDeviceTime(), isFalse);
+          expect(dive.rawData.hasSystemTime(), isFalse);
 
           // --- Verify basic info ---
           expect(dive.dateTime.seconds.toInt(), DateTime(2025, 11, 22, 13, 54, 17).millisecondsSinceEpoch ~/ 1000);
