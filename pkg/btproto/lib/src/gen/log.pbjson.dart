@@ -352,6 +352,14 @@ const LogSample$json = {
       '6': '.btstore.VendorData',
       '10': 'vendorData'
     },
+    {
+      '1': 'position',
+      '3': 15,
+      '4': 1,
+      '5': 11,
+      '6': '.btstore.Position',
+      '10': 'position'
+    },
   ],
 };
 
@@ -365,7 +373,8 @@ final $typed_data.Uint8List logSampleDescriptor = $convert.base64Decode(
     'FSCHNldHBvaW50EigKBHBwbzIYCiADKAsyFC5idHN0b3JlLlBwbzJSZWFkaW5nUgRwcG8yEhAK'
     'A2NucxgLIAEoAVIDY25zEicKBGRlY28YDCABKAsyEy5idHN0b3JlLkRlY29TdGF0dXNSBGRlY2'
     '8SIgoNZ2FzX21peF9pbmRleBgNIAEoBVILZ2FzTWl4SW5kZXgSNAoLdmVuZG9yX2RhdGEYDiAD'
-    'KAsyEy5idHN0b3JlLlZlbmRvckRhdGFSCnZlbmRvckRhdGE=');
+    'KAsyEy5idHN0b3JlLlZlbmRvckRhdGFSCnZlbmRvckRhdGESLQoIcG9zaXRpb24YDyABKAsyES'
+    '5idHN0b3JlLlBvc2l0aW9uUghwb3NpdGlvbg==');
 
 @$core.Deprecated('Use salinityDescriptor instead')
 const Salinity$json = {

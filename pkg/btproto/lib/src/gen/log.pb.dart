@@ -331,6 +331,7 @@ class LogSample extends $pb.GeneratedMessage {
     DecoStatus? deco,
     $core.int? gasMixIndex,
     $core.Iterable<VendorData>? vendorData,
+    $1.Position? position,
   }) {
     final result = create();
     if (time != null) result.time = time;
@@ -347,6 +348,7 @@ class LogSample extends $pb.GeneratedMessage {
     if (deco != null) result.deco = deco;
     if (gasMixIndex != null) result.gasMixIndex = gasMixIndex;
     if (vendorData != null) result.vendorData.addAll(vendorData);
+    if (position != null) result.position = position;
     return result;
   }
 
@@ -382,6 +384,8 @@ class LogSample extends $pb.GeneratedMessage {
     ..aI(13, _omitFieldNames ? '' : 'gasMixIndex')
     ..pPM<VendorData>(14, _omitFieldNames ? '' : 'vendorData',
         subBuilder: VendorData.create)
+    ..aOM<$1.Position>(15, _omitFieldNames ? '' : 'position',
+        subBuilder: $1.Position.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -505,6 +509,17 @@ class LogSample extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(14)
   $pb.PbList<VendorData> get vendorData => $_getList(13);
+
+  @$pb.TagNumber(15)
+  $1.Position get position => $_getN(14);
+  @$pb.TagNumber(15)
+  set position($1.Position value) => $_setField(15, value);
+  @$pb.TagNumber(15)
+  $core.bool hasPosition() => $_has(14);
+  @$pb.TagNumber(15)
+  void clearPosition() => $_clearField(15);
+  @$pb.TagNumber(15)
+  $1.Position ensurePosition() => $_ensure(14);
 }
 
 /// Water salinity information.
