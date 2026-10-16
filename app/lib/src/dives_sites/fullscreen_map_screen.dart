@@ -7,7 +7,10 @@ import 'site_details_bloc.dart';
 import 'site_map.dart';
 
 class FullscreenMapScreen extends StatelessWidget {
-  const FullscreenMapScreen({super.key});
+  final LatLng? startPosition;
+  final LatLng? endPosition;
+
+  const FullscreenMapScreen({super.key, this.startPosition, this.endPosition});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +39,11 @@ class FullscreenMapScreen extends StatelessWidget {
 
           return ScreenScaffold(
             title: Text(state.site.name),
-            body: SiteMap(sitePosition: LatLng(state.site.position.latitude, state.site.position.longitude)),
+            body: SiteMap(
+              sitePosition: LatLng(state.site.position.latitude, state.site.position.longitude),
+              startPosition: startPosition,
+              endPosition: endPosition,
+            ),
           );
         },
       ),

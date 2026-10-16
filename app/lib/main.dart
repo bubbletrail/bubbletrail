@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -265,10 +266,18 @@ class _MyAppState extends State<MyApp> with WindowListener {
                   path: AppRoutePath.sitesDetailsMap,
                   name: AppRouteName.sitesDetailsMap,
                   builder: (context, state) {
+                    LatLng? start, end;
+                    final extra = state.extra;
+                    if (extra is Map<String, LatLng?>) {
+                      start = extra['startPosition'];
+                      end = extra['endPosition'];
+                    }
                     return BlocProvider(
                       key: ValueKey(state.matchedLocation),
                       create: (_) => SiteDetailsBloc()..add(SiteDetailsEvent.loadSite(state.pathParameters['siteID']!)),
-                      child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(child: const FullscreenMapScreen()),
+                      child: DetailsAvailable<SiteDetailsBloc, SiteDetailsState>(
+                        child: FullscreenMapScreen(startPosition: start, endPosition: end),
+                      ),
                     );
                   },
                 ),
