@@ -398,7 +398,7 @@ void setSampleLocations(Log log) {
     if (!sample.hasPosition()) continue;
     lastPosition = sample.position;
     if (!sample.hasDepth() || sample.depth != 0) continue;
-    if (firstSubmerged < 0 || index < firstSubmerged) {
+    if (firstSubmerged < 0 || index < firstSubmerged || start == null) {
       start = sample.position;
     }
     if (index > lastSubmerged) {
