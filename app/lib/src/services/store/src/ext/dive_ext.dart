@@ -4,6 +4,34 @@ import 'package:btproto/btproto.dart';
 import 'ext.dart';
 
 extension DiveExtensions on Dive {
+  // Rebuild the primary computer log's events using elapsed dive times.
+  void rebuildEvents({Map<int, int>? gasMixtoCylinderIdx}) {
+    if (logs.isEmpty) return;
+    final dl = logs.first;
+    gasMixtoCylinderIdx ??= {
+      for (final (idx, gas) in dl.gasMixes.indexed) idx: cylinders.indexWhere((cylinder) => cylinder.oxygen == gas.oxygen && cylinder.helium == gas.helium),
+    };
+    events.clear();
+    // Collect events, synthesize gas switch events
+    var currentCylinderIdx = 0;
+    for (final sample in dl.samples) {
+      for (final event in sample.events) {
+        if (event.type != SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE) {
+          // libdivecomputer event times are offsets in seconds from the current
+          // sample. Dive events use elapsed seconds from the start of the dive.
+          events.add(event.deepCopy()..time = sample.time.toInt() + event.time);
+        }
+      }
+      if (sample.hasGasMixIndex() && sample.gasMixIndex != currentCylinderIdx) {
+        // Add a gas switch event. The value is the cylinder index.
+        events.add(SampleEvent(type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, time: sample.time.toInt(), value: gasMixtoCylinderIdx[sample.gasMixIndex]));
+        currentCylinderIdx = sample.gasMixIndex;
+      }
+    }
+
+    events.sort((a, b) => a.time.compareTo(b.time));
+  }
+
   // Drop the cached decompression state and recompute everything derived from
   // the samples/gases. Call after editing anything that affects the profile
   // (start time, depth/duration, cylinders or gas switches).

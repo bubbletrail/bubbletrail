@@ -140,6 +140,11 @@ class DiveStore with ChangeNotifier {
         dive.events.sort((a, b) => a.time.compareTo(b.time));
       });
     }
+    if (dive.logs.isNotEmpty && dive.events.any((event) => event.time == 0)) {
+      dive = dive.rebuild((dive) {
+        dive.rebuildEvents();
+      });
+    }
     _dives[id] = dive;
     return dive;
   }
