@@ -37,10 +37,27 @@ void main(List<String> args) async {
     }
     File('version.h').copySync('$libdir/include/libdivecomputer/version.h');
 
+    // Include the actual submodule revision in dc_version() for saved payloads.
+    final revisionResult = await Process.run('git', ['-C', libdir, 'rev-parse', 'HEAD']);
+    if (revisionResult.exitCode == 0) {
+      // A detached submodule HEAD changes when the pinned revision is updated.
+      final headPath = await Process.run('git', ['-C', libdir, 'rev-parse', '--path-format=absolute', '--git-path', 'HEAD']);
+      if (headPath.exitCode == 0) {
+        output.dependencies.add(Uri.file((headPath.stdout as String).trim()));
+      }
+
+      final revision = (revisionResult.stdout as String).trim();
+      if (RegExp(r'^[0-9a-f]{40,64}$').hasMatch(revision)) {
+        final revisionHeader = File.fromUri(input.outputDirectory.resolve('revision.h'));
+        await revisionHeader.writeAsString('#define DC_VERSION_REVISION "$revision"\n');
+        defines['HAVE_VERSION_SUFFIX'] = '1';
+      }
+    }
+
     final cbuilder = CBuilder.library(
       name: packageName,
       assetName: '${packageName}_bindings_generated.dart',
-      includes: [libdir, '$libdir/include', '$libdir/src'],
+      includes: [input.outputDirectory.toFilePath(), libdir, '$libdir/include', '$libdir/src'],
       sources: localsources + libsources,
       libraries: ['m'],
       defines: defines,

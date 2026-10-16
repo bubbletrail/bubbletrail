@@ -12,6 +12,7 @@
 
 import 'dart:core' as $core;
 
+import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart'
     as $0;
@@ -46,6 +47,7 @@ class Log extends $pb.GeneratedMessage {
     $core.List<$core.int>? ldcFingerprint,
     $core.String? uniqueID,
     $1.Position? endPosition,
+    RawDiveData? rawData,
   }) {
     final result = create();
     if (model != null) result.model = model;
@@ -70,6 +72,7 @@ class Log extends $pb.GeneratedMessage {
     if (ldcFingerprint != null) result.ldcFingerprint = ldcFingerprint;
     if (uniqueID != null) result.uniqueID = uniqueID;
     if (endPosition != null) result.endPosition = endPosition;
+    if (rawData != null) result.rawData = rawData;
     return result;
   }
 
@@ -115,6 +118,8 @@ class Log extends $pb.GeneratedMessage {
     ..aOS(19, _omitFieldNames ? '' : 'uniqueID', protoName: 'uniqueID')
     ..aOM<$1.Position>(20, _omitFieldNames ? '' : 'endPosition',
         subBuilder: $1.Position.create)
+    ..aOM<RawDiveData>(21, _omitFieldNames ? '' : 'rawData',
+        subBuilder: RawDiveData.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -312,6 +317,188 @@ class Log extends $pb.GeneratedMessage {
   void clearEndPosition() => $_clearField(20);
   @$pb.TagNumber(20)
   $1.Position ensureEndPosition() => $_ensure(19);
+
+  /// Original computer data and parser context, retained for future reparsing.
+  @$pb.TagNumber(21)
+  RawDiveData get rawData => $_getN(20);
+  @$pb.TagNumber(21)
+  set rawData(RawDiveData value) => $_setField(21, value);
+  @$pb.TagNumber(21)
+  $core.bool hasRawData() => $_has(20);
+  @$pb.TagNumber(21)
+  void clearRawData() => $_clearField(21);
+  @$pb.TagNumber(21)
+  RawDiveData ensureRawData() => $_ensure(20);
+}
+
+/// Device-specific payload after transport decoding and decompression.
+class RawDiveData extends $pb.GeneratedMessage {
+  factory RawDiveData({
+    $core.List<$core.int>? data,
+    $core.int? parserFamily,
+    $core.int? deviceModel,
+    $core.String? vendor,
+    $core.String? product,
+    $core.int? deviceTime,
+    $fixnum.Int64? systemTime,
+    $core.String? libdivecomputerVersion,
+    $core.int? parsingVersion,
+    $core.int? descriptorModel,
+  }) {
+    final result = create();
+    if (data != null) result.data = data;
+    if (parserFamily != null) result.parserFamily = parserFamily;
+    if (deviceModel != null) result.deviceModel = deviceModel;
+    if (vendor != null) result.vendor = vendor;
+    if (product != null) result.product = product;
+    if (deviceTime != null) result.deviceTime = deviceTime;
+    if (systemTime != null) result.systemTime = systemTime;
+    if (libdivecomputerVersion != null)
+      result.libdivecomputerVersion = libdivecomputerVersion;
+    if (parsingVersion != null) result.parsingVersion = parsingVersion;
+    if (descriptorModel != null) result.descriptorModel = descriptorModel;
+    return result;
+  }
+
+  RawDiveData._();
+
+  factory RawDiveData.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory RawDiveData.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RawDiveData',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
+      createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(
+        1, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..aI(2, _omitFieldNames ? '' : 'parserFamily',
+        fieldType: $pb.PbFieldType.OU3)
+    ..aI(3, _omitFieldNames ? '' : 'deviceModel',
+        fieldType: $pb.PbFieldType.OU3)
+    ..aOS(4, _omitFieldNames ? '' : 'vendor')
+    ..aOS(5, _omitFieldNames ? '' : 'product')
+    ..aI(6, _omitFieldNames ? '' : 'deviceTime', fieldType: $pb.PbFieldType.OU3)
+    ..aInt64(7, _omitFieldNames ? '' : 'systemTime')
+    ..aOS(8, _omitFieldNames ? '' : 'libdivecomputerVersion')
+    ..aI(9, _omitFieldNames ? '' : 'parsingVersion',
+        fieldType: $pb.PbFieldType.OU3)
+    ..aI(10, _omitFieldNames ? '' : 'descriptorModel',
+        fieldType: $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RawDiveData clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RawDiveData copyWith(void Function(RawDiveData) updates) =>
+      super.copyWith((message) => updates(message as RawDiveData))
+          as RawDiveData;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static RawDiveData create() => RawDiveData._();
+  @$core.override
+  RawDiveData createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static RawDiveData getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RawDiveData>(create);
+  static RawDiveData? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get data => $_getN(0);
+  @$pb.TagNumber(1)
+  set data($core.List<$core.int> value) => $_setBytes(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasData() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearData() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get parserFamily => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set parserFamily($core.int value) => $_setUnsignedInt32(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasParserFamily() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearParserFamily() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get deviceModel => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set deviceModel($core.int value) => $_setUnsignedInt32(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasDeviceModel() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearDeviceModel() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get vendor => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set vendor($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasVendor() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearVendor() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get product => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set product($core.String value) => $_setString(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasProduct() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearProduct() => $_clearField(5);
+
+  /// Clock calibration supplied by DC_EVENT_CLOCK. Omitted when unavailable.
+  @$pb.TagNumber(6)
+  $core.int get deviceTime => $_getIZ(5);
+  @$pb.TagNumber(6)
+  set deviceTime($core.int value) => $_setUnsignedInt32(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasDeviceTime() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearDeviceTime() => $_clearField(6);
+
+  @$pb.TagNumber(7)
+  $fixnum.Int64 get systemTime => $_getI64(6);
+  @$pb.TagNumber(7)
+  set systemTime($fixnum.Int64 value) => $_setInt64(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasSystemTime() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearSystemTime() => $_clearField(7);
+
+  @$pb.TagNumber(8)
+  $core.String get libdivecomputerVersion => $_getSZ(7);
+  @$pb.TagNumber(8)
+  set libdivecomputerVersion($core.String value) => $_setString(7, value);
+  @$pb.TagNumber(8)
+  $core.bool hasLibdivecomputerVersion() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearLibdivecomputerVersion() => $_clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.int get parsingVersion => $_getIZ(8);
+  @$pb.TagNumber(9)
+  set parsingVersion($core.int value) => $_setUnsignedInt32(8, value);
+  @$pb.TagNumber(9)
+  $core.bool hasParsingVersion() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearParsingVersion() => $_clearField(9);
+
+  @$pb.TagNumber(10)
+  $core.int get descriptorModel => $_getIZ(9);
+  @$pb.TagNumber(10)
+  set descriptorModel($core.int value) => $_setUnsignedInt32(9, value);
+  @$pb.TagNumber(10)
+  $core.bool hasDescriptorModel() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearDescriptorModel() => $_clearField(10);
 }
 
 /// A single sample point in the dive profile.

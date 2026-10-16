@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:btproto/btproto.dart';
 import 'package:ffi/ffi.dart';
+import 'package:fixnum/fixnum.dart';
 import 'package:logging/logging.dart';
 
 import 'download.dart';
@@ -230,6 +231,10 @@ void _downloadIsolateEntry(DownloadRequest request) {
 
   // Remember the device info
   String deviceSerial = '';
+  var deviceModelNumber = bindings.dc_descriptor_get_model(descriptor);
+  int? deviceTime;
+  Int64? systemTime;
+  final libraryVersion = bindings.dc_version(ffi.nullptr).cast<Utf8>().toDartString();
 
   final eventCallback = ffi.NativeCallable<bindings.dc_event_callback_tFunction>.isolateLocal((
     ffi.Pointer<bindings.dc_device_t> dev,
@@ -244,14 +249,22 @@ void _downloadIsolateEntry(DownloadRequest request) {
       sendPort.send(DownloadProgressEvent(DownloadProgress(progress.current, progress.maximum)));
     } else if (eventType == bindings.dc_event_type_t.DC_EVENT_DEVINFO.value) {
       final devinfo = data.cast<bindings.dc_event_devinfo_t>().ref;
+      deviceModelNumber = devinfo.model;
       deviceSerial = devinfo.serial.toRadixString(16).toUpperCase();
       sendPort.send(DownloadDeviceInfo(DeviceInfo(model: devinfo.model, firmware: devinfo.firmware, serial: deviceSerial)));
+    } else if (eventType == bindings.dc_event_type_t.DC_EVENT_CLOCK.value) {
+      final clock = data.cast<bindings.dc_event_clock_t>().ref;
+      deviceTime = clock.devtime;
+      systemTime = Int64(clock.systime);
     }
   });
 
   // Subscribe to all useful events
   final events =
-      bindings.dc_event_type_t.DC_EVENT_WAITING.value | bindings.dc_event_type_t.DC_EVENT_PROGRESS.value | bindings.dc_event_type_t.DC_EVENT_DEVINFO.value;
+      bindings.dc_event_type_t.DC_EVENT_WAITING.value |
+      bindings.dc_event_type_t.DC_EVENT_PROGRESS.value |
+      bindings.dc_event_type_t.DC_EVENT_DEVINFO.value |
+      bindings.dc_event_type_t.DC_EVENT_CLOCK.value;
 
   final eventsStatus = bindings.dc_device_set_events(device.value, events, eventCallback.nativeFunction, ffi.nullptr);
 
@@ -282,6 +295,20 @@ void _downloadIsolateEntry(DownloadRequest request) {
   // The exceptionalReturn value (0) is returned if the callback throws an exception
   final diveCallback = ffi.NativeCallable<bindings.dc_dive_callback_tFunction>.isolateLocal(
     (ffi.Pointer<ffi.UnsignedChar> data, int size, ffi.Pointer<ffi.UnsignedChar> fingerprint, int fsize, ffi.Pointer<ffi.Void> userdata) {
+      // The native buffer is only valid during this callback. Retain an owned
+      // copy of the device payload so the log can be reparsed in the future.
+      final rawData = RawDiveData(
+        data: Uint8List.fromList(data.cast<ffi.Uint8>().asTypedList(size)),
+        parserFamily: bindings.dc_descriptor_get_type(descriptor).value,
+        deviceModel: deviceModelNumber,
+        descriptorModel: bindings.dc_descriptor_get_model(descriptor),
+        vendor: vendor,
+        product: product,
+        deviceTime: deviceTime,
+        systemTime: systemTime,
+        libdivecomputerVersion: libraryVersion,
+        parsingVersion: diveParsingVersion,
+      );
       // Copy fingerprint if available
       Uint8List? fpBytes;
       if (fsize > 0 && fingerprint != ffi.nullptr) {
@@ -297,7 +324,7 @@ void _downloadIsolateEntry(DownloadRequest request) {
 
       if (parserStatus == bindings.dc_status_t.DC_STATUS_SUCCESS) {
         try {
-          final dive = parseDiveFromParser(parser.value, fingerprint: fpBytes, model: deviceModel, serial: deviceSerial);
+          final dive = parseDiveFromParser(parser.value, fingerprint: fpBytes, rawData: rawData, model: deviceModel, serial: deviceSerial);
 
           if (request.lastLogDate != null && !request.lastLogDate!.isBefore(dive.dateTime.toDateTime())) {
             // We've already seen this one.
@@ -313,8 +340,8 @@ void _downloadIsolateEntry(DownloadRequest request) {
         }
       } else {
         _log.warning('failed to parse dive: $parserStatus');
-        // Send a minimal dive with just the number and raw data
-        sendPort.send(DownloadDiveReceived(Log(ldcFingerprint: fpBytes)));
+        // Retain the payload even when this version cannot create a parser.
+        sendPort.send(DownloadDiveReceived(Log(ldcFingerprint: fpBytes, rawData: rawData, model: deviceModel, serial: deviceSerial)));
       }
 
       calloc.free(parser);

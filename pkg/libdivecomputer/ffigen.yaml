@@ -1,13 +1,13 @@
 # Run with `dart run ffigen --config ffigen.yaml`.
 name: LibdivecomputerBindings
 description: |
-  Bindings for `src/libdivecomputer.h`.
+  Bindings for libdivecomputer and the local FIFO transport.
 
   Regenerate bindings with `dart run ffigen --config ffigen.yaml`.
 output: 'lib/libdivecomputer_bindings_generated.dart'
 headers:
   entry-points:
-    - 'src/libdivecomputer.h'
+    - 'version.h'
     - 'src/fifos.h'
     - 'libdivecomputer-git/include/libdivecomputer/context.h'
     - 'libdivecomputer-git/include/libdivecomputer/descriptor.h'
@@ -16,7 +16,7 @@ headers:
     - 'libdivecomputer-git/include/libdivecomputer/device.h'
     - 'libdivecomputer-git/include/libdivecomputer/parser.h'
   include-directives:
-    - 'src/libdivecomputer.h'
+    - 'version.h'
     - 'src/fifos.h'
     - 'libdivecomputer-git/include/libdivecomputer/context.h'
     - 'libdivecomputer-git/include/libdivecomputer/descriptor.h'

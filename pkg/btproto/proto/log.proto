@@ -38,6 +38,24 @@ message Log {
 
   // Unique ID calculated by Bubbletrail
   string uniqueID = 19;
+
+  // Original computer data and parser context, retained for future reparsing.
+  RawDiveData raw_data = 21;
+}
+
+// Device-specific payload after transport decoding and decompression.
+message RawDiveData {
+  bytes data = 1;
+  uint32 parser_family = 2; // libdivecomputer dc_family_t value
+  uint32 device_model = 3; // Model reported by DC_EVENT_DEVINFO
+  string vendor = 4;
+  string product = 5;
+  // Clock calibration supplied by DC_EVENT_CLOCK. Omitted when unavailable.
+  optional uint32 device_time = 6;
+  optional int64 system_time = 7; // libdivecomputer dc_ticks_t (Unix seconds)
+  string libdivecomputer_version = 8; // Includes source revision when available
+  uint32 parsing_version = 9; // Bubbletrail interpretation version
+  uint32 descriptor_model = 10; // Model used when selecting the descriptor
 }
 
 // A single sample point in the dive profile.

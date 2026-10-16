@@ -8,21 +8,11 @@
 // ignore_for_file: type=lint, unused_import
 import 'dart:ffi' as ffi;
 
-/// A very short-lived native function.
-///
-/// For very short-lived functions, it is fine to call them on the main isolate.
-/// They will block the Dart execution while running the native function, so
-/// only do this for native functions which are guaranteed to be short-lived.
-@ffi.Native<ffi.IntPtr Function(ffi.IntPtr, ffi.IntPtr)>()
-external int sum(int a, int b);
+@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<dc_version_t>)>()
+external ffi.Pointer<ffi.Char> dc_version(ffi.Pointer<dc_version_t> version);
 
-/// A longer lived native function, which occupies the thread calling it.
-///
-/// Do not call these kind of native functions in the main isolate. They will
-/// block Dart execution. This will cause dropped frames in Flutter applications.
-/// Instead, call these native functions on a separate isolate.
-@ffi.Native<ffi.IntPtr Function(ffi.IntPtr, ffi.IntPtr)>()
-external int sum_long_running(int a, int b);
+@ffi.Native<ffi.Int Function(ffi.UnsignedInt, ffi.UnsignedInt, ffi.UnsignedInt)>()
+external int dc_version_check(int major, int minor, int micro);
 
 /// Create a pair of FIFOs with unique names in the specified directory.
 ///
@@ -575,6 +565,17 @@ dc_status_t dc_parser_samples_foreach(ffi.Pointer<dc_parser_t> parser, dc_sample
 external int _dc_parser_destroy(ffi.Pointer<dc_parser_t> parser);
 
 dc_status_t dc_parser_destroy(ffi.Pointer<dc_parser_t> parser) => dc_status_t.fromValue(_dc_parser_destroy(parser));
+
+final class dc_version_t extends ffi.Struct {
+  @ffi.UnsignedInt()
+  external int major;
+
+  @ffi.UnsignedInt()
+  external int minor;
+
+  @ffi.UnsignedInt()
+  external int micro;
+}
 
 enum dc_status_t {
   DC_STATUS_SUCCESS(0),
@@ -1602,6 +1603,14 @@ final class dc_parser_t extends ffi.Opaque {}
 typedef dc_sample_callback_tFunction = ffi.Void Function(ffi.UnsignedInt type, ffi.Pointer<dc_sample_value_t> value, ffi.Pointer<ffi.Void> userdata);
 typedef Dartdc_sample_callback_tFunction = void Function(dc_sample_type_t type, ffi.Pointer<dc_sample_value_t> value, ffi.Pointer<ffi.Void> userdata);
 typedef dc_sample_callback_t = ffi.Pointer<ffi.NativeFunction<dc_sample_callback_tFunction>>;
+
+const String DC_VERSION = '0.9.1';
+
+const int DC_VERSION_MAJOR = 0;
+
+const int DC_VERSION_MINOR = 9;
+
+const int DC_VERSION_MICRO = 1;
 
 const int SAMPLE_EVENT_UNKNOWN = 16;
 

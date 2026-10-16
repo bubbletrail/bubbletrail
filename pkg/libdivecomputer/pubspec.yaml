@@ -10,6 +10,7 @@ dependencies:
   btproto: {path: ../btproto}
   code_assets: ^2.1.0
   ffi: ^2.2.0
+  fixnum: ^1.1.1
   glob: ^2.1.3
   hooks: ^2.0.2
   logging: ^1.3.0
