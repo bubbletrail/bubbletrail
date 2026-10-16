@@ -754,7 +754,11 @@ class _SiteCard extends StatelessWidget {
                     child: IconButton.filled(
                       icon: const Icon(Icons.fullscreen),
                       onPressed: () {
-                        context.pushNamed(AppRouteName.sitesDetailsMap, pathParameters: {'siteID': site.id});
+                        context.pushNamed(
+                          AppRouteName.sitesDetailsMap,
+                          pathParameters: {'siteID': site.id},
+                          extra: <String, LatLng?>{'startPosition': startPos, 'endPosition': endPos},
+                        );
                       },
                       tooltip: 'View fullscreen',
                     ),
