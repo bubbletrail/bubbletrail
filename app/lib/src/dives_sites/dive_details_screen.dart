@@ -806,7 +806,13 @@ class _RawDiveDataScreen extends StatelessWidget {
       child: SingleChildScrollView(
         padding: const .all(16),
         child: SelectableText(
-          JsonEncoder.withIndent('  ').convert(dive.toProto3Json()),
+          JsonEncoder.withIndent('  ').convert(
+            dive.rebuild((d) {
+              final logs = d.logs.map((l) => l.rebuild((l) => l.clearRawData())).toList();
+              d.logs.clear();
+              d.logs.addAll(logs);
+            }).toProto3Json(),
+          ),
           style: Theme.of(context).textTheme.bodyMedium?.apply(fontFamily: 'Courier'),
         ),
       ),
