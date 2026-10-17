@@ -726,6 +726,7 @@ class _SiteCard extends StatelessWidget {
       final p = site.position;
       sitePos = LatLng(p.latitude, p.longitude);
     }
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 2,
       clipBehavior: .antiAlias,
@@ -784,7 +785,23 @@ class _SiteCard extends StatelessWidget {
                   if (site.hasCountry()) LabeledChip(label: 'Location', child: Text(site.location)),
                   if (site.bodyOfWater.isNotEmpty) LabeledChip(label: 'Body of water', child: Text(site.bodyOfWater)),
                   if (site.hasPosition())
-                    LabeledChip(label: 'Position', child: Text([formatLatitude(site.position.latitude), formatLongitude(site.position.longitude)].join(' '))),
+                    LabeledChip(
+                      label: 'Site position',
+                      child: Text([formatLatitude(site.position.latitude), formatLongitude(site.position.longitude)].join(' ')),
+                    ),
+                  if (site.tags.isNotEmpty) TagsList(tags: site.tags, prefix: '#'),
+                  if (dive.logs.isNotEmpty && dive.logs[0].hasStartPosition())
+                    LabeledChip(
+                      label: 'Dive start position',
+                      backgroundColor: colorScheme.secondaryContainer,
+                      child: Text([formatLatitude(dive.logs[0].startPosition.latitude), formatLongitude(dive.logs[0].startPosition.longitude)].join(' ')),
+                    ),
+                  if (dive.logs.isNotEmpty && dive.logs[0].hasEndPosition())
+                    LabeledChip(
+                      label: 'Dive end position',
+                      backgroundColor: colorScheme.secondaryContainer,
+                      child: Text([formatLatitude(dive.logs[0].endPosition.latitude), formatLongitude(dive.logs[0].endPosition.longitude)].join(' ')),
+                    ),
                 ],
               ),
             ),
