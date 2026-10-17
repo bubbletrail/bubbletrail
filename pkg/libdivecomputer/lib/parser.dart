@@ -383,30 +383,19 @@ SampleEventType _convertSampleEventType(dc.parser_sample_event_t dcValue) {
 }
 
 void setSampleLocations(Log log) {
-  // The start location is the last sample with a depth of zero, before the
-  // dive starts. The end position is the first sample with a zero depth
-  // once there are no further samples with a depth, or the last sample with
-  // a position if there are no samples with position and zero depth.
+  var diveStarted = false;
+  var diveEnded = false;
 
-  final firstSubmerged = log.samples.indexWhere((sample) => sample.hasDepth() && sample.depth > 0);
-  final lastSubmerged = log.samples.lastIndexWhere((sample) => sample.hasDepth() && sample.depth > 0);
-  Position? start;
-  Position? end;
-  Position? lastPosition;
+  for (final sample in log.samples) {
+    if (!sample.hasPosition() || !sample.hasDepth()) continue;
+    if (sample.depth > 0) diveStarted = true;
+    diveEnded = diveStarted && sample.depth == 0;
 
-  for (final (index, sample) in log.samples.indexed) {
-    if (!sample.hasPosition()) continue;
-    lastPosition = sample.position;
-    if (!sample.hasDepth() || sample.depth != 0) continue;
-    if (firstSubmerged < 0 || index < firstSubmerged || start == null) {
-      start = sample.position;
+    if (!diveStarted || log.startPosition == null) {
+      log.startPosition = sample.position;
     }
-    if (index > lastSubmerged) {
-      end ??= sample.position;
+    if (!diveEnded || log.endPosition == null) {
+      log.endPosition = sample.position;
     }
   }
-
-  if (start != null) log.startPosition = start;
-  final endPosition = end ?? lastPosition;
-  if (endPosition != null) log.endPosition = endPosition;
 }
