@@ -205,7 +205,7 @@ void _parseSamples(ffi.Pointer<dc.dc_parser_t> parser, Log log) {
   }
 
   // Post-process samples for start and end location.
-  setSampleLocations(log);
+  _setStartEndPositions(log);
 
   _currentLog = null;
   _currentSample = null;
@@ -382,20 +382,23 @@ SampleEventType _convertSampleEventType(dc.parser_sample_event_t dcValue) {
   };
 }
 
-void setSampleLocations(Log log) {
-  var diveStarted = false;
-  var diveEnded = false;
+void _setStartEndPositions(Log log) {
+  var endPositionDepth = 0.0;
 
   for (final sample in log.samples) {
     if (!sample.hasPosition() || !sample.hasDepth()) continue;
-    if (sample.depth > 0) diveStarted = true;
-    diveEnded = diveStarted && sample.depth == 0;
 
-    if (!diveStarted || log.startPosition == null) {
+    if (!log.hasStartPosition()) {
       log.startPosition = sample.position;
+      continue;
     }
-    if (!diveEnded || log.endPosition == null) {
+    // Enforcing different depth than the last position means we take
+    // approximately the last sample, but if there are several position
+    // updates with depth=0 we skip the later ones (movement at the
+    // surface).
+    if (!log.hasEndPosition() || sample.depth != endPositionDepth) {
       log.endPosition = sample.position;
+      endPositionDepth = sample.depth;
     }
   }
 }
