@@ -92,6 +92,11 @@ Log parseDiveFromParser(ffi.Pointer<dc.dc_parser_t> parser, {Uint8List? fingerpr
   final salinityPtr = calloc<dc.dc_salinity_t>();
   if (_getField(parser, dc.dc_field_type_t.DC_FIELD_SALINITY, salinityPtr.cast())) {
     log.salinity = Salinity(type: _convertWaterType(salinityPtr.ref.type), density: salinityPtr.ref.density);
+    // libdivecomputer doesn't have an EN13319 constant, but 1020 kg/m3 is
+    // the EN13319 definition.
+    if (log.salinity.density == 1020) {
+      log.salinity.type = .WATER_TYPE_EN13319;
+    }
   }
   calloc.free(salinityPtr);
 
