@@ -805,6 +805,7 @@ class _SiteCard extends StatelessWidget {
                 ],
               ),
             ),
+            if (site.hasNotes()) Padding(padding: const .all(16), child: Text(site.notes)),
           ],
         ),
       ),
