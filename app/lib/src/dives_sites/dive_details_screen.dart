@@ -748,30 +748,20 @@ class _SiteCard extends StatelessWidget {
             ),
             // Map preview (only if position exists)
             if (sitePos != null || startPos != null || endPos != null)
-              Stack(
-                children: [
-                  SizedBox(
-                    height: 150,
-                    child: IgnorePointer(
-                      child: SiteMap(sitePosition: sitePos, startPosition: startPos, endPosition: endPos),
-                    ),
+              InkWell(
+                onTap: () {
+                  context.pushNamed(
+                    AppRouteName.sitesDetailsMap,
+                    pathParameters: {'siteID': site.id},
+                    extra: <String, LatLng?>{'startPosition': startPos, 'endPosition': endPos},
+                  );
+                },
+                child: SizedBox(
+                  height: 150,
+                  child: IgnorePointer(
+                    child: SiteMap(sitePosition: sitePos, startPosition: startPos, endPosition: endPos),
                   ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: IconButton.filled(
-                      icon: const Icon(Icons.fullscreen),
-                      onPressed: () {
-                        context.pushNamed(
-                          AppRouteName.sitesDetailsMap,
-                          pathParameters: {'siteID': site.id},
-                          extra: <String, LatLng?>{'startPosition': startPos, 'endPosition': endPos},
-                        );
-                      },
-                      tooltip: 'View fullscreen',
-                    ),
-                  ),
-                ],
+                ),
               ),
             // Site information
             Padding(
