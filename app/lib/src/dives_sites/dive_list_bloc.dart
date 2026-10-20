@@ -344,7 +344,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       }
 
       // Insert all imported dives
-      await _store.dives.insertAll(importedDoc.dives);
+      await _store.insertDives(importedDoc.dives);
 
       // Reload overview list after update
       add(_LoadAll());
