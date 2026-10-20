@@ -8,6 +8,7 @@ import 'package:glob/glob.dart';
 import 'package:glob/list_local_fs.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../archive/archiveprovider.dart';
 import '../ext/ext.dart';
@@ -159,6 +160,43 @@ class Store with ChangeNotifier {
     await init();
     _log.info('import complete');
   }
+
+  Future<void> insertDives(Iterable<Dive> imported) async {
+    final positionedSites = (await sites.getAll()).where((s) => s.hasPosition() && _validPosition(s.position)).toList();
+    const distance = Distance(roundResult: false);
+    final matched = <Dive>[];
+    for (var dive in imported) {
+      if (dive.siteId.isEmpty) {
+        Site? nearest;
+        var nearestDistance = 100.0;
+        for (final log in dive.logs) {
+          for (final position in [if (log.hasStartPosition()) log.startPosition, if (log.hasEndPosition()) log.endPosition]) {
+            if (!_validPosition(position)) continue;
+            for (final site in positionedSites) {
+              final metres = distance(LatLng(position.latitude, position.longitude), LatLng(site.position.latitude, site.position.longitude));
+              if (metres <= nearestDistance) {
+                nearest = site;
+                nearestDistance = metres;
+              }
+            }
+          }
+        }
+        if (nearest != null) {
+          dive = dive.deepCopy()..siteId = nearest.id;
+        }
+      }
+      matched.add(dive);
+    }
+    await dives.insertAll(matched);
+  }
+
+  static bool _validPosition(Position position) =>
+      position.hasLatitude() &&
+      position.hasLongitude() &&
+      position.latitude.isFinite &&
+      position.longitude.isFinite &&
+      position.latitude.abs() <= 90 &&
+      position.longitude.abs() <= 180;
 
   Future<Dive?> diveById(String diveID) async {
     final dive = await dives.getById(diveID);

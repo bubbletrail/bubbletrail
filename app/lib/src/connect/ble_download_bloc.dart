@@ -426,7 +426,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
       }
     }
 
-    await _store.dives.insertAll(downloaded);
+    await _store.insertDives(downloaded);
 
     // Refresh the remembered computers list in scan bloc
     _scanBloc.add(BleScanEvent.refreshRemembered());
