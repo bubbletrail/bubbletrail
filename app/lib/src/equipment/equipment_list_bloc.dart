@@ -26,14 +26,15 @@ class EquipmentListLoading extends EquipmentListState {
 class EquipmentListLoaded extends EquipmentListState {
   final List<Equipment> equipment;
   final bool showArchived;
+  final Map<String, int> diveCountByEquipmentId;
 
-  const EquipmentListLoaded(this.equipment, {this.showArchived = false});
+  const EquipmentListLoaded(this.equipment, {this.showArchived = false, this.diveCountByEquipmentId = const {}});
 
   List<Equipment> get visibleEquipment => showArchived ? equipment : activeEquipment;
   List<Equipment> get activeEquipment => equipment.where((e) => !e.archived).toList();
 
   @override
-  List<Object?> get props => [equipment, showArchived];
+  List<Object?> get props => [equipment, showArchived, diveCountByEquipmentId];
 }
 
 abstract class EquipmentListEvent extends Equatable {
@@ -63,10 +64,12 @@ class _ImportEquipment extends EquipmentListEvent {
 class _LoadedEquipment extends EquipmentListEvent {
   final List<Equipment> equipment;
 
-  const _LoadedEquipment(this.equipment);
+  final Map<String, int> diveCountByEquipmentId;
+
+  const _LoadedEquipment(this.equipment, this.diveCountByEquipmentId);
 
   @override
-  List<Object?> get props => [equipment];
+  List<Object?> get props => [equipment, diveCountByEquipmentId];
 }
 
 class _ToggleShowArchived extends EquipmentListEvent {
@@ -97,24 +100,37 @@ class EquipmentListBloc extends Bloc<EquipmentListEvent, EquipmentListState> {
 
   Future<void> _onInit(_Init event, Emitter<EquipmentListState> emit) async {
     _equipmentListener = () async {
-      final equipment = await _store.equipment.getAll();
-      add(_LoadedEquipment(equipment));
+      final loaded = await _loadEquipment();
+      if (!isClosed) add(loaded);
     };
     _store.equipment.addListener(_equipmentListener!);
+    _store.dives.addListener(_equipmentListener!);
+    final loaded = await _loadEquipment();
+    emit(EquipmentListLoaded(loaded.equipment, diveCountByEquipmentId: loaded.diveCountByEquipmentId));
+  }
+
+  Future<_LoadedEquipment> _loadEquipment() async {
     final equipment = await _store.equipment.getAll();
-    emit(EquipmentListLoaded(equipment));
+    final dives = await _store.dives.getAll();
+    final diveCounts = <String, int>{};
+    for (final dive in dives) {
+      for (final id in dive.equipment.map((e) => e.id).where((id) => id.isNotEmpty).toSet()) {
+        diveCounts[id] = (diveCounts[id] ?? 0) + 1;
+      }
+    }
+    return _LoadedEquipment(equipment, diveCounts);
   }
 
   Future<void> _onLoadedEquipment(_LoadedEquipment event, Emitter<EquipmentListState> emit) async {
     final currentState = state;
     final showArchived = currentState is EquipmentListLoaded ? currentState.showArchived : false;
-    emit(EquipmentListLoaded(event.equipment, showArchived: showArchived));
+    emit(EquipmentListLoaded(event.equipment, showArchived: showArchived, diveCountByEquipmentId: event.diveCountByEquipmentId));
   }
 
   Future<void> _onToggleShowArchived(_ToggleShowArchived event, Emitter<EquipmentListState> emit) async {
     final currentState = state;
     if (currentState is EquipmentListLoaded) {
-      emit(EquipmentListLoaded(currentState.equipment, showArchived: !currentState.showArchived));
+      emit(EquipmentListLoaded(currentState.equipment, showArchived: !currentState.showArchived, diveCountByEquipmentId: currentState.diveCountByEquipmentId));
     }
   }
 
@@ -156,6 +172,7 @@ class EquipmentListBloc extends Bloc<EquipmentListEvent, EquipmentListState> {
   Future<void> close() {
     if (_equipmentListener != null) {
       _store.equipment.removeListener(_equipmentListener!);
+      _store.dives.removeListener(_equipmentListener!);
     }
     return super.close();
   }

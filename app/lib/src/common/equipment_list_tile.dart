@@ -7,11 +7,16 @@ class EquipmentListTile extends StatelessWidget {
   final Equipment equipment;
   final void Function(Equipment) onTap;
   final IconData? trailing;
+  final int? diveCount;
 
-  const EquipmentListTile({super.key, required this.equipment, required this.onTap, this.trailing});
+  const EquipmentListTile({super.key, required this.equipment, required this.onTap, this.trailing, this.diveCount});
 
   @override
   Widget build(BuildContext context) {
+    final subtitleParts = [
+      if (equipmentSubtitleText(equipment).isNotEmpty) equipmentSubtitleText(equipment),
+      if (diveCount != null) '$diveCount ${diveCount == 1 ? 'dive' : 'dives'}',
+    ];
     final cs = Theme.of(context).colorScheme;
     return ListTile(
       leading: EquipmentIcons.icon(EquipmentIcons.forType(equipment.type), color: cs.onSurface, size: 32),
@@ -23,8 +28,8 @@ class EquipmentListTile extends StatelessWidget {
           if (equipment.archived) TextBadge(label: 'Archived', backgroundColor: cs.surfaceContainerHighest, textColor: cs.onSurfaceVariant),
         ],
       ),
-      subtitle: equipmentSubtitle(equipment) != null
-          ? Text(equipmentSubtitleText(equipment), style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).hintColor))
+      subtitle: subtitleParts.isNotEmpty
+          ? Text(subtitleParts.join(' \u2022 '), style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).hintColor))
           : null,
       trailing: trailing != null ? Icon(trailing, color: Theme.of(context).hintColor) : null,
       onTap: () => onTap(equipment),
