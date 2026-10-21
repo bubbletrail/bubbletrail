@@ -45,6 +45,7 @@ class EquipmentListScreen extends StatelessWidget {
                       return Card(
                         child: EquipmentListTile(
                           equipment: item,
+                          diveCount: state.diveCountByEquipmentId[item.id] ?? 0,
                           onTap: (item) => context.goNamed(AppRouteName.equipmentDetails, pathParameters: {'equipmentID': item.id}),
                           trailing: Icons.chevron_right,
                         ),
