@@ -12,8 +12,8 @@ class CylinderListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
-      title: const Text('Cylinders'),
-      actions: [IconButton(icon: const Icon(Icons.add), tooltip: 'Add new cylinder', onPressed: () => context.goNamed(AppRouteName.cylindersNew))],
+      title: const Text('Cylinder types'),
+      actions: [IconButton(icon: const Icon(Icons.add), tooltip: 'Add new cylinder type', onPressed: () => context.goNamed(AppRouteName.cylindersNew))],
       body: BlocBuilder<CylinderListBloc, CylinderListState>(
         builder: (context, state) {
           if (state is CylinderListInitial || state is CylinderListLoading) {
@@ -24,7 +24,7 @@ class CylinderListScreen extends StatelessWidget {
             final cylinders = state.cylinders;
 
             if (cylinders.isEmpty) {
-              return const EmptyStateWidget(message: 'No cylinders yet. Tap + to add one.', icon: Icons.science_outlined);
+              return const EmptyStateWidget(message: 'No cylinder types yet. Tap + to add one.', icon: Icons.science_outlined);
             }
 
             return ListView.builder(
@@ -35,7 +35,7 @@ class CylinderListScreen extends StatelessWidget {
                 return Card(
                   child: CylinderTile(
                     index: index,
-                    description: cylinder.description.isNotEmpty ? cylinder.description : 'Cylinder #${cylinder.id}',
+                    description: cylinder.description.isNotEmpty ? cylinder.description : 'Cylinder type #${cylinder.id}',
                     volumeL: cylinder.volumeL,
                     workingPressureBar: cylinder.workingPressureBar,
                     volumeCuft: cylinder.volumeCuft,

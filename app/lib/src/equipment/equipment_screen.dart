@@ -16,7 +16,7 @@ class EquipmentScreen extends StatelessWidget {
         children: [
           ListTileCard(title: 'Equipment', subtitle: 'BCDs, regulators, wetsuits, etc.', onTap: () => context.goNamed(AppRouteName.equipmentList)),
           const SizedBox(height: 8),
-          ListTileCard(title: 'Cylinders', subtitle: 'Available cylinder types and defaults', onTap: () => context.goNamed(AppRouteName.cylinders)),
+          ListTileCard(title: 'Cylinder types', subtitle: 'Available cylinder types and defaults', onTap: () => context.goNamed(AppRouteName.cylinders)),
           const SizedBox(height: 8),
           ListTileCard(title: 'Certifications', subtitle: 'Diver certification cards', onTap: () => context.goNamed(AppRouteName.certifications)),
         ],

@@ -128,8 +128,8 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
     if (diveCount == 0) {
       confirmed = await showConfirmationDialog(
         context: context,
-        title: 'Delete cylinder',
-        message: 'Are you sure you want to delete this cylinder? This cannot be undone.',
+        title: 'Delete cylinder type',
+        message: 'Are you sure you want to delete this cylinder type? This cannot be undone.',
         confirmText: 'Delete',
         isDestructive: true,
       );
@@ -158,7 +158,7 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
           await _deleteCylinder();
         }
       },
-      itemBuilder: (context) => [const PopupMenuItem(value: 'delete', child: Text('Delete cylinder'))],
+      itemBuilder: (context) => [const PopupMenuItem(value: 'delete', child: Text('Delete cylinder type'))],
     );
   }
 
@@ -176,7 +176,7 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
           if (state is CylinderDetailsClosed) context.pop();
         },
         child: ScreenScaffold(
-          title: Text(_isNew ? 'New cylinder' : 'Edit cylinder'),
+          title: Text(_isNew ? 'New cylinder type' : 'Edit cylinder type'),
           actions: [
             if (!_isNew) _popupMenuActions(),
             IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes'),
@@ -421,11 +421,11 @@ class _DeleteCylinderDialogState extends State<_DeleteCylinderDialog> {
           crossAxisAlignment: .stretch,
           spacing: 16,
           children: [
-            Text('Delete cylinder', style: Theme.of(context).textTheme.titleMedium),
+            Text('Delete cylinder type', style: Theme.of(context).textTheme.titleMedium),
             Text(
               widget.diveCount == 1
-                  ? '1 dive uses this cylinder. What should that dive use instead?'
-                  : '${widget.diveCount} dives use this cylinder. What should those dives use instead?',
+                  ? '1 dive uses this cylinder type. What should that dive use instead?'
+                  : '${widget.diveCount} dives use this cylinder type. What should those dives use instead?',
             ),
             if (canReplace) ...[
               RadioGroup<bool>(
@@ -434,20 +434,20 @@ class _DeleteCylinderDialogState extends State<_DeleteCylinderDialog> {
                 child: Column(
                   crossAxisAlignment: .stretch,
                   children: [
-                    RadioListTile<bool>(title: const Text('Leave dives without cylinder'), value: false, contentPadding: .zero),
-                    RadioListTile<bool>(title: const Text('Replace with another cylinder'), value: true, contentPadding: .zero),
+                    RadioListTile<bool>(title: const Text('Leave dives without cylinder type'), value: false, contentPadding: .zero),
+                    RadioListTile<bool>(title: const Text('Replace with another cylinder type'), value: true, contentPadding: .zero),
                   ],
                 ),
               ),
               if (_replace)
                 DropdownButtonFormField<String>(
                   initialValue: _replacementID,
-                  decoration: const InputDecoration(labelText: 'Cylinder', border: OutlineInputBorder(), isDense: true),
+                  decoration: const InputDecoration(labelText: 'Cylinder type', border: OutlineInputBorder(), isDense: true),
                   items: widget.replacementOptions.map((c) => DropdownMenuItem(value: c.id, child: Text(_cylinderLabel(c)))).toList(),
                   onChanged: (id) => setState(() => _replacementID = id),
                 ),
             ] else
-              Text('No other cylinders exist, so those dives will be left without a cylinder.', style: TextStyle(color: Theme.of(context).hintColor)),
+              Text('No other cylinder types exist, so those dives will be left without a cylinder.', style: TextStyle(color: Theme.of(context).hintColor)),
             Row(
               mainAxisAlignment: .end,
               spacing: 8,
@@ -467,4 +467,4 @@ class _DeleteCylinderDialogState extends State<_DeleteCylinderDialog> {
   }
 }
 
-String _cylinderLabel(Cylinder c) => c.description.isNotEmpty ? c.description : 'Cylinder ${c.id}';
+String _cylinderLabel(Cylinder c) => c.description.isNotEmpty ? c.description : 'Cylinder type ${c.id}';
