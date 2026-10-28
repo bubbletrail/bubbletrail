@@ -75,7 +75,7 @@ class _Statistics extends StatelessWidget {
   List<Widget> _statRows(BuildContext context, PreferencesStore prefs, _Stats stats) {
     return [
       infoRow('Dives', '${stats.count}'),
-      infoRow('Total time', _formatTotalTime(stats.totalSeconds)),
+      infoRow('Total time', formatTotalTime(stats.totalSeconds)),
       infoRow('Average max depth', formatDepth(prefs.depthUnit, stats.avgMaxDepth)),
       if (stats.hasDeepest) _diveRow(context, 'Deepest dive', Text(formatDepth(prefs.depthUnit, stats.maxMaxDepth)), stats.deepestDive!),
       if (stats.hasLongest) _diveRow(context, 'Longest dive', DurationText(stats.longestSeconds), stats.longestDive!),
@@ -159,7 +159,7 @@ class _Statistics extends StatelessWidget {
 
 // Like formatMinutes, but extends to hours and days: "95 min", "120 min",
 // "2 hours, 1 min", "2 days, 3 hours", "14 days, 2 hours, 5 min".
-String _formatTotalTime(int seconds) {
+String formatTotalTime(int seconds) {
   final totalMinutes = (seconds / 60).round();
   if (totalMinutes <= 120) return '$totalMinutes min';
   final hours = totalMinutes ~/ 60;

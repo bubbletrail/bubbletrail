@@ -1,6 +1,7 @@
 import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 
+import '../statistics/statistics_screen.dart';
 import 'common.dart';
 
 class EquipmentListTile extends StatelessWidget {
@@ -8,14 +9,16 @@ class EquipmentListTile extends StatelessWidget {
   final void Function(Equipment) onTap;
   final IconData? trailing;
   final int? diveCount;
+  final int? diveSeconds;
 
-  const EquipmentListTile({super.key, required this.equipment, required this.onTap, this.trailing, this.diveCount});
+  const EquipmentListTile({super.key, required this.equipment, required this.onTap, this.trailing, this.diveCount, this.diveSeconds});
 
   @override
   Widget build(BuildContext context) {
     final subtitleParts = [
       if (equipmentSubtitleText(equipment).isNotEmpty) equipmentSubtitleText(equipment),
       if (diveCount != null) '$diveCount ${diveCount == 1 ? 'dive' : 'dives'}',
+      if (diveSeconds != null) '${formatTotalTime(diveSeconds!)} underwater',
     ];
     final cs = Theme.of(context).colorScheme;
     return ListTile(
