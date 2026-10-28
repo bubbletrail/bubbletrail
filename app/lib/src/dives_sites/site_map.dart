@@ -132,7 +132,14 @@ class _SiteMapState extends State<_SiteMap> {
 
     return FlutterMap(
       mapController: _mapController,
-      options: MapOptions(initialCenter: widget.centerPos, initialZoom: widget.initialZoom, minZoom: 3.0, maxZoom: 18.0, onTap: widget.onTap),
+      options: MapOptions(
+        initialCenter: widget.centerPos,
+        initialZoom: widget.initialZoom,
+        minZoom: 3.0,
+        maxZoom: 18.0,
+        onTap: widget.onTap,
+        interactionOptions: InteractionOptions(enableMultiFingerGestureRace: true),
+      ),
       children: [
         ...tiles,
         MarkerLayer(markers: widget.markers, rotate: true),
