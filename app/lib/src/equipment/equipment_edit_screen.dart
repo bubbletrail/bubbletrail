@@ -93,6 +93,11 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
     final price = double.tryParse(_priceController.text.trim());
     final shop = _shopController.text.trim();
 
+    if (_isNew && type.isEmpty && manufacturer.isEmpty && name.isEmpty) {
+      _cancel();
+      return true;
+    }
+
     final updatedEquipment = Equipment(
       id: _originalEquipment.id,
       type: type.isEmpty ? null : type,
