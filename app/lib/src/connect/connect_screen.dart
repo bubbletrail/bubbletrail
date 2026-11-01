@@ -1,12 +1,12 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
+import '../common/common.dart';
 import 'ble_download_bloc.dart';
 import 'ble_scan_bloc.dart';
-import '../common/common.dart';
 
 class ConnectScreen extends StatelessWidget {
   const ConnectScreen({super.key});
@@ -18,14 +18,14 @@ class ConnectScreen extends StatelessWidget {
         BlocListener<BleScanBloc, BleScanState>(
           listener: (context, state) {
             if (state.error != null) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error!), backgroundColor: Colors.red));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(localizeError(context.l10n, state.error!)), backgroundColor: Colors.red));
             }
           },
         ),
         BlocListener<BleDownloadBloc, BleDownloadState>(
           listener: (context, state) {
             if (state.error != null) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error!), backgroundColor: Colors.red));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(localizeError(context.l10n, state.error!)), backgroundColor: Colors.red));
             }
           },
         ),
@@ -35,10 +35,14 @@ class ConnectScreen extends StatelessWidget {
           return BlocBuilder<BleDownloadBloc, BleDownloadState>(
             builder: (context, downloadState) {
               return ScreenScaffold(
-                title: const Text('Connect dive computer'),
+                title: Text(context.l10n.connectDiveComputer),
                 actions: [
                   if (downloadState.connectedDevice != null)
-                    IconButton(icon: const Icon(Icons.bluetooth), tooltip: 'Disconnect', onPressed: () => context.read<BleDownloadBloc>().add(.disconnect())),
+                    IconButton(
+                      icon: const Icon(Icons.bluetooth),
+                      tooltip: context.l10n.disconnect,
+                      onPressed: () => context.read<BleDownloadBloc>().add(.disconnect()),
+                    ),
                 ],
                 body: _buildBody(context, scanState, downloadState),
                 floatingActionButton: scanState.adapterState == BluetoothAdapterState.on && downloadState.connectedDevice == null
@@ -51,7 +55,7 @@ class ConnectScreen extends StatelessWidget {
                           }
                         },
                         icon: Icon(scanState.isScanning ? Icons.stop : Icons.search),
-                        label: Text(scanState.isScanning ? 'Stop' : 'Scan'),
+                        label: Text(scanState.isScanning ? context.l10n.stop : context.l10n.scan),
                       )
                     : null,
               );
@@ -70,11 +74,11 @@ class ConnectScreen extends StatelessWidget {
           children: [
             Icon(Icons.bluetooth, size: 64, color: Theme.of(context).colorScheme.error),
             const SizedBox(height: 16),
-            Text('Bluetooth is ${scanState.adapterState.name}', style: Theme.of(context).textTheme.titleLarge),
+            Text(context.l10n.bluetoothIs(scanState.adapterState.name), style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            const Text('Please enable Bluetooth to scan for dive computers'),
+            Text(context.l10n.pleaseEnableBluetoothToScanForDiveComputers),
             const SizedBox(height: 24),
-            ElevatedButton(onPressed: () => context.read<BleScanBloc>().add(.turnOnBluetooth()), child: const Text('Turn on Bluetooth')),
+            ElevatedButton(onPressed: () => context.read<BleScanBloc>().add(.turnOnBluetooth()), child: Text(context.l10n.turnOnBluetooth)),
           ],
         ),
       );
@@ -88,7 +92,7 @@ class ConnectScreen extends StatelessWidget {
           children: [
             Icon(Icons.bluetooth, size: 64, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 16),
-            const Text('Scan to find your dive computer'),
+            Text(context.l10n.scanToFindYourDiveComputer),
           ],
         ),
       );
@@ -109,7 +113,7 @@ class ConnectScreen extends StatelessWidget {
               if (scanState.rememberedComputers.isNotEmpty) ...[
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Text('Known dive computers', style: Theme.of(context).textTheme.titleMedium),
+                  child: Text(context.l10n.knownDiveComputers, style: Theme.of(context).textTheme.titleMedium),
                 ),
                 ..._buildRememberedComputersList(context, scanState),
               ],
@@ -117,14 +121,14 @@ class ConnectScreen extends StatelessWidget {
               if (scanState.scannedComputers.isNotEmpty || scanState.scannedOther.isNotEmpty || scanState.isScanning) ...[
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
-                  child: Text('${scanState.scannedComputers.length} dive computer(s) found', style: Theme.of(context).textTheme.titleMedium),
+                  child: Text(context.l10n.computersFound(scanState.scannedComputers.length), style: Theme.of(context).textTheme.titleMedium),
                 ),
                 ..._buildScannedDevicesList(context, scanState.scannedComputers.map((c) => c.$1)),
               ],
               if ((scanState.isScanning || scanState.scannedOther.isNotEmpty) && scanState.scannedComputers.isEmpty) ...[
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Opacity(opacity: 0.7, child: Text('Make sure your dive computer is in Bluetooth communication mode')),
+                  child: Opacity(opacity: 0.7, child: Text(context.l10n.makeSureYourDiveComputerIsInBluetoothCommunicationMode)),
                 ),
               ],
               // Scanned other devices
@@ -134,10 +138,10 @@ class ConnectScreen extends StatelessWidget {
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
-                        child: Text('${scanState.scannedOther.length} non-dive-computer device(s) found', style: Theme.of(context).textTheme.titleSmall),
+                        child: Text(context.l10n.otherDevicesFound(scanState.scannedOther.length), style: Theme.of(context).textTheme.titleSmall),
                       ),
                     ),
-                    const Text('Show all'),
+                    Text(context.l10n.showAll),
                     Switch(value: scanState.showAllDevices, onChanged: (_) => context.read<BleScanBloc>().add(.toggleShowAll())),
                   ],
                 ),
@@ -177,7 +181,7 @@ class ConnectScreen extends StatelessWidget {
                   context.read<BleDownloadBloc>().add(.connectToRemembered(computer, descriptor));
                 }
               },
-              child: const Text('Download'),
+              child: Text(context.l10n.download),
             ),
             PopupMenuButton<String>(
               onSelected: (value) {
@@ -185,7 +189,7 @@ class ConnectScreen extends StatelessWidget {
                   context.read<BleScanBloc>().add(.forgetComputer(computer));
                 }
               },
-              itemBuilder: (context) => [const PopupMenuItem(value: 'forget', child: Text('Forget'))],
+              itemBuilder: (context) => [PopupMenuItem(value: 'forget', child: Text(context.l10n.forget))],
             ),
           ],
         ),
@@ -209,7 +213,7 @@ class ConnectScreen extends StatelessWidget {
                   spacing: 4,
                   children: [
                     const Icon(Icons.signal_wifi_4_bar, size: 16),
-                    Text('${_getSignalStrengthLabel(result.rssi)} (${result.rssi} dBm)', style: Theme.of(context).textTheme.bodySmall),
+                    Text(context.l10n.signalStrength(_getSignalStrengthLabel(context, result.rssi), result.rssi), style: Theme.of(context).textTheme.bodySmall),
                   ],
                 ),
                 Row(
@@ -222,7 +226,7 @@ class ConnectScreen extends StatelessWidget {
               ],
             ),
           ),
-          trailing: ElevatedButton(onPressed: () => context.read<BleDownloadBloc>().add(.connectToDevice(device)), child: const Text('Connect')),
+          trailing: ElevatedButton(onPressed: () => context.read<BleDownloadBloc>().add(.connectToDevice(device)), child: Text(context.l10n.connect)),
         ),
       );
     }).toList();
@@ -238,17 +242,17 @@ class ConnectScreen extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.bluetooth),
             title: Text(downloadState.connectedDevice!.platformName),
-            subtitle: Text('Status: ${downloadState.connectionState.name}'),
-            trailing: TextButton(onPressed: () => context.read<BleDownloadBloc>().add(.disconnect()), child: const Text('Disconnect')),
+            subtitle: Text(context.l10n.status(downloadState.connectionState.name)),
+            trailing: TextButton(onPressed: () => context.read<BleDownloadBloc>().add(.disconnect()), child: Text(context.l10n.disconnect)),
           ),
           if (downloadState.isDiscoveringServices)
-            const Padding(
+            Padding(
               padding: EdgeInsets.all(16.0),
               child: Row(
                 children: [
                   SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
                   SizedBox(width: 12),
-                  Text('Discovering services...'),
+                  Text(context.l10n.discoveringServices),
                 ],
               ),
             )
@@ -262,7 +266,7 @@ class ConnectScreen extends StatelessWidget {
                     children: [
                       const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
                       const SizedBox(width: 12),
-                      Expanded(child: Text(_downloadProgressLabel(downloadState))),
+                      Expanded(child: Text(_downloadProgressLabel(context, downloadState))),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -286,12 +290,12 @@ class ConnectScreen extends StatelessWidget {
           FilledButton.icon(
             onPressed: scanState.supportedComputers.isEmpty ? null : () => _showComputerSelectionDialog(context, scanState, downloadState),
             icon: const Icon(Icons.download),
-            label: const Text('Download dives'),
+            label: Text(context.l10n.downloadDives),
           ),
           if (scanState.supportedComputers.isEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
-              child: Text('Loading supported computers...', style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
+              child: Text(context.l10n.loadingSupportedComputers, style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
             ),
         ],
       ),
@@ -307,7 +311,7 @@ class ConnectScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Select dive computer'),
+        title: Text(context.l10n.selectDiveComputer),
         content: SizedBox(
           width: double.maxFinite,
           child: Column(
@@ -317,7 +321,7 @@ class ConnectScreen extends StatelessWidget {
               if (matchedComputers.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Text('Suggested for "$deviceName":', style: Theme.of(dialogContext).textTheme.bodySmall),
+                  child: Text(context.l10n.suggestedFor(deviceName), style: Theme.of(dialogContext).textTheme.bodySmall),
                 ),
               Flexible(
                 child: ListView.builder(
@@ -342,13 +346,13 @@ class ConnectScreen extends StatelessWidget {
                     Navigator.of(dialogContext).pop();
                     _showAllComputersDialog(context, scanState);
                   },
-                  child: const Text('Show all computers...'),
+                  child: Text(context.l10n.showAllComputers),
                 ),
               ],
             ],
           ),
         ),
-        actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Cancel'))],
+        actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: Text(context.l10n.cancel))],
       ),
     );
   }
@@ -357,7 +361,7 @@ class ConnectScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('All BLE dive computers'),
+        title: Text(context.l10n.allBLEDiveComputers),
         content: SizedBox(
           width: double.maxFinite,
           height: 400,
@@ -375,25 +379,25 @@ class ConnectScreen extends StatelessWidget {
             },
           ),
         ),
-        actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Cancel'))],
+        actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: Text(context.l10n.cancel))],
       ),
     );
   }
 
-  String _downloadProgressLabel(BleDownloadState downloadState) {
+  String _downloadProgressLabel(BuildContext context, BleDownloadState downloadState) {
     final dives = downloadState.downloadedDives.length;
-    final divesLabel = dives > 0 ? ', $dives dive${dives == 1 ? '' : 's'} downloaded' : '';
+    final divesLabel = dives > 0 ? context.l10n.divesDownloaded(dives) : '';
     final progress = downloadState.downloadProgress;
     if (progress == null || progress.indeterminate) {
-      return 'Downloading dives...$divesLabel';
+      return context.l10n.downloadingDives(divesLabel);
     }
-    return 'Downloading dives... ${(progress.fraction * 100).toStringAsFixed(0)}%$divesLabel';
+    return context.l10n.downloadingDivesProgress((progress.fraction * 100).toStringAsFixed(0), divesLabel);
   }
 
-  String _getSignalStrengthLabel(int rssi) {
-    if (rssi >= -50) return 'Excellent';
-    if (rssi >= -60) return 'Good';
-    if (rssi >= -70) return 'Fair';
-    return 'Weak';
+  String _getSignalStrengthLabel(BuildContext context, int rssi) {
+    if (rssi >= -50) return context.l10n.excellent;
+    if (rssi >= -60) return context.l10n.good;
+    if (rssi >= -70) return context.l10n.fair;
+    return context.l10n.weak;
   }
 }

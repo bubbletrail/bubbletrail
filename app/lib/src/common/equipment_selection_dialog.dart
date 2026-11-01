@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 
@@ -93,16 +94,16 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
 
   void _setAsDefault() {
     widget.onSetAsDefault?.call(_selectedIds.toSet());
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Default equipment updated')));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.defaultEquipmentUpdated)));
   }
 
   // The secondary actions shared by every layout: pull in the default set, and
   // (when supported) promote the current selection to be the default.
   List<Widget> _defaultActionButtons() {
     return [
-      if (_defaultEquipment.isNotEmpty) TextButton.icon(onPressed: _addDefaults, icon: const Icon(Icons.playlist_add), label: const Text('Add defaults')),
+      if (_defaultEquipment.isNotEmpty) TextButton.icon(onPressed: _addDefaults, icon: const Icon(Icons.playlist_add), label: Text(context.l10n.addDefaults)),
       if (widget.onSetAsDefault != null)
-        TextButton.icon(onPressed: _setAsDefault, icon: const Icon(Icons.push_pin_outlined), label: const Text('Set as default')),
+        TextButton.icon(onPressed: _setAsDefault, icon: const Icon(Icons.push_pin_outlined), label: Text(context.l10n.setAsDefault)),
     ];
   }
 
@@ -133,11 +134,11 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: 16,
           children: [
-            Text('Select equipment', style: Theme.of(context).textTheme.titleMedium),
+            Text(context.l10n.selectEquipment, style: Theme.of(context).textTheme.titleMedium),
             if (widget.allEquipment.isEmpty)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(vertical: 24),
-                child: Center(child: Text('No equipment available')),
+                child: Center(child: Text(context.l10n.noEquipmentAvailable)),
               )
             else
               Flexible(
@@ -165,8 +166,8 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 ..._defaultActionButtons(),
-                TextButton(onPressed: _cancel, child: const Text('Cancel')),
-                FilledButton(onPressed: _confirm, child: const Text('Done')),
+                TextButton(onPressed: _cancel, child: Text(context.l10n.cancel)),
+                FilledButton(onPressed: _confirm, child: Text(context.l10n.done)),
               ],
             ),
           ],
@@ -177,11 +178,11 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
 
   Widget _buildNarrowLayout() {
     return AlertDialog(
-      title: const Text('Select equipment'),
+      title: Text(context.l10n.selectEquipment),
       content: SizedBox(
         width: double.maxFinite,
         child: widget.allEquipment.isEmpty
-            ? const Center(child: Text('No equipment available'))
+            ? Center(child: Text(context.l10n.noEquipmentAvailable))
             : ListView.builder(
                 shrinkWrap: true,
                 itemCount: widget.allEquipment.length,
@@ -192,16 +193,16 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
                     value: isSelected,
                     onChanged: (_) => _toggleEquipment(equipment),
                     secondary: EquipmentIcons.icon(EquipmentIcons.forType(equipment.type), color: Theme.of(context).colorScheme.onSurface, size: 32),
-                    title: Text(EquipmentListTile.equipmentTitle(equipment)),
-                    subtitle: EquipmentListTile.equipmentSubtitle(equipment),
+                    title: Text(EquipmentListTile.equipmentTitle(context, equipment)),
+                    subtitle: EquipmentListTile.equipmentSubtitle(context, equipment),
                   );
                 },
               ),
       ),
       actions: [
         ..._defaultActionButtons(),
-        TextButton(onPressed: _cancel, child: const Text('Cancel')),
-        TextButton(onPressed: _confirm, child: const Text('Done')),
+        TextButton(onPressed: _cancel, child: Text(context.l10n.cancel)),
+        TextButton(onPressed: _confirm, child: Text(context.l10n.done)),
       ],
     );
   }
@@ -219,7 +220,7 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 16,
             children: [
-              Text('Select equipment', style: Theme.of(context).textTheme.headlineSmall),
+              Text(context.l10n.selectEquipment, style: Theme.of(context).textTheme.headlineSmall),
               Expanded(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,7 +228,7 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
                     // Used Equipment column
                     Expanded(
                       child: _buildDragColumn(
-                        title: 'Used this dive',
+                        title: context.l10n.usedThisDive,
                         items: selected,
                         isSelectedColumn: true,
                         onItemDropped: _selectEquipment,
@@ -238,7 +239,7 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
                     // Available Equipment column
                     Expanded(
                       child: _buildDragColumn(
-                        title: 'Available equipment',
+                        title: context.l10n.availableEquipment,
                         items: available,
                         isSelectedColumn: false,
                         onItemDropped: _deselectEquipment,
@@ -254,8 +255,8 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
                 children: [
                   ..._defaultActionButtons(),
                   const Spacer(),
-                  TextButton(onPressed: _cancel, child: const Text('Cancel')),
-                  FilledButton(onPressed: _confirm, child: const Text('Done')),
+                  TextButton(onPressed: _cancel, child: Text(context.l10n.cancel)),
+                  FilledButton(onPressed: _confirm, child: Text(context.l10n.done)),
                 ],
               ),
             ],
@@ -308,7 +309,10 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
               Expanded(
                 child: items.isEmpty
                     ? Center(
-                        child: Text(isSelectedColumn ? 'Drag equipment here' : 'No more equipment', style: TextStyle(color: Theme.of(context).hintColor)),
+                        child: Text(
+                          isSelectedColumn ? context.l10n.dragEquipmentHere : context.l10n.noMoreEquipment,
+                          style: TextStyle(color: Theme.of(context).hintColor),
+                        ),
                       )
                     : ListView.builder(
                         padding: const EdgeInsets.all(8),

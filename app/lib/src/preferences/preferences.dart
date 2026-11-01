@@ -1,46 +1,53 @@
+import 'package:btl10n/btl10n.dart';
+
 enum DepthUnit {
-  meters('m'),
-  feet('ft');
+  meters,
+  feet;
 
-  const DepthUnit(this.label);
-
-  final String label;
+  String label(AppLocalizations l10n) => switch (this) {
+    .meters => l10n.unitMeters,
+    .feet => l10n.unitFeet,
+  };
 }
 
 enum PressureUnit {
-  bar('bar'),
-  psi('psi');
+  bar,
+  psi;
 
-  const PressureUnit(this.label);
-
-  final String label;
+  String label(AppLocalizations l10n) => switch (this) {
+    .bar => l10n.unitBar,
+    .psi => l10n.unitPsi,
+  };
 }
 
 enum TemperatureUnit {
-  celsius('°C'),
-  fahrenheit('°F');
+  celsius,
+  fahrenheit;
 
-  const TemperatureUnit(this.label);
-
-  final String label;
+  String label(AppLocalizations l10n) => switch (this) {
+    .celsius => l10n.unitCelsius,
+    .fahrenheit => l10n.unitFahrenheit,
+  };
 }
 
 enum VolumeUnit {
-  liters('L'),
-  cuft('cuft');
+  liters,
+  cuft;
 
-  const VolumeUnit(this.label);
-
-  final String label;
+  String label(AppLocalizations l10n) => switch (this) {
+    .liters => l10n.unitLiters,
+    .cuft => l10n.unitCubicFeet,
+  };
 }
 
 enum WeightUnit {
-  kg('kg'),
-  lb('lb');
+  kg,
+  lb;
 
-  const WeightUnit(this.label);
-
-  final String label;
+  String label(AppLocalizations l10n) => switch (this) {
+    .kg => l10n.unitKilograms,
+    .lb => l10n.unitPounds,
+  };
 }
 
 enum DateFormatPref {

@@ -7,7 +7,7 @@ mixin DetailsStateMixin {
   bool get isLoading => false;
   bool get isLoaded => false;
   bool get isError => false;
-  String? get errorMessage => null;
+  Object? get errorMessage => null;
 }
 
 /// Mixin for the initial state
@@ -21,7 +21,7 @@ mixin DetailsInitialMixin implements DetailsStateMixin {
   @override
   bool get isError => false;
   @override
-  String? get errorMessage => null;
+  Object? get errorMessage => null;
 }
 
 /// Mixin for the loading state
@@ -35,7 +35,7 @@ mixin DetailsLoadingMixin implements DetailsStateMixin {
   @override
   bool get isError => false;
   @override
-  String? get errorMessage => null;
+  Object? get errorMessage => null;
 }
 
 /// Mixin for the loaded state
@@ -49,7 +49,7 @@ mixin DetailsLoadedMixin implements DetailsStateMixin {
   @override
   bool get isError => false;
   @override
-  String? get errorMessage => null;
+  Object? get errorMessage => null;
 }
 
 /// Mixin for the error state - requires [errorMessage] to be implemented
@@ -63,5 +63,5 @@ mixin DetailsErrorMixin implements DetailsStateMixin {
   @override
   bool get isError => true;
   @override
-  String? get errorMessage;
+  Object? get errorMessage;
 }

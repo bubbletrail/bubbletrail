@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:latlong2/latlong.dart';
@@ -33,7 +34,7 @@ class FullscreenMapScreen extends StatelessWidget {
           if (!state.site.hasPosition()) {
             return ScreenScaffold(
               title: Text(state.site.name),
-              body: const Center(child: Text('No location data available')),
+              body: Center(child: Text(context.l10n.noLocationDataAvailable)),
             );
           }
 

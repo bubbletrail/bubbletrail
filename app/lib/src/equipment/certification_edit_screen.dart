@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -160,7 +161,7 @@ class _CertificationEditScreenState extends State<CertificationEditScreen> {
     } catch (e) {
       _log.warning('failed to pick image', e);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to pick image: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.failedToPickImage(e))));
       }
       return null;
     }
@@ -176,12 +177,12 @@ class _CertificationEditScreenState extends State<CertificationEditScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_camera_outlined),
-              title: const Text('Take photo'),
+              title: Text(context.l10n.takePhoto),
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Choose from gallery'),
+              title: Text(context.l10n.chooseFromGallery),
               onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
           ],
@@ -229,11 +230,11 @@ class _CertificationEditScreenState extends State<CertificationEditScreen> {
           final confirmed = await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text('Delete Certification'),
-              content: const Text('Are you sure you want to delete this certification?'),
+              title: Text(context.l10n.deleteCertification),
+              content: Text(context.l10n.areYouSureYouWantToDeleteThisCertification),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-                TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
+                TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.l10n.cancel)),
+                TextButton(onPressed: () => Navigator.pop(context, true), child: Text(context.l10n.delete)),
               ],
             ),
           );
@@ -242,7 +243,7 @@ class _CertificationEditScreenState extends State<CertificationEditScreen> {
           }
         }
       },
-      itemBuilder: (context) => [const PopupMenuItem(value: 'delete', child: Text('Delete certification'))],
+      itemBuilder: (context) => [PopupMenuItem(value: 'delete', child: Text(context.l10n.deleteCertificationAction))],
     );
   }
 
@@ -258,26 +259,26 @@ class _CertificationEditScreenState extends State<CertificationEditScreen> {
           if (state is CertificationDetailsClosed) context.pop();
         },
         child: ScreenScaffold(
-          title: Text(_isNew ? 'New Certification' : 'Edit Certification'),
+          title: Text(_isNew ? context.l10n.newCertification : context.l10n.editCertification),
           actions: [
             if (!_isNew) _popupMenuActions(),
-            IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes'),
+            IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: context.l10n.discardChanges),
           ],
           body: LayoutBuilder(
             builder: (context, constraints) {
               final isNarrow = constraints.maxWidth < narrowLayoutBreakpoint;
               final instructorName = TextField(
                 controller: _instructorNameController,
-                decoration: const InputDecoration(labelText: 'Instructor Name', border: OutlineInputBorder()),
+                decoration: InputDecoration(labelText: context.l10n.instructorNameTitle, border: OutlineInputBorder()),
               );
               final instructorNumber = TextField(
                 controller: _instructorNumberController,
-                decoration: const InputDecoration(labelText: 'Instructor Number', border: OutlineInputBorder()),
+                decoration: InputDecoration(labelText: context.l10n.instructorNumberTitle, border: OutlineInputBorder()),
               );
-              final granted = _buildDateField('Granted', _granted, _selectGranted, () => setState(() => _granted = null));
-              final expires = _buildDateField('Expires', _expires, _selectExpires, () => setState(() => _expires = null));
+              final granted = _buildDateField(context.l10n.granted, _granted, _selectGranted, () => setState(() => _granted = null));
+              final expires = _buildDateField(context.l10n.expires, _expires, _selectExpires, () => setState(() => _expires = null));
               final cardFront = _PhotoCard(
-                label: 'Card front',
+                label: context.l10n.cardFront,
                 photoId: _frontPhotoId,
                 newBytes: _newFront,
                 cleared: _clearFront,
@@ -285,7 +286,7 @@ class _CertificationEditScreenState extends State<CertificationEditScreen> {
                 onRemove: _removeFront,
               );
               final cardBack = _PhotoCard(
-                label: 'Card back',
+                label: context.l10n.cardBack,
                 photoId: _backPhotoId,
                 newBytes: _newBack,
                 cleared: _clearBack,
@@ -303,10 +304,10 @@ class _CertificationEditScreenState extends State<CertificationEditScreen> {
                     TextField(
                       controller: _nameController,
                       decoration: InputDecoration(
-                        labelText: 'Certification Name *',
+                        labelText: context.l10n.certificationName,
                         border: const OutlineInputBorder(),
-                        hintText: 'e.g., Open Water Diver',
-                        errorText: _validationFailed && _nameController.text.trim().isEmpty ? 'Required' : null,
+                        hintText: context.l10n.eGOpenWaterDiver,
+                        errorText: _validationFailed && _nameController.text.trim().isEmpty ? context.l10n.required : null,
                       ),
                       onChanged: (_) {
                         if (_validationFailed) setState(() {});
@@ -315,9 +316,9 @@ class _CertificationEditScreenState extends State<CertificationEditScreen> {
                     TextField(
                       controller: _numberController,
                       decoration: InputDecoration(
-                        labelText: 'Certification Number *',
+                        labelText: context.l10n.certificationNumber,
                         border: const OutlineInputBorder(),
-                        errorText: _validationFailed && _numberController.text.trim().isEmpty ? 'Required' : null,
+                        errorText: _validationFailed && _numberController.text.trim().isEmpty ? context.l10n.required : null,
                       ),
                       onChanged: (_) {
                         if (_validationFailed) setState(() {});
@@ -349,10 +350,10 @@ class _CertificationEditScreenState extends State<CertificationEditScreen> {
           controller: controller,
           focusNode: focusNode,
           decoration: InputDecoration(
-            labelText: 'Agency *',
+            labelText: context.l10n.requiredAgency,
             border: const OutlineInputBorder(),
-            hintText: 'e.g., PADI, SSI',
-            errorText: _validationFailed && controller.text.trim().isEmpty ? 'Required' : null,
+            hintText: context.l10n.eGPADISSI,
+            errorText: _validationFailed && controller.text.trim().isEmpty ? context.l10n.required : null,
           ),
           onChanged: (value) {
             _agencyController.text = value;
@@ -387,7 +388,7 @@ class _CertificationEditScreenState extends State<CertificationEditScreen> {
           border: const OutlineInputBorder(),
           suffixIcon: value != null ? IconButton(icon: const Icon(Icons.clear), onPressed: onClear) : null,
         ),
-        child: Text(formatted ?? 'Not set', style: formatted == null ? TextStyle(color: Theme.of(context).hintColor) : null),
+        child: Text(formatted ?? context.l10n.notSet, style: formatted == null ? TextStyle(color: Theme.of(context).hintColor) : null),
       ),
     );
   }
@@ -420,8 +421,8 @@ class _PhotoCard extends StatelessWidget {
               children: [
                 Expanded(child: Text(label, style: Theme.of(context).textTheme.titleMedium)),
                 if (_hasContent) ...[
-                  IconButton(icon: const Icon(Icons.refresh), tooltip: 'Replace photo', onPressed: onPick),
-                  IconButton(icon: const Icon(Icons.delete_outline), tooltip: 'Remove photo', onPressed: onRemove),
+                  IconButton(icon: const Icon(Icons.refresh), tooltip: context.l10n.replacePhoto, onPressed: onPick),
+                  IconButton(icon: const Icon(Icons.delete_outline), tooltip: context.l10n.removePhoto, onPressed: onRemove),
                 ],
               ],
             ),
@@ -465,7 +466,7 @@ class _PhotoCard extends StatelessWidget {
         children: [
           Icon(Icons.add_a_photo_outlined, size: 40, color: Theme.of(context).hintColor),
           const SizedBox(height: 4),
-          Text('Tap to add photo', style: TextStyle(color: Theme.of(context).hintColor)),
+          Text(context.l10n.tapToAddPhoto, style: TextStyle(color: Theme.of(context).hintColor)),
         ],
       ),
     );

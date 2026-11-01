@@ -1,4 +1,5 @@
 import 'package:btcountries/btcountries.dart';
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 
 // Three single-select dropdowns (year, country, tag) shown above the mobile
@@ -37,8 +38,8 @@ class MobileDiveFilterBar extends StatelessWidget {
           Expanded(
             child: _dropdown<int>(
               value: selectedYear,
-              label: 'Year',
-              allLabel: 'All years',
+              label: context.l10n.year,
+              allLabel: context.l10n.allYears,
               items: years.map((y) => DropdownMenuItem(value: y, child: Text('$y'))).toList(),
               onChanged: onYearChanged,
             ),
@@ -46,13 +47,13 @@ class MobileDiveFilterBar extends StatelessWidget {
           Expanded(
             child: _dropdown<String>(
               value: selectedCountry,
-              label: 'Country',
-              allLabel: 'All countries',
+              label: context.l10n.country,
+              allLabel: context.l10n.allCountries,
               items: countries
                   .map(
                     (c) => DropdownMenuItem(
                       value: c,
-                      child: Text(countryDisplayName(c), overflow: .ellipsis),
+                      child: Text(countryDisplayName(c, l10n: context.l10n), overflow: .ellipsis),
                     ),
                   )
                   .toList(),
@@ -62,8 +63,8 @@ class MobileDiveFilterBar extends StatelessWidget {
           Expanded(
             child: _dropdown<String>(
               value: selectedTag,
-              label: 'Tag',
-              allLabel: 'All tags',
+              label: context.l10n.tag,
+              allLabel: context.l10n.allTags,
               items: tags
                   .map(
                     (t) => DropdownMenuItem(

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -58,7 +59,7 @@ class _StoredPhotoState extends State<StoredPhoto> {
           children: [
             Icon(Icons.broken_image_outlined, size: 40, color: Theme.of(context).hintColor),
             const SizedBox(height: 4),
-            Text('Photo not yet downloaded', style: TextStyle(color: Theme.of(context).hintColor)),
+            Text(context.l10n.photoNotYetDownloaded, style: TextStyle(color: Theme.of(context).hintColor)),
           ],
         ),
       );

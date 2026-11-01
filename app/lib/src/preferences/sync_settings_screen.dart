@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,7 +12,7 @@ class SyncSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
-      title: const Text('Syncing'),
+      title: Text(context.l10n.syncingSection),
       body: Consumer<PreferencesStore>(
         builder: (context, prefs, _) {
           return ListView(
@@ -38,11 +39,13 @@ class _SyncProviderTile extends StatelessWidget {
     final availableProviders = <SyncProviderKind>[.none, .bubbletrail, .s3];
 
     return PreferencesTile(
-      title: 'Sync provider',
+      title: context.l10n.syncProvider,
       trailing: DropdownButton<SyncProviderKind>(
         dropdownColor: Theme.of(context).colorScheme.primaryContainer,
         value: syncProvider,
-        items: [for (final provider in availableProviders) DropdownMenuItem<SyncProviderKind>(value: provider, child: Text(_syncProviderLabel(provider)))],
+        items: [
+          for (final provider in availableProviders) DropdownMenuItem<SyncProviderKind>(value: provider, child: Text(_syncProviderLabel(context, provider))),
+        ],
         onChanged: (value) {
           PreferencesStore.instance.syncProvider = value!;
         },
@@ -50,11 +53,11 @@ class _SyncProviderTile extends StatelessWidget {
     );
   }
 
-  String _syncProviderLabel(SyncProviderKind provider) {
+  String _syncProviderLabel(BuildContext context, SyncProviderKind provider) {
     return switch (provider) {
-      .none => 'Off',
-      .bubbletrail => 'Bubbletrail S3',
-      .s3 => 'Generic S3',
+      .none => context.l10n.off,
+      .bubbletrail => context.l10n.bubbletrailS3,
+      .s3 => context.l10n.genericS3,
     };
   }
 }
@@ -121,18 +124,18 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
       spacing: 24,
       children: [
         const SizedBox(height: 8),
-        Text(widget.isBubbletrail ? 'Bubbletrail sync configuration' : 'S3 configuration', style: Theme.of(context).textTheme.titleSmall),
+        Text(widget.isBubbletrail ? context.l10n.bubbletrailSyncConfiguration : context.l10n.s3Configuration, style: Theme.of(context).textTheme.titleSmall),
         if (!widget.isBubbletrail)
           TextField(
             controller: _endpointController,
-            decoration: const InputDecoration(labelText: 'Endpoint', hintText: 's3.amazonaws.com or minio.example.com', border: OutlineInputBorder()),
+            decoration: InputDecoration(labelText: context.l10n.endpoint, hintText: context.l10n.s3AmazonawsComOrMinioExampleCom, border: OutlineInputBorder()),
             onChanged: (_) => _saveConfig(),
             keyboardType: .url,
           ),
         if (!widget.isBubbletrail)
           TextField(
             controller: _regionController,
-            decoration: const InputDecoration(labelText: 'Region', hintText: 'us-east-1', border: OutlineInputBorder()),
+            decoration: InputDecoration(labelText: context.l10n.region, hintText: 'us-east-1', border: OutlineInputBorder()),
             onChanged: (_) => _saveConfig(),
             autocorrect: false,
           ),
@@ -142,13 +145,13 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
           children: [
             TextField(
               controller: _bucketController,
-              decoration: const InputDecoration(labelText: 'Bucket', hintText: 'my-bucket-name', border: OutlineInputBorder()),
+              decoration: InputDecoration(labelText: context.l10n.bucket, hintText: context.l10n.myBucketName, border: OutlineInputBorder()),
               onChanged: (_) => _saveConfig(),
               autocorrect: false,
             ),
             Opacity(
               opacity: 0.7,
-              child: Text('The bucket is the identifier for where your cloud data is stored.', style: Theme.of(context).textTheme.labelMedium),
+              child: Text(context.l10n.theBucketIsTheIdentifierForWhereYourCloudDataIsStored, style: Theme.of(context).textTheme.labelMedium),
             ),
           ],
         ),
@@ -158,13 +161,13 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
           children: [
             TextField(
               controller: _accessKeyController,
-              decoration: const InputDecoration(labelText: 'Access key', border: OutlineInputBorder()),
+              decoration: InputDecoration(labelText: context.l10n.accessKey, border: OutlineInputBorder()),
               onChanged: (_) => _saveConfig(),
               autocorrect: false,
             ),
             Opacity(
               opacity: 0.7,
-              child: Text('The access key is your username for authenticating to the storage provider.', style: Theme.of(context).textTheme.labelMedium),
+              child: Text(context.l10n.theAccessKeyIsYourUsernameForAuthenticatingToTheStorageProvider, style: Theme.of(context).textTheme.labelMedium),
             ),
           ],
         ),
@@ -175,7 +178,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
             TextField(
               controller: _secretKeyController,
               decoration: InputDecoration(
-                labelText: 'Secret key',
+                labelText: context.l10n.secretKey,
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                   icon: Icon(_obscureSecretKey ? Icons.visibility : Icons.visibility_off),
@@ -189,7 +192,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
             ),
             Opacity(
               opacity: 0.7,
-              child: Text('The secret key is your password for authenticating to the storage provider.', style: Theme.of(context).textTheme.labelMedium),
+              child: Text(context.l10n.theSecretKeyIsYourPasswordForAuthenticatingToTheStorageProvider, style: Theme.of(context).textTheme.labelMedium),
             ),
           ],
         ),
@@ -200,7 +203,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
             TextField(
               controller: _vaultKeyController,
               decoration: InputDecoration(
-                labelText: 'Vault key',
+                labelText: context.l10n.vaultKey,
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                   icon: Icon(_obscureVaultKey ? Icons.visibility : Icons.visibility_off),
@@ -215,7 +218,7 @@ class _S3ConfigSectionState extends State<_S3ConfigSection> {
             Opacity(
               opacity: 0.7,
               child: Text(
-                'The vault key is the encryption password for data uploaded to the cloud. It prevents the storage provider from being able to read your data.',
+                context.l10n.theVaultKeyIsTheEncryptionPasswordForDataUploadedToTheCloudItPreventsTheStorageProvid,
                 style: Theme.of(context).textTheme.labelMedium,
               ),
             ),

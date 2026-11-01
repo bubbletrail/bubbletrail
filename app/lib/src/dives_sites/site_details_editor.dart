@@ -1,4 +1,5 @@
 import 'package:btcountries/btcountries.dart';
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 
 import '../common/common.dart';
@@ -62,7 +63,7 @@ class _SiteDetailsEditorState extends State<_SiteDetailsEditor> {
   }
 
   Future<void> _selectCountry() async {
-    final result = await showCountryPickerDialog(context: context, selectedCode: _countryCode, noneOption: 'No country');
+    final result = await showCountryPickerDialog(context: context, selectedCode: _countryCode, noneOption: context.l10n.noCountry);
     if (result != null) setState(() => _countryCode = result);
   }
 
@@ -89,11 +90,11 @@ class _SiteDetailsEditorState extends State<_SiteDetailsEditor> {
           crossAxisAlignment: .stretch,
           spacing: 16,
           children: [
-            Text('Site details', style: Theme.of(context).textTheme.titleMedium),
+            Text(context.l10n.siteDetails, style: Theme.of(context).textTheme.titleMedium),
             TextField(
               controller: _nameController,
               autofocus: widget.initial.name.isEmpty,
-              decoration: const InputDecoration(labelText: 'Name *', border: OutlineInputBorder()),
+              decoration: InputDecoration(labelText: context.l10n.requiredName, border: OutlineInputBorder()),
               textCapitalization: .words,
             ),
             Row(
@@ -103,14 +104,14 @@ class _SiteDetailsEditorState extends State<_SiteDetailsEditor> {
                   child: InkWell(
                     onTap: _selectCountry,
                     child: InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Country', border: OutlineInputBorder()),
+                      decoration: InputDecoration(labelText: context.l10n.country, border: OutlineInputBorder()),
                       child: Row(
                         spacing: 8,
                         children: [
                           CountryFlag(code: _countryCode),
                           Expanded(
                             child: Text(
-                              _countryCode.isEmpty ? 'Select country' : countryDisplayName(_countryCode),
+                              _countryCode.isEmpty ? context.l10n.selectCountry : countryDisplayName(_countryCode, l10n: context.l10n),
                               style: _countryCode.isEmpty ? TextStyle(color: Theme.of(context).hintColor) : null,
                               overflow: .ellipsis,
                             ),
@@ -124,7 +125,7 @@ class _SiteDetailsEditorState extends State<_SiteDetailsEditor> {
                 Expanded(
                   child: TextField(
                     controller: _locationController,
-                    decoration: const InputDecoration(labelText: 'Location', border: OutlineInputBorder()),
+                    decoration: InputDecoration(labelText: context.l10n.location, border: OutlineInputBorder()),
                     textCapitalization: .words,
                   ),
                 ),
@@ -136,14 +137,14 @@ class _SiteDetailsEditorState extends State<_SiteDetailsEditor> {
                 Expanded(
                   child: TextField(
                     controller: _bodyOfWaterController,
-                    decoration: const InputDecoration(labelText: 'Body of water', border: OutlineInputBorder()),
+                    decoration: InputDecoration(labelText: context.l10n.bodyOfWater, border: OutlineInputBorder()),
                     textCapitalization: .words,
                   ),
                 ),
                 Expanded(
                   child: TextField(
                     controller: _difficultyController,
-                    decoration: const InputDecoration(labelText: 'Difficulty', border: OutlineInputBorder()),
+                    decoration: InputDecoration(labelText: context.l10n.difficulty, border: OutlineInputBorder()),
                   ),
                 ),
               ],
@@ -152,8 +153,8 @@ class _SiteDetailsEditorState extends State<_SiteDetailsEditor> {
               mainAxisAlignment: .end,
               spacing: 8,
               children: [
-                TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
-                FilledButton(onPressed: canSave ? _done : null, child: const Text('Done')),
+                TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.l10n.cancel)),
+                FilledButton(onPressed: canSave ? _done : null, child: Text(context.l10n.done)),
               ],
             ),
           ],

@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,11 +24,11 @@ class CertificationDetailsScreen extends StatelessWidget {
         if (state is! CertificationDetailsLoaded) return const Placeholder();
         final cert = state.certification;
         return ScreenScaffold(
-          title: Text(_title(cert)),
+          title: Text(_title(context, cert)),
           actions: [
             IconButton(
               icon: const Icon(Icons.edit),
-              tooltip: 'Edit',
+              tooltip: context.l10n.edit,
               onPressed: () => context.goNamed(AppRouteName.certificationsDetailsEdit, pathParameters: {'certificationID': cert.id}),
             ),
             _popupMenuActions(context, cert),
@@ -46,23 +47,23 @@ class CertificationDetailsScreen extends StatelessWidget {
                     if (hasFront || hasBack)
                       _twoColumn(
                         isNarrow: isNarrow,
-                        first: hasFront ? _PhotoView(label: 'Card front', photoId: cert.cardFrontId) : const SizedBox.shrink(),
-                        second: hasBack ? _PhotoView(label: 'Card back', photoId: cert.cardBackId) : const SizedBox.shrink(),
+                        first: hasFront ? _PhotoView(label: context.l10n.cardFront, photoId: cert.cardFrontId) : const SizedBox.shrink(),
+                        second: hasBack ? _PhotoView(label: context.l10n.cardBack, photoId: cert.cardBackId) : const SizedBox.shrink(),
                       ),
                     Card(
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: DataCardColumn(
                           children: [
-                            if (cert.agency.isNotEmpty) ColumnRow(label: 'Agency', child: Text(cert.agency)),
-                            if (cert.name.isNotEmpty) ColumnRow(label: 'Name', child: Text(cert.name)),
-                            if (cert.number.isNotEmpty) ColumnRow(label: 'Number', child: Text(cert.number)),
-                            if (cert.instructorName.isNotEmpty) ColumnRow(label: 'Instructor name', child: Text(cert.instructorName)),
-                            if (cert.instructorNumber.isNotEmpty) ColumnRow(label: 'Instructor number', child: Text(cert.instructorNumber)),
-                            if (cert.hasGranted()) ColumnRow(label: 'Granted', child: Text(DateFormat.yMMMd().format(cert.granted.toDateTime()))),
+                            if (cert.agency.isNotEmpty) ColumnRow(label: context.l10n.agency, child: Text(cert.agency)),
+                            if (cert.name.isNotEmpty) ColumnRow(label: context.l10n.name, child: Text(cert.name)),
+                            if (cert.number.isNotEmpty) ColumnRow(label: context.l10n.number, child: Text(cert.number)),
+                            if (cert.instructorName.isNotEmpty) ColumnRow(label: context.l10n.instructorName, child: Text(cert.instructorName)),
+                            if (cert.instructorNumber.isNotEmpty) ColumnRow(label: context.l10n.instructorNumber, child: Text(cert.instructorNumber)),
+                            if (cert.hasGranted()) ColumnRow(label: context.l10n.granted, child: Text(DateFormat.yMMMd().format(cert.granted.toDateTime()))),
                             if (cert.hasExpires())
                               ColumnRow(
-                                label: 'Expires',
+                                label: context.l10n.expires,
                                 child: _ExpiresText(expires: cert.expires.toDateTime()),
                               ),
                           ],
@@ -79,13 +80,13 @@ class CertificationDetailsScreen extends StatelessWidget {
     );
   }
 
-  static String _title(Certification cert) {
+  static String _title(BuildContext context, Certification cert) {
     final agency = cert.agency.trim();
     final name = cert.name.trim();
     if (agency.isNotEmpty && name.isNotEmpty) return '$agency – $name';
     if (name.isNotEmpty) return name;
     if (agency.isNotEmpty) return agency;
-    return 'Certification';
+    return context.l10n.certificationTitle;
   }
 
   Widget _twoColumn({required bool isNarrow, required Widget first, required Widget second}) {
@@ -109,11 +110,11 @@ class CertificationDetailsScreen extends StatelessWidget {
           final confirmed = await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text('Delete Certification'),
-              content: const Text('Are you sure you want to delete this certification?'),
+              title: Text(context.l10n.deleteCertification),
+              content: Text(context.l10n.areYouSureYouWantToDeleteThisCertification),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-                TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
+                TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.l10n.cancel)),
+                TextButton(onPressed: () => Navigator.pop(context, true), child: Text(context.l10n.delete)),
               ],
             ),
           );
@@ -122,7 +123,7 @@ class CertificationDetailsScreen extends StatelessWidget {
           }
         }
       },
-      itemBuilder: (context) => [const PopupMenuItem(value: 'delete', child: Text('Delete certification'))],
+      itemBuilder: (context) => [PopupMenuItem(value: 'delete', child: Text(context.l10n.deleteCertificationAction))],
     );
   }
 }
@@ -181,9 +182,9 @@ class _ExpiresText extends StatelessWidget {
     final formatted = DateFormat.yMMMd().format(expires);
     Widget? badge;
     if (expires.isBefore(now)) {
-      badge = TextBadge(label: 'Expired', backgroundColor: cs.errorContainer, textColor: cs.onErrorContainer);
+      badge = TextBadge(label: context.l10n.expired, backgroundColor: cs.errorContainer, textColor: cs.onErrorContainer);
     } else if (expires.isBefore(now.add(const Duration(days: 90)))) {
-      badge = TextBadge(label: 'Expiring', backgroundColor: cs.tertiaryContainer, textColor: cs.onTertiaryContainer);
+      badge = TextBadge(label: context.l10n.expiring, backgroundColor: cs.tertiaryContainer, textColor: cs.onTertiaryContainer);
     }
     if (badge == null) return Text(formatted);
     return Row(mainAxisSize: MainAxisSize.min, spacing: 8, children: [Text(formatted), badge]);

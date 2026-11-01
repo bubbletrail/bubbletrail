@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 
 import 'countries.dart';
@@ -23,7 +24,6 @@ class _CountryPickerDialog extends StatefulWidget {
 
 class _CountryPickerDialogState extends State<_CountryPickerDialog> {
   final _searchController = TextEditingController();
-  List<Country> _filteredCountries = countries;
 
   @override
   void initState() {
@@ -38,20 +38,19 @@ class _CountryPickerDialogState extends State<_CountryPickerDialog> {
   }
 
   void _onSearchChanged() {
-    final query = _searchController.text.toLowerCase();
-    setState(() {
-      if (query.isEmpty) {
-        _filteredCountries = countries;
-      } else {
-        _filteredCountries = countries.where((c) => c.name.toLowerCase().contains(query) || c.code.toLowerCase().contains(query)).toList();
-      }
-    });
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    final query = _searchController.text.toLowerCase();
+    final filteredCountries =
+        countries
+            .where((country) => localizedCountryName(context.l10n, country.code).toLowerCase().contains(query) || country.code.toLowerCase().contains(query))
+            .toList()
+          ..sort((a, b) => localizedCountryName(context.l10n, a.code).compareTo(localizedCountryName(context.l10n, b.code)));
     return AlertDialog(
-      title: const Text('Select country'),
+      title: Text(context.l10n.selectCountry),
       content: SizedBox(
         width: .maxFinite,
         height: 400,
@@ -59,13 +58,13 @@ class _CountryPickerDialogState extends State<_CountryPickerDialog> {
           children: [
             TextField(
               controller: _searchController,
-              decoration: const InputDecoration(hintText: 'Search...', prefixIcon: Icon(Icons.search), border: OutlineInputBorder()),
+              decoration: InputDecoration(hintText: context.l10n.searchCountries, prefixIcon: Icon(Icons.search), border: OutlineInputBorder()),
               autofocus: true,
             ),
             const SizedBox(height: 12),
             Expanded(
               child: ListView.builder(
-                itemCount: _filteredCountries.length + (widget.noneOption != null ? 1 : 0),
+                itemCount: filteredCountries.length + (widget.noneOption != null ? 1 : 0),
                 itemBuilder: (context, index) {
                   if (widget.noneOption != null && index == 0) {
                     return ListTile(
@@ -75,11 +74,11 @@ class _CountryPickerDialogState extends State<_CountryPickerDialog> {
                       onTap: () => Navigator.of(context).pop(''),
                     );
                   }
-                  final country = _filteredCountries[widget.noneOption != null ? index - 1 : index];
+                  final country = filteredCountries[widget.noneOption != null ? index - 1 : index];
                   final isSelected = widget.selectedCode?.toUpperCase() == country.code;
                   return ListTile(
                     leading: CountryFlag(code: country.code, size: 24),
-                    title: Text(country.name),
+                    title: Text(localizedCountryName(context.l10n, country.code)),
                     trailing: Text(country.code, style: TextStyle(color: Theme.of(context).hintColor)),
                     selected: isSelected,
                     onTap: () => Navigator.of(context).pop(country.code),
@@ -90,7 +89,7 @@ class _CountryPickerDialogState extends State<_CountryPickerDialog> {
           ],
         ),
       ),
-      actions: [TextButton(onPressed: () => Navigator.of(context).pop(null), child: const Text('Cancel'))],
+      actions: [TextButton(onPressed: () => Navigator.of(context).pop(null), child: Text(context.l10n.cancel))],
     );
   }
 }

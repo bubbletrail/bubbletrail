@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -11,7 +12,7 @@ class SiteMapScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
-      title: const Text('Site map'),
+      title: Text(context.l10n.siteMap),
       body: BlocBuilder<DiveListBloc, DiveListState>(
         builder: (context, state) {
           if (state is DiveListInitial || state is DiveListLoading) {
@@ -22,13 +23,13 @@ class SiteMapScreen extends StatelessWidget {
             final sites = state.sites;
 
             if (sites.isEmpty) {
-              return const EmptyStateWidget(message: 'No dive sites yet.', icon: Icons.location_on_outlined);
+              return EmptyStateWidget(message: context.l10n.noDiveSitesYet, icon: Icons.location_on_outlined);
             }
 
             return AllSitesMap(sites: sites);
           }
 
-          return const Center(child: Text('Unknown state'));
+          return Center(child: Text(context.l10n.unknownState));
         },
       ),
     );

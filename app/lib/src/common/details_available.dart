@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -33,15 +34,15 @@ class DetailsAvailable<B extends BlocBase<S>, S extends DetailsStateMixin> exten
 
         if (state.isLoading || state.isInitial) {
           return ScreenScaffold(
-            title: const Text('Loading...'),
+            title: Text(context.l10n.loading),
             body: const Center(child: CircularProgressIndicator()),
           );
         }
 
         if (state.isError) {
           return ScreenScaffold(
-            title: const Text('Error'),
-            body: Center(child: Text(state.errorMessage ?? 'An error occurred')),
+            title: Text(context.l10n.error),
+            body: Center(child: Text(state.errorMessage == null ? context.l10n.anErrorOccurred : localizeError(context.l10n, state.errorMessage!))),
           );
         }
 

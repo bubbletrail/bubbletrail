@@ -1,9 +1,11 @@
 import 'dart:math';
 
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../app_routes.dart';
 import '../common/common.dart';
@@ -16,7 +18,7 @@ class StatisticsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
-      title: const Text('Statistics'),
+      title: Text(context.l10n.statistics),
       body: BlocBuilder<DiveListBloc, DiveListState>(
         builder: (context, state) {
           if (state is DiveListInitial || state is DiveListLoading) {
@@ -25,12 +27,12 @@ class StatisticsScreen extends StatelessWidget {
 
           if (state is DiveListLoaded) {
             if (state.dives.isEmpty) {
-              return const EmptyStateWidget(message: 'No dives yet. Add your first dive to see statistics!', icon: Icons.insights_outlined);
+              return EmptyStateWidget(message: context.l10n.noDivesYetAddYourFirstDiveToSeeStatistics, icon: Icons.insights_outlined);
             }
             return _Statistics(dives: state.dives);
           }
 
-          return const Center(child: Text('Unknown state'));
+          return Center(child: Text(context.l10n.unknownState));
         },
       ),
     );
@@ -54,16 +56,16 @@ class _Statistics extends StatelessWidget {
       itemBuilder: (context, index) {
         if (index == 0) {
           return InfoSection(
-            title: 'Activity',
+            title: context.l10n.activity,
             even: index % 2 == 0,
             children: [_DiveHeatMap(dives: dives)],
           );
         }
         if (index == 1) {
           return InfoSection(
-            title: 'Lifetime',
+            title: context.l10n.lifetime,
             even: index % 2 == 0,
-            children: [infoRow('Years diving', '${years.length}'), ..._statRows(context, prefs, lifetime)],
+            children: [infoRow(context.l10n.yearsDiving, years.length.toString()), ..._statRows(context, prefs, lifetime)],
           );
         }
         final (year, stats) = years[index - 2];
@@ -74,14 +76,18 @@ class _Statistics extends StatelessWidget {
 
   List<Widget> _statRows(BuildContext context, PreferencesStore prefs, _Stats stats) {
     return [
-      infoRow('Dives', '${stats.count}'),
-      infoRow('Total time', formatTotalTime(stats.totalSeconds)),
-      infoRow('Average max depth', formatDepth(prefs.depthUnit, stats.avgMaxDepth)),
-      if (stats.hasDeepest) _diveRow(context, 'Deepest dive', Text(formatDepth(prefs.depthUnit, stats.maxMaxDepth)), stats.deepestDive!),
-      if (stats.hasLongest) _diveRow(context, 'Longest dive', DurationText(stats.longestSeconds), stats.longestDive!),
-      if (stats.hasWarmest) _diveRow(context, 'Warmest dive', Text(formatTemperature(prefs.temperatureUnit, stats.warmestTemp)), stats.warmestDive!),
-      if (stats.hasColdest) _diveRow(context, 'Coldest dive', Text(formatTemperature(prefs.temperatureUnit, stats.coldestTemp)), stats.coldestDive!),
-      if (stats.hasSAC) infoRow('Average SAC', '${formatVolume(prefs.volumeUnit, stats.averageSAC, precise: true)}/min'),
+      infoRow(context.l10n.dives, stats.count.toString()),
+      infoRow(context.l10n.totalTime, formatTotalTime(context.l10n, stats.totalSeconds)),
+      infoRow(context.l10n.averageMaxDepth, formatDepth(context.l10n, prefs.depthUnit, stats.avgMaxDepth)),
+      if (stats.hasDeepest)
+        _diveRow(context, context.l10n.deepestDive, Text(formatDepth(context.l10n, prefs.depthUnit, stats.maxMaxDepth)), stats.deepestDive!),
+      if (stats.hasLongest) _diveRow(context, context.l10n.longestDive, DurationText(stats.longestSeconds), stats.longestDive!),
+      if (stats.hasWarmest)
+        _diveRow(context, context.l10n.warmestDive, Text(formatTemperature(context.l10n, prefs.temperatureUnit, stats.warmestTemp)), stats.warmestDive!),
+      if (stats.hasColdest)
+        _diveRow(context, context.l10n.coldestDive, Text(formatTemperature(context.l10n, prefs.temperatureUnit, stats.coldestTemp)), stats.coldestDive!),
+      if (stats.hasSAC)
+        infoRow(context.l10n.averageSAC, context.l10n.ratePerMinute(formatVolume(context.l10n, prefs.volumeUnit, stats.averageSAC, precise: true))),
     ];
   }
 
@@ -159,20 +165,17 @@ class _Statistics extends StatelessWidget {
 
 // Like formatMinutes, but extends to hours and days: "95 min", "120 min",
 // "2 hours, 1 min", "2 days, 3 hours", "14 days, 2 hours, 5 min".
-String formatTotalTime(int seconds) {
+String formatTotalTime(AppLocalizations l10n, int seconds) {
   final totalMinutes = (seconds / 60).round();
-  if (totalMinutes <= 120) return '$totalMinutes min';
+  if (totalMinutes <= 120) return l10n.minutesDuration(totalMinutes);
   final hours = totalMinutes ~/ 60;
   final minutes = totalMinutes % 60;
-  if (hours <= 48) return '$hours hours, $minutes min';
+  if (hours <= 48) return l10n.hoursMinutesDuration(hours, minutes);
   final days = hours ~/ 24;
   final restHours = hours % 24;
-  if (minutes == 0) return '$days days, $restHours hours';
-  return '$days days, $restHours hours, $minutes min';
+  if (minutes == 0) return l10n.daysHoursDuration(days, restHours);
+  return l10n.daysHoursMinutesDuration(days, restHours, minutes);
 }
-
-// Months of the year, index zero being January.
-const _monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // Dive activity heat map, contribution graph style: one row per year (latest
 // year first) and one square per month, colored by dive count along the
@@ -184,6 +187,7 @@ class _DiveHeatMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final monthNames = DateFormat.MMM(context.l10n.localeName).dateSymbols.SHORTMONTHS;
     final counts = <int, List<int>>{};
     for (final dive in dives) {
       if (!dive.hasStart()) continue;
@@ -215,7 +219,7 @@ class _DiveHeatMap extends StatelessWidget {
             child: Padding(
               padding: const .all(2.0),
               child: Tooltip(
-                message: '${_monthNames[month]} $year: ${count == 1 ? '1 dive' : '$count dives'}',
+                message: context.l10n.monthlyDiveCount(monthNames[month], year, count),
                 child: DecoratedBox(
                   decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3)),
                 ),
@@ -236,7 +240,7 @@ class _DiveHeatMap extends StatelessWidget {
                     child: Center(
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Text(_monthNames[m], style: labelStyle),
+                        child: Text(monthNames[m], style: labelStyle),
                       ),
                     ),
                   ),

@@ -1,4 +1,5 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -40,7 +41,7 @@ class EquipmentDetailsLoaded extends EquipmentDetailsState with DetailsLoadedMix
 
 class EquipmentDetailsError extends EquipmentDetailsState with DetailsErrorMixin {
   @override
-  final String errorMessage;
+  final Object errorMessage;
 
   const EquipmentDetailsError(this.errorMessage);
 
@@ -123,13 +124,13 @@ class EquipmentDetailsBloc extends Bloc<EquipmentDetailsEvent, EquipmentDetailsS
     try {
       final equipment = await _store.equipment.getById(event.equipmentId);
       if (equipment == null) {
-        emit(const EquipmentDetailsError('Equipment not found'));
+        emit(const EquipmentDetailsError(LocalizedError(AppError.equipmentNotFound)));
         return;
       }
 
       emit(EquipmentDetailsLoaded(equipment, false));
     } catch (e) {
-      emit(EquipmentDetailsError('Failed to load equipment details: $e'));
+      emit(EquipmentDetailsError(LocalizedError(AppError.loadEquipmentFailed, e)));
     }
   }
 
@@ -139,7 +140,7 @@ class EquipmentDetailsBloc extends Bloc<EquipmentDetailsEvent, EquipmentDetailsS
       emit(EquipmentDetailsClosed());
     } catch (e) {
       _log.warning('failed to update equipment', e);
-      emit(EquipmentDetailsError('Failed to update equipment: $e'));
+      emit(EquipmentDetailsError(LocalizedError(AppError.updateEquipmentFailed, e)));
     }
   }
 
@@ -149,7 +150,7 @@ class EquipmentDetailsBloc extends Bloc<EquipmentDetailsEvent, EquipmentDetailsS
       emit(EquipmentDetailsClosed());
     } catch (e) {
       _log.warning('failed to delete equipment', e);
-      emit(EquipmentDetailsError('Failed to delete equipment: $e'));
+      emit(EquipmentDetailsError(LocalizedError(AppError.deleteEquipmentFailed, e)));
     }
   }
 }

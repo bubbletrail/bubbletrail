@@ -1,6 +1,6 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
-
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
@@ -37,7 +37,7 @@ class CylinderDetailsLoaded extends CylinderDetailsState with DetailsLoadedMixin
 
 class CylinderDetailsError extends CylinderDetailsState with DetailsErrorMixin {
   @override
-  final String errorMessage;
+  final Object errorMessage;
 
   const CylinderDetailsError(this.errorMessage);
 
@@ -117,13 +117,13 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
     try {
       final cylinder = await _store.cylinders.getById(event.cylinderId);
       if (cylinder == null) {
-        emit(const CylinderDetailsError('Cylinder not found'));
+        emit(const CylinderDetailsError(LocalizedError(AppError.cylinderNotFound)));
         return;
       }
 
       emit(CylinderDetailsLoaded(cylinder, false));
     } catch (e) {
-      emit(CylinderDetailsError('Failed to load cylinder details: $e'));
+      emit(CylinderDetailsError(LocalizedError(AppError.loadCylinderFailed, e)));
     }
   }
 
@@ -163,7 +163,7 @@ class CylinderDetailsBloc extends Bloc<CylinderDetailsEvent, CylinderDetailsStat
       add(_LoadCylinderDetails(upd.id));
     } catch (e) {
       _log.warning('failed to update cylinder', e);
-      emit(CylinderDetailsError('Failed to update cylinder: $e'));
+      emit(CylinderDetailsError(LocalizedError(AppError.updateCylinderFailed, e)));
     }
   }
 }

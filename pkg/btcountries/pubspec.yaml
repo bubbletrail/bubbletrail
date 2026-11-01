@@ -7,6 +7,7 @@ environment:
   sdk: ^3.10.7
 
 dependencies:
+  btl10n: {path: ../btl10n}
   flutter: {sdk: flutter}
 
 dev_dependencies:

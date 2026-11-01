@@ -1,0 +1,1259 @@
+{
+  "@@locale": "en",
+  "dives": "Dives",
+  "sites": "Sites",
+  "equipment": "Equipment",
+  "statistics": "Statistics",
+  "preferences": "Preferences",
+  "more": "More",
+  "noDivesYetAddYourFirstDiveToSeeStatistics": "No dives yet. Add your first dive to see statistics!",
+  "unknownState": "Unknown state",
+  "activity": "Activity",
+  "lifetime": "Lifetime",
+  "yearsDiving": "Years diving",
+  "message": "{years}",
+  "@message": {
+    "placeholders": {
+      "years": {
+        "type": "Object"
+      }
+    }
+  },
+  "totalTime": "Total time",
+  "averageMaxDepth": "Average max depth",
+  "deepestDive": "Deepest dive",
+  "longestDive": "Longest dive",
+  "warmestDive": "Warmest dive",
+  "coldestDive": "Coldest dive",
+  "averageSAC": "Average SAC",
+  "units": "Units",
+  "depth": "Depth",
+  "pressure": "Pressure",
+  "temperature": "Temperature",
+  "volume": "Volume",
+  "weight": "Weight",
+  "dateFormat": "Date format",
+  "timeFormat": "Time format",
+  "syncing": "Syncing...",
+  "syncFailed": "Sync failed: {error}",
+  "@syncFailed": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "lastSynced": "Last synced",
+  "syncNow": "Sync now",
+  "editSyncSettings": "Edit sync settings",
+  "importExport": "Import & export",
+  "system": "System",
+  "light": "Light",
+  "dark": "Dark",
+  "editUnits": "Edit units",
+  "divePreferences": "Dive preferences",
+  "maintenance": "Maintenance",
+  "checkForUpdates": "Check for updates",
+  "renumberDives": "Renumber dives",
+  "resetDatabase": "Reset database",
+  "openSourceLicenses": "Open source licenses",
+  "thisWillRenumberAllDivesSequentiallyInChronologicalOrderReplacingAnyExistingDiveNumbe": "This will renumber all dives sequentially, in chronological order, replacing any existing dive numbers.",
+  "startFrom": "Start from:",
+  "cancel": "Cancel",
+  "renumberingDives": "Renumbering dives...",
+  "logs": "Logs",
+  "noLogEntries": "No log entries",
+  "exportBackup": "Export backup",
+  "importBackup": "Import backup",
+  "thisWillReplaceYourExistingDataWithTheBackupYourCurrentDataWillBeMovedToABackupFolder": "This will replace your existing data with the backup. Your current data will be moved to a backup folder. Continue?",
+  "import": "Import",
+  "importingDives": "Importing dives...",
+  "importingEquipment": "Importing equipment...",
+  "errorDetails": "Error: {error}",
+  "@errorDetails": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "exportComplete": "Export complete",
+  "importComplete": "Import complete",
+  "importLogFile": "Import log file",
+  "importEquipment": "Import equipment",
+  "exportSubsurfaceFile": "Export Subsurface file",
+  "exportUDDFFile": "Export UDDF file",
+  "importDatabaseBackup": "Import database backup",
+  "exportDatabaseBackup": "Export database backup",
+  "gradientFactors": "Gradient Factors",
+  "gradientFactorsAdjustTheConservatismOfTheBuhlmannDecompressionAlgorithm": "Gradient factors adjust the conservatism of the Buhlmann decompression algorithm.",
+  "gfLow": "GF Low",
+  "gfHigh": "GF High",
+  "filterByLevel": "Filter by level",
+  "all": "All",
+  "debug": "Debug+",
+  "info": "Info+",
+  "warning": "Warning+",
+  "severe": "Severe",
+  "copyAllLogs": "Copy all logs",
+  "copiedLogEntries": "{count, plural, =1{Copied 1 log entry} other{Copied {count} log entries}}",
+  "@copiedLogEntries": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "clearLogs": "Clear logs",
+  "syncProvider": "Sync provider",
+  "off": "Off",
+  "bubbletrailS3": "Bubbletrail S3",
+  "genericS3": "Generic S3",
+  "bubbletrailSyncConfiguration": "Bubbletrail sync configuration",
+  "s3Configuration": "S3 configuration",
+  "endpoint": "Endpoint",
+  "s3AmazonawsComOrMinioExampleCom": "s3.amazonaws.com or minio.example.com",
+  "region": "Region",
+  "bucket": "Bucket",
+  "myBucketName": "my-bucket-name",
+  "theBucketIsTheIdentifierForWhereYourCloudDataIsStored": "The bucket is the identifier for where your cloud data is stored.",
+  "accessKey": "Access key",
+  "theAccessKeyIsYourUsernameForAuthenticatingToTheStorageProvider": "The access key is your username for authenticating to the storage provider.",
+  "secretKey": "Secret key",
+  "theSecretKeyIsYourPasswordForAuthenticatingToTheStorageProvider": "The secret key is your password for authenticating to the storage provider.",
+  "vaultKey": "Vault key",
+  "theVaultKeyIsTheEncryptionPasswordForDataUploadedToTheCloudItPreventsTheStorageProvid": "The vault key is the encryption password for data uploaded to the cloud. It prevents the storage provider from being able to read your data.",
+  "selectDiveSite": "Select dive site",
+  "tags": "Tags:",
+  "diveDetails": "Dive details",
+  "timesShownIn": "Times shown in {zoneAbbreviation}",
+  "@timesShownIn": {
+    "placeholders": {
+      "zoneAbbreviation": {
+        "type": "Object"
+      }
+    }
+  },
+  "diveNumber": "Dive #{number}",
+  "@diveNumber": {
+    "placeholders": {
+      "number": {
+        "type": "Object"
+      }
+    }
+  },
+  "date": "Date",
+  "time": "Time",
+  "duration": "Duration",
+  "maxDepth": "Max depth",
+  "done": "Done",
+  "rating": "Rating",
+  "defaultEquipmentUpdated": "Default equipment updated",
+  "addDefaults": "Add defaults",
+  "setAsDefault": "Set as default",
+  "selectEquipment": "Select equipment",
+  "noEquipmentAvailable": "No equipment available",
+  "usedThisDive": "Used this dive",
+  "availableEquipment": "Available equipment",
+  "dragEquipmentHere": "Drag equipment here",
+  "noMoreEquipment": "No more equipment",
+  "gasChangeTime": "Gas change time",
+  "cylinders": "Cylinders",
+  "cylinder": "Cylinder",
+  "cylinderWithId": "Cylinder {id}",
+  "@cylinderWithId": {
+    "placeholders": {
+      "id": {
+        "type": "Object"
+      }
+    }
+  },
+  "removeCylinder": "Remove cylinder",
+  "oxygen": "Oxygen %",
+  "helium": "Helium %",
+  "startPressure": "Start pressure",
+  "endPressure": "End pressure",
+  "addCylinder": "Add cylinder",
+  "noCylindersDefinedAddCylindersInEquipmentFirst": "No cylinders defined. Add cylinders in Equipment first.",
+  "gasChanges": "Gas changes",
+  "startOfDive": "Start of dive",
+  "switchToThisCylinder": "{time} switch to this cylinder",
+  "@switchToThisCylinder": {
+    "placeholders": {
+      "time": {
+        "type": "Object"
+      }
+    }
+  },
+  "removeGasChange": "Remove gas change",
+  "addGasChange": "Add gas change",
+  "minutes": "Minutes",
+  "seconds": "Seconds",
+  "ok": "OK",
+  "waitABit": "Wait a bit",
+  "gotIt": "Got it",
+  "youCanFly": "You can fly",
+  "diveCount": "{count, plural, =1{1 dive} other{{count} dives}}",
+  "@diveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "underwater": "{duration} underwater",
+  "@underwater": {
+    "placeholders": {
+      "duration": {
+        "type": "Object"
+      }
+    }
+  },
+  "defaultEquipment": "Default",
+  "archived": "Archived",
+  "otherItems": "Others ({count})",
+  "@otherItems": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "addTag": "Add tag",
+  "unspecified": "Unspecified",
+  "none": "None",
+  "vpm": "VPM {conservatism}",
+  "@vpm": {
+    "placeholders": {
+      "conservatism": {
+        "type": "Object"
+      }
+    }
+  },
+  "rgbm": "RGBM {conservatism}",
+  "@rgbm": {
+    "placeholders": {
+      "conservatism": {
+        "type": "Object"
+      }
+    }
+  },
+  "dciem": "DCIEM {conservatism}",
+  "@dciem": {
+    "placeholders": {
+      "conservatism": {
+        "type": "Object"
+      }
+    }
+  },
+  "unknown": "Unknown",
+  "deco": "Deco {time} @ {depth}",
+  "@deco": {
+    "placeholders": {
+      "time": {
+        "type": "Object"
+      },
+      "depth": {
+        "type": "Object"
+      }
+    }
+  },
+  "deepStop": "Deep stop {time} @ {depth}",
+  "@deepStop": {
+    "placeholders": {
+      "time": {
+        "type": "Object"
+      },
+      "depth": {
+        "type": "Object"
+      }
+    }
+  },
+  "safetyStop": "Safety stop {time} @ {depth}",
+  "@safetyStop": {
+    "placeholders": {
+      "time": {
+        "type": "Object"
+      },
+      "depth": {
+        "type": "Object"
+      }
+    }
+  },
+  "ndl": "{time} NDL",
+  "@ndl": {
+    "placeholders": {
+      "time": {
+        "type": "Object"
+      }
+    }
+  },
+  "air": "Air",
+  "weights": "Weights",
+  "type": "Type",
+  "remove": "Remove",
+  "addWeight": "Add weight",
+  "cylinderNumber": "Cylinder {number}",
+  "@cylinderNumber": {
+    "placeholders": {
+      "number": {
+        "type": "Object"
+      }
+    }
+  },
+  "wp": "WP",
+  "mix": "Mix",
+  "start": "Start",
+  "end": "End",
+  "sac": "SAC",
+  "backgas": "Backgas",
+  "deepDeco": "Deep deco",
+  "shallowDeco": "Shallow deco",
+  "loading": "Loading...",
+  "error": "Error",
+  "anErrorOccurred": "An error occurred",
+  "noDepthProfileDataAvailable": "No depth profile data available",
+  "compCeil": "Comp ceil: ",
+  "calcCeil": "Calc ceil: ",
+  "addNewDive": "Add new dive",
+  "downloadFromComputer": "Download from computer",
+  "enterManually": "Enter manually",
+  "noDivesYetAddYourFirstDive": "No dives yet. Add your first dive!",
+  "enterValidCoordinatesOrClearBothFields": "Enter valid coordinates, or clear both fields.",
+  "position": "Position",
+  "latitude": "Latitude",
+  "longitude": "Longitude",
+  "dive": "Dive ",
+  "addGases": "Add gases",
+  "addWeights": "Add weights",
+  "addEquipment": "Add equipment",
+  "mergeIntoPreviousDive": "Merge into previous dive",
+  "merge": "Merge",
+  "deleteDive": "Delete dive",
+  "delete": "Delete",
+  "viewRawData": "View raw data",
+  "addSite": "Add site",
+  "location": "Location",
+  "addBuddies": "Add buddies",
+  "buddy": "Buddy",
+  "addDivemaster": "Add divemaster",
+  "divemaster": "Divemaster",
+  "noDiveSitesAvailable": "No dive sites available",
+  "noSite": "No site",
+  "buddies": "Buddies",
+  "addBuddy": "Add buddy",
+  "name": "Name",
+  "addNotes": "Add notes",
+  "notes": "Notes",
+  "addTags": "Add tags",
+  "addRating": "Add rating",
+  "weightNumber": "Weight {number}",
+  "@weightNumber": {
+    "placeholders": {
+      "number": {
+        "type": "Object"
+      }
+    }
+  },
+  "otu": "OTU",
+  "cns": "CNS",
+  "model": "Model",
+  "computer": "Computer",
+  "serial": "Serial",
+  "number": "Number",
+  "meanDepth": "Mean depth",
+  "viewFullscreen": "View fullscreen",
+  "temp": "Temp",
+  "country": "Country",
+  "bodyOfWater": "Body of water",
+  "sitePosition": "Site position",
+  "diveStartPosition": "Dive start position",
+  "diveEndPosition": "Dive end position",
+  "volumeUsed": "Volume used",
+  "noLocationDataAvailable": "No location data available",
+  "newDiveSite": "New dive site",
+  "notSet": "Not set",
+  "difficulty": "Difficulty",
+  "deleteSite": "Delete site",
+  "addLocation": "Add location",
+  "diveSites": "Dive sites",
+  "viewAsMap": "View as map",
+  "addNewDiveSite": "Add new dive site",
+  "noDiveSitesYet": "No dive sites yet.",
+  "siteMap": "Site map",
+  "noDivesToDisplay": "No dives to display",
+  "noDivesMatchTheseFilters": "No dives match these filters.",
+  "clearFilters": "Clear filters",
+  "site": "Site",
+  "year": "Year",
+  "allYears": "All years",
+  "allCountries": "All countries",
+  "tag": "Tag",
+  "allTags": "All tags",
+  "noCountry": "No country",
+  "siteDetails": "Site details",
+  "selectCountry": "Select country",
+  "connectDiveComputer": "Connect dive computer",
+  "disconnect": "Disconnect",
+  "stop": "Stop",
+  "scan": "Scan",
+  "bluetoothIs": "{state, select, on{Bluetooth is on} off{Bluetooth is off} turningOn{Bluetooth is turning on} turningOff{Bluetooth is turning off} unauthorized{Bluetooth is unauthorized} unavailable{Bluetooth is unavailable} unknown{Bluetooth state is unknown} other{Bluetooth is {state}}}",
+  "@bluetoothIs": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "pleaseEnableBluetoothToScanForDiveComputers": "Please enable Bluetooth to scan for dive computers",
+  "turnOnBluetooth": "Turn on Bluetooth",
+  "scanToFindYourDiveComputer": "Scan to find your dive computer",
+  "knownDiveComputers": "Known dive computers",
+  "computersFound": "{count, plural, =1{1 dive computer found} other{{count} dive computers found}}",
+  "@computersFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "makeSureYourDiveComputerIsInBluetoothCommunicationMode": "Make sure your dive computer is in Bluetooth communication mode",
+  "otherDevicesFound": "{count, plural, =1{1 non-dive-computer device found} other{{count} non-dive-computer devices found}}",
+  "@otherDevicesFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "showAll": "Show all",
+  "download": "Download",
+  "forget": "Forget",
+  "connect": "Connect",
+  "status": "Status: {state, select, connected{connected} disconnected{disconnected} connecting{connecting} disconnecting{disconnecting} other{{state}}}",
+  "@status": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "discoveringServices": "Discovering services...",
+  "downloadDives": "Download dives",
+  "loadingSupportedComputers": "Loading supported computers...",
+  "selectDiveComputer": "Select dive computer",
+  "suggestedFor": "Suggested for \"{deviceName}\":",
+  "@suggestedFor": {
+    "placeholders": {
+      "deviceName": {
+        "type": "Object"
+      }
+    }
+  },
+  "showAllComputers": "Show all computers...",
+  "allBLEDiveComputers": "All BLE dive computers",
+  "divesDownloaded": ", {count, plural, =1{1 dive downloaded} other{{count} dives downloaded}}",
+  "@divesDownloaded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "downloadingDives": "Downloading dives...{downloadedLabel}",
+  "@downloadingDives": {
+    "placeholders": {
+      "downloadedLabel": {
+        "type": "Object"
+      }
+    }
+  },
+  "excellent": "Excellent",
+  "good": "Good",
+  "fair": "Fair",
+  "weak": "Weak",
+  "certifications": "Certifications",
+  "addNewCertification": "Add new certification",
+  "noCertificationsYetTapToAddOne": "No certifications yet. Tap + to add one.",
+  "expired": "Expired",
+  "expiring": "Expiring",
+  "certification": "Certification #{id}",
+  "@certification": {
+    "placeholders": {
+      "id": {
+        "type": "Object"
+      }
+    }
+  },
+  "cylinderTypes": "Cylinder types",
+  "addNewCylinderType": "Add new cylinder type",
+  "noCylinderTypesYetTapToAddOne": "No cylinder types yet. Tap + to add one.",
+  "cylinderType": "Cylinder type #{id}",
+  "@cylinderType": {
+    "placeholders": {
+      "id": {
+        "type": "Object"
+      }
+    }
+  },
+  "bcdsRegulatorsWetsuitsEtc": "BCDs, regulators, wetsuits, etc.",
+  "availableCylinderTypesAndDefaults": "Available cylinder types and defaults",
+  "diverCertificationCards": "Diver certification cards",
+  "otherEquipment": "Other Equipment",
+  "addNewEquipment": "Add new equipment",
+  "noEquipmentYetTapToAddOne": "No equipment yet. Tap + to add one.",
+  "showArchived": "Show archived",
+  "photoNotYetDownloaded": "Photo not yet downloaded",
+  "edit": "Edit",
+  "cardFront": "Card front",
+  "cardBack": "Card back",
+  "agency": "Agency",
+  "instructorName": "Instructor name",
+  "instructorNumber": "Instructor number",
+  "granted": "Granted",
+  "expires": "Expires",
+  "deleteCertification": "Delete Certification",
+  "areYouSureYouWantToDeleteThisCertification": "Are you sure you want to delete this certification?",
+  "failedToPickImage": "Failed to pick image: {details}",
+  "@failedToPickImage": {
+    "placeholders": {
+      "details": {
+        "type": "Object"
+      }
+    }
+  },
+  "takePhoto": "Take photo",
+  "chooseFromGallery": "Choose from gallery",
+  "newCertification": "New Certification",
+  "editCertification": "Edit Certification",
+  "discardChanges": "Discard changes",
+  "certificationName": "Certification Name *",
+  "eGOpenWaterDiver": "e.g., Open Water Diver",
+  "required": "Required",
+  "certificationNumber": "Certification Number *",
+  "eGPADISSI": "e.g., PADI, SSI",
+  "replacePhoto": "Replace photo",
+  "removePhoto": "Remove photo",
+  "tapToAddPhoto": "Tap to add photo",
+  "deleteCylinderType": "Delete cylinder type",
+  "areYouSureYouWantToDeleteThisCylinderTypeThisCannotBeUndone": "Are you sure you want to delete this cylinder type? This cannot be undone.",
+  "newCylinderType": "New cylinder type",
+  "editCylinderType": "Edit cylinder type",
+  "description": "Description",
+  "eGAL8012x232": "e.g., AL80, 12x232",
+  "metric": "Metric",
+  "waterVolumeL": "Water volume (L)",
+  "eG12": "e.g. 12",
+  "workingPressureBar": "Working pressure (bar)",
+  "eG232": "e.g. 232",
+  "imperial": "Imperial",
+  "sizeCuft": "Size (cuft)",
+  "eG80": "e.g. 80",
+  "workingPressurePsi": "Working pressure (psi)",
+  "eG3000": "e.g. 3000",
+  "defaultForImports": "Default for imports",
+  "useThisCylinderWhenImportingDivesWithoutCylinderTypeInfo": "Use this cylinder when importing dives without cylinder type info",
+  "backgas40O": "Backgas (<40% O₂)",
+  "deepDeco4060O": "Deep deco (40-60% O₂)",
+  "shallowDeco60O": "Shallow deco (>60% O₂)",
+  "leaveDivesWithoutCylinderType": "Leave dives without cylinder type",
+  "replaceWithAnotherCylinderType": "Replace with another cylinder type",
+  "noOtherCylinderTypesExistSoThoseDivesWillBeLeftWithoutACylinder": "No other cylinder types exist, so those dives will be left without a cylinder.",
+  "deleteEquipment": "Delete Equipment",
+  "areYouSureYouWantToDeleteThisEquipment": "Are you sure you want to delete this equipment?",
+  "newEquipment": "New Equipment",
+  "editEquipment": "Edit Equipment",
+  "manufacturer": "Manufacturer",
+  "modelName": "Model/Name",
+  "serialNumber": "Serial Number",
+  "purchasePrice": "Purchase Price",
+  "shop": "Shop",
+  "purchaseDate": "Purchase Date",
+  "warrantyUntil": "Warranty Until",
+  "lastService": "Last Service",
+  "addToNewDivesByDefault": "Add to new dives by default",
+  "eGBCDRegulatorWetsuit": "e.g., BCD, Regulator, Wetsuit",
+  "appTitle": "Bubbletrail",
+  "mergeDiveConfirmation": "Dive #{number} will be merged into dive #{previousNumber}, appending its profile to that dive. Dive #{number} is then deleted. Continue?",
+  "@mergeDiveConfirmation": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "previousNumber": {
+        "type": "int"
+      }
+    }
+  },
+  "resetDatabaseConfirmation": "This will remove all dives, sites, etc. in Bubbletrail and revert to an empty state. Syncing will be disabled, but synced data remains untouched in the cloud. Continue?",
+  "confirm": "Confirm",
+  "unknownSite": "Unknown site",
+  "diveTitle": "Dive #{number}: {site}",
+  "@diveTitle": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "site": {
+        "type": "String"
+      }
+    }
+  },
+  "compactDiveTitle": "#{number}: {site}",
+  "@compactDiveTitle": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "site": {
+        "type": "String"
+      }
+    }
+  },
+  "minutesDuration": "{minutes} min",
+  "@minutesDuration": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursMinutesDuration": "{hours, plural, =1{1 hour} other{{hours} hours}}, {minutes} min",
+  "@hoursMinutesDuration": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "daysHoursDuration": "{days, plural, =1{1 day} other{{days} days}}, {hours, plural, =1{1 hour} other{{hours} hours}}",
+  "@daysHoursDuration": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "daysHoursMinutesDuration": "{days, plural, =1{1 day} other{{days} days}}, {hours, plural, =1{1 hour} other{{hours} hours}}, {minutes} min",
+  "@daysHoursMinutesDuration": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "monthlyDiveCount": "{month} {year}: {count, plural, =1{1 dive} other{{count} dives}}",
+  "@monthlyDiveCount": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "weightBackplate": "Backplate",
+  "weightBelt": "Belt",
+  "weightHarness": "Harness",
+  "weightIntegrated": "Integrated",
+  "weightTrim": "Trim",
+  "noLocation": "No location",
+  "equipmentNotFound": "Equipment not found",
+  "loadEquipmentFailed": "Failed to load equipment details: {details}",
+  "@loadEquipmentFailed": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "updateEquipmentFailed": "Failed to update equipment: {details}",
+  "@updateEquipmentFailed": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteEquipmentFailed": "Failed to delete equipment: {details}",
+  "@deleteEquipmentFailed": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "certificationNotFound": "Certification not found",
+  "loadCertificationFailed": "Failed to load certification details: {details}",
+  "@loadCertificationFailed": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "updateCertificationFailed": "Failed to update certification: {details}",
+  "@updateCertificationFailed": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteCertificationFailed": "Failed to delete certification: {details}",
+  "@deleteCertificationFailed": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "cylinderNotFound": "Cylinder not found",
+  "loadCylinderFailed": "Failed to load cylinder details: {details}",
+  "@loadCylinderFailed": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "updateCylinderFailed": "Failed to update cylinder: {details}",
+  "@updateCylinderFailed": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "connectFailed": "Failed to connect: {details}",
+  "@connectFailed": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "noServicesDiscovered": "No services discovered",
+  "noBleCharacteristics": "No suitable BLE characteristics found",
+  "notificationsFailed": "Failed to enable notifications: {details}",
+  "@notificationsFailed": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadFailed": "Download exception: {details}",
+  "@downloadFailed": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownError": "Unknown error",
+  "cylinderTypeWithId": "Cylinder type {id}",
+  "@cylinderTypeWithId": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "equipmentBcd": "BCD",
+  "equipmentRegulator": "Regulator",
+  "equipmentWetsuit": "Wetsuit",
+  "equipmentDrysuit": "Drysuit",
+  "equipmentMask": "Mask",
+  "equipmentFins": "Fins",
+  "equipmentComputer": "Computer",
+  "equipmentLight": "Light",
+  "equipmentCamera": "Camera",
+  "equipmentSmb": "SMB",
+  "equipmentReel": "Reel",
+  "equipmentWeightBelt": "Weight belt",
+  "equipmentHood": "Hood",
+  "equipmentGloves": "Gloves",
+  "equipmentBoots": "Boots",
+  "equipmentOther": "Other",
+  "measurement": "{value} {unit}",
+  "@measurement": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "perMinute": "/min",
+  "ratePerMinute": "{value}/min",
+  "@ratePerMinute": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "trimix": "Tx{oxygen}/{helium}",
+  "@trimix": {
+    "placeholders": {
+      "oxygen": {
+        "type": "int"
+      },
+      "helium": {
+        "type": "int"
+      }
+    }
+  },
+  "nitrox": "EAN{oxygen}",
+  "@nitrox": {
+    "placeholders": {
+      "oxygen": {
+        "type": "int"
+      }
+    }
+  },
+  "syncingSection": "Syncing",
+  "equipmentWithId": "Equipment #{id}",
+  "@equipmentWithId": {
+    "placeholders": {
+      "id": {
+        "type": "Object"
+      }
+    }
+  },
+  "tagsLabel": "Tags",
+  "buhlmannGradientFactors": "Bühlmann GF {gfLow}/{gfHigh}",
+  "@buhlmannGradientFactors": {
+    "placeholders": {
+      "gfLow": {
+        "type": "Object"
+      },
+      "gfHigh": {
+        "type": "Object"
+      }
+    }
+  },
+  "buhlmann": "Bühlmann",
+  "durationRange": "0 - {maximumMinutes} min",
+  "@durationRange": {
+    "placeholders": {
+      "maximumMinutes": {
+        "type": "Object"
+      }
+    }
+  },
+  "surfaceGradientFactorValue": "SurfGF: {percent}%",
+  "@surfaceGradientFactorValue": {
+    "placeholders": {
+      "percent": {
+        "type": "Object"
+      }
+    }
+  },
+  "surfaceGradientFactor": "SurfGF",
+  "percentage": "{value}%",
+  "@percentage": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "decoLabel": "Deco",
+  "bodyOfWaterTitle": "Body of Water",
+  "diveCountColumn": "# Dives",
+  "diveNumberColumn": "Dive #",
+  "requiredName": "Name *",
+  "downloadingDivesProgress": "Downloading dives... {percent}%{downloadedLabel}",
+  "@downloadingDivesProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "Object"
+      },
+      "downloadedLabel": {
+        "type": "Object"
+      }
+    }
+  },
+  "certificationTitle": "Certification",
+  "deleteCertificationAction": "Delete certification",
+  "instructorNameTitle": "Instructor Name",
+  "instructorNumberTitle": "Instructor Number",
+  "requiredAgency": "Agency *",
+  "cylinderTypeLabel": "Cylinder type",
+  "deleteEquipmentAction": "Delete equipment",
+  "dateExampleEuropean": "25/12/2024",
+  "dateExampleIso": "2024-12-25",
+  "dateExampleUs": "12/25/2024",
+  "timeFormat24Hour": "24h",
+  "timeFormat12Hour": "12h",
+  "signalStrength": "{strength} ({rssi} dBm)",
+  "@signalStrength": {
+    "placeholders": {
+      "strength": {
+        "type": "Object"
+      },
+      "rssi": {
+        "type": "Object"
+      }
+    }
+  },
+  "noFlyWaitExplanation": "Wait {waitHours} hours, then your gradient factor at flight level will be {waitFlightGF}%. Right now, if teleported to 8000 ft, your GF would be {curFlightGF}%.",
+  "@noFlyWaitExplanation": {
+    "placeholders": {
+      "waitHours": {
+        "type": "Object"
+      },
+      "waitFlightGF": {
+        "type": "Object"
+      },
+      "curFlightGF": {
+        "type": "Object"
+      }
+    }
+  },
+  "noFlySafeExplanation": "Your gradient factor at flight level will be {gf}%, which is likely safe.",
+  "@noFlySafeExplanation": {
+    "placeholders": {
+      "gf": {
+        "type": "Object"
+      }
+    }
+  },
+  "appVersion": "Bubbletrail {appVer} ({gitVer})",
+  "@appVersion": {
+    "placeholders": {
+      "appVer": {
+        "type": "Object"
+      },
+      "gitVer": {
+        "type": "Object"
+      }
+    }
+  },
+  "deleteDiveConfirmation": "Are you sure you want to delete dive #{number}? This cannot be undone.",
+  "@deleteDiveConfirmation": {
+    "placeholders": {
+      "number": {
+        "type": "Object"
+      }
+    }
+  },
+  "deleteSiteConfirmation": "Are you sure you want to delete the site {name}? Dives using this site will be left without site. This cannot be undone.",
+  "@deleteSiteConfirmation": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "deviceDownloadFailed": "{details}",
+  "@deviceDownloadFailed": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "cylinderReplacementPrompt": "{count, plural, =1{1 dive uses this cylinder type. What should that dive use instead?} other{{count} dives use this cylinder type. What should those dives use instead?}}",
+  "@cylinderReplacementPrompt": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countryAD": "Andorra",
+  "countryAE": "United Arab Emirates",
+  "countryAF": "Afghanistan",
+  "countryAG": "Antigua and Barbuda",
+  "countryAI": "Anguilla",
+  "countryAL": "Albania",
+  "countryAM": "Armenia",
+  "countryAO": "Angola",
+  "countryAQ": "Antarctica",
+  "countryAR": "Argentina",
+  "countryAS": "American Samoa",
+  "countryAT": "Austria",
+  "countryAU": "Australia",
+  "countryAW": "Aruba",
+  "countryAX": "Åland Islands",
+  "countryAZ": "Azerbaijan",
+  "countryBA": "Bosnia and Herzegovina",
+  "countryBB": "Barbados",
+  "countryBD": "Bangladesh",
+  "countryBE": "Belgium",
+  "countryBF": "Burkina Faso",
+  "countryBG": "Bulgaria",
+  "countryBH": "Bahrain",
+  "countryBI": "Burundi",
+  "countryBJ": "Benin",
+  "countryBL": "Saint Barthélemy",
+  "countryBM": "Bermuda",
+  "countryBN": "Brunei",
+  "countryBO": "Bolivia",
+  "countryBQ": "Caribbean Netherlands",
+  "countryBR": "Brazil",
+  "countryBS": "Bahamas",
+  "countryBT": "Bhutan",
+  "countryBV": "Bouvet Island",
+  "countryBW": "Botswana",
+  "countryBY": "Belarus",
+  "countryBZ": "Belize",
+  "countryCA": "Canada",
+  "countryCC": "Cocos (Keeling) Islands",
+  "countryCD": "DR Congo",
+  "countryCF": "Central African Republic",
+  "countryCG": "Republic of the Congo",
+  "countryCH": "Switzerland",
+  "countryCI": "Ivory Coast",
+  "countryCK": "Cook Islands",
+  "countryCL": "Chile",
+  "countryCM": "Cameroon",
+  "countryCN": "China",
+  "countryCO": "Colombia",
+  "countryCR": "Costa Rica",
+  "countryCU": "Cuba",
+  "countryCV": "Cape Verde",
+  "countryCW": "Curaçao",
+  "countryCX": "Christmas Island",
+  "countryCY": "Cyprus",
+  "countryCZ": "Czechia",
+  "countryDE": "Germany",
+  "countryDJ": "Djibouti",
+  "countryDK": "Denmark",
+  "countryDM": "Dominica",
+  "countryDO": "Dominican Republic",
+  "countryDZ": "Algeria",
+  "countryEC": "Ecuador",
+  "countryEE": "Estonia",
+  "countryEG": "Egypt",
+  "countryEH": "Western Sahara",
+  "countryER": "Eritrea",
+  "countryES": "Spain",
+  "countryET": "Ethiopia",
+  "countryFI": "Finland",
+  "countryFJ": "Fiji",
+  "countryFK": "Falkland Islands",
+  "countryFM": "Micronesia",
+  "countryFO": "Faroe Islands",
+  "countryFR": "France",
+  "countryGA": "Gabon",
+  "countryGB": "United Kingdom",
+  "countryGD": "Grenada",
+  "countryGE": "Georgia",
+  "countryGF": "French Guiana",
+  "countryGG": "Guernsey",
+  "countryGH": "Ghana",
+  "countryGI": "Gibraltar",
+  "countryGL": "Greenland",
+  "countryGM": "Gambia",
+  "countryGN": "Guinea",
+  "countryGP": "Guadeloupe",
+  "countryGQ": "Equatorial Guinea",
+  "countryGR": "Greece",
+  "countryGS": "South Georgia",
+  "countryGT": "Guatemala",
+  "countryGU": "Guam",
+  "countryGW": "Guinea-Bissau",
+  "countryGY": "Guyana",
+  "countryHK": "Hong Kong",
+  "countryHM": "Heard Island and McDonald Islands",
+  "countryHN": "Honduras",
+  "countryHR": "Croatia",
+  "countryHT": "Haiti",
+  "countryHU": "Hungary",
+  "countryID": "Indonesia",
+  "countryIE": "Ireland",
+  "countryIL": "Israel",
+  "countryIM": "Isle of Man",
+  "countryIN": "India",
+  "countryIO": "British Indian Ocean Territory",
+  "countryIQ": "Iraq",
+  "countryIR": "Iran",
+  "countryIS": "Iceland",
+  "countryIT": "Italy",
+  "countryJE": "Jersey",
+  "countryJM": "Jamaica",
+  "countryJO": "Jordan",
+  "countryJP": "Japan",
+  "countryKE": "Kenya",
+  "countryKG": "Kyrgyzstan",
+  "countryKH": "Cambodia",
+  "countryKI": "Kiribati",
+  "countryKM": "Comoros",
+  "countryKN": "Saint Kitts and Nevis",
+  "countryKP": "North Korea",
+  "countryKR": "South Korea",
+  "countryKW": "Kuwait",
+  "countryKY": "Cayman Islands",
+  "countryKZ": "Kazakhstan",
+  "countryLA": "Laos",
+  "countryLB": "Lebanon",
+  "countryLC": "Saint Lucia",
+  "countryLI": "Liechtenstein",
+  "countryLK": "Sri Lanka",
+  "countryLR": "Liberia",
+  "countryLS": "Lesotho",
+  "countryLT": "Lithuania",
+  "countryLU": "Luxembourg",
+  "countryLV": "Latvia",
+  "countryLY": "Libya",
+  "countryMA": "Morocco",
+  "countryMC": "Monaco",
+  "countryMD": "Moldova",
+  "countryME": "Montenegro",
+  "countryMF": "Saint Martin",
+  "countryMG": "Madagascar",
+  "countryMH": "Marshall Islands",
+  "countryMK": "North Macedonia",
+  "countryML": "Mali",
+  "countryMM": "Myanmar",
+  "countryMN": "Mongolia",
+  "countryMO": "Macau",
+  "countryMP": "Northern Mariana Islands",
+  "countryMQ": "Martinique",
+  "countryMR": "Mauritania",
+  "countryMS": "Montserrat",
+  "countryMT": "Malta",
+  "countryMU": "Mauritius",
+  "countryMV": "Maldives",
+  "countryMW": "Malawi",
+  "countryMX": "Mexico",
+  "countryMY": "Malaysia",
+  "countryMZ": "Mozambique",
+  "countryNA": "Namibia",
+  "countryNC": "New Caledonia",
+  "countryNE": "Niger",
+  "countryNF": "Norfolk Island",
+  "countryNG": "Nigeria",
+  "countryNI": "Nicaragua",
+  "countryNL": "Netherlands",
+  "countryNO": "Norway",
+  "countryNP": "Nepal",
+  "countryNR": "Nauru",
+  "countryNU": "Niue",
+  "countryNZ": "New Zealand",
+  "countryOM": "Oman",
+  "countryPA": "Panama",
+  "countryPE": "Peru",
+  "countryPF": "French Polynesia",
+  "countryPG": "Papua New Guinea",
+  "countryPH": "Philippines",
+  "countryPK": "Pakistan",
+  "countryPL": "Poland",
+  "countryPM": "Saint Pierre and Miquelon",
+  "countryPN": "Pitcairn Islands",
+  "countryPR": "Puerto Rico",
+  "countryPS": "Palestine",
+  "countryPT": "Portugal",
+  "countryPW": "Palau",
+  "countryPY": "Paraguay",
+  "countryQA": "Qatar",
+  "countryRE": "Réunion",
+  "countryRO": "Romania",
+  "countryRS": "Serbia",
+  "countryRU": "Russia",
+  "countryRW": "Rwanda",
+  "countrySA": "Saudi Arabia",
+  "countrySB": "Solomon Islands",
+  "countrySC": "Seychelles",
+  "countrySD": "Sudan",
+  "countrySE": "Sweden",
+  "countrySG": "Singapore",
+  "countrySH": "Saint Helena",
+  "countrySI": "Slovenia",
+  "countrySJ": "Svalbard and Jan Mayen",
+  "countrySK": "Slovakia",
+  "countrySL": "Sierra Leone",
+  "countrySM": "San Marino",
+  "countrySN": "Senegal",
+  "countrySO": "Somalia",
+  "countrySR": "Suriname",
+  "countrySS": "South Sudan",
+  "countryST": "São Tomé and Príncipe",
+  "countrySV": "El Salvador",
+  "countrySX": "Sint Maarten",
+  "countrySY": "Syria",
+  "countrySZ": "Eswatini",
+  "countryTC": "Turks and Caicos Islands",
+  "countryTD": "Chad",
+  "countryTF": "French Southern Territories",
+  "countryTG": "Togo",
+  "countryTH": "Thailand",
+  "countryTJ": "Tajikistan",
+  "countryTK": "Tokelau",
+  "countryTL": "Timor-Leste",
+  "countryTM": "Turkmenistan",
+  "countryTN": "Tunisia",
+  "countryTO": "Tonga",
+  "countryTR": "Turkey",
+  "countryTT": "Trinidad and Tobago",
+  "countryTV": "Tuvalu",
+  "countryTW": "Taiwan",
+  "countryTZ": "Tanzania",
+  "countryUA": "Ukraine",
+  "countryUG": "Uganda",
+  "countryUM": "U.S. Minor Outlying Islands",
+  "countryUS": "United States",
+  "countryUY": "Uruguay",
+  "countryUZ": "Uzbekistan",
+  "countryVA": "Vatican City",
+  "countryVC": "Saint Vincent and the Grenadines",
+  "countryVE": "Venezuela",
+  "countryVG": "British Virgin Islands",
+  "countryVI": "U.S. Virgin Islands",
+  "countryVN": "Vietnam",
+  "countryVU": "Vanuatu",
+  "countryWF": "Wallis and Futuna",
+  "countryWS": "Samoa",
+  "countryXK": "Kosovo",
+  "countryYE": "Yemen",
+  "countryYT": "Mayotte",
+  "countryZA": "South Africa",
+  "countryZM": "Zambia",
+  "countryZW": "Zimbabwe",
+  "searchCountries": "Search...",
+  "diveNumberLabel": "Dive number",
+  "unitMeters": "m",
+  "unitFeet": "ft",
+  "unitBar": "bar",
+  "unitPsi": "psi",
+  "unitCelsius": "°C",
+  "unitFahrenheit": "°F",
+  "unitLiters": "L",
+  "unitCubicFeet": "cuft",
+  "unitKilograms": "kg",
+  "unitPounds": "lb",
+  "unitPoundsPlural": "lbs",
+  "unknownXmlDiveLog": "Unknown dive log XML format: root element is <{details}>",
+  "@unknownXmlDiveLog": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "unsupportedJsonDiveLog": "Unsupported JSON dive log structure",
+  "unknownJsonDiveLog": "Unknown JSON dive log format",
+  "invalidSuuntoDiveLog": "Not a Suunto JSON dive log: missing DeviceLog"
+}

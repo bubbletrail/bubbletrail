@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 
 import 'adaptive_modal.dart';
@@ -74,8 +75,8 @@ class _TextEditorState extends State<_TextEditor> {
               mainAxisAlignment: .end,
               spacing: 8,
               children: [
-                TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
-                FilledButton(onPressed: () => Navigator.of(context).pop(_controller.text.trim()), child: const Text('Done')),
+                TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.l10n.cancel)),
+                FilledButton(onPressed: () => Navigator.of(context).pop(_controller.text.trim()), child: Text(context.l10n.done)),
               ],
             ),
           ],

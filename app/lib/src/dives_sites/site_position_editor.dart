@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -80,7 +81,7 @@ class _SitePositionEditorState extends State<_SitePositionEditor> {
     final lat = double.tryParse(latText);
     final lon = double.tryParse(lonText);
     if (lat == null || lon == null) {
-      setState(() => _error = 'Enter valid coordinates, or clear both fields.');
+      setState(() => _error = context.l10n.enterValidCoordinatesOrClearBothFields);
       return;
     }
     Navigator.of(context).pop(SelectionResult<Position>.selected(Position(latitude: lat, longitude: lon)));
@@ -96,7 +97,7 @@ class _SitePositionEditorState extends State<_SitePositionEditor> {
           crossAxisAlignment: .stretch,
           spacing: 16,
           children: [
-            Text('Position', style: Theme.of(context).textTheme.titleMedium),
+            Text(context.l10n.position, style: Theme.of(context).textTheme.titleMedium),
             AspectRatio(
               aspectRatio: 2,
               child: ClipRRect(
@@ -110,7 +111,7 @@ class _SitePositionEditorState extends State<_SitePositionEditor> {
                 Expanded(
                   child: TextField(
                     controller: _latController,
-                    decoration: const InputDecoration(labelText: 'Latitude', border: OutlineInputBorder()),
+                    decoration: InputDecoration(labelText: context.l10n.latitude, border: OutlineInputBorder()),
                     keyboardType: const .numberWithOptions(decimal: true, signed: true),
                     onChanged: (_) => _onCoordsChanged(),
                   ),
@@ -118,7 +119,7 @@ class _SitePositionEditorState extends State<_SitePositionEditor> {
                 Expanded(
                   child: TextField(
                     controller: _lonController,
-                    decoration: const InputDecoration(labelText: 'Longitude', border: OutlineInputBorder()),
+                    decoration: InputDecoration(labelText: context.l10n.longitude, border: OutlineInputBorder()),
                     keyboardType: const .numberWithOptions(decimal: true, signed: true),
                     onChanged: (_) => _onCoordsChanged(),
                   ),
@@ -130,8 +131,8 @@ class _SitePositionEditorState extends State<_SitePositionEditor> {
               mainAxisAlignment: .end,
               spacing: 8,
               children: [
-                TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
-                FilledButton(onPressed: _done, child: const Text('Done')),
+                TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.l10n.cancel)),
+                FilledButton(onPressed: _done, child: Text(context.l10n.done)),
               ],
             ),
           ],

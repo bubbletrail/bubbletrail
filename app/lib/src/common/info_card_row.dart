@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 
 import 'tags_list.dart';
@@ -75,9 +76,9 @@ Widget tagsRow(BuildContext context, List<String> tags, {List<String>? secondary
     child: Row(
       crossAxisAlignment: .start,
       children: [
-        const SizedBox(
+        SizedBox(
           width: 150,
-          child: Text('Tags:', style: TextStyle(fontWeight: .w600)),
+          child: Text(context.l10n.tags, style: TextStyle(fontWeight: .w600)),
         ),
         Expanded(
           child: TagsList(tags: tags, secondaryTags: secondaryTags),

@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 
@@ -13,9 +14,6 @@ Future<List<Weightsystem>?> showWeightsEditor({required BuildContext context, re
     builder: (context) => _WeightsEditor(weights: weights.toList()),
   );
 }
-
-// Suggested weight system types, offered as quick-select chips.
-const _defaultWeightTypes = ['Backplate', 'Belt', 'Harness', 'Integrated', 'Trim'];
 
 class _WeightRow {
   final TextEditingController description;
@@ -68,7 +66,7 @@ class _WeightsEditorState extends State<_WeightsEditor> {
           crossAxisAlignment: .stretch,
           spacing: 16,
           children: [
-            Text('Weights', style: Theme.of(context).textTheme.titleMedium),
+            Text(context.l10n.weights, style: Theme.of(context).textTheme.titleMedium),
             Flexible(
               child: SingleChildScrollView(
                 child: Column(
@@ -94,21 +92,27 @@ class _WeightsEditorState extends State<_WeightsEditor> {
                                       expandedInsets: .zero,
                                       requestFocusOnTap: true,
                                       enableFilter: true,
-                                      label: const Text('Type'),
-                                      dropdownMenuEntries: _defaultWeightTypes.map((type) => DropdownMenuEntry(value: type, label: type)).toList(),
+                                      label: Text(context.l10n.type),
+                                      dropdownMenuEntries: [
+                                        context.l10n.weightBackplate,
+                                        context.l10n.weightBelt,
+                                        context.l10n.weightHarness,
+                                        context.l10n.weightIntegrated,
+                                        context.l10n.weightTrim,
+                                      ].map((type) => DropdownMenuEntry(value: type, label: type)).toList(),
                                     ),
                                   ),
-                                  IconButton(icon: const Icon(Icons.delete_outline), onPressed: () => _remove(index), tooltip: 'Remove'),
+                                  IconButton(icon: const Icon(Icons.delete_outline), onPressed: () => _remove(index), tooltip: context.l10n.remove),
                                 ],
                               ),
-                              WeightEditor(label: 'Weight', initialValue: row.weight, onChanged: (value) => row.weight = value),
+                              WeightEditor(label: context.l10n.weight, initialValue: row.weight, onChanged: (value) => row.weight = value),
                             ],
                           ),
                         ),
                       ),
                     Align(
                       alignment: .centerLeft,
-                      child: TextButton.icon(onPressed: _add, icon: const Icon(Icons.add), label: const Text('Add weight')),
+                      child: TextButton.icon(onPressed: _add, icon: const Icon(Icons.add), label: Text(context.l10n.addWeight)),
                     ),
                   ],
                 ),
@@ -118,8 +122,8 @@ class _WeightsEditorState extends State<_WeightsEditor> {
               mainAxisAlignment: .end,
               spacing: 8,
               children: [
-                TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
-                FilledButton(onPressed: () => Navigator.of(context).pop(_result()), child: const Text('Done')),
+                TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.l10n.cancel)),
+                FilledButton(onPressed: () => Navigator.of(context).pop(_result()), child: Text(context.l10n.done)),
               ],
             ),
           ],

@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 
 import 'adaptive_modal.dart';
@@ -40,7 +41,7 @@ class _RatingEditorState extends State<_RatingEditor> {
           crossAxisAlignment: .start,
           spacing: 16,
           children: [
-            Text('Rating', style: Theme.of(context).textTheme.titleMedium),
+            Text(context.l10n.rating, style: Theme.of(context).textTheme.titleMedium),
             Row(
               mainAxisAlignment: .center,
               children: .generate(5, (index) {
@@ -56,8 +57,8 @@ class _RatingEditorState extends State<_RatingEditor> {
               mainAxisAlignment: .end,
               spacing: 8,
               children: [
-                TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
-                FilledButton(onPressed: () => Navigator.of(context).pop(_rating), child: const Text('Done')),
+                TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.l10n.cancel)),
+                FilledButton(onPressed: () => Navigator.of(context).pop(_rating), child: Text(context.l10n.done)),
               ],
             ),
           ],

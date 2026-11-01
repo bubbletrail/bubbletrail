@@ -127,6 +127,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  btl10n:
+    dependency: "direct main"
+    description:
+      path: "../pkg/btl10n"
+      relative: true
+    source: path
+    version: "1.0.0"
   btproto:
     dependency: "direct main"
     description:

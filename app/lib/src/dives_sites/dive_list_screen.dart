@@ -1,12 +1,13 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
+import '../common/common.dart';
 import '../common/no_fly.dart';
 import 'dive_list_bloc.dart';
-import '../common/common.dart';
 import 'dive_table.dart';
 
 class DiveListScreen extends StatelessWidget {
@@ -14,16 +15,16 @@ class DiveListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenScaffold(title: const Text('Dives'), actions: [NoFlyIndicator(), _addAction(context)], body: _body());
+    return ScreenScaffold(title: Text(context.l10n.dives), actions: [NoFlyIndicator(), _addAction(context)], body: _body());
   }
 
   Widget _addAction(BuildContext context) {
     if (!platformSupportsConnect) {
-      return IconButton(icon: const Icon(Icons.add), tooltip: 'Add new dive', onPressed: () => context.goNamed(AppRouteName.divesNew));
+      return IconButton(icon: const Icon(Icons.add), tooltip: context.l10n.addNewDive, onPressed: () => context.goNamed(AppRouteName.divesNew));
     }
 
     return PopupMenuButton<String>(
-      tooltip: 'Add new dive',
+      tooltip: context.l10n.addNewDive,
       icon: const Icon(Icons.add),
       onSelected: (value) {
         if (value == 'download') {
@@ -33,13 +34,13 @@ class DiveListScreen extends StatelessWidget {
         }
       },
       itemBuilder: (context) => [
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'download',
-          child: Row(spacing: 12, children: [Icon(Icons.download), Text('Download from computer')]),
+          child: Row(spacing: 12, children: [Icon(Icons.download), Text(context.l10n.downloadFromComputer)]),
         ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'manual',
-          child: Row(spacing: 12, children: [Icon(Icons.edit), Text('Enter manually')]),
+          child: Row(spacing: 12, children: [Icon(Icons.edit), Text(context.l10n.enterManually)]),
         ),
       ],
     );
@@ -56,13 +57,13 @@ class DiveListScreen extends StatelessWidget {
           final dives = state.dives;
 
           if (dives.isEmpty) {
-            return const EmptyStateWidget(message: 'No dives yet. Add your first dive!', icon: Icons.water_drop_outlined);
+            return EmptyStateWidget(message: context.l10n.noDivesYetAddYourFirstDive, icon: Icons.water_drop_outlined);
           }
 
           return DiveTable(dives: dives, sitesByUuid: state.sitesByUuid, showSiteColumn: true, enableFilters: true);
         }
 
-        return const Center(child: Text('Unknown state'));
+        return Center(child: Text(context.l10n.unknownState));
       },
     );
   }

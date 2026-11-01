@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 
 import 'common.dart';
@@ -45,33 +46,37 @@ class CylinderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final desc = description.isNotEmpty ? description : 'Cylinder ${index + 1}';
+    final desc = description.isNotEmpty ? description : context.l10n.cylinderNumber(index + 1);
     final details = <Widget>[];
 
     if (workingPressurePsi > 0 && volumeCuft > 0) {
-      details.add(LabeledChip(label: 'Volume', child: Text('${formatDisplayValue(volumeCuft)} cuft')));
-      details.add(LabeledChip(label: 'WP', child: Text('${formatDisplayValue(workingPressurePsi)} psi')));
+      details.add(LabeledChip(label: context.l10n.volume, child: Text(context.l10n.measurement(formatDisplayValue(volumeCuft), context.l10n.unitCubicFeet))));
+      details.add(LabeledChip(label: context.l10n.wp, child: Text(context.l10n.measurement(formatDisplayValue(workingPressurePsi), context.l10n.unitPsi))));
     } else {
-      if (volumeL > 0) details.add(LabeledChip(label: 'Volume', child: Text('${formatDisplayValue(volumeL)} L')));
-      if (workingPressureBar > 0) details.add(LabeledChip(label: 'WP', child: Text('${formatDisplayValue(workingPressureBar)} bar')));
+      if (volumeL > 0) {
+        details.add(LabeledChip(label: context.l10n.volume, child: Text(context.l10n.measurement(formatDisplayValue(volumeL), context.l10n.unitLiters))));
+      }
+      if (workingPressureBar > 0) {
+        details.add(LabeledChip(label: context.l10n.wp, child: Text(context.l10n.measurement(formatDisplayValue(workingPressureBar), context.l10n.unitBar))));
+      }
     }
-    if (oxygenPct > 0) details.add(LabeledChip(label: 'Mix', child: Text(formatGasPercentage(oxygenPct, heliumPct))));
-    if (beginPressure > 0) details.add(LabeledChip(label: 'Start', child: PressureText(beginPressure)));
-    if (endPressure > 0) details.add(LabeledChip(label: 'End', child: PressureText(endPressure)));
+    if (oxygenPct > 0) details.add(LabeledChip(label: context.l10n.mix, child: Text(formatGasPercentage(context, oxygenPct, heliumPct))));
+    if (beginPressure > 0) details.add(LabeledChip(label: context.l10n.start, child: PressureText(beginPressure)));
+    if (endPressure > 0) details.add(LabeledChip(label: context.l10n.end, child: PressureText(endPressure)));
     if (sac > 0) {
       details.add(
         LabeledChip(
-          label: 'SAC',
-          child: VolumeText(sac, suffix: '/min', precise: true),
+          label: context.l10n.sac,
+          child: VolumeText(sac, suffix: context.l10n.perMinute, precise: true),
         ),
       );
     }
 
     final defaults = <Widget>[];
     final cs = Theme.of(context).colorScheme;
-    if (defaultForBackgas) defaults.add(TextBadge(label: 'Backgas', backgroundColor: cs.primaryContainer, textColor: cs.onPrimaryContainer));
-    if (defaultForDeepDeco) defaults.add(TextBadge(label: 'Deep deco', backgroundColor: cs.primaryContainer, textColor: cs.onPrimaryContainer));
-    if (defaultForShallowDeco) defaults.add(TextBadge(label: 'Shallow deco', backgroundColor: cs.primaryContainer, textColor: cs.onPrimaryContainer));
+    if (defaultForBackgas) defaults.add(TextBadge(label: context.l10n.backgas, backgroundColor: cs.primaryContainer, textColor: cs.onPrimaryContainer));
+    if (defaultForDeepDeco) defaults.add(TextBadge(label: context.l10n.deepDeco, backgroundColor: cs.primaryContainer, textColor: cs.onPrimaryContainer));
+    if (defaultForShallowDeco) defaults.add(TextBadge(label: context.l10n.shallowDeco, backgroundColor: cs.primaryContainer, textColor: cs.onPrimaryContainer));
 
     return ListTile(
       contentPadding: contentPadding,

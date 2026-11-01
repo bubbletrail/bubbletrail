@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -136,7 +137,7 @@ class _CylindersEditorState extends State<_CylindersEditor> {
     final maxSeconds = widget.durationSeconds > 0 ? widget.durationSeconds : 7200;
     final result = await showDialog<int>(
       context: context,
-      builder: (context) => DurationPickerDialog(initialSeconds: 0, maxSeconds: maxSeconds, title: 'Gas change time'),
+      builder: (context) => DurationPickerDialog(initialSeconds: 0, maxSeconds: maxSeconds, title: context.l10n.gasChangeTime),
     );
     if (result != null) {
       setState(() {
@@ -186,7 +187,7 @@ class _CylindersEditorState extends State<_CylindersEditor> {
           crossAxisAlignment: .stretch,
           spacing: 16,
           children: [
-            Text('Cylinders', style: Theme.of(context).textTheme.titleMedium),
+            Text(context.l10n.cylinders, style: Theme.of(context).textTheme.titleMedium),
             Flexible(
               child: SingleChildScrollView(
                 child: Column(
@@ -208,9 +209,14 @@ class _CylindersEditorState extends State<_CylindersEditor> {
                                   Expanded(
                                     child: DropdownButtonFormField<String>(
                                       initialValue: _optionsFor(row).any((c) => c.id == row.cylinderId) ? row.cylinderId : null,
-                                      decoration: const InputDecoration(labelText: 'Cylinder', border: OutlineInputBorder(), isDense: true),
+                                      decoration: InputDecoration(labelText: context.l10n.cylinder, border: OutlineInputBorder(), isDense: true),
                                       items: _optionsFor(row)
-                                          .map((c) => DropdownMenuItem(value: c.id, child: Text(c.description.isNotEmpty ? c.description : 'Cylinder ${c.id}')))
+                                          .map(
+                                            (c) => DropdownMenuItem(
+                                              value: c.id,
+                                              child: Text(c.description.isNotEmpty ? c.description : context.l10n.cylinderWithId(c.id)),
+                                            ),
+                                          )
                                           .toList(),
                                       onChanged: (id) {
                                         if (id == null) return;
@@ -221,7 +227,7 @@ class _CylindersEditorState extends State<_CylindersEditor> {
                                       },
                                     ),
                                   ),
-                                  IconButton(icon: const Icon(Icons.delete_outline), onPressed: () => _remove(index), tooltip: 'Remove cylinder'),
+                                  IconButton(icon: const Icon(Icons.delete_outline), onPressed: () => _remove(index), tooltip: context.l10n.removeCylinder),
                                 ],
                               ),
                               Row(
@@ -230,21 +236,25 @@ class _CylindersEditorState extends State<_CylindersEditor> {
                                   Expanded(
                                     child: TextField(
                                       controller: row.oxygen,
-                                      decoration: const InputDecoration(labelText: 'Oxygen %', border: OutlineInputBorder(), isDense: true),
+                                      decoration: InputDecoration(labelText: context.l10n.oxygen, border: OutlineInputBorder(), isDense: true),
                                       keyboardType: const .numberWithOptions(decimal: true),
                                     ),
                                   ),
                                   Expanded(
                                     child: TextField(
                                       controller: row.helium,
-                                      decoration: const InputDecoration(labelText: 'Helium %', border: OutlineInputBorder(), isDense: true),
+                                      decoration: InputDecoration(labelText: context.l10n.helium, border: OutlineInputBorder(), isDense: true),
                                       keyboardType: const .numberWithOptions(decimal: true),
                                     ),
                                   ),
                                 ],
                               ),
-                              PressureEditor(label: 'Start pressure', initialValue: row.beginPressure, onChanged: (value) => row.beginPressure = value),
-                              PressureEditor(label: 'End pressure', initialValue: row.endPressure, onChanged: (value) => row.endPressure = value),
+                              PressureEditor(
+                                label: context.l10n.startPressure,
+                                initialValue: row.beginPressure,
+                                onChanged: (value) => row.beginPressure = value,
+                              ),
+                              PressureEditor(label: context.l10n.endPressure, initialValue: row.endPressure, onChanged: (value) => row.endPressure = value),
                               _GasChanges(
                                 row: row,
                                 formatTime: _formatTime,
@@ -258,10 +268,10 @@ class _CylindersEditorState extends State<_CylindersEditor> {
                     if (canAdd)
                       Align(
                         alignment: .centerLeft,
-                        child: TextButton.icon(onPressed: _add, icon: const Icon(Icons.add), label: const Text('Add cylinder')),
+                        child: TextButton.icon(onPressed: _add, icon: const Icon(Icons.add), label: Text(context.l10n.addCylinder)),
                       )
                     else
-                      Text('No cylinders defined. Add cylinders in Equipment first.', style: TextStyle(color: Theme.of(context).hintColor)),
+                      Text(context.l10n.noCylindersDefinedAddCylindersInEquipmentFirst, style: TextStyle(color: Theme.of(context).hintColor)),
                   ],
                 ),
               ),
@@ -270,8 +280,8 @@ class _CylindersEditorState extends State<_CylindersEditor> {
               mainAxisAlignment: .end,
               spacing: 8,
               children: [
-                TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
-                FilledButton(onPressed: () => Navigator.of(context).pop(_result()), child: const Text('Done')),
+                TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.l10n.cancel)),
+                FilledButton(onPressed: () => Navigator.of(context).pop(_result()), child: Text(context.l10n.done)),
               ],
             ),
           ],
@@ -296,7 +306,7 @@ class _GasChanges extends StatelessWidget {
     return Column(
       crossAxisAlignment: .start,
       children: [
-        Text('Gas changes', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: .bold)),
+        Text(context.l10n.gasChanges, style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: .bold)),
         for (final (i, time) in row.switchTimes.indexed)
           EvenOddContainer(
             index: i,
@@ -304,8 +314,8 @@ class _GasChanges extends StatelessWidget {
               padding: const .all(8),
               child: Row(
                 children: [
-                  Expanded(child: Text(time == 0 ? 'Start of dive' : '${formatTime(time)} switch to this cylinder')),
-                  IconButton(onPressed: () => onRemove(i), icon: const Icon(Icons.delete_outline), tooltip: 'Remove gas change'),
+                  Expanded(child: Text(time == 0 ? context.l10n.startOfDive : context.l10n.switchToThisCylinder(formatTime(time)))),
+                  IconButton(onPressed: () => onRemove(i), icon: const Icon(Icons.delete_outline), tooltip: context.l10n.removeGasChange),
                 ],
               ),
             ),
@@ -313,7 +323,7 @@ class _GasChanges extends StatelessWidget {
         TextButton.icon(
           onPressed: onAdd,
           icon: const Icon(Icons.add),
-          label: const Text('Add gas change'),
+          label: Text(context.l10n.addGasChange),
           style: TextButton.styleFrom(padding: .zero, minimumSize: const Size(0, 32)),
         ),
       ],

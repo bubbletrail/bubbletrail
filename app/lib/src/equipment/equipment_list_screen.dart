@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -12,8 +13,8 @@ class EquipmentListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
-      title: const Text('Other Equipment'),
-      actions: [IconButton(icon: const Icon(Icons.add), tooltip: 'Add new equipment', onPressed: () => context.goNamed(AppRouteName.equipmentNew))],
+      title: Text(context.l10n.otherEquipment),
+      actions: [IconButton(icon: const Icon(Icons.add), tooltip: context.l10n.addNewEquipment, onPressed: () => context.goNamed(AppRouteName.equipmentNew))],
       body: BlocBuilder<EquipmentListBloc, EquipmentListState>(
         builder: (context, state) {
           if (state is EquipmentListInitial || state is EquipmentListLoading) {
@@ -25,14 +26,14 @@ class EquipmentListScreen extends StatelessWidget {
             final hasArchived = state.equipment.any((e) => e.archived);
 
             if (state.equipment.isEmpty) {
-              return const EmptyStateWidget(message: 'No equipment yet. Tap + to add one.', icon: Icons.inventory_2_outlined);
+              return EmptyStateWidget(message: context.l10n.noEquipmentYetTapToAddOne, icon: Icons.inventory_2_outlined);
             }
 
             return Column(
               children: [
                 if (hasArchived)
                   SwitchListTile(
-                    title: const Text('Show archived'),
+                    title: Text(context.l10n.showArchived),
                     value: state.showArchived,
                     onChanged: (_) => context.read<EquipmentListBloc>().add(EquipmentListEvent.toggleShowArchived()),
                   ),
@@ -58,7 +59,7 @@ class EquipmentListScreen extends StatelessWidget {
             );
           }
 
-          return const Center(child: Text('Unknown state'));
+          return Center(child: Text(context.l10n.unknownState));
         },
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 
@@ -16,9 +17,9 @@ class EquipmentListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final subtitleParts = [
-      if (equipmentSubtitleText(equipment).isNotEmpty) equipmentSubtitleText(equipment),
-      if (diveCount != null) '$diveCount ${diveCount == 1 ? 'dive' : 'dives'}',
-      if (diveSeconds != null) '${formatTotalTime(diveSeconds!)} underwater',
+      if (equipmentSubtitleText(context, equipment).isNotEmpty) equipmentSubtitleText(context, equipment),
+      if (diveCount != null) context.l10n.diveCount(diveCount!),
+      if (diveSeconds != null) context.l10n.underwater(formatTotalTime(context.l10n, diveSeconds!)),
     ];
     final cs = Theme.of(context).colorScheme;
     return ListTile(
@@ -26,9 +27,10 @@ class EquipmentListTile extends StatelessWidget {
       title: Row(
         spacing: 8,
         children: [
-          Flexible(child: Text(equipmentTitle(equipment), style: Theme.of(context).textTheme.bodyMedium)),
-          if (equipment.defaultForNewDives) TextBadge(label: 'Default', backgroundColor: cs.primaryContainer, textColor: cs.onPrimaryContainer),
-          if (equipment.archived) TextBadge(label: 'Archived', backgroundColor: cs.surfaceContainerHighest, textColor: cs.onSurfaceVariant),
+          Flexible(child: Text(equipmentTitle(context, equipment), style: Theme.of(context).textTheme.bodyMedium)),
+          if (equipment.defaultForNewDives)
+            TextBadge(label: context.l10n.defaultEquipment, backgroundColor: cs.primaryContainer, textColor: cs.onPrimaryContainer),
+          if (equipment.archived) TextBadge(label: context.l10n.archived, backgroundColor: cs.surfaceContainerHighest, textColor: cs.onSurfaceVariant),
         ],
       ),
       subtitle: subtitleParts.isNotEmpty
@@ -39,7 +41,7 @@ class EquipmentListTile extends StatelessWidget {
     );
   }
 
-  static String equipmentTitle(Equipment item) {
+  static String equipmentTitle(BuildContext context, Equipment item) {
     if (item.manufacturer.isNotEmpty && item.name.isNotEmpty) {
       return '${item.manufacturer} ${item.name}';
     }
@@ -47,24 +49,24 @@ class EquipmentListTile extends StatelessWidget {
       return item.name;
     }
     if (item.manufacturer.isNotEmpty && item.type.isNotEmpty) {
-      return '${item.manufacturer} ${item.type}';
+      return '${item.manufacturer} ${equipmentTypeLabel(context.l10n, item.type)}';
     }
     if (item.type.isNotEmpty) {
-      return item.type;
+      return equipmentTypeLabel(context.l10n, item.type);
     }
-    return 'Equipment #${item.id}';
+    return context.l10n.equipmentWithId(item.id);
   }
 
-  static Widget? equipmentSubtitle(Equipment item) {
-    final text = equipmentSubtitleText(item);
+  static Widget? equipmentSubtitle(BuildContext context, Equipment item) {
+    final text = equipmentSubtitleText(context, item);
     if (text.isEmpty) return null;
     return Text(text);
   }
 
-  static String equipmentSubtitleText(Equipment item) {
+  static String equipmentSubtitleText(BuildContext context, Equipment item) {
     final parts = <String>[];
     if (item.type.isNotEmpty && item.name.isNotEmpty) {
-      parts.add(item.type);
+      parts.add(equipmentTypeLabel(context.l10n, item.type));
     }
     return parts.join(' \u2022 ');
   }

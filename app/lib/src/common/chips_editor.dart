@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 
 import 'adaptive_modal.dart';
@@ -139,8 +140,8 @@ class _ChipsEditorState extends State<_ChipsEditor> {
               mainAxisAlignment: .end,
               spacing: 8,
               children: [
-                TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
-                FilledButton(onPressed: () => Navigator.of(context).pop(_selected.toList()..sort(_caseInsensitive)), child: const Text('Done')),
+                TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.l10n.cancel)),
+                FilledButton(onPressed: () => Navigator.of(context).pop(_selected.toList()..sort(_caseInsensitive)), child: Text(context.l10n.done)),
               ],
             ),
           ],
@@ -166,7 +167,7 @@ class _ChipsEditorState extends State<_ChipsEditor> {
       TextButton.icon(
         onPressed: () => setState(() => _showOthers = !_showOthers),
         icon: Icon(_showOthers ? Icons.expand_less : Icons.expand_more),
-        label: Text('Others (${others.length})'),
+        label: Text(context.l10n.otherItems(others.length)),
       ),
       if (_showOthers) _chipsWrap(others),
     ];

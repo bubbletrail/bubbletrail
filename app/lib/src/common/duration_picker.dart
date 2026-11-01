@@ -1,16 +1,17 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 
 /// A dialog for picking a duration with text fields and a slider
 class DurationPickerDialog extends StatefulWidget {
   final int initialSeconds;
   final int maxSeconds;
-  final String title;
+  final String? title;
 
   const DurationPickerDialog({
     super.key,
     required this.initialSeconds,
     this.maxSeconds = 7200, // 2 hours default
-    this.title = 'Duration',
+    this.title,
   });
 
   @override
@@ -66,7 +67,7 @@ class _DurationPickerDialogState extends State<DurationPickerDialog> {
     final maxDivisions = widget.maxSeconds ~/ 15;
 
     return AlertDialog(
-      title: Text(widget.title),
+      title: Text(widget.title ?? context.l10n.duration),
       content: Column(
         mainAxisSize: .min,
         children: [
@@ -75,7 +76,7 @@ class _DurationPickerDialogState extends State<DurationPickerDialog> {
               Expanded(
                 child: TextField(
                   controller: _minutesController,
-                  decoration: const InputDecoration(labelText: 'Minutes', border: OutlineInputBorder()),
+                  decoration: InputDecoration(labelText: context.l10n.minutes, border: OutlineInputBorder()),
                   keyboardType: .number,
                   onChanged: (_) => _updateFromTextFields(),
                 ),
@@ -84,7 +85,7 @@ class _DurationPickerDialogState extends State<DurationPickerDialog> {
               Expanded(
                 child: TextField(
                   controller: _secondsController,
-                  decoration: const InputDecoration(labelText: 'Seconds', border: OutlineInputBorder()),
+                  decoration: InputDecoration(labelText: context.l10n.seconds, border: OutlineInputBorder()),
                   keyboardType: .number,
                   onChanged: (_) => _updateFromTextFields(),
                 ),
@@ -100,12 +101,12 @@ class _DurationPickerDialogState extends State<DurationPickerDialog> {
             divisions: maxDivisions,
             onChanged: _updateFromSlider,
           ),
-          Text('0 - ${widget.maxSeconds ~/ 60} min', style: Theme.of(context).textTheme.bodySmall),
+          Text(context.l10n.durationRange(widget.maxSeconds ~/ 60), style: Theme.of(context).textTheme.bodySmall),
         ],
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(null), child: const Text('Cancel')),
-        TextButton(onPressed: () => Navigator.of(context).pop(_currentSeconds), child: const Text('OK')),
+        TextButton(onPressed: () => Navigator.of(context).pop(null), child: Text(context.l10n.cancel)),
+        TextButton(onPressed: () => Navigator.of(context).pop(_currentSeconds), child: Text(context.l10n.ok)),
       ],
     );
   }

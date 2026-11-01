@@ -1,3 +1,5 @@
+import 'package:btl10n/btl10n.dart';
+
 // ISO 3166-1 alpha-2 country codes and names
 
 class Country {
@@ -342,10 +344,10 @@ Country? countryByCode(String code) => byCode[code.toUpperCase()];
 /// Get the display name for a country code or freetext value.
 /// If it's a valid code, returns the country name.
 /// Otherwise returns the input as-is (for legacy freetext values).
-String countryDisplayName(String codeOrName) {
+String countryDisplayName(String codeOrName, {AppLocalizations? l10n}) {
   if (codeOrName.isEmpty) return '';
   final country = byCode[codeOrName.toUpperCase()];
-  if (country != null) return country.name;
+  if (country != null) return l10n == null ? country.name : localizedCountryName(l10n, country.code);
   return codeOrName;
 }
 

@@ -22,7 +22,7 @@ final _log = Logger('archive_bloc.dart');
 
 class ArchiveState extends Equatable {
   final bool working;
-  final String? error;
+  final Object? error;
   final String? exportReadyPath;
   final String? exportReadyFilename;
   final bool exportComplete;
@@ -37,7 +37,7 @@ class ArchiveState extends Equatable {
     this.importComplete = false,
   });
 
-  ArchiveState copyWith({bool? working, String? error, String? exportReadyPath, String? exportReadyFilename, bool? exportComplete, bool? importComplete}) {
+  ArchiveState copyWith({bool? working, Object? error, String? exportReadyPath, String? exportReadyFilename, bool? exportComplete, bool? importComplete}) {
     return ArchiveState(
       working: working ?? this.working,
       error: error,
@@ -150,7 +150,7 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
       emit(state.copyWith(working: false, exportReadyPath: zipFile.path, exportReadyFilename: filename));
     } catch (e) {
       _log.severe('export failed', e);
-      emit(state.copyWith(working: false, error: e.toString()));
+      emit(state.copyWith(working: false, error: e));
     }
   }
 
@@ -201,7 +201,7 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
       emit(state.copyWith(working: false, importComplete: true));
     } catch (e) {
       _log.severe('import failed', e);
-      emit(state.copyWith(working: false, error: e.toString()));
+      emit(state.copyWith(working: false, error: e));
     }
   }
 
@@ -245,7 +245,7 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
       emit(state.copyWith(working: false, exportReadyPath: logFile.path, exportReadyFilename: filename));
     } catch (e) {
       _log.severe('${format.toUpperCase()} export failed', e);
-      emit(state.copyWith(working: false, error: e.toString()));
+      emit(state.copyWith(working: false, error: e));
     }
   }
 }

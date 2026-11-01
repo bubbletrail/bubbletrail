@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -139,10 +140,10 @@ class PressureEditor extends StatelessWidget {
     };
   }
 
-  static String _unitLabel(PressureUnit unit) {
+  static String _unitLabel(BuildContext context, PressureUnit unit) {
     return switch (unit) {
-      .bar => 'bar',
-      .psi => 'psi',
+      .bar => context.l10n.unitBar,
+      .psi => context.l10n.unitPsi,
     };
   }
 
@@ -152,7 +153,7 @@ class PressureEditor extends StatelessWidget {
       label: label,
       initialValue: initialValue,
       units: PressureUnit.values,
-      unitLabel: _unitLabel,
+      unitLabel: (unit) => _unitLabel(context, unit),
       fromMetric: _fromMetric,
       toMetric: _toMetric,
       getPreferredUnit: (prefs) => prefs.pressureUnit,
@@ -184,10 +185,10 @@ class WeightEditor extends StatelessWidget {
     };
   }
 
-  static String _unitLabel(WeightUnit unit) {
+  static String _unitLabel(BuildContext context, WeightUnit unit) {
     return switch (unit) {
-      .kg => 'kg',
-      .lb => 'lbs',
+      .kg => context.l10n.unitKilograms,
+      .lb => context.l10n.unitPoundsPlural,
     };
   }
 
@@ -197,7 +198,7 @@ class WeightEditor extends StatelessWidget {
       label: label,
       initialValue: initialValue,
       units: WeightUnit.values,
-      unitLabel: _unitLabel,
+      unitLabel: (unit) => _unitLabel(context, unit),
       fromMetric: _fromMetric,
       toMetric: _toMetric,
       getPreferredUnit: (prefs) => prefs.weightUnit,
@@ -235,7 +236,7 @@ class DepthEditor extends StatelessWidget {
       label: label,
       initialValue: initialValue,
       units: DepthUnit.values,
-      unitLabel: (unit) => unit.label,
+      unitLabel: (unit) => unit.label(context.l10n),
       fromMetric: _fromMetric,
       toMetric: _toMetric,
       getPreferredUnit: (prefs) => prefs.depthUnit,

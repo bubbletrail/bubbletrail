@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:btbuhlmann/btbuhlmann.dart' as buhlmann;
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -95,13 +96,11 @@ class _NoFlyIndicator extends StatelessWidget {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: const Text('Wait a bit'),
-              content: Text(
-                'Wait $waitHours hours, then your gradient factor at flight level will be $waitFlightGF%. Right now, if teleported to 8000 ft, your GF would be $curFlightGF%.',
-              ),
+              title: Text(context.l10n.waitABit),
+              content: Text(context.l10n.noFlyWaitExplanation(waitHours, waitFlightGF, curFlightGF)),
               actions: <Widget>[
                 TextButton(
-                  child: const Text('Got it'),
+                  child: Text(context.l10n.gotIt),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -129,11 +128,11 @@ class _ClearToFlyIndicator extends StatelessWidget {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: const Text('You can fly'),
-              content: Text('Your gradient factor at flight level will be $gf%, which is likely safe.'),
+              title: Text(context.l10n.youCanFly),
+              content: Text(context.l10n.noFlySafeExplanation(gf)),
               actions: <Widget>[
                 TextButton(
-                  child: const Text('Got it'),
+                  child: Text(context.l10n.gotIt),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },

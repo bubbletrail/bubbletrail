@@ -1,6 +1,6 @@
 import 'package:btcountries/btcountries.dart';
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -24,7 +24,7 @@ class DiveListItem extends StatelessWidget {
     final maxDepth = dive.hasMaxDepth() ? dive.maxDepth : 0.0;
     String? siteName;
     if (site != null) {
-      final parts = [if (site!.hasLocation()) site!.location, if (site!.hasCountry()) countryDisplayName(site!.country)];
+      final parts = [if (site!.hasLocation()) site!.location, if (site!.hasCountry()) countryDisplayName(site!.country, l10n: context.l10n)];
       if (parts.isNotEmpty) {
         siteName = '${site!.name} (${parts.join(', ')})';
       } else {
@@ -45,7 +45,7 @@ class DiveListItem extends StatelessWidget {
             Row(
               mainAxisAlignment: .spaceBetween,
               children: [
-                Text('Dive #${dive.number}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: .bold)),
+                Text(context.l10n.diveNumber(dive.number), style: theme.textTheme.titleMedium?.copyWith(fontWeight: .bold)),
                 DateTimeText(
                   _startDateTime,
                   timezone: siteTimeZone(site),
@@ -74,7 +74,7 @@ class DiveListItem extends StatelessWidget {
                 if (dive.sac > 0)
                   _InfoChip(
                     icon: Icons.speed,
-                    label: VolumeText(dive.sac, suffix: '/min', precise: true),
+                    label: VolumeText(dive.sac, suffix: context.l10n.perMinute, precise: true),
                     theme: theme,
                   ),
                 Expanded(child: Container()),

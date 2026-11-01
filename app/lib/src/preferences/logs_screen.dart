@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
@@ -47,27 +48,27 @@ class _LogsScreenState extends State<LogsScreen> {
     final timeFormat = context.select<PreferencesStore, TimeFormatPref>((p) => p.timeFormat);
     final filtered = _filteredRecords;
     return ScreenScaffold(
-      title: const Text('Logs'),
+      title: Text(context.l10n.logs),
       actions: [
         PopupMenuButton<Level>(
           icon: const Icon(Icons.filter_list, size: 18),
-          tooltip: 'Filter by level',
+          tooltip: context.l10n.filterByLevel,
           onSelected: (level) {
             setState(() {
               _minLevel = level;
             });
           },
           itemBuilder: (context) => [
-            _buildLevelMenuItem(.ALL, 'All'),
-            _buildLevelMenuItem(.FINE, 'Debug+'),
-            _buildLevelMenuItem(.INFO, 'Info+'),
-            _buildLevelMenuItem(.WARNING, 'Warning+'),
-            _buildLevelMenuItem(.SEVERE, 'Severe'),
+            _buildLevelMenuItem(.ALL, context.l10n.all),
+            _buildLevelMenuItem(.FINE, context.l10n.debug),
+            _buildLevelMenuItem(.INFO, context.l10n.info),
+            _buildLevelMenuItem(.WARNING, context.l10n.warning),
+            _buildLevelMenuItem(.SEVERE, context.l10n.severe),
           ],
         ),
         IconButton(
           icon: const Icon(Icons.content_copy, size: 18),
-          tooltip: 'Copy all logs',
+          tooltip: context.l10n.copyAllLogs,
           onPressed: _records.isEmpty
               ? null
               : () {
@@ -75,19 +76,19 @@ class _LogsScreenState extends State<LogsScreen> {
                   Clipboard.setData(ClipboardData(text: text));
                   ScaffoldMessenger.of(
                     context,
-                  ).showSnackBar(SnackBar(content: Text('Copied ${_records.length} log entries'), duration: const Duration(seconds: 1)));
+                  ).showSnackBar(SnackBar(content: Text(context.l10n.copiedLogEntries(_records.length)), duration: const Duration(seconds: 1)));
                 },
         ),
         IconButton(
           icon: const Icon(Icons.delete_outline, size: 18),
-          tooltip: 'Clear logs',
+          tooltip: context.l10n.clearLogs,
           onPressed: () {
             LogBuffer.instance.clear();
           },
         ),
       ],
       body: filtered.isEmpty
-          ? const Center(child: Text('No log entries'))
+          ? Center(child: Text(context.l10n.noLogEntries))
           : ListView.builder(
               itemCount: filtered.length,
               itemBuilder: (context, index) {
@@ -130,7 +131,7 @@ class _LogEntryTile extends StatelessWidget {
             ),
             if (record.error != null)
               Text(
-                'Error: ${record.error}',
+                context.l10n.errorDetails(record.error!),
                 style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.error, fontFamily: 'courier'),
               ),
           ],

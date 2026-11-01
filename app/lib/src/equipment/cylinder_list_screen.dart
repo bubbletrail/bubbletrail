@@ -1,10 +1,11 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_routes.dart';
-import 'cylinder_list_bloc.dart';
 import '../common/common.dart';
+import 'cylinder_list_bloc.dart';
 
 class CylinderListScreen extends StatelessWidget {
   const CylinderListScreen({super.key});
@@ -12,8 +13,8 @@ class CylinderListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
-      title: const Text('Cylinder types'),
-      actions: [IconButton(icon: const Icon(Icons.add), tooltip: 'Add new cylinder type', onPressed: () => context.goNamed(AppRouteName.cylindersNew))],
+      title: Text(context.l10n.cylinderTypes),
+      actions: [IconButton(icon: const Icon(Icons.add), tooltip: context.l10n.addNewCylinderType, onPressed: () => context.goNamed(AppRouteName.cylindersNew))],
       body: BlocBuilder<CylinderListBloc, CylinderListState>(
         builder: (context, state) {
           if (state is CylinderListInitial || state is CylinderListLoading) {
@@ -24,7 +25,7 @@ class CylinderListScreen extends StatelessWidget {
             final cylinders = state.cylinders;
 
             if (cylinders.isEmpty) {
-              return const EmptyStateWidget(message: 'No cylinder types yet. Tap + to add one.', icon: Icons.science_outlined);
+              return EmptyStateWidget(message: context.l10n.noCylinderTypesYetTapToAddOne, icon: Icons.science_outlined);
             }
 
             return ListView.builder(
@@ -35,7 +36,7 @@ class CylinderListScreen extends StatelessWidget {
                 return Card(
                   child: CylinderTile(
                     index: index,
-                    description: cylinder.description.isNotEmpty ? cylinder.description : 'Cylinder type #${cylinder.id}',
+                    description: cylinder.description.isNotEmpty ? cylinder.description : context.l10n.cylinderType(cylinder.id),
                     volumeL: cylinder.volumeL,
                     workingPressureBar: cylinder.workingPressureBar,
                     volumeCuft: cylinder.volumeCuft,
@@ -51,7 +52,7 @@ class CylinderListScreen extends StatelessWidget {
             );
           }
 
-          return const Center(child: Text('Unknown state'));
+          return Center(child: Text(context.l10n.unknownState));
         },
       ),
     );

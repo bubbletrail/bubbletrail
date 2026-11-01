@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -60,7 +61,7 @@ class _FullscreenProfileScreenState extends State<FullscreenProfileScreen> {
           builder: (context, state) {
             if (state is! DiveDetailsLoaded) return Placeholder();
             return ScreenScaffold(
-              title: Text('Dive #${state.dive.number}: ${state.site?.name ?? 'Unknown site'}'),
+              title: Text(context.l10n.diveTitle(state.dive.number, state.site?.name ?? context.l10n.unknownSite)),
               body: Padding(
                 padding: platformIsMobile ? EdgeInsets.zero : const EdgeInsets.all(8.0),
                 child: DepthProfile(key: ValueKey(state.dive), dive: state.dive),

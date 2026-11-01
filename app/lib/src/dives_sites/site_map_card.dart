@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -18,7 +19,7 @@ class SiteMapCard extends StatelessWidget {
     if (!site.hasPosition()) {
       return Card(
         elevation: 2,
-        child: Container(height: height, alignment: .center, child: const Text('No location data available')),
+        child: Container(height: height, alignment: .center, child: Text(context.l10n.noLocationDataAvailable)),
       );
     }
 
@@ -39,7 +40,7 @@ class SiteMapCard extends StatelessWidget {
                   onPressed: () {
                     context.pushNamed(AppRouteName.sitesDetailsMap, pathParameters: {'siteID': site.id});
                   },
-                  tooltip: 'View fullscreen',
+                  tooltip: context.l10n.viewFullscreen,
                 ),
               ),
           ],

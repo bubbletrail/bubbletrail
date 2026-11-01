@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -12,18 +13,18 @@ class UnitPreferencessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
-      title: const Text('Units'),
+      title: Text(context.l10n.units),
       body: Consumer<PreferencesStore>(
         builder: (context, prefs, _) {
           return ListView(
             padding: const .all(16),
             children: [
               PreferencesTile(
-                title: 'Depth',
+                title: context.l10n.depth,
                 trailing: SegmentedButton<DepthUnit>(
-                  segments: const [
-                    ButtonSegment(value: .meters, label: Text('m'), icon: Icon(Icons.public)),
-                    ButtonSegment(value: .feet, label: Text('ft'), icon: Icon(Icons.star_border)),
+                  segments: [
+                    ButtonSegment(value: .meters, label: Text(context.l10n.unitMeters), icon: Icon(Icons.public)),
+                    ButtonSegment(value: .feet, label: Text(context.l10n.unitFeet), icon: Icon(Icons.star_border)),
                   ],
                   selected: {prefs.depthUnit},
                   onSelectionChanged: (value) {
@@ -32,11 +33,11 @@ class UnitPreferencessScreen extends StatelessWidget {
                 ),
               ),
               PreferencesTile(
-                title: 'Pressure',
+                title: context.l10n.pressure,
                 trailing: SegmentedButton<PressureUnit>(
-                  segments: const [
-                    ButtonSegment(value: .bar, label: Text('bar'), icon: Icon(Icons.public)),
-                    ButtonSegment(value: .psi, label: Text('psi'), icon: Icon(Icons.star_border)),
+                  segments: [
+                    ButtonSegment(value: .bar, label: Text(context.l10n.unitBar), icon: Icon(Icons.public)),
+                    ButtonSegment(value: .psi, label: Text(context.l10n.unitPsi), icon: Icon(Icons.star_border)),
                   ],
                   selected: {prefs.pressureUnit},
                   onSelectionChanged: (value) {
@@ -45,11 +46,11 @@ class UnitPreferencessScreen extends StatelessWidget {
                 ),
               ),
               PreferencesTile(
-                title: 'Temperature',
+                title: context.l10n.temperature,
                 trailing: SegmentedButton<TemperatureUnit>(
-                  segments: const [
-                    ButtonSegment(value: .celsius, label: Text('°C'), icon: Icon(Icons.public)),
-                    ButtonSegment(value: .fahrenheit, label: Text('°F'), icon: Icon(Icons.star_border)),
+                  segments: [
+                    ButtonSegment(value: .celsius, label: Text(context.l10n.unitCelsius), icon: Icon(Icons.public)),
+                    ButtonSegment(value: .fahrenheit, label: Text(context.l10n.unitFahrenheit), icon: Icon(Icons.star_border)),
                   ],
                   selected: {prefs.temperatureUnit},
                   onSelectionChanged: (value) {
@@ -58,11 +59,11 @@ class UnitPreferencessScreen extends StatelessWidget {
                 ),
               ),
               PreferencesTile(
-                title: 'Volume',
+                title: context.l10n.volume,
                 trailing: SegmentedButton<VolumeUnit>(
-                  segments: const [
-                    ButtonSegment(value: .liters, label: Text('L'), icon: Icon(Icons.public)),
-                    ButtonSegment(value: .cuft, label: Text('cuft'), icon: Icon(Icons.star_border)),
+                  segments: [
+                    ButtonSegment(value: .liters, label: Text(context.l10n.unitLiters), icon: Icon(Icons.public)),
+                    ButtonSegment(value: .cuft, label: Text(context.l10n.unitCubicFeet), icon: Icon(Icons.star_border)),
                   ],
                   selected: {prefs.volumeUnit},
                   onSelectionChanged: (value) {
@@ -71,11 +72,11 @@ class UnitPreferencessScreen extends StatelessWidget {
                 ),
               ),
               PreferencesTile(
-                title: 'Weight',
+                title: context.l10n.weight,
                 trailing: SegmentedButton<WeightUnit>(
-                  segments: const [
-                    ButtonSegment(value: .kg, label: Text('kg'), icon: Icon(Icons.public)),
-                    ButtonSegment(value: .lb, label: Text('lbs'), icon: Icon(Icons.star_border)),
+                  segments: [
+                    ButtonSegment(value: .kg, label: Text(context.l10n.unitKilograms), icon: Icon(Icons.public)),
+                    ButtonSegment(value: .lb, label: Text(context.l10n.unitPoundsPlural), icon: Icon(Icons.star_border)),
                   ],
                   selected: {prefs.weightUnit},
                   onSelectionChanged: (value) {
@@ -85,12 +86,12 @@ class UnitPreferencessScreen extends StatelessWidget {
               ),
               const Divider(height: 16),
               PreferencesTile(
-                title: 'Date format',
+                title: context.l10n.dateFormat,
                 trailing: SegmentedButton<DateFormatPref>(
-                  segments: const [
-                    ButtonSegment(value: DateFormatPref.eu, label: Text('25/12/2024'), icon: Icon(Icons.public)),
-                    ButtonSegment(value: DateFormatPref.iso, label: Text('2024-12-25'), icon: Icon(Icons.description)),
-                    ButtonSegment(value: DateFormatPref.us, label: Text('12/25/2024'), icon: Icon(Icons.star_border)),
+                  segments: [
+                    ButtonSegment(value: DateFormatPref.eu, label: Text(context.l10n.dateExampleEuropean), icon: Icon(Icons.public)),
+                    ButtonSegment(value: DateFormatPref.iso, label: Text(context.l10n.dateExampleIso), icon: Icon(Icons.description)),
+                    ButtonSegment(value: DateFormatPref.us, label: Text(context.l10n.dateExampleUs), icon: Icon(Icons.star_border)),
                   ],
                   selected: {prefs.dateFormat},
                   onSelectionChanged: (value) {
@@ -99,11 +100,11 @@ class UnitPreferencessScreen extends StatelessWidget {
                 ),
               ),
               PreferencesTile(
-                title: 'Time format',
+                title: context.l10n.timeFormat,
                 trailing: SegmentedButton<TimeFormatPref>(
-                  segments: const [
-                    ButtonSegment(value: TimeFormatPref.h24, label: Text('24h'), icon: Icon(Icons.public)),
-                    ButtonSegment(value: TimeFormatPref.h12, label: Text('12h'), icon: Icon(Icons.star_border)),
+                  segments: [
+                    ButtonSegment(value: TimeFormatPref.h24, label: Text(context.l10n.timeFormat24Hour), icon: Icon(Icons.public)),
+                    ButtonSegment(value: TimeFormatPref.h12, label: Text(context.l10n.timeFormat12Hour), icon: Icon(Icons.star_border)),
                   ],
                   selected: {prefs.timeFormat},
                   onSelectionChanged: (value) {

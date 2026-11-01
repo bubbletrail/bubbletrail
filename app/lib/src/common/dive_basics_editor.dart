@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -132,12 +133,12 @@ class _DiveBasicsEditorState extends State<_DiveBasicsEditor> {
           crossAxisAlignment: .stretch,
           spacing: 16,
           children: [
-            Text('Dive details', style: Theme.of(context).textTheme.titleMedium),
+            Text(context.l10n.diveDetails, style: Theme.of(context).textTheme.titleMedium),
             if (_zoneAbbreviation != null)
-              Text('Times shown in $_zoneAbbreviation', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).hintColor)),
+              Text(context.l10n.timesShownIn(_zoneAbbreviation!), style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).hintColor)),
             TextField(
               controller: _numberController,
-              decoration: const InputDecoration(labelText: 'Dive number', border: OutlineInputBorder(), suffixIcon: Icon(Icons.tag)),
+              decoration: InputDecoration(labelText: context.l10n.diveNumberLabel, border: OutlineInputBorder(), suffixIcon: Icon(Icons.tag)),
               keyboardType: .number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
@@ -148,7 +149,7 @@ class _DiveBasicsEditorState extends State<_DiveBasicsEditor> {
                   child: InkWell(
                     onTap: _selectDate,
                     child: InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Date', border: OutlineInputBorder(), suffixIcon: Icon(Icons.calendar_today)),
+                      decoration: InputDecoration(labelText: context.l10n.date, border: OutlineInputBorder(), suffixIcon: Icon(Icons.calendar_today)),
                       child: DateText(_start),
                     ),
                   ),
@@ -157,7 +158,7 @@ class _DiveBasicsEditorState extends State<_DiveBasicsEditor> {
                   child: InkWell(
                     onTap: _selectTime,
                     child: InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Time', border: OutlineInputBorder(), suffixIcon: Icon(Icons.access_time)),
+                      decoration: InputDecoration(labelText: context.l10n.time, border: OutlineInputBorder(), suffixIcon: Icon(Icons.access_time)),
                       child: TimeText(_start),
                     ),
                   ),
@@ -172,14 +173,14 @@ class _DiveBasicsEditorState extends State<_DiveBasicsEditor> {
                     child: InkWell(
                       onTap: _selectDuration,
                       child: InputDecorator(
-                        decoration: const InputDecoration(labelText: 'Duration', border: OutlineInputBorder(), suffixIcon: Icon(Icons.timer)),
+                        decoration: InputDecoration(labelText: context.l10n.duration, border: OutlineInputBorder(), suffixIcon: Icon(Icons.timer)),
                         child: DurationText(_durationSeconds),
                       ),
                     ),
                   ),
                   Expanded(
                     child: DepthEditor(
-                      label: 'Max depth',
+                      label: context.l10n.maxDepth,
                       initialValue: _maxDepth,
                       onChanged: (val) {
                         if (val != null) _maxDepth = val;
@@ -192,12 +193,12 @@ class _DiveBasicsEditorState extends State<_DiveBasicsEditor> {
               mainAxisAlignment: .end,
               spacing: 8,
               children: [
-                TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+                TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.l10n.cancel)),
                 FilledButton(
                   onPressed: () => Navigator.of(
                     context,
                   ).pop(DiveBasics(number: _number, start: wallClockToUtc(_start, widget.timezone), durationSeconds: _durationSeconds, maxDepth: _maxDepth)),
-                  child: const Text('Done'),
+                  child: Text(context.l10n.done),
                 ),
               ],
             ),

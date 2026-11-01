@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 
 /// Result of a selection dialog - distinguishes between cancelled and selected value
@@ -17,8 +18,8 @@ Future<bool> showConfirmationDialog({
   required BuildContext context,
   required String title,
   required String message,
-  String confirmText = 'Confirm',
-  String cancelText = 'Cancel',
+  String? confirmText,
+  String? cancelText,
   bool isDestructive = false,
 }) async {
   final result = await showDialog<bool>(
@@ -27,11 +28,11 @@ Future<bool> showConfirmationDialog({
       title: Text(title),
       content: Text(message),
       actions: [
-        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(cancelText)),
+        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(cancelText ?? context.l10n.cancel)),
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(true),
           style: isDestructive ? TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error) : null,
-          child: Text(confirmText),
+          child: Text(confirmText ?? context.l10n.confirm),
         ),
       ],
     ),

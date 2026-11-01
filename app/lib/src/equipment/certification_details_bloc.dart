@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -43,7 +44,7 @@ class CertificationDetailsLoaded extends CertificationDetailsState with DetailsL
 
 class CertificationDetailsError extends CertificationDetailsState with DetailsErrorMixin {
   @override
-  final String errorMessage;
+  final Object errorMessage;
 
   const CertificationDetailsError(this.errorMessage);
 
@@ -134,7 +135,7 @@ class CertificationDetailsBloc extends Bloc<CertificationDetailsEvent, Certifica
     try {
       final cert = await _store.certifications.getById(event.certificationId);
       if (cert == null) {
-        emit(const CertificationDetailsError('Certification not found'));
+        emit(const CertificationDetailsError(LocalizedError(AppError.certificationNotFound)));
         return;
       }
       // Subscribe to storage changes so that edits made in a sub-route are
@@ -145,7 +146,7 @@ class CertificationDetailsBloc extends Bloc<CertificationDetailsEvent, Certifica
       }
       emit(CertificationDetailsLoaded(cert, false));
     } catch (e) {
-      emit(CertificationDetailsError('Failed to load certification details: $e'));
+      emit(CertificationDetailsError(LocalizedError(AppError.loadCertificationFailed, e)));
     }
   }
 
@@ -190,7 +191,7 @@ class CertificationDetailsBloc extends Bloc<CertificationDetailsEvent, Certifica
       emit(const CertificationDetailsClosed());
     } catch (e) {
       _log.warning('failed to update certification', e);
-      emit(CertificationDetailsError('Failed to update certification: $e'));
+      emit(CertificationDetailsError(LocalizedError(AppError.updateCertificationFailed, e)));
     }
   }
 
@@ -205,7 +206,7 @@ class CertificationDetailsBloc extends Bloc<CertificationDetailsEvent, Certifica
       emit(const CertificationDetailsClosed());
     } catch (e) {
       _log.warning('failed to delete certification', e);
-      emit(CertificationDetailsError('Failed to delete certification: $e'));
+      emit(CertificationDetailsError(LocalizedError(AppError.deleteCertificationFailed, e)));
     }
   }
 }

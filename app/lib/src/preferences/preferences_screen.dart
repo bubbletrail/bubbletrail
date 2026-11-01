@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:btl10n/btl10n.dart';
 import 'package:btsparkle/btsparkle.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -11,15 +12,15 @@ import 'package:provider/provider.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
-import '../providers/storage_provider.dart';
-import 'archive_bloc.dart';
+import '../common/common.dart';
 import '../dives_sites/dive_list_bloc.dart';
 import '../equipment/equipment_list_bloc.dart';
-import 'preferences_store.dart';
-import 'sync_bloc.dart';
-import '../common/common.dart';
+import '../providers/storage_provider.dart';
 import '../services/log_buffer.dart';
+import 'archive_bloc.dart';
+import 'preferences_store.dart';
 import 'preferences_widgets.dart';
+import 'sync_bloc.dart';
 
 final _log = Logger('preferences_screen.dart');
 
@@ -33,12 +34,12 @@ class PreferencesScreen extends StatelessWidget {
         return Consumer<PreferencesStore>(
           builder: (context, prefs, _) {
             return ScreenScaffold(
-              title: const Text('Preferences'),
+              title: Text(context.l10n.preferences),
               body: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
                   _SectionColumn(
-                    title: 'Syncing',
+                    title: context.l10n.syncingSection,
                     children: [
                       Wrap(
                         spacing: 8,
@@ -46,14 +47,14 @@ class PreferencesScreen extends StatelessWidget {
                         children: [
                           FilledButton.icon(
                             icon: const Icon(Icons.sync),
-                            label: const Text('Sync now'),
+                            label: Text(context.l10n.syncNow),
                             onPressed: prefs.syncProvider == .none || !prefs.s3Config.isConfigured || syncState.syncing
                                 ? null
                                 : () => context.read<SyncBloc>().add(const SyncEvent.startSyncing()),
                           ),
                           OutlinedButton.icon(
                             icon: Icon(Icons.cloud_sync),
-                            label: Text('Edit sync settings'),
+                            label: Text(context.l10n.editSyncSettings),
                             onPressed: () => context.goNamed(AppRouteName.syncing),
                           ),
                         ],
@@ -61,16 +62,16 @@ class PreferencesScreen extends StatelessWidget {
                       if (prefs.syncProvider != .none && prefs.s3Config.isConfigured) SyncStatusTile(state: syncState),
                     ],
                   ),
-                  _SectionColumn(title: 'Import & export', children: [_ImportExportButtons()]),
+                  _SectionColumn(title: context.l10n.importExport, children: [_ImportExportButtons()]),
                   _SectionColumn(
-                    title: 'Preferences',
+                    title: context.l10n.preferences,
                     children: [
                       SegmentedButton<ThemeMode>(
                         showSelectedIcon: true,
-                        segments: const [
-                          ButtonSegment(value: ThemeMode.system, label: Text('System'), icon: Icon(Icons.brightness_auto)),
-                          ButtonSegment(value: ThemeMode.light, label: Text('Light'), icon: Icon(Icons.light_mode)),
-                          ButtonSegment(value: ThemeMode.dark, label: Text('Dark'), icon: Icon(Icons.dark_mode)),
+                        segments: [
+                          ButtonSegment(value: ThemeMode.system, label: Text(context.l10n.system), icon: Icon(Icons.brightness_auto)),
+                          ButtonSegment(value: ThemeMode.light, label: Text(context.l10n.light), icon: Icon(Icons.light_mode)),
+                          ButtonSegment(value: ThemeMode.dark, label: Text(context.l10n.dark), icon: Icon(Icons.dark_mode)),
                         ],
                         selected: {prefs.themeMode},
                         onSelectionChanged: (value) {
@@ -81,10 +82,14 @@ class PreferencesScreen extends StatelessWidget {
                         spacing: 8,
                         runSpacing: 8,
                         children: [
-                          OutlinedButton.icon(icon: Icon(Icons.straighten), label: Text('Edit units'), onPressed: () => context.goNamed(AppRouteName.units)),
+                          OutlinedButton.icon(
+                            icon: Icon(Icons.straighten),
+                            label: Text(context.l10n.editUnits),
+                            onPressed: () => context.goNamed(AppRouteName.units),
+                          ),
                           OutlinedButton.icon(
                             icon: Icon(Icons.scuba_diving),
-                            label: Text('Dive preferences'),
+                            label: Text(context.l10n.divePreferences),
                             onPressed: () => context.goNamed(AppRouteName.divePreferences),
                           ),
                         ],
@@ -92,7 +97,7 @@ class PreferencesScreen extends StatelessWidget {
                     ],
                   ),
                   _SectionColumn(
-                    title: 'Maintenance',
+                    title: context.l10n.maintenance,
                     children: [
                       Wrap(
                         spacing: 8,
@@ -102,14 +107,18 @@ class PreferencesScreen extends StatelessWidget {
                             OutlinedButton.icon(
                               onPressed: () => BTSparkle.checkForUpdates(),
                               icon: Icon(Icons.update_outlined),
-                              label: Text('Check for updates'),
+                              label: Text(context.l10n.checkForUpdates),
                             ),
-                          OutlinedButton.icon(onPressed: () => _renumberDives(context), icon: Icon(Icons.format_list_numbered), label: Text('Renumber dives')),
+                          OutlinedButton.icon(
+                            onPressed: () => _renumberDives(context),
+                            icon: Icon(Icons.format_list_numbered),
+                            label: Text(context.l10n.renumberDives),
+                          ),
                           OutlinedButton.icon(
                             onPressed: () => _resetDatabase(context),
                             style: OutlinedButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
                             icon: Icon(Icons.delete_forever_outlined),
-                            label: Text('Reset database'),
+                            label: Text(context.l10n.resetDatabase),
                           ),
                         ],
                       ),
@@ -124,7 +133,7 @@ class PreferencesScreen extends StatelessWidget {
                         crossAxisAlignment: .start,
                         children: [
                           Text(
-                            'Bubbletrail $appVer ($gitVer)',
+                            context.l10n.appVersion(appVer, gitVer),
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
                           ),
                           DateTimeText(
@@ -137,7 +146,7 @@ class PreferencesScreen extends StatelessWidget {
                       TextButton(
                         onPressed: () => showLicensePage(
                           context: context,
-                          applicationName: 'Bubbletrail',
+                          applicationName: context.l10n.appTitle,
                           applicationVersion: '$appVer ($gitVer)',
                           applicationIcon: Padding(
                             padding: .symmetric(vertical: 8),
@@ -149,7 +158,7 @@ class PreferencesScreen extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          'Open source licenses',
+                          context.l10n.openSourceLicenses,
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
                         ),
                       ),
@@ -170,16 +179,16 @@ class PreferencesScreen extends StatelessWidget {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text('Renumber dives'),
+          title: Text(context.l10n.renumberDives),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('This will renumber all dives sequentially, in chronological order, replacing any existing dive numbers.'),
+              Text(context.l10n.thisWillRenumberAllDivesSequentiallyInChronologicalOrderReplacingAnyExistingDiveNumbe),
               const SizedBox(height: 16),
               Row(
                 children: [
-                  const Text('Start from:'),
+                  Text(context.l10n.startFrom),
                   const SizedBox(width: 16),
                   SizedBox(
                     width: 80,
@@ -200,8 +209,8 @@ class PreferencesScreen extends StatelessWidget {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancel')),
-            TextButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Renumber dives')),
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(context.l10n.cancel)),
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: Text(context.l10n.renumberDives)),
           ],
         ),
       ),
@@ -209,18 +218,16 @@ class PreferencesScreen extends StatelessWidget {
     if (!(confirmed ?? false) || !context.mounted) return;
 
     context.read<DiveListBloc>().add(DiveListEvent.renumberDives(startFrom: startFrom));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Renumbering dives...')));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.renumberingDives)));
   }
 
   Future<void> _resetDatabase(BuildContext context) async {
     final confirmed = await showConfirmationDialog(
       context: context,
-      title: 'Reset database',
-      message:
-          'This will remove all dives, sites, etc. in Bubbletrail and revert to an empty state. '
-          'Syncing will be disabled, but synced data remains untouched in the cloud. Continue?',
-      cancelText: 'Cancel',
-      confirmText: 'Reset database',
+      title: context.l10n.resetDatabase,
+      message: context.l10n.resetDatabaseConfirmation,
+      cancelText: context.l10n.cancel,
+      confirmText: context.l10n.resetDatabase,
       isDestructive: true,
     );
     if (confirmed != true || !context.mounted) return;
@@ -297,14 +304,14 @@ class _LogPreviewState extends State<_LogPreview> {
           children: [
             Row(
               children: [
-                Text('Logs', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                Text(context.l10n.logs, style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 const Spacer(),
                 Icon(Icons.chevron_right, size: 12, color: theme.colorScheme.onSurfaceVariant),
               ],
             ),
             const SizedBox(height: 4),
             if (recentLogs.isEmpty)
-              Text('No log entries', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant))
+              Text(context.l10n.noLogEntries, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant))
             else
               ...recentLogs.map((record) => _LogLine(record: record, timeFormat: prefs.timeFormat)),
           ],
@@ -353,6 +360,7 @@ class _ImportExportButtons extends StatelessWidget {
     final fileName = state.exportReadyFilename ?? 'bubbletrail.$backupFileExtension';
 
     try {
+      final dialogTitle = context.l10n.exportBackup;
       final bytes = await File(state.exportReadyPath!).readAsBytes();
       // FileType.custom requires a non-empty extension list, otherwise
       // file_picker throws before showing the dialog.
@@ -362,13 +370,7 @@ class _ImportExportButtons extends StatelessWidget {
       // extension. Desktop save panels derive the extension themselves and
       // would end up with a doubled extension if we included it here.
       final name = platformIsMobile ? fileName : fileName.substring(0, fileName.length - extension.length - 1);
-      final result = await FilePicker.saveFile(
-        bytes: bytes,
-        dialogTitle: 'Export backup',
-        fileName: name,
-        type: FileType.custom,
-        allowedExtensions: [extension],
-      );
+      final result = await FilePicker.saveFile(bytes: bytes, dialogTitle: dialogTitle, fileName: name, type: FileType.custom, allowedExtensions: [extension]);
 
       if (result != null) {
         // file URIs map to a filesystem path; other schemes (content etc.) are kept as-is.
@@ -391,11 +393,11 @@ class _ImportExportButtons extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Import backup'),
-        content: const Text('This will replace your existing data with the backup. Your current data will be moved to a backup folder. Continue?'),
+        title: Text(context.l10n.importBackup),
+        content: Text(context.l10n.thisWillReplaceYourExistingDataWithTheBackupYourCurrentDataWillBeMovedToABackupFolder),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Import')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.l10n.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(context.l10n.import)),
         ],
       ),
     );
@@ -410,7 +412,7 @@ class _ImportExportButtons extends StatelessWidget {
     if (!context.mounted) return;
 
     context.read<DiveListBloc>().add(DiveListEvent.importDives(file.path!));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Importing dives...')));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.importingDives)));
   }
 
   Future<void> _importEquipment(BuildContext context) async {
@@ -419,7 +421,7 @@ class _ImportExportButtons extends StatelessWidget {
     if (!context.mounted) return;
 
     context.read<EquipmentListBloc>().add(EquipmentListEvent.importEquipment(file.path!));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Importing equipment...')));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.importingEquipment)));
   }
 
   @override
@@ -427,13 +429,13 @@ class _ImportExportButtons extends StatelessWidget {
     return BlocConsumer<ArchiveBloc, ArchiveState>(
       listener: (context, state) {
         if (state.error != null) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${state.error}')));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.errorDetails(localizeError(context.l10n, state.error!)))));
         } else if (state.exportReadyPath != null && !state.exportComplete) {
           _showSaveDialog(context, state);
         } else if (state.exportComplete) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Export complete')));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.exportComplete)));
         } else if (state.importComplete) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Import complete')));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.importComplete)));
         }
       },
       builder: (context, state) {
@@ -443,32 +445,32 @@ class _ImportExportButtons extends StatelessWidget {
           children: [
             OutlinedButton.icon(
               icon: const Icon(Icons.file_upload_outlined, size: 16),
-              label: const Text('Import log file'),
+              label: Text(context.l10n.importLogFile),
               onPressed: state.working ? null : () => _importDives(context),
             ),
             OutlinedButton.icon(
               icon: const Icon(Icons.file_upload_outlined, size: 16),
-              label: const Text('Import equipment'),
+              label: Text(context.l10n.importEquipment),
               onPressed: state.working ? null : () => _importEquipment(context),
             ),
             OutlinedButton.icon(
               icon: const Icon(Icons.file_download_outlined, size: 16),
-              label: const Text('Export Subsurface file'),
+              label: Text(context.l10n.exportSubsurfaceFile),
               onPressed: state.working ? null : () => context.read<ArchiveBloc>().add(ArchiveEvent.exportSsrf()),
             ),
             OutlinedButton.icon(
               icon: const Icon(Icons.file_download_outlined, size: 16),
-              label: const Text('Export UDDF file'),
+              label: Text(context.l10n.exportUDDFFile),
               onPressed: state.working ? null : () => context.read<ArchiveBloc>().add(ArchiveEvent.exportUddf()),
             ),
             OutlinedButton.icon(
               icon: const Icon(Icons.file_upload_outlined, size: 16),
-              label: const Text('Import database backup'),
+              label: Text(context.l10n.importDatabaseBackup),
               onPressed: state.working ? null : () => _importBackup(context),
             ),
             OutlinedButton.icon(
               icon: const Icon(Icons.file_download_outlined, size: 16),
-              label: const Text('Export database backup'),
+              label: Text(context.l10n.exportDatabaseBackup),
               onPressed: state.working ? null : () => context.read<ArchiveBloc>().add(ArchiveEvent.exportArchive()),
             ),
             if (state.working) const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),

@@ -1,7 +1,8 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 
-import 'sync_bloc.dart';
 import '../common/common.dart';
+import 'sync_bloc.dart';
 
 class PreferencesSectionHeader extends StatelessWidget {
   final String title;
@@ -48,11 +49,16 @@ class SyncStatusTile extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     if (state.syncing) {
-      return _buildTile(context, icon: Icons.sync, iconColor: colorScheme.primary, message: 'Syncing...', isAnimating: true);
+      return _buildTile(context, icon: Icons.sync, iconColor: colorScheme.primary, message: context.l10n.syncing, isAnimating: true);
     }
 
     if (state.lastSyncSuccess == false) {
-      return _buildTile(context, icon: Icons.error_outline, iconColor: colorScheme.error, message: 'Sync failed: ${state.error ?? "Unknown error"}');
+      return _buildTile(
+        context,
+        icon: Icons.error_outline,
+        iconColor: colorScheme.error,
+        message: context.l10n.syncFailed(state.error ?? context.l10n.unknownError),
+      );
     }
 
     if (state.lastSynced != null) {
@@ -60,7 +66,7 @@ class SyncStatusTile extends StatelessWidget {
         context,
         icon: Icons.check_circle_outline,
         iconColor: Theme.of(context).colorScheme.primary,
-        message: 'Last synced',
+        message: context.l10n.lastSynced,
         trailing: DateTimeText(state.lastSynced!, style: Theme.of(context).textTheme.bodySmall),
       );
     }

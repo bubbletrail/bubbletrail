@@ -1,6 +1,6 @@
 import 'package:btcountries/btcountries.dart';
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -60,7 +60,7 @@ class _DiveTableState extends State<DiveTable> {
   @override
   Widget build(BuildContext context) {
     if (widget.dives.isEmpty) {
-      return const Center(child: Text('No dives to display'));
+      return Center(child: Text(context.l10n.noDivesToDisplay));
     }
 
     return LayoutBuilder(
@@ -120,7 +120,7 @@ class _DiveTableState extends State<DiveTable> {
         ),
         if (filteredDives.isEmpty)
           SliverFillRemaining(
-            child: EmptyStateWidget(message: 'No dives match these filters.', actionLabel: 'Clear filters', onAction: _clearFilters),
+            child: EmptyStateWidget(message: context.l10n.noDivesMatchTheseFilters, actionLabel: context.l10n.clearFilters, onAction: _clearFilters),
           )
         else
           SliverList.builder(
@@ -140,20 +140,20 @@ class _DiveTableState extends State<DiveTable> {
   Widget _buildTrinaGrid(BuildContext context) {
     final prefs = context.watch<PreferencesStore>();
     final columns = <TrinaColumn>[
-      TrinaColumn(title: 'Dive #', field: 'number', type: .number(), width: 80, readOnly: true, sort: .descending),
+      TrinaColumn(title: context.l10n.diveNumberColumn, field: 'number', type: .number(), width: 80, readOnly: true, sort: .descending),
       TrinaColumn(
-        title: 'Start',
+        title: context.l10n.start,
         field: 'start',
         type: .dateTime(format: prefs.dateTimeFormat),
         width: 170,
         readOnly: true,
       ),
-      TrinaColumn(title: 'Max depth', field: 'maxDepth', type: .number(), width: 80, readOnly: true),
-      TrinaColumn(title: 'Duration', field: 'duration', type: .number(), width: 80, readOnly: true),
-      if (widget.showSiteColumn) TrinaColumn(title: 'Country', field: 'country', type: .text(), width: 120, readOnly: true),
-      if (widget.showSiteColumn) TrinaColumn(title: 'Location', field: 'location', type: .text(), width: 120, readOnly: true),
-      if (widget.showSiteColumn) TrinaColumn(title: 'Site', field: 'site', type: .text(), width: 120, readOnly: true),
-      TrinaColumn(title: 'SAC', field: 'sac', type: .number(), width: 80, readOnly: true),
+      TrinaColumn(title: context.l10n.maxDepth, field: 'maxDepth', type: .number(), width: 80, readOnly: true),
+      TrinaColumn(title: context.l10n.duration, field: 'duration', type: .number(), width: 80, readOnly: true),
+      if (widget.showSiteColumn) TrinaColumn(title: context.l10n.country, field: 'country', type: .text(), width: 120, readOnly: true),
+      if (widget.showSiteColumn) TrinaColumn(title: context.l10n.location, field: 'location', type: .text(), width: 120, readOnly: true),
+      if (widget.showSiteColumn) TrinaColumn(title: context.l10n.site, field: 'site', type: .text(), width: 120, readOnly: true),
+      TrinaColumn(title: context.l10n.sac, field: 'sac', type: .number(), width: 80, readOnly: true),
     ];
     final rows = widget.dives.map((dive) {
       final site = _getSite(dive);
@@ -173,13 +173,13 @@ class _DiveTableState extends State<DiveTable> {
           ),
           'maxDepth': TrinaCell(value: dive.maxDepth * 10, renderer: (rendererContext) => DepthText(rendererContext.cell.value / 10)),
           'duration': TrinaCell(value: dive.duration, renderer: (rendererContext) => DurationText(rendererContext.cell.value)),
-          'country': TrinaCell(value: countryDisplayName(site?.country ?? '')),
+          'country': TrinaCell(value: countryDisplayName(site?.country ?? '', l10n: context.l10n)),
           'location': TrinaCell(value: site?.location ?? ''),
           'site': TrinaCell(value: site?.name ?? ''),
           'sac': TrinaCell(
             value: dive.sac * 10,
             renderer: (rendererContext) =>
-                rendererContext.cell.value != 0 ? VolumeText(rendererContext.cell.value / 10, suffix: '/min', precise: true) : Text('-'),
+                rendererContext.cell.value != 0 ? VolumeText(rendererContext.cell.value / 10, suffix: context.l10n.perMinute, precise: true) : Text('-'),
           ),
           '_id': TrinaCell(value: dive.id), // Hidden field for navigation
         },

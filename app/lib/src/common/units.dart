@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -58,12 +59,12 @@ Color getLogLevelColor(Level level, ThemeData theme) {
   }
 }
 
-String formatDepth(DepthUnit unit, num depth) {
+String formatDepth(AppLocalizations l10n, DepthUnit unit, num depth) {
   switch (unit) {
     case .meters:
-      return '${depth.toStringAsFixed(1)} ${unit.label}';
+      return l10n.measurement(depth.toStringAsFixed(1), unit.label(l10n));
     case .feet:
-      return '${(depth * metersToFeet).toStringAsFixed(0)} ${unit.label}';
+      return l10n.measurement((depth * metersToFeet).toStringAsFixed(0), unit.label(l10n));
   }
 }
 
@@ -76,42 +77,42 @@ int convertDepth(DepthUnit unit, num depth) {
   }
 }
 
-String formatTemperature(TemperatureUnit unit, num temperature) {
+String formatTemperature(AppLocalizations l10n, TemperatureUnit unit, num temperature) {
   switch (unit) {
     case .celsius:
-      return '${temperature.toStringAsFixed(1)} ${unit.label}';
+      return l10n.measurement(temperature.toStringAsFixed(1), unit.label(l10n));
     case .fahrenheit:
-      return '${(temperature * 1.8 + 32).toStringAsFixed(0)} ${unit.label}';
+      return l10n.measurement((temperature * 1.8 + 32).toStringAsFixed(0), unit.label(l10n));
   }
 }
 
-String formatPressure(PressureUnit unit, num pressure) {
+String formatPressure(AppLocalizations l10n, PressureUnit unit, num pressure) {
   switch (unit) {
     case .bar:
-      return '${pressure.toStringAsFixed(0)} ${unit.label}';
+      return l10n.measurement(pressure.toStringAsFixed(0), unit.label(l10n));
     case .psi:
-      return '${(pressure * barToPsi).toStringAsFixed(0)} ${unit.label}';
+      return l10n.measurement((pressure * barToPsi).toStringAsFixed(0), unit.label(l10n));
   }
 }
 
-String formatVolume(VolumeUnit unit, num volume, {precise = false}) {
+String formatVolume(AppLocalizations l10n, VolumeUnit unit, num volume, {precise = false}) {
   switch (unit) {
     case .liters:
-      if (precise) return '${volume.toStringAsFixed(1)} ${unit.label}';
-      return '${formatDisplayValue(volume)} ${unit.label}';
+      if (precise) return l10n.measurement(volume.toStringAsFixed(1), unit.label(l10n));
+      return l10n.measurement(formatDisplayValue(volume), unit.label(l10n));
     case .cuft:
       final val = volume * litersToCuft;
-      if (precise) return '${val.toStringAsFixed(2)} ${unit.label}';
-      return '${formatDisplayValue(val)} ${unit.label}';
+      if (precise) return l10n.measurement(val.toStringAsFixed(2), unit.label(l10n));
+      return l10n.measurement(formatDisplayValue(val), unit.label(l10n));
   }
 }
 
-String formatWeight(WeightUnit unit, num weight) {
+String formatWeight(AppLocalizations l10n, WeightUnit unit, num weight) {
   switch (unit) {
     case .kg:
-      return '${weight.toStringAsFixed(1)} ${unit.label}';
+      return l10n.measurement(weight.toStringAsFixed(1), unit.label(l10n));
     case .lb:
-      return '${(weight * kgToLbs).toStringAsFixed(1)} ${unit.label}';
+      return l10n.measurement((weight * kgToLbs).toStringAsFixed(1), unit.label(l10n));
   }
 }
 
@@ -121,9 +122,9 @@ String formatDuration(int seconds) {
   return '$minutes:${secs.toString().padLeft(2, '0')}';
 }
 
-String formatMinutes(int seconds) {
+String formatMinutes(AppLocalizations l10n, int seconds) {
   final minutes = (seconds / 60).round();
-  return '$minutes min';
+  return l10n.minutesDuration(minutes);
 }
 
 String formatLatitude(double val) {
@@ -150,7 +151,7 @@ class DurationText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(formatMinutes(seconds), style: style);
+    return Text(formatMinutes(context.l10n, seconds), style: style);
   }
 }
 
@@ -217,7 +218,7 @@ class DepthText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final unit = context.select<PreferencesStore, DepthUnit>((p) => p.depthUnit);
-    return Text(prefix + formatDepth(unit, depth));
+    return Text(prefix + formatDepth(context.l10n, unit, depth));
   }
 }
 
@@ -229,7 +230,7 @@ class TemperatureText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final unit = context.select<PreferencesStore, TemperatureUnit>((p) => p.temperatureUnit);
-    return Text(formatTemperature(unit, temperature));
+    return Text(formatTemperature(context.l10n, unit, temperature));
   }
 }
 
@@ -242,7 +243,7 @@ class PressureText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final unit = context.select<PreferencesStore, PressureUnit>((p) => p.pressureUnit);
-    return IconText(icon, formatPressure(unit, pressure));
+    return IconText(icon, formatPressure(context.l10n, unit, pressure));
   }
 }
 
@@ -257,7 +258,7 @@ class VolumeText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final unit = context.select<PreferencesStore, VolumeUnit>((p) => p.volumeUnit);
-    return IconText(icon, formatVolume(unit, volume, precise: precise) + suffix);
+    return IconText(icon, formatVolume(context.l10n, unit, volume, precise: precise) + suffix);
   }
 }
 
@@ -270,7 +271,7 @@ class WeightText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final unit = context.select<PreferencesStore, WeightUnit>((p) => p.weightUnit);
-    return Text(formatWeight(unit, weight), style: style);
+    return Text(formatWeight(context.l10n, unit, weight), style: style);
   }
 }
 
@@ -281,29 +282,29 @@ class DecoModelText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(format());
+    return Text(format(context));
   }
 
-  String format() {
+  String format(BuildContext context) {
     switch (model.type) {
       case .DECO_MODEL_TYPE_UNSPECIFIED:
-        return 'Unspecified';
+        return context.l10n.unspecified;
       case .DECO_MODEL_TYPE_NONE:
-        return 'None';
+        return context.l10n.none;
       case .DECO_MODEL_TYPE_BUHLMANN:
         if (model.hasGfLow()) {
-          return 'Bühlmann GF ${model.gfLow}/${model.gfHigh}';
+          return context.l10n.buhlmannGradientFactors(model.gfLow, model.gfHigh);
         } else {
-          return 'Bühlmann';
+          return context.l10n.buhlmann;
         }
       case .DECO_MODEL_TYPE_VPM:
-        return 'VPM ${model.conservatism}';
+        return context.l10n.vpm(model.conservatism);
       case .DECO_MODEL_TYPE_RGBM:
-        return 'RGBM ${model.conservatism}';
+        return context.l10n.rgbm(model.conservatism);
       case .DECO_MODEL_TYPE_DCIEM:
-        return 'DCIEM ${model.conservatism}';
+        return context.l10n.dciem(model.conservatism);
       default:
-        return 'Unknown';
+        return context.l10n.unknown;
     }
   }
 }
@@ -318,17 +319,17 @@ class DecoStatusText extends StatelessWidget {
     final unit = context.select<PreferencesStore, DepthUnit>((p) => p.depthUnit);
     switch (status.type) {
       case .DECO_STOP_TYPE_DECO_STOP:
-        return Text('Deco ${formatMinutes(status.time)} @ ${formatDepth(unit, status.depth)}');
+        return Text(context.l10n.deco(formatMinutes(context.l10n, status.time), formatDepth(context.l10n, unit, status.depth)));
       case .DECO_STOP_TYPE_DEEP_STOP:
-        return Text('Deep stop ${formatMinutes(status.time)} @ ${formatDepth(unit, status.depth)}');
+        return Text(context.l10n.deepStop(formatMinutes(context.l10n, status.time), formatDepth(context.l10n, unit, status.depth)));
       case .DECO_STOP_TYPE_SAFETY_STOP:
-        return Text('Safety stop ${formatMinutes(status.time)} @ ${formatDepth(unit, status.depth)}');
+        return Text(context.l10n.safetyStop(formatMinutes(context.l10n, status.time), formatDepth(context.l10n, unit, status.depth)));
       case .DECO_STOP_TYPE_NDL:
-        return Text('${formatMinutes(status.time)} NDL');
+        return Text(context.l10n.ndl(formatMinutes(context.l10n, status.time)));
       case .DECO_STOP_TYPE_UNSPECIFIED:
         return Text('-');
       default:
-        return Text('Unknown');
+        return Text(context.l10n.unknown);
     }
   }
 }
@@ -350,15 +351,15 @@ String formatDisplayValue(num value) {
   return formatted;
 }
 
-String formatGasPercentage(num oxygenPct, num heliumPct) {
+String formatGasPercentage(BuildContext context, num oxygenPct, num heliumPct) {
   if (heliumPct > 0) {
-    return 'Tx${oxygenPct.round()}/${heliumPct.round()}';
+    return context.l10n.trimix(oxygenPct.round(), heliumPct.round());
   } else if (oxygenPct > 0 && oxygenPct.round() != 21) {
-    return 'EAN${oxygenPct.round()}';
+    return context.l10n.nitrox(oxygenPct.round());
   }
-  return 'Air';
+  return context.l10n.air;
 }
 
-String formatGasFraction(double oxygen, double helium) {
-  return formatGasPercentage(100 * oxygen, 100 * helium);
+String formatGasFraction(BuildContext context, double oxygen, double helium) {
+  return formatGasPercentage(context, 100 * oxygen, 100 * helium);
 }

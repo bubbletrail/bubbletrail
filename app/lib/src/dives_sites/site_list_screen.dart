@@ -1,4 +1,5 @@
 import 'package:btcountries/btcountries.dart';
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,10 +18,10 @@ class SiteListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
-      title: const Text('Dive sites'),
+      title: Text(context.l10n.diveSites),
       actions: [
-        IconButton(icon: const Icon(Icons.map_outlined), tooltip: 'View as map', onPressed: () => context.goNamed(AppRouteName.sitesMap)),
-        IconButton(icon: const Icon(Icons.add), tooltip: 'Add new dive site', onPressed: () => context.goNamed(AppRouteName.sitesNew)),
+        IconButton(icon: const Icon(Icons.map_outlined), tooltip: context.l10n.viewAsMap, onPressed: () => context.goNamed(AppRouteName.sitesMap)),
+        IconButton(icon: const Icon(Icons.add), tooltip: context.l10n.addNewDiveSite, onPressed: () => context.goNamed(AppRouteName.sitesNew)),
       ],
       body: BlocBuilder<DiveListBloc, DiveListState>(
         builder: (context, state) {
@@ -32,7 +33,7 @@ class SiteListScreen extends StatelessWidget {
             final sites = state.sites;
 
             if (sites.isEmpty) {
-              return const EmptyStateWidget(message: 'No dive sites yet.', icon: Icons.location_on_outlined);
+              return EmptyStateWidget(message: context.l10n.noDiveSitesYet, icon: Icons.location_on_outlined);
             }
 
             return LayoutBuilder(
@@ -43,7 +44,7 @@ class SiteListScreen extends StatelessWidget {
             );
           }
 
-          return const Center(child: Text('Unknown state'));
+          return Center(child: Text(context.l10n.unknownState));
         },
       ),
     );
@@ -71,18 +72,21 @@ class SiteListScreen extends StatelessWidget {
 
   Widget _buildTrinaGrid(BuildContext context, List<Site> sites, Map<String, int> diveCountBySiteId) {
     final columns = <TrinaColumn>[
-      TrinaColumn(title: 'Name', field: 'name', type: .text(), width: 200, readOnly: true),
-      TrinaColumn(title: 'Country', field: 'country', type: .text(), width: 120, readOnly: true),
-      TrinaColumn(title: 'Location', field: 'location', type: .text(), width: 150, readOnly: true),
-      TrinaColumn(title: 'Body of water', field: 'bodyOfWater', type: .text(), width: 150, readOnly: true),
-      TrinaColumn(title: 'Difficulty', field: 'difficulty', type: .text(), width: 100, readOnly: true),
-      TrinaColumn(title: '# Dives', field: 'diveCount', type: .number(), width: 80, readOnly: true),
+      TrinaColumn(title: context.l10n.name, field: 'name', type: .text(), width: 200, readOnly: true),
+      TrinaColumn(title: context.l10n.country, field: 'country', type: .text(), width: 120, readOnly: true),
+      TrinaColumn(title: context.l10n.location, field: 'location', type: .text(), width: 150, readOnly: true),
+      TrinaColumn(title: context.l10n.bodyOfWater, field: 'bodyOfWater', type: .text(), width: 150, readOnly: true),
+      TrinaColumn(title: context.l10n.difficulty, field: 'difficulty', type: .text(), width: 100, readOnly: true),
+      TrinaColumn(title: context.l10n.diveCountColumn, field: 'diveCount', type: .number(), width: 80, readOnly: true),
     ];
 
     // Sort by country > location > name for logical grouping
     final sortedSites = List<Site>.from(sites)
       ..sort((a, b) {
-        final countryCompare = countryDisplayName(a.country.isEmpty ? 'zzz' : a.country).compareTo(countryDisplayName(b.country.isEmpty ? 'zzz' : b.country));
+        final countryCompare = countryDisplayName(
+          a.country.isEmpty ? 'zzz' : a.country,
+          l10n: context.l10n,
+        ).compareTo(countryDisplayName(b.country.isEmpty ? 'zzz' : b.country, l10n: context.l10n));
         if (countryCompare != 0) return countryCompare;
         final locationCompare = (a.location.isEmpty ? 'zzz' : a.location).compareTo(b.location.isEmpty ? 'zzz' : b.location);
         if (locationCompare != 0) return locationCompare;
@@ -94,7 +98,7 @@ class SiteListScreen extends StatelessWidget {
       return TrinaRow(
         cells: {
           'name': TrinaCell(value: site.name),
-          'country': TrinaCell(value: site.country.isEmpty ? '-' : countryDisplayName(site.country)),
+          'country': TrinaCell(value: site.country.isEmpty ? '-' : countryDisplayName(site.country, l10n: context.l10n)),
           'location': TrinaCell(value: site.location.isEmpty ? '-' : site.location),
           'bodyOfWater': TrinaCell(value: site.bodyOfWater.isEmpty ? '-' : site.bodyOfWater),
           'difficulty': TrinaCell(value: site.difficulty.isEmpty ? '-' : site.difficulty),
@@ -131,7 +135,7 @@ class _CountryExpansionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locations = hierarchy.locationsFor(country);
-    final displayName = countryDisplayName(country);
+    final displayName = country.isEmpty ? context.l10n.unknown : countryDisplayName(country, l10n: context.l10n);
 
     int countryDiveCount = 0;
     for (final location in locations) {
@@ -143,7 +147,7 @@ class _CountryExpansionTile extends StatelessWidget {
     return ExpansionTile(
       leading: CountryFlag(code: country),
       title: Text(displayName),
-      subtitle: Text('$countryDiveCount ${countryDiveCount == 1 ? 'dive' : 'dives'}'),
+      subtitle: Text(context.l10n.diveCount(countryDiveCount)),
       children: [
         for (final location in locations)
           Padding(
@@ -175,8 +179,8 @@ class _LocationExpansionTile extends StatelessWidget {
 
     return ExpansionTile(
       leading: const Icon(Icons.map_outlined),
-      title: Text(location),
-      subtitle: Text('$locationDiveCount ${locationDiveCount == 1 ? 'dive' : 'dives'}'),
+      title: Text(location.isEmpty ? context.l10n.noLocation : location),
+      subtitle: Text(context.l10n.diveCount(locationDiveCount)),
       children: [
         for (final site in sites)
           Padding(
@@ -184,7 +188,7 @@ class _LocationExpansionTile extends StatelessWidget {
             child: ListTile(
               leading: const Icon(Icons.place_outlined),
               title: Text(site.name),
-              subtitle: Text('${diveCountBySiteId[site.id] ?? 0} ${diveCountBySiteId[site.id] == 1 ? 'dive' : 'dives'}'),
+              subtitle: Text(context.l10n.diveCount(diveCountBySiteId[site.id] ?? 0)),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.goNamed(AppRouteName.sitesDetails, pathParameters: {'siteID': site.id}),
             ),

@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
-
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -107,7 +107,7 @@ class _Completed extends BleDownloadEvent {
 }
 
 class _Failed extends BleDownloadEvent {
-  final String error;
+  final LocalizedError error;
 
   const _Failed(this.error);
 
@@ -133,7 +133,7 @@ class BleDownloadState extends Equatable {
   final bool isDownloading;
   final DownloadProgress? downloadProgress;
   final List<Dive> downloadedDives;
-  final String? error;
+  final LocalizedError? error;
   final DateTime? lastLogDate;
 
   /// If connecting to a remembered computer, auto-start with this descriptor
@@ -247,7 +247,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
       final services = await device.discoverServices();
       add(_ServicesDiscovered(services));
     } catch (e) {
-      emit(state.copyWith(error: 'Failed to connect: $e'));
+      emit(state.copyWith(error: LocalizedError(AppError.connectFailed, e)));
     }
   }
 
@@ -283,13 +283,13 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     if (device == null) return;
 
     if (state.discoveredServices.isEmpty) {
-      emit(state.copyWith(error: 'No services discovered'));
+      emit(state.copyWith(error: LocalizedError(AppError.noServicesDiscovered)));
       return;
     }
 
     final charPair = findBleCharacteristics(state.discoveredServices);
     if (charPair == null) {
-      emit(state.copyWith(error: 'No suitable BLE characteristics found'));
+      emit(state.copyWith(error: LocalizedError(AppError.noBleCharacteristics)));
       return;
     }
 
@@ -313,7 +313,7 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
     try {
       await charPair.rx.setNotifyValue(true);
     } catch (e) {
-      emit(state.copyWith(isDownloading: false, error: 'Failed to enable notifications: $e'));
+      emit(state.copyWith(isDownloading: false, error: LocalizedError(AppError.notificationsFailed, e)));
       return;
     }
 
@@ -357,14 +357,14 @@ class BleDownloadBloc extends Bloc<BleDownloadEvent, BleDownloadState> {
 
         case DownloadError(:final message):
           _log.warning('download error: $message');
-          add(_Failed(message));
+          add(_Failed(LocalizedError(AppError.deviceDownloadFailed, message)));
 
         case DownloadWaiting():
           _log.info('waiting for user action on device');
       }
     });
     sub.onError((e) {
-      add(_Failed('Download exception: $e'));
+      add(_Failed(LocalizedError(AppError.downloadFailed, e)));
     });
     sub.onDone(() async {
       try {

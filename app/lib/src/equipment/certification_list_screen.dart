@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,8 +17,10 @@ class CertificationListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
-      title: const Text('Certifications'),
-      actions: [IconButton(icon: const Icon(Icons.add), tooltip: 'Add new certification', onPressed: () => context.goNamed(AppRouteName.certificationsNew))],
+      title: Text(context.l10n.certifications),
+      actions: [
+        IconButton(icon: const Icon(Icons.add), tooltip: context.l10n.addNewCertification, onPressed: () => context.goNamed(AppRouteName.certificationsNew)),
+      ],
       body: BlocBuilder<CertificationListBloc, CertificationListState>(
         builder: (context, state) {
           if (state is CertificationListInitial || state is CertificationListLoading) {
@@ -28,7 +31,7 @@ class CertificationListScreen extends StatelessWidget {
             final certs = state.certifications;
 
             if (certs.isEmpty) {
-              return const EmptyStateWidget(message: 'No certifications yet. Tap + to add one.', icon: Icons.card_membership_outlined);
+              return EmptyStateWidget(message: context.l10n.noCertificationsYetTapToAddOne, icon: Icons.card_membership_outlined);
             }
 
             return ListView.builder(
@@ -48,7 +51,7 @@ class CertificationListScreen extends StatelessWidget {
             );
           }
 
-          return const Center(child: Text('Unknown state'));
+          return Center(child: Text(context.l10n.unknownState));
         },
       ),
     );
@@ -67,16 +70,16 @@ class CertificationTile extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final cert = certification;
 
-    final title = _title(cert);
+    final title = _title(context, cert);
 
     final badges = <Widget>[];
     if (cert.hasExpires()) {
       final expiry = cert.expires.toDateTime();
       final now = DateTime.now();
       if (expiry.isBefore(now)) {
-        badges.add(TextBadge(label: 'Expired', backgroundColor: cs.errorContainer, textColor: cs.onErrorContainer));
+        badges.add(TextBadge(label: context.l10n.expired, backgroundColor: cs.errorContainer, textColor: cs.onErrorContainer));
       } else if (expiry.isBefore(now.add(const Duration(days: 90)))) {
-        badges.add(TextBadge(label: 'Expiring', backgroundColor: cs.tertiaryContainer, textColor: cs.onTertiaryContainer));
+        badges.add(TextBadge(label: context.l10n.expiring, backgroundColor: cs.tertiaryContainer, textColor: cs.onTertiaryContainer));
       }
     }
 
@@ -121,13 +124,13 @@ class CertificationTile extends StatelessWidget {
     );
   }
 
-  static String _title(Certification cert) {
+  static String _title(BuildContext context, Certification cert) {
     final agency = cert.agency.trim();
     final name = cert.name.trim();
     if (agency.isNotEmpty && name.isNotEmpty) return '$name ($agency)';
     if (name.isNotEmpty) return name;
     if (agency.isNotEmpty) return agency;
-    return 'Certification #${cert.id}';
+    return context.l10n.certification(cert.id);
   }
 }
 

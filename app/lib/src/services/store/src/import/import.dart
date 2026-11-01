@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:btl10n/btl10n.dart';
+
 import 'package:xml/xml.dart';
 
 import 'container.dart';
@@ -60,7 +62,7 @@ Container importXml(XmlDocument doc) {
       return MacDiveXml.fromXml(doc.rootElement);
     case DiveLogFormat.suuntoJson:
     case DiveLogFormat.unknown:
-      throw FormatException('Unknown dive log XML format: root element is <${doc.rootElement.name.local}>');
+      throw LocalizedFormatException(LocalizedError(AppError.unknownXmlDiveLog, doc.rootElement.name.local));
   }
 }
 
@@ -90,7 +92,7 @@ Container importString(String content) {
 Container importJsonString(String jsonString) {
   final decoded = jsonDecode(jsonString);
   if (decoded is! Map<String, dynamic>) {
-    throw const FormatException('Unsupported JSON dive log structure');
+    throw const LocalizedFormatException(LocalizedError(AppError.unsupportedJsonDiveLog));
   }
   return importJson(decoded);
 }
@@ -103,5 +105,5 @@ Container importJson(Map<String, dynamic> json) {
   if (json.containsKey('DeviceLog')) {
     return SuuntoJson.fromJson(json);
   }
-  throw const FormatException('Unknown JSON dive log format');
+  throw const LocalizedFormatException(LocalizedError(AppError.unknownJsonDiveLog));
 }

@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -12,17 +13,17 @@ class DivePreferencesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final prefs = context.watch<PreferencesStore>();
     return ScreenScaffold(
-      title: const Text('Dive preferences'),
+      title: Text(context.l10n.divePreferences),
       body: ListView(
         padding: const .all(16),
         children: [
-          PreferencesSectionHeader(title: 'Gradient Factors'),
+          PreferencesSectionHeader(title: context.l10n.gradientFactors),
           const SizedBox(height: 8),
-          Text('Gradient factors adjust the conservatism of the Buhlmann decompression algorithm.', style: Theme.of(context).textTheme.bodySmall),
+          Text(context.l10n.gradientFactorsAdjustTheConservatismOfTheBuhlmannDecompressionAlgorithm, style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 16),
-          _GfSlider(label: 'GF Low', value: prefs.gfLow, onChanged: (value) => PreferencesStore.instance.gfLow = value),
+          _GfSlider(label: context.l10n.gfLow, value: prefs.gfLow, onChanged: (value) => PreferencesStore.instance.gfLow = value),
           const SizedBox(height: 8),
-          _GfSlider(label: 'GF High', value: prefs.gfHigh, onChanged: (value) => PreferencesStore.instance.gfHigh = value),
+          _GfSlider(label: context.l10n.gfHigh, value: prefs.gfHigh, onChanged: (value) => PreferencesStore.instance.gfHigh = value),
         ],
       ),
     );
@@ -45,10 +46,10 @@ class _GfSlider extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(label, style: Theme.of(context).textTheme.bodyLarge),
-            Text('${(value * 100).round()}%', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+            Text(context.l10n.percentage((value * 100).round()), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
           ],
         ),
-        Slider(value: value, min: 0.1, max: 1.0, divisions: 18, label: '${(value * 100).round()}%', onChanged: (v) => onChanged(v)),
+        Slider(value: value, min: 0.1, max: 1.0, divisions: 18, label: context.l10n.percentage((value * 100).round()), onChanged: (v) => onChanged(v)),
       ],
     );
   }

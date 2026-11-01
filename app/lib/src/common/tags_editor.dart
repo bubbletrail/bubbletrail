@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/material.dart';
 
 import 'chips_editor.dart';
@@ -6,5 +7,11 @@ import 'chips_editor.dart';
 // desktop a modal dialog. Returns the updated list of selected tags, or null
 // if the user cancelled.
 Future<List<String>?> showTagsEditor({required BuildContext context, required Iterable<String> selectedTags, required Iterable<String> availableTags}) {
-  return showChipsEditor(context: context, title: 'Tags', addLabel: 'Add tag', selectedValues: selectedTags, availableValues: availableTags);
+  return showChipsEditor(
+    context: context,
+    title: context.l10n.tagsLabel,
+    addLabel: context.l10n.addTag,
+    selectedValues: selectedTags,
+    availableValues: availableTags,
+  );
 }

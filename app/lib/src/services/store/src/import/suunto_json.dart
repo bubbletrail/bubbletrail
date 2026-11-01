@@ -1,3 +1,4 @@
+import 'package:btl10n/btl10n.dart';
 import 'dart:math';
 
 import 'package:btproto/btproto.dart';
@@ -56,7 +57,7 @@ extension SuuntoJson on Container {
   static Container fromJson(Map<String, dynamic> json) {
     final deviceLog = _asMap(json['DeviceLog']);
     if (deviceLog == null) {
-      throw const FormatException('Not a Suunto JSON dive log: missing DeviceLog');
+      throw const LocalizedFormatException(LocalizedError(AppError.invalidSuuntoDiveLog));
     }
     return Container(dives: [_SuuntoDive.fromJson(deviceLog)]);
   }

@@ -12,6 +12,7 @@ dependencies:
   bloc_concurrency: ^0.3.0
   btbuhlmann: {path: ../pkg/btbuhlmann}
   btcountries: {path: ../pkg/btcountries}
+  btl10n: {path: ../pkg/btl10n}
   btproto: {path: ../pkg/btproto}
   btsparkle: {path: ../pkg/btsparkle}
   chips_input_autocomplete: ^1.2.2

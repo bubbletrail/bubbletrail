@@ -8,9 +8,9 @@ class SiteHierarchy {
   SiteHierarchy(List<Site> sites) : hierarchy = _buildHierarchy(sites);
 
   static Map<String, Map<String, List<Site>>> _buildHierarchy(List<Site> sites) {
-    final byCountry = sites.groupListsBy((s) => matchCountryCode(s.country) ?? 'Unknown');
+    final byCountry = sites.groupListsBy((s) => matchCountryCode(s.country) ?? '');
     return byCountry.map((country, countrySites) {
-      final byLocation = countrySites.groupListsBy((s) => s.location.isEmpty ? 'No location' : s.location);
+      final byLocation = countrySites.groupListsBy((s) => s.location);
       for (final sites in byLocation.values) {
         sites.sort((a, b) => a.name.compareTo(b.name));
       }

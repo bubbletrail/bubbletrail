@@ -1,4 +1,5 @@
 import 'package:btcountries/btcountries.dart';
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:flutter/material.dart';
 
@@ -34,7 +35,7 @@ class _SiteSelectionDialog extends StatelessWidget {
     final countries = _hierarchy.countries;
 
     return AlertDialog(
-      title: const Text('Select dive site'),
+      title: Text(context.l10n.selectDiveSite),
       content: SizedBox(
         width: .maxFinite,
         child: Theme(
@@ -54,13 +55,13 @@ class _SiteSelectionDialog extends StatelessWidget {
           ),
         ),
       ),
-      actions: [TextButton(onPressed: () => Navigator.of(context).pop(SelectionResult<Site>.cancelled()), child: const Text('Cancel'))],
+      actions: [TextButton(onPressed: () => Navigator.of(context).pop(SelectionResult<Site>.cancelled()), child: Text(context.l10n.cancel))],
     );
   }
 
   Widget _buildCountryTile(BuildContext context, String country) {
     final locations = _hierarchy.locationsFor(country);
-    final displayName = countryDisplayName(country);
+    final displayName = country.isEmpty ? context.l10n.unknown : countryDisplayName(country, l10n: context.l10n);
 
     return ExpansionTile(
       leading: CountryFlag(code: country),
@@ -77,7 +78,7 @@ class _SiteSelectionDialog extends StatelessWidget {
 
     return ExpansionTile(
       leading: const Icon(Icons.map_outlined),
-      title: Text(location),
+      title: Text(location.isEmpty ? context.l10n.noLocation : location),
       initiallyExpanded: selectedSite?.country == country && selectedSite?.location == location,
       children: sites.map((site) => Padding(padding: const EdgeInsets.only(left: 16.0), child: _buildSiteTile(context, site))).toList(),
     );

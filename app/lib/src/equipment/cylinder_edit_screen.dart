@@ -1,14 +1,14 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_metadata.dart';
+import '../common/common.dart';
 import '../dives_sites/dive_list_bloc.dart';
 import 'cylinder_details_bloc.dart';
 import 'cylinder_list_bloc.dart';
-import '../common/common.dart';
 
 class CylinderEditScreen extends StatefulWidget {
   const CylinderEditScreen({super.key});
@@ -128,9 +128,9 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
     if (diveCount == 0) {
       confirmed = await showConfirmationDialog(
         context: context,
-        title: 'Delete cylinder type',
-        message: 'Are you sure you want to delete this cylinder type? This cannot be undone.',
-        confirmText: 'Delete',
+        title: context.l10n.deleteCylinderType,
+        message: context.l10n.areYouSureYouWantToDeleteThisCylinderTypeThisCannotBeUndone,
+        confirmText: context.l10n.delete,
         isDestructive: true,
       );
     } else {
@@ -158,7 +158,7 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
           await _deleteCylinder();
         }
       },
-      itemBuilder: (context) => [const PopupMenuItem(value: 'delete', child: Text('Delete cylinder type'))],
+      itemBuilder: (context) => [PopupMenuItem(value: 'delete', child: Text(context.l10n.deleteCylinderType))],
     );
   }
 
@@ -176,10 +176,10 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
           if (state is CylinderDetailsClosed) context.pop();
         },
         child: ScreenScaffold(
-          title: Text(_isNew ? 'New cylinder type' : 'Edit cylinder type'),
+          title: Text(_isNew ? context.l10n.newCylinderType : context.l10n.editCylinderType),
           actions: [
             if (!_isNew) _popupMenuActions(),
-            IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes'),
+            IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: context.l10n.discardChanges),
           ],
           body: Padding(
             padding: const .all(16.0),
@@ -196,7 +196,7 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
   TextField _descriptionCard() {
     return TextField(
       controller: _descriptionController,
-      decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder(), hintText: 'e.g., AL80, 12x232'),
+      decoration: InputDecoration(labelText: context.l10n.description, border: OutlineInputBorder(), hintText: context.l10n.eGAL8012x232),
     );
   }
 
@@ -225,10 +225,10 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
             spacing: 16,
             crossAxisAlignment: .start,
             children: [
-              Text('Metric', style: Theme.of(context).textTheme.titleMedium),
+              Text(context.l10n.metric, style: Theme.of(context).textTheme.titleMedium),
               TextField(
                 controller: _volumeLController,
-                decoration: InputDecoration(labelText: 'Water volume (L)', border: const OutlineInputBorder(), hintText: 'e.g. 12'),
+                decoration: InputDecoration(labelText: context.l10n.waterVolumeL, border: const OutlineInputBorder(), hintText: context.l10n.eG12),
                 keyboardType: const .numberWithOptions(decimal: true),
                 onChanged: _didSetVolumeL,
                 onTap: () => setState(() {
@@ -237,7 +237,7 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
               ),
               TextField(
                 controller: _pressureBarController,
-                decoration: InputDecoration(labelText: 'Working pressure (bar)', border: const OutlineInputBorder(), hintText: 'e.g. 232'),
+                decoration: InputDecoration(labelText: context.l10n.workingPressureBar, border: const OutlineInputBorder(), hintText: context.l10n.eG232),
                 keyboardType: const .numberWithOptions(decimal: true),
                 onChanged: _didSetPressureBar,
                 onTap: () => setState(() {
@@ -262,10 +262,10 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
             spacing: 16,
             crossAxisAlignment: .start,
             children: [
-              Text('Imperial', style: Theme.of(context).textTheme.titleMedium),
+              Text(context.l10n.imperial, style: Theme.of(context).textTheme.titleMedium),
               TextField(
                 controller: _volumeCuftController,
-                decoration: InputDecoration(labelText: 'Size (cuft)', border: const OutlineInputBorder(), hintText: 'e.g. 80'),
+                decoration: InputDecoration(labelText: context.l10n.sizeCuft, border: const OutlineInputBorder(), hintText: context.l10n.eG80),
                 keyboardType: const .numberWithOptions(decimal: true),
                 onChanged: _didSetVolumeCuft,
                 onTap: () => setState(() {
@@ -274,7 +274,7 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
               ),
               TextField(
                 controller: _pressurePsiController,
-                decoration: InputDecoration(labelText: 'Working pressure (psi)', border: const OutlineInputBorder(), hintText: 'e.g. 3000'),
+                decoration: InputDecoration(labelText: context.l10n.workingPressurePsi, border: const OutlineInputBorder(), hintText: context.l10n.eG3000),
                 keyboardType: const .numberWithOptions(decimal: true),
                 onChanged: _didSetPressurePsi,
                 onTap: () => setState(() {
@@ -342,25 +342,25 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
         child: Column(
           crossAxisAlignment: .start,
           children: [
-            Text('Default for imports', style: Theme.of(context).textTheme.titleMedium),
+            Text(context.l10n.defaultForImports, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 4),
-            Text('Use this cylinder when importing dives without cylinder type info', style: Theme.of(context).textTheme.bodySmall),
+            Text(context.l10n.useThisCylinderWhenImportingDivesWithoutCylinderTypeInfo, style: Theme.of(context).textTheme.bodySmall),
             CheckboxListTile(
-              title: const Text('Backgas (<40% O\u2082)'),
+              title: Text(context.l10n.backgas40O),
               value: _defaultForBackgas,
               onChanged: (v) => setState(() => _defaultForBackgas = v ?? false),
               controlAffinity: .leading,
               contentPadding: .zero,
             ),
             CheckboxListTile(
-              title: const Text('Deep deco (40-60% O\u2082)'),
+              title: Text(context.l10n.deepDeco4060O),
               value: _defaultForDeepDeco,
               onChanged: (v) => setState(() => _defaultForDeepDeco = v ?? false),
               controlAffinity: .leading,
               contentPadding: .zero,
             ),
             CheckboxListTile(
-              title: const Text('Shallow deco (>60% O\u2082)'),
+              title: Text(context.l10n.shallowDeco60O),
               value: _defaultForShallowDeco,
               onChanged: (v) => setState(() => _defaultForShallowDeco = v ?? false),
               controlAffinity: .leading,
@@ -421,12 +421,8 @@ class _DeleteCylinderDialogState extends State<_DeleteCylinderDialog> {
           crossAxisAlignment: .stretch,
           spacing: 16,
           children: [
-            Text('Delete cylinder type', style: Theme.of(context).textTheme.titleMedium),
-            Text(
-              widget.diveCount == 1
-                  ? '1 dive uses this cylinder type. What should that dive use instead?'
-                  : '${widget.diveCount} dives use this cylinder type. What should those dives use instead?',
-            ),
+            Text(context.l10n.deleteCylinderType, style: Theme.of(context).textTheme.titleMedium),
+            Text(context.l10n.cylinderReplacementPrompt(widget.diveCount)),
             if (canReplace) ...[
               RadioGroup<bool>(
                 groupValue: _replace,
@@ -434,29 +430,29 @@ class _DeleteCylinderDialogState extends State<_DeleteCylinderDialog> {
                 child: Column(
                   crossAxisAlignment: .stretch,
                   children: [
-                    RadioListTile<bool>(title: const Text('Leave dives without cylinder type'), value: false, contentPadding: .zero),
-                    RadioListTile<bool>(title: const Text('Replace with another cylinder type'), value: true, contentPadding: .zero),
+                    RadioListTile<bool>(title: Text(context.l10n.leaveDivesWithoutCylinderType), value: false, contentPadding: .zero),
+                    RadioListTile<bool>(title: Text(context.l10n.replaceWithAnotherCylinderType), value: true, contentPadding: .zero),
                   ],
                 ),
               ),
               if (_replace)
                 DropdownButtonFormField<String>(
                   initialValue: _replacementID,
-                  decoration: const InputDecoration(labelText: 'Cylinder type', border: OutlineInputBorder(), isDense: true),
-                  items: widget.replacementOptions.map((c) => DropdownMenuItem(value: c.id, child: Text(_cylinderLabel(c)))).toList(),
+                  decoration: InputDecoration(labelText: context.l10n.cylinderTypeLabel, border: OutlineInputBorder(), isDense: true),
+                  items: widget.replacementOptions.map((c) => DropdownMenuItem(value: c.id, child: Text(_cylinderLabel(context, c)))).toList(),
                   onChanged: (id) => setState(() => _replacementID = id),
                 ),
             ] else
-              Text('No other cylinder types exist, so those dives will be left without a cylinder.', style: TextStyle(color: Theme.of(context).hintColor)),
+              Text(context.l10n.noOtherCylinderTypesExistSoThoseDivesWillBeLeftWithoutACylinder, style: TextStyle(color: Theme.of(context).hintColor)),
             Row(
               mainAxisAlignment: .end,
               spacing: 8,
               children: [
-                TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+                TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.l10n.cancel)),
                 TextButton(
                   onPressed: _replace && _replacementID == null ? null : _delete,
                   style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
-                  child: const Text('Delete'),
+                  child: Text(context.l10n.delete),
                 ),
               ],
             ),
@@ -467,4 +463,4 @@ class _DeleteCylinderDialogState extends State<_DeleteCylinderDialog> {
   }
 }
 
-String _cylinderLabel(Cylinder c) => c.description.isNotEmpty ? c.description : 'Cylinder type ${c.id}';
+String _cylinderLabel(BuildContext context, Cylinder c) => c.description.isNotEmpty ? c.description : context.l10n.cylinderTypeWithId(c.id);

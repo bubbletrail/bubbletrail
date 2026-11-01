@@ -23,7 +23,7 @@ abstract class _$BleDownloadStateCWProxy {
 
   BleDownloadState downloadedDives(List<Dive> downloadedDives);
 
-  BleDownloadState error(String? error);
+  BleDownloadState error(LocalizedError? error);
 
   BleDownloadState lastLogDate(DateTime? lastLogDate);
 
@@ -44,7 +44,7 @@ abstract class _$BleDownloadStateCWProxy {
     bool isDownloading,
     DownloadProgress? downloadProgress,
     List<Dive> downloadedDives,
-    String? error,
+    LocalizedError? error,
     DateTime? lastLogDate,
     ComputerDescriptor? autoStartDescriptor,
   });
@@ -87,7 +87,7 @@ class _$BleDownloadStateCWProxyImpl implements _$BleDownloadStateCWProxy {
       call(downloadedDives: downloadedDives);
 
   @override
-  BleDownloadState error(String? error) => call(error: error);
+  BleDownloadState error(LocalizedError? error) => call(error: error);
 
   @override
   BleDownloadState lastLogDate(DateTime? lastLogDate) =>
@@ -159,7 +159,7 @@ class _$BleDownloadStateCWProxyImpl implements _$BleDownloadStateCWProxy {
       error: error == const $CopyWithPlaceholder()
           ? _value.error
           // ignore: cast_nullable_to_non_nullable
-          : error as String?,
+          : error as LocalizedError?,
       lastLogDate: lastLogDate == const $CopyWithPlaceholder()
           ? _value.lastLogDate
           // ignore: cast_nullable_to_non_nullable

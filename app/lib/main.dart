@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:btl10n/btl10n.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:logging/logging.dart';
@@ -149,13 +149,13 @@ class _MyAppState extends State<MyApp> with WindowListener {
             // The branch field must match the order of the StatefulShellBranches below: top level
             // destinations first, then the destinations that live in the overflow menu on mobile.
             final topDestinations = [
-              (icon: Icons.water_outlined, label: 'Dives', branch: 0),
-              (icon: Icons.location_on_outlined, label: 'Sites', branch: 1),
-              (icon: Icons.inventory_2_outlined, label: 'Equipment', branch: 2),
+              (icon: Icons.water_outlined, label: context.l10n.dives, branch: 0),
+              (icon: Icons.location_on_outlined, label: context.l10n.sites, branch: 1),
+              (icon: Icons.inventory_2_outlined, label: context.l10n.equipment, branch: 2),
             ];
             final menuDestinations = [
-              (icon: Icons.insights_outlined, label: 'Statistics', branch: topDestinations.length),
-              (icon: Icons.settings, label: 'Preferences', branch: topDestinations.length + 1),
+              (icon: Icons.insights_outlined, label: context.l10n.statistics, branch: topDestinations.length),
+              (icon: Icons.settings, label: context.l10n.preferences, branch: topDestinations.length + 1),
             ];
 
             final cs = Theme.of(context).colorScheme;
@@ -198,7 +198,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
                       },
                       destinations: [
                         for (final d in topDestinations) NavigationDestination(icon: Icon(d.icon), label: d.label),
-                        NavigationDestination(icon: Icon(selectedMenu?.icon ?? Icons.more), label: selectedMenu?.label ?? 'More'),
+                        NavigationDestination(icon: Icon(selectedMenu?.icon ?? Icons.more), label: selectedMenu?.label ?? context.l10n.more),
                       ],
                     ),
                   ),
@@ -520,13 +520,14 @@ class _MyAppState extends State<MyApp> with WindowListener {
         builder: (context, prefs, _) {
           final themeMode = prefs.themeMode;
           return MaterialApp.router(
-            title: 'Bubbletrail',
+            onGenerateTitle: (context) => context.l10n.appTitle,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeMode,
             debugShowCheckedModeBanner: false,
             routerConfig: _router,
-            localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
           );
         },
       ),

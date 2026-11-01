@@ -1,4 +1,5 @@
 import 'package:btcountries/btcountries.dart';
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +43,7 @@ class SiteDetailsScreen extends StatelessWidget {
         final site = state.site;
         final dives = diveListState.dives.where((s) => s.siteId == site.id).toList();
         return ScreenScaffold(
-          title: Text(site.name.isNotEmpty ? site.name : 'New dive site'),
+          title: Text(site.name.isNotEmpty ? site.name : context.l10n.newDiveSite),
           actions: [_popupMenuActions(context, site)],
           body: SingleChildScrollView(
             child: Padding(
@@ -84,13 +85,17 @@ class SiteDetailsScreen extends StatelessWidget {
   Widget _detailsCard(BuildContext context, Site site) {
     final rows = <Widget>[
       ColumnRow(
-        label: 'Name',
-        child: Text(site.name.isNotEmpty ? site.name : 'Not set', style: site.name.isEmpty ? TextStyle(color: Theme.of(context).hintColor) : null),
+        label: context.l10n.name,
+        child: Text(site.name.isNotEmpty ? site.name : context.l10n.notSet, style: site.name.isEmpty ? TextStyle(color: Theme.of(context).hintColor) : null),
       ),
-      if (site.country.isNotEmpty) ColumnRow(label: 'Country', child: Text(countryDisplayName(site.country))),
-      if (site.location.isNotEmpty) ColumnRow(label: 'Location', child: Text(site.location)),
-      if (site.bodyOfWater.isNotEmpty) ColumnRow(label: 'Body of Water', child: Text(site.bodyOfWater)),
-      if (site.difficulty.isNotEmpty) ColumnRow(label: 'Difficulty', child: Text(site.difficulty)),
+      if (site.country.isNotEmpty)
+        ColumnRow(
+          label: context.l10n.country,
+          child: Text(countryDisplayName(site.country, l10n: context.l10n)),
+        ),
+      if (site.location.isNotEmpty) ColumnRow(label: context.l10n.location, child: Text(site.location)),
+      if (site.bodyOfWater.isNotEmpty) ColumnRow(label: context.l10n.bodyOfWaterTitle, child: Text(site.bodyOfWater)),
+      if (site.difficulty.isNotEmpty) ColumnRow(label: context.l10n.difficulty, child: Text(site.difficulty)),
     ];
     return Card(
       child: InkWell(
@@ -129,7 +134,7 @@ class SiteDetailsScreen extends StatelessWidget {
 
   Widget _tagsSection(BuildContext context, Site site, DiveListLoaded listState) {
     final child = site.tags.isEmpty
-        ? Chip(avatar: const Icon(Icons.add, size: 18), label: const Text('Add tags'), visualDensity: .compact, materialTapTargetSize: .shrinkWrap)
+        ? Chip(avatar: const Icon(Icons.add, size: 18), label: Text(context.l10n.addTags), visualDensity: .compact, materialTapTargetSize: .shrinkWrap)
         : TagsList(tags: site.tags, prefix: '#');
     return InkWell(onTap: () => _editTags(context, site, listState), borderRadius: .circular(8), child: child);
   }
@@ -161,7 +166,7 @@ class SiteDetailsScreen extends StatelessWidget {
                     spacing: 8,
                     children: [
                       Icon(Icons.notes_outlined, size: 18, color: Theme.of(context).hintColor),
-                      Text('Add notes', style: TextStyle(color: Theme.of(context).hintColor)),
+                      Text(context.l10n.addNotes, style: TextStyle(color: Theme.of(context).hintColor)),
                     ],
                   ),
           ),
@@ -171,7 +176,7 @@ class SiteDetailsScreen extends StatelessWidget {
   }
 
   Future<void> _editNotes(BuildContext context, Site site) async {
-    final result = await showTextEditor(context: context, title: 'Notes', initialValue: site.notes, maxLines: 6, textCapitalization: .sentences);
+    final result = await showTextEditor(context: context, title: context.l10n.notes, initialValue: site.notes, maxLines: 6, textCapitalization: .sentences);
     if (result == null || !context.mounted || result == site.notes) return;
 
     _save(context, site, (s) => s.notes = result);
@@ -183,9 +188,9 @@ class SiteDetailsScreen extends StatelessWidget {
         if (value == 'delete') {
           final confirmed = await showConfirmationDialog(
             context: context,
-            title: 'Delete site',
-            message: 'Are you sure you want to delete the site ${site.name}? Dives using this site will be left without site. This cannot be undone.',
-            confirmText: 'Delete',
+            title: context.l10n.deleteSite,
+            message: context.l10n.deleteSiteConfirmation(site.name),
+            confirmText: context.l10n.delete,
             isDestructive: true,
           );
           if (confirmed && context.mounted) {
@@ -193,7 +198,7 @@ class SiteDetailsScreen extends StatelessWidget {
           }
         }
       },
-      itemBuilder: (context) => [const PopupMenuItem(value: 'delete', child: Text('Delete site'))],
+      itemBuilder: (context) => [PopupMenuItem(value: 'delete', child: Text(context.l10n.deleteSite))],
     );
   }
 }
@@ -238,7 +243,7 @@ class _MapCard extends StatelessWidget {
               spacing: 8,
               children: [
                 Icon(Icons.add_location_alt_outlined, size: 18, color: Theme.of(context).hintColor),
-                Text('Add location', style: TextStyle(color: Theme.of(context).hintColor)),
+                Text(context.l10n.addLocation, style: TextStyle(color: Theme.of(context).hintColor)),
               ],
             ),
           ),
@@ -266,7 +271,7 @@ class _MapCard extends StatelessWidget {
               child: IconButton.filled(
                 icon: const Icon(Icons.fullscreen),
                 onPressed: () => context.pushNamed(AppRouteName.sitesDetailsMap, pathParameters: {'siteID': site.id}),
-                tooltip: 'View fullscreen',
+                tooltip: context.l10n.viewFullscreen,
               ),
             ),
           ],

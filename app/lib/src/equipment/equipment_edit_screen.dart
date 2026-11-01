@@ -1,13 +1,13 @@
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart' as proto;
 
-import 'equipment_details_bloc.dart';
 import '../common/common.dart';
+import 'equipment_details_bloc.dart';
 
 class EquipmentEditScreen extends StatefulWidget {
   const EquipmentEditScreen({super.key});
@@ -32,25 +32,6 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
   DateTime? _warrantyUntil;
   bool _defaultForNewDives = false;
   bool _archived = false;
-
-  static const _equipmentTypes = [
-    'BCD',
-    'Regulator',
-    'Wetsuit',
-    'Drysuit',
-    'Mask',
-    'Fins',
-    'Computer',
-    'Light',
-    'Camera',
-    'SMB',
-    'Reel',
-    'Weight belt',
-    'Hood',
-    'Gloves',
-    'Boots',
-    'Other',
-  ];
 
   @override
   void initState() {
@@ -160,11 +141,11 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
           final confirmed = await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text('Delete Equipment'),
-              content: const Text('Are you sure you want to delete this equipment?'),
+              title: Text(context.l10n.deleteEquipment),
+              content: Text(context.l10n.areYouSureYouWantToDeleteThisEquipment),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-                TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
+                TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.l10n.cancel)),
+                TextButton(onPressed: () => Navigator.pop(context, true), child: Text(context.l10n.delete)),
               ],
             ),
           );
@@ -174,7 +155,7 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
           }
         }
       },
-      itemBuilder: (context) => [const PopupMenuItem(value: 'delete', child: Text('Delete equipment'))],
+      itemBuilder: (context) => [PopupMenuItem(value: 'delete', child: Text(context.l10n.deleteEquipmentAction))],
     );
   }
 
@@ -192,10 +173,10 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
           if (state is EquipmentDetailsClosed) context.pop();
         },
         child: ScreenScaffold(
-          title: Text(_isNew ? 'New Equipment' : 'Edit Equipment'),
+          title: Text(_isNew ? context.l10n.newEquipment : context.l10n.editEquipment),
           actions: [
             if (!_isNew) _popupMenuActions(),
-            IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: 'Discard changes'),
+            IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: context.l10n.discardChanges),
           ],
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
@@ -203,18 +184,18 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
               spacing: 16,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildTypeField(),
+                _buildTypeField(context),
                 TextField(
                   controller: _manufacturerController,
-                  decoration: const InputDecoration(labelText: 'Manufacturer', border: OutlineInputBorder()),
+                  decoration: InputDecoration(labelText: context.l10n.manufacturer, border: OutlineInputBorder()),
                 ),
                 TextField(
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Model/Name', border: OutlineInputBorder()),
+                  decoration: InputDecoration(labelText: context.l10n.modelName, border: OutlineInputBorder()),
                 ),
                 TextField(
                   controller: _serialController,
-                  decoration: const InputDecoration(labelText: 'Serial Number', border: OutlineInputBorder()),
+                  decoration: InputDecoration(labelText: context.l10n.serialNumber, border: OutlineInputBorder()),
                 ),
                 Row(
                   spacing: 16,
@@ -222,33 +203,39 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
                     Expanded(
                       child: TextField(
                         controller: _priceController,
-                        decoration: const InputDecoration(labelText: 'Purchase Price', border: OutlineInputBorder()),
+                        decoration: InputDecoration(labelText: context.l10n.purchasePrice, border: OutlineInputBorder()),
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       ),
                     ),
                     Expanded(
                       child: TextField(
                         controller: _shopController,
-                        decoration: const InputDecoration(labelText: 'Shop', border: OutlineInputBorder()),
+                        decoration: InputDecoration(labelText: context.l10n.shop, border: OutlineInputBorder()),
                       ),
                     ),
                   ],
                 ),
-                WeightEditor(label: 'Weight', initialValue: _weight, onChanged: (value) => _weight = value),
+                WeightEditor(label: context.l10n.weight, initialValue: _weight, onChanged: (value) => _weight = value),
                 Row(
                   spacing: 16,
                   children: [
-                    Expanded(child: _buildDateField('Purchase Date', _purchaseDate, _selectPurchaseDate, () => setState(() => _purchaseDate = null))),
-                    Expanded(child: _buildDateField('Warranty Until', _warrantyUntil, _selectWarrantyUntil, () => setState(() => _warrantyUntil = null))),
+                    Expanded(child: _buildDateField(context.l10n.purchaseDate, _purchaseDate, _selectPurchaseDate, () => setState(() => _purchaseDate = null))),
+                    Expanded(
+                      child: _buildDateField(context.l10n.warrantyUntil, _warrantyUntil, _selectWarrantyUntil, () => setState(() => _warrantyUntil = null)),
+                    ),
                   ],
                 ),
-                _buildDateField('Last Service', _lastService, _selectLastService, () => setState(() => _lastService = null)),
+                _buildDateField(context.l10n.lastService, _lastService, _selectLastService, () => setState(() => _lastService = null)),
                 SwitchListTile(
-                  title: const Text('Add to new dives by default'),
+                  title: Text(context.l10n.addToNewDivesByDefault),
                   value: _defaultForNewDives,
                   onChanged: _archived ? null : (v) => setState(() => _defaultForNewDives = v),
                 ),
-                SwitchListTile(title: const Text('Archived'), value: _archived, onChanged: _defaultForNewDives ? null : (v) => setState(() => _archived = v)),
+                SwitchListTile(
+                  title: Text(context.l10n.archived),
+                  value: _archived,
+                  onChanged: _defaultForNewDives ? null : (v) => setState(() => _archived = v),
+                ),
               ],
             ),
           ),
@@ -257,24 +244,26 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
     );
   }
 
-  Widget _buildTypeField() {
+  Widget _buildTypeField(BuildContext context) {
     return Autocomplete<String>(
-      initialValue: TextEditingValue(text: _typeController.text),
+      initialValue: TextEditingValue(text: equipmentTypeLabel(context.l10n, _typeController.text)),
       optionsBuilder: (textEditingValue) {
         if (textEditingValue.text.isEmpty) {
-          return _equipmentTypes;
+          return equipmentTypes.map((type) => equipmentTypeLabel(context.l10n, type));
         }
-        return _equipmentTypes.where((type) => type.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+        return equipmentTypes
+            .map((type) => equipmentTypeLabel(context.l10n, type))
+            .where((type) => type.toLowerCase().contains(textEditingValue.text.toLowerCase()));
       },
       onSelected: (selection) {
-        _typeController.text = selection;
+        _typeController.text = canonicalEquipmentType(context.l10n, selection);
       },
       fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
         return TextField(
           controller: controller,
           focusNode: focusNode,
-          decoration: const InputDecoration(labelText: 'Type', border: OutlineInputBorder(), hintText: 'e.g., BCD, Regulator, Wetsuit'),
-          onChanged: (value) => _typeController.text = value,
+          decoration: InputDecoration(labelText: context.l10n.type, border: OutlineInputBorder(), hintText: context.l10n.eGBCDRegulatorWetsuit),
+          onChanged: (value) => _typeController.text = canonicalEquipmentType(context.l10n, value),
         );
       },
     );
@@ -290,7 +279,7 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
           border: const OutlineInputBorder(),
           suffixIcon: value != null ? IconButton(icon: const Icon(Icons.clear), onPressed: onClear) : null,
         ),
-        child: Text(formatted ?? 'Not set', style: formatted == null ? TextStyle(color: Theme.of(context).hintColor) : null),
+        child: Text(formatted ?? context.l10n.notSet, style: formatted == null ? TextStyle(color: Theme.of(context).hintColor) : null),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:btcountries/btcountries.dart';
+import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart' hide DataColumn;
@@ -12,10 +13,10 @@ import 'package:stretch_wrap/stretch_wrap.dart';
 
 import '../app_metadata.dart';
 import '../app_routes.dart';
-import '../services/store/store.dart';
 import '../common/common.dart';
 import '../equipment/cylinder_list_bloc.dart';
 import '../equipment/equipment_list_bloc.dart';
+import '../services/store/store.dart';
 import 'depth_profile_widget.dart';
 import 'dive_details_bloc.dart';
 import 'dive_list_bloc.dart';
@@ -49,7 +50,6 @@ class _DiveDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = platformIsDesktop ? 'Dive ' : '';
     return BlocConsumer<DiveDetailsBloc, DiveDetailsState>(
       listener: (context, state) {
         if (state is DiveDetailsClosed) {
@@ -59,7 +59,11 @@ class _DiveDetails extends StatelessWidget {
       },
       builder: (context, state) {
         return ScreenScaffold(
-          title: Text('$title#${dive.number}: ${site?.name ?? 'Unknown site'}'),
+          title: Text(
+            platformIsDesktop
+                ? context.l10n.diveTitle(dive.number, site?.name ?? context.l10n.unknownSite)
+                : context.l10n.compactDiveTitle(dive.number, site?.name ?? context.l10n.unknownSite),
+          ),
           actions: [
             IconButton(
               icon: const Icon(Icons.arrow_upward),
@@ -68,7 +72,7 @@ class _DiveDetails extends StatelessWidget {
                       context.read<DiveDetailsBloc>().add(DiveDetailsEvent.loadDive(prevDive!.id));
                     }
                   : null,
-              tooltip: prevDive != null ? 'Dive #${prevDive?.number}' : null,
+              tooltip: prevDive != null ? context.l10n.diveNumber(prevDive!.number) : null,
             ),
             IconButton(
               icon: const Icon(Icons.arrow_downward),
@@ -77,7 +81,7 @@ class _DiveDetails extends StatelessWidget {
                       context.read<DiveDetailsBloc>().add(DiveDetailsEvent.loadDive(nextDive!.id));
                     }
                   : null,
-              tooltip: nextDive != null ? 'Dive #${nextDive?.number}' : null,
+              tooltip: nextDive != null ? context.l10n.diveNumber(nextDive!.number) : null,
             ),
             if (platformIsDesktop) _popupMenuActions(context),
           ],
@@ -94,8 +98,8 @@ class _DiveDetails extends StatelessWidget {
 
   List<Widget> _buildAllSections(BuildContext context) {
     // The depths/times card is editable; the physio card is not.
-    final depthsCard = _tappableDataCard(context, onTap: () => _editBasics(context), child: _depthsTable());
-    final physioTable = _physioTable();
+    final depthsCard = _tappableDataCard(context, onTap: () => _editBasics(context), child: _depthsTable(context));
+    final physioTable = _physioTable(context);
     final infoCards = <Widget>[
       depthsCard,
       if (physioTable != null)
@@ -106,17 +110,17 @@ class _DiveDetails extends StatelessWidget {
 
     // Cylinders (gases): one tappable card each, or an "add" affordance.
     final gasCards = dive.cylinders.isEmpty
-        ? [_addDataCard(context, label: 'Add gases', icon: Icons.gas_meter_outlined, onTap: () => _editGases(context))]
+        ? [_addDataCard(context, label: context.l10n.addGases, icon: Icons.gas_meter_outlined, onTap: () => _editGases(context))]
         : _cylindersTables().map<Widget>((t) => _tappableDataCard(context, onTap: () => _editGases(context), child: t)).toList();
 
     // Weights: a tappable card, or an "add" affordance.
     final weightCard = dive.weightsystems.isEmpty
-        ? _addDataCard(context, label: 'Add weights', icon: Icons.fitness_center, onTap: () => _editWeights(context))
-        : _tappableDataCard(context, onTap: () => _editWeights(context), child: _weightsTable());
+        ? _addDataCard(context, label: context.l10n.addWeights, icon: Icons.fitness_center, onTap: () => _editWeights(context))
+        : _tappableDataCard(context, onTap: () => _editWeights(context), child: _weightsTable(context));
 
     // Equipment: a tappable card, or an "add" affordance when none is set.
     final equipmentCard = dive.equipment.isEmpty
-        ? _addDataCard(context, label: 'Add equipment', icon: Icons.inventory_2_outlined, onTap: () => _editEquipment(context))
+        ? _addDataCard(context, label: context.l10n.addEquipment, icon: Icons.inventory_2_outlined, onTap: () => _editEquipment(context))
         : _tappableDataCard(context, onTap: () => _editEquipment(context), child: _equipmentTable(context));
 
     final datacolumns =
@@ -174,11 +178,9 @@ class _DiveDetails extends StatelessWidget {
   Future<void> _mergeIntoPrevious(BuildContext context, Dive preceding) async {
     final confirmed = await showConfirmationDialog(
       context: context,
-      title: 'Merge into previous dive',
-      message:
-          'Dive #${dive.number} will be merged into dive #${preceding.number}, appending its profile to that dive. '
-          'Dive #${dive.number} is then deleted. Continue?',
-      confirmText: 'Merge',
+      title: context.l10n.mergeIntoPreviousDive,
+      message: context.l10n.mergeDiveConfirmation(dive.number, preceding.number),
+      confirmText: context.l10n.merge,
     );
     if (!confirmed || !context.mounted) return;
 
@@ -199,9 +201,9 @@ class _DiveDetails extends StatelessWidget {
         } else if (value == 'delete') {
           final confirmed = await showConfirmationDialog(
             context: context,
-            title: 'Delete dive',
-            message: 'Are you sure you want to delete dive #${dive.number}? This cannot be undone.',
-            confirmText: 'Delete',
+            title: context.l10n.deleteDive,
+            message: context.l10n.deleteDiveConfirmation(dive.number),
+            confirmText: context.l10n.delete,
             isDestructive: true,
           );
           if (confirmed && context.mounted) {
@@ -212,9 +214,9 @@ class _DiveDetails extends StatelessWidget {
       itemBuilder: (context) {
         final preceding = _precedingDive(context);
         return [
-          const PopupMenuItem(value: 'debug', child: Text('View raw data')),
-          PopupMenuItem(value: 'merge', enabled: preceding != null && _canMergeInto(preceding), child: const Text('Merge into previous dive')),
-          const PopupMenuItem(value: 'delete', child: Text('Delete dive')),
+          PopupMenuItem(value: 'debug', child: Text(context.l10n.viewRawData)),
+          PopupMenuItem(value: 'merge', enabled: preceding != null && _canMergeInto(preceding), child: Text(context.l10n.mergeIntoPreviousDive)),
+          PopupMenuItem(value: 'delete', child: Text(context.l10n.deleteDive)),
         ];
       },
     );
@@ -250,46 +252,46 @@ class _DiveDetails extends StatelessWidget {
 
   Widget _siteSection(BuildContext context) {
     if (site == null) {
-      return _addChip(label: 'Add site', icon: Icons.location_on_outlined, onTap: () => _editSite(context));
+      return _addChip(label: context.l10n.addSite, icon: Icons.location_on_outlined, onTap: () => _editSite(context));
     }
     return _tappableChip(
       onTap: () => _editSite(context),
-      child: LabeledChip(label: 'Location', child: Text(site!.name)),
+      child: LabeledChip(label: context.l10n.location, child: Text(site!.name)),
     );
   }
 
   Widget _buddiesSection(BuildContext context) {
     if (dive.buddies.isEmpty) {
-      return _addChip(label: 'Add buddies', icon: Icons.group_outlined, onTap: () => _editBuddies(context));
+      return _addChip(label: context.l10n.addBuddies, icon: Icons.group_outlined, onTap: () => _editBuddies(context));
     }
     return _tappableChip(
       onTap: () => _editBuddies(context),
       child: Wrap(
         spacing: 8,
         runSpacing: 4,
-        children: dive.buddies.map<Widget>((b) => LabeledChip(label: 'Buddy', child: Text(b))).toList(),
+        children: dive.buddies.map<Widget>((b) => LabeledChip(label: context.l10n.buddy, child: Text(b))).toList(),
       ),
     );
   }
 
   Widget _divemasterSection(BuildContext context) {
     if (dive.divemaster.isEmpty) {
-      return _addChip(label: 'Add divemaster', icon: Icons.person_outline, onTap: () => _editDivemaster(context));
+      return _addChip(label: context.l10n.addDivemaster, icon: Icons.person_outline, onTap: () => _editDivemaster(context));
     }
     return _tappableChip(
       onTap: () => _editDivemaster(context),
-      child: LabeledChip(label: 'Divemaster', child: Text(dive.divemaster)),
+      child: LabeledChip(label: context.l10n.divemaster, child: Text(dive.divemaster)),
     );
   }
 
   Future<void> _editSite(BuildContext context) async {
     final listState = context.read<DiveListBloc>().state;
     if (listState is! DiveListLoaded || listState.sites.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No dive sites available')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.noDiveSitesAvailable)));
       return;
     }
 
-    final res = await showSiteSelectionDialog(context: context, sites: listState.sites, selectedSite: site, noneOption: 'No site');
+    final res = await showSiteSelectionDialog(context: context, sites: listState.sites, selectedSite: site, noneOption: context.l10n.noSite);
     if (res.cancelled || !context.mounted) return;
 
     final newSiteId = res.value?.id ?? '';
@@ -305,8 +307,8 @@ class _DiveDetails extends StatelessWidget {
 
     final result = await showChipsEditor(
       context: context,
-      title: 'Buddies',
-      addLabel: 'Add buddy',
+      title: context.l10n.buddies,
+      addLabel: context.l10n.addBuddy,
       selectedValues: dive.buddies,
       availableValues: available,
       featuredValues: featured,
@@ -323,7 +325,13 @@ class _DiveDetails extends StatelessWidget {
   }
 
   Future<void> _editDivemaster(BuildContext context) async {
-    final result = await showTextEditor(context: context, title: 'Divemaster', label: 'Name', initialValue: dive.divemaster, textCapitalization: .words);
+    final result = await showTextEditor(
+      context: context,
+      title: context.l10n.divemaster,
+      label: context.l10n.name,
+      initialValue: dive.divemaster,
+      textCapitalization: .words,
+    );
     if (result == null || !context.mounted || result == dive.divemaster) return;
 
     _save(context, (d) => d.divemaster = result);
@@ -343,7 +351,7 @@ class _DiveDetails extends StatelessWidget {
                   spacing: 8,
                   children: [
                     Icon(Icons.notes_outlined, size: 18, color: Theme.of(context).hintColor),
-                    Text('Add notes', style: TextStyle(color: Theme.of(context).hintColor)),
+                    Text(context.l10n.addNotes, style: TextStyle(color: Theme.of(context).hintColor)),
                   ],
                 ),
         ),
@@ -352,7 +360,7 @@ class _DiveDetails extends StatelessWidget {
   }
 
   Future<void> _editNotes(BuildContext context) async {
-    final result = await showTextEditor(context: context, title: 'Notes', initialValue: dive.notes, maxLines: 6, textCapitalization: .sentences);
+    final result = await showTextEditor(context: context, title: context.l10n.notes, initialValue: dive.notes, maxLines: 6, textCapitalization: .sentences);
     if (result == null || !context.mounted || result == dive.notes) return;
 
     _save(context, (d) => d.notes = result);
@@ -496,7 +504,7 @@ class _DiveDetails extends StatelessWidget {
       mainAxisSize: .min,
       spacing: 6,
       children: [
-        if (dive.tags.isEmpty) _addChip(label: 'Add tags', icon: Icons.add, onTap: () => _editTags(context)),
+        if (dive.tags.isEmpty) _addChip(label: context.l10n.addTags, icon: Icons.add, onTap: () => _editTags(context)),
         if (dive.tags.isNotEmpty)
           _tappableChip(
             onTap: () => _editTags(context),
@@ -525,7 +533,7 @@ class _DiveDetails extends StatelessWidget {
 
   Widget _ratingSection(BuildContext context) {
     if (dive.rating == 0) {
-      return _addChip(label: 'Add rating', icon: Icons.star_border, onTap: () => _editRating(context));
+      return _addChip(label: context.l10n.addRating, icon: Icons.star_border, onTap: () => _editRating(context));
     }
     return _tappableChip(
       onTap: () => _editRating(context),
@@ -564,12 +572,12 @@ class _DiveDetails extends StatelessWidget {
     }).toList();
   }
 
-  Widget _weightsTable() {
+  Widget _weightsTable(BuildContext context) {
     return DataCardColumn(
       children: dive.weightsystems.indexed.map((entry) {
         final idx = entry.$1;
         final ws = entry.$2;
-        final desc = ws.description.isNotEmpty ? ws.description : 'Weight ${idx + 1}';
+        final desc = ws.description.isNotEmpty ? ws.description : context.l10n.weightNumber(idx + 1);
         return ColumnRow(label: desc, child: WeightText(ws.weight));
       }).toList(),
     );
@@ -584,14 +592,14 @@ class _DiveDetails extends StatelessWidget {
           .map(
             (e) => Chip(
               avatar: EquipmentIcons.icon(EquipmentIcons.forType(e.type), color: pc),
-              label: Text(EquipmentListTile.equipmentTitle(e)),
+              label: Text(EquipmentListTile.equipmentTitle(context, e)),
             ),
           )
           .toList(),
     );
   }
 
-  Widget? _physioTable() {
+  Widget? _physioTable(BuildContext context) {
     final worstDeco = dive.logs.isNotEmpty ? dive.logs.first.worstDecoStatus : null;
     final decoModel = dive.logs.isNotEmpty && dive.logs[0].hasDecoModel() ? dive.logs[0].decoModel : null;
     final children = <Widget>[];
@@ -599,33 +607,35 @@ class _DiveDetails extends StatelessWidget {
     if (dive.hasSac()) {
       children.add(
         ColumnRow(
-          label: 'SAC',
-          child: VolumeText(dive.sac, suffix: '/min', precise: true),
+          label: context.l10n.sac,
+          child: VolumeText(dive.sac, suffix: context.l10n.perMinute, precise: true),
         ),
       );
     }
-    if (dive.hasOtu()) children.add(ColumnRow(label: 'OTU', child: Text(dive.otu.toString())));
-    if (dive.hasCns()) children.add(ColumnRow(label: 'CNS', child: Text('${dive.cns}%')));
-    if (dive.hasEndSurfGf()) children.add(ColumnRow(label: 'SurfGF', child: Text('${dive.endSurfGf.round().clamp(0, 999)}%')));
-    if (worstDeco != null) children.add(ColumnRow(label: 'Deco', child: DecoStatusText(worstDeco)));
-    if (decoModel != null) children.add(ColumnRow(label: 'Model', child: DecoModelText(decoModel)));
-    if (dive.logs.isNotEmpty && dive.logs.first.hasModel()) children.add(ColumnRow(label: 'Computer', child: Text(dive.logs.first.model)));
-    if (dive.logs.isNotEmpty && dive.logs.first.hasSerial()) children.add(ColumnRow(label: 'Serial', child: Text(dive.logs.first.serial)));
+    if (dive.hasOtu()) children.add(ColumnRow(label: context.l10n.otu, child: Text(dive.otu.toString())));
+    if (dive.hasCns()) children.add(ColumnRow(label: context.l10n.cns, child: Text(context.l10n.percentage(dive.cns))));
+    if (dive.hasEndSurfGf()) {
+      children.add(ColumnRow(label: context.l10n.surfaceGradientFactor, child: Text(context.l10n.percentage(dive.endSurfGf.round().clamp(0, 999)))));
+    }
+    if (worstDeco != null) children.add(ColumnRow(label: context.l10n.decoLabel, child: DecoStatusText(worstDeco)));
+    if (decoModel != null) children.add(ColumnRow(label: context.l10n.model, child: DecoModelText(decoModel)));
+    if (dive.logs.isNotEmpty && dive.logs.first.hasModel()) children.add(ColumnRow(label: context.l10n.computer, child: Text(dive.logs.first.model)));
+    if (dive.logs.isNotEmpty && dive.logs.first.hasSerial()) children.add(ColumnRow(label: context.l10n.serial, child: Text(dive.logs.first.serial)));
     if (children.isEmpty) return null;
     return DataCardColumn(children: children);
   }
 
-  Widget _depthsTable() {
+  Widget _depthsTable(BuildContext context) {
     return DataCardColumn(
       children: [
-        ColumnRow(label: 'Number', child: Text('${dive.number}')),
+        ColumnRow(label: context.l10n.number, child: Text('${dive.number}')),
         ColumnRow(
-          label: 'Start',
+          label: context.l10n.start,
           child: DateTimeText(dive.start.toDateTime(), timezone: siteTimeZone(site)),
         ),
-        ColumnRow(label: 'Duration', child: DurationText(dive.duration)),
-        ColumnRow(label: 'Max depth', child: DepthText(dive.maxDepth)),
-        ColumnRow(label: 'Mean depth', child: DepthText(dive.meanDepth)),
+        ColumnRow(label: context.l10n.duration, child: DurationText(dive.duration)),
+        ColumnRow(label: context.l10n.maxDepth, child: DepthText(dive.maxDepth)),
+        ColumnRow(label: context.l10n.meanDepth, child: DepthText(dive.meanDepth)),
       ],
     );
   }
@@ -663,7 +673,7 @@ class _ProfileCard extends StatelessWidget {
                   onPressed: () {
                     context.pushNamed(AppRouteName.divesDetailsDepthProfile, pathParameters: {'diveID': dive.id});
                   },
-                  tooltip: 'View fullscreen',
+                  tooltip: context.l10n.viewFullscreen,
                 ),
               ),
             ],
@@ -683,7 +693,7 @@ class _Temps extends StatelessWidget {
   Widget build(BuildContext context) {
     if (dive.hasMinTemp() && dive.hasMaxTemp() && dive.minTemp != dive.maxTemp) {
       return ColumnRow(
-        label: 'Temp',
+        label: context.l10n.temp,
         child: Row(
           children: [
             TemperatureText(dive.minTemp),
@@ -694,10 +704,10 @@ class _Temps extends StatelessWidget {
       );
     }
     if (dive.hasMaxTemp()) {
-      return ColumnRow(label: 'Temp', child: TemperatureText(dive.maxTemp));
+      return ColumnRow(label: context.l10n.temp, child: TemperatureText(dive.maxTemp));
     }
     if (dive.hasMinTemp()) {
-      return ColumnRow(label: 'Temp', child: TemperatureText(dive.minTemp));
+      return ColumnRow(label: context.l10n.temp, child: TemperatureText(dive.minTemp));
     }
     return const SizedBox();
   }
@@ -771,24 +781,28 @@ class _SiteCard extends StatelessWidget {
                 runSpacing: 8,
                 crossAxisAlignment: .center,
                 children: [
-                  if (site.hasCountry()) LabeledChip(label: 'Country', child: Text(countryDisplayName(site.country))),
-                  if (site.hasCountry()) LabeledChip(label: 'Location', child: Text(site.location)),
-                  if (site.bodyOfWater.isNotEmpty) LabeledChip(label: 'Body of water', child: Text(site.bodyOfWater)),
+                  if (site.hasCountry())
+                    LabeledChip(
+                      label: context.l10n.country,
+                      child: Text(countryDisplayName(site.country, l10n: context.l10n)),
+                    ),
+                  if (site.hasCountry()) LabeledChip(label: context.l10n.location, child: Text(site.location)),
+                  if (site.bodyOfWater.isNotEmpty) LabeledChip(label: context.l10n.bodyOfWater, child: Text(site.bodyOfWater)),
                   if (site.hasPosition())
                     LabeledChip(
-                      label: 'Site position',
+                      label: context.l10n.sitePosition,
                       child: Text([formatLatitude(site.position.latitude), formatLongitude(site.position.longitude)].join(' ')),
                     ),
                   if (site.tags.isNotEmpty) TagsList(tags: site.tags, prefix: '#'),
                   if (dive.logs.isNotEmpty && dive.logs[0].hasStartPosition())
                     LabeledChip(
-                      label: 'Dive start position',
+                      label: context.l10n.diveStartPosition,
                       backgroundColor: colorScheme.secondaryContainer,
                       child: Text([formatLatitude(dive.logs[0].startPosition.latitude), formatLongitude(dive.logs[0].startPosition.longitude)].join(' ')),
                     ),
                   if (dive.logs.isNotEmpty && dive.logs[0].hasEndPosition())
                     LabeledChip(
-                      label: 'Dive end position',
+                      label: context.l10n.diveEndPosition,
                       backgroundColor: colorScheme.secondaryContainer,
                       child: Text([formatLatitude(dive.logs[0].endPosition.latitude), formatLongitude(dive.logs[0].endPosition.longitude)].join(' ')),
                     ),
@@ -851,19 +865,19 @@ class _CylinderColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final desc = description.isNotEmpty ? description : 'Cylinder ${index + 1}';
-    final details = <Widget>[ColumnRow(label: 'Cylinder', child: Text(desc))];
-    details.add(ColumnRow(label: 'Mix', child: Text(formatGasPercentage(oxygenPct, heliumPct))));
-    if (beginPressure > 0) details.add(ColumnRow(label: 'Start', child: PressureText(beginPressure)));
-    if (endPressure > 0) details.add(ColumnRow(label: 'End', child: PressureText(endPressure)));
+    final desc = description.isNotEmpty ? description : context.l10n.cylinderNumber(index + 1);
+    final details = <Widget>[ColumnRow(label: context.l10n.cylinder, child: Text(desc))];
+    details.add(ColumnRow(label: context.l10n.mix, child: Text(formatGasPercentage(context, oxygenPct, heliumPct))));
+    if (beginPressure > 0) details.add(ColumnRow(label: context.l10n.start, child: PressureText(beginPressure)));
+    if (endPressure > 0) details.add(ColumnRow(label: context.l10n.end, child: PressureText(endPressure)));
     if (beginPressure > 0 && endPressure > 0 && volumeL > 0) {
-      details.add(ColumnRow(label: 'Volume used', child: VolumeText((beginPressure - endPressure) * volumeL)));
+      details.add(ColumnRow(label: context.l10n.volumeUsed, child: VolumeText((beginPressure - endPressure) * volumeL)));
     }
     if (sac > 0) {
       details.add(
         ColumnRow(
-          label: 'SAC',
-          child: VolumeText(sac, suffix: '/min', precise: true),
+          label: context.l10n.sac,
+          child: VolumeText(sac, suffix: context.l10n.perMinute, precise: true),
         ),
       );
     }
