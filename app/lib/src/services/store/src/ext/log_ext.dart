@@ -80,7 +80,7 @@ extension LogExtensions on Log {
           case DecoStopType.DECO_STOP_TYPE_DECO_STOP:
           case DecoStopType.DECO_STOP_TYPE_DEEP_STOP:
           case DecoStopType.DECO_STOP_TYPE_SAFETY_STOP:
-            if (sample.deco.time > worst.time) {
+            if (sample.deco.tts > worst.tts || sample.deco.depth > worst.depth) {
               worst = sample.deco;
               continue;
             }

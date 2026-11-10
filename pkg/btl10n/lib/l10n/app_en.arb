@@ -247,7 +247,7 @@
     }
   },
   "unknown": "Unknown",
-  "deco": "Deco {time} @ {depth}",
+  "deco": "Starting at {depth}, TTS {time}",
   "@deco": {
     "placeholders": {
       "time": {
