@@ -245,25 +245,6 @@ class _DepthProfileState extends State<DepthProfile> {
     final buhlmann = _buhlmann.firstWhereOrNull((s) => s.time == _displaySample?.time);
     return Stack(
       children: [
-        // Top info line
-        if (_displaySample != null)
-          Padding(
-            padding: const .only(top: 8, left: 48),
-            child: Row(
-              spacing: 16,
-              children: [
-                Text(formatDuration(_displaySample!.time.toInt())),
-                DepthText(_displaySample!.depth),
-                if (_displaySample!.hasTemperature()) TemperatureText(_displaySample!.temperature),
-                if (_displaySample!.pressures.isNotEmpty && _displaySample!.pressures.first.pressure > 0)
-                  PressureText(_displaySample!.pressures.first.pressure),
-                if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0) DepthText(_displaySample!.deco.depth, prefix: context.l10n.compCeil),
-                if (buhlmann != null && buhlmann.ceiling > 0) DepthText(buhlmann.ceiling, prefix: context.l10n.calcCeil),
-                if (buhlmann != null) Text(context.l10n.surfaceGradientFactorValue(buhlmann.surfGF.round().clamp(0, 999))),
-              ],
-            ),
-          ),
-
         // Chart
         LineChart(
           LineChartData(
@@ -360,6 +341,25 @@ class _DepthProfileState extends State<DepthProfile> {
             clipData: .vertical(),
           ),
         ),
+
+        // Top info line
+        if (_displaySample != null)
+          Padding(
+            padding: const .only(top: 8, left: 48),
+            child: Row(
+              spacing: 16,
+              children: [
+                Text(formatDuration(_displaySample!.time.toInt())),
+                DepthText(_displaySample!.depth),
+                if (_displaySample!.hasTemperature()) TemperatureText(_displaySample!.temperature),
+                if (_displaySample!.pressures.isNotEmpty && _displaySample!.pressures.first.pressure > 0)
+                  PressureText(_displaySample!.pressures.first.pressure),
+                if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0) DepthText(_displaySample!.deco.depth, prefix: context.l10n.compCeil),
+                if (buhlmann != null && buhlmann.ceiling > 0) DepthText(buhlmann.ceiling, prefix: context.l10n.calcCeil),
+                if (buhlmann != null) Text(context.l10n.surfaceGradientFactorValue(buhlmann.surfGF.round().clamp(0, 999))),
+              ],
+            ),
+          ),
       ],
     );
   }
