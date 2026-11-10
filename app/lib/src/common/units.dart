@@ -319,7 +319,7 @@ class DecoStatusText extends StatelessWidget {
     final unit = context.select<PreferencesStore, DepthUnit>((p) => p.depthUnit);
     switch (status.type) {
       case .DECO_STOP_TYPE_DECO_STOP:
-        return Text(context.l10n.deco(formatMinutes(context.l10n, status.time), formatDepth(context.l10n, unit, status.depth)));
+        return Text(context.l10n.deco(formatMinutes(context.l10n, status.tts), formatDepth(context.l10n, unit, status.depth)));
       case .DECO_STOP_TYPE_DEEP_STOP:
         return Text(context.l10n.deepStop(formatMinutes(context.l10n, status.time), formatDepth(context.l10n, unit, status.depth)));
       case .DECO_STOP_TYPE_SAFETY_STOP:

@@ -988,7 +988,7 @@ abstract class AppLocalizations {
   /// No description provided for @deco.
   ///
   /// In en, this message translates to:
-  /// **'Deco {time} @ {depth}'**
+  /// **'Starting at {depth}, TTS {time}'**
   String deco(Object time, Object depth);
 
   /// No description provided for @deepStop.

@@ -491,7 +491,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String deco(Object time, Object depth) {
-    return 'Deco $time @ $depth';
+    return 'Starting at $depth, TTS $time';
   }
 
   @override
