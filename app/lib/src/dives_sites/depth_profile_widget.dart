@@ -101,15 +101,44 @@ class _DepthProfileState extends State<DepthProfile> {
     }
 
     // Deco ceiling (from dive computer)
+    var inDeco = false;
     for (final sample in samplesWithDepth) {
       final hasCeiling = sample.deco.type == .DECO_STOP_TYPE_DECO_STOP && sample.deco.depth > 0;
-      final ceilingDepth = hasCeiling ? sample.deco.depth : -1.0;
-      _ceilingSpots.add(FlSpot(sample.time / 60, depthMult * -ceilingDepth));
+      if (hasCeiling) {
+        final t = sample.time / 60;
+        final ceilingDepth = sample.deco.depth * -depthMult;
+        if (!inDeco) {
+          // Starting point for left vertical edge
+          _ceilingSpots.add(FlSpot(t, 0));
+        }
+        _ceilingSpots.add(FlSpot(t, ceilingDepth));
+        inDeco = true;
+      } else if (inDeco) {
+        // Ending point for right vertical edge
+        _ceilingSpots.add(FlSpot(_ceilingSpots.last.x, 0));
+        inDeco = false;
+      }
     }
 
     // Buhlmann calculated ceiling & surfGF
     _calculateBuhlmann(prefs.gfLow, prefs.gfHigh);
-    _buhlmannCeilingSpots.addAll(_buhlmann.map((e) => FlSpot(e.time / 60, depthMult * -e.ceiling)));
+    inDeco = false;
+    for (final sample in _buhlmann) {
+      if (sample.ceiling > 0) {
+        final t = sample.time / 60;
+        final ceilingDepth = sample.ceiling * -depthMult;
+        if (!inDeco) {
+          // Starting point for left vertical edge
+          _buhlmannCeilingSpots.add(FlSpot(t, 0));
+        }
+        _buhlmannCeilingSpots.add(FlSpot(t, ceilingDepth));
+        inDeco = true;
+      } else if (inDeco) {
+        // Ending point for right vertical edge
+        _buhlmannCeilingSpots.add(FlSpot(_buhlmannCeilingSpots.last.x, 0));
+        inDeco = false;
+      }
+    }
 
     // Pressure data - find all tank indices used
     final tankIndices = <int>{};
