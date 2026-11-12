@@ -1,5 +1,5 @@
 import 'package:btl10n/btl10n.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Result of a selection dialog - distinguishes between cancelled and selected value
 class SelectionResult<T> {

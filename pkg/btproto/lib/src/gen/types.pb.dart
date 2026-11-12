@@ -25,7 +25,7 @@ class Position extends $pb.GeneratedMessage {
     $core.double? longitude,
     $core.double? altitude,
   }) {
-    final result = create();
+    final result = Position._();
     if (latitude != null) result.latitude = latitude;
     if (longitude != null) result.longitude = longitude;
     if (altitude != null) result.altitude = altitude;
@@ -36,15 +36,15 @@ class Position extends $pb.GeneratedMessage {
 
   factory Position.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      Position()..mergeFromBuffer(data, registry);
   factory Position.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      Position()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Position',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: Position.$_createMessage)
     ..aD(1, _omitFieldNames ? '' : 'latitude')
     ..aD(2, _omitFieldNames ? '' : 'longitude')
     ..aD(3, _omitFieldNames ? '' : 'altitude')
@@ -60,12 +60,14 @@ class Position extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use Position() / Position.new instead')
   static Position create() => Position._();
+  static $pb.GeneratedMessage $_createMessage() => Position._();
   @$core.override
-  Position createEmptyInstance() => create();
+  Position createEmptyInstance() => Position._();
   @$core.pragma('dart2js:noInline')
-  static Position getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Position>(create);
+  static Position getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Position>(Position.$_createMessage);
   static Position? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -102,7 +104,7 @@ class Metadata extends $pb.GeneratedMessage {
     $0.Timestamp? updatedAt,
     $0.Timestamp? deletedAt,
   }) {
-    final result = create();
+    final result = Metadata._();
     if (createdAt != null) result.createdAt = createdAt;
     if (updatedAt != null) result.updatedAt = updatedAt;
     if (deletedAt != null) result.deletedAt = deletedAt;
@@ -113,21 +115,21 @@ class Metadata extends $pb.GeneratedMessage {
 
   factory Metadata.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      Metadata()..mergeFromBuffer(data, registry);
   factory Metadata.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      Metadata()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Metadata',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: Metadata.$_createMessage)
     ..aOM<$0.Timestamp>(1, _omitFieldNames ? '' : 'createdAt',
-        subBuilder: $0.Timestamp.create)
+        subBuilder: $0.Timestamp.$_createMessage)
     ..aOM<$0.Timestamp>(2, _omitFieldNames ? '' : 'updatedAt',
-        subBuilder: $0.Timestamp.create)
+        subBuilder: $0.Timestamp.$_createMessage)
     ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'deletedAt',
-        subBuilder: $0.Timestamp.create)
+        subBuilder: $0.Timestamp.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -140,12 +142,14 @@ class Metadata extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use Metadata() / Metadata.new instead')
   static Metadata create() => Metadata._();
+  static $pb.GeneratedMessage $_createMessage() => Metadata._();
   @$core.override
-  Metadata createEmptyInstance() => create();
+  Metadata createEmptyInstance() => Metadata._();
   @$core.pragma('dart2js:noInline')
-  static Metadata getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Metadata>(create);
+  static Metadata getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Metadata>(Metadata.$_createMessage);
   static Metadata? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -192,7 +196,7 @@ class Tissues extends $pb.GeneratedMessage {
     $core.String? chainId,
     $core.int? generation,
   }) {
-    final result = create();
+    final result = Tissues._();
     if (n2Pressures != null) result.n2Pressures.addAll(n2Pressures);
     if (hePressures != null) result.hePressures.addAll(hePressures);
     if (timestamp != null) result.timestamp = timestamp;
@@ -205,21 +209,21 @@ class Tissues extends $pb.GeneratedMessage {
 
   factory Tissues.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      Tissues()..mergeFromBuffer(data, registry);
   factory Tissues.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      Tissues()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Tissues',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: Tissues.$_createMessage)
     ..p<$core.double>(
         1, _omitFieldNames ? '' : 'n2Pressures', $pb.PbFieldType.KD)
     ..p<$core.double>(
         2, _omitFieldNames ? '' : 'hePressures', $pb.PbFieldType.KD)
     ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'timestamp',
-        subBuilder: $0.Timestamp.create)
+        subBuilder: $0.Timestamp.$_createMessage)
     ..aOS(4, _omitFieldNames ? '' : 'chainId')
     ..aI(5, _omitFieldNames ? '' : 'generation')
     ..hasRequiredFields = false;
@@ -234,12 +238,14 @@ class Tissues extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use Tissues() / Tissues.new instead')
   static Tissues create() => Tissues._();
+  static $pb.GeneratedMessage $_createMessage() => Tissues._();
   @$core.override
-  Tissues createEmptyInstance() => create();
+  Tissues createEmptyInstance() => Tissues._();
   @$core.pragma('dart2js:noInline')
-  static Tissues getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Tissues>(create);
+  static Tissues getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Tissues>(Tissues.$_createMessage);
   static Tissues? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -295,7 +301,7 @@ class Cylinder extends $pb.GeneratedMessage {
     $core.bool? defaultForDeepDeco,
     $core.bool? defaultForShallowDeco,
   }) {
-    final result = create();
+    final result = Cylinder._();
     if (id != null) result.id = id;
     if (meta != null) result.meta = meta;
     if (volumeL != null) result.volumeL = volumeL;
@@ -317,18 +323,18 @@ class Cylinder extends $pb.GeneratedMessage {
 
   factory Cylinder.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      Cylinder()..mergeFromBuffer(data, registry);
   factory Cylinder.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      Cylinder()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Cylinder',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: Cylinder.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..aOM<Metadata>(2, _omitFieldNames ? '' : 'meta',
-        subBuilder: Metadata.create)
+        subBuilder: Metadata.$_createMessage)
     ..aD(3, _omitFieldNames ? '' : 'volumeL')
     ..aD(4, _omitFieldNames ? '' : 'workingPressureBar')
     ..aOS(5, _omitFieldNames ? '' : 'description')
@@ -349,12 +355,14 @@ class Cylinder extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use Cylinder() / Cylinder.new instead')
   static Cylinder create() => Cylinder._();
+  static $pb.GeneratedMessage $_createMessage() => Cylinder._();
   @$core.override
-  Cylinder createEmptyInstance() => create();
+  Cylinder createEmptyInstance() => Cylinder._();
   @$core.pragma('dart2js:noInline')
-  static Cylinder getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Cylinder>(create);
+  static Cylinder getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Cylinder>(Cylinder.$_createMessage);
   static Cylinder? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -465,7 +473,7 @@ class Certification extends $pb.GeneratedMessage {
     $core.String? cardFrontId,
     $core.String? cardBackId,
   }) {
-    final result = create();
+    final result = Certification._();
     if (id != null) result.id = id;
     if (meta != null) result.meta = meta;
     if (agency != null) result.agency = agency;
@@ -484,27 +492,27 @@ class Certification extends $pb.GeneratedMessage {
 
   factory Certification.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      Certification()..mergeFromBuffer(data, registry);
   factory Certification.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      Certification()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Certification',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: Certification.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..aOM<Metadata>(2, _omitFieldNames ? '' : 'meta',
-        subBuilder: Metadata.create)
+        subBuilder: Metadata.$_createMessage)
     ..aOS(3, _omitFieldNames ? '' : 'agency')
     ..aOS(4, _omitFieldNames ? '' : 'name')
     ..aOS(5, _omitFieldNames ? '' : 'number')
     ..aOS(6, _omitFieldNames ? '' : 'instructorName')
     ..aOS(7, _omitFieldNames ? '' : 'instructorNumber')
     ..aOM<$0.Timestamp>(8, _omitFieldNames ? '' : 'granted',
-        subBuilder: $0.Timestamp.create)
+        subBuilder: $0.Timestamp.$_createMessage)
     ..aOM<$0.Timestamp>(9, _omitFieldNames ? '' : 'expires',
-        subBuilder: $0.Timestamp.create)
+        subBuilder: $0.Timestamp.$_createMessage)
     ..aOS(10, _omitFieldNames ? '' : 'cardFrontId')
     ..aOS(11, _omitFieldNames ? '' : 'cardBackId')
     ..hasRequiredFields = false;
@@ -520,12 +528,15 @@ class Certification extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use Certification() / Certification.new instead')
   static Certification create() => Certification._();
+  static $pb.GeneratedMessage $_createMessage() => Certification._();
   @$core.override
-  Certification createEmptyInstance() => create();
+  Certification createEmptyInstance() => Certification._();
   @$core.pragma('dart2js:noInline')
-  static Certification getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<Certification>(create);
+  static Certification getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Certification>(
+          Certification.$_createMessage);
   static Certification? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -639,7 +650,7 @@ class Photo extends $pb.GeneratedMessage {
     $core.String? id,
     Metadata? meta,
   }) {
-    final result = create();
+    final result = Photo._();
     if (id != null) result.id = id;
     if (meta != null) result.meta = meta;
     return result;
@@ -649,18 +660,18 @@ class Photo extends $pb.GeneratedMessage {
 
   factory Photo.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      Photo()..mergeFromBuffer(data, registry);
   factory Photo.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      Photo()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Photo',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: Photo.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..aOM<Metadata>(2, _omitFieldNames ? '' : 'meta',
-        subBuilder: Metadata.create)
+        subBuilder: Metadata.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -673,12 +684,14 @@ class Photo extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use Photo() / Photo.new instead')
   static Photo create() => Photo._();
+  static $pb.GeneratedMessage $_createMessage() => Photo._();
   @$core.override
-  Photo createEmptyInstance() => create();
+  Photo createEmptyInstance() => Photo._();
   @$core.pragma('dart2js:noInline')
-  static Photo getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Photo>(create);
+  static Photo getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Photo>(Photo.$_createMessage);
   static Photo? _defaultInstance;
 
   @$pb.TagNumber(1)

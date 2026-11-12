@@ -1,6 +1,6 @@
 import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';

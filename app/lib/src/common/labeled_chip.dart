@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class LabeledChip extends StatelessWidget {
   const LabeledChip({super.key, required this.label, this.backgroundColor, required this.child});

@@ -7,4 +7,4 @@ environment:
   sdk: ^3.10.4
 
 dependencies:
-  protobuf: ^6.0.0
+  protobuf: ^6.1.0

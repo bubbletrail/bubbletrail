@@ -49,7 +49,7 @@ class Log extends $pb.GeneratedMessage {
     $1.Position? endPosition,
     RawDiveData? rawData,
   }) {
-    final result = create();
+    final result = Log._();
     if (model != null) result.model = model;
     if (serial != null) result.serial = serial;
     if (dateTime != null) result.dateTime = dateTime;
@@ -80,19 +80,19 @@ class Log extends $pb.GeneratedMessage {
 
   factory Log.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      Log()..mergeFromBuffer(data, registry);
   factory Log.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      Log()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Log',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: Log.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'model')
     ..aOS(2, _omitFieldNames ? '' : 'serial')
     ..aOM<$0.Timestamp>(3, _omitFieldNames ? '' : 'dateTime',
-        subBuilder: $0.Timestamp.create)
+        subBuilder: $0.Timestamp.$_createMessage)
     ..aI(4, _omitFieldNames ? '' : 'diveTime')
     ..aD(5, _omitFieldNames ? '' : 'maxDepth')
     ..aD(6, _omitFieldNames ? '' : 'avgDepth')
@@ -100,26 +100,27 @@ class Log extends $pb.GeneratedMessage {
     ..aD(8, _omitFieldNames ? '' : 'minTemperature')
     ..aD(9, _omitFieldNames ? '' : 'maxTemperature')
     ..aOM<Salinity>(10, _omitFieldNames ? '' : 'salinity',
-        subBuilder: Salinity.create)
+        subBuilder: Salinity.$_createMessage)
     ..aD(11, _omitFieldNames ? '' : 'atmosphericPressure')
     ..aE<DiveMode>(12, _omitFieldNames ? '' : 'diveMode',
         enumValues: DiveMode.values)
     ..aOM<DecoModel>(13, _omitFieldNames ? '' : 'decoModel',
-        subBuilder: DecoModel.create)
+        subBuilder: DecoModel.$_createMessage)
     ..aOM<$1.Position>(14, _omitFieldNames ? '' : 'startPosition',
-        subBuilder: $1.Position.create)
+        subBuilder: $1.Position.$_createMessage)
     ..pPM<GasMix>(15, _omitFieldNames ? '' : 'gasMixes',
-        subBuilder: GasMix.create)
-    ..pPM<Tank>(16, _omitFieldNames ? '' : 'tanks', subBuilder: Tank.create)
+        subBuilder: GasMix.$_createMessage)
+    ..pPM<Tank>(16, _omitFieldNames ? '' : 'tanks',
+        subBuilder: Tank.$_createMessage)
     ..pPM<LogSample>(17, _omitFieldNames ? '' : 'samples',
-        subBuilder: LogSample.create)
+        subBuilder: LogSample.$_createMessage)
     ..a<$core.List<$core.int>>(
         18, _omitFieldNames ? '' : 'ldcFingerprint', $pb.PbFieldType.OY)
     ..aOS(19, _omitFieldNames ? '' : 'uniqueID', protoName: 'uniqueID')
     ..aOM<$1.Position>(20, _omitFieldNames ? '' : 'endPosition',
-        subBuilder: $1.Position.create)
+        subBuilder: $1.Position.$_createMessage)
     ..aOM<RawDiveData>(21, _omitFieldNames ? '' : 'rawData',
-        subBuilder: RawDiveData.create)
+        subBuilder: RawDiveData.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -132,12 +133,14 @@ class Log extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use Log() / Log.new instead')
   static Log create() => Log._();
+  static $pb.GeneratedMessage $_createMessage() => Log._();
   @$core.override
-  Log createEmptyInstance() => create();
+  Log createEmptyInstance() => Log._();
   @$core.pragma('dart2js:noInline')
-  static Log getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Log>(create);
+  static Log getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Log>(Log.$_createMessage);
   static Log? _defaultInstance;
 
   /// Dive computer identity
@@ -345,7 +348,7 @@ class RawDiveData extends $pb.GeneratedMessage {
     $core.int? parsingVersion,
     $core.int? descriptorModel,
   }) {
-    final result = create();
+    final result = RawDiveData._();
     if (data != null) result.data = data;
     if (parserFamily != null) result.parserFamily = parserFamily;
     if (deviceModel != null) result.deviceModel = deviceModel;
@@ -364,15 +367,15 @@ class RawDiveData extends $pb.GeneratedMessage {
 
   factory RawDiveData.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      RawDiveData()..mergeFromBuffer(data, registry);
   factory RawDiveData.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      RawDiveData()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'RawDiveData',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: RawDiveData.$_createMessage)
     ..a<$core.List<$core.int>>(
         1, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
     ..aI(2, _omitFieldNames ? '' : 'parserFamily',
@@ -401,12 +404,15 @@ class RawDiveData extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use RawDiveData() / RawDiveData.new instead')
   static RawDiveData create() => RawDiveData._();
+  static $pb.GeneratedMessage $_createMessage() => RawDiveData._();
   @$core.override
-  RawDiveData createEmptyInstance() => create();
+  RawDiveData createEmptyInstance() => RawDiveData._();
   @$core.pragma('dart2js:noInline')
-  static RawDiveData getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<RawDiveData>(create);
+  static RawDiveData getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RawDiveData>(
+          RawDiveData.$_createMessage);
   static RawDiveData? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -520,7 +526,7 @@ class LogSample extends $pb.GeneratedMessage {
     $core.Iterable<VendorData>? vendorData,
     $1.Position? position,
   }) {
-    final result = create();
+    final result = LogSample._();
     if (time != null) result.time = time;
     if (depth != null) result.depth = depth;
     if (temperature != null) result.temperature = temperature;
@@ -543,36 +549,36 @@ class LogSample extends $pb.GeneratedMessage {
 
   factory LogSample.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      LogSample()..mergeFromBuffer(data, registry);
   factory LogSample.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      LogSample()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'LogSample',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: LogSample.$_createMessage)
     ..aD(1, _omitFieldNames ? '' : 'time')
     ..aD(2, _omitFieldNames ? '' : 'depth')
     ..aD(3, _omitFieldNames ? '' : 'temperature')
     ..pPM<TankPressure>(4, _omitFieldNames ? '' : 'pressures',
-        subBuilder: TankPressure.create)
+        subBuilder: TankPressure.$_createMessage)
     ..pPM<SampleEvent>(5, _omitFieldNames ? '' : 'events',
-        subBuilder: SampleEvent.create)
+        subBuilder: SampleEvent.$_createMessage)
     ..aI(6, _omitFieldNames ? '' : 'rbt')
     ..aI(7, _omitFieldNames ? '' : 'heartbeat')
     ..aI(8, _omitFieldNames ? '' : 'bearing')
     ..aD(9, _omitFieldNames ? '' : 'setpoint')
     ..pPM<Ppo2Reading>(10, _omitFieldNames ? '' : 'ppo2',
-        subBuilder: Ppo2Reading.create)
+        subBuilder: Ppo2Reading.$_createMessage)
     ..aD(11, _omitFieldNames ? '' : 'cns')
     ..aOM<DecoStatus>(12, _omitFieldNames ? '' : 'deco',
-        subBuilder: DecoStatus.create)
+        subBuilder: DecoStatus.$_createMessage)
     ..aI(13, _omitFieldNames ? '' : 'gasMixIndex')
     ..pPM<VendorData>(14, _omitFieldNames ? '' : 'vendorData',
-        subBuilder: VendorData.create)
+        subBuilder: VendorData.$_createMessage)
     ..aOM<$1.Position>(15, _omitFieldNames ? '' : 'position',
-        subBuilder: $1.Position.create)
+        subBuilder: $1.Position.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -585,12 +591,14 @@ class LogSample extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use LogSample() / LogSample.new instead')
   static LogSample create() => LogSample._();
+  static $pb.GeneratedMessage $_createMessage() => LogSample._();
   @$core.override
-  LogSample createEmptyInstance() => create();
+  LogSample createEmptyInstance() => LogSample._();
   @$core.pragma('dart2js:noInline')
-  static LogSample getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<LogSample>(create);
+  static LogSample getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<LogSample>(LogSample.$_createMessage);
   static LogSample? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -715,7 +723,7 @@ class Salinity extends $pb.GeneratedMessage {
     WaterType? type,
     $core.double? density,
   }) {
-    final result = create();
+    final result = Salinity._();
     if (type != null) result.type = type;
     if (density != null) result.density = density;
     return result;
@@ -725,15 +733,15 @@ class Salinity extends $pb.GeneratedMessage {
 
   factory Salinity.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      Salinity()..mergeFromBuffer(data, registry);
   factory Salinity.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      Salinity()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Salinity',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: Salinity.$_createMessage)
     ..aE<WaterType>(1, _omitFieldNames ? '' : 'type',
         enumValues: WaterType.values)
     ..aD(2, _omitFieldNames ? '' : 'density')
@@ -749,12 +757,14 @@ class Salinity extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use Salinity() / Salinity.new instead')
   static Salinity create() => Salinity._();
+  static $pb.GeneratedMessage $_createMessage() => Salinity._();
   @$core.override
-  Salinity createEmptyInstance() => create();
+  Salinity createEmptyInstance() => Salinity._();
   @$core.pragma('dart2js:noInline')
-  static Salinity getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Salinity>(create);
+  static Salinity getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Salinity>(Salinity.$_createMessage);
   static Salinity? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -784,7 +794,7 @@ class GasMix extends $pb.GeneratedMessage {
     $core.double? nitrogen,
     GasUsage? usage,
   }) {
-    final result = create();
+    final result = GasMix._();
     if (oxygen != null) result.oxygen = oxygen;
     if (helium != null) result.helium = helium;
     if (nitrogen != null) result.nitrogen = nitrogen;
@@ -796,15 +806,15 @@ class GasMix extends $pb.GeneratedMessage {
 
   factory GasMix.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      GasMix()..mergeFromBuffer(data, registry);
   factory GasMix.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      GasMix()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'GasMix',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: GasMix.$_createMessage)
     ..aD(1, _omitFieldNames ? '' : 'oxygen')
     ..aD(2, _omitFieldNames ? '' : 'helium')
     ..aD(3, _omitFieldNames ? '' : 'nitrogen')
@@ -822,12 +832,14 @@ class GasMix extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use GasMix() / GasMix.new instead')
   static GasMix create() => GasMix._();
+  static $pb.GeneratedMessage $_createMessage() => GasMix._();
   @$core.override
-  GasMix createEmptyInstance() => create();
+  GasMix createEmptyInstance() => GasMix._();
   @$core.pragma('dart2js:noInline')
-  static GasMix getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GasMix>(create);
+  static GasMix getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GasMix>(GasMix.$_createMessage);
   static GasMix? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -878,7 +890,7 @@ class Tank extends $pb.GeneratedMessage {
     $core.double? endPressure,
     GasUsage? usage,
   }) {
-    final result = create();
+    final result = Tank._();
     if (gasMixIndex != null) result.gasMixIndex = gasMixIndex;
     if (volumeType != null) result.volumeType = volumeType;
     if (volume != null) result.volume = volume;
@@ -893,15 +905,15 @@ class Tank extends $pb.GeneratedMessage {
 
   factory Tank.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      Tank()..mergeFromBuffer(data, registry);
   factory Tank.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      Tank()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Tank',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: Tank.$_createMessage)
     ..aI(1, _omitFieldNames ? '' : 'gasMixIndex')
     ..aE<TankVolumeType>(2, _omitFieldNames ? '' : 'volumeType',
         enumValues: TankVolumeType.values)
@@ -923,12 +935,14 @@ class Tank extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use Tank() / Tank.new instead')
   static Tank create() => Tank._();
+  static $pb.GeneratedMessage $_createMessage() => Tank._();
   @$core.override
-  Tank createEmptyInstance() => create();
+  Tank createEmptyInstance() => Tank._();
   @$core.pragma('dart2js:noInline')
-  static Tank getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Tank>(create);
+  static Tank getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Tank>(Tank.$_createMessage);
   static Tank? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1003,7 +1017,7 @@ class DecoModel extends $pb.GeneratedMessage {
     $core.int? gfLow,
     $core.int? gfHigh,
   }) {
-    final result = create();
+    final result = DecoModel._();
     if (type != null) result.type = type;
     if (conservatism != null) result.conservatism = conservatism;
     if (gfLow != null) result.gfLow = gfLow;
@@ -1015,15 +1029,15 @@ class DecoModel extends $pb.GeneratedMessage {
 
   factory DecoModel.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      DecoModel()..mergeFromBuffer(data, registry);
   factory DecoModel.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      DecoModel()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'DecoModel',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: DecoModel.$_createMessage)
     ..aE<DecoModelType>(1, _omitFieldNames ? '' : 'type',
         enumValues: DecoModelType.values)
     ..aI(2, _omitFieldNames ? '' : 'conservatism')
@@ -1041,12 +1055,14 @@ class DecoModel extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use DecoModel() / DecoModel.new instead')
   static DecoModel create() => DecoModel._();
+  static $pb.GeneratedMessage $_createMessage() => DecoModel._();
   @$core.override
-  DecoModel createEmptyInstance() => create();
+  DecoModel createEmptyInstance() => DecoModel._();
   @$core.pragma('dart2js:noInline')
-  static DecoModel getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DecoModel>(create);
+  static DecoModel getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<DecoModel>(DecoModel.$_createMessage);
   static DecoModel? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1092,7 +1108,7 @@ class TankPressure extends $pb.GeneratedMessage {
     $core.int? tankIndex,
     $core.double? pressure,
   }) {
-    final result = create();
+    final result = TankPressure._();
     if (tankIndex != null) result.tankIndex = tankIndex;
     if (pressure != null) result.pressure = pressure;
     return result;
@@ -1102,15 +1118,15 @@ class TankPressure extends $pb.GeneratedMessage {
 
   factory TankPressure.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      TankPressure()..mergeFromBuffer(data, registry);
   factory TankPressure.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      TankPressure()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'TankPressure',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: TankPressure.$_createMessage)
     ..aI(1, _omitFieldNames ? '' : 'tankIndex')
     ..aD(2, _omitFieldNames ? '' : 'pressure')
     ..hasRequiredFields = false;
@@ -1126,12 +1142,15 @@ class TankPressure extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use TankPressure() / TankPressure.new instead')
   static TankPressure create() => TankPressure._();
+  static $pb.GeneratedMessage $_createMessage() => TankPressure._();
   @$core.override
-  TankPressure createEmptyInstance() => create();
+  TankPressure createEmptyInstance() => TankPressure._();
   @$core.pragma('dart2js:noInline')
-  static TankPressure getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<TankPressure>(create);
+  static TankPressure getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<TankPressure>(
+          TankPressure.$_createMessage);
   static TankPressure? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1159,7 +1178,7 @@ class Ppo2Reading extends $pb.GeneratedMessage {
     $core.int? sensorIndex,
     $core.double? value,
   }) {
-    final result = create();
+    final result = Ppo2Reading._();
     if (sensorIndex != null) result.sensorIndex = sensorIndex;
     if (value != null) result.value = value;
     return result;
@@ -1169,15 +1188,15 @@ class Ppo2Reading extends $pb.GeneratedMessage {
 
   factory Ppo2Reading.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      Ppo2Reading()..mergeFromBuffer(data, registry);
   factory Ppo2Reading.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      Ppo2Reading()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Ppo2Reading',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: Ppo2Reading.$_createMessage)
     ..aI(1, _omitFieldNames ? '' : 'sensorIndex')
     ..aD(2, _omitFieldNames ? '' : 'value')
     ..hasRequiredFields = false;
@@ -1193,12 +1212,15 @@ class Ppo2Reading extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use Ppo2Reading() / Ppo2Reading.new instead')
   static Ppo2Reading create() => Ppo2Reading._();
+  static $pb.GeneratedMessage $_createMessage() => Ppo2Reading._();
   @$core.override
-  Ppo2Reading createEmptyInstance() => create();
+  Ppo2Reading createEmptyInstance() => Ppo2Reading._();
   @$core.pragma('dart2js:noInline')
-  static Ppo2Reading getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<Ppo2Reading>(create);
+  static Ppo2Reading getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Ppo2Reading>(
+          Ppo2Reading.$_createMessage);
   static Ppo2Reading? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1228,7 +1250,7 @@ class DecoStatus extends $pb.GeneratedMessage {
     $core.double? depth,
     $core.int? tts,
   }) {
-    final result = create();
+    final result = DecoStatus._();
     if (type != null) result.type = type;
     if (time != null) result.time = time;
     if (depth != null) result.depth = depth;
@@ -1240,15 +1262,15 @@ class DecoStatus extends $pb.GeneratedMessage {
 
   factory DecoStatus.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      DecoStatus()..mergeFromBuffer(data, registry);
   factory DecoStatus.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      DecoStatus()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'DecoStatus',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: DecoStatus.$_createMessage)
     ..aE<DecoStopType>(1, _omitFieldNames ? '' : 'type',
         enumValues: DecoStopType.values)
     ..aI(2, _omitFieldNames ? '' : 'time')
@@ -1266,12 +1288,14 @@ class DecoStatus extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use DecoStatus() / DecoStatus.new instead')
   static DecoStatus create() => DecoStatus._();
+  static $pb.GeneratedMessage $_createMessage() => DecoStatus._();
   @$core.override
-  DecoStatus createEmptyInstance() => create();
+  DecoStatus createEmptyInstance() => DecoStatus._();
   @$core.pragma('dart2js:noInline')
   static DecoStatus getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<DecoStatus>(create);
+      $pb.GeneratedMessage.$_defaultFor<DecoStatus>(DecoStatus.$_createMessage);
   static DecoStatus? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1319,7 +1343,7 @@ class SampleEvent extends $pb.GeneratedMessage {
     $core.int? flags,
     $core.int? value,
   }) {
-    final result = create();
+    final result = SampleEvent._();
     if (type != null) result.type = type;
     if (time != null) result.time = time;
     if (flags != null) result.flags = flags;
@@ -1331,15 +1355,15 @@ class SampleEvent extends $pb.GeneratedMessage {
 
   factory SampleEvent.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      SampleEvent()..mergeFromBuffer(data, registry);
   factory SampleEvent.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      SampleEvent()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SampleEvent',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: SampleEvent.$_createMessage)
     ..aE<SampleEventType>(1, _omitFieldNames ? '' : 'type',
         enumValues: SampleEventType.values)
     ..aI(2, _omitFieldNames ? '' : 'time')
@@ -1358,12 +1382,15 @@ class SampleEvent extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use SampleEvent() / SampleEvent.new instead')
   static SampleEvent create() => SampleEvent._();
+  static $pb.GeneratedMessage $_createMessage() => SampleEvent._();
   @$core.override
-  SampleEvent createEmptyInstance() => create();
+  SampleEvent createEmptyInstance() => SampleEvent._();
   @$core.pragma('dart2js:noInline')
-  static SampleEvent getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<SampleEvent>(create);
+  static SampleEvent getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SampleEvent>(
+          SampleEvent.$_createMessage);
   static SampleEvent? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1409,7 +1436,7 @@ class VendorData extends $pb.GeneratedMessage {
     $core.int? type,
     $core.List<$core.int>? data,
   }) {
-    final result = create();
+    final result = VendorData._();
     if (type != null) result.type = type;
     if (data != null) result.data = data;
     return result;
@@ -1419,15 +1446,15 @@ class VendorData extends $pb.GeneratedMessage {
 
   factory VendorData.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      VendorData()..mergeFromBuffer(data, registry);
   factory VendorData.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      VendorData()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'VendorData',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: VendorData.$_createMessage)
     ..aI(1, _omitFieldNames ? '' : 'type')
     ..a<$core.List<$core.int>>(
         2, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
@@ -1443,12 +1470,14 @@ class VendorData extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use VendorData() / VendorData.new instead')
   static VendorData create() => VendorData._();
+  static $pb.GeneratedMessage $_createMessage() => VendorData._();
   @$core.override
-  VendorData createEmptyInstance() => create();
+  VendorData createEmptyInstance() => VendorData._();
   @$core.pragma('dart2js:noInline')
   static VendorData getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<VendorData>(create);
+      $pb.GeneratedMessage.$_defaultFor<VendorData>(VendorData.$_createMessage);
   static VendorData? _defaultInstance;
 
   @$pb.TagNumber(1)

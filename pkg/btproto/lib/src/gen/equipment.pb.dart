@@ -37,7 +37,7 @@ class Equipment extends $pb.GeneratedMessage {
     $core.bool? defaultForNewDives,
     $core.bool? archived,
   }) {
-    final result = create();
+    final result = Equipment._();
     if (id != null) result.id = id;
     if (meta != null) result.meta = meta;
     if (type != null) result.type = type;
@@ -60,31 +60,31 @@ class Equipment extends $pb.GeneratedMessage {
 
   factory Equipment.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      Equipment()..mergeFromBuffer(data, registry);
   factory Equipment.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      Equipment()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Equipment',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: Equipment.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..aOM<$0.Metadata>(2, _omitFieldNames ? '' : 'meta',
-        subBuilder: $0.Metadata.create)
+        subBuilder: $0.Metadata.$_createMessage)
     ..aOS(3, _omitFieldNames ? '' : 'type')
     ..aOS(4, _omitFieldNames ? '' : 'manufacturer')
     ..aOS(5, _omitFieldNames ? '' : 'name')
     ..aOS(6, _omitFieldNames ? '' : 'serial')
     ..aD(7, _omitFieldNames ? '' : 'weight')
     ..aOM<$1.Timestamp>(8, _omitFieldNames ? '' : 'lastService',
-        subBuilder: $1.Timestamp.create)
+        subBuilder: $1.Timestamp.$_createMessage)
     ..aOM<$1.Timestamp>(9, _omitFieldNames ? '' : 'purchaseDate',
-        subBuilder: $1.Timestamp.create)
+        subBuilder: $1.Timestamp.$_createMessage)
     ..aD(10, _omitFieldNames ? '' : 'purchasePrice')
     ..aOS(11, _omitFieldNames ? '' : 'shop')
     ..aOM<$1.Timestamp>(12, _omitFieldNames ? '' : 'warrantyUntil',
-        subBuilder: $1.Timestamp.create)
+        subBuilder: $1.Timestamp.$_createMessage)
     ..aOB(13, _omitFieldNames ? '' : 'defaultForNewDives')
     ..aOB(14, _omitFieldNames ? '' : 'archived')
     ..hasRequiredFields = false;
@@ -99,12 +99,14 @@ class Equipment extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use Equipment() / Equipment.new instead')
   static Equipment create() => Equipment._();
+  static $pb.GeneratedMessage $_createMessage() => Equipment._();
   @$core.override
-  Equipment createEmptyInstance() => create();
+  Equipment createEmptyInstance() => Equipment._();
   @$core.pragma('dart2js:noInline')
-  static Equipment getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Equipment>(create);
+  static Equipment getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Equipment>(Equipment.$_createMessage);
   static Equipment? _defaultInstance;
 
   @$pb.TagNumber(1)

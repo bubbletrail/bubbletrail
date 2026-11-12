@@ -32,7 +32,7 @@ class Computer extends $pb.GeneratedMessage {
     $core.List<$core.int>? ldcFingerprint,
     $1.Timestamp? lastLogDate,
   }) {
-    final result = create();
+    final result = Computer._();
     if (remoteId != null) result.remoteId = remoteId;
     if (meta != null) result.meta = meta;
     if (advertisedName != null) result.advertisedName = advertisedName;
@@ -48,18 +48,18 @@ class Computer extends $pb.GeneratedMessage {
 
   factory Computer.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      Computer()..mergeFromBuffer(data, registry);
   factory Computer.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      Computer()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Computer',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: Computer.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'remoteId')
     ..aOM<$0.Metadata>(2, _omitFieldNames ? '' : 'meta',
-        subBuilder: $0.Metadata.create)
+        subBuilder: $0.Metadata.$_createMessage)
     ..aOS(3, _omitFieldNames ? '' : 'advertisedName')
     ..aOS(4, _omitFieldNames ? '' : 'vendor')
     ..aOS(5, _omitFieldNames ? '' : 'product')
@@ -67,7 +67,7 @@ class Computer extends $pb.GeneratedMessage {
     ..a<$core.List<$core.int>>(
         7, _omitFieldNames ? '' : 'ldcFingerprint', $pb.PbFieldType.OY)
     ..aOM<$1.Timestamp>(8, _omitFieldNames ? '' : 'lastLogDate',
-        subBuilder: $1.Timestamp.create)
+        subBuilder: $1.Timestamp.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -80,12 +80,14 @@ class Computer extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use Computer() / Computer.new instead')
   static Computer create() => Computer._();
+  static $pb.GeneratedMessage $_createMessage() => Computer._();
   @$core.override
-  Computer createEmptyInstance() => create();
+  Computer createEmptyInstance() => Computer._();
   @$core.pragma('dart2js:noInline')
-  static Computer getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Computer>(create);
+  static Computer getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Computer>(Computer.$_createMessage);
   static Computer? _defaultInstance;
 
   /// Bluetooth LE remote ID as seen in a scan

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class DataCardColumn extends StatelessWidget {
   const DataCardColumn({super.key, required this.children});
