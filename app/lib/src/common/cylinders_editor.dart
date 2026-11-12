@@ -1,7 +1,7 @@
 import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'adaptive_modal.dart';
 import 'duration_picker.dart';

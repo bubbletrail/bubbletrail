@@ -1,6 +1,6 @@
 import 'package:btcountries/btcountries.dart';
 import 'package:btl10n/btl10n.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 // Three single-select dropdowns (year, country, tag) shown above the mobile
 // dive list. Each starts with a null-valued "All" entry to clear that filter.

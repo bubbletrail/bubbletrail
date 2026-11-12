@@ -3,7 +3,7 @@ import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
 import 'package:collection/collection.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
 import '../common/common.dart';
