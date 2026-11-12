@@ -26,7 +26,7 @@ class InternalCylinderList extends $pb.GeneratedMessage {
   factory InternalCylinderList({
     $core.Iterable<$0.Cylinder>? cylinders,
   }) {
-    final result = create();
+    final result = InternalCylinderList._();
     if (cylinders != null) result.cylinders.addAll(cylinders);
     return result;
   }
@@ -35,17 +35,17 @@ class InternalCylinderList extends $pb.GeneratedMessage {
 
   factory InternalCylinderList.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      InternalCylinderList()..mergeFromBuffer(data, registry);
   factory InternalCylinderList.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      InternalCylinderList()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'InternalCylinderList',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: InternalCylinderList.$_createMessage)
     ..pPM<$0.Cylinder>(1, _omitFieldNames ? '' : 'cylinders',
-        subBuilder: $0.Cylinder.create)
+        subBuilder: $0.Cylinder.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -59,12 +59,16 @@ class InternalCylinderList extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use InternalCylinderList() / InternalCylinderList.new instead')
   static InternalCylinderList create() => InternalCylinderList._();
+  static $pb.GeneratedMessage $_createMessage() => InternalCylinderList._();
   @$core.override
-  InternalCylinderList createEmptyInstance() => create();
+  InternalCylinderList createEmptyInstance() => InternalCylinderList._();
   @$core.pragma('dart2js:noInline')
   static InternalCylinderList getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<InternalCylinderList>(create);
+      $pb.GeneratedMessage.$_defaultFor<InternalCylinderList>(
+          InternalCylinderList.$_createMessage);
   static InternalCylinderList? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -75,7 +79,7 @@ class InternalSiteList extends $pb.GeneratedMessage {
   factory InternalSiteList({
     $core.Iterable<$1.Site>? sites,
   }) {
-    final result = create();
+    final result = InternalSiteList._();
     if (sites != null) result.sites.addAll(sites);
     return result;
   }
@@ -84,17 +88,17 @@ class InternalSiteList extends $pb.GeneratedMessage {
 
   factory InternalSiteList.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      InternalSiteList()..mergeFromBuffer(data, registry);
   factory InternalSiteList.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      InternalSiteList()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'InternalSiteList',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: InternalSiteList.$_createMessage)
     ..pPM<$1.Site>(1, _omitFieldNames ? '' : 'sites',
-        subBuilder: $1.Site.create)
+        subBuilder: $1.Site.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -108,12 +112,15 @@ class InternalSiteList extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use InternalSiteList() / InternalSiteList.new instead')
   static InternalSiteList create() => InternalSiteList._();
+  static $pb.GeneratedMessage $_createMessage() => InternalSiteList._();
   @$core.override
-  InternalSiteList createEmptyInstance() => create();
+  InternalSiteList createEmptyInstance() => InternalSiteList._();
   @$core.pragma('dart2js:noInline')
-  static InternalSiteList getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<InternalSiteList>(create);
+  static InternalSiteList getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<InternalSiteList>(
+          InternalSiteList.$_createMessage);
   static InternalSiteList? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -124,7 +131,7 @@ class InternalLogList extends $pb.GeneratedMessage {
   factory InternalLogList({
     $core.Iterable<$2.Log>? logs,
   }) {
-    final result = create();
+    final result = InternalLogList._();
     if (logs != null) result.logs.addAll(logs);
     return result;
   }
@@ -133,16 +140,17 @@ class InternalLogList extends $pb.GeneratedMessage {
 
   factory InternalLogList.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      InternalLogList()..mergeFromBuffer(data, registry);
   factory InternalLogList.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      InternalLogList()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'InternalLogList',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
-    ..pPM<$2.Log>(1, _omitFieldNames ? '' : 'logs', subBuilder: $2.Log.create)
+      createEmptyInstance: InternalLogList.$_createMessage)
+    ..pPM<$2.Log>(1, _omitFieldNames ? '' : 'logs',
+        subBuilder: $2.Log.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -156,12 +164,15 @@ class InternalLogList extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use InternalLogList() / InternalLogList.new instead')
   static InternalLogList create() => InternalLogList._();
+  static $pb.GeneratedMessage $_createMessage() => InternalLogList._();
   @$core.override
-  InternalLogList createEmptyInstance() => create();
+  InternalLogList createEmptyInstance() => InternalLogList._();
   @$core.pragma('dart2js:noInline')
-  static InternalLogList getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<InternalLogList>(create);
+  static InternalLogList getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<InternalLogList>(
+          InternalLogList.$_createMessage);
   static InternalLogList? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -172,7 +183,7 @@ class InternalComputerList extends $pb.GeneratedMessage {
   factory InternalComputerList({
     $core.Iterable<$3.Computer>? computers,
   }) {
-    final result = create();
+    final result = InternalComputerList._();
     if (computers != null) result.computers.addAll(computers);
     return result;
   }
@@ -181,17 +192,17 @@ class InternalComputerList extends $pb.GeneratedMessage {
 
   factory InternalComputerList.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      InternalComputerList()..mergeFromBuffer(data, registry);
   factory InternalComputerList.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      InternalComputerList()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'InternalComputerList',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: InternalComputerList.$_createMessage)
     ..pPM<$3.Computer>(1, _omitFieldNames ? '' : 'computers',
-        subBuilder: $3.Computer.create)
+        subBuilder: $3.Computer.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -205,12 +216,16 @@ class InternalComputerList extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use InternalComputerList() / InternalComputerList.new instead')
   static InternalComputerList create() => InternalComputerList._();
+  static $pb.GeneratedMessage $_createMessage() => InternalComputerList._();
   @$core.override
-  InternalComputerList createEmptyInstance() => create();
+  InternalComputerList createEmptyInstance() => InternalComputerList._();
   @$core.pragma('dart2js:noInline')
   static InternalComputerList getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<InternalComputerList>(create);
+      $pb.GeneratedMessage.$_defaultFor<InternalComputerList>(
+          InternalComputerList.$_createMessage);
   static InternalComputerList? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -221,7 +236,7 @@ class InternalEquipmentList extends $pb.GeneratedMessage {
   factory InternalEquipmentList({
     $core.Iterable<$4.Equipment>? equipments,
   }) {
-    final result = create();
+    final result = InternalEquipmentList._();
     if (equipments != null) result.equipments.addAll(equipments);
     return result;
   }
@@ -230,17 +245,17 @@ class InternalEquipmentList extends $pb.GeneratedMessage {
 
   factory InternalEquipmentList.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      InternalEquipmentList()..mergeFromBuffer(data, registry);
   factory InternalEquipmentList.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      InternalEquipmentList()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'InternalEquipmentList',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: InternalEquipmentList.$_createMessage)
     ..pPM<$4.Equipment>(1, _omitFieldNames ? '' : 'equipments',
-        subBuilder: $4.Equipment.create)
+        subBuilder: $4.Equipment.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -255,12 +270,16 @@ class InternalEquipmentList extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use InternalEquipmentList() / InternalEquipmentList.new instead')
   static InternalEquipmentList create() => InternalEquipmentList._();
+  static $pb.GeneratedMessage $_createMessage() => InternalEquipmentList._();
   @$core.override
-  InternalEquipmentList createEmptyInstance() => create();
+  InternalEquipmentList createEmptyInstance() => InternalEquipmentList._();
   @$core.pragma('dart2js:noInline')
   static InternalEquipmentList getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<InternalEquipmentList>(create);
+      $pb.GeneratedMessage.$_defaultFor<InternalEquipmentList>(
+          InternalEquipmentList.$_createMessage);
   static InternalEquipmentList? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -271,7 +290,7 @@ class InternalCertificationList extends $pb.GeneratedMessage {
   factory InternalCertificationList({
     $core.Iterable<$0.Certification>? certifications,
   }) {
-    final result = create();
+    final result = InternalCertificationList._();
     if (certifications != null) result.certifications.addAll(certifications);
     return result;
   }
@@ -280,17 +299,17 @@ class InternalCertificationList extends $pb.GeneratedMessage {
 
   factory InternalCertificationList.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      InternalCertificationList()..mergeFromBuffer(data, registry);
   factory InternalCertificationList.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      InternalCertificationList()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'InternalCertificationList',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: InternalCertificationList.$_createMessage)
     ..pPM<$0.Certification>(1, _omitFieldNames ? '' : 'certifications',
-        subBuilder: $0.Certification.create)
+        subBuilder: $0.Certification.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -305,12 +324,18 @@ class InternalCertificationList extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use InternalCertificationList() / InternalCertificationList.new instead')
   static InternalCertificationList create() => InternalCertificationList._();
+  static $pb.GeneratedMessage $_createMessage() =>
+      InternalCertificationList._();
   @$core.override
-  InternalCertificationList createEmptyInstance() => create();
+  InternalCertificationList createEmptyInstance() =>
+      InternalCertificationList._();
   @$core.pragma('dart2js:noInline')
   static InternalCertificationList getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<InternalCertificationList>(create);
+      $pb.GeneratedMessage.$_defaultFor<InternalCertificationList>(
+          InternalCertificationList.$_createMessage);
   static InternalCertificationList? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -321,7 +346,7 @@ class InternalPhotoList extends $pb.GeneratedMessage {
   factory InternalPhotoList({
     $core.Iterable<$0.Photo>? photos,
   }) {
-    final result = create();
+    final result = InternalPhotoList._();
     if (photos != null) result.photos.addAll(photos);
     return result;
   }
@@ -330,17 +355,17 @@ class InternalPhotoList extends $pb.GeneratedMessage {
 
   factory InternalPhotoList.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      InternalPhotoList()..mergeFromBuffer(data, registry);
   factory InternalPhotoList.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      InternalPhotoList()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'InternalPhotoList',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: InternalPhotoList.$_createMessage)
     ..pPM<$0.Photo>(1, _omitFieldNames ? '' : 'photos',
-        subBuilder: $0.Photo.create)
+        subBuilder: $0.Photo.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -354,12 +379,15 @@ class InternalPhotoList extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use InternalPhotoList() / InternalPhotoList.new instead')
   static InternalPhotoList create() => InternalPhotoList._();
+  static $pb.GeneratedMessage $_createMessage() => InternalPhotoList._();
   @$core.override
-  InternalPhotoList createEmptyInstance() => create();
+  InternalPhotoList createEmptyInstance() => InternalPhotoList._();
   @$core.pragma('dart2js:noInline')
-  static InternalPhotoList getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<InternalPhotoList>(create);
+  static InternalPhotoList getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<InternalPhotoList>(
+          InternalPhotoList.$_createMessage);
   static InternalPhotoList? _defaultInstance;
 
   @$pb.TagNumber(1)

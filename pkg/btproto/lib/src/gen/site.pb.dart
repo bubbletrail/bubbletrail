@@ -33,7 +33,7 @@ class Site extends $pb.GeneratedMessage {
     $core.String? notes,
     $core.String? timezone,
   }) {
-    final result = create();
+    final result = Site._();
     if (id != null) result.id = id;
     if (meta != null) result.meta = meta;
     if (name != null) result.name = name;
@@ -52,21 +52,21 @@ class Site extends $pb.GeneratedMessage {
 
   factory Site.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      Site()..mergeFromBuffer(data, registry);
   factory Site.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      Site()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Site',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'btstore'),
-      createEmptyInstance: create)
+      createEmptyInstance: Site.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..aOM<$0.Metadata>(2, _omitFieldNames ? '' : 'meta',
-        subBuilder: $0.Metadata.create)
+        subBuilder: $0.Metadata.$_createMessage)
     ..aOS(3, _omitFieldNames ? '' : 'name')
     ..aOM<$0.Position>(4, _omitFieldNames ? '' : 'position',
-        subBuilder: $0.Position.create)
+        subBuilder: $0.Position.$_createMessage)
     ..aOS(5, _omitFieldNames ? '' : 'country')
     ..aOS(6, _omitFieldNames ? '' : 'location')
     ..aOS(7, _omitFieldNames ? '' : 'bodyOfWater')
@@ -86,12 +86,14 @@ class Site extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use Site() / Site.new instead')
   static Site create() => Site._();
+  static $pb.GeneratedMessage $_createMessage() => Site._();
   @$core.override
-  Site createEmptyInstance() => create();
+  Site createEmptyInstance() => Site._();
   @$core.pragma('dart2js:noInline')
-  static Site getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Site>(create);
+  static Site getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Site>(Site.$_createMessage);
   static Site? _defaultInstance;
 
   @$pb.TagNumber(1)
