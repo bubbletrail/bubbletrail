@@ -18,10 +18,7 @@ class ScreenScaffold extends StatelessWidget {
     final inner = platformIsMobile
         ? transparent
               ? body
-              : DecoratedBox(
-                  decoration: BoxDecoration(color: t.canvasColor),
-                  child: body,
-                )
+              : Material(color: t.canvasColor, child: body)
         : DecoratedBox(
             decoration: BoxDecoration(
               border: .all(color: t.colorScheme.onTertiaryContainer),
@@ -32,7 +29,7 @@ class ScreenScaffold extends StatelessWidget {
               padding: const .all(1.0), // the border
               child: ClipRRect(
                 borderRadius: .only(topLeft: .circular(8), topRight: .circular(8), bottomLeft: .circular(8), bottomRight: .circular(8)),
-                child: body,
+                child: Material(color: t.canvasColor, child: body),
               ),
             ),
           );

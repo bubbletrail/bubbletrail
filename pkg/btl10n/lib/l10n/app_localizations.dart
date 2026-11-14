@@ -985,6 +985,12 @@ abstract class AppLocalizations {
   /// **'Unknown'**
   String get unknown;
 
+  /// No description provided for @tts.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} TTS'**
+  String tts(Object time);
+
   /// No description provided for @deco.
   ///
   /// In en, this message translates to:
