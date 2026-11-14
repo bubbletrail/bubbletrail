@@ -2,6 +2,8 @@ import 'package:btl10n/btl10n.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'adaptive_modal.dart';
+import 'desktop_shortcuts.dart';
+import 'package:flutter/services.dart';
 
 // Shows an editor for a single piece of text. On mobile this is a bottom
 // sheet, on desktop a modal dialog. Returns the trimmed new value, or null if
@@ -50,6 +52,13 @@ class _TextEditorState extends State<_TextEditor> {
 
   @override
   Widget build(BuildContext context) {
+    return DesktopShortcuts(
+      actions: [DesktopAction(LogicalKeyboardKey.enter, context.l10n.done, () => Navigator.of(context).pop(_controller.text.trim()))],
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     return SafeArea(
       child: Padding(
         padding: const .all(16.0),

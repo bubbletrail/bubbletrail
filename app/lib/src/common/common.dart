@@ -28,3 +28,6 @@ export 'text_editor.dart';
 export 'timezone.dart';
 export 'weights_editor.dart';
 export 'units.dart';
+export 'desktop_shortcuts.dart';
+export 'package:flutter/services.dart' show LogicalKeyboardKey;
+export 'import_dives.dart';

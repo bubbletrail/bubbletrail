@@ -43,8 +43,20 @@ class SiteDetailsScreen extends StatelessWidget {
         final site = state.site;
         final dives = diveListState.dives.where((s) => s.siteId == site.id).toList();
         return ScreenScaffold(
+          shortcuts: [
+            DesktopAction(
+              LogicalKeyboardKey.backspace,
+              context.l10n.deleteSite,
+              () => _popupMenuActions(context, site).onSelected?.call('delete'),
+              menuValue: 'delete',
+            ),
+            DesktopAction(LogicalKeyboardKey.keyE, context.l10n.edit, () => _editDetails(context, site)),
+            DesktopAction(LogicalKeyboardKey.keyN, context.l10n.notes, () => _editNotes(context, site), shift: true),
+            DesktopAction(LogicalKeyboardKey.keyT, context.l10n.tags, () => _editTags(context, site, diveListState), shift: true),
+            DesktopAction(LogicalKeyboardKey.keyL, context.l10n.addLocation, () => _MapCard(site: site)._editPosition(context), shift: true),
+          ],
           title: Text(site.name.isNotEmpty ? site.name : context.l10n.newDiveSite),
-          actions: [_popupMenuActions(context, site)],
+          overflowMenu: _popupMenuActions(context, site),
           body: SingleChildScrollView(
             child: Padding(
               padding: const .all(8.0),

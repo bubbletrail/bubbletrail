@@ -259,11 +259,13 @@ class _CertificationEditScreenState extends State<CertificationEditScreen> {
           if (state is CertificationDetailsClosed) context.pop();
         },
         child: ScreenScaffold(
-          title: Text(_isNew ? context.l10n.newCertification : context.l10n.editCertification),
-          actions: [
-            if (!_isNew) _popupMenuActions(),
-            IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: context.l10n.discardChanges),
+          overflowMenu: _isNew ? null : _popupMenuActions(),
+          shortcuts: [
+            DesktopAction(LogicalKeyboardKey.keyS, context.l10n.done, _save),
+            DesktopAction(LogicalKeyboardKey.period, context.l10n.discardChanges, _cancel),
           ],
+          title: Text(_isNew ? context.l10n.newCertification : context.l10n.editCertification),
+          actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: context.l10n.discardChanges)],
           body: LayoutBuilder(
             builder: (context, constraints) {
               final isNarrow = constraints.maxWidth < narrowLayoutBreakpoint;

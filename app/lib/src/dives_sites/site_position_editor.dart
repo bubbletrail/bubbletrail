@@ -89,6 +89,10 @@ class _SitePositionEditorState extends State<_SitePositionEditor> {
 
   @override
   Widget build(BuildContext context) {
+    return DesktopShortcuts(actions: [DesktopAction(LogicalKeyboardKey.enter, context.l10n.done, _done)], child: _buildContent(context));
+  }
+
+  Widget _buildContent(BuildContext context) {
     return SafeArea(
       child: Padding(
         padding: const .all(16.0),

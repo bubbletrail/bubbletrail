@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
 import 'adaptive_modal.dart';
+import 'desktop_shortcuts.dart';
 import 'duration_picker.dart';
 import 'measurement_editor.dart';
 import 'timezone.dart';
@@ -125,6 +126,21 @@ class _DiveBasicsEditorState extends State<_DiveBasicsEditor> {
 
   @override
   Widget build(BuildContext context) {
+    return DesktopShortcuts(
+      actions: [
+        DesktopAction(
+          LogicalKeyboardKey.enter,
+          context.l10n.done,
+          () => Navigator.of(
+            context,
+          ).pop(DiveBasics(number: _number, start: wallClockToUtc(_start, widget.timezone), durationSeconds: _durationSeconds, maxDepth: _maxDepth)),
+        ),
+      ],
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     return SafeArea(
       child: Padding(
         padding: const .all(16.0),

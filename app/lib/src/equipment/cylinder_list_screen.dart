@@ -13,6 +13,7 @@ class CylinderListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
+      shortcuts: [DesktopAction(LogicalKeyboardKey.keyN, context.l10n.addNewCylinderType, () => context.goNamed(AppRouteName.cylindersNew))],
       title: Text(context.l10n.cylinderTypes),
       actions: [IconButton(icon: const Icon(Icons.add), tooltip: context.l10n.addNewCylinderType, onPressed: () => context.goNamed(AppRouteName.cylindersNew))],
       body: BlocBuilder<CylinderListBloc, CylinderListState>(

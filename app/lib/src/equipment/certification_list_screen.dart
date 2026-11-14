@@ -17,6 +17,7 @@ class CertificationListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
+      shortcuts: [DesktopAction(LogicalKeyboardKey.keyN, context.l10n.addNewCertification, () => context.goNamed(AppRouteName.certificationsNew))],
       title: Text(context.l10n.certifications),
       actions: [
         IconButton(icon: const Icon(Icons.add), tooltip: context.l10n.addNewCertification, onPressed: () => context.goNamed(AppRouteName.certificationsNew)),

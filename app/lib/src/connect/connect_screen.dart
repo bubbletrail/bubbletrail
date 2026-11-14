@@ -35,6 +35,26 @@ class ConnectScreen extends StatelessWidget {
           return BlocBuilder<BleDownloadBloc, BleDownloadState>(
             builder: (context, downloadState) {
               return ScreenScaffold(
+                shortcuts: [
+                  DesktopAction(
+                    LogicalKeyboardKey.keyR,
+                    scanState.isScanning ? context.l10n.stop : context.l10n.scan,
+                    scanState.adapterState != BluetoothAdapterState.on || downloadState.connectedDevice != null
+                        ? null
+                        : () {
+                            if (scanState.isScanning) {
+                              context.read<BleScanBloc>().add(.stop());
+                            } else {
+                              context.read<BleScanBloc>().add(.start());
+                            }
+                          },
+                  ),
+                  DesktopAction(
+                    LogicalKeyboardKey.keyD,
+                    context.l10n.disconnect,
+                    downloadState.connectedDevice == null ? null : () => context.read<BleDownloadBloc>().add(.disconnect()),
+                  ),
+                ],
                 title: Text(context.l10n.connectDiveComputer),
                 actions: [
                   if (downloadState.connectedDevice != null)

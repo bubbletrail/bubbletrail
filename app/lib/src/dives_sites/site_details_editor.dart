@@ -81,6 +81,13 @@ class _SiteDetailsEditorState extends State<_SiteDetailsEditor> {
 
   @override
   Widget build(BuildContext context) {
+    return DesktopShortcuts(
+      actions: [DesktopAction(LogicalKeyboardKey.enter, context.l10n.done, _nameController.text.trim().isNotEmpty ? _done : null)],
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     final canSave = _nameController.text.trim().isNotEmpty;
     return SafeArea(
       child: Padding(

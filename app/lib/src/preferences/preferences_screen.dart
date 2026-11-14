@@ -407,12 +407,7 @@ class _ImportExportButtons extends StatelessWidget {
   }
 
   Future<void> _importDives(BuildContext context) async {
-    final file = await _pickFile(['ssrf', 'xml', 'uddf', 'json']);
-    if (file == null || file.path == null) return;
-    if (!context.mounted) return;
-
-    context.read<DiveListBloc>().add(DiveListEvent.importDives(file.path!));
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.importingDives)));
+    await importDives(context);
   }
 
   Future<void> _importEquipment(BuildContext context) async {

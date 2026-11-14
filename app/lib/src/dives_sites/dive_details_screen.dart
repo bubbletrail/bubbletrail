@@ -59,11 +59,48 @@ class _DiveDetails extends StatelessWidget {
       },
       builder: (context, state) {
         return ScreenScaffold(
+          shortcuts: [
+            DesktopAction(
+              LogicalKeyboardKey.arrowUp,
+              prevDive != null ? context.l10n.diveNumber(prevDive!.number) : '↑',
+              prevDive == null ? null : () => context.read<DiveDetailsBloc>().add(DiveDetailsEvent.loadDive(prevDive!.id)),
+            ),
+            DesktopAction(
+              LogicalKeyboardKey.arrowDown,
+              nextDive != null ? context.l10n.diveNumber(nextDive!.number) : '↓',
+              nextDive == null ? null : () => context.read<DiveDetailsBloc>().add(DiveDetailsEvent.loadDive(nextDive!.id)),
+            ),
+            DesktopAction(
+              LogicalKeyboardKey.keyP,
+              context.l10n.viewFullscreen,
+              dive.logs.isEmpty || dive.logs.first.samples.isEmpty
+                  ? null
+                  : () => context.pushNamed(AppRouteName.divesDetailsDepthProfile, pathParameters: {'diveID': dive.id}),
+              shift: true,
+            ),
+            DesktopAction(LogicalKeyboardKey.keyN, context.l10n.notes, () => _editNotes(context), shift: true),
+            DesktopAction(LogicalKeyboardKey.keyB, context.l10n.buddies, () => _editBuddies(context), shift: true),
+            DesktopAction(LogicalKeyboardKey.keyS, context.l10n.location, () => _editSite(context), shift: true),
+            DesktopAction(LogicalKeyboardKey.keyT, context.l10n.tags, () => _editTags(context), shift: true),
+            DesktopAction(LogicalKeyboardKey.keyR, context.l10n.addRating, () => _editRating(context), shift: true),
+            DesktopAction(LogicalKeyboardKey.keyD, context.l10n.divemaster, () => _editDivemaster(context), shift: true),
+            DesktopAction(LogicalKeyboardKey.keyA, context.l10n.edit, () => _editBasics(context), shift: true),
+            DesktopAction(LogicalKeyboardKey.keyG, context.l10n.addGases, () => _editGases(context), shift: true),
+            DesktopAction(LogicalKeyboardKey.keyW, context.l10n.addWeights, () => _editWeights(context), shift: true),
+            DesktopAction(LogicalKeyboardKey.keyE, context.l10n.addEquipment, () => _editEquipment(context), shift: true),
+            DesktopAction(
+              LogicalKeyboardKey.backspace,
+              context.l10n.deleteDive,
+              () => _popupMenuActions(context).onSelected?.call('delete'),
+              menuValue: 'delete',
+            ),
+          ],
           title: Text(
             platformIsDesktop
                 ? context.l10n.diveTitle(dive.number, site?.name ?? context.l10n.unknownSite)
                 : context.l10n.compactDiveTitle(dive.number, site?.name ?? context.l10n.unknownSite),
           ),
+          overflowMenu: platformIsDesktop ? _popupMenuActions(context) : null,
           actions: [
             IconButton(
               icon: const Icon(Icons.arrow_upward),
@@ -83,7 +120,6 @@ class _DiveDetails extends StatelessWidget {
                   : null,
               tooltip: nextDive != null ? context.l10n.diveNumber(nextDive!.number) : null,
             ),
-            if (platformIsDesktop) _popupMenuActions(context),
           ],
           body: SingleChildScrollView(
             child: Padding(
@@ -214,8 +250,8 @@ class _DiveDetails extends StatelessWidget {
       itemBuilder: (context) {
         final preceding = _precedingDive(context);
         return [
-          PopupMenuItem(value: 'debug', child: Text(context.l10n.viewRawData)),
           PopupMenuItem(value: 'merge', enabled: preceding != null && _canMergeInto(preceding), child: Text(context.l10n.mergeIntoPreviousDive)),
+          PopupMenuItem(value: 'debug', child: Text(context.l10n.viewRawData)),
           PopupMenuItem(value: 'delete', child: Text(context.l10n.deleteDive)),
         ];
       },

@@ -18,6 +18,10 @@ class SiteListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
+      shortcuts: [
+        DesktopAction(LogicalKeyboardKey.keyN, context.l10n.addNewDiveSite, () => context.goNamed(AppRouteName.sitesNew)),
+        DesktopAction(LogicalKeyboardKey.keyM, context.l10n.viewAsMap, () => context.goNamed(AppRouteName.sitesMap)),
+      ],
       title: Text(context.l10n.diveSites),
       actions: [
         IconButton(icon: const Icon(Icons.map_outlined), tooltip: context.l10n.viewAsMap, onPressed: () => context.goNamed(AppRouteName.sitesMap)),

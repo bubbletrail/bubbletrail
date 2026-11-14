@@ -109,6 +109,10 @@ class _EquipmentSelectionDialogState extends State<_EquipmentSelectionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    return DesktopShortcuts(actions: [DesktopAction(LogicalKeyboardKey.enter, context.l10n.done, _confirm)], child: _buildContent(context));
+  }
+
+  Widget _buildContent(BuildContext context) {
     // On mobile we're hosted in a bottom sheet, so render sheet content.
     if (platformIsMobile) {
       return _buildSheetLayout();

@@ -173,11 +173,15 @@ class _EquipmentEditScreenState extends State<EquipmentEditScreen> {
           if (state is EquipmentDetailsClosed) context.pop();
         },
         child: ScreenScaffold(
-          title: Text(_isNew ? context.l10n.newEquipment : context.l10n.editEquipment),
-          actions: [
-            if (!_isNew) _popupMenuActions(),
-            IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: context.l10n.discardChanges),
+          overflowMenu: _isNew ? null : _popupMenuActions(),
+          shortcuts: [
+            DesktopAction(LogicalKeyboardKey.keyS, context.l10n.done, () {
+              _saveEquipment();
+            }),
+            DesktopAction(LogicalKeyboardKey.period, context.l10n.discardChanges, _cancel),
           ],
+          title: Text(_isNew ? context.l10n.newEquipment : context.l10n.editEquipment),
+          actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: context.l10n.discardChanges)],
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(

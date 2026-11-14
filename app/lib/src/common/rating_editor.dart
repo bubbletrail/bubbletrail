@@ -2,6 +2,8 @@ import 'package:btl10n/btl10n.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'adaptive_modal.dart';
+import 'desktop_shortcuts.dart';
+import 'package:flutter/services.dart';
 
 // Shows an editor for a dive's rating. On mobile this is a bottom sheet, on
 // desktop a modal dialog. Returns the selected rating (0 meaning no rating),
@@ -33,6 +35,13 @@ class _RatingEditorState extends State<_RatingEditor> {
 
   @override
   Widget build(BuildContext context) {
+    return DesktopShortcuts(
+      actions: [DesktopAction(LogicalKeyboardKey.enter, context.l10n.done, () => Navigator.of(context).pop(_rating))],
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     return SafeArea(
       child: Padding(
         padding: const .all(16.0),

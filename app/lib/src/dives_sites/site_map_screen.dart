@@ -3,6 +3,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../common/common.dart';
+import '../app_routes.dart';
+import 'package:go_router/go_router.dart';
 import 'dive_list_bloc.dart';
 import 'site_map.dart';
 
@@ -12,6 +14,7 @@ class SiteMapScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
+      shortcuts: [DesktopAction(LogicalKeyboardKey.keyM, context.l10n.diveSites, () => context.goNamed(AppRouteName.sites))],
       title: Text(context.l10n.siteMap),
       body: BlocBuilder<DiveListBloc, DiveListState>(
         builder: (context, state) {
