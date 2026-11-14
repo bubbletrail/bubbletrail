@@ -24,14 +24,21 @@ class CertificationDetailsScreen extends StatelessWidget {
         if (state is! CertificationDetailsLoaded) return const Placeholder();
         final cert = state.certification;
         return ScreenScaffold(
+          shortcuts: [
+            DesktopAction(
+              LogicalKeyboardKey.keyE,
+              context.l10n.edit,
+              () => context.goNamed(AppRouteName.certificationsDetailsEdit, pathParameters: {'certificationID': cert.id}),
+            ),
+          ],
           title: Text(_title(context, cert)),
+          overflowMenu: _popupMenuActions(context, cert),
           actions: [
             IconButton(
               icon: const Icon(Icons.edit),
               tooltip: context.l10n.edit,
               onPressed: () => context.goNamed(AppRouteName.certificationsDetailsEdit, pathParameters: {'certificationID': cert.id}),
             ),
-            _popupMenuActions(context, cert),
           ],
           body: LayoutBuilder(
             builder: (context, constraints) {

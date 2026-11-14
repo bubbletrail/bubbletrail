@@ -11,6 +11,11 @@ class EquipmentScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
+      shortcuts: [
+        DesktopAction(LogicalKeyboardKey.keyE, context.l10n.equipment, () => context.goNamed(AppRouteName.equipmentList)),
+        DesktopAction(LogicalKeyboardKey.keyG, context.l10n.cylinderTypes, () => context.goNamed(AppRouteName.cylinders)),
+        DesktopAction(LogicalKeyboardKey.keyC, context.l10n.certifications, () => context.goNamed(AppRouteName.certifications)),
+      ],
       title: Text(context.l10n.equipment),
       body: ListView(
         padding: const EdgeInsets.all(16),

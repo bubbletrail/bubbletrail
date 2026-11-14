@@ -105,6 +105,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
   BleScanBloc? _bleScanBloc;
   BleDownloadBloc? _bleDownloadBloc;
   late final GoRouter _router;
+  StatefulNavigationShell? _navigationShell;
 
   @override
   void initState() {
@@ -144,6 +145,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
       routes: [
         StatefulShellRoute.indexedStack(
           builder: (BuildContext context, GoRouterState state, StatefulNavigationShell shell) {
+            _navigationShell = shell;
             final appBarTheme = Theme.of(context).appBarTheme;
 
             // The branch field must match the order of the StatefulShellBranches below: top level
@@ -526,6 +528,39 @@ class _MyAppState extends State<MyApp> with WindowListener {
             themeMode: themeMode,
             debugShowCheckedModeBanner: false,
             routerConfig: _router,
+            // App shortcuts must surround the root focus scope, not just the shell.
+            shortcuts: platformIsDesktop
+                ? {
+                    ...WidgetsApp.defaultShortcuts,
+                    for (final (index, key) in [
+                      LogicalKeyboardKey.digit1,
+                      LogicalKeyboardKey.digit2,
+                      LogicalKeyboardKey.digit3,
+                      LogicalKeyboardKey.digit4,
+                      LogicalKeyboardKey.digit5,
+                    ].indexed)
+                      DesktopAction(key, '', null).activator: DesktopNavigationIntent(index),
+                    const DesktopAction(LogicalKeyboardKey.keyI, '', null).activator: const DesktopImportIntent(),
+                  }
+                : null,
+            actions: {
+              DesktopNavigationIntent: CallbackAction<DesktopNavigationIntent>(
+                onInvoke: (intent) {
+                  if (desktopPopupHasFocus) return null;
+                  final shell = _navigationShell;
+                  shell?.goBranch(intent.destination, initialLocation: intent.destination == shell.currentIndex);
+                  return null;
+                },
+              ),
+              DesktopImportIntent: CallbackAction<DesktopImportIntent>(
+                onInvoke: (intent) {
+                  if (desktopPopupHasFocus) return null;
+                  final context = _router.routerDelegate.navigatorKey.currentContext;
+                  if (context != null) importDives(context);
+                  return null;
+                },
+              ),
+            },
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
           );

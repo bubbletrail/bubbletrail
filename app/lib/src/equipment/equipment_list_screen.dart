@@ -13,6 +13,7 @@ class EquipmentListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold(
+      shortcuts: [DesktopAction(LogicalKeyboardKey.keyN, context.l10n.addNewEquipment, () => context.goNamed(AppRouteName.equipmentNew))],
       title: Text(context.l10n.otherEquipment),
       actions: [IconButton(icon: const Icon(Icons.add), tooltip: context.l10n.addNewEquipment, onPressed: () => context.goNamed(AppRouteName.equipmentNew))],
       body: BlocBuilder<EquipmentListBloc, EquipmentListState>(

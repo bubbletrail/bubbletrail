@@ -176,11 +176,13 @@ class _CylinderEditScreenState extends State<CylinderEditScreen> {
           if (state is CylinderDetailsClosed) context.pop();
         },
         child: ScreenScaffold(
-          title: Text(_isNew ? context.l10n.newCylinderType : context.l10n.editCylinderType),
-          actions: [
-            if (!_isNew) _popupMenuActions(),
-            IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: context.l10n.discardChanges),
+          shortcuts: [
+            DesktopAction(LogicalKeyboardKey.keyS, context.l10n.done, _saveAndPop),
+            DesktopAction(LogicalKeyboardKey.period, context.l10n.discardChanges, _cancel),
           ],
+          title: Text(_isNew ? context.l10n.newCylinderType : context.l10n.editCylinderType),
+          overflowMenu: _isNew ? null : _popupMenuActions(),
+          actions: [IconButton(icon: const Icon(Icons.close), onPressed: _cancel, tooltip: context.l10n.discardChanges)],
           body: Padding(
             padding: const .all(16.0),
             child: Column(

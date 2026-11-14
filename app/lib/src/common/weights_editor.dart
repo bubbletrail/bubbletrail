@@ -3,6 +3,8 @@ import 'package:btproto/btproto.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'adaptive_modal.dart';
+import 'desktop_shortcuts.dart';
+import 'package:flutter/services.dart';
 import 'measurement_editor.dart';
 
 // Shows an editor for a dive's weight systems. On mobile this is a bottom
@@ -58,6 +60,13 @@ class _WeightsEditorState extends State<_WeightsEditor> {
 
   @override
   Widget build(BuildContext context) {
+    return DesktopShortcuts(
+      actions: [DesktopAction(LogicalKeyboardKey.enter, context.l10n.done, () => Navigator.of(context).pop(_result()))],
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     return SafeArea(
       child: Padding(
         padding: const .all(16.0),

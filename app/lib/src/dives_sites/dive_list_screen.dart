@@ -15,7 +15,16 @@ class DiveListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenScaffold(title: Text(context.l10n.dives), actions: [NoFlyIndicator(), _addAction(context)], body: _body());
+    return ScreenScaffold(
+      shortcuts: [
+        DesktopAction(LogicalKeyboardKey.keyN, context.l10n.addNewDive, () => context.goNamed(AppRouteName.divesNew)),
+        if (platformSupportsConnect) DesktopAction(LogicalKeyboardKey.keyD, context.l10n.downloadFromComputer, () => context.goNamed(AppRouteName.connect)),
+        DesktopAction(LogicalKeyboardKey.keyI, context.l10n.importLogFile, () => importDives(context)),
+      ],
+      title: Text(context.l10n.dives),
+      actions: [NoFlyIndicator(), _addAction(context)],
+      body: _body(),
+    );
   }
 
   Widget _addAction(BuildContext context) {

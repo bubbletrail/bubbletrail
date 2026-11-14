@@ -4,6 +4,8 @@ import 'package:collection/collection.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'adaptive_modal.dart';
+import 'desktop_shortcuts.dart';
+import 'package:flutter/services.dart';
 import 'duration_picker.dart';
 import 'info_card_row.dart';
 import 'measurement_editor.dart';
@@ -178,6 +180,13 @@ class _CylindersEditorState extends State<_CylindersEditor> {
 
   @override
   Widget build(BuildContext context) {
+    return DesktopShortcuts(
+      actions: [DesktopAction(LogicalKeyboardKey.enter, context.l10n.done, () => Navigator.of(context).pop(_result()))],
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     final canAdd = widget.availableCylinders.isNotEmpty;
     return SafeArea(
       child: Padding(
