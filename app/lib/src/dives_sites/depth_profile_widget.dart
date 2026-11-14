@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../common/common.dart';
 import '../preferences/preferences_store.dart';
+import 'dive_list_bloc.dart';
 import 'tissue_calculator.dart';
 
 class DepthProfile extends StatefulWidget {
@@ -30,7 +31,7 @@ class _DepthProfileState extends State<DepthProfile> {
   final List<FlSpot> _ceilingSpots = [];
   final List<FlSpot> _buhlmannCeilingSpots = [];
   final List<({double time, double ceiling, double surfGF})> _buhlmann = [];
-  final _pressureData = <int, ({List<FlSpot> spots, double minPressure, double maxPressure})>{};
+  final _pressureData = <int, ({List<FlSpot> spots, List<double> times, List<double> sac, double minPressure, double maxPressure})>{};
   final _gasSwitches = <({double timeMinutes, String gasName})>[];
 
   Locale? _lastLocale;
@@ -170,7 +171,14 @@ class _DepthProfileState extends State<DepthProfile> {
           (s) => normalizePressure(s.pressures.firstWhere((p) => p.tankIndex == tankIndex).pressure),
           _maxTime,
         );
-        _pressureData[tankIndex] = (spots: spots, minPressure: minPressure, maxPressure: maxPressure);
+        final volume = tankIndex < widget.dive.cylinders.length ? widget.dive.cylinders[tankIndex].cylinder.volumeL : 0.0;
+        _pressureData[tankIndex] = (
+          spots: spots,
+          times: samplesWithPressure.map((s) => s.time / 60).toList(),
+          sac: volume > 0 ? pressureSac(samplesWithPressure, tankIndex, volume) : [],
+          minPressure: minPressure,
+          maxPressure: maxPressure,
+        );
       }
     }
 
@@ -257,21 +265,66 @@ class _DepthProfileState extends State<DepthProfile> {
     }
 
     // Pressure lines
+    final averageSac = context.select<DiveListBloc, double>((bloc) {
+      final state = bloc.state;
+      if (state is! DiveListLoaded) return 0;
+      var total = 0.0;
+      var count = 0;
+      for (final dive in state.dives) {
+        if (dive.sac > 0 && dive.sac.isFinite) {
+          total += dive.sac;
+          count++;
+        }
+      }
+      return count > 0 ? total / count : 0;
+    });
+    final minSac = averageSac / 2;
+    final maxSac = averageSac * 2;
+    const sacPalette = [
+      Color(0xffaa3355),
+      Color(0xffcc6666),
+      Color(0xffee9944),
+      Color(0xffeedd00),
+      Color(0xff99dd55),
+      Color(0xff44dd88),
+      Color(0xff22ccbb),
+      Color(0xff00bbcc),
+      Color(0xff0099cc),
+      Color(0xff3366bb),
+    ];
     var pressureColorIdx = 0;
     for (final entry in _pressureData.entries) {
+      final data = entry.value;
+      final colors = <Color>[];
+      final stops = <double>[];
+      if (averageSac > 0 && data.sac.length > 1 && data.times.last > data.times.first) {
+        final span = data.spots.last.x - data.times.first;
+        for (var i = 0; i < data.sac.length; i++) {
+          final fraction = ((data.sac[i] - minSac) / (maxSac - minSac)).clamp(0.0, 1.0);
+          final index = ((1 - fraction) * sacPalette.length).floor().clamp(0, sacPalette.length - 1);
+          final color = sacPalette[index];
+          // Duplicate stops at sample boundaries keep the palette stepped.
+          colors.addAll([color, color]);
+          stops.addAll([
+            (data.times[i] - data.times.first) / span,
+            ((i + 1 < data.times.length ? data.times[i + 1] : data.spots.last.x) - data.times.first) / span,
+          ]);
+        }
+      }
       lineBars.add(
         LineChartBarData(
           spots: entry.value.spots,
           color: pressureColors[pressureColorIdx % pressureColors.length],
-          barWidth: 1,
+          barWidth: 2,
+          gradient: colors.isNotEmpty ? LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: colors, stops: stops) : null,
           dotData: const FlDotData(show: false),
-          dashArray: [2, 2],
         ),
       );
       pressureColorIdx++;
     }
 
     final buhlmann = _buhlmann.firstWhereOrNull((s) => s.time == _displaySample?.time);
+    final selectedSac = _selectedSac();
     return Stack(
       children: [
         // Chart
@@ -361,7 +414,7 @@ class _DepthProfileState extends State<DepthProfile> {
               },
               touchTooltipData: LineTouchTooltipData(getTooltipItems: (touchedSpots) => [for (var i = 0; i < touchedSpots.length; i++) null]),
               getTouchedSpotIndicator: (barData, spotIndexes) => spotIndexes.map((idx) {
-                if (barData.barWidth < 2) return null; // hack to identify depth line
+                if (!identical(barData, lineBars[depthLineIndex])) return null;
                 return TouchedSpotIndicatorData(FlLine(color: Theme.of(context).colorScheme.secondary, strokeWidth: 1), FlDotData());
               }).toList(),
               getTouchLineStart: (barData, spotIndex) => 0,
@@ -383,6 +436,15 @@ class _DepthProfileState extends State<DepthProfile> {
                 if (_displaySample!.hasTemperature()) TemperatureText(_displaySample!.temperature),
                 if (_displaySample!.pressures.isNotEmpty && _displaySample!.pressures.first.pressure > 0)
                   PressureText(_displaySample!.pressures.first.pressure),
+                if (selectedSac != null)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 4,
+                    children: [
+                      Text(context.l10n.sac),
+                      VolumeText(selectedSac, suffix: context.l10n.perMinute, precise: true),
+                    ],
+                  ),
                 if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0) DepthText(_displaySample!.deco.depth, prefix: context.l10n.compCeil),
                 if (buhlmann != null && buhlmann.ceiling > 0) DepthText(buhlmann.ceiling, prefix: context.l10n.calcCeil),
                 if (buhlmann != null) Text(context.l10n.surfaceGradientFactorValue(buhlmann.surfGF.round().clamp(0, 999))),
@@ -391,6 +453,21 @@ class _DepthProfileState extends State<DepthProfile> {
           ),
       ],
     );
+  }
+
+  double? _selectedSac() {
+    final sample = _displaySample;
+    if (sample == null || sample.pressures.isEmpty || sample.pressures.first.pressure <= 0) return null;
+    final data = _pressureData[sample.pressures.first.tankIndex];
+    if (data == null || data.sac.length < 2) return null;
+    final time = sample.time / 60;
+    if (time < data.times.first) return null;
+    for (var i = 1; i < data.times.length; i++) {
+      if (data.times[i] > time) {
+        return data.sac[i - 1];
+      }
+    }
+    return data.sac.last;
   }
 
   void _calculateBuhlmann(double gfLow, double gfHigh) {
@@ -489,4 +566,55 @@ class _DepthProfileState extends State<DepthProfile> {
 
     return spots;
   }
+}
+
+// Centered one-minute SAC in litres/minute. At the edges, use the first or
+// last minute; for shorter recordings, use the entire available interval.
+// Fit a linear pressure trend through all readings in each window. Samples
+// must have depth and positive pressure for [tankIndex], in time order.
+List<double> pressureSac(List<LogSample> samples, int tankIndex, double volume) {
+  if (samples.length < 2) return List<double>.filled(samples.length, 0);
+  double pressure(int i) => samples[i].pressures.firstWhere((p) => p.tankIndex == tankIndex).pressure;
+  double ambient(int i) => 1 + samples[i].depth / 10;
+
+  final rates = List<double>.filled(samples.length, 0);
+  final firstTime = samples.first.time;
+  final lastTime = samples.last.time;
+  final window = (lastTime - firstTime).clamp(0.0, 60.0);
+  var start = 0;
+  var end = 0;
+  for (var i = 0; i < samples.length; i++) {
+    final startTime = (samples[i].time - window / 2).clamp(firstTime, lastTime - window).toDouble();
+    final endTime = startTime + window;
+    while (start + 1 < samples.length && (samples[start + 1].time - startTime).abs() <= (samples[start].time - startTime).abs()) {
+      start++;
+    }
+    while (end + 1 < samples.length && (samples[end + 1].time - endTime).abs() <= (samples[end].time - endTime).abs()) {
+      end++;
+    }
+    final count = end - start + 1;
+    var totalAmbient = 0.0;
+    var totalTime = 0.0;
+    var totalPressure = 0.0;
+    for (var j = start; j <= end; j++) {
+      totalAmbient += ambient(j);
+      totalTime += samples[j].time - samples[start].time;
+      totalPressure += pressure(j);
+    }
+    final averageAmbient = totalAmbient / count;
+    final meanTime = totalTime / count;
+    final meanPressure = totalPressure / count;
+    var covariance = 0.0;
+    var variance = 0.0;
+    for (var j = start; j <= end; j++) {
+      final time = samples[j].time - samples[start].time - meanTime;
+      covariance += time * (pressure(j) - meanPressure);
+      variance += time * time;
+    }
+    if (variance > 0 && averageAmbient > 0) {
+      final pressureDropPerMinute = (-covariance / variance * 60).clamp(0.0, double.infinity);
+      rates[i] = pressureDropPerMinute * volume / averageAmbient;
+    }
+  }
+  return rates;
 }
