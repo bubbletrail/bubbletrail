@@ -490,6 +490,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unknown => 'Unknown';
 
   @override
+  String tts(Object time) {
+    return '$time TTS';
+  }
+
+  @override
   String deco(Object time, Object depth) {
     return 'Starting at $depth, TTS $time';
   }

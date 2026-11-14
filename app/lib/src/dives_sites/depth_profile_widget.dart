@@ -21,11 +21,44 @@ class DepthProfile extends StatefulWidget {
   State<DepthProfile> createState() => _DepthProfileState();
 }
 
+class _ProfileAnnotationPainter extends FlDotCirclePainter {
+  final String label;
+  final Color background;
+  final TextDirection textDirection;
+  final bool above;
+
+  _ProfileAnnotationPainter({required this.label, required super.color, required this.background, required this.textDirection, this.above = false})
+    : super(radius: 4, strokeWidth: 2, strokeColor: background);
+
+  @override
+  void draw(Canvas canvas, FlSpot spot, Offset offsetInCanvas) {
+    super.draw(canvas, spot, offsetInCanvas);
+    final text = TextPainter(
+      text: TextSpan(
+        text: label,
+        style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600),
+      ),
+      textDirection: textDirection,
+    )..layout();
+    final bounds = canvas.getLocalClipBounds();
+    final left = (offsetInCanvas.dx - text.width / 2).clamp(bounds.left + 2, (bounds.right - text.width - 2).clamp(bounds.left + 2, double.infinity));
+    final offset = Offset(left, above ? offsetInCanvas.dy - text.height - 8 : offsetInCanvas.dy + 8);
+    canvas.drawRRect(RRect.fromRectAndRadius((offset & text.size).inflate(2), const Radius.circular(2)), Paint()..color = background);
+    text.paint(canvas, offset);
+    text.dispose();
+  }
+
+  @override
+  List<Object?> get props => [...super.props, label, background, textDirection, above];
+}
+
 class _DepthProfileState extends State<DepthProfile> {
   LogSample? _displaySample;
+  LogSample? _decoAnnotationSample;
   double _maxTime = 0;
   double _chartMaxDepth = 0;
   final List<FlSpot> _tempSpots = [];
+  final Map<FlSpot, double> _temperatureExtrema = {};
   final List<LogSample> samplesWithDepth = [];
   final List<FlSpot> _depthSpots = [];
   final List<FlSpot> _ceilingSpots = [];
@@ -59,11 +92,13 @@ class _DepthProfileState extends State<DepthProfile> {
     samplesWithDepth.clear();
     _depthSpots.clear();
     _tempSpots.clear();
+    _temperatureExtrema.clear();
     _ceilingSpots.clear();
     _buhlmannCeilingSpots.clear();
     _buhlmann.clear();
     _pressureData.clear();
     _gasSwitches.clear();
+    _decoAnnotationSample = null;
 
     // Filter out samples without depth data
     samplesWithDepth.addAll(widget.log.samples.where((s) => s.hasDepth()));
@@ -80,7 +115,8 @@ class _DepthProfileState extends State<DepthProfile> {
 
     // Depth data
     final maxDepth = depthMult * -samplesWithDepth.map((s) => s.depth).reduce((a, b) => a > b ? a : b);
-    _chartMaxDepth = ((maxDepth ~/ 3) - 1).toDouble() * 3;
+    // Leave room below the deepest sample for its annotation.
+    _chartMaxDepth = ((maxDepth * 1.2 ~/ 3) - 1).toDouble() * 3;
     _maxTime = samplesWithDepth.map((s) => s.time).reduce((a, b) => a > b ? a : b) / 60;
     _depthSpots.addAll(samplesWithDepth.map((sample) => FlSpot(sample.time / 60, depthMult * -sample.depth)));
 
@@ -91,17 +127,41 @@ class _DepthProfileState extends State<DepthProfile> {
       minTemp = samplesWithTemp.map((s) => s.temperature).reduce((a, b) => a < b ? a : b);
       maxTemp = samplesWithTemp.map((s) => s.temperature).reduce((a, b) => a > b ? a : b);
       final tempRange = maxTemp - minTemp;
-      if (tempRange > 0) {
-        double normalizeTemp(double temp) {
-          final normalized = (temp - minTemp) / tempRange;
-          return maxDepth * 0.9 - normalized * (maxDepth * 0.2);
-        }
+      double normalizeTemp(double temp) {
+        if (tempRange == 0) return maxDepth * 0.8;
+        final normalized = (temp - minTemp) / tempRange;
+        return maxDepth * 0.9 - normalized * (maxDepth * 0.2);
+      }
 
-        _tempSpots.addAll(_buildStepSpots(samplesWithTemp, (s) => s.time / 60, (s) => normalizeTemp(s.temperature), _maxTime));
+      _tempSpots.addAll(_buildStepSpots(samplesWithTemp, (s) => s.time / 60, (s) => normalizeTemp(s.temperature), _maxTime));
+      // Use actual samples so synthetic step points cannot move the markers.
+      for (final temperature in {minTemp, maxTemp}) {
+        final sample = samplesWithTemp.firstWhere((s) => s.temperature == temperature);
+        _temperatureExtrema[FlSpot(sample.time / 60, normalizeTemp(temperature))] = temperature;
       }
     }
 
     // Deco ceiling (from dive computer)
+    LogSample? lowestNdl;
+    LogSample? highestTts;
+    final reportedDecoValues = <(DecoStopType, int)>{};
+    for (final sample in samplesWithDepth) {
+      if (!sample.hasDeco()) continue;
+      final deco = sample.deco;
+      if (deco.type == .DECO_STOP_TYPE_DECO_STOP && deco.depth > 0) {
+        reportedDecoValues.add((deco.type, deco.tts));
+        if (highestTts == null || deco.tts > highestTts.deco.tts || (deco.tts == highestTts.deco.tts && deco.depth > highestTts.deco.depth)) {
+          highestTts = sample;
+        }
+      } else if (deco.type == .DECO_STOP_TYPE_NDL && deco.time > 0) {
+        reportedDecoValues.add((deco.type, deco.time));
+        if (lowestNdl == null || deco.time < lowestNdl.deco.time) {
+          lowestNdl = sample;
+        }
+      }
+    }
+    // Constant values usually represent a computer's placeholder or limit.
+    _decoAnnotationSample = reportedDecoValues.length > 1 ? highestTts ?? lowestNdl : null;
     var inDeco = false;
     for (final sample in samplesWithDepth) {
       final hasCeiling = sample.deco.type == .DECO_STOP_TYPE_DECO_STOP && sample.deco.depth > 0;
@@ -216,6 +276,9 @@ class _DepthProfileState extends State<DepthProfile> {
     final pressureColors = [Colors.orange, Colors.green, Colors.lime, Colors.teal];
     final ceilingColor = Colors.red;
     final buhlmannCeilingColor = Colors.deepPurple;
+    final deepestSpot = _depthSpots.reduce((a, b) => a.y <= b.y ? a : b);
+    final deepestIndex = _depthSpots.indexOf(deepestSpot);
+    final deepestLabel = formatDepth(context.l10n, _lastDepthUnit!, samplesWithDepth[deepestIndex].depth);
 
     // Build line bars
     final lineBars = <LineChartBarData>[];
@@ -255,14 +318,38 @@ class _DepthProfileState extends State<DepthProfile> {
         spots: _depthSpots,
         color: primaryColor,
         barWidth: 2,
-        dotData: const FlDotData(show: false),
+        dotData: FlDotData(
+          // Chart animations recreate spots, so compare their coordinates.
+          checkToShowDot: (spot, bar) => spot == deepestSpot,
+          getDotPainter: (spot, percent, bar, index) =>
+              _ProfileAnnotationPainter(label: deepestLabel, color: primaryColor, background: colorScheme.surface, textDirection: Directionality.of(context)),
+        ),
         aboveBarData: BarAreaData(show: true, color: primaryColor.withValues(alpha: 0.3)),
       ),
     );
 
     // Temperature line
     if (_tempSpots.isNotEmpty) {
-      lineBars.add(LineChartBarData(spots: _tempSpots, color: tempColor, barWidth: 1, dotData: const FlDotData(show: false), dashArray: [4, 2]));
+      final temperatureUnit = context.select<PreferencesStore, TemperatureUnit>((prefs) => prefs.temperatureUnit);
+      final maxTemperature = _temperatureExtrema.values.reduce((a, b) => a > b ? a : b);
+      lineBars.add(
+        LineChartBarData(
+          spots: _tempSpots,
+          color: tempColor,
+          barWidth: 1,
+          dotData: FlDotData(
+            checkToShowDot: (spot, bar) => _temperatureExtrema.containsKey(spot),
+            getDotPainter: (spot, percent, bar, index) => _ProfileAnnotationPainter(
+              label: formatTemperature(context.l10n, temperatureUnit, _temperatureExtrema[spot]!),
+              above: _temperatureExtrema[spot] == maxTemperature,
+              color: tempColor,
+              background: colorScheme.surface,
+              textDirection: Directionality.of(context),
+            ),
+          ),
+          dashArray: [4, 2],
+        ),
+      );
     }
 
     // Pressure lines
@@ -322,6 +409,24 @@ class _DepthProfileState extends State<DepthProfile> {
         ),
       );
       pressureColorIdx++;
+    }
+
+    final decoSample = _decoAnnotationSample;
+    if (decoSample != null) {
+      final deco = decoSample.deco;
+      final isDeco = deco.type == .DECO_STOP_TYPE_DECO_STOP;
+      final label = isDeco ? context.l10n.tts(formatMinutes(context.l10n, deco.tts)) : context.l10n.ndl(formatMinutes(context.l10n, deco.time));
+      final depthMult = _lastDepthUnit == .feet ? 3.28 : 1.0;
+      lineBars.add(
+        LineChartBarData(
+          spots: [FlSpot(decoSample.time / 60, isDeco ? -deco.depth * depthMult : 0)],
+          barWidth: 0,
+          dotData: FlDotData(
+            getDotPainter: (spot, percent, bar, index) =>
+                _ProfileAnnotationPainter(label: label, color: ceilingColor, background: colorScheme.surface, textDirection: Directionality.of(context)),
+          ),
+        ),
+      );
     }
 
     final buhlmann = _buhlmann.firstWhereOrNull((s) => s.time == _displaySample?.time);
