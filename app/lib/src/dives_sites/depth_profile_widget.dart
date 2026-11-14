@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:btbuhlmann/btbuhlmann.dart' as buhlmann;
 import 'package:btl10n/btl10n.dart';
 import 'package:btproto/btproto.dart';
@@ -54,6 +56,8 @@ class _ProfileAnnotationPainter extends FlDotCirclePainter {
 
 class _DepthProfileState extends State<DepthProfile> {
   LogSample? _displaySample;
+  Timer? _infoHideTimer;
+  bool _infoVisible = false;
   LogSample? _decoAnnotationSample;
   double _maxTime = 0;
   double _chartMaxDepth = 0;
@@ -71,6 +75,19 @@ class _DepthProfileState extends State<DepthProfile> {
   DepthUnit? _lastDepthUnit;
   double? _lastGfLow;
   double? _lastGfHigh;
+
+  @override
+  void dispose() {
+    _infoHideTimer?.cancel();
+    super.dispose();
+  }
+
+  void _scheduleInfoHide() {
+    _infoHideTimer?.cancel();
+    _infoHideTimer = Timer(const Duration(seconds: 5), () {
+      setState(() => _infoVisible = false);
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -492,15 +509,14 @@ class _DepthProfileState extends State<DepthProfile> {
             lineTouchData: LineTouchData(
               touchCallback: (event, resp) {
                 if (event is FlLongPressEnd) {
+                  _infoHideTimer?.cancel();
                   setState(() {
-                    _displaySample = null;
+                    _infoVisible = false;
                   });
                   return;
                 }
                 if (resp == null || resp.lineBarSpots == null || resp.lineBarSpots!.isEmpty) {
-                  setState(() {
-                    _displaySample = null;
-                  });
+                  if (_infoVisible) _scheduleInfoHide();
                   return;
                 }
 
@@ -514,8 +530,10 @@ class _DepthProfileState extends State<DepthProfile> {
                 final sample = _findClosestSample(samplesWithDepth, timeSeconds);
                 if (sample == null) return;
 
+                _scheduleInfoHide();
                 setState(() {
                   _displaySample = sample;
+                  _infoVisible = true;
                 });
               },
               touchTooltipData: LineTouchTooltipData(getTooltipItems: (touchedSpots) => [for (var i = 0; i < touchedSpots.length; i++) null]),
@@ -532,29 +550,35 @@ class _DepthProfileState extends State<DepthProfile> {
 
         // Top info line
         if (_displaySample != null)
-          Padding(
-            padding: const .only(top: 8, left: 48),
-            child: Row(
-              spacing: 16,
-              children: [
-                Text(formatDuration(_displaySample!.time.toInt())),
-                DepthText(_displaySample!.depth),
-                if (_displaySample!.hasTemperature()) TemperatureText(_displaySample!.temperature),
-                if (_displaySample!.pressures.isNotEmpty && _displaySample!.pressures.first.pressure > 0)
-                  PressureText(_displaySample!.pressures.first.pressure),
-                if (selectedSac != null)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: 4,
-                    children: [
-                      Text(context.l10n.sac),
-                      VolumeText(selectedSac, suffix: context.l10n.perMinute, precise: true),
-                    ],
-                  ),
-                if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0) DepthText(_displaySample!.deco.depth, prefix: context.l10n.compCeil),
-                if (buhlmann != null && buhlmann.ceiling > 0) DepthText(buhlmann.ceiling, prefix: context.l10n.calcCeil),
-                if (buhlmann != null) Text(context.l10n.surfaceGradientFactorValue(buhlmann.surfGF.round().clamp(0, 999))),
-              ],
+          IgnorePointer(
+            child: AnimatedOpacity(
+              opacity: _infoVisible ? 1 : 0,
+              duration: const Duration(milliseconds: 300),
+              child: Padding(
+                padding: const .only(top: 8, left: 48),
+                child: Row(
+                  spacing: 16,
+                  children: [
+                    Text(formatDuration(_displaySample!.time.toInt())),
+                    DepthText(_displaySample!.depth),
+                    if (_displaySample!.hasTemperature()) TemperatureText(_displaySample!.temperature),
+                    if (_displaySample!.pressures.isNotEmpty && _displaySample!.pressures.first.pressure > 0)
+                      PressureText(_displaySample!.pressures.first.pressure),
+                    if (selectedSac != null)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 4,
+                        children: [
+                          Text(context.l10n.sac),
+                          VolumeText(selectedSac, suffix: context.l10n.perMinute, precise: true),
+                        ],
+                      ),
+                    if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0) DepthText(_displaySample!.deco.depth, prefix: context.l10n.compCeil),
+                    if (buhlmann != null && buhlmann.ceiling > 0) DepthText(buhlmann.ceiling, prefix: context.l10n.calcCeil),
+                    if (buhlmann != null) Text(context.l10n.surfaceGradientFactorValue(buhlmann.surfGF.round().clamp(0, 999))),
+                  ],
+                ),
+              ),
             ),
           ),
       ],
