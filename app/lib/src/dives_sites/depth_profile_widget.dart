@@ -242,7 +242,8 @@ class _DepthProfileState extends State<DepthProfile> {
           color: ceilingColor,
           barWidth: 1.5,
           dotData: const FlDotData(show: false),
-          aboveBarData: BarAreaData(show: true, color: ceilingColor.withValues(alpha: 0.5), cutOffY: 0, applyCutOffY: true),
+          aboveBarData: BarAreaData(show: true, color: ceilingColor.withValues(alpha: 0.2), cutOffY: 0, applyCutOffY: true),
+          dashArray: [3, 1],
         ),
       );
     }
