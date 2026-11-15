@@ -685,36 +685,30 @@ class _ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    void openFullscreen() {
+      context.pushNamed(AppRouteName.divesDetailsDepthProfile, pathParameters: {'diveID': dive.id});
+    }
+
     return Padding(
       padding: const .all(8.0),
-      child: Column(
-        crossAxisAlignment: .stretch,
-        spacing: 8,
-        children: [
-          Stack(
-            children: [
-              IgnorePointer(
-                ignoring: platformIsMobile,
-                child: _AspectMaxHeight(
-                  aspectRatio: 2.5,
-                  maxHeight: 250,
-                  child: DepthProfile(key: ValueKey(dive), dive: dive),
-                ),
+      child: Semantics(
+        button: true,
+        label: context.l10n.viewFullscreen,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: openFullscreen,
+            child: IgnorePointer(
+              ignoring: platformIsMobile,
+              child: _AspectMaxHeight(
+                aspectRatio: 2.5,
+                maxHeight: 250,
+                child: DepthProfile(key: ValueKey(dive), dive: dive, onTap: openFullscreen),
               ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: IconButton.filled(
-                  icon: const Icon(Icons.fullscreen),
-                  onPressed: () {
-                    context.pushNamed(AppRouteName.divesDetailsDepthProfile, pathParameters: {'diveID': dive.id});
-                  },
-                  tooltip: context.l10n.viewFullscreen,
-                ),
-              ),
-            ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }

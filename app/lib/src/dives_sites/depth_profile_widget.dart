@@ -16,8 +16,9 @@ import 'tissue_calculator.dart';
 class DepthProfile extends StatefulWidget {
   final Dive dive;
   final Log log;
+  final VoidCallback? onTap;
 
-  DepthProfile({super.key, required this.dive}) : log = dive.logs.firstOrNull ?? Log();
+  DepthProfile({super.key, required this.dive, this.onTap}) : log = dive.logs.firstOrNull ?? Log();
 
   @override
   State<DepthProfile> createState() => _DepthProfileState();
@@ -575,6 +576,7 @@ class _DepthProfileState extends State<DepthProfile> {
       lineTouchData: LineTouchData(
         handleBuiltInTouches: false,
         touchCallback: (event, resp) {
+          if (event is FlTapUpEvent) widget.onTap?.call();
           if (event is FlLongPressEnd) {
             _infoHideTimer?.cancel();
             _infoVisible = false;
