@@ -55,9 +55,28 @@ class _ProfileAnnotationPainter extends FlDotCirclePainter {
 }
 
 class _DepthProfileState extends State<DepthProfile> {
+  static const _chartBorderWidth = 1.0;
+  static const _leftTitleWidth = 24.0;
+  static const _bottomTitleHeight = 16.0;
+  static const sacPalette = [
+    Color(0xffaa3355),
+    Color(0xffcc6666),
+    Color(0xffee9944),
+    Color(0xffeedd00),
+    Color(0xff99dd55),
+    Color(0xff44dd88),
+    Color(0xff22ccbb),
+    Color(0xff00bbcc),
+    Color(0xff0099cc),
+    Color(0xff3366bb),
+  ];
+
+  final _hoverChanges = ValueNotifier<int>(0);
+  final List<LogSample> _inspectionSamples = [];
   LogSample? _displaySample;
   Timer? _infoHideTimer;
   bool _infoVisible = false;
+  double? _inspectionTime;
   LogSample? _decoAnnotationSample;
   double _maxTime = 0;
   double _chartMaxDepth = 0;
@@ -69,9 +88,14 @@ class _DepthProfileState extends State<DepthProfile> {
   final List<FlSpot> _buhlmannCeilingSpots = [];
   final List<({double time, double ceiling, double surfGF})> _buhlmann = [];
   final _pressureData = <int, ({List<FlSpot> spots, List<double> times, List<double> sac, double minPressure, double maxPressure})>{};
-  final _gasSwitches = <({double timeMinutes, String gasName})>[];
+  final _gasSwitches = <({double timeMinutes, double oxygen, double helium})>[];
+  final _buhlmannByTime = <double, ({double time, double ceiling, double surfGF})>{};
+  final List<double?> _inspectionSac = [];
+  double? _displaySac;
+  LineChartData? _chartData;
+  DiveListState? _lastDiveListState;
+  double _averageSac = 0;
 
-  Locale? _lastLocale;
   DepthUnit? _lastDepthUnit;
   double? _lastGfLow;
   double? _lastGfHigh;
@@ -79,34 +103,74 @@ class _DepthProfileState extends State<DepthProfile> {
   @override
   void dispose() {
     _infoHideTimer?.cancel();
+    _hoverChanges.dispose();
     super.dispose();
   }
 
   void _scheduleInfoHide() {
     _infoHideTimer?.cancel();
     _infoHideTimer = Timer(const Duration(seconds: 5), () {
-      setState(() => _infoVisible = false);
+      _infoVisible = false;
+      _hoverChanges.value++;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _buildData(context.read<PreferencesStore>());
+  }
+
+  @override
+  void didUpdateWidget(covariant DepthProfile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.dive, widget.dive) || !identical(oldWidget.log, widget.log)) {
+      _buildData(context.read<PreferencesStore>());
+      _chartData = samplesWithDepth.isEmpty ? null : _buildChartData();
+    }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final prefs = context.watch<PreferencesStore>();
-    final locale = Localizations.localeOf(context);
-    final needsRebuild = _lastLocale != locale || _lastDepthUnit != prefs.depthUnit || _lastGfLow != prefs.gfLow || _lastGfHigh != prefs.gfHigh;
-
-    if (needsRebuild) {
-      _lastLocale = locale;
-      _lastDepthUnit = prefs.depthUnit;
-      _lastGfLow = prefs.gfLow;
-      _lastGfHigh = prefs.gfHigh;
+    if (_lastDepthUnit != prefs.depthUnit || _lastGfLow != prefs.gfLow || _lastGfHigh != prefs.gfHigh) {
       _buildData(prefs);
     }
+    final diveListState = context.watch<DiveListBloc>().state;
+    if (!identical(_lastDiveListState, diveListState)) {
+      _lastDiveListState = diveListState;
+      var total = 0.0;
+      var count = 0;
+      if (diveListState is DiveListLoaded) {
+        for (final dive in diveListState.dives) {
+          if (dive.sac > 0 && dive.sac.isFinite) {
+            total += dive.sac;
+            count++;
+          }
+        }
+      }
+      _averageSac = count > 0 ? total / count : 0;
+    }
+    // Labels and colours depend on inherited locale, direction, units and theme.
+    _chartData = samplesWithDepth.isEmpty ? null : _buildChartData();
   }
 
   void _buildData(PreferencesStore prefs) {
+    _lastDepthUnit = prefs.depthUnit;
+    _lastGfLow = prefs.gfLow;
+    _lastGfHigh = prefs.gfHigh;
+    _infoHideTimer?.cancel();
+    _displaySample = null;
+    _displaySac = null;
+    _inspectionTime = null;
+    _infoVisible = false;
+    _maxTime = 0;
+    _chartMaxDepth = 0;
+    _inspectionSac.clear();
+    _buhlmannByTime.clear();
     samplesWithDepth.clear();
+    _inspectionSamples.clear();
     _depthSpots.clear();
     _tempSpots.clear();
     _temperatureExtrema.clear();
@@ -126,6 +190,21 @@ class _DepthProfileState extends State<DepthProfile> {
     }
 
     if (samplesWithDepth.isEmpty) return;
+
+    // Carry sparse readings forward once, rather than scanning the dive on every hover.
+    final inspectionSample = LogSample();
+    for (final sample in samplesWithDepth) {
+      inspectionSample.time = sample.time;
+      inspectionSample.depth = sample.depth;
+      if (sample.hasTemperature()) inspectionSample.temperature = sample.temperature;
+      if (sample.pressures.isNotEmpty) {
+        inspectionSample.pressures
+          ..clear()
+          ..addAll(sample.pressures);
+      }
+      if (sample.hasDeco()) inspectionSample.deco = sample.deco;
+      _inspectionSamples.add(inspectionSample.deepCopy());
+    }
 
     final depthUnit = prefs.depthUnit;
     final depthMult = depthUnit == .feet ? 3.28 : 1.0;
@@ -177,6 +256,7 @@ class _DepthProfileState extends State<DepthProfile> {
         }
       }
     }
+
     // Constant values usually represent a computer's placeholder or limit.
     _decoAnnotationSample = reportedDecoValues.length > 1 ? highestTts ?? lowestNdl : null;
     var inDeco = false;
@@ -259,6 +339,25 @@ class _DepthProfileState extends State<DepthProfile> {
       }
     }
 
+    final pressureIndices = <int, int>{};
+    for (final sample in _inspectionSamples) {
+      double? sac;
+      if (sample.pressures.isNotEmpty && sample.pressures.first.pressure > 0) {
+        final tankIndex = sample.pressures.first.tankIndex;
+        final data = _pressureData[tankIndex];
+        final time = sample.time / 60;
+        if (data != null && data.sac.length >= 2 && time >= data.times.first) {
+          var index = pressureIndices[tankIndex] ?? 0;
+          while (index + 1 < data.times.length && data.times[index + 1] <= time) {
+            index++;
+          }
+          pressureIndices[tankIndex] = index;
+          sac = data.sac[index];
+        }
+      }
+      _inspectionSac.add(sac);
+    }
+
     if (widget.dive.cylinders.length > 1) {
       // Find gas switches
       for (final event in widget.dive.events) {
@@ -268,24 +367,17 @@ class _DepthProfileState extends State<DepthProfile> {
             // We're switching to a non-default gas, without having switched
             // to the default gas, so for illustrative purposes we add a
             // synthetic switch at the first sample.
-            _gasSwitches.add((timeMinutes: 0, gasName: formatGasFraction(context, widget.dive.cylinders.first.oxygen, widget.dive.cylinders.first.helium)));
+            _gasSwitches.add((timeMinutes: 0, oxygen: widget.dive.cylinders.first.oxygen, helium: widget.dive.cylinders.first.helium));
           }
           final cyl = widget.dive.cylinders[event.value];
-          final gasName = formatGasFraction(context, cyl.oxygen, cyl.helium);
-          _gasSwitches.add((timeMinutes: event.time / 60, gasName: gasName));
+          _gasSwitches.add((timeMinutes: event.time / 60, oxygen: cyl.oxygen, helium: cyl.helium));
         }
       }
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (samplesWithDepth.isEmpty) {
-      return Center(
-        child: Padding(padding: .all(16.0), child: Text(context.l10n.noDepthProfileDataAvailable)),
-      );
-    }
-
+  LineChartData _buildChartData() {
+    final textDirection = Directionality.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final primaryColor = colorScheme.primary;
     final borderColor = colorScheme.outline;
@@ -339,7 +431,7 @@ class _DepthProfileState extends State<DepthProfile> {
           // Chart animations recreate spots, so compare their coordinates.
           checkToShowDot: (spot, bar) => spot == deepestSpot,
           getDotPainter: (spot, percent, bar, index) =>
-              _ProfileAnnotationPainter(label: deepestLabel, color: primaryColor, background: colorScheme.surface, textDirection: Directionality.of(context)),
+              _ProfileAnnotationPainter(label: deepestLabel, color: primaryColor, background: colorScheme.surface, textDirection: textDirection),
         ),
         aboveBarData: BarAreaData(show: true, color: primaryColor.withValues(alpha: 0.3)),
       ),
@@ -347,7 +439,7 @@ class _DepthProfileState extends State<DepthProfile> {
 
     // Temperature line
     if (_tempSpots.isNotEmpty) {
-      final temperatureUnit = context.select<PreferencesStore, TemperatureUnit>((prefs) => prefs.temperatureUnit);
+      final temperatureUnit = context.read<PreferencesStore>().temperatureUnit;
       final maxTemperature = _temperatureExtrema.values.reduce((a, b) => a > b ? a : b);
       lineBars.add(
         LineChartBarData(
@@ -361,7 +453,7 @@ class _DepthProfileState extends State<DepthProfile> {
               above: _temperatureExtrema[spot] == maxTemperature,
               color: tempColor,
               background: colorScheme.surface,
-              textDirection: Directionality.of(context),
+              textDirection: textDirection,
             ),
           ),
           dashArray: [4, 2],
@@ -370,33 +462,9 @@ class _DepthProfileState extends State<DepthProfile> {
     }
 
     // Pressure lines
-    final averageSac = context.select<DiveListBloc, double>((bloc) {
-      final state = bloc.state;
-      if (state is! DiveListLoaded) return 0;
-      var total = 0.0;
-      var count = 0;
-      for (final dive in state.dives) {
-        if (dive.sac > 0 && dive.sac.isFinite) {
-          total += dive.sac;
-          count++;
-        }
-      }
-      return count > 0 ? total / count : 0;
-    });
+    final averageSac = _averageSac;
     final minSac = averageSac / 2;
     final maxSac = averageSac * 2;
-    const sacPalette = [
-      Color(0xffaa3355),
-      Color(0xffcc6666),
-      Color(0xffee9944),
-      Color(0xffeedd00),
-      Color(0xff99dd55),
-      Color(0xff44dd88),
-      Color(0xff22ccbb),
-      Color(0xff00bbcc),
-      Color(0xff0099cc),
-      Color(0xff3366bb),
-    ];
     var pressureColorIdx = 0;
     for (final entry in _pressureData.entries) {
       final data = entry.value;
@@ -440,164 +508,189 @@ class _DepthProfileState extends State<DepthProfile> {
           barWidth: 0,
           dotData: FlDotData(
             getDotPainter: (spot, percent, bar, index) =>
-                _ProfileAnnotationPainter(label: label, color: ceilingColor, background: colorScheme.surface, textDirection: Directionality.of(context)),
+                _ProfileAnnotationPainter(label: label, color: ceilingColor, background: colorScheme.surface, textDirection: textDirection),
           ),
         ),
       );
     }
 
-    final buhlmann = _buhlmann.firstWhereOrNull((s) => s.time == _displaySample?.time);
-    final selectedSac = _selectedSac();
-    return Stack(
-      children: [
-        // Chart
-        LineChart(
-          LineChartData(
-            backgroundColor: Colors.transparent,
-            gridData: FlGridData(show: true, drawVerticalLine: true, drawHorizontalLine: true),
-            titlesData: FlTitlesData(
-              leftTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  minIncluded: false,
-                  reservedSize: 24,
-                  getTitlesWidget: (value, meta) {
-                    return Padding(
-                      padding: const .only(right: 8.0),
-                      child: Text(value.toStringAsFixed(0).replaceFirst('-', ''), style: const TextStyle(fontSize: 10), textAlign: .right),
-                    );
-                  },
-                ),
-              ),
-              rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  maxIncluded: false,
-                  reservedSize: 16,
-                  getTitlesWidget: (value, meta) {
-                    return Text(value.toStringAsFixed(0), style: const TextStyle(fontSize: 10));
-                  },
-                ),
-              ),
-            ),
-            borderData: FlBorderData(show: true, border: Border.all(color: borderColor)),
-            minX: 0,
-            maxX: _maxTime + 0.5, // minutes
-            minY: _chartMaxDepth,
-            maxY: 0,
-            lineBarsData: lineBars,
-            extraLinesData: ExtraLinesData(
-              // gas switches
-              verticalLines: [
-                for (final gs in _gasSwitches)
-                  VerticalLine(
-                    x: gs.timeMinutes,
-                    color: colorScheme.tertiary.withValues(alpha: 0.7),
-                    strokeWidth: 1,
-                    dashArray: [2, 2],
-                    label: VerticalLineLabel(
-                      show: true,
-                      alignment: .bottomRight,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(color: colorScheme.tertiary),
-                      labelResolver: (line) => gs.gasName,
-                    ),
-                  ),
-              ],
-            ),
-            lineTouchData: LineTouchData(
-              touchCallback: (event, resp) {
-                if (event is FlLongPressEnd) {
-                  _infoHideTimer?.cancel();
-                  setState(() {
-                    _infoVisible = false;
-                  });
-                  return;
-                }
-                if (resp == null || resp.lineBarSpots == null || resp.lineBarSpots!.isEmpty) {
-                  if (_infoVisible) _scheduleInfoHide();
-                  return;
-                }
-
-                // Find the time from the depth line spot
-                final depthSpot = resp.lineBarSpots!.where((s) => s.barIndex == depthLineIndex).firstOrNull;
-                if (depthSpot == null) return;
-                final time = depthSpot.x;
-                final timeSeconds = (time * 60).toInt();
-
-                // Find the sample closest to this time
-                final sample = _findClosestSample(samplesWithDepth, timeSeconds);
-                if (sample == null) return;
-
-                _scheduleInfoHide();
-                setState(() {
-                  _displaySample = sample;
-                  _infoVisible = true;
-                });
-              },
-              touchTooltipData: LineTouchTooltipData(getTooltipItems: (touchedSpots) => [for (var i = 0; i < touchedSpots.length; i++) null]),
-              getTouchedSpotIndicator: (barData, spotIndexes) => spotIndexes.map((idx) {
-                if (!identical(barData, lineBars[depthLineIndex])) return null;
-                return TouchedSpotIndicatorData(FlLine(color: Theme.of(context).colorScheme.secondary, strokeWidth: 1), FlDotData());
-              }).toList(),
-              getTouchLineStart: (barData, spotIndex) => 0,
-              getTouchLineEnd: (barData, spotIndex) => _chartMaxDepth,
-            ),
-            clipData: .vertical(),
+    final gasLabels = [for (final gs in _gasSwitches) formatGasFraction(context, gs.oxygen, gs.helium)];
+    return LineChartData(
+      backgroundColor: Colors.transparent,
+      gridData: FlGridData(show: true, drawVerticalLine: true, drawHorizontalLine: true),
+      titlesData: FlTitlesData(
+        leftTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            minIncluded: false,
+            reservedSize: _leftTitleWidth,
+            getTitlesWidget: (value, meta) {
+              return Padding(
+                padding: const .only(right: 8.0),
+                child: Text(value.toStringAsFixed(0).replaceFirst('-', ''), style: const TextStyle(fontSize: 10), textAlign: .right),
+              );
+            },
           ),
         ),
-
-        // Top info line
-        if (_displaySample != null)
-          IgnorePointer(
-            child: AnimatedOpacity(
-              opacity: _infoVisible ? 1 : 0,
-              duration: const Duration(milliseconds: 300),
-              child: Padding(
-                padding: const .only(top: 8, left: 48),
-                child: Row(
-                  spacing: 16,
-                  children: [
-                    Text(formatDuration(_displaySample!.time.toInt())),
-                    DepthText(_displaySample!.depth),
-                    if (_displaySample!.hasTemperature()) TemperatureText(_displaySample!.temperature),
-                    if (_displaySample!.pressures.isNotEmpty && _displaySample!.pressures.first.pressure > 0)
-                      PressureText(_displaySample!.pressures.first.pressure),
-                    if (selectedSac != null)
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        spacing: 4,
-                        children: [
-                          Text(context.l10n.sac),
-                          VolumeText(selectedSac, suffix: context.l10n.perMinute, precise: true),
-                        ],
-                      ),
-                    if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0) DepthText(_displaySample!.deco.depth, prefix: context.l10n.compCeil),
-                    if (buhlmann != null && buhlmann.ceiling > 0) DepthText(buhlmann.ceiling, prefix: context.l10n.calcCeil),
-                    if (buhlmann != null) Text(context.l10n.surfaceGradientFactorValue(buhlmann.surfGF.round().clamp(0, 999))),
-                  ],
-                ),
+        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            maxIncluded: false,
+            reservedSize: _bottomTitleHeight,
+            getTitlesWidget: (value, meta) {
+              return Text(value.toStringAsFixed(0), style: const TextStyle(fontSize: 10));
+            },
+          ),
+        ),
+      ),
+      borderData: FlBorderData(
+        show: true,
+        border: Border.all(color: borderColor, width: _chartBorderWidth),
+      ),
+      minX: 0,
+      maxX: _maxTime + 0.5, // minutes
+      minY: _chartMaxDepth,
+      maxY: 0,
+      lineBarsData: lineBars,
+      extraLinesData: ExtraLinesData(
+        verticalLines: [
+          // Gas switches
+          for (var i = 0; i < _gasSwitches.length; i++)
+            VerticalLine(
+              x: _gasSwitches[i].timeMinutes,
+              color: colorScheme.tertiary.withValues(alpha: 0.7),
+              strokeWidth: 1,
+              dashArray: [2, 2],
+              label: VerticalLineLabel(
+                show: true,
+                alignment: .bottomRight,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(color: colorScheme.tertiary),
+                labelResolver: (line) => gasLabels[i],
               ),
             ),
-          ),
-      ],
+        ],
+      ),
+      lineTouchData: LineTouchData(
+        handleBuiltInTouches: false,
+        touchCallback: (event, resp) {
+          if (event is FlLongPressEnd) {
+            _infoHideTimer?.cancel();
+            _infoVisible = false;
+            _inspectionTime = null;
+            _hoverChanges.value++;
+            return;
+          }
+          if (!event.isInterestedForInteractions || resp == null || resp.lineBarSpots == null || resp.lineBarSpots!.isEmpty) {
+            if (_inspectionTime != null) {
+              _inspectionTime = null;
+              _hoverChanges.value++;
+            }
+            if (_infoVisible) _scheduleInfoHide();
+            return;
+          }
+
+          // Find the time from the depth line spot
+          final depthSpot = resp.lineBarSpots!.where((s) => s.barIndex == depthLineIndex).firstOrNull;
+          if (depthSpot == null) return;
+          final time = depthSpot.x;
+          _scheduleInfoHide();
+          if (_inspectionTime == time && _infoVisible) return;
+          _displaySample = _inspectionSamples[depthSpot.spotIndex];
+          _displaySac = _inspectionSac[depthSpot.spotIndex];
+          _inspectionTime = time;
+          _infoVisible = true;
+          _hoverChanges.value++;
+        },
+      ),
+      clipData: .vertical(),
     );
   }
 
-  double? _selectedSac() {
-    final sample = _displaySample;
-    if (sample == null || sample.pressures.isEmpty || sample.pressures.first.pressure <= 0) return null;
-    final data = _pressureData[sample.pressures.first.tankIndex];
-    if (data == null || data.sac.length < 2) return null;
-    final time = sample.time / 60;
-    if (time < data.times.first) return null;
-    for (var i = 1; i < data.times.length; i++) {
-      if (data.times[i] > time) {
-        return data.sac[i - 1];
-      }
+  @override
+  Widget build(BuildContext context) {
+    final chartData = _chartData;
+    if (chartData == null) {
+      return Center(
+        child: Padding(padding: .all(16.0), child: Text(context.l10n.noDepthProfileDataAvailable)),
+      );
     }
-    return data.sac.last;
+    final colorScheme = Theme.of(context).colorScheme;
+    return Stack(
+      children: [
+        RepaintBoundary(child: LineChart(chartData)),
+
+        // Hover updates repaint only these overlays, leaving the chart cached.
+        Positioned.fill(
+          left: _leftTitleWidth + _chartBorderWidth,
+          top: _chartBorderWidth,
+          right: _chartBorderWidth,
+          bottom: _bottomTitleHeight + _chartBorderWidth,
+          child: IgnorePointer(
+            child: RepaintBoundary(
+              child: ListenableBuilder(
+                listenable: _hoverChanges,
+                builder: (context, child) => LayoutBuilder(
+                  builder: (context, constraints) => Stack(
+                    children: [
+                      if (_inspectionTime case final time?)
+                        Positioned(
+                          left: time / (_maxTime + 0.5) * constraints.maxWidth,
+                          top: 0,
+                          bottom: 0,
+                          child: ColoredBox(color: colorScheme.secondary, child: const SizedBox(width: 1)),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        ListenableBuilder(
+          listenable: _hoverChanges,
+          builder: (context, child) {
+            if (_displaySample == null) return const SizedBox.shrink();
+            final buhlmann = _buhlmannByTime[_displaySample!.time];
+            final selectedSac = _displaySac;
+            return RepaintBoundary(
+              child: IgnorePointer(
+                child: AnimatedOpacity(
+                  opacity: _infoVisible ? 1 : 0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Padding(
+                    padding: const .only(top: 8, left: 48),
+                    child: Row(
+                      spacing: 16,
+                      children: [
+                        Text(formatDuration(_displaySample!.time.toInt())),
+                        DepthText(_displaySample!.depth),
+                        if (_displaySample!.hasTemperature()) TemperatureText(_displaySample!.temperature),
+                        if (_displaySample!.pressures.isNotEmpty && _displaySample!.pressures.first.pressure > 0)
+                          PressureText(_displaySample!.pressures.first.pressure),
+                        if (selectedSac != null)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            spacing: 4,
+                            children: [
+                              Text(context.l10n.sac),
+                              VolumeText(selectedSac, suffix: context.l10n.perMinute, precise: true),
+                            ],
+                          ),
+                        if (buhlmann != null) Text(context.l10n.surfaceGradientFactorValue(buhlmann.surfGF.round().clamp(0, 999))),
+                        if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0) DepthText(_displaySample!.deco.depth, prefix: context.l10n.compCeil),
+                        if (buhlmann != null && buhlmann.ceiling > 0) DepthText(buhlmann.ceiling, prefix: context.l10n.calcCeil),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
   }
 
   void _calculateBuhlmann(double gfLow, double gfHigh) {
@@ -615,30 +708,12 @@ class _DepthProfileState extends State<DepthProfile> {
       config: config,
       onSample: (sample, deco) {
         if (sample.hasDepth()) {
-          _buhlmann.add((time: sample.time, ceiling: deco.displayCeiling(), surfGF: deco.surfaceGradientFactor()));
+          final value = (time: sample.time, ceiling: deco.displayCeiling(), surfGF: deco.surfaceGradientFactor());
+          _buhlmann.add(value);
+          _buhlmannByTime[sample.time] = value;
         }
       },
     );
-  }
-
-  LogSample? _findClosestSample(List<LogSample> samples, int timeSeconds) {
-    if (samples.isEmpty) return null;
-    final res = LogSample();
-    for (final sample in samples) {
-      if (sample.time > timeSeconds) return res;
-      res.time = sample.time;
-      if (sample.hasDepth()) res.depth = sample.depth;
-      if (sample.hasTemperature()) res.temperature = sample.temperature;
-      if (sample.pressures.isNotEmpty) {
-        res.pressures
-          ..clear()
-          ..addAll(sample.pressures);
-      }
-      if (sample.hasDeco()) {
-        res.deco = sample.deco;
-      }
-    }
-    return res;
   }
 
   /// Builds step-style graph spots from samples.
