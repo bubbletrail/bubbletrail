@@ -687,6 +687,10 @@ class _DepthProfileState extends State<DepthProfile> {
                                 ],
                               ),
                             if (buhlmann != null) Text(context.l10n.surfaceGradientFactorValue(buhlmann.surfGF.round().clamp(0, 999))),
+                            if (_displaySample!.hasDeco() && _displaySample!.deco.type == .DECO_STOP_TYPE_NDL && _displaySample!.deco.time > 0)
+                              Text(context.l10n.ndl(formatMinutes(context.l10n, _displaySample!.deco.time))),
+                            if (_displaySample!.hasDeco() && _displaySample!.deco.type == .DECO_STOP_TYPE_DECO_STOP && _displaySample!.deco.tts > 0)
+                              Text(context.l10n.tts(formatMinutes(context.l10n, _displaySample!.deco.tts))),
                             if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0)
                               DepthText(_displaySample!.deco.depth, prefix: context.l10n.compCeil),
                             if (buhlmann != null && buhlmann.ceiling > 0) DepthText(buhlmann.ceiling, prefix: context.l10n.calcCeil),
