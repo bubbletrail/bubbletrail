@@ -662,28 +662,37 @@ class _DepthProfileState extends State<DepthProfile> {
                   opacity: _infoVisible ? 1 : 0,
                   duration: const Duration(milliseconds: 300),
                   child: Padding(
-                    padding: const .only(top: 8, left: 48),
-                    child: Row(
-                      spacing: 16,
-                      children: [
-                        Text(formatDuration(_displaySample!.time.toInt())),
-                        DepthText(_displaySample!.depth),
-                        if (_displaySample!.hasTemperature()) TemperatureText(_displaySample!.temperature),
-                        if (_displaySample!.pressures.isNotEmpty && _displaySample!.pressures.first.pressure > 0)
-                          PressureText(_displaySample!.pressures.first.pressure),
-                        if (selectedSac != null)
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            spacing: 4,
-                            children: [
-                              Text(context.l10n.sac),
-                              VolumeText(selectedSac, suffix: context.l10n.perMinute, precise: true),
-                            ],
-                          ),
-                        if (buhlmann != null) Text(context.l10n.surfaceGradientFactorValue(buhlmann.surfGF.round().clamp(0, 999))),
-                        if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0) DepthText(_displaySample!.deco.depth, prefix: context.l10n.compCeil),
-                        if (buhlmann != null && buhlmann.ceiling > 0) DepthText(buhlmann.ceiling, prefix: context.l10n.calcCeil),
-                      ],
+                    padding: const .only(top: _chartBorderWidth, left: _leftTitleWidth + _chartBorderWidth),
+                    child: DefaultTextStyle.merge(
+                      style: const TextStyle(fontFamily: 'Courier', fontFamilyFallback: ['monospace']),
+                      child: Container(
+                        color: colorScheme.surface.withAlpha(128),
+                        padding: EdgeInsets.all(4),
+                        child: Row(
+                          spacing: 16,
+                          mainAxisSize: .min,
+                          children: [
+                            Text(formatDuration(_displaySample!.time.toInt())),
+                            DepthText(_displaySample!.depth),
+                            if (_displaySample!.hasTemperature()) TemperatureText(_displaySample!.temperature),
+                            if (_displaySample!.pressures.isNotEmpty && _displaySample!.pressures.first.pressure > 0)
+                              PressureText(_displaySample!.pressures.first.pressure),
+                            if (selectedSac != null)
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                spacing: 4,
+                                children: [
+                                  Text(context.l10n.sac),
+                                  VolumeText(selectedSac, suffix: context.l10n.perMinute, precise: true),
+                                ],
+                              ),
+                            if (buhlmann != null) Text(context.l10n.surfaceGradientFactorValue(buhlmann.surfGF.round().clamp(0, 999))),
+                            if (_displaySample!.hasDeco() && _displaySample!.deco.depth > 0)
+                              DepthText(_displaySample!.deco.depth, prefix: context.l10n.compCeil),
+                            if (buhlmann != null && buhlmann.ceiling > 0) DepthText(buhlmann.ceiling, prefix: context.l10n.calcCeil),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
