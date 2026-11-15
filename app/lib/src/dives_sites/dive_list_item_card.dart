@@ -22,13 +22,11 @@ class DiveListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final maxDepth = dive.hasMaxDepth() ? dive.maxDepth : 0.0;
-    String? siteName;
+    String? siteLocation;
     if (site != null) {
       final parts = [if (site!.hasLocation()) site!.location, if (site!.hasCountry()) countryDisplayName(site!.country, l10n: context.l10n)];
       if (parts.isNotEmpty) {
-        siteName = '${site!.name} (${parts.join(', ')})';
-      } else {
-        siteName = site!.name;
+        siteLocation = parts.join(', ');
       }
     }
 
@@ -41,11 +39,14 @@ class DiveListItem extends StatelessWidget {
         child: Column(
           crossAxisAlignment: .start,
           children: [
-            // Top row: Dive number and date
+            // Top row: Dive number, site, and date
             Row(
               mainAxisAlignment: .spaceBetween,
               children: [
-                Text(context.l10n.diveNumber(dive.number), style: theme.textTheme.titleMedium?.copyWith(fontWeight: .bold)),
+                Text(
+                  context.l10n.compactDiveTitle(dive.number, site?.name ?? context.l10n.unknownSite),
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: .bold),
+                ),
                 DateTimeText(
                   _startDateTime,
                   timezone: siteTimeZone(site),
@@ -54,18 +55,16 @@ class DiveListItem extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            // Middle row: Site name (if shown)
-            if (showSite && siteName != null) ...[
+            // Middle row: Site location (if shown)
+            if (showSite && siteLocation != null) ...[
               _InfoChip(
                 icon: Icons.location_on_outlined,
-                label: Expanded(
-                  child: Text(siteName, style: theme.textTheme.bodyMedium, overflow: .ellipsis),
-                ),
+                label: Text(siteLocation, style: theme.textTheme.titleMedium, overflow: .ellipsis),
                 theme: theme,
               ),
               const SizedBox(height: 8),
             ],
-            // Bottom row: Depth and duration
+            // Bottom row: Depth, duration, SAC, rating
             Row(
               spacing: 12,
               children: [
