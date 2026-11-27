@@ -478,6 +478,23 @@ More text here.</notes>
       expect(root.getElement('divesite')?.findElements('site'), hasLength(2));
     });
 
+    test('names buddy and site IDs and keeps colliding references distinct', () {
+      final first = Site(id: 'first-site', name: 'North / Reef');
+      final second = Site(id: 'second-site', name: 'North Reef');
+      final dive = Dive(id: 'reef-dive', siteId: second.id, buddies: ['Alex / Smith', 'Alex Smith']);
+      final xml = Container(dives: [dive], sites: [first, second]).toUddfString();
+      final doc = XmlDocument.parse(xml);
+      expect(doc.findAllElements('site').map((site) => site.getAttribute('id')), ['site-north-reef', 'site-north-reef-2']);
+      expect(doc.findAllElements('buddy').map((buddy) => buddy.getAttribute('id')), ['buddy-alex-smith', 'buddy-alex-smith-2']);
+      final links = doc.findAllElements('informationbeforedive').single.findElements('link');
+      expect(links.map((link) => link.getAttribute('ref')), ['site-north-reef-2', 'buddy-alex-smith', 'buddy-alex-smith-2']);
+
+      final imported = importXmlString(xml);
+      expect(imported.sites.map((site) => site.id), [first.id, second.id]);
+      expect(imported.dives.single.siteId, second.id);
+      expect(imported.dives.single.buddies, dive.buddies);
+    });
+
     test('sites fully roundtrip', () {
       expect(reimported.sites, hasLength(2));
 
@@ -544,10 +561,64 @@ More text here.</notes>
 
       final deco = dive.cylinders[1];
       expect(deco.hasCylinder(), isFalse);
-      expect(deco.hasBeginPressure(), isFalse);
+      expect(deco.hasBeginPressure(), isTrue);
+      expect(deco.beginPressure, 0);
       expect(deco.hasEndPressure(), isFalse);
       expect(deco.oxygen, closeTo(0.5, 1e-9));
       expect(deco.helium, closeTo(0.0, 1e-9));
+    });
+
+    test('reuses a tank across dives with different fills', () {
+      final tank = Cylinder(id: 'shared-tank', volumeL: 12, description: 'AL80');
+      final air = Dive(
+        id: 'air-dive',
+        cylinders: [DiveCylinder(cylinderId: tank.id, cylinder: tank, oxygen: 0.21, beginPressure: 200)],
+      );
+      final nitrox = Dive(
+        id: 'nitrox-dive',
+        cylinders: [DiveCylinder(cylinderId: tank.id, cylinder: tank, oxygen: 0.32, endPressure: 50)],
+      );
+      final xml = Container(dives: [air, nitrox]).toUddfString();
+      final doc = XmlDocument.parse(xml);
+      final definition = doc.findAllElements('tank').single;
+      expect(definition.getAttribute('id'), 'tank-al80');
+      expect(definition.getElement('link'), isNull);
+      final uses = doc.findAllElements('tankdata').toList();
+      final refs = uses.map((use) => use.findElements('link').map((link) => link.getAttribute('ref')).toList()).toList();
+      expect(refs.map((ref) => ref.first), [definition.getAttribute('id'), definition.getAttribute('id')]);
+      expect(refs[0].last, isNot(refs[1].last));
+
+      final imported = importXmlString(xml).dives;
+      expect(imported.map((dive) => dive.cylinders.single.oxygen), [0.21, 0.32]);
+      expect(imported.last.cylinders.single.beginPressure, 0);
+      expect(imported.last.cylinders.single.endPressure, 50);
+    });
+
+    test('names tank IDs and disambiguates duplicate names', () {
+      final dive = Dive(
+        id: 'two-tanks',
+        cylinders: [
+          DiveCylinder(cylinder: Cylinder(description: 'Steel / 12 L')),
+          DiveCylinder(cylinder: Cylinder(description: 'Steel / 12 L')),
+          DiveCylinder(cylinder: Cylinder(description: 'Steel / 12 L-2')),
+          DiveCylinder(),
+        ],
+      );
+      final doc = XmlDocument.parse(Container(dives: [dive]).toUddfString());
+      final ids = doc.findAllElements('tank').map((tank) => tank.getAttribute('id')).toList();
+      expect(ids, ['tank-steel-12-l', 'tank-steel-12-l-2', 'tank-steel-12-l-2-2', 'tank']);
+      expect(doc.findAllElements('tankdata').map((data) => data.getElement('link')?.getAttribute('ref')), ids);
+    });
+
+    test('names gas mix IDs by composition and keeps collisions distinct', () {
+      final dive = Dive(
+        id: 'mixed-gases',
+        cylinders: [DiveCylinder(oxygen: 0.32), DiveCylinder(oxygen: 0.21, helium: 0.35), DiveCylinder(oxygen: 0.32), DiveCylinder(oxygen: 0.321)],
+      );
+      final xml = Container(dives: [dive]).toUddfString();
+      final doc = XmlDocument.parse(xml);
+      expect(doc.findAllElements('mix').map((mix) => mix.getAttribute('id')), ['mix-ean32', 'mix-tx21-35', 'mix-ean32-2', 'mix-ean32-3']);
+      expect(importXmlString(xml).dives.single.cylinders.map((cylinder) => cylinder.oxygen), [0.32, 0.21, 0.32, 0.321]);
     });
 
     test('weights fully roundtrip', () {
@@ -580,6 +651,50 @@ More text here.</notes>
       expect(log.samples[3].time, closeTo(3530, 1e-9));
       expect(log.samples[3].depth, closeTo(0.1, 1e-6));
       expect(log.samples.last.depth, 0);
+    });
+
+    test('omits waypoint tank pressure when the sample has no reading', () {
+      final dive = Dive(
+        id: 'sparse-pressures',
+        cylinders: [DiveCylinder(oxygen: 0.21)],
+        logs: [
+          Log(
+            samples: [
+              LogSample(time: 0, depth: 0),
+              LogSample(time: 10, depth: 10, pressures: [TankPressure(tankIndex: 0)]),
+              LogSample(time: 20, depth: 10, pressures: [TankPressure(tankIndex: 0, pressure: 150)]),
+              LogSample(time: 30, depth: 0, pressures: [TankPressure(tankIndex: 0, pressure: 0)]),
+            ],
+          ),
+        ],
+      );
+      final xml = Container(dives: [dive]).toUddfString();
+      final doc = XmlDocument.parse(xml);
+      final waypoints = doc.findAllElements('waypoint');
+      final pressures = waypoints.map((waypoint) => waypoint.getElement('tankpressure')?.innerText);
+      expect(pressures, [null, null, '15000000', '0']);
+      expect(doc.findAllElements('tankpressurebegin').single.innerText, '0');
+      final samples = importXmlString(xml).dives.single.logs.single.samples;
+      expect(samples.map((sample) => sample.pressures.length), [0, 0, 1, 1]);
+      expect(samples.last.pressures.single.pressure, 0);
+    });
+
+    test('rounds tank pressures to whole kilopascals written in pascals', () {
+      final dive = Dive(
+        id: 'pressure-precision',
+        cylinders: [DiveCylinder(beginPressure: 208.126, endPressure: 51.234)],
+        logs: [
+          Log(
+            samples: [
+              LogSample(time: 0, depth: 0, pressures: [TankPressure(tankIndex: 0, pressure: 200.876543)]),
+            ],
+          ),
+        ],
+      );
+      final doc = XmlDocument.parse(Container(dives: [dive]).toUddfString());
+      expect(doc.findAllElements('tankpressurebegin').single.innerText, '20813000');
+      expect(doc.findAllElements('tankpressureend').single.innerText, '5123000');
+      expect(doc.findAllElements('tankpressure').single.innerText, '20088000');
     });
 
     test('gas switch events fully roundtrip', () {
@@ -627,7 +742,7 @@ More text here.</notes>
     test('roundtrips a manual dive and a same-mix cylinder switch through a fresh store', () async {
       final start = proto.Timestamp.fromDateTime(DateTime.utc(2025, 1, 1))..nanos = 123456789;
       final manual = Dive(id: '1-manual', start: start, number: 1, duration: 1900, maxDepth: 14, meanDepth: 7);
-      final air = DiveCylinder(oxygen: 0.21, beginPressure: 200);
+      final air = DiveCylinder(cylinderId: 'shared-definition', oxygen: 0.21, beginPressure: 200);
       final recorded = Dive(
         id: '2-recorded',
         start: start,
