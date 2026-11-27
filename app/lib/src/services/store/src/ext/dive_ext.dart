@@ -119,7 +119,7 @@ extension DiveExtensions on Dive {
     }
   }
 
-  void recalculateMetadata() {
+  void recalculateMetadata({bool preserveSummary = false}) {
     // Process samples, calculating depths, durations, etc.
 
     // We want to update only cylinder that don't already have pressure data
@@ -164,13 +164,15 @@ extension DiveExtensions on Dive {
     double prevTime = 0.0;
 
     if (logs.isNotEmpty) {
+      final preserveMaxTemp = preserveSummary && hasMaxTemp();
+      final preserveMinTemp = preserveSummary && hasMinTemp();
       // Calculate depths etc based on samples.
       final dl = logs.first;
       for (final sample in dl.samples) {
         // Temperature bounds
         if (sample.hasTemperature()) {
-          if (!hasMaxTemp() || sample.temperature > maxTemp) maxTemp = sample.temperature;
-          if (!hasMinTemp() || sample.temperature < minTemp) minTemp = sample.temperature;
+          if (!preserveMaxTemp && (!hasMaxTemp() || sample.temperature > maxTemp)) maxTemp = sample.temperature;
+          if (!preserveMinTemp && (!hasMinTemp() || sample.temperature < minTemp)) minTemp = sample.temperature;
         }
 
         // Collect and update tank pressures as required
@@ -201,10 +203,12 @@ extension DiveExtensions on Dive {
         } on StateError catch (_) {}
       }
 
-      duration = max(duration, 1.0);
-      this.duration = duration.round();
-      this.maxDepth = maxDepth;
-      meanDepth = totDepth / duration;
+      if (dl.samples.isNotEmpty || !preserveSummary) {
+        duration = max(duration, 1.0);
+        if (!preserveSummary || !hasDuration()) this.duration = duration.round();
+        if (!preserveSummary || !hasMaxDepth()) this.maxDepth = maxDepth;
+        if (!preserveSummary || !hasMeanDepth()) meanDepth = totDepth / duration;
+      }
 
       // Update cylinder used gas volumes now that we know pressures
       for (var (idx, cyl) in cylinders.indexed) {

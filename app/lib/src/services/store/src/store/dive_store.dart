@@ -141,6 +141,14 @@ class DiveStore with ChangeNotifier {
       });
     }
     if (dive.logs.isNotEmpty && dive.events.any((event) => event.time == 0)) {
+      final samples = dive.logs.first.samples;
+      // UDDF stores the initial gas explicitly as a waypoint event. The legacy
+      // Bluetooth event repair would clear it because there is no gas-mix index.
+      final initialGas = samples.firstOrNull?.events.any((event) => event.time == 0 && event.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE) ?? false;
+      if (initialGas && dive.logs.first.gasMixes.isEmpty) {
+        _dives[id] = dive;
+        return dive;
+      }
       dive = dive.rebuild((dive) {
         dive.rebuildEvents();
       });

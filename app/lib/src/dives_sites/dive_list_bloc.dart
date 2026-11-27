@@ -340,7 +340,7 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
           dive.equipment[idx] = Equipment(id: matched.id);
         }
 
-        dive.recalculateMetadata();
+        dive.recalculateMetadata(preserveSummary: importedDoc.preserveDiveSummary);
       }
 
       // Insert all imported dives

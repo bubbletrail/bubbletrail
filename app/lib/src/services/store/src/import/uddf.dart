@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:btproto/btproto.dart';
 import 'package:collection/collection.dart';
 import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart';
@@ -8,13 +10,12 @@ import '../ext/ext.dart';
 import 'container.dart';
 
 const double _kelvinOffset = 273.15;
-const double _pascalToBar = 1e-5;
 const double _barToPascal = 1e5;
 const double _cubicMeterToLiter = 1000.0;
 const double _literToCubicMeter = 0.001;
 
 double? _kelvinToCelsius(double? k) => k != null ? k - _kelvinOffset : null;
-double? _pascalToBarConvert(double? pa) => pa != null ? pa * _pascalToBar : null;
+double? _pascalToBarConvert(double? pa) => pa != null ? pa / _barToPascal : null;
 double? _celsiusToKelvin(double? c) => c != null ? c + _kelvinOffset : null;
 double? _barToPascalConvert(double? bar) => bar != null ? bar * _barToPascal : null;
 double? _litersToCubicMeters(double? liters) => liters != null ? liters * _literToCubicMeter : null;
@@ -94,6 +95,11 @@ class _Buddy {
 extension UddfXml on Container {
   // Parse UDDF XML and return an Ssrf container with dives and sites.
   static Container fromXml(XmlElement elem) {
+    final ownExport = _getElementText(elem.getElement('generator'), 'name') == 'Bubbletrail';
+    final tanks = <String, XmlElement>{
+      for (final tank in elem.getElement('diver')?.findAllElements('tank') ?? <XmlElement>[])
+        if (tank.getAttribute('id') case final String id) id: tank,
+    };
     // Parse gas definitions (referenced by dives)
     final gasMixes = <String, _GasMix>{};
     final gasDefs = elem.getElement('gasdefinitions');
@@ -130,9 +136,9 @@ extension UddfXml on Container {
     final divesiteElem = elem.getElement('divesite');
     if (divesiteElem != null) {
       for (final siteElem in divesiteElem.findElements('site')) {
-        final site = _UddfSite.fromXml(siteElem);
+        final site = _UddfSite.fromXml(siteElem, ownExport);
         sites.add(site);
-        sitesById[site.id] = site;
+        sitesById[siteElem.getAttribute('id') ?? site.id] = site;
       }
     }
 
@@ -142,13 +148,13 @@ extension UddfXml on Container {
     if (profileData != null) {
       for (final repGroup in profileData.findElements('repetitiongroup')) {
         for (final diveElem in repGroup.findElements('dive')) {
-          final dive = _UddfDive.fromXml(diveElem, gasMixes, buddies, sitesById);
+          final dive = _UddfDive.fromXml(diveElem, gasMixes, buddies, sitesById, tanks, ownExport);
           dives.add(dive);
         }
       }
     }
 
-    return Container(dives: dives, sites: sites);
+    return Container(dives: dives, sites: sites, preserveDiveSummary: true);
   }
 
   // Serialise the container to a UDDF 3.2.1 document string.
@@ -159,9 +165,8 @@ extension UddfXml on Container {
   // left out. The [version], when given, is recorded as the generating
   // application's version.
   String toUddfString({String? version}) {
-    // Collect the shared definitions referenced by the dives: buddies by
-    // name, gas mixes by composition. The ids only need to be unique within
-    // the document.
+    // Share gas definitions across dives, giving same-mix tanks within a dive
+    // distinct references so a switch identifies the cylinder.
     final buddies = <String, String>{};
     for (final dive in dives) {
       for (final name in dive.buddies) {
@@ -169,17 +174,19 @@ extension UddfXml on Container {
         if (trimmed.isNotEmpty) buddies.putIfAbsent(trimmed, () => 'buddy-${buddies.length + 1}');
       }
     }
-    final mixes = <(double, double), String>{};
+    final mixes = <String, (double, double)>{};
+    final sharedMixIds = <(double, double), String>{};
+    final tankMixIds = <String, String>{};
+    final hasTanks = dives.any((dive) => dive.cylinders.isNotEmpty);
     for (final dive in dives) {
-      for (final cyl in dive.cylinders) {
-        if (cyl.hasOxygen() || cyl.hasHelium()) {
-          mixes.putIfAbsent((cyl.oxygen, cyl.helium), () => 'mix-${mixes.length + 1}');
-        }
+      final seen = <(double, double)>{};
+      for (final (index, cyl) in dive.cylinders.indexed) {
+        if (!cyl.hasOxygen() && !cyl.hasHelium()) continue;
+        final composition = (cyl.hasOxygen() ? cyl.oxygen : 0.21, cyl.helium);
+        final id = seen.add(composition) ? sharedMixIds.putIfAbsent(composition, () => 'mix-${mixes.length + 1}') : 'mix-${mixes.length + 1}';
+        mixes[id] = composition;
+        tankMixIds[_tankId(dive, index)] = id;
       }
-    }
-    String? mixIdFor(DiveCylinder cyl) {
-      if (!cyl.hasOxygen() && !cyl.hasHelium()) return null;
-      return mixes[(cyl.oxygen, cyl.helium)];
     }
 
     final siteIds = sites.map((s) => s.id).toSet();
@@ -206,7 +213,7 @@ extension UddfXml on Container {
           },
         );
 
-        if (buddies.isNotEmpty) {
+        if (buddies.isNotEmpty || hasTanks) {
           builder.element(
             'diver',
             nest: () {
@@ -222,6 +229,31 @@ extension UddfXml on Container {
                       builder.element('lastname');
                     },
                   );
+                  if (hasTanks) {
+                    builder.element(
+                      'equipment',
+                      nest: () {
+                        for (final dive in dives) {
+                          for (final (index, cylinder) in dive.cylinders.indexed) {
+                            final id = _tankId(dive, index);
+                            builder.element(
+                              'tank',
+                              attributes: {'id': id},
+                              nest: () {
+                                builder.element('name', nest: () => builder.text(cylinder.cylinder.description));
+                                if (tankMixIds[id] case final String mix) {
+                                  builder.element('link', attributes: {'ref': mix});
+                                }
+                                if (cylinder.cylinder.hasVolumeL()) {
+                                  builder.element('tankvolume', nest: () => builder.text(_fmt(cylinder.cylinder.volumeL * _literToCubicMeter)));
+                                }
+                              },
+                            );
+                          }
+                        }
+                      },
+                    );
+                  }
                 },
               );
               for (final name in buddies.keys) {
@@ -260,11 +292,11 @@ extension UddfXml on Container {
             'gasdefinitions',
             nest: () {
               for (final entry in mixes.entries) {
-                final (o2, he) = entry.key;
+                final (o2, he) = entry.value;
                 final n2 = 1.0 - o2 - he;
                 builder.element(
                   'mix',
-                  attributes: {'id': entry.value},
+                  attributes: {'id': entry.key},
                   nest: () {
                     builder.element('name', nest: () => builder.text(_mixName(o2, he)));
                     builder.element('o2', nest: () => builder.text(_fmt(o2)));
@@ -284,9 +316,9 @@ extension UddfXml on Container {
               for (final dive in orderedDives) {
                 builder.element(
                   'repetitiongroup',
-                  attributes: {'id': 'rg-${dive.id}'},
+                  attributes: {'id': _xmlId('group', dive.id)},
                   nest: () {
-                    _writeDive(builder, dive, siteIds, buddies, mixIdFor);
+                    _writeDive(builder, dive, siteIds, buddies, tankMixIds);
                   },
                 );
               }
@@ -309,7 +341,7 @@ extension UddfXml on Container {
 void _writeSite(XmlBuilder builder, Site site) {
   builder.element(
     'site',
-    attributes: {'id': site.id},
+    attributes: {'id': _xmlId('site', site.id)},
     nest: () {
       builder.element('name', nest: () => builder.text(site.name));
 
@@ -329,6 +361,7 @@ void _writeSite(XmlBuilder builder, Site site) {
             if (site.hasPosition()) {
               builder.element('latitude', nest: () => builder.text(_fmt(site.position.latitude)));
               builder.element('longitude', nest: () => builder.text(_fmt(site.position.longitude)));
+              if (site.position.hasAltitude()) builder.element('altitude', nest: () => builder.text(_fmt(site.position.altitude)));
             }
           },
         );
@@ -347,18 +380,18 @@ void _writeSite(XmlBuilder builder, Site site) {
   );
 }
 
-void _writeDive(XmlBuilder builder, Dive dive, Set<String> siteIds, Map<String, String> buddies, String? Function(DiveCylinder) mixIdFor) {
+void _writeDive(XmlBuilder builder, Dive dive, Set<String> siteIds, Map<String, String> buddies, Map<String, String> tankMixIds) {
   final log = dive.logs.firstOrNull;
 
   builder.element(
     'dive',
-    attributes: {'id': dive.id},
+    attributes: {'id': _xmlId('dive', dive.id)},
     nest: () {
       builder.element(
         'informationbeforedive',
         nest: () {
           if (dive.hasSiteId() && siteIds.contains(dive.siteId)) {
-            builder.element('link', attributes: {'ref': dive.siteId});
+            builder.element('link', attributes: {'ref': _xmlId('site', dive.siteId)});
           }
           for (final name in dive.buddies) {
             final id = buddies[name.trim()];
@@ -366,11 +399,14 @@ void _writeDive(XmlBuilder builder, Dive dive, Set<String> siteIds, Map<String, 
               builder.element('link', attributes: {'ref': id});
             }
           }
+          for (final (index, _) in dive.cylinders.indexed) {
+            builder.element('link', attributes: {'ref': _tankId(dive, index)});
+          }
           if (dive.number > 0) {
             builder.element('divenumber', nest: () => builder.text(dive.number.toString()));
           }
           final start = dive.hasStart() ? dive.start.toDateTime() : DateTime.fromMillisecondsSinceEpoch(0);
-          builder.element('datetime', nest: () => builder.text(_formatDateTime(start)));
+          builder.element('datetime', nest: () => builder.text(_formatDateTime(start, nanos: dive.start.nanos)));
           final airTemp = _celsiusToKelvin(log != null && log.hasSurfaceTemperature() ? log.surfaceTemperature : null);
           if (airTemp != null) {
             builder.element('airtemperature', nest: () => builder.text(_fmt(airTemp)));
@@ -382,25 +418,65 @@ void _writeDive(XmlBuilder builder, Dive dive, Set<String> siteIds, Map<String, 
         builder.element(
           'samples',
           nest: () {
-            // Gas switches on downloaded dives live on the dive itself rather
-            // than on the samples; index them by time so they land on the
-            // matching waypoint.
-            final switchByTime = <int, int>{
-              for (final event in dive.events)
-                if (event.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE) event.time: event.value,
+            final sampleSwitchTimes = <(int, int), double>{
+              for (final sample in log.samples)
+                for (final event in sample.events)
+                  if (event.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE && event.time == sample.time.toInt()) (event.time, event.value): sample.time,
             };
+            final switches = <double, int>{
+              for (final event in dive.events)
+                if (event.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE && event.value >= 0 && event.value < dive.cylinders.length)
+                  (sampleSwitchTimes[(event.time, event.value)] ?? event.time.toDouble()): event.value,
+            };
+            final samples = <double, LogSample>{};
             for (final sample in log.samples) {
-              _writeWaypoint(builder, dive, sample, mixIdFor, switchByTime);
+              final previous = samples[sample.time];
+              if (previous == null) {
+                samples[sample.time] = sample;
+              } else {
+                final merged = sample.deepCopy();
+                if (!sample.hasTemperature() && previous.hasTemperature()) merged.temperature = previous.temperature;
+                if (!sample.hasDepth() && previous.hasDepth()) merged.depth = previous.depth;
+                merged.pressures.insertAll(0, previous.pressures);
+                merged.events.insertAll(0, previous.events);
+                samples[sample.time] = merged;
+              }
+            }
+            final recorded = samples.keys.sorted((a, b) => a.compareTo(b));
+            for (final time in switches.keys) {
+              if (samples.containsKey(time)) continue;
+              final next = recorded.firstWhereOrNull((t) => t > time);
+              final previous = recorded.lastWhereOrNull((t) => t < time);
+              final depth = previous == null || next == null
+                  ? 0.0
+                  : samples[previous]!.depth + (samples[next]!.depth - samples[previous]!.depth) * (time - previous) / (next - previous);
+              samples[time] = LogSample(time: time, depth: depth);
+            }
+            samples.putIfAbsent(0, () => LogSample(time: 0, depth: 0));
+            final last = samples.keys.max;
+            if (samples[last]!.depth != 0) {
+              final end = dive.duration > last ? dive.duration.toDouble() : last + 1;
+              samples[end] = LogSample(time: end, depth: 0);
+            }
+            for (final time in samples.keys.sorted((a, b) => a.compareTo(b))) {
+              final sample = samples[time]!;
+              final sampleSwitch = sample.events.firstWhereOrNull((event) => event.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE);
+              final index = switches[time] ?? sampleSwitch?.value ?? (time == 0 && dive.cylinders.isNotEmpty ? 0 : null);
+              final mix = index == null ? null : tankMixIds[_tankId(dive, index)];
+              _writeWaypoint(builder, dive, sample, mix);
             }
           },
         );
       }
 
-      for (final cyl in dive.cylinders) {
+      for (final (index, cyl) in dive.cylinders.indexed) {
+        if (!cyl.hasBeginPressure()) continue;
         builder.element(
           'tankdata',
           nest: () {
-            final mixId = mixIdFor(cyl);
+            final tankId = _tankId(dive, index);
+            builder.element('link', attributes: {'ref': tankId});
+            final mixId = tankMixIds[tankId];
             if (mixId != null) {
               builder.element('link', attributes: {'ref': mixId});
             }
@@ -423,7 +499,7 @@ void _writeDive(XmlBuilder builder, Dive dive, Set<String> siteIds, Map<String, 
       builder.element(
         'informationafterdive',
         nest: () {
-          final lowestTemp = _celsiusToKelvin(log != null && log.hasMinTemperature() ? log.minTemperature : (dive.hasMinTemp() ? dive.minTemp : null));
+          final lowestTemp = _celsiusToKelvin(dive.hasMinTemp() ? dive.minTemp : (log != null && log.hasMinTemperature() ? log.minTemperature : null));
           if (lowestTemp != null) {
             builder.element('lowesttemperature', nest: () => builder.text(_fmt(lowestTemp)));
           }
@@ -472,39 +548,44 @@ void _writeDive(XmlBuilder builder, Dive dive, Set<String> siteIds, Map<String, 
   );
 }
 
-void _writeWaypoint(XmlBuilder builder, Dive dive, LogSample sample, String? Function(DiveCylinder) mixIdFor, Map<int, int> switchByTime) {
+void _writeWaypoint(XmlBuilder builder, Dive dive, LogSample sample, String? mixId) {
   builder.element(
     'waypoint',
     nest: () {
-      if (sample.hasDepth()) {
-        builder.element('depth', nest: () => builder.text(_fmt(sample.depth)));
-      }
+      builder.element('depth', nest: () => builder.text(_fmt(sample.depth)));
       builder.element('divetime', nest: () => builder.text(_fmt(sample.time)));
-
-      // The gas in use changes either via an event on the sample itself
-      // (imported dives) or via a dive level event at this time (downloaded
-      // dives).
-      final cylIdx =
-          sample.events.firstWhereOrNull((e) => e.type == SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE)?.value ?? switchByTime.remove(sample.time.toInt());
-      if (cylIdx != null && cylIdx >= 0 && cylIdx < dive.cylinders.length) {
-        final mixId = mixIdFor(dive.cylinders[cylIdx]);
-        if (mixId != null) {
-          builder.element('switchmix', attributes: {'ref': mixId});
+      if (mixId != null) builder.element('switchmix', attributes: {'ref': mixId});
+      for (final reading in sample.pressures) {
+        if (!reading.hasPressure()) continue;
+        final index = reading.tankIndex;
+        if (index < 0 || index >= dive.cylinders.length) {
+          if (index != 0 || dive.cylinders.isNotEmpty) continue;
+          builder.element('tankpressure', nest: () => builder.text(_fmt(reading.pressure * _barToPascal)));
+          continue;
         }
+        builder.element('tankpressure', attributes: {'ref': _tankId(dive, index)}, nest: () => builder.text(_fmt(reading.pressure * _barToPascal)));
       }
-
-      final reading = sample.pressures.firstWhereOrNull((p) => p.tankIndex == 0) ?? sample.pressures.firstOrNull;
-      final tankPressure = _barToPascalConvert(reading != null && reading.hasPressure() ? reading.pressure : null);
-      if (tankPressure != null) {
-        builder.element('tankpressure', nest: () => builder.text(_fmt(tankPressure)));
-      }
-
-      final temperature = _celsiusToKelvin(sample.hasTemperature() ? sample.temperature : null);
-      if (temperature != null) {
-        builder.element('temperature', nest: () => builder.text(_fmt(temperature)));
+      if (sample.hasTemperature()) {
+        builder.element('temperature', nest: () => builder.text(_fmt(sample.temperature + _kelvinOffset)));
       }
     },
   );
+}
+
+String _xmlId(String kind, String id) => 'bt-$kind-${base64Url.encode(utf8.encode(id)).replaceAll('=', '')}';
+String _tankId(Dive dive, int index) => '${_xmlId('tank', dive.id)}-$index';
+
+String _readId(String? id, String kind, bool ownExport) {
+  if (id == null) return const Uuid().v7();
+  final prefix = 'bt-$kind-';
+  if (ownExport && id.startsWith(prefix)) {
+    try {
+      return utf8.decode(base64Url.decode(base64Url.normalize(id.substring(prefix.length))));
+    } on FormatException {
+      return id;
+    }
+  }
+  return id;
 }
 
 // Split a buddy name into (firstname, lastname) at the first whitespace,
@@ -532,28 +613,18 @@ String? _notesWithTags(String? notes, List<String> tags) {
   return '$notes\n\n$tagLine';
 }
 
-// Format a number with up to six decimals, trailing zeros trimmed.
-String _fmt(double value) {
-  var s = value.toStringAsFixed(6);
-  if (s.contains('.')) {
-    s = s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
-  }
-  return s.isEmpty || s == '-' ? '0' : s;
-}
+String _fmt(double value) => value.toString();
 
-// Format a timestamp as an xs:dateTime string, in local time with the
-// UTC offset included so the instant survives re-import in any timezone.
-String _formatDateTime(DateTime dt) {
-  String two(int n) => n.toString().padLeft(2, '0');
-  final offset = dt.timeZoneOffset;
-  final sign = offset.isNegative ? '-' : '+';
-  final offsetText = '$sign${two(offset.inHours.abs())}:${two(offset.inMinutes.abs() % 60)}';
-  return '${dt.year.toString().padLeft(4, '0')}-${two(dt.month)}-${two(dt.day)}T${two(dt.hour)}:${two(dt.minute)}:${two(dt.second)}$offsetText';
+String _formatDateTime(DateTime dt, {int? nanos}) {
+  final utc = dt.toUtc().toIso8601String();
+  if (nanos == null) return utc;
+  final seconds = utc.substring(0, utc.indexOf('.'));
+  return nanos == 0 ? '${seconds}Z' : '$seconds.${nanos.toString().padLeft(9, '0')}Z';
 }
 
 extension _UddfSite on Site {
-  static Site fromXml(XmlElement elem) {
-    final id = elem.getAttribute('id') ?? const Uuid().v7();
+  static Site fromXml(XmlElement elem, bool ownExport) {
+    final id = _readId(elem.getAttribute('id'), 'site', ownExport);
     final name = _getElementText(elem, 'name') ?? '';
 
     final geography = elem.getElement('geography');
@@ -565,7 +636,7 @@ extension _UddfSite on Site {
       final lat = double.tryParse(_getElementText(geography, 'latitude') ?? '');
       final lon = double.tryParse(_getElementText(geography, 'longitude') ?? '');
       if (lat != null && lon != null) {
-        position = Position(latitude: lat, longitude: lon);
+        position = Position(latitude: lat, longitude: lon, altitude: double.tryParse(_getElementText(geography, 'altitude') ?? ''));
       }
 
       final address = geography.getElement('address');
@@ -575,18 +646,7 @@ extension _UddfSite on Site {
       location = _getElementText(geography, 'location');
     }
 
-    // Parse notes - may have <para> wrapper or plain text
-    final notesElem = elem.getElement('notes');
-    String? rawNotes;
-    if (notesElem != null) {
-      final para = notesElem.getElement('para');
-      if (para != null) {
-        rawNotes = para.innerText.trim();
-      } else {
-        rawNotes = notesElem.innerText.trim();
-      }
-      if (rawNotes.isEmpty) rawNotes = null;
-    }
+    final rawNotes = _readNotes(elem.getElement('notes'));
 
     // Extract tags from notes (last line as #hashtags)
     final extracted = _extractTagsFromNotes(rawNotes);
@@ -598,17 +658,29 @@ extension _UddfSite on Site {
 }
 
 extension _UddfDive on Dive {
-  static Dive fromXml(XmlElement elem, Map<String, _GasMix> gasMixes, Map<String, _Buddy> buddies, Map<String, Site> sitesById) {
-    final diveId = elem.getAttribute('id') ?? const Uuid().v7();
+  static Dive fromXml(
+    XmlElement elem,
+    Map<String, _GasMix> gasMixes,
+    Map<String, _Buddy> buddies,
+    Map<String, Site> sitesById,
+    Map<String, XmlElement> tanks,
+    bool ownExport,
+  ) {
+    final diveId = _readId(elem.getAttribute('id'), 'dive', ownExport);
 
     final infoBefore = elem.getElement('informationbeforedive');
     final infoAfter = elem.getElement('informationafterdive');
 
     // Parse datetime
-    DateTime? dateTime;
+    Timestamp? dateTime;
     final dateTimeStr = _getElementText(infoBefore, 'datetime');
     if (dateTimeStr != null) {
-      dateTime = DateTime.tryParse(dateTimeStr);
+      final parsed = DateTime.tryParse(dateTimeStr);
+      if (parsed != null) {
+        dateTime = Timestamp.fromDateTime(parsed);
+        final fraction = RegExp(r'T[0-9:]+[.,]([0-9]+)').firstMatch(dateTimeStr)?.group(1);
+        if (fraction != null) dateTime.nanos = int.parse(fraction.padRight(9, '0').substring(0, 9));
+      }
     }
 
     // Parse dive number
@@ -623,7 +695,7 @@ extension _UddfDive on Dive {
         final ref = link.getAttribute('ref');
         if (ref != null) {
           if (sitesById.containsKey(ref)) {
-            siteId = ref;
+            siteId = sitesById[ref]!.id;
           } else if (buddies.containsKey(ref)) {
             buddyNames.add(buddies[ref]!.fullName);
           }
@@ -656,18 +728,7 @@ extension _UddfDive on Dive {
     final ratingElem = infoAfter?.getElement('rating');
     final rating = int.tryParse(_getElementText(ratingElem, 'ratingvalue') ?? '');
 
-    // Parse notes - may have <para> wrapper or plain text
-    final notesElem = infoAfter?.getElement('notes');
-    String? rawNotes;
-    if (notesElem != null) {
-      final para = notesElem.getElement('para');
-      if (para != null) {
-        rawNotes = para.innerText.trim();
-      } else {
-        rawNotes = notesElem.innerText.trim();
-      }
-      if (rawNotes.isEmpty) rawNotes = null;
-    }
+    final rawNotes = _readNotes(infoAfter?.getElement('notes'));
 
     // Extract tags from notes (last line as #hashtags)
     final extractedNotes = _extractTagsFromNotes(rawNotes);
@@ -675,14 +736,26 @@ extension _UddfDive on Dive {
     // Parse tank data and build gas mix ID to cylinder index mapping
     final cylinders = <DiveCylinder>[];
     final gasMixIdToCylinderIdx = <String, int>{};
-    for (final tankData in elem.findElements('tankdata')) {
-      final result = _parseTankData(tankData, gasMixes);
-      if (result != null) {
-        if (result.gasMixId != null) {
-          gasMixIdToCylinderIdx[result.gasMixId!] = cylinders.length;
-        }
+    final tankIndexes = <String, int>{};
+    void addCylinder(XmlElement? data, String? tankId) {
+      final index = tankIndexes[tankId] ?? cylinders.length;
+      if (tankId != null) tankIndexes[tankId] = index;
+      final result = _parseTankData(data, tanks[tankId], gasMixes);
+      if (index == cylinders.length) {
         cylinders.add(result.cylinder);
+      } else {
+        cylinders[index] = result.cylinder;
       }
+      if (result.gasMixId case final String mixId) gasMixIdToCylinderIdx[mixId] = index;
+    }
+
+    for (final link in infoBefore?.findElements('link') ?? <XmlElement>[]) {
+      final ref = link.getAttribute('ref');
+      if (tanks.containsKey(ref)) addCylinder(null, ref);
+    }
+    for (final tankData in elem.findElements('tankdata')) {
+      final ref = tankData.findElements('link').map((link) => link.getAttribute('ref')).firstWhereOrNull(tanks.containsKey);
+      addCylinder(tankData, ref);
     }
 
     // Parse samples
@@ -690,7 +763,7 @@ extension _UddfDive on Dive {
     final samplesElem = elem.getElement('samples');
     if (samplesElem != null) {
       for (final waypoint in samplesElem.findElements('waypoint')) {
-        final sample = _parseWaypoint(waypoint, gasMixIdToCylinderIdx);
+        final sample = _parseWaypoint(waypoint, gasMixIdToCylinderIdx, tankIndexes);
         if (sample != null) {
           samples.add(sample);
         }
@@ -703,7 +776,7 @@ extension _UddfDive on Dive {
 
     // Set log time
     if (dateTime != null) {
-      log.dateTime = Timestamp.fromDateTime(dateTime);
+      log.dateTime = dateTime;
     }
 
     log.setUniqueID();
@@ -712,7 +785,7 @@ extension _UddfDive on Dive {
     final dive = Dive(
       id: diveId,
       number: diveNumber,
-      start: dateTime != null ? Timestamp.fromDateTime(dateTime) : null,
+      start: dateTime,
       duration: diveDuration?.toInt(),
       maxDepth: greatestDepth,
       meanDepth: averageDepth,
@@ -726,6 +799,12 @@ extension _UddfDive on Dive {
     dive.buddies.addAll(buddyNames);
     dive.cylinders.addAll(cylinders);
     dive.weightsystems.addAll(weightsystems);
+    var activeCylinder = 0;
+    for (final event in samples.expand((sample) => sample.events)) {
+      if (event.value == activeCylinder) continue;
+      dive.events.add(event.deepCopy());
+      activeCylinder = event.value;
+    }
     dive.logs.add(log);
 
     return dive;
@@ -740,35 +819,24 @@ class _TankDataResult {
   _TankDataResult({required this.cylinder, this.gasMixId});
 }
 
-_TankDataResult? _parseTankData(XmlElement tankData, Map<String, _GasMix> gasMixes) {
-  // Get gas mix from link
-  double oxygen = 0.21;
-  double helium = 0.0;
-  String? gasMixId;
-
-  for (final link in tankData.findElements('link')) {
-    final ref = link.getAttribute('ref');
-    if (ref != null && gasMixes.containsKey(ref)) {
-      final mix = gasMixes[ref]!;
-      oxygen = mix.oxygen;
-      helium = mix.helium;
-      gasMixId = ref;
-      break;
-    }
-  }
+_TankDataResult _parseTankData(XmlElement? tankData, XmlElement? tank, Map<String, _GasMix> gasMixes) {
+  final refs = [...?tankData?.findElements('link').map((link) => link.getAttribute('ref')), tank?.getElement('link')?.getAttribute('ref')];
+  final gasMixId = refs.firstWhereOrNull(gasMixes.containsKey);
+  final mix = gasMixes[gasMixId];
 
   // Parse tank volume (may be m³ or liters depending on exporter)
-  final tankVolume = _tankVolumeToLiters(double.tryParse(_getElementText(tankData, 'tankvolume') ?? ''));
+  final tankVolume = _tankVolumeToLiters(double.tryParse(_getElementText(tankData, 'tankvolume') ?? _getElementText(tank, 'tankvolume') ?? ''));
 
   // Parse pressures (Pa -> bar)
   final beginPressure = _pascalToBarConvert(double.tryParse(_getElementText(tankData, 'tankpressurebegin') ?? ''));
   final endPressure = _pascalToBarConvert(double.tryParse(_getElementText(tankData, 'tankpressureend') ?? ''));
 
+  final description = _getElementText(tank, 'name');
   return _TankDataResult(
     cylinder: DiveCylinder(
-      cylinder: tankVolume != null ? Cylinder(volumeL: tankVolume) : null,
-      oxygen: oxygen,
-      helium: helium,
+      cylinder: tankVolume != null || description != null ? Cylinder(volumeL: tankVolume, description: description) : null,
+      oxygen: mix?.oxygen ?? 0.21,
+      helium: mix?.helium ?? 0,
       beginPressure: beginPressure,
       endPressure: endPressure,
     ),
@@ -776,7 +844,7 @@ _TankDataResult? _parseTankData(XmlElement tankData, Map<String, _GasMix> gasMix
   );
 }
 
-LogSample? _parseWaypoint(XmlElement waypoint, Map<String, int> gasMixIdToCylinderIdx) {
+LogSample? _parseWaypoint(XmlElement waypoint, Map<String, int> gasMixIdToCylinderIdx, Map<String, int> tankIndexes) {
   final depth = double.tryParse(_getElementText(waypoint, 'depth') ?? '');
   final diveTime = double.tryParse(_getElementText(waypoint, 'divetime') ?? '');
 
@@ -785,13 +853,13 @@ LogSample? _parseWaypoint(XmlElement waypoint, Map<String, int> gasMixIdToCylind
   // Temperature (K -> °C)
   final temp = _kelvinToCelsius(double.tryParse(_getElementText(waypoint, 'temperature') ?? ''));
 
-  // Tank pressure (Pa -> bar)
-  final tankPressure = _pascalToBarConvert(double.tryParse(_getElementText(waypoint, 'tankpressure') ?? ''));
-
   final sample = LogSample(time: diveTime, depth: depth, temperature: temp);
 
-  if (tankPressure != null) {
-    sample.pressures.add(TankPressure(tankIndex: 0, pressure: tankPressure));
+  for (final reading in waypoint.findElements('tankpressure')) {
+    final ref = reading.getAttribute('ref') ?? reading.getAttribute('tankref');
+    final index = ref == null ? 0 : tankIndexes[ref];
+    final pressure = _pascalToBarConvert(double.tryParse(reading.innerText.trim()));
+    if (index != null && pressure != null) sample.pressures.add(TankPressure(tankIndex: index, pressure: pressure));
   }
 
   // Check for gas switch
@@ -813,5 +881,12 @@ String? _getElementText(XmlElement? parent, String name) {
   final elem = parent.getElement(name);
   if (elem == null) return null;
   final text = elem.innerText.trim();
+  return text.isEmpty ? null : text;
+}
+
+String? _readNotes(XmlElement? notes) {
+  if (notes == null) return null;
+  final paragraphs = notes.findElements('para');
+  final text = paragraphs.isEmpty ? notes.innerText.trim() : paragraphs.map((para) => para.innerText.trim()).join('\n\n').trim();
   return text.isEmpty ? null : text;
 }

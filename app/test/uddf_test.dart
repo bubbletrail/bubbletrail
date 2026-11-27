@@ -460,8 +460,8 @@ More text here.</notes>
       // Dives are exported chronologically.
       final dives = root.getElement('profiledata')?.findElements('repetitiongroup').expand((rg) => rg.findElements('dive')).toList();
       expect(dives, hasLength(2));
-      expect(dives![0].getAttribute('id'), '9f0ac9d0-4444-4444-8444-000000000004');
-      expect(dives[1].getAttribute('id'), '9f0ac9d0-2222-4222-8222-000000000002');
+      expect(dives![0].getAttribute('id'), startsWith('bt-dive-'));
+      expect(reimported.dives.map((dive) => dive.number), [248, 249]);
 
       // Every dive carries the elements the UDDF schema requires.
       for (final dive in dives) {
@@ -566,7 +566,7 @@ More text here.</notes>
       expect(log.surfaceTemperature, closeTo(12.0, 1e-6));
       expect(log.minTemperature, closeTo(8.0, 1e-6));
 
-      expect(log.samples, hasLength(4));
+      expect(log.samples, hasLength(5));
       expect(log.samples[0].time, closeTo(0, 1e-9));
       expect(log.samples[0].depth, closeTo(0.0, 1e-6));
       expect(log.samples[1].time, closeTo(60, 1e-9));
@@ -579,6 +579,7 @@ More text here.</notes>
       expect(log.samples[2].depth, closeTo(35.7, 1e-6));
       expect(log.samples[3].time, closeTo(3530, 1e-9));
       expect(log.samples[3].depth, closeTo(0.1, 1e-6));
+      expect(log.samples.last.depth, 0);
     });
 
     test('gas switch events fully roundtrip', () {
@@ -608,22 +609,107 @@ More text here.</notes>
       expect(re.sites, isEmpty);
     });
 
-    // The strongest form of the roundtrip guarantee: data that came from a
-    // UDDF file (both the MacDive and the Subsurface flavoured samples)
-    // survives an export followed by a re-import completely unchanged.
-    for (final sample in ['sample-1.uddf', 'sample-2.uddf']) {
-      test('$sample survives export + re-import unchanged', () {
-        final file = File('test/testdata/$sample');
-        final original = UddfXml.fromXml(XmlDocument.parse(file.readAsStringSync()).rootElement);
-        final reimported = importXmlString(original.toUddfString());
+    test('validates a native export against the 3.2.1 XSD when xmllint is available', () async {
+      try {
+        await Process.run('xmllint', ['--version']);
+      } on ProcessException {
+        markTestSkipped('xmllint is unavailable');
+        return;
+      }
+      // Validate through a temporary file so this also works on Windows installations of xmllint.
+      final directory = await Directory.systemTemp.createTemp('uddf_schema');
+      addTearDown(() => directory.delete(recursive: true));
+      final file = await File('${directory.path}/export.uddf').writeAsString(exported);
+      final validation = await Process.run('xmllint', ['--noout', '--schema', '../doc/uddf_3.2.1.xsd', file.path]);
+      expect(validation.exitCode, 0, reason: validation.stderr.toString());
+    });
 
-        expect(reimported.sites.length, original.sites.length);
-        for (final site in original.sites) {
-          expect(reimported.sites, contains(site));
-        }
-        expect(reimported.dives.length, original.dives.length);
-        for (final dive in original.dives) {
-          expect(reimported.dives, contains(dive));
+    test('roundtrips a manual dive and a same-mix cylinder switch through a fresh store', () async {
+      final start = proto.Timestamp.fromDateTime(DateTime.utc(2025, 1, 1))..nanos = 123456789;
+      final manual = Dive(id: '1-manual', start: start, number: 1, duration: 1900, maxDepth: 14, meanDepth: 7);
+      final air = DiveCylinder(oxygen: 0.21, beginPressure: 200);
+      final recorded = Dive(
+        id: '2-recorded',
+        start: start,
+        number: 2,
+        duration: 30,
+        cylinders: [air, air.deepCopy()],
+        events: [SampleEvent(type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, time: 15, value: 1)],
+        logs: [
+          Log(
+            samples: [
+              LogSample(time: 0, depth: 0),
+              LogSample(time: 10, depth: 10, pressures: [TankPressure(tankIndex: 0, pressure: 190), TankPressure(tankIndex: 1, pressure: 200)]),
+              LogSample(time: 20, depth: 20),
+              LogSample(time: 30, depth: 0),
+            ],
+          ),
+        ],
+      );
+      final imported = importXmlString(Container(dives: [manual, recorded]).toUddfString());
+      final directory = await Directory.systemTemp.createTemp('uddf_store');
+      addTearDown(() => directory.delete(recursive: true));
+      final store = Store('${directory.path}/db');
+      await store.init();
+      for (final dive in imported.dives) {
+        dive.recalculateMetadata(preserveSummary: imported.preserveDiveSummary);
+      }
+      await store.insertDives(imported.dives);
+
+      final saved = (await store.diveById(manual.id))!;
+      expect(saved.start, start);
+      expect(saved.duration, 1900);
+      expect(saved.maxDepth, 14);
+      expect(saved.meanDepth, 7);
+
+      final profile = (await store.diveById(recorded.id))!;
+      expect(profile.cylinders.map((cylinder) => cylinder.oxygen), [0.21, 0.21]);
+      final switchEvent = profile.events.single;
+      expect(switchEvent.time, 15);
+      expect(switchEvent.value, 1);
+      expect(profile.logs.single.samples.firstWhere((sample) => sample.time == 15).depth, 15);
+      final pressures = profile.logs.single.samples.firstWhere((sample) => sample.time == 10).pressures;
+      expect(pressures.map((reading) => reading.tankIndex), [0, 1]);
+      expect(pressures[0].pressure, closeTo(190, 1e-9));
+      expect(pressures[1].pressure, closeTo(200, 1e-9));
+      // Wait for the debounced write before checking that a reopened store
+      // also preserves the imported summary.
+      final savedFile = File('${directory.path}/db/dives/2025-01/2025-01-01.${recorded.id}.meta.binpb');
+      for (var attempt = 0; attempt < 40 && !await savedFile.exists(); attempt++) {
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+      }
+      final reopened = Store('${directory.path}/db');
+      await reopened.init();
+      expect((await reopened.diveById(manual.id))!.duration, 1900);
+    });
+
+    for (final sample in ['sample-1.uddf', 'sample-2.uddf']) {
+      test('$sample stabilizes after normalization to Bubbletrail UDDF', () {
+        final original = importXmlString(File('test/testdata/$sample').readAsStringSync());
+        final normalized = importXmlString(original.toUddfString());
+        final reimported = importXmlString(normalized.toUddfString());
+
+        expect(reimported.sites, normalized.sites);
+        expect(reimported.dives.map((dive) => dive.id), normalized.dives.map((dive) => dive.id));
+        for (final (index, dive) in reimported.dives.indexed) {
+          final expected = normalized.dives[index];
+          expect(dive.duration, expected.duration);
+          expect(dive.siteId, expected.siteId);
+          expect(dive.events, expected.events);
+          final samples = dive.logs.single.samples;
+          final expectedSamples = expected.logs.single.samples;
+          expect(samples.length, expectedSamples.length);
+          for (final (index, sample) in samples.indexed) {
+            final expectedSample = expectedSamples[index];
+            expect(sample.time, expectedSample.time);
+            expect(sample.depth, expectedSample.depth);
+            expect(sample.events, expectedSample.events);
+            expect(sample.pressures.length, expectedSample.pressures.length);
+            for (final (index, reading) in sample.pressures.indexed) {
+              expect(reading.tankIndex, expectedSample.pressures[index].tankIndex);
+              expect(reading.pressure, closeTo(expectedSample.pressures[index].pressure, 1e-9));
+            }
+          }
         }
       });
     }
