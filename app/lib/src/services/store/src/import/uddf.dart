@@ -520,7 +520,7 @@ void _writeDive(XmlBuilder builder, Dive dive, Map<String, String> siteIds, Map<
             builder.element('lowesttemperature', nest: () => builder.text(_fmt(lowestTemp)));
           }
           final greatestDepth = dive.hasMaxDepth() ? dive.maxDepth : (log != null && log.hasMaxDepth() ? log.maxDepth : 0.0);
-          builder.element('greatestdepth', nest: () => builder.text(_fmt(greatestDepth)));
+          builder.element('greatestdepth', nest: () => builder.text(greatestDepth.toStringAsFixed(1)));
 
           final notes = _notesWithTags(dive.hasNotes() ? dive.notes : null, dive.tags);
           if (notes != null && notes.isNotEmpty) {
@@ -556,7 +556,7 @@ void _writeDive(XmlBuilder builder, Dive dive, Map<String, String> siteIds, Map<
           }
 
           if (dive.hasMeanDepth()) {
-            builder.element('averagedepth', nest: () => builder.text(_fmt(dive.meanDepth)));
+            builder.element('averagedepth', nest: () => builder.text(dive.meanDepth.toStringAsFixed(1)));
           }
         },
       );
@@ -568,7 +568,7 @@ void _writeWaypoint(XmlBuilder builder, List<String> tankIds, LogSample sample, 
   builder.element(
     'waypoint',
     nest: () {
-      builder.element('depth', nest: () => builder.text(_fmt(sample.depth)));
+      builder.element('depth', nest: () => builder.text(sample.depth.toStringAsFixed(1)));
       builder.element('divetime', nest: () => builder.text(_fmt(sample.time)));
       if (mixId != null) builder.element('switchmix', attributes: {'ref': mixId});
       for (final reading in sample.pressures) {

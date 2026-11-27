@@ -697,6 +697,21 @@ More text here.</notes>
       expect(doc.findAllElements('tankpressure').single.innerText, '20088000');
     });
 
+    test('rounds waypoint and summary depths to one decimal place', () {
+      final dive = Dive(
+        id: 'depth-precision',
+        maxDepth: 15.678,
+        meanDepth: 6.342,
+        logs: [
+          Log(samples: [LogSample(time: 0, depth: 0), LogSample(time: 10, depth: 15.678), LogSample(time: 20, depth: 0)]),
+        ],
+      );
+      final doc = XmlDocument.parse(Container(dives: [dive]).toUddfString());
+      expect(doc.findAllElements('depth').map((depth) => depth.innerText), ['0.0', '15.7', '0.0']);
+      expect(doc.findAllElements('greatestdepth').single.innerText, '15.7');
+      expect(doc.findAllElements('averagedepth').single.innerText, '6.3');
+    });
+
     test('gas switch events fully roundtrip', () {
       final log = reDive1().logs[0];
 
