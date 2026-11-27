@@ -237,7 +237,8 @@ class ArchiveBloc extends Bloc<ArchiveEvent, ArchiveState> {
         }
       }
 
-      final xml = await compute(generate, Container(dives: dives, sites: sites));
+      final equipment = format == 'uddf' ? await _store.equipment.getAll() : <Equipment>[];
+      final xml = await compute(generate, Container(dives: dives, sites: sites, equipment: equipment));
 
       await logFile.writeAsString(xml);
 

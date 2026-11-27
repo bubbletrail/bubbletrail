@@ -392,6 +392,20 @@ More text here.</notes>
         notes: 'Beautiful, heated pool.',
       );
 
+      final regulator = Equipment(
+        id: 'regulator-id',
+        type: 'Regulator',
+        name: 'XTX50',
+        manufacturer: 'Apeks',
+        serial: 'ABC123',
+        purchaseDate: proto.Timestamp.fromDateTime(DateTime.utc(2024, 1, 15)),
+        purchasePrice: 349.95,
+        shop: 'Dive Shop',
+      );
+      final camera = Equipment(id: 'camera-id', type: 'Camera', name: 'TG-7', manufacturer: 'OM System');
+      final suit = Equipment(id: 'suit-id', type: 'Drysuit', name: 'Explorer');
+      final reel = Equipment(id: 'reel-id', type: 'Reel', name: 'Spool');
+
       final dive1 = Dive(
         id: '9f0ac9d0-2222-4222-8222-000000000002',
         number: 249,
@@ -409,6 +423,7 @@ More text here.</notes>
           DiveCylinder(oxygen: 0.5, helium: 0.0),
         ],
         weightsystems: [Weightsystem(weight: 6.0, description: 'Lead')],
+        equipment: [regulator, camera, suit],
         events: [SampleEvent(type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, time: 1800, value: 1)],
         logs: [
           Log(
@@ -433,13 +448,14 @@ More text here.</notes>
         siteId: site2.id,
         tags: ['training'],
         buddies: ['Name Namesson'],
+        equipment: [Equipment(id: regulator.id)],
         cylinders: [DiveCylinder(cylinder: Cylinder(volumeL: 12.0), oxygen: 0.21, helium: 0.0)],
         logs: [
           Log(samples: [LogSample(time: 0, depth: 0.0), LogSample(time: 600, depth: 5.5)]),
         ],
       );
 
-      original = Container(dives: [dive1, dive2], sites: [site1, site2]);
+      original = Container(dives: [dive1, dive2], sites: [site1, site2], equipment: [regulator, camera, suit, reel]);
       exported = original.toUddfString(version: '1.2.3');
       reimported = importXmlString(exported);
     });
@@ -618,6 +634,26 @@ More text here.</notes>
       final doc = XmlDocument.parse(xml);
       expect(doc.findAllElements('mix').map((mix) => mix.getAttribute('id')), ['mix-ean32', 'mix-tx21-35', 'mix-ean32-2', 'mix-ean32-3']);
       expect(importXmlString(xml).dives.single.cylinders.map((cylinder) => cylinder.oxygen), [0.32, 0.21, 0.32, 0.321]);
+    });
+
+    test('roundtrips equipment inventory, purchase fields and per-dive links', () {
+      final doc = XmlDocument.parse(exported);
+      final ownerEquipment = doc.findAllElements('owner').single.getElement('equipment')!;
+      expect(ownerEquipment.childElements.map((item) => item.name.local), ['camera', 'regulator', 'suit', 'tank', 'tank', 'tank', 'variouspieces']);
+      expect(doc.findAllElements('price').single.getAttribute('currency'), isNull);
+
+      final regulator = reimported.equipment.singleWhere((item) => item.type == 'Regulator');
+      expect(regulator.id, 'equipment-xtx50');
+      expect(regulator.name, 'XTX50');
+      expect(regulator.manufacturer, 'Apeks');
+      expect(regulator.serial, 'ABC123');
+      expect(regulator.purchaseDate, proto.Timestamp.fromDateTime(DateTime.utc(2024, 1, 15)));
+      expect(regulator.purchasePrice, 349.95);
+      expect(regulator.shop, 'Dive Shop');
+      expect(reDive1().equipment.map((item) => item.type), ['Regulator', 'Camera', 'Drysuit']);
+      expect(reDive2().equipment.single, regulator);
+      expect(reDive1().equipment.first, regulator);
+      expect(reimported.equipment.singleWhere((item) => item.type == 'Reel').name, 'Spool');
     });
 
     test('weights fully roundtrip', () {

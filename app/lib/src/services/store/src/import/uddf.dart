@@ -101,6 +101,10 @@ extension UddfXml on Container {
       for (final tank in elem.getElement('diver')?.findAllElements('tank') ?? <XmlElement>[])
         if (tank.getAttribute('id') case final String id) id: tank,
     };
+    final equipment = <String, Equipment>{
+      for (final item in elem.getElement('diver')?.getElement('owner')?.getElement('equipment')?.childElements ?? <XmlElement>[])
+        if (item.getAttribute('id') case final String id when _equipmentTypes.containsKey(item.name.local)) id: _readEquipment(item, id, ownExport),
+    };
     // Parse gas definitions (referenced by dives)
     final gasMixes = <String, _GasMix>{};
     final gasDefs = elem.getElement('gasdefinitions');
@@ -149,13 +153,13 @@ extension UddfXml on Container {
     if (profileData != null) {
       for (final repGroup in profileData.findElements('repetitiongroup')) {
         for (final diveElem in repGroup.findElements('dive')) {
-          final dive = _UddfDive.fromXml(diveElem, gasMixes, buddies, sitesById, tanks, ownExport);
+          final dive = _UddfDive.fromXml(diveElem, gasMixes, buddies, sitesById, tanks, equipment, ownExport);
           dives.add(dive);
         }
       }
     }
 
-    return Container(dives: dives, sites: sites, preserveDiveSummary: true);
+    return Container(dives: dives, sites: sites, equipment: equipment.values.toList(), preserveDiveSummary: true);
   }
 
   // Serialise the container to a UDDF 3.2.1 document string.
@@ -215,6 +219,12 @@ extension UddfXml on Container {
       }
     }
 
+    final gear = {
+      for (final item in [...dives.expand((dive) => dive.equipment), ...equipment]) _equipmentKey(item): item,
+    };
+    final gearIds = gear.map((key, item) => MapEntry(key, _namedId('equipment', item.name, usedIds)));
+    final gearByTag = gear.entries.groupListsBy((entry) => _equipmentTag(entry.value.type));
+
     final siteIds = {for (final site in sites) site.id: _namedId('site', site.name, usedIds)};
     int startSeconds(Dive d) => d.hasStart() ? d.start.seconds.toInt() : 0;
     final orderedDives = [...dives]..sort((a, b) => startSeconds(a).compareTo(startSeconds(b)));
@@ -239,7 +249,7 @@ extension UddfXml on Container {
           },
         );
 
-        if (buddies.isNotEmpty || tankDefinitions.isNotEmpty) {
+        if (buddies.isNotEmpty || tankDefinitions.isNotEmpty || gear.isNotEmpty) {
           builder.element(
             'diver',
             nest: () {
@@ -255,22 +265,29 @@ extension UddfXml on Container {
                       builder.element('lastname');
                     },
                   );
-                  if (tankDefinitions.isNotEmpty) {
+                  if (tankDefinitions.isNotEmpty || gear.isNotEmpty) {
                     builder.element(
                       'equipment',
                       nest: () {
-                        for (final entry in tankDefinitions.entries) {
-                          final cylinder = entry.value;
-                          builder.element(
-                            'tank',
-                            attributes: {'id': entry.key},
-                            nest: () {
-                              builder.element('name', nest: () => builder.text(cylinder.description));
-                              if (cylinder.hasVolumeL()) {
-                                builder.element('tankvolume', nest: () => builder.text(_fmt(cylinder.volumeL * _literToCubicMeter)));
-                              }
-                            },
-                          );
+                        for (final tag in _equipmentTypes.keys) {
+                          if (tag == 'variouspieces') {
+                            for (final entry in tankDefinitions.entries) {
+                              final cylinder = entry.value;
+                              builder.element(
+                                'tank',
+                                attributes: {'id': entry.key},
+                                nest: () {
+                                  builder.element('name', nest: () => builder.text(cylinder.description));
+                                  if (cylinder.hasVolumeL()) {
+                                    builder.element('tankvolume', nest: () => builder.text(_fmt(cylinder.volumeL * _literToCubicMeter)));
+                                  }
+                                },
+                              );
+                            }
+                          }
+                          for (final entry in gearByTag[tag] ?? []) {
+                            _writeEquipment(builder, tag, gearIds[entry.key]!, entry.value, usedIds);
+                          }
                         }
                       },
                     );
@@ -339,7 +356,8 @@ extension UddfXml on Container {
                   'repetitiongroup',
                   attributes: {'id': _xmlId('group', dive.id)},
                   nest: () {
-                    _writeDive(builder, dive, siteIds, buddies, tankIdsByDive[dive.id]!, mixIdsByDive[dive.id]!);
+                    final equipmentRefs = dive.equipment.map((item) => gearIds[_equipmentKey(item)]!).toSet();
+                    _writeDive(builder, dive, siteIds, buddies, tankIdsByDive[dive.id]!, mixIdsByDive[dive.id]!, equipmentRefs);
                   },
                 );
               }
@@ -404,7 +422,15 @@ void _writeSite(XmlBuilder builder, Site site, String id) {
   );
 }
 
-void _writeDive(XmlBuilder builder, Dive dive, Map<String, String> siteIds, Map<String, String> buddies, List<String> tankIds, Map<int, String> mixIds) {
+void _writeDive(
+  XmlBuilder builder,
+  Dive dive,
+  Map<String, String> siteIds,
+  Map<String, String> buddies,
+  List<String> tankIds,
+  Map<int, String> mixIds,
+  Set<String> equipmentRefs,
+) {
   final log = dive.logs.firstOrNull;
 
   builder.element(
@@ -547,11 +573,14 @@ void _writeDive(XmlBuilder builder, Dive dive, Map<String, String> siteIds, Map<
           // UDDF only has a single total lead weight; the per-weightsystem
           // breakdown cannot be represented.
           final lead = dive.weightsystems.fold(0.0, (sum, ws) => sum + (ws.hasWeight() ? ws.weight : 0.0));
-          if (lead > 0) {
+          if (lead > 0 || equipmentRefs.isNotEmpty) {
             builder.element(
               'equipmentused',
               nest: () {
-                builder.element('leadquantity', nest: () => builder.text(_fmt(lead)));
+                if (lead > 0) builder.element('leadquantity', nest: () => builder.text(_fmt(lead)));
+                for (final ref in equipmentRefs) {
+                  builder.element('link', attributes: {'ref': ref});
+                }
               },
             );
           }
@@ -694,6 +723,7 @@ extension _UddfDive on Dive {
     Map<String, _Buddy> buddies,
     Map<String, Site> sitesById,
     Map<String, XmlElement> tanks,
+    Map<String, Equipment> equipment,
     bool ownExport,
   ) {
     final diveId = _readId(elem.getAttribute('id'), 'dive', ownExport);
@@ -701,17 +731,7 @@ extension _UddfDive on Dive {
     final infoBefore = elem.getElement('informationbeforedive');
     final infoAfter = elem.getElement('informationafterdive');
 
-    // Parse datetime
-    Timestamp? dateTime;
-    final dateTimeStr = _getElementText(infoBefore, 'datetime');
-    if (dateTimeStr != null) {
-      final parsed = DateTime.tryParse(dateTimeStr);
-      if (parsed != null) {
-        dateTime = Timestamp.fromDateTime(parsed);
-        final fraction = RegExp(r'T[0-9:]+[.,]([0-9]+)').firstMatch(dateTimeStr)?.group(1);
-        if (fraction != null) dateTime.nanos = int.parse(fraction.padRight(9, '0').substring(0, 9));
-      }
-    }
+    final dateTime = _readTimestamp(_getElementText(infoBefore, 'datetime'));
 
     // Parse dive number
     final diveNumber = int.tryParse(_getElementText(infoBefore, 'divenumber') ?? '') ?? 0;
@@ -829,6 +849,9 @@ extension _UddfDive on Dive {
     dive.buddies.addAll(buddyNames);
     dive.cylinders.addAll(cylinders);
     dive.weightsystems.addAll(weightsystems);
+    for (final link in equipUsed?.findElements('link') ?? <XmlElement>[]) {
+      if (equipment[link.getAttribute('ref')] case final Equipment item) dive.equipment.add(item.deepCopy());
+    }
     var activeCylinder = 0;
     for (final event in samples.expand((sample) => sample.events)) {
       if (event.value == activeCylinder) continue;
@@ -839,6 +862,128 @@ extension _UddfDive on Dive {
 
     return dive;
   }
+}
+
+// UDDF equipment children must appear in schema order. Tanks are handled
+// separately between suits and miscellaneous equipment.
+const _equipmentTypes = {
+  'boots': 'Boots',
+  'buoyancycontroldevice': 'BCD',
+  'camera': 'Camera',
+  'compass': 'Compass',
+  'compressor': 'Compressor',
+  'divecomputer': 'Computer',
+  'fins': 'Fins',
+  'gloves': 'Gloves',
+  'knife': 'Knife',
+  'lead': 'Lead',
+  'light': 'Light',
+  'mask': 'Mask',
+  'rebreather': 'Rebreather',
+  'regulator': 'Regulator',
+  'scooter': 'Scooter',
+  'suit': 'Suit',
+  'variouspieces': 'Other',
+  'videocamera': 'Video camera',
+  'watch': 'Watch',
+};
+
+Object _equipmentKey(Equipment item) => item.id.isNotEmpty ? item.id : (item.type, item.manufacturer, item.name, item.serial);
+
+String _equipmentTag(String type) {
+  if (type == 'Wetsuit' || type == 'Drysuit') return 'suit';
+  return _equipmentTypes.entries.firstWhereOrNull((entry) => entry.value == type)?.key ?? 'variouspieces';
+}
+
+void _writeEquipment(XmlBuilder builder, String tag, String id, Equipment item, Set<String> usedIds) {
+  void writeFields() {
+    builder.element('name', nest: () => builder.text(item.name));
+    if (item.manufacturer.isNotEmpty) {
+      builder.element(
+        'manufacturer',
+        attributes: {'id': _namedId('manufacturer', item.manufacturer, usedIds)},
+        nest: () => builder.element('name', nest: () => builder.text(item.manufacturer)),
+      );
+    }
+    if (item.serial.isNotEmpty) builder.element('serialnumber', nest: () => builder.text(item.serial));
+    if (item.hasPurchaseDate() || item.hasPurchasePrice() || item.shop.isNotEmpty) {
+      builder.element(
+        'purchase',
+        nest: () {
+          if (item.hasPurchaseDate()) {
+            builder.element('datetime', nest: () => builder.text(_formatDateTime(item.purchaseDate.toDateTime(), nanos: item.purchaseDate.nanos)));
+          }
+          if (item.hasPurchasePrice()) builder.element('price', nest: () => builder.text(_fmt(item.purchasePrice)));
+          if (item.shop.isNotEmpty) {
+            builder.element(
+              'shop',
+              attributes: {'id': _namedId('shop', item.shop, usedIds)},
+              nest: () => builder.element('name', nest: () => builder.text(item.shop)),
+            );
+          }
+        },
+      );
+    }
+  }
+
+  builder.element(
+    tag,
+    attributes: {'id': id},
+    nest: () {
+      if (tag == 'camera' || tag == 'videocamera') {
+        builder.element('body', attributes: {'id': _namedId('camera-body', item.name, usedIds)}, nest: writeFields);
+      } else {
+        if (tag == 'variouspieces' && item.type != 'Other') {
+          builder.processing('bubbletrail-equipment-type', base64Url.encode(utf8.encode(item.type)));
+        }
+        writeFields();
+        if (item.type == 'Wetsuit' || item.type == 'Drysuit') {
+          builder.element('suittype', nest: () => builder.text(item.type == 'Wetsuit' ? 'wet-suit' : 'dry-suit'));
+        }
+      }
+    },
+  );
+}
+
+Equipment _readEquipment(XmlElement element, String id, bool ownExport) {
+  final tag = element.name.local;
+  final item = element.getElement('body') ?? element;
+  final purchase = item.getElement('purchase');
+  var type = switch (_getElementText(item, 'suittype')) {
+    'wet-suit' => 'Wetsuit',
+    'dry-suit' => 'Drysuit',
+    _ => _equipmentTypes[tag]!,
+  };
+  if (ownExport && tag == 'variouspieces') {
+    final storedType = item.children.whereType<XmlProcessing>().firstWhereOrNull((node) => node.target == 'bubbletrail-equipment-type')?.value;
+    if (storedType != null) {
+      try {
+        type = utf8.decode(base64Url.decode(storedType));
+      } on FormatException {
+        // Fall back to the standard UDDF type.
+      }
+    }
+  }
+  return Equipment(
+    id: id,
+    type: type,
+    name: _getElementText(item, 'name') ?? _getElementText(item, 'model'),
+    manufacturer: _getElementText(item.getElement('manufacturer'), 'name'),
+    serial: _getElementText(item, 'serialnumber'),
+    purchaseDate: _readTimestamp(_getElementText(purchase, 'datetime')),
+    purchasePrice: double.tryParse(_getElementText(purchase, 'price') ?? ''),
+    shop: _getElementText(purchase?.getElement('shop'), 'name'),
+  );
+}
+
+Timestamp? _readTimestamp(String? value) {
+  if (value == null) return null;
+  final parsed = DateTime.tryParse(value);
+  if (parsed == null) return null;
+  final timestamp = Timestamp.fromDateTime(parsed);
+  final fraction = RegExp(r'T[0-9:]+[.,]([0-9]+)').firstMatch(value)?.group(1);
+  if (fraction != null) timestamp.nanos = int.parse(fraction.padRight(9, '0').substring(0, 9));
+  return timestamp;
 }
 
 // Result of parsing tank data: the cylinder and optionally the gas mix ID it links to.

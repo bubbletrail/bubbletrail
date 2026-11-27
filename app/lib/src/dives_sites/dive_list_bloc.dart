@@ -297,6 +297,24 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
       final defaultDeepDeco = await _store.cylinders.getDefaultForDeepDeco();
       final defaultShallowDeco = await _store.cylinders.getDefaultForShallowDeco();
 
+      Future<Equipment> persistEquipment(Equipment eq) => _store.equipment.getOrCreate(
+        type: eq.type,
+        manufacturer: eq.manufacturer,
+        name: eq.name,
+        serial: eq.serial,
+        weight: eq.hasWeight() ? eq.weight : null,
+        purchaseDate: eq.hasPurchaseDate() ? eq.purchaseDate : null,
+        purchasePrice: eq.hasPurchasePrice() ? eq.purchasePrice : null,
+        shop: eq.hasShop() ? eq.shop : null,
+        warrantyUntil: eq.hasWarrantyUntil() ? eq.warrantyUntil : null,
+        lastService: eq.hasLastService() ? eq.lastService : null,
+      );
+      final equipmentByDocumentId = <String, Equipment>{};
+      for (final eq in importedDoc.equipment) {
+        final saved = await persistEquipment(eq);
+        if (eq.id.isNotEmpty) equipmentByDocumentId[eq.id] = saved;
+      }
+
       for (final dive in importedDoc.dives) {
         // Process cylinders
         for (final cyl in dive.cylinders) {
@@ -323,20 +341,8 @@ class DiveListBloc extends Bloc<DiveListEvent, DiveListState> {
           }
         }
 
-        // Process equipment
         for (final (idx, eq) in dive.equipment.indexed) {
-          final matched = await _store.equipment.getOrCreate(
-            type: eq.type,
-            manufacturer: eq.manufacturer,
-            name: eq.name,
-            serial: eq.serial,
-            weight: eq.hasWeight() ? eq.weight : null,
-            purchaseDate: eq.hasPurchaseDate() ? eq.purchaseDate : null,
-            purchasePrice: eq.hasPurchasePrice() ? eq.purchasePrice : null,
-            shop: eq.hasShop() ? eq.shop : null,
-            warrantyUntil: eq.hasWarrantyUntil() ? eq.warrantyUntil : null,
-            lastService: eq.hasLastService() ? eq.lastService : null,
-          );
+          final matched = equipmentByDocumentId[eq.id] ?? await persistEquipment(eq);
           dive.equipment[idx] = Equipment(id: matched.id);
         }
 
