@@ -15,10 +15,10 @@ const double _cubicMeterToLiter = 1000.0;
 const double _literToCubicMeter = 0.001;
 
 double? _kelvinToCelsius(double? k) => k != null ? k - _kelvinOffset : null;
-double? _pascalToBarConvert(double? pa) => pa != null ? pa / _barToPascal : null;
-double? _celsiusToKelvin(double? c) => c != null ? c + _kelvinOffset : null;
-// Round to 0.01 bar (1 kPa) and serialize in pascals.
-String _formatPressure(double bar) => ((bar * 100).round() * 1000).toString();
+double? _pascalToBarConvert(double? pa) => pa != null && pa != 0 ? pa / _barToPascal : null;
+String _formatTemperature(double celsius) => ((celsius * 100).round() / 100 + _kelvinOffset).toStringAsFixed(2);
+// Round to 0.01 bar (1 kPa) and return whole pascals.
+int _roundPressureToPascals(double bar) => (bar * 100).round() * 1000;
 double? _litersToCubicMeters(double? liters) => liters != null ? liters * _literToCubicMeter : null;
 
 // Extract hashtags from the last line of notes and return (cleanedNotes, tags).
@@ -428,9 +428,9 @@ void _writeDive(XmlBuilder builder, Dive dive, Map<String, String> siteIds, Map<
           }
           final start = dive.hasStart() ? dive.start.toDateTime() : DateTime.fromMillisecondsSinceEpoch(0);
           builder.element('datetime', nest: () => builder.text(_formatDateTime(start, nanos: dive.start.nanos)));
-          final airTemp = _celsiusToKelvin(log != null && log.hasSurfaceTemperature() ? log.surfaceTemperature : null);
+          final airTemp = log != null && log.hasSurfaceTemperature() ? log.surfaceTemperature : null;
           if (airTemp != null) {
-            builder.element('airtemperature', nest: () => builder.text(_fmt(airTemp)));
+            builder.element('airtemperature', nest: () => builder.text(_formatTemperature(airTemp)));
           }
         },
       );
@@ -504,9 +504,10 @@ void _writeDive(XmlBuilder builder, Dive dive, Map<String, String> siteIds, Map<
             if (volume != null) {
               builder.element('tankvolume', nest: () => builder.text(_fmt(volume)));
             }
-            builder.element('tankpressurebegin', nest: () => builder.text(_formatPressure(cyl.beginPressure)));
-            if (cyl.hasEndPressure()) {
-              builder.element('tankpressureend', nest: () => builder.text(_formatPressure(cyl.endPressure)));
+            builder.element('tankpressurebegin', nest: () => builder.text(_roundPressureToPascals(cyl.beginPressure).toString()));
+            final endPressure = _roundPressureToPascals(cyl.endPressure);
+            if (endPressure != 0) {
+              builder.element('tankpressureend', nest: () => builder.text(endPressure.toString()));
             }
           },
         );
@@ -515,9 +516,9 @@ void _writeDive(XmlBuilder builder, Dive dive, Map<String, String> siteIds, Map<
       builder.element(
         'informationafterdive',
         nest: () {
-          final lowestTemp = _celsiusToKelvin(dive.hasMinTemp() ? dive.minTemp : (log != null && log.hasMinTemperature() ? log.minTemperature : null));
+          final lowestTemp = dive.hasMinTemp() ? dive.minTemp : (log != null && log.hasMinTemperature() ? log.minTemperature : null);
           if (lowestTemp != null) {
-            builder.element('lowesttemperature', nest: () => builder.text(_fmt(lowestTemp)));
+            builder.element('lowesttemperature', nest: () => builder.text(_formatTemperature(lowestTemp)));
           }
           final greatestDepth = dive.hasMaxDepth() ? dive.maxDepth : (log != null && log.hasMaxDepth() ? log.maxDepth : 0.0);
           builder.element('greatestdepth', nest: () => builder.text(greatestDepth.toStringAsFixed(1)));
@@ -572,17 +573,18 @@ void _writeWaypoint(XmlBuilder builder, List<String> tankIds, LogSample sample, 
       builder.element('divetime', nest: () => builder.text(_fmt(sample.time)));
       if (mixId != null) builder.element('switchmix', attributes: {'ref': mixId});
       for (final reading in sample.pressures) {
-        if (!reading.hasPressure()) continue;
+        final pressure = _roundPressureToPascals(reading.pressure);
+        if (pressure == 0) continue;
         final index = reading.tankIndex;
         if (index < 0 || index >= tankIds.length) {
           if (index != 0 || tankIds.isNotEmpty) continue;
-          builder.element('tankpressure', nest: () => builder.text(_formatPressure(reading.pressure)));
+          builder.element('tankpressure', nest: () => builder.text(pressure.toString()));
           continue;
         }
-        builder.element('tankpressure', attributes: {'ref': tankIds[index]}, nest: () => builder.text(_formatPressure(reading.pressure)));
+        builder.element('tankpressure', attributes: {'ref': tankIds[index]}, nest: () => builder.text(pressure.toString()));
       }
       if (sample.hasTemperature()) {
-        builder.element('temperature', nest: () => builder.text(_fmt(sample.temperature + _kelvinOffset)));
+        builder.element('temperature', nest: () => builder.text(_formatTemperature(sample.temperature)));
       }
     },
   );

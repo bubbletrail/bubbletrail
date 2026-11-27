@@ -561,8 +561,7 @@ More text here.</notes>
 
       final deco = dive.cylinders[1];
       expect(deco.hasCylinder(), isFalse);
-      expect(deco.hasBeginPressure(), isTrue);
-      expect(deco.beginPressure, 0);
+      expect(deco.hasBeginPressure(), isFalse);
       expect(deco.hasEndPressure(), isFalse);
       expect(deco.oxygen, closeTo(0.5, 1e-9));
       expect(deco.helium, closeTo(0.0, 1e-9));
@@ -590,7 +589,7 @@ More text here.</notes>
 
       final imported = importXmlString(xml).dives;
       expect(imported.map((dive) => dive.cylinders.single.oxygen), [0.21, 0.32]);
-      expect(imported.last.cylinders.single.beginPressure, 0);
+      expect(imported.last.cylinders.single.hasBeginPressure(), isFalse);
       expect(imported.last.cylinders.single.endPressure, 50);
     });
 
@@ -653,10 +652,10 @@ More text here.</notes>
       expect(log.samples.last.depth, 0);
     });
 
-    test('omits waypoint tank pressure when the sample has no reading', () {
+    test('treats zero tank pressure as missing', () {
       final dive = Dive(
         id: 'sparse-pressures',
-        cylinders: [DiveCylinder(oxygen: 0.21)],
+        cylinders: [DiveCylinder(oxygen: 0.21, endPressure: 0)],
         logs: [
           Log(
             samples: [
@@ -672,11 +671,18 @@ More text here.</notes>
       final doc = XmlDocument.parse(xml);
       final waypoints = doc.findAllElements('waypoint');
       final pressures = waypoints.map((waypoint) => waypoint.getElement('tankpressure')?.innerText);
-      expect(pressures, [null, null, '15000000', '0']);
+      expect(pressures, [null, null, '15000000', null]);
       expect(doc.findAllElements('tankpressurebegin').single.innerText, '0');
-      final samples = importXmlString(xml).dives.single.logs.single.samples;
-      expect(samples.map((sample) => sample.pressures.length), [0, 0, 1, 1]);
-      expect(samples.last.pressures.single.pressure, 0);
+      expect(doc.findAllElements('tankpressureend'), isEmpty);
+
+      final imported = importXmlString(
+        xml
+            .replaceFirst('</waypoint>', '<tankpressure>0</tankpressure></waypoint>')
+            .replaceFirst('</tankdata>', '<tankpressureend>0</tankpressureend></tankdata>'),
+      ).dives.single;
+      expect(imported.logs.single.samples.map((sample) => sample.pressures.length), [0, 0, 1, 0]);
+      expect(imported.cylinders.single.hasBeginPressure(), isFalse);
+      expect(imported.cylinders.single.hasEndPressure(), isFalse);
     });
 
     test('rounds tank pressures to whole kilopascals written in pascals', () {
@@ -710,6 +716,22 @@ More text here.</notes>
       expect(doc.findAllElements('depth').map((depth) => depth.innerText), ['0.0', '15.7', '0.0']);
       expect(doc.findAllElements('greatestdepth').single.innerText, '15.7');
       expect(doc.findAllElements('averagedepth').single.innerText, '6.3');
+    });
+
+    test('rounds temperatures in Celsius before writing kelvin', () {
+      final dive = Dive(
+        id: 'temperature-precision',
+        minTemp: -0.125,
+        logs: [
+          Log(surfaceTemperature: 21.246, samples: [LogSample(time: 0, depth: 0, temperature: 8.234)]),
+        ],
+      );
+      final xml = Container(dives: [dive]).toUddfString();
+      final doc = XmlDocument.parse(xml);
+      expect(doc.findAllElements('airtemperature').single.innerText, '294.40');
+      expect(doc.findAllElements('lowesttemperature').single.innerText, '273.02');
+      expect(doc.findAllElements('temperature').single.innerText, '281.38');
+      expect(importXmlString(xml).dives.single.minTemp, closeTo(-0.13, 1e-9));
     });
 
     test('gas switch events fully roundtrip', () {
