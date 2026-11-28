@@ -365,12 +365,14 @@ class _ImportExportButtons extends StatelessWidget {
       // FileType.custom requires a non-empty extension list, otherwise
       // file_picker throws before showing the dialog.
       final extension = fileName.split('.').last;
-      // The mobile save flows (iOS document export, Android SAF) name the
-      // saved file from the fileName we pass, so it must include the
-      // extension. Desktop save panels derive the extension themselves and
-      // would end up with a doubled extension if we included it here.
-      final name = platformIsMobile ? fileName : fileName.substring(0, fileName.length - extension.length - 1);
-      final result = await FilePicker.saveFile(bytes: bytes, dialogTitle: dialogTitle, fileName: name, type: FileType.custom, allowedExtensions: [extension]);
+      // The macOS save picker derives its default extension from the suggested filename.
+      final result = await FilePicker.saveFile(
+        bytes: bytes,
+        dialogTitle: dialogTitle,
+        fileName: fileName,
+        type: FileType.custom,
+        allowedExtensions: [extension],
+      );
 
       if (result != null) {
         // file URIs map to a filesystem path; other schemes (content etc.) are kept as-is.
