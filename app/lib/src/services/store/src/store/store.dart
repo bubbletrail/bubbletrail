@@ -230,7 +230,7 @@ class Store with ChangeNotifier {
         dive.cylinders.addAll(mappedCyls);
         dive.equipment.clear();
         dive.equipment.addAll(mappedEquipment);
-        dive.recalculateMetadata();
+        dive.recalculateMetadata(preserveSummary: true);
       });
     } catch (e) {
       _log.warning('failed to load dive $diveID', e);

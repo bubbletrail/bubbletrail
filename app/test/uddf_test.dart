@@ -392,6 +392,20 @@ More text here.</notes>
         notes: 'Beautiful, heated pool.',
       );
 
+      final regulator = Equipment(
+        id: 'regulator-id',
+        type: 'Regulator',
+        name: 'XTX50',
+        manufacturer: 'Apeks',
+        serial: 'ABC123',
+        purchaseDate: proto.Timestamp.fromDateTime(DateTime.utc(2024, 1, 15)),
+        purchasePrice: 349.95,
+        shop: 'Dive Shop',
+      );
+      final camera = Equipment(id: 'camera-id', type: 'Camera', name: 'TG-7', manufacturer: 'OM System');
+      final suit = Equipment(id: 'suit-id', type: 'Drysuit', name: 'Explorer');
+      final reel = Equipment(id: 'reel-id', type: 'Reel', name: 'Spool');
+
       final dive1 = Dive(
         id: '9f0ac9d0-2222-4222-8222-000000000002',
         number: 249,
@@ -409,6 +423,7 @@ More text here.</notes>
           DiveCylinder(oxygen: 0.5, helium: 0.0),
         ],
         weightsystems: [Weightsystem(weight: 6.0, description: 'Lead')],
+        equipment: [regulator, camera, suit],
         events: [SampleEvent(type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, time: 1800, value: 1)],
         logs: [
           Log(
@@ -433,13 +448,14 @@ More text here.</notes>
         siteId: site2.id,
         tags: ['training'],
         buddies: ['Name Namesson'],
+        equipment: [Equipment(id: regulator.id)],
         cylinders: [DiveCylinder(cylinder: Cylinder(volumeL: 12.0), oxygen: 0.21, helium: 0.0)],
         logs: [
           Log(samples: [LogSample(time: 0, depth: 0.0), LogSample(time: 600, depth: 5.5)]),
         ],
       );
 
-      original = Container(dives: [dive1, dive2], sites: [site1, site2]);
+      original = Container(dives: [dive1, dive2], sites: [site1, site2], equipment: [regulator, camera, suit, reel]);
       exported = original.toUddfString(version: '1.2.3');
       reimported = importXmlString(exported);
     });
@@ -460,8 +476,8 @@ More text here.</notes>
       // Dives are exported chronologically.
       final dives = root.getElement('profiledata')?.findElements('repetitiongroup').expand((rg) => rg.findElements('dive')).toList();
       expect(dives, hasLength(2));
-      expect(dives![0].getAttribute('id'), '9f0ac9d0-4444-4444-8444-000000000004');
-      expect(dives[1].getAttribute('id'), '9f0ac9d0-2222-4222-8222-000000000002');
+      expect(dives![0].getAttribute('id'), startsWith('bt-dive-'));
+      expect(reimported.dives.map((dive) => dive.number), [248, 249]);
 
       // Every dive carries the elements the UDDF schema requires.
       for (final dive in dives) {
@@ -476,6 +492,23 @@ More text here.</notes>
       expect(root.getElement('diver')?.findElements('buddy'), hasLength(2));
       expect(root.getElement('gasdefinitions')?.findElements('mix'), hasLength(2));
       expect(root.getElement('divesite')?.findElements('site'), hasLength(2));
+    });
+
+    test('names buddy and site IDs and keeps colliding references distinct', () {
+      final first = Site(id: 'first-site', name: 'North / Reef');
+      final second = Site(id: 'second-site', name: 'North Reef');
+      final dive = Dive(id: 'reef-dive', siteId: second.id, buddies: ['Alex / Smith', 'Alex Smith']);
+      final xml = Container(dives: [dive], sites: [first, second]).toUddfString();
+      final doc = XmlDocument.parse(xml);
+      expect(doc.findAllElements('site').map((site) => site.getAttribute('id')), ['site-north-reef', 'site-north-reef-2']);
+      expect(doc.findAllElements('buddy').map((buddy) => buddy.getAttribute('id')), ['buddy-alex-smith', 'buddy-alex-smith-2']);
+      final links = doc.findAllElements('informationbeforedive').single.findElements('link');
+      expect(links.map((link) => link.getAttribute('ref')), ['site-north-reef-2', 'buddy-alex-smith', 'buddy-alex-smith-2']);
+
+      final imported = importXmlString(xml);
+      expect(imported.sites.map((site) => site.id), [first.id, second.id]);
+      expect(imported.dives.single.siteId, second.id);
+      expect(imported.dives.single.buddies, dive.buddies);
     });
 
     test('sites fully roundtrip', () {
@@ -550,6 +583,79 @@ More text here.</notes>
       expect(deco.helium, closeTo(0.0, 1e-9));
     });
 
+    test('reuses a tank across dives with different fills', () {
+      final tank = Cylinder(id: 'shared-tank', volumeL: 12, description: 'AL80');
+      final air = Dive(
+        id: 'air-dive',
+        cylinders: [DiveCylinder(cylinderId: tank.id, cylinder: tank, oxygen: 0.21, beginPressure: 200)],
+      );
+      final nitrox = Dive(
+        id: 'nitrox-dive',
+        cylinders: [DiveCylinder(cylinderId: tank.id, cylinder: tank, oxygen: 0.32, endPressure: 50)],
+      );
+      final xml = Container(dives: [air, nitrox]).toUddfString();
+      final doc = XmlDocument.parse(xml);
+      final definition = doc.findAllElements('tank').single;
+      expect(definition.getAttribute('id'), 'tank-al80');
+      expect(definition.getElement('link'), isNull);
+      final uses = doc.findAllElements('tankdata').toList();
+      final refs = uses.map((use) => use.findElements('link').map((link) => link.getAttribute('ref')).toList()).toList();
+      expect(refs.map((ref) => ref.first), [definition.getAttribute('id'), definition.getAttribute('id')]);
+      expect(refs[0].last, isNot(refs[1].last));
+
+      final imported = importXmlString(xml).dives;
+      expect(imported.map((dive) => dive.cylinders.single.oxygen), [0.21, 0.32]);
+      expect(imported.last.cylinders.single.hasBeginPressure(), isFalse);
+      expect(imported.last.cylinders.single.endPressure, 50);
+    });
+
+    test('names tank IDs and disambiguates duplicate names', () {
+      final dive = Dive(
+        id: 'two-tanks',
+        cylinders: [
+          DiveCylinder(cylinder: Cylinder(description: 'Steel / 12 L')),
+          DiveCylinder(cylinder: Cylinder(description: 'Steel / 12 L')),
+          DiveCylinder(cylinder: Cylinder(description: 'Steel / 12 L-2')),
+          DiveCylinder(),
+        ],
+      );
+      final doc = XmlDocument.parse(Container(dives: [dive]).toUddfString());
+      final ids = doc.findAllElements('tank').map((tank) => tank.getAttribute('id')).toList();
+      expect(ids, ['tank-steel-12-l', 'tank-steel-12-l-2', 'tank-steel-12-l-2-2', 'tank']);
+      expect(doc.findAllElements('tankdata').map((data) => data.getElement('link')?.getAttribute('ref')), ids);
+    });
+
+    test('names gas mix IDs by composition and keeps collisions distinct', () {
+      final dive = Dive(
+        id: 'mixed-gases',
+        cylinders: [DiveCylinder(oxygen: 0.32), DiveCylinder(oxygen: 0.21, helium: 0.35), DiveCylinder(oxygen: 0.32), DiveCylinder(oxygen: 0.321)],
+      );
+      final xml = Container(dives: [dive]).toUddfString();
+      final doc = XmlDocument.parse(xml);
+      expect(doc.findAllElements('mix').map((mix) => mix.getAttribute('id')), ['mix-ean32', 'mix-tx21-35', 'mix-ean32-2', 'mix-ean32-3']);
+      expect(importXmlString(xml).dives.single.cylinders.map((cylinder) => cylinder.oxygen), [0.32, 0.21, 0.32, 0.321]);
+    });
+
+    test('roundtrips equipment inventory, purchase fields and per-dive links', () {
+      final doc = XmlDocument.parse(exported);
+      final ownerEquipment = doc.findAllElements('owner').single.getElement('equipment')!;
+      expect(ownerEquipment.childElements.map((item) => item.name.local), ['camera', 'regulator', 'suit', 'tank', 'tank', 'tank', 'variouspieces']);
+      expect(doc.findAllElements('price').single.getAttribute('currency'), isNull);
+
+      final regulator = reimported.equipment.singleWhere((item) => item.type == 'Regulator');
+      expect(regulator.id, 'equipment-xtx50');
+      expect(regulator.name, 'XTX50');
+      expect(regulator.manufacturer, 'Apeks');
+      expect(regulator.serial, 'ABC123');
+      expect(regulator.purchaseDate, proto.Timestamp.fromDateTime(DateTime.utc(2024, 1, 15)));
+      expect(regulator.purchasePrice, 349.95);
+      expect(regulator.shop, 'Dive Shop');
+      expect(reDive1().equipment.map((item) => item.type), ['Regulator', 'Camera', 'Drysuit']);
+      expect(reDive2().equipment.single, regulator);
+      expect(reDive1().equipment.first, regulator);
+      expect(reimported.equipment.singleWhere((item) => item.type == 'Reel').name, 'Spool');
+    });
+
     test('weights fully roundtrip', () {
       final dive = reDive1();
       expect(dive.weightsystems, hasLength(1));
@@ -566,7 +672,7 @@ More text here.</notes>
       expect(log.surfaceTemperature, closeTo(12.0, 1e-6));
       expect(log.minTemperature, closeTo(8.0, 1e-6));
 
-      expect(log.samples, hasLength(4));
+      expect(log.samples, hasLength(5));
       expect(log.samples[0].time, closeTo(0, 1e-9));
       expect(log.samples[0].depth, closeTo(0.0, 1e-6));
       expect(log.samples[1].time, closeTo(60, 1e-9));
@@ -579,6 +685,89 @@ More text here.</notes>
       expect(log.samples[2].depth, closeTo(35.7, 1e-6));
       expect(log.samples[3].time, closeTo(3530, 1e-9));
       expect(log.samples[3].depth, closeTo(0.1, 1e-6));
+      expect(log.samples.last.depth, 0);
+    });
+
+    test('treats zero tank pressure as missing', () {
+      final dive = Dive(
+        id: 'sparse-pressures',
+        cylinders: [DiveCylinder(oxygen: 0.21, endPressure: 0)],
+        logs: [
+          Log(
+            samples: [
+              LogSample(time: 0, depth: 0),
+              LogSample(time: 10, depth: 10, pressures: [TankPressure(tankIndex: 0)]),
+              LogSample(time: 20, depth: 10, pressures: [TankPressure(tankIndex: 0, pressure: 150)]),
+              LogSample(time: 30, depth: 0, pressures: [TankPressure(tankIndex: 0, pressure: 0)]),
+            ],
+          ),
+        ],
+      );
+      final xml = Container(dives: [dive]).toUddfString();
+      final doc = XmlDocument.parse(xml);
+      final waypoints = doc.findAllElements('waypoint');
+      final pressures = waypoints.map((waypoint) => waypoint.getElement('tankpressure')?.innerText);
+      expect(pressures, [null, null, '15000000', null]);
+      expect(doc.findAllElements('tankpressurebegin').single.innerText, '0');
+      expect(doc.findAllElements('tankpressureend'), isEmpty);
+
+      final imported = importXmlString(
+        xml
+            .replaceFirst('</waypoint>', '<tankpressure>0</tankpressure></waypoint>')
+            .replaceFirst('</tankdata>', '<tankpressureend>0</tankpressureend></tankdata>'),
+      ).dives.single;
+      expect(imported.logs.single.samples.map((sample) => sample.pressures.length), [0, 0, 1, 0]);
+      expect(imported.cylinders.single.hasBeginPressure(), isFalse);
+      expect(imported.cylinders.single.hasEndPressure(), isFalse);
+    });
+
+    test('rounds tank pressures to whole kilopascals written in pascals', () {
+      final dive = Dive(
+        id: 'pressure-precision',
+        cylinders: [DiveCylinder(beginPressure: 208.126, endPressure: 51.234)],
+        logs: [
+          Log(
+            samples: [
+              LogSample(time: 0, depth: 0, pressures: [TankPressure(tankIndex: 0, pressure: 200.876543)]),
+            ],
+          ),
+        ],
+      );
+      final doc = XmlDocument.parse(Container(dives: [dive]).toUddfString());
+      expect(doc.findAllElements('tankpressurebegin').single.innerText, '20813000');
+      expect(doc.findAllElements('tankpressureend').single.innerText, '5123000');
+      expect(doc.findAllElements('tankpressure').single.innerText, '20088000');
+    });
+
+    test('rounds waypoint and summary depths to one decimal place', () {
+      final dive = Dive(
+        id: 'depth-precision',
+        maxDepth: 15.678,
+        meanDepth: 6.342,
+        logs: [
+          Log(samples: [LogSample(time: 0, depth: 0), LogSample(time: 10, depth: 15.678), LogSample(time: 20, depth: 0)]),
+        ],
+      );
+      final doc = XmlDocument.parse(Container(dives: [dive]).toUddfString());
+      expect(doc.findAllElements('depth').map((depth) => depth.innerText), ['0.0', '15.7', '0.0']);
+      expect(doc.findAllElements('greatestdepth').single.innerText, '15.7');
+      expect(doc.findAllElements('averagedepth').single.innerText, '6.3');
+    });
+
+    test('rounds temperatures in Celsius before writing kelvin', () {
+      final dive = Dive(
+        id: 'temperature-precision',
+        minTemp: -0.125,
+        logs: [
+          Log(surfaceTemperature: 21.246, samples: [LogSample(time: 0, depth: 0, temperature: 8.234)]),
+        ],
+      );
+      final xml = Container(dives: [dive]).toUddfString();
+      final doc = XmlDocument.parse(xml);
+      expect(doc.findAllElements('airtemperature').single.innerText, '294.40');
+      expect(doc.findAllElements('lowesttemperature').single.innerText, '273.02');
+      expect(doc.findAllElements('temperature').single.innerText, '281.38');
+      expect(importXmlString(xml).dives.single.minTemp, closeTo(-0.13, 1e-9));
     });
 
     test('gas switch events fully roundtrip', () {
@@ -608,22 +797,107 @@ More text here.</notes>
       expect(re.sites, isEmpty);
     });
 
-    // The strongest form of the roundtrip guarantee: data that came from a
-    // UDDF file (both the MacDive and the Subsurface flavoured samples)
-    // survives an export followed by a re-import completely unchanged.
-    for (final sample in ['sample-1.uddf', 'sample-2.uddf']) {
-      test('$sample survives export + re-import unchanged', () {
-        final file = File('test/testdata/$sample');
-        final original = UddfXml.fromXml(XmlDocument.parse(file.readAsStringSync()).rootElement);
-        final reimported = importXmlString(original.toUddfString());
+    test('validates a native export against the 3.2.1 XSD when xmllint is available', () async {
+      try {
+        await Process.run('xmllint', ['--version']);
+      } on ProcessException {
+        markTestSkipped('xmllint is unavailable');
+        return;
+      }
+      // Validate through a temporary file so this also works on Windows installations of xmllint.
+      final directory = await Directory.systemTemp.createTemp('uddf_schema');
+      addTearDown(() => directory.delete(recursive: true));
+      final file = await File('${directory.path}/export.uddf').writeAsString(exported);
+      final validation = await Process.run('xmllint', ['--noout', '--schema', '../doc/uddf_3.2.1.xsd', file.path]);
+      expect(validation.exitCode, 0, reason: validation.stderr.toString());
+    });
 
-        expect(reimported.sites.length, original.sites.length);
-        for (final site in original.sites) {
-          expect(reimported.sites, contains(site));
-        }
-        expect(reimported.dives.length, original.dives.length);
-        for (final dive in original.dives) {
-          expect(reimported.dives, contains(dive));
+    test('roundtrips a manual dive and a same-mix cylinder switch through a fresh store', () async {
+      final start = proto.Timestamp.fromDateTime(DateTime.utc(2025, 1, 1))..nanos = 123456789;
+      final manual = Dive(id: '1-manual', start: start, number: 1, duration: 1900, maxDepth: 14, meanDepth: 7);
+      final air = DiveCylinder(cylinderId: 'shared-definition', oxygen: 0.21, beginPressure: 200);
+      final recorded = Dive(
+        id: '2-recorded',
+        start: start,
+        number: 2,
+        duration: 30,
+        cylinders: [air, air.deepCopy()],
+        events: [SampleEvent(type: SampleEventType.SAMPLE_EVENT_TYPE_GAS_CHANGE, time: 15, value: 1)],
+        logs: [
+          Log(
+            samples: [
+              LogSample(time: 0, depth: 0),
+              LogSample(time: 10, depth: 10, pressures: [TankPressure(tankIndex: 0, pressure: 190), TankPressure(tankIndex: 1, pressure: 200)]),
+              LogSample(time: 20, depth: 20),
+              LogSample(time: 30, depth: 0),
+            ],
+          ),
+        ],
+      );
+      final imported = importXmlString(Container(dives: [manual, recorded]).toUddfString());
+      final directory = await Directory.systemTemp.createTemp('uddf_store');
+      addTearDown(() => directory.delete(recursive: true));
+      final store = Store('${directory.path}/db');
+      await store.init();
+      for (final dive in imported.dives) {
+        dive.recalculateMetadata(preserveSummary: imported.preserveDiveSummary);
+      }
+      await store.insertDives(imported.dives);
+
+      final saved = (await store.diveById(manual.id))!;
+      expect(saved.start, start);
+      expect(saved.duration, 1900);
+      expect(saved.maxDepth, 14);
+      expect(saved.meanDepth, 7);
+
+      final profile = (await store.diveById(recorded.id))!;
+      expect(profile.cylinders.map((cylinder) => cylinder.oxygen), [0.21, 0.21]);
+      final switchEvent = profile.events.single;
+      expect(switchEvent.time, 15);
+      expect(switchEvent.value, 1);
+      expect(profile.logs.single.samples.firstWhere((sample) => sample.time == 15).depth, 15);
+      final pressures = profile.logs.single.samples.firstWhere((sample) => sample.time == 10).pressures;
+      expect(pressures.map((reading) => reading.tankIndex), [0, 1]);
+      expect(pressures[0].pressure, closeTo(190, 1e-9));
+      expect(pressures[1].pressure, closeTo(200, 1e-9));
+      // Wait for the debounced write before checking that a reopened store
+      // also preserves the imported summary.
+      final savedFile = File('${directory.path}/db/dives/2025-01/2025-01-01.${recorded.id}.meta.binpb');
+      for (var attempt = 0; attempt < 40 && !await savedFile.exists(); attempt++) {
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+      }
+      final reopened = Store('${directory.path}/db');
+      await reopened.init();
+      expect((await reopened.diveById(manual.id))!.duration, 1900);
+    });
+
+    for (final sample in ['sample-1.uddf', 'sample-2.uddf']) {
+      test('$sample stabilizes after normalization to Bubbletrail UDDF', () {
+        final original = importXmlString(File('test/testdata/$sample').readAsStringSync());
+        final normalized = importXmlString(original.toUddfString());
+        final reimported = importXmlString(normalized.toUddfString());
+
+        expect(reimported.sites, normalized.sites);
+        expect(reimported.dives.map((dive) => dive.id), normalized.dives.map((dive) => dive.id));
+        for (final (index, dive) in reimported.dives.indexed) {
+          final expected = normalized.dives[index];
+          expect(dive.duration, expected.duration);
+          expect(dive.siteId, expected.siteId);
+          expect(dive.events, expected.events);
+          final samples = dive.logs.single.samples;
+          final expectedSamples = expected.logs.single.samples;
+          expect(samples.length, expectedSamples.length);
+          for (final (index, sample) in samples.indexed) {
+            final expectedSample = expectedSamples[index];
+            expect(sample.time, expectedSample.time);
+            expect(sample.depth, expectedSample.depth);
+            expect(sample.events, expectedSample.events);
+            expect(sample.pressures.length, expectedSample.pressures.length);
+            for (final (index, reading) in sample.pressures.indexed) {
+              expect(reading.tankIndex, expectedSample.pressures[index].tankIndex);
+              expect(reading.pressure, closeTo(expectedSample.pressures[index].pressure, 1e-9));
+            }
+          }
         }
       });
     }
